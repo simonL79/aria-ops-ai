@@ -33,14 +33,14 @@ const mockAlerts = [
     severity: 'low',
     status: 'reviewing'
   }
-] as const;
+];
 
 const mockSources = [
   { name: 'Twitter', status: 'critical', positiveRatio: 35, total: 120 },
   { name: 'Facebook', status: 'good', positiveRatio: 87, total: 230 },
   { name: 'Reddit', status: 'warning', positiveRatio: 62, total: 85 },
   { name: 'Yelp', status: 'good', positiveRatio: 78, total: 45 }
-] as const;
+];
 
 const mockActions = [
   { 
@@ -71,7 +71,7 @@ const mockActions = [
     date: '3 days ago', 
     status: 'rejected' 
   }
-] as const;
+];
 
 const Index = () => {
   return (
