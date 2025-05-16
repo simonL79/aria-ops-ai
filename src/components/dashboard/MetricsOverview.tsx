@@ -2,7 +2,17 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Ban, MessageSquareX, Shield } from "lucide-react";
 
-const MetricsOverview = () => {
+interface MetricsOverviewProps {
+  monitoredSources?: number;
+  negativeContent?: number;
+  removedContent?: number;
+}
+
+const MetricsOverview = ({
+  monitoredSources = 58,
+  negativeContent = 12,
+  removedContent = 7
+}: MetricsOverviewProps) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       <Card className="bg-white shadow-sm hover:shadow transition-shadow">
@@ -13,7 +23,7 @@ const MetricsOverview = () => {
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground">Monitored Sources</div>
-              <div className="text-2xl font-bold">58</div>
+              <div className="text-2xl font-bold">{monitoredSources}</div>
             </div>
           </div>
         </CardContent>
@@ -27,7 +37,7 @@ const MetricsOverview = () => {
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground">Negative Content</div>
-              <div className="text-2xl font-bold">12</div>
+              <div className="text-2xl font-bold">{negativeContent}</div>
             </div>
           </div>
         </CardContent>
@@ -41,7 +51,7 @@ const MetricsOverview = () => {
             </div>
             <div>
               <div className="text-sm font-medium text-muted-foreground">Removed Content</div>
-              <div className="text-2xl font-bold">7</div>
+              <div className="text-2xl font-bold">{removedContent}</div>
             </div>
           </div>
         </CardContent>

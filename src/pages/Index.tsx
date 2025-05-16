@@ -12,6 +12,7 @@ import MetricsOverview from "@/components/dashboard/MetricsOverview";
 import DateRangePicker from "@/components/dashboard/DateRangePicker";
 import ContentFilter from "@/components/dashboard/ContentFilter";
 import InfoTooltip from "@/components/dashboard/InfoTooltip";
+import ProfileTestPanel, { TestProfileData } from "@/components/dashboard/ProfileTestPanel";
 
 // Sample data
 const mockAlerts = [
@@ -86,6 +87,16 @@ const Index = () => {
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   
+  // State for metrics
+  const [reputationScore, setReputationScore] = useState(68);
+  const [previousScore, setPreviousScore] = useState(61);
+  const [sources, setSources] = useState(mockSources);
+  const [alerts, setAlerts] = useState(mockAlerts);
+  const [actions, setActions] = useState(mockActions);
+  const [monitoredSources, setMonitoredSources] = useState(58);
+  const [negativeContent, setNegativeContent] = useState(12);
+  const [removedContent, setRemovedContent] = useState(7);
+  
   // Simulating initial data loading
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -99,9 +110,37 @@ const Index = () => {
     // Simulate scanning delay
     setTimeout(() => {
       setIsScanning(false);
-      toast.success("Scan completed", {
-        description: "Found 2 new mentions across monitored platforms.",
-      });
+      
+      // Simulate finding new content
+      const newAlerts = [...alerts];
+      
+      // 50% chance to find new content
+      if (Math.random() > 0.5) {
+        const platforms = ['Twitter', 'Facebook', 'Reddit', 'Yelp', 'Instagram'];
+        const randomPlatform = platforms[Math.floor(Math.random() * platforms.length)];
+        const randomSeverity = Math.random() > 0.7 ? 'high' : Math.random() > 0.4 ? 'medium' : 'low';
+        
+        newAlerts.unshift({
+          id: `new-${Date.now()}`,
+          platform: randomPlatform,
+          content: `New ${randomSeverity === 'high' ? 'negative' : randomSeverity === 'medium' ? 'mixed' : 'positive'} mention found during the latest scan.`,
+          date: 'Just now',
+          severity: randomSeverity as 'high' | 'medium' | 'low',
+          status: 'new' as 'new'
+        });
+        
+        setAlerts(newAlerts);
+        setFilteredAlerts(newAlerts);
+        setNegativeContent(prev => prev + (randomSeverity === 'high' ? 1 : 0));
+        
+        toast.success("Scan completed", {
+          description: `Found new content on ${randomPlatform}.`,
+        });
+      } else {
+        toast.success("Scan completed", {
+          description: "No new mentions found across monitored platforms.",
+        });
+      }
     }, 2000);
   };
 
@@ -110,7 +149,7 @@ const Index = () => {
     severities: string[];
     statuses: string[];
   }) => {
-    let filtered = [...mockAlerts];
+    let filtered = [...alerts];
 
     if (filters.platforms.length > 0) {
       filtered = filtered.filter((alert) =>
@@ -137,6 +176,36 @@ const Index = () => {
     setStartDate(start);
     setEndDate(end);
     // In a real app, you would refetch data based on this date range
+    
+    // For demo purposes, let's adjust the metrics slightly
+    if (start && end) {
+      const daysDiff = Math.ceil((end.getTime() - start.getTime()) / (1000 * 3600 * 24));
+      
+      if (daysDiff <= 7) {
+        // Last week data
+        setNegativeContent(Math.floor(negativeContent * 0.7));
+        setRemovedContent(Math.floor(removedContent * 0.6));
+      } else if (daysDiff <= 30) {
+        // Last month data
+        setNegativeContent(Math.floor(negativeContent * 1.2));
+        setRemovedContent(Math.floor(removedContent * 1.1));
+      } else {
+        // Longer period
+        setNegativeContent(Math.floor(negativeContent * 1.5));
+        setRemovedContent(Math.floor(removedContent * 1.3));
+      }
+    }
+  };
+  
+  const handleSelectTestProfile = (profile: TestProfileData) => {
+    setReputationScore(profile.reputationScore);
+    setPreviousScore(profile.previousScore);
+    setSources(profile.sources);
+    setAlerts(profile.alerts);
+    setFilteredAlerts(profile.alerts);
+    setMonitoredSources(profile.metrics.monitoredSources);
+    setNegativeContent(profile.metrics.negativeContent);
+    setRemovedContent(profile.metrics.removedContent);
   };
 
   if (isLoading) {
@@ -160,7 +229,10 @@ const Index = () => {
       </div>
       
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-        <DateRangePicker onDateRangeChange={handleDateRangeChange} />
+        <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+          <DateRangePicker onDateRangeChange={handleDateRangeChange} />
+          <ProfileTestPanel onSelectTestProfile={handleSelectTestProfile} />
+        </div>
         <Button 
           onClick={handleScan} 
           disabled={isScanning}
@@ -177,17 +249,21 @@ const Index = () => {
         </Button>
       </div>
       
-      <MetricsOverview />
+      <MetricsOverview 
+        monitoredSources={monitoredSources}
+        negativeContent={negativeContent} 
+        removedContent={removedContent}
+      />
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
         <div className="lg:col-span-1">
           <div className="space-y-6">
             <div className="flex items-center">
-              <ReputationScore score={68} previousScore={61} />
+              <ReputationScore score={reputationScore} previousScore={previousScore} />
               <InfoTooltip text="Your reputation score is calculated based on sentiment analysis of mentions across all monitored platforms." />
             </div>
             <div className="flex items-center">
-              <RecentActions actions={mockActions} />
+              <RecentActions actions={actions} />
               <InfoTooltip text="Recent actions taken on content that may affect your online reputation." />
             </div>
           </div>
@@ -204,7 +280,7 @@ const Index = () => {
             </div>
             <ContentAlerts alerts={filteredAlerts} />
             <div className="flex items-center">
-              <SourceOverview sources={mockSources} />
+              <SourceOverview sources={sources} />
               <InfoTooltip text="Overview of your reputation status across different platforms." />
             </div>
           </div>
