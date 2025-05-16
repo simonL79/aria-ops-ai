@@ -14,62 +14,62 @@ const mockAlerts = [
     platform: 'Twitter',
     content: 'This company has terrible customer service. I waited for hours and no one helped me. #awful #scam',
     date: '2 hours ago',
-    severity: 'high',
-    status: 'new'
+    severity: 'high' as 'high', // Type assertion to match ContentAlert type
+    status: 'new' as 'new' // Type assertion to match ContentAlert type
   },
   {
     id: '2',
     platform: 'Reddit',
     content: 'I had a somewhat negative experience with their product, but customer service was helpful in resolving it.',
     date: '5 hours ago',
-    severity: 'medium',
-    status: 'new'
+    severity: 'medium' as 'medium',
+    status: 'new' as 'new'
   },
   {
     id: '3',
     platform: 'Yelp',
     content: 'Not the best service, but the staff were polite. Food was just okay.',
     date: '1 day ago',
-    severity: 'low',
-    status: 'reviewing'
+    severity: 'low' as 'low',
+    status: 'reviewing' as 'reviewing'
   }
 ];
 
 const mockSources = [
-  { name: 'Twitter', status: 'critical', positiveRatio: 35, total: 120 },
-  { name: 'Facebook', status: 'good', positiveRatio: 87, total: 230 },
-  { name: 'Reddit', status: 'warning', positiveRatio: 62, total: 85 },
-  { name: 'Yelp', status: 'good', positiveRatio: 78, total: 45 }
+  { name: 'Twitter', status: 'critical' as 'critical', positiveRatio: 35, total: 120 },
+  { name: 'Facebook', status: 'good' as 'good', positiveRatio: 87, total: 230 },
+  { name: 'Reddit', status: 'warning' as 'warning', positiveRatio: 62, total: 85 },
+  { name: 'Yelp', status: 'good' as 'good', positiveRatio: 78, total: 45 }
 ];
 
 const mockActions = [
   { 
     id: '1', 
     platform: 'Twitter', 
-    action: 'removal_requested', 
+    action: 'removal_requested' as 'removal_requested', 
     date: '3 hours ago', 
-    status: 'completed' 
+    status: 'completed' as 'completed'
   },
   { 
     id: '2', 
     platform: 'Yelp', 
-    action: 'reported', 
+    action: 'reported' as 'reported', 
     date: '1 day ago', 
-    status: 'pending' 
+    status: 'pending' as 'pending'
   },
   { 
     id: '3', 
     platform: 'Reddit', 
-    action: 'content_hidden', 
+    action: 'content_hidden' as 'content_hidden', 
     date: '2 days ago', 
-    status: 'completed' 
+    status: 'completed' as 'completed'
   },
   { 
     id: '4', 
     platform: 'Facebook', 
-    action: 'removal_requested', 
+    action: 'removal_requested' as 'removal_requested', 
     date: '3 days ago', 
-    status: 'rejected' 
+    status: 'rejected' as 'rejected'
   }
 ];
 
