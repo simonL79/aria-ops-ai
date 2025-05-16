@@ -1,9 +1,10 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Ban } from "lucide-react";
+import { Ban, Loader } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface ContentAlert {
   id: string;
@@ -16,9 +17,10 @@ interface ContentAlert {
 
 interface ContentAlertsProps {
   alerts: ContentAlert[];
+  isLoading?: boolean;
 }
 
-const ContentAlerts = ({ alerts }: ContentAlertsProps) => {
+const ContentAlerts = ({ alerts, isLoading = false }: ContentAlertsProps) => {
   const getSeverityColor = (severity: string) => {
     switch (severity) {
       case 'high': return 'bg-alert-negative text-white';
@@ -27,6 +29,57 @@ const ContentAlerts = ({ alerts }: ContentAlertsProps) => {
       default: return 'bg-gray-200';
     }
   };
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg font-medium flex justify-between items-center">
+            <Skeleton className="h-6 w-44" />
+            <Skeleton className="h-5 w-16" />
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="max-h-96 overflow-y-auto">
+            {[1, 2, 3].map((item) => (
+              <div key={item}>
+                <div className="p-4">
+                  <div className="flex justify-between mb-2">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-5 w-24" />
+                  </div>
+                  <Skeleton className="h-3 w-32 mb-2" />
+                  <Skeleton className="h-4 w-full mb-3" />
+                  <Skeleton className="h-4 w-11/12 mb-2" />
+                  <div className="flex gap-2">
+                    <Skeleton className="h-9 w-20" />
+                    <Skeleton className="h-9 w-36" />
+                  </div>
+                </div>
+                {item < 3 && <Separator />}
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (alerts.length === 0) {
+    return (
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg font-medium">Recent Content Alerts</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col items-center justify-center py-8">
+            <p className="text-muted-foreground mb-2">No alerts match your current filters</p>
+            <Button variant="outline" size="sm">Reset Filters</Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
