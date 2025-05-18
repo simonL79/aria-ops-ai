@@ -9,7 +9,8 @@ import {
   Copy, 
   ThumbsUp, 
   UserRound, 
-  Loader 
+  Loader,
+  RefreshCw
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { 
@@ -19,7 +20,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { generateAIResponse, ResponseGenerationProps } from "@/services/openaiService";
 
 interface ResponseTemplateProps {
   type: string;
@@ -33,6 +36,11 @@ const StrategicResponseEngine = () => {
   const [responseText, setResponseText] = useState<string>("");
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [toneStyle, setToneStyle] = useState<string>("professional");
+  const [contentToRespond, setContentToRespond] = useState<string>("");
+  const [platform, setPlatform] = useState<string>("");
+  const [apiKey, setApiKey] = useState<string>(localStorage.getItem("openai_api_key") || "");
+  const [usageTokens, setUsageTokens] = useState<number>(0);
+  const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
   
   const responseTemplates: ResponseTemplateProps[] = [
     {
@@ -55,23 +63,49 @@ const StrategicResponseEngine = () => {
     }
   ];
   
-  const handleGenerateResponse = () => {
-    setIsGenerating(true);
-    const selectedTemplate = responseTemplates.find(template => template.type === responseType);
+  const handleGenerateResponse = async () => {
+    if (!contentToRespond.trim()) {
+      toast.error("Please enter content to respond to");
+      return;
+    }
     
-    // Simulate AI generation
-    setTimeout(() => {
-      if (selectedTemplate) {
-        setResponseText(selectedTemplate.template);
-      }
-      setIsGenerating(false);
+    if (!apiKey) {
+      toast.error("Please enter an OpenAI API key");
+      return;
+    }
+    
+    setIsGenerating(true);
+    localStorage.setItem("openai_api_key", apiKey);
+    
+    try {
+      const props: ResponseGenerationProps = {
+        responseType,
+        toneStyle,
+        content: contentToRespond,
+        platform
+      };
+      
+      const generatedResponse = await generateAIResponse(props);
+      setResponseText(generatedResponse);
+      
       toast.success("AI response generated successfully");
-    }, 1500);
+    } catch (error) {
+      console.error("Error generating response:", error);
+      toast.error("Failed to generate response", {
+        description: error instanceof Error ? error.message : "Unknown error"
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
   
   const handleCopyResponse = () => {
     navigator.clipboard.writeText(responseText);
     toast.success("Response copied to clipboard");
+  };
+  
+  const handleRegenerateResponse = () => {
+    handleGenerateResponse();
   };
 
   return (
@@ -88,6 +122,31 @@ const StrategicResponseEngine = () => {
           
           <TabsContent value="generate">
             <div className="space-y-4">
+              {/* API Key Input */}
+              <div>
+                <label className="text-sm font-medium mb-1 block">OpenAI API Key</label>
+                <Input
+                  type="password"
+                  value={apiKey}
+                  onChange={(e) => setApiKey(e.target.value)}
+                  placeholder="Enter your OpenAI API key"
+                  className="font-mono text-sm"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Your API key is stored locally in your browser and is never sent to our servers.
+                </p>
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium mb-1 block">Content to Respond To</label>
+                <Textarea
+                  value={contentToRespond}
+                  onChange={(e) => setContentToRespond(e.target.value)}
+                  placeholder="Enter the criticism or content that needs a response..."
+                  className="min-h-[100px]"
+                />
+              </div>
+              
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-sm font-medium mb-1 block">Response Type</label>
@@ -122,6 +181,39 @@ const StrategicResponseEngine = () => {
               </div>
               
               <div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setShowAdvanced(!showAdvanced)}
+                  className="text-xs"
+                >
+                  {showAdvanced ? "Hide Advanced Options" : "Show Advanced Options"}
+                </Button>
+                
+                {showAdvanced && (
+                  <div className="mt-2 grid grid-cols-1 gap-2">
+                    <div>
+                      <label className="text-xs font-medium mb-1 block">Platform Context</label>
+                      <Select value={platform} onValueChange={setPlatform}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select platform (optional)" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">None</SelectItem>
+                          <SelectItem value="Twitter">Twitter</SelectItem>
+                          <SelectItem value="Facebook">Facebook</SelectItem>
+                          <SelectItem value="Instagram">Instagram</SelectItem>
+                          <SelectItem value="Yelp">Yelp</SelectItem>
+                          <SelectItem value="Reddit">Reddit</SelectItem>
+                          <SelectItem value="TripAdvisor">TripAdvisor</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              <div>
                 <label className="text-sm font-medium mb-1 block">AI-Generated Response</label>
                 <Textarea 
                   value={responseText} 
@@ -151,14 +243,27 @@ const StrategicResponseEngine = () => {
                   )}
                 </Button>
                 
-                <Button 
-                  variant="outline" 
-                  onClick={handleCopyResponse}
-                  disabled={!responseText}
-                >
-                  <Copy className="h-4 w-4 mr-2" />
-                  Copy
-                </Button>
+                {responseText && (
+                  <>
+                    <Button 
+                      variant="outline" 
+                      onClick={handleRegenerateResponse}
+                      disabled={isGenerating}
+                    >
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Regenerate
+                    </Button>
+                    
+                    <Button 
+                      variant="outline" 
+                      onClick={handleCopyResponse}
+                      disabled={!responseText}
+                    >
+                      <Copy className="h-4 w-4 mr-2" />
+                      Copy
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
           </TabsContent>

@@ -1,15 +1,27 @@
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Shield } from "lucide-react";
 import { ContentAlert } from "@/types/dashboard";
 import { getRecommendedActions } from "@/utils/alertUtils";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { ResponseGenerationProps } from "@/services/openaiService";
+import StrategicResponseEngine from "@/components/dashboard/StrategicResponseEngine";
 
 interface AlertDetailsProps {
   alert: ContentAlert;
 }
 
 const AlertDetails = ({ alert }: AlertDetailsProps) => {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  
   return (
     <div className="bg-gray-50 px-4 py-3 border-t border-gray-100">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
@@ -61,10 +73,22 @@ const AlertDetails = ({ alert }: AlertDetailsProps) => {
       )}
       
       <div className="flex justify-end mt-3">
-        <Button size="sm" variant="secondary" className="gap-1">
-          <Shield className="h-4 w-4" />
-          <span>AI Response Suggestions</span>
-        </Button>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button size="sm" variant="secondary" className="gap-1">
+              <Shield className="h-4 w-4" />
+              <span>AI Response Suggestions</span>
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle>Strategic Response Engine</DialogTitle>
+            </DialogHeader>
+            <div className="p-1">
+              <StrategicResponseEngine />
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
