@@ -22,6 +22,12 @@ export interface ContentAlert {
   date: string;
   severity: 'high' | 'medium' | 'low';
   status: 'new' | 'reviewing' | 'actioned';
+  threatType?: 'falseReviews' | 'coordinatedAttack' | 'competitorSmear' | 'botActivity' | 'misinformation' | 'legalRisk' | 'viralThreat';
+  confidenceScore?: number;
+  sourceType?: 'social' | 'review' | 'news' | 'forum' | 'darkweb';
+  sentiment?: 'negative' | 'neutral' | 'sarcastic' | 'threatening';
+  potentialReach?: number;
+  detectedEntities?: string[];
 }
 
 // Define source type
@@ -41,7 +47,7 @@ export interface ContentAction {
   status: 'completed' | 'pending' | 'rejected';
 }
 
-// Sample data
+// Sample data with enhanced threat intelligence
 const mockAlerts: ContentAlert[] = [
   {
     id: '1',
@@ -49,23 +55,68 @@ const mockAlerts: ContentAlert[] = [
     content: 'This company has terrible customer service. I waited for hours and no one helped me. #awful #scam',
     date: '2 hours ago',
     severity: 'high',
-    status: 'new'
+    status: 'new',
+    threatType: 'viralThreat',
+    confidenceScore: 89,
+    sourceType: 'social',
+    sentiment: 'negative',
+    potentialReach: 6500,
+    detectedEntities: ['Customer Service', 'Company']
   },
   {
     id: '2',
     platform: 'Reddit',
-    content: 'I had a somewhat negative experience with their product, but customer service was helpful in resolving it.',
+    content: 'Just found evidence that this business is using fake reviews to boost their ratings. Look at these screenshots of identical reviews across different accounts.',
     date: '5 hours ago',
-    severity: 'medium',
-    status: 'new'
+    severity: 'high',
+    status: 'new',
+    threatType: 'misinformation',
+    confidenceScore: 73,
+    sourceType: 'forum',
+    sentiment: 'threatening',
+    potentialReach: 12400,
+    detectedEntities: ['Business', 'Reviews']
   },
   {
     id: '3',
-    platform: 'Yelp',
+    platform: 'Trustpilot',
     content: 'Not the best service, but the staff were polite. Food was just okay.',
     date: '1 day ago',
     severity: 'low',
-    status: 'reviewing'
+    status: 'reviewing',
+    threatType: 'falseReviews',
+    confidenceScore: 42,
+    sourceType: 'review',
+    sentiment: 'neutral',
+    detectedEntities: ['Service', 'Staff', 'Food']
+  },
+  {
+    id: '4',
+    platform: 'Dark Web Forum',
+    content: 'Looking for people to help coordinate negative reviews for [BRAND]. Will pay $5 per review that stays up for at least 2 weeks.',
+    date: '3 hours ago',
+    severity: 'high',
+    status: 'new',
+    threatType: 'coordinatedAttack',
+    confidenceScore: 95,
+    sourceType: 'darkweb',
+    sentiment: 'threatening',
+    potentialReach: 1200,
+    detectedEntities: ['BRAND']
+  },
+  {
+    id: '5',
+    platform: 'Business Competitor Blog',
+    content: 'Our investigation reveals questionable business practices at [COMPANY]. We've found evidence suggesting potential ethical violations.',
+    date: '12 hours ago',
+    severity: 'medium',
+    status: 'reviewing',
+    threatType: 'competitorSmear',
+    confidenceScore: 82,
+    sourceType: 'news',
+    sentiment: 'negative',
+    potentialReach: 3800,
+    detectedEntities: ['COMPANY', 'Ethical Violations']
   }
 ];
 
@@ -249,9 +300,9 @@ const Index = () => {
   return (
     <DashboardLayout>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold mb-2">Reputation Dashboard</h1>
+        <h1 className="text-2xl font-bold mb-2">Brand Protection Intelligence Center</h1>
         <p className="text-muted-foreground">
-          Monitor and manage your online reputation across multiple platforms.
+          Monitor, detect, and respond to online reputation threats using AI-powered intelligence.
         </p>
       </div>
       
@@ -269,10 +320,10 @@ const Index = () => {
           {isScanning ? (
             <>
               <Loader className="mr-2 h-4 w-4 animate-spin" />
-              Scanning...
+              Scanning Platforms...
             </>
           ) : (
-            "Scan for New Content"
+            "Intelligence Sweep"
           )}
         </Button>
       </div>
@@ -301,8 +352,8 @@ const Index = () => {
           <div className="space-y-6">
             <div className="flex justify-between items-center mb-2">
               <div className="flex items-center">
-                <h2 className="text-lg font-medium">Content Alerts</h2>
-                <InfoTooltip text="Content mentioning your brand that may require attention or action." />
+                <h2 className="text-lg font-medium">Threat Intelligence</h2>
+                <InfoTooltip text="AI-detected content mentioning your brand that may require attention or action." />
               </div>
               <ContentFilter onFilterChange={handleFilterChange} />
             </div>
