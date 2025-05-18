@@ -107,7 +107,7 @@ const mockAlerts: ContentAlert[] = [
   {
     id: '5',
     platform: 'Business Competitor Blog',
-    content: 'Our investigation reveals questionable business practices at [COMPANY]. We've found evidence suggesting potential ethical violations.',
+    content: 'Our investigation reveals questionable business practices at [COMPANY]. We\'ve found evidence suggesting potential ethical violations.',
     date: '12 hours ago',
     severity: 'medium',
     status: 'reviewing',
