@@ -1,27 +1,15 @@
 
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
 import { Loader } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import ReputationScore from "@/components/dashboard/ReputationScore";
-import ContentAlerts from "@/components/dashboard/ContentAlerts";
-import SourceOverview from "@/components/dashboard/SourceOverview";
-import RecentActions from "@/components/dashboard/RecentActions";
-import MetricsOverview from "@/components/dashboard/MetricsOverview";
-import DateRangePicker from "@/components/dashboard/DateRangePicker";
-import ContentFilter from "@/components/dashboard/ContentFilter";
-import InfoTooltip from "@/components/dashboard/InfoTooltip";
-import ProfileTestPanel from "@/components/dashboard/ProfileTestPanel";
-import ContentIntelligencePanel from "@/components/dashboard/ContentIntelligencePanel";
-import IntelligenceCollection from "@/components/dashboard/IntelligenceCollection";
-import StrategicResponseEngine from "@/components/dashboard/StrategicResponseEngine";
-import SerpDefense from "@/components/dashboard/SerpDefense";
-import DarkWebSurveillance from "@/components/dashboard/DarkWebSurveillance";
 import { useDashboardData } from "@/hooks/useDashboardData";
+import { useDashboardScan } from "@/hooks/useDashboardScan";
+import DashboardHeader from "@/components/dashboard/DashboardHeader";
+import DashboardControls from "@/components/dashboard/DashboardControls";
+import DashboardMetrics from "@/components/dashboard/DashboardMetrics";
+import DashboardMainContent from "@/components/dashboard/DashboardMainContent";
 
 const DashboardPage = () => {
-  const [isScanning, setIsScanning] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<string>("dashboard");
   
@@ -50,6 +38,13 @@ const DashboardPage = () => {
     setRemovedContent
   } = useDashboardData();
 
+  const { isScanning, handleScan } = useDashboardScan(
+    alerts,
+    setAlerts,
+    setFilteredAlerts,
+    setNegativeContent
+  );
+
   // Simulating initial data loading
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -57,45 +52,6 @@ const DashboardPage = () => {
     }, 1500); // 1.5 seconds for demonstration
     return () => clearTimeout(timer);
   }, []);
-
-  const handleScan = () => {
-    setIsScanning(true);
-    // Simulate scanning delay
-    setTimeout(() => {
-      setIsScanning(false);
-      
-      // Simulate finding new content
-      const newAlerts = [...alerts];
-      
-      // 50% chance to find new content
-      if (Math.random() > 0.5) {
-        const platforms = ['Twitter', 'Facebook', 'Reddit', 'Yelp', 'Instagram'];
-        const randomPlatform = platforms[Math.floor(Math.random() * platforms.length)];
-        const randomSeverity = Math.random() > 0.7 ? 'high' : Math.random() > 0.4 ? 'medium' : 'low';
-        
-        newAlerts.unshift({
-          id: `new-${Date.now()}`,
-          platform: randomPlatform,
-          content: `New ${randomSeverity === 'high' ? 'negative' : randomSeverity === 'medium' ? 'mixed' : 'positive'} mention found during the latest scan.`,
-          date: 'Just now',
-          severity: randomSeverity,
-          status: 'new'
-        });
-        
-        setAlerts(newAlerts);
-        setFilteredAlerts(newAlerts);
-        setNegativeContent(prev => prev + (randomSeverity === 'high' ? 1 : 0));
-        
-        toast.success("Scan completed", {
-          description: `Found new content on ${randomPlatform}.`,
-        });
-      } else {
-        toast.success("Scan completed", {
-          description: "No new mentions found across monitored platforms.",
-        });
-      }
-    }, 2000);
-  };
 
   const handleFilterChange = (filters: {
     platforms: string[];
@@ -128,7 +84,6 @@ const DashboardPage = () => {
   const handleDateRangeChange = (start: Date | undefined, end: Date | undefined) => {
     setStartDate(start);
     setEndDate(end);
-    // In a real app, you would refetch data based on this date range
     
     // For demo purposes, let's adjust the metrics slightly
     if (start && end) {
@@ -174,86 +129,32 @@ const DashboardPage = () => {
 
   return (
     <DashboardLayout>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold mb-2">LOVEABLE.SHIELD - Online Reputation Command Center</h1>
-        <p className="text-muted-foreground">
-          AI-powered intelligence for detecting, analyzing, and responding to reputation threats across digital platforms.
-        </p>
-      </div>
+      <DashboardHeader 
+        title="LOVEABLE.SHIELD - Online Reputation Command Center" 
+        subtitle="AI-powered intelligence for detecting, analyzing, and responding to reputation threats across digital platforms."
+      />
       
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-        <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
-          <DateRangePicker onDateRangeChange={handleDateRangeChange} />
-          <ProfileTestPanel onSelectTestProfile={handleSelectTestProfile} />
-          <ContentIntelligencePanel />
-        </div>
-        <Button 
-          onClick={handleScan} 
-          disabled={isScanning}
-          className="w-full md:w-auto"
-        >
-          {isScanning ? (
-            <>
-              <Loader className="mr-2 h-4 w-4 animate-spin" />
-              Running Intelligence Sweep...
-            </>
-          ) : (
-            "Intelligence Sweep"
-          )}
-        </Button>
-      </div>
+      <DashboardControls 
+        isScanning={isScanning}
+        onScan={handleScan}
+        onDateRangeChange={handleDateRangeChange}
+        onSelectTestProfile={handleSelectTestProfile}
+      />
       
-      <div className="mb-6">
-        <MetricsOverview 
-          monitoredSources={monitoredSources}
-          negativeContent={negativeContent} 
-          removedContent={removedContent}
-        />
-      </div>
+      <DashboardMetrics 
+        monitoredSources={monitoredSources}
+        negativeContent={negativeContent}
+        removedContent={removedContent}
+      />
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        <div className="lg:col-span-1">
-          <div className="space-y-6">
-            <div className="flex items-center">
-              <ReputationScore score={reputationScore} previousScore={previousScore} />
-              <InfoTooltip text="Your reputation score is calculated based on sentiment analysis of mentions across all monitored platforms." />
-            </div>
-            <div className="flex items-center">
-              <IntelligenceCollection />
-            </div>
-          </div>
-        </div>
-        
-        <div className="lg:col-span-2">
-          <div className="space-y-6">
-            <div className="flex justify-between items-center mb-2">
-              <div className="flex items-center">
-                <h2 className="text-lg font-medium">Threat Intelligence</h2>
-                <InfoTooltip text="AI-detected content mentioning your brand that may require attention or action." />
-              </div>
-              <ContentFilter onFilterChange={handleFilterChange} />
-            </div>
-            <ContentAlerts alerts={filteredAlerts} />
-          </div>
-        </div>
-      </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        <div className="lg:col-span-1">
-          <SourceOverview sources={sources} />
-        </div>
-        <div className="lg:col-span-1">
-          <RecentActions actions={actions} />
-        </div>
-        <div className="lg:col-span-1">
-          <DarkWebSurveillance />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <StrategicResponseEngine />
-        <SerpDefense />
-      </div>
+      <DashboardMainContent 
+        reputationScore={reputationScore}
+        previousScore={previousScore}
+        sources={sources}
+        filteredAlerts={filteredAlerts}
+        actions={actions}
+        onFilterChange={handleFilterChange}
+      />
     </DashboardLayout>
   );
 };
