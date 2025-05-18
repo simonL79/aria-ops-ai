@@ -36,8 +36,15 @@ export interface ThreatSource {
   id: string;
   name: string;
   type: string;
-  confidence: number;
-  lastUpdated: string;
+  confidence?: number;
+  lastUpdated?: string;
+  platform: string;
+  active: boolean;
+  lastScan?: string;
+  credentials: {
+    type: string;
+    status: string;
+  };
 }
 
 // Define intelligence levels
