@@ -1,6 +1,7 @@
 
 import { AlertSeverity, ContentThreatType, AlertSourceType } from "@/types/intelligence";
 import { Ban, Shield, Eye, Flag, AlertTriangle, MessageSquareWarning, Globe, Users } from "lucide-react";
+import React from "react";
 
 export const getSeverityColor = (severity: string) => {
   switch (severity) {
@@ -76,4 +77,3 @@ export const getRecommendedActions = (severity: AlertSeverity) => {
     ];
   }
 };
-
