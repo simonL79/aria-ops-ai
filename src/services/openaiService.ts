@@ -1,7 +1,6 @@
 
 import { toast } from "sonner";
 import { ContentThreatType } from "@/types/intelligence";
-import { AlertSeverity } from "@/types/dashboard";
 
 // Define the types for our OpenAI API responses
 export interface OpenAIMessage {
@@ -27,8 +26,8 @@ export interface ResponseGenerationProps {
   toneStyle: string;
   content: string;
   platform?: string; 
-  severity?: AlertSeverity;
-  threatType?: ContentThreatType;
+  severity?: string;
+  threatType?: ContentThreatType | string;
 }
 
 export interface ThreatClassificationResult {

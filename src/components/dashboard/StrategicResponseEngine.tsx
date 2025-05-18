@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -23,6 +22,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { generateAIResponse, ResponseGenerationProps } from "@/services/openaiService";
+import { ContentThreatType } from "@/types/intelligence";
 
 interface ResponseTemplateProps {
   type: string;
@@ -31,13 +31,26 @@ interface ResponseTemplateProps {
   template: string;
 }
 
-const StrategicResponseEngine = () => {
+// Define props for the StrategicResponseEngine component
+interface StrategicResponseEngineProps {
+  initialContent?: string;
+  threatType?: ContentThreatType | string;
+  severity?: string;
+  platform?: string;
+}
+
+const StrategicResponseEngine = ({ 
+  initialContent = "", 
+  threatType, 
+  severity, 
+  platform 
+}: StrategicResponseEngineProps) => {
   const [responseType, setResponseType] = useState<string>("empathetic");
   const [responseText, setResponseText] = useState<string>("");
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [toneStyle, setToneStyle] = useState<string>("professional");
-  const [contentToRespond, setContentToRespond] = useState<string>("");
-  const [platform, setPlatform] = useState<string>("");
+  const [contentToRespond, setContentToRespond] = useState<string>(initialContent);
+  const [selectedPlatform, setPlatform] = useState<string>(platform || "");
   const [apiKey, setApiKey] = useState<string>(localStorage.getItem("openai_api_key") || "");
   const [usageTokens, setUsageTokens] = useState<number>(0);
   const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
@@ -82,7 +95,9 @@ const StrategicResponseEngine = () => {
         responseType,
         toneStyle,
         content: contentToRespond,
-        platform
+        platform: selectedPlatform,
+        severity,
+        threatType
       };
       
       const generatedResponse = await generateAIResponse(props);
@@ -194,7 +209,7 @@ const StrategicResponseEngine = () => {
                   <div className="mt-2 grid grid-cols-1 gap-2">
                     <div>
                       <label className="text-xs font-medium mb-1 block">Platform Context</label>
-                      <Select value={platform} onValueChange={setPlatform}>
+                      <Select value={selectedPlatform} onValueChange={setPlatform}>
                         <SelectTrigger>
                           <SelectValue placeholder="Select platform (optional)" />
                         </SelectTrigger>
