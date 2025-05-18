@@ -13,6 +13,10 @@ import ContentFilter from "@/components/dashboard/ContentFilter";
 import InfoTooltip from "@/components/dashboard/InfoTooltip";
 import ProfileTestPanel, { TestProfileData } from "@/components/dashboard/ProfileTestPanel";
 import ContentIntelligencePanel from "@/components/dashboard/ContentIntelligencePanel";
+import IntelligenceCollection from "@/components/dashboard/IntelligenceCollection";
+import StrategicResponseEngine from "@/components/dashboard/StrategicResponseEngine";
+import SerpDefense from "@/components/dashboard/SerpDefense";
+import DarkWebSurveillance from "@/components/dashboard/DarkWebSurveillance";
 
 // Define content alert type to avoid TypeScript errors
 export interface ContentAlert {
@@ -286,6 +290,9 @@ const Index = () => {
     setRemovedContent(profile.metrics.removedContent);
   };
 
+  // Add new state for blueprint features
+  const [activeTab, setActiveTab] = useState<string>("dashboard");
+
   if (isLoading) {
     return (
       <DashboardLayout>
@@ -300,9 +307,9 @@ const Index = () => {
   return (
     <DashboardLayout>
       <div className="mb-6">
-        <h1 className="text-2xl font-bold mb-2">Brand Protection Intelligence Center</h1>
+        <h1 className="text-2xl font-bold mb-2">LOVEABLE.SHIELD - Online Reputation Command Center</h1>
         <p className="text-muted-foreground">
-          Monitor, detect, and respond to online reputation threats using AI-powered intelligence.
+          AI-powered intelligence for detecting, analyzing, and responding to reputation threats across digital platforms.
         </p>
       </div>
       
@@ -320,7 +327,7 @@ const Index = () => {
           {isScanning ? (
             <>
               <Loader className="mr-2 h-4 w-4 animate-spin" />
-              Scanning Platforms...
+              Running Intelligence Sweep...
             </>
           ) : (
             "Intelligence Sweep"
@@ -328,13 +335,15 @@ const Index = () => {
         </Button>
       </div>
       
-      <MetricsOverview 
-        monitoredSources={monitoredSources}
-        negativeContent={negativeContent} 
-        removedContent={removedContent}
-      />
+      <div className="mb-6">
+        <MetricsOverview 
+          monitoredSources={monitoredSources}
+          negativeContent={negativeContent} 
+          removedContent={removedContent}
+        />
+      </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         <div className="lg:col-span-1">
           <div className="space-y-6">
             <div className="flex items-center">
@@ -342,8 +351,7 @@ const Index = () => {
               <InfoTooltip text="Your reputation score is calculated based on sentiment analysis of mentions across all monitored platforms." />
             </div>
             <div className="flex items-center">
-              <RecentActions actions={actions} />
-              <InfoTooltip text="Recent actions taken on content that may affect your online reputation." />
+              <IntelligenceCollection />
             </div>
           </div>
         </div>
@@ -358,12 +366,25 @@ const Index = () => {
               <ContentFilter onFilterChange={handleFilterChange} />
             </div>
             <ContentAlerts alerts={filteredAlerts} />
-            <div className="flex items-center">
-              <SourceOverview sources={sources} />
-              <InfoTooltip text="Overview of your reputation status across different platforms." />
-            </div>
           </div>
         </div>
+      </div>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <div className="lg:col-span-1">
+          <SourceOverview sources={sources} />
+        </div>
+        <div className="lg:col-span-1">
+          <RecentActions actions={actions} />
+        </div>
+        <div className="lg:col-span-1">
+          <DarkWebSurveillance />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <StrategicResponseEngine />
+        <SerpDefense />
       </div>
     </DashboardLayout>
   );
