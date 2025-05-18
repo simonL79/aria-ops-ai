@@ -5,8 +5,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
-import { Loader, AlertTriangle, ShieldCheck, Scale } from "lucide-react";
-import { classifyContentThreat, ThreatClassificationResult } from "@/services/openaiService";
+import { Input } from "@/components/ui/input";
+import { Loader, AlertTriangle, ShieldCheck, Scale, Building, Globe } from "lucide-react";
+import { ThreatClassificationResult, ThreatClassifierRequest } from "@/types/intelligence";
+import { classifyThreat } from "@/services/threatClassifierService";
 import { toast } from "sonner";
 
 interface ThreatClassifierProps {
@@ -16,6 +18,8 @@ interface ThreatClassifierProps {
 
 const ThreatClassifier = ({ initialContent = "", onClassified }: ThreatClassifierProps) => {
   const [content, setContent] = useState<string>(initialContent);
+  const [brand, setBrand] = useState<string>("RepShield");
+  const [platform, setPlatform] = useState<string>("Twitter");
   const [isClassifying, setIsClassifying] = useState<boolean>(false);
   const [result, setResult] = useState<ThreatClassificationResult | null>(null);
   
@@ -27,7 +31,13 @@ const ThreatClassifier = ({ initialContent = "", onClassified }: ThreatClassifie
     
     setIsClassifying(true);
     try {
-      const classificationResult = await classifyContentThreat(content);
+      const request: ThreatClassifierRequest = {
+        content,
+        platform,
+        brand
+      };
+      
+      const classificationResult = await classifyThreat(request);
       
       if (classificationResult) {
         setResult(classificationResult);
@@ -86,6 +96,33 @@ const ThreatClassifier = ({ initialContent = "", onClassified }: ThreatClassifie
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="brand" className="flex items-center gap-1">
+              <Building className="h-4 w-4" />
+              Brand Name
+            </Label>
+            <Input
+              id="brand"
+              value={brand}
+              onChange={(e) => setBrand(e.target.value)}
+              placeholder="Enter brand name"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="platform" className="flex items-center gap-1">
+              <Globe className="h-4 w-4" />
+              Platform
+            </Label>
+            <Input
+              id="platform"
+              value={platform}
+              onChange={(e) => setPlatform(e.target.value)}
+              placeholder="Enter platform (e.g. Twitter, Instagram)"
+            />
+          </div>
+        </div>
+        
         <div className="space-y-2">
           <Label htmlFor="content">Content to Analyze</Label>
           <Textarea
@@ -114,13 +151,13 @@ const ThreatClassifier = ({ initialContent = "", onClassified }: ThreatClassifie
             <div className="space-y-2 pt-2">
               <div>
                 <span className="text-sm font-medium">Recommended Action:</span>
-                <p className="text-sm">{result.action}</p>
+                <p className="text-sm">{result.recommendation}</p>
               </div>
               
-              {result.explanation && (
+              {result.ai_reasoning && (
                 <div>
                   <span className="text-sm font-medium">Analysis:</span>
-                  <p className="text-sm">{result.explanation}</p>
+                  <p className="text-sm">{result.ai_reasoning}</p>
                 </div>
               )}
             </div>

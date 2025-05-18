@@ -9,6 +9,37 @@ export type ContentThreatType =
   'legalRisk' | 
   'viralThreat';
 
+// Define a content threat interface that contains more information
+export interface ContentThreat {
+  type: ContentThreatType;
+  description: string;
+  icon: React.ReactElement;
+  detectionRate: number;
+  difficulty: 'easy' | 'moderate' | 'hard';
+}
+
+// Define intelligence strategy
+export interface IntelligenceStrategy {
+  name: string;
+  description: string;
+  effectivenessRate: number;
+  platforms: string[];
+  timeToImplement: string;
+  icon: React.ReactElement;
+}
+
+// Define alert severity
+export type AlertSeverity = 'high' | 'medium' | 'low';
+
+// Define threat source
+export interface ThreatSource {
+  id: string;
+  name: string;
+  type: string;
+  confidence: number;
+  lastUpdated: string;
+}
+
 // Define intelligence levels
 export type IntelligenceLevel = 
   'basic' | 
@@ -100,4 +131,18 @@ export const getIntelligenceLevelColor = (level: IntelligenceLevel): string => {
 // Update dashboard.ts ContentAlert interface to include 'read' status
 export interface ContentAlertUpdate {
   status: 'read' | 'new' | 'reviewing' | 'actioned';
+}
+
+// FastAPI threat classification types
+export interface ThreatClassifierRequest {
+  content: string;
+  platform: string;
+  brand: string;
+}
+
+export interface ThreatClassificationResult {
+  category: 'Neutral' | 'Positive' | 'Complaint' | 'Reputation Threat' | 'Misinformation' | 'Legal Risk';
+  severity: number; // 1-10
+  recommendation: string;
+  ai_reasoning: string;
 }
