@@ -1,7 +1,8 @@
 
-import { AlertSeverity, ContentThreatType, AlertSourceType } from "@/types/intelligence";
+import { ContentThreatType } from "@/types/intelligence";
 import { Ban, Shield, Eye, Flag, AlertTriangle, MessageSquareWarning, Globe, Users } from "lucide-react";
 import React from "react";
+import type { AlertSeverity } from "@/types/intelligence";
 
 export const getSeverityColor = (severity: string) => {
   switch (severity) {
@@ -60,7 +61,7 @@ export const formatThousands = (num?: number) => {
   return num >= 1000 ? `${(num / 1000).toFixed(1)}k` : num.toString();
 };
 
-export const getRecommendedActions = (severity: AlertSeverity) => {
+export const getRecommendedActions = (severity: string) => {
   if (severity === 'high') {
     return [
       'Immediate response required',

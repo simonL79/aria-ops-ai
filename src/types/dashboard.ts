@@ -6,7 +6,7 @@ export interface ContentAlert {
   content: string;
   date: string;
   severity: 'high' | 'medium' | 'low';
-  status: 'new' | 'reviewing' | 'actioned';
+  status: 'new' | 'reviewing' | 'actioned' | 'read';
   threatType?: 'falseReviews' | 'coordinatedAttack' | 'competitorSmear' | 'botActivity' | 'misinformation' | 'legalRisk' | 'viralThreat';
   confidenceScore?: number;
   sourceType?: 'social' | 'review' | 'news' | 'forum' | 'darkweb';

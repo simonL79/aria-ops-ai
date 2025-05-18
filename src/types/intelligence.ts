@@ -1,7 +1,11 @@
 
 // Intelligence System Types
 
-export type IntelligenceLevel = 'basic' | 'advanced' | 'enterprise';
+export type IntelligenceLevel = 'basic' | 'advanced' | 'enterprise' | 'expert';
+
+export type AlertSeverity = 'high' | 'medium' | 'low';
+
+export type AlertSourceType = 'social' | 'review' | 'news' | 'forum' | 'darkweb';
 
 export type ContentThreatType = 
   | 'falseReviews' 
@@ -11,6 +15,23 @@ export type ContentThreatType =
   | 'misinformation' 
   | 'legalRisk'
   | 'viralThreat';
+
+export interface ContentThreat {
+  type: ContentThreatType;
+  description: string;
+  icon: React.ReactElement;
+  detectionRate: number;
+  difficulty: string;
+}
+
+export interface IntelligenceStrategy {
+  name: string;
+  description: string;
+  effectivenessRate: number;
+  platforms: string[];
+  timeToImplement: string;
+  icon: React.ReactElement;
+}
 
 export interface ThreatSource {
   id: string;
@@ -64,6 +85,8 @@ export const getIntelligenceLevelColor = (level: IntelligenceLevel): string => {
       return 'bg-purple-600';
     case 'enterprise':
       return 'bg-indigo-800';
+    case 'expert':
+      return 'bg-red-700';
     default:
       return 'bg-gray-500';
   }

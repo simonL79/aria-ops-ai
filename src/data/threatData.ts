@@ -9,7 +9,7 @@ import {
   Eye,
   ShieldCheck
 } from "lucide-react";
-import { ContentThreat, IntelligenceStrategy } from "@/types/intelligence";
+import { ContentThreat, ContentThreatType, IntelligenceStrategy } from "@/types/intelligence";
 
 export const threatTypes: Record<string, ContentThreat> = {
   falseReviews: {
