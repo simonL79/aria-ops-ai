@@ -1,49 +1,36 @@
 
-// Intelligence System Types
-
-export type IntelligenceLevel = 'basic' | 'advanced' | 'enterprise' | 'expert';
-
-export type AlertSeverity = 'high' | 'medium' | 'low';
-
-export type AlertSourceType = 'social' | 'review' | 'news' | 'forum' | 'darkweb';
-
+// Define content threat type
 export type ContentThreatType = 
-  | 'falseReviews' 
-  | 'coordinatedAttack' 
-  | 'competitorSmear' 
-  | 'botActivity' 
-  | 'misinformation' 
-  | 'legalRisk'
-  | 'viralThreat';
+  'falseReviews' | 
+  'coordinatedAttack' | 
+  'competitorSmear' | 
+  'botActivity' | 
+  'misinformation' | 
+  'legalRisk' | 
+  'viralThreat';
 
-export interface ContentThreat {
-  type: ContentThreatType;
-  description: string;
-  icon: React.ReactElement;
-  detectionRate: number;
-  difficulty: string;
-}
+// Define intelligence levels
+export type IntelligenceLevel = 
+  'basic' | 
+  'advanced' | 
+  'enterprise' | 
+  'expert';
 
-export interface IntelligenceStrategy {
-  name: string;
-  description: string;
-  effectivenessRate: number;
-  platforms: string[];
-  timeToImplement: string;
-  icon: React.ReactElement;
-}
+// Source types
+export type SourceType = 
+  'social' | 
+  'news' | 
+  'review' | 
+  'forum' | 
+  'darkweb';
 
-export interface ThreatSource {
-  id: string;
-  name: string;
-  type: 'social' | 'news' | 'review' | 'forum' | 'dark';
-  platform: string;
-  active: boolean;
-  lastScan?: string;
-  credentials?: {
-    type: 'api' | 'oauth' | 'credentials';
-    status: 'valid' | 'expired' | 'invalid';
-  }
+// For threat vectors and analysis
+export interface ThreatVector {
+  type: string;
+  count: number; 
+  severity: number;
+  trend: 'increasing' | 'stable' | 'decreasing';
+  examples: string[];
 }
 
 export interface IntelligenceReport {
@@ -62,52 +49,55 @@ export interface IntelligenceReport {
   };
 }
 
-export interface ThreatVector {
-  type: ContentThreatType;
-  count: number;
-  severity: number; // 1-10
-  trend: 'increasing' | 'stable' | 'decreasing';
-  examples: string[];
-}
-
 export interface DataSourceStats {
   source: string;
   mentions: number;
-  sentiment: number; // -10 to 10
-  coverage: number; // percentage
+  sentiment: number;
+  coverage: number;
 }
 
+// For the UI components
+export interface ThreatFeedProps {
+  threats: any[];
+  loading?: boolean;
+  onThreatSelect?: (threat: any) => void;
+}
+
+export interface TimelineViewProps {
+  data: any[];
+  period?: 'day' | 'week' | 'month' | 'year';
+  loading?: boolean;
+}
+
+export interface ActionPanelProps {
+  selectedAlert?: any;
+  onApprove?: (response: string) => void;
+  onSend?: (response: string) => void;
+}
+
+export interface SEOTrackerProps {
+  keywords: string[];
+  positions: any[];
+  loading?: boolean;
+}
+
+// Helper function for Intelligence level colors
 export const getIntelligenceLevelColor = (level: IntelligenceLevel): string => {
-  switch (level) {
+  switch(level) {
     case 'basic':
-      return 'bg-blue-600';
+      return 'bg-blue-500';
     case 'advanced':
-      return 'bg-purple-600';
+      return 'bg-green-500';
     case 'enterprise':
-      return 'bg-indigo-800';
+      return 'bg-purple-500';
     case 'expert':
-      return 'bg-red-700';
+      return 'bg-amber-500';
     default:
       return 'bg-gray-500';
   }
 };
 
-export const threatTypeLabels: Record<ContentThreatType, string> = {
-  falseReviews: 'False Reviews',
-  coordinatedAttack: 'Coordinated Attack',
-  competitorSmear: 'Competitor Smear',
-  botActivity: 'Bot Activity',
-  misinformation: 'Misinformation',
-  legalRisk: 'Legal Risk',
-  viralThreat: 'Viral Threat'
-};
-
-export const threatTypeSeverity: Record<ContentThreatType, number> = {
-  falseReviews: 6,
-  coordinatedAttack: 9,
-  competitorSmear: 7,
-  botActivity: 5,
-  misinformation: 8,
-  legalRisk: 10,
-  viralThreat: 9
-};
+// Update dashboard.ts ContentAlert interface to include 'read' status
+export interface ContentAlertUpdate {
+  status: 'read' | 'new' | 'reviewing' | 'actioned';
+}
