@@ -14,28 +14,28 @@ export const threatTypes: Record<string, ContentThreat> = {
   falseReviews: {
     type: 'falseReviews',
     description: 'Fake negative reviews posted by non-customers',
-    icon: <MessageSquareWarning className="h-4 w-4" />,
+    icon: MessageSquareWarning,
     detectionRate: 78,
     difficulty: 'moderate'
   },
   coordinatedAttack: {
     type: 'coordinatedAttack',
     description: 'Multiple accounts posting similar negative content',
-    icon: <AlertTriangle className="h-4 w-4" />,
+    icon: AlertTriangle,
     detectionRate: 65,
     difficulty: 'hard'
   },
   competitorSmear: {
     type: 'competitorSmear',
     description: 'Negative content from competitor entities',
-    icon: <Ban className="h-4 w-4" />,
+    icon: Ban,
     detectionRate: 58,
     difficulty: 'hard'
   },
   botActivity: {
     type: 'botActivity',
     description: 'Automated negative content from bot accounts',
-    icon: <Shield className="h-4 w-4" />,
+    icon: Shield,
     detectionRate: 89,
     difficulty: 'easy'
   }
@@ -48,7 +48,7 @@ export const strategies: IntelligenceStrategy[] = [
     effectivenessRate: 76,
     platforms: ['Twitter', 'Reddit', 'Facebook'],
     timeToImplement: '1-2 days',
-    icon: <Search className="h-4 w-4" />
+    icon: Search
   },
   {
     name: 'Linguistic Analysis',
@@ -56,7 +56,7 @@ export const strategies: IntelligenceStrategy[] = [
     effectivenessRate: 82,
     platforms: ['Yelp', 'Google Reviews', 'Amazon'],
     timeToImplement: '3-5 days',
-    icon: <Eye className="h-4 w-4" />
+    icon: Eye
   },
   {
     name: 'Cross-Platform Monitoring',
@@ -64,6 +64,6 @@ export const strategies: IntelligenceStrategy[] = [
     effectivenessRate: 94,
     platforms: ['All Major Platforms'],
     timeToImplement: '1 week',
-    icon: <ShieldCheck className="h-4 w-4" />
+    icon: ShieldCheck
   }
 ];
