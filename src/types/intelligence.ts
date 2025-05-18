@@ -1,4 +1,3 @@
-
 // Define content threat type
 export type ContentThreatType = 
   'falseReviews' | 
@@ -152,4 +151,84 @@ export interface ThreatClassificationResult {
   severity: number; // 1-10
   recommendation: string;
   ai_reasoning: string;
+}
+
+// Define AI agent types
+export type AgentRole = 
+  'sentinel' | 
+  'liaison' | 
+  'legal' | 
+  'outreach' | 
+  'researcher' | 
+  'predictor';
+
+// Define AI agent interface
+export interface IntelligenceAgent {
+  id: string;
+  role: AgentRole;
+  name: string;
+  description: string;
+  capabilities: string[];
+  active: boolean;
+  lastAction?: string;
+  memory?: {
+    incidentsAnalyzed: number;
+    decisionsRecorded: number;
+    memoryVectors: number;
+  };
+  tools: string[];
+}
+
+// Define Agent collaboration types
+export interface AgentCollaboration {
+  id: string;
+  title: string;
+  description: string;
+  agents: AgentRole[];
+  status: 'active' | 'paused' | 'completed';
+  createdAt: string;
+  results?: {
+    insights: string[];
+    recommendations: string[];
+    actions: string[];
+  };
+}
+
+// Define prediction model
+export interface PredictionModel {
+  id: string;
+  name: string;
+  description: string;
+  accuracy: number;
+  lastTrained: string;
+  predictionType: 'virality' | 'sentiment' | 'seo' | 'attack';
+  activeIndicators: string[];
+}
+
+// Define simulation scenario
+export interface RedTeamSimulation {
+  id: string;
+  title: string;
+  description: string;
+  scenario: string;
+  status: 'planned' | 'running' | 'completed';
+  results?: {
+    defenseScore: number;
+    vulnerabilities: string[];
+    recommendations: string[];
+  };
+  createdAt: string;
+  completedAt?: string;
+}
+
+// Define memory entry for AI learning
+export interface MemoryEntry {
+  id: string;
+  content: string;
+  context: string;
+  timestamp: string;
+  tags: string[];
+  relatedEntities?: string[];
+  importance: number;
+  vector?: number[]; // For vector embedding
 }
