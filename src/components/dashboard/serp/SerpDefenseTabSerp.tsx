@@ -1,7 +1,8 @@
 
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Shield } from "lucide-react";
 import SerpResultItem from "./SerpResultItem";
 import { SERPResult } from "../../../types/serp";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface SerpDefenseTabSerpProps {
   keyword: string;
@@ -9,24 +10,48 @@ interface SerpDefenseTabSerpProps {
 }
 
 const SerpDefenseTabSerp = ({ keyword, serpResults }: SerpDefenseTabSerpProps) => {
+  // Count negative results for highlighting
+  const negativeResults = serpResults.filter(result => result.type === "negative");
+  const hasNegativeResults = negativeResults.length > 0;
+  
+  // Find the highest ranked negative result (lowest position number)
+  const highestNegativePosition = hasNegativeResults 
+    ? Math.min(...negativeResults.map(result => result.position))
+    : null;
+
   return (
     <div>
-      <div className="mb-4 text-sm">
-        <span className="font-medium">Monitoring keyword:</span> {keyword}
+      <div className="mb-4 flex justify-between items-center">
+        <div className="text-sm">
+          <span className="font-medium">Monitoring keyword:</span> {keyword}
+        </div>
+        <div className="text-xs bg-gray-100 px-3 py-1 rounded-full">
+          {serpResults.length} results
+        </div>
       </div>
       
-      <div className="space-y-2">
+      <div className="space-y-3">
         {serpResults.map((result) => (
-          <SerpResultItem key={result.url} result={result} />
+          <SerpResultItem 
+            key={result.url} 
+            result={result} 
+            isHighlighted={result.type === "negative"}
+          />
         ))}
       </div>
       
-      <div className="mt-4 p-2 border rounded-md bg-amber-50 flex items-center gap-2">
-        <AlertTriangle className="h-4 w-4 text-amber-600" />
-        <div className="text-xs">
-          <span className="font-medium">Alert:</span> Negative content on position #4 - implement defense tactics.
-        </div>
-      </div>
+      {hasNegativeResults && (
+        <Alert variant="destructive" className="mt-6 bg-red-50 border-red-200">
+          <AlertTriangle className="h-4 w-4 text-red-600" />
+          <AlertDescription className="flex items-center justify-between">
+            <div>
+              <span className="font-semibold">Alert:</span> {negativeResults.length} negative {negativeResults.length === 1 ? 'result' : 'results'} detected
+              {highestNegativePosition && ` (highest at position #${highestNegativePosition})`}
+            </div>
+            <Shield className="h-4 w-4 text-red-600 ml-2" />
+          </AlertDescription>
+        </Alert>
+      )}
     </div>
   );
 };

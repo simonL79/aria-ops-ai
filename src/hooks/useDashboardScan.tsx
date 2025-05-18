@@ -6,7 +6,7 @@ export const useDashboardScan = (
   alerts: any[],
   setAlerts: (alerts: any[]) => void,
   setFilteredAlerts: (alerts: any[]) => void, 
-  setNegativeContent: (value: number) => void
+  setNegativeContent: React.Dispatch<React.SetStateAction<number>>
 ) => {
   const [isScanning, setIsScanning] = useState(false);
 
@@ -36,7 +36,11 @@ export const useDashboardScan = (
         
         setAlerts(newAlerts);
         setFilteredAlerts(newAlerts);
-        setNegativeContent(prev => prev + (randomSeverity === 'high' ? 1 : 0));
+        
+        // Fixed TypeScript error by directly passing a number instead of a function
+        if (randomSeverity === 'high') {
+          setNegativeContent(prev => prev + 1);
+        }
         
         toast.success("Scan completed", {
           description: `Found new content on ${randomPlatform}.`,

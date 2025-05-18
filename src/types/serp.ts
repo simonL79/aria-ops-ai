@@ -13,3 +13,10 @@ export interface SeoMetrics {
   controlScore: number;
   visibilityScore: number;
 }
+
+export interface SerpPositionChange {
+  difference: number;
+  improved: boolean;
+  declined: boolean;
+  noChange: boolean;
+}
