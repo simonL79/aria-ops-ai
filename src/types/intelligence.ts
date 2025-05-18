@@ -1,41 +1,90 @@
 
-// Define intelligence types
-export type IntelligenceLevel = 'basic' | 'advanced' | 'expert';
-export type ContentThreatType = 'falseReviews' | 'coordinatedAttack' | 'competitorSmear' | 'botActivity' | 'misinformation' | 'legalRisk' | 'viralThreat';
+// Intelligence System Types
 
-export interface ContentThreat {
-  type: ContentThreatType;
-  description: string;
-  icon: React.ReactNode;
-  detectionRate: number;
-  difficulty: 'easy' | 'moderate' | 'hard';
-}
+export type IntelligenceLevel = 'basic' | 'advanced' | 'enterprise';
 
-export interface IntelligenceStrategy {
+export type ContentThreatType = 
+  | 'falseReviews' 
+  | 'coordinatedAttack' 
+  | 'competitorSmear' 
+  | 'botActivity' 
+  | 'misinformation' 
+  | 'legalRisk'
+  | 'viralThreat';
+
+export interface ThreatSource {
+  id: string;
   name: string;
-  description: string;
-  effectivenessRate: number;
-  platforms: string[];
-  timeToImplement: string;
-  icon: React.ReactNode;
+  type: 'social' | 'news' | 'review' | 'forum' | 'dark';
+  platform: string;
+  active: boolean;
+  lastScan?: string;
+  credentials?: {
+    type: 'api' | 'oauth' | 'credentials';
+    status: 'valid' | 'expired' | 'invalid';
+  }
 }
 
-export const getIntelligenceLevelColor = (level: IntelligenceLevel) => {
+export interface IntelligenceReport {
+  id: string;
+  title: string;
+  date: string;
+  summary: string;
+  threatLevel: number;
+  topics: string[];
+  sources: number;
+  mentions: number;
+  sentiment: {
+    positive: number;
+    neutral: number;
+    negative: number;
+  };
+}
+
+export interface ThreatVector {
+  type: ContentThreatType;
+  count: number;
+  severity: number; // 1-10
+  trend: 'increasing' | 'stable' | 'decreasing';
+  examples: string[];
+}
+
+export interface DataSourceStats {
+  source: string;
+  mentions: number;
+  sentiment: number; // -10 to 10
+  coverage: number; // percentage
+}
+
+export const getIntelligenceLevelColor = (level: IntelligenceLevel): string => {
   switch (level) {
-    case 'basic': 
-      return 'bg-blue-500 hover:bg-blue-600';
+    case 'basic':
+      return 'bg-blue-600';
     case 'advanced':
-      return 'bg-purple-600 hover:bg-purple-700';
-    case 'expert':
-      return 'bg-red-600 hover:bg-red-700';
+      return 'bg-purple-600';
+    case 'enterprise':
+      return 'bg-indigo-800';
     default:
       return 'bg-gray-500';
   }
 };
 
-// Content alert specific type additions
-export type AlertSeverity = 'high' | 'medium' | 'low';
-export type AlertStatus = 'new' | 'reviewing' | 'actioned';
-export type AlertSourceType = 'social' | 'review' | 'news' | 'forum' | 'darkweb';
-export type AlertSentiment = 'negative' | 'neutral' | 'sarcastic' | 'threatening';
+export const threatTypeLabels: Record<ContentThreatType, string> = {
+  falseReviews: 'False Reviews',
+  coordinatedAttack: 'Coordinated Attack',
+  competitorSmear: 'Competitor Smear',
+  botActivity: 'Bot Activity',
+  misinformation: 'Misinformation',
+  legalRisk: 'Legal Risk',
+  viralThreat: 'Viral Threat'
+};
 
+export const threatTypeSeverity: Record<ContentThreatType, number> = {
+  falseReviews: 6,
+  coordinatedAttack: 9,
+  competitorSmear: 7,
+  botActivity: 5,
+  misinformation: 8,
+  legalRisk: 10,
+  viralThreat: 9
+};

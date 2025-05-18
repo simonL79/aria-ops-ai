@@ -1,18 +1,20 @@
 
 import { useState, useEffect } from "react";
-import { Loader } from "lucide-react";
+import { toast } from "sonner";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { useDashboardData } from "@/hooks/useDashboardData";
-import { useDashboardScan } from "@/hooks/useDashboardScan";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import DashboardControls from "@/components/dashboard/DashboardControls";
 import DashboardMetrics from "@/components/dashboard/DashboardMetrics";
-import DashboardMainContent from "@/components/dashboard/DashboardMainContent";
+import ContentAlerts from "@/components/dashboard/ContentAlerts";
+import RealTimeAlerts from "@/components/dashboard/RealTimeAlerts";
+import IntelligenceDashboard from "@/components/dashboard/IntelligenceDashboard";
+import { useDashboardData } from "@/hooks/useDashboardData";
+import { useDashboardScan } from "@/hooks/useDashboardScan";
+import { ContentAlert } from "@/types/dashboard";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ThreatClassificationResult } from "@/services/openaiService";
 
 const DashboardPage = () => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<string>("dashboard");
-  
   const {
     filteredAlerts, 
     setFilteredAlerts,
@@ -21,140 +23,132 @@ const DashboardPage = () => {
     endDate, 
     setEndDate,
     reputationScore, 
-    setReputationScore,
-    previousScore, 
-    setPreviousScore,
+    previousScore,
     sources, 
-    setSources,
     alerts, 
     setAlerts,
     actions, 
-    setActions,
     monitoredSources, 
-    setMonitoredSources,
     negativeContent, 
     setNegativeContent,
-    removedContent, 
-    setRemovedContent
+    removedContent 
   } = useDashboardData();
-
+  
   const { isScanning, handleScan } = useDashboardScan(
     alerts,
     setAlerts,
     setFilteredAlerts,
     setNegativeContent
   );
-
-  // Simulating initial data loading
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1500); // 1.5 seconds for demonstration
-    return () => clearTimeout(timer);
-  }, []);
-
-  const handleFilterChange = (filters: {
-    platforms: string[];
-    severities: string[];
-    statuses: string[];
-  }) => {
-    let filtered = [...alerts];
-
-    if (filters.platforms.length > 0) {
-      filtered = filtered.filter((alert) =>
-        filters.platforms.includes(alert.platform.toLowerCase())
-      );
-    }
-
-    if (filters.severities.length > 0) {
-      filtered = filtered.filter((alert) =>
-        filters.severities.includes(alert.severity)
-      );
-    }
-
-    if (filters.statuses.length > 0) {
-      filtered = filtered.filter((alert) =>
-        filters.statuses.includes(alert.status)
-      );
-    }
-
-    setFilteredAlerts(filtered);
-  };
+  
+  const [selectedTab, setSelectedTab] = useState<string>("intelligence");
+  const [selectedAlert, setSelectedAlert] = useState<ContentAlert | null>(null);
 
   const handleDateRangeChange = (start: Date | undefined, end: Date | undefined) => {
     setStartDate(start);
     setEndDate(end);
-    
-    // For demo purposes, let's adjust the metrics slightly
-    if (start && end) {
-      const daysDiff = Math.ceil((end.getTime() - start.getTime()) / (1000 * 3600 * 24));
-      
-      if (daysDiff <= 7) {
-        // Last week data
-        setNegativeContent(Math.floor(negativeContent * 0.7));
-        setRemovedContent(Math.floor(removedContent * 0.6));
-      } else if (daysDiff <= 30) {
-        // Last month data
-        setNegativeContent(Math.floor(negativeContent * 1.2));
-        setRemovedContent(Math.floor(removedContent * 1.1));
-      } else {
-        // Longer period
-        setNegativeContent(Math.floor(negativeContent * 1.5));
-        setRemovedContent(Math.floor(removedContent * 1.3));
-      }
-    }
-  };
-  
-  const handleSelectTestProfile = (profile: any) => {
-    setReputationScore(profile.reputationScore);
-    setPreviousScore(profile.previousScore);
-    setSources(profile.sources);
-    setAlerts(profile.alerts);
-    setFilteredAlerts(profile.alerts);
-    setMonitoredSources(profile.metrics.monitoredSources);
-    setNegativeContent(profile.metrics.negativeContent);
-    setRemovedContent(profile.metrics.removedContent);
   };
 
-  if (isLoading) {
-    return (
-      <DashboardLayout>
-        <div className="flex flex-col items-center justify-center h-[80vh]">
-          <Loader className="h-12 w-12 animate-spin text-primary mb-4" />
-          <p className="text-lg text-muted-foreground">Loading dashboard data...</p>
-        </div>
-      </DashboardLayout>
+  const handleSelectTestProfile = (profile: any) => {
+    toast.info(`Test profile "${profile.name}" selected`, {
+      description: "Dashboard data has been updated to reflect this test scenario."
+    });
+  };
+
+  const handleViewAlertDetail = (alert: ContentAlert) => {
+    setSelectedAlert(alert);
+    // You could navigate to a detail view or open a modal here
+    toast.info("Alert selected for analysis", {
+      description: `You can now analyze and respond to this ${alert.severity} severity mention.`
+    });
+  };
+
+  const handleMarkAlertAsRead = (alertId: string) => {
+    setFilteredAlerts(prev => 
+      prev.map(alert => alert.id === alertId 
+        ? { ...alert, status: 'read' } 
+        : alert
+      )
     );
-  }
+    
+    setAlerts(prev => 
+      prev.map(alert => alert.id === alertId 
+        ? { ...alert, status: 'read' } 
+        : alert
+      )
+    );
+  };
+
+  const handleDismissAlert = (alertId: string) => {
+    setFilteredAlerts(prev => prev.filter(alert => alert.id !== alertId));
+    setAlerts(prev => prev.filter(alert => alert.id !== alertId));
+  };
+
+  const handleClassificationResult = (result: ThreatClassificationResult) => {
+    toast.info(`Content classified as "${result.category}"`, {
+      description: `Severity: ${result.severity}/10. Recommended action: ${result.action}`
+    });
+  };
 
   return (
     <DashboardLayout>
       <DashboardHeader 
-        title="LOVEABLE.SHIELD - Online Reputation Command Center" 
-        subtitle="AI-powered intelligence for detecting, analyzing, and responding to reputation threats across digital platforms."
+        title="Brand Intelligence Dashboard" 
+        description="Monitor, analyze and respond to online reputation threats"
       />
       
-      <DashboardControls 
+      <DashboardControls
         isScanning={isScanning}
         onScan={handleScan}
         onDateRangeChange={handleDateRangeChange}
         onSelectTestProfile={handleSelectTestProfile}
       />
       
-      <DashboardMetrics 
-        monitoredSources={monitoredSources}
-        negativeContent={negativeContent}
-        removedContent={removedContent}
-      />
+      <div className="mb-6">
+        <DashboardMetrics 
+          reputationScore={reputationScore}
+          previousScore={previousScore}
+          sources={monitoredSources}
+          alerts={negativeContent}
+          removed={removedContent}
+        />
+      </div>
       
-      <DashboardMainContent 
-        reputationScore={reputationScore}
-        previousScore={previousScore}
-        sources={sources}
-        filteredAlerts={filteredAlerts}
-        actions={actions}
-        onFilterChange={handleFilterChange}
-      />
+      <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-4">
+        <TabsList className="w-full grid grid-cols-2 lg:grid-cols-4">
+          <TabsTrigger value="intelligence">Intelligence</TabsTrigger>
+          <TabsTrigger value="content">Content Alerts</TabsTrigger>
+          <TabsTrigger value="realtime">Real-Time</TabsTrigger>
+          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="intelligence" className="mt-6">
+          <IntelligenceDashboard onAlertDetected={handleClassificationResult} />
+        </TabsContent>
+        
+        <TabsContent value="content" className="mt-6">
+          <ContentAlerts alerts={filteredAlerts} />
+        </TabsContent>
+        
+        <TabsContent value="realtime" className="mt-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <RealTimeAlerts 
+              alerts={filteredAlerts.filter(a => a.status === 'new')} 
+              onDismiss={handleDismissAlert}
+              onMarkAsRead={handleMarkAlertAsRead}
+              onViewDetail={handleViewAlertDetail}
+            />
+            <ContentAlerts alerts={filteredAlerts.filter(a => a.status === 'new')} />
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="analytics" className="mt-6">
+          <div className="bg-muted rounded-md p-12 text-center">
+            <h3 className="text-lg font-medium mb-2">Analytics Dashboard</h3>
+            <p className="text-muted-foreground">Detailed analytics and trend visualization will be available in the next update.</p>
+          </div>
+        </TabsContent>
+      </Tabs>
     </DashboardLayout>
   );
 };
