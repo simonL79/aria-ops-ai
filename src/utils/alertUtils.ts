@@ -17,21 +17,21 @@ export const getThreatTypeIcon = (threatType?: string) => {
   
   switch (threatType) {
     case 'falseReviews': 
-      return <MessageSquareWarning className="h-4 w-4 text-yellow-600" />;
+      return React.createElement(MessageSquareWarning, { className: "h-4 w-4 text-yellow-600" });
     case 'coordinatedAttack': 
-      return <Users className="h-4 w-4 text-red-600" />;
+      return React.createElement(Users, { className: "h-4 w-4 text-red-600" });
     case 'competitorSmear': 
-      return <Ban className="h-4 w-4 text-purple-600" />;
+      return React.createElement(Ban, { className: "h-4 w-4 text-purple-600" });
     case 'botActivity': 
-      return <Eye className="h-4 w-4 text-blue-600" />;
+      return React.createElement(Eye, { className: "h-4 w-4 text-blue-600" });
     case 'misinformation': 
-      return <AlertTriangle className="h-4 w-4 text-orange-600" />;
+      return React.createElement(AlertTriangle, { className: "h-4 w-4 text-orange-600" });
     case 'legalRisk': 
-      return <Shield className="h-4 w-4 text-red-800" />;
+      return React.createElement(Shield, { className: "h-4 w-4 text-red-800" });
     case 'viralThreat': 
-      return <Globe className="h-4 w-4 text-pink-600" />;
+      return React.createElement(Globe, { className: "h-4 w-4 text-pink-600" });
     default: 
-      return <Flag className="h-4 w-4 text-gray-600" />;
+      return React.createElement(Flag, { className: "h-4 w-4 text-gray-600" });
   }
 };
 
@@ -46,10 +46,12 @@ export const getSourceTypeLabel = (sourceType?: string) => {
     darkweb: 'bg-red-100 text-red-800'
   };
   
-  return (
-    <span className={`text-xs px-2 py-0.5 rounded-full ${colors[sourceType] || 'bg-gray-100 text-gray-800'}`}>
-      {sourceType.charAt(0).toUpperCase() + sourceType.slice(1)}
-    </span>
+  return React.createElement(
+    'span',
+    { 
+      className: `text-xs px-2 py-0.5 rounded-full ${colors[sourceType] || 'bg-gray-100 text-gray-800'}`
+    },
+    sourceType.charAt(0).toUpperCase() + sourceType.slice(1)
   );
 };
 
