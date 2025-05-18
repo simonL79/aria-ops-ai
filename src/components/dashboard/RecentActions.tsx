@@ -2,17 +2,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-
-interface Action {
-  id: string;
-  platform: string;
-  action: 'removal_requested' | 'content_hidden' | 'reported';
-  date: string;
-  status: 'pending' | 'completed' | 'rejected';
-}
+import { ContentAction } from "@/types/dashboard";
 
 interface RecentActionsProps {
-  actions: Action[];
+  actions: ContentAction[];
 }
 
 const RecentActions = ({ actions }: RecentActionsProps) => {
@@ -21,6 +14,7 @@ const RecentActions = ({ actions }: RecentActionsProps) => {
       case 'removal_requested': return 'Removal Requested';
       case 'content_hidden': return 'Content Hidden';
       case 'reported': return 'Reported';
+      case 'auto_responded': return 'Auto Responded';
       default: return action;
     }
   };
