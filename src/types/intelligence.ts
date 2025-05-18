@@ -1,7 +1,7 @@
 
 // Define intelligence types
 export type IntelligenceLevel = 'basic' | 'advanced' | 'expert';
-export type ContentThreatType = 'falseReviews' | 'coordinatedAttack' | 'competitorSmear' | 'botActivity';
+export type ContentThreatType = 'falseReviews' | 'coordinatedAttack' | 'competitorSmear' | 'botActivity' | 'misinformation' | 'legalRisk' | 'viralThreat';
 
 export interface ContentThreat {
   type: ContentThreatType;
@@ -32,3 +32,10 @@ export const getIntelligenceLevelColor = (level: IntelligenceLevel) => {
       return 'bg-gray-500';
   }
 };
+
+// Content alert specific type additions
+export type AlertSeverity = 'high' | 'medium' | 'low';
+export type AlertStatus = 'new' | 'reviewing' | 'actioned';
+export type AlertSourceType = 'social' | 'review' | 'news' | 'forum' | 'darkweb';
+export type AlertSentiment = 'negative' | 'neutral' | 'sarcastic' | 'threatening';
+
