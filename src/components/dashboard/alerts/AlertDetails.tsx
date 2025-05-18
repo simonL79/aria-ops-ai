@@ -22,6 +22,11 @@ interface AlertDetailsProps {
 const AlertDetails = ({ alert }: AlertDetailsProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   
+  // Pass alert data to the Strategic Response Engine
+  const handleOpenResponseEngine = () => {
+    setIsDialogOpen(true);
+  };
+  
   return (
     <div className="bg-gray-50 px-4 py-3 border-t border-gray-100">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
@@ -75,7 +80,7 @@ const AlertDetails = ({ alert }: AlertDetailsProps) => {
       <div className="flex justify-end mt-3">
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button size="sm" variant="secondary" className="gap-1">
+            <Button size="sm" variant="secondary" className="gap-1" onClick={handleOpenResponseEngine}>
               <Shield className="h-4 w-4" />
               <span>AI Response Suggestions</span>
             </Button>
@@ -85,7 +90,12 @@ const AlertDetails = ({ alert }: AlertDetailsProps) => {
               <DialogTitle>Strategic Response Engine</DialogTitle>
             </DialogHeader>
             <div className="p-1">
-              <StrategicResponseEngine />
+              <StrategicResponseEngine 
+                initialContent={alert.content}
+                threatType={alert.threatType}
+                severity={alert.severity}
+                platform={alert.platform}
+              />
             </div>
           </DialogContent>
         </Dialog>
