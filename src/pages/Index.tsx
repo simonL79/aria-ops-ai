@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -13,70 +12,98 @@ import DateRangePicker from "@/components/dashboard/DateRangePicker";
 import ContentFilter from "@/components/dashboard/ContentFilter";
 import InfoTooltip from "@/components/dashboard/InfoTooltip";
 import ProfileTestPanel, { TestProfileData } from "@/components/dashboard/ProfileTestPanel";
+import ContentIntelligencePanel from "@/components/dashboard/ContentIntelligencePanel";
+
+// Define content alert type to avoid TypeScript errors
+export interface ContentAlert {
+  id: string;
+  platform: string;
+  content: string;
+  date: string;
+  severity: 'high' | 'medium' | 'low';
+  status: 'new' | 'reviewing' | 'actioned';
+}
+
+// Define source type
+export interface ContentSource {
+  name: string;
+  status: 'critical' | 'warning' | 'good';
+  positiveRatio: number;
+  total: number;
+}
+
+// Define action type
+export interface ContentAction {
+  id: string;
+  platform: string;
+  action: 'removal_requested' | 'reported' | 'content_hidden';
+  date: string;
+  status: 'completed' | 'pending' | 'rejected';
+}
 
 // Sample data
-const mockAlerts = [
+const mockAlerts: ContentAlert[] = [
   {
     id: '1',
     platform: 'Twitter',
     content: 'This company has terrible customer service. I waited for hours and no one helped me. #awful #scam',
     date: '2 hours ago',
-    severity: 'high' as 'high', 
-    status: 'new' as 'new'
+    severity: 'high',
+    status: 'new'
   },
   {
     id: '2',
     platform: 'Reddit',
     content: 'I had a somewhat negative experience with their product, but customer service was helpful in resolving it.',
     date: '5 hours ago',
-    severity: 'medium' as 'medium',
-    status: 'new' as 'new'
+    severity: 'medium',
+    status: 'new'
   },
   {
     id: '3',
     platform: 'Yelp',
     content: 'Not the best service, but the staff were polite. Food was just okay.',
     date: '1 day ago',
-    severity: 'low' as 'low',
-    status: 'reviewing' as 'reviewing'
+    severity: 'low',
+    status: 'reviewing'
   }
 ];
 
-const mockSources = [
-  { name: 'Twitter', status: 'critical' as 'critical', positiveRatio: 35, total: 120 },
-  { name: 'Facebook', status: 'good' as 'good', positiveRatio: 87, total: 230 },
-  { name: 'Reddit', status: 'warning' as 'warning', positiveRatio: 62, total: 85 },
-  { name: 'Yelp', status: 'good' as 'good', positiveRatio: 78, total: 45 }
+const mockSources: ContentSource[] = [
+  { name: 'Twitter', status: 'critical', positiveRatio: 35, total: 120 },
+  { name: 'Facebook', status: 'good', positiveRatio: 87, total: 230 },
+  { name: 'Reddit', status: 'warning', positiveRatio: 62, total: 85 },
+  { name: 'Yelp', status: 'good', positiveRatio: 78, total: 45 }
 ];
 
-const mockActions = [
+const mockActions: ContentAction[] = [
   { 
     id: '1', 
     platform: 'Twitter', 
-    action: 'removal_requested' as 'removal_requested', 
+    action: 'removal_requested', 
     date: '3 hours ago', 
-    status: 'completed' as 'completed'
+    status: 'completed'
   },
   { 
     id: '2', 
     platform: 'Yelp', 
-    action: 'reported' as 'reported', 
+    action: 'reported', 
     date: '1 day ago', 
-    status: 'pending' as 'pending'
+    status: 'pending'
   },
   { 
     id: '3', 
     platform: 'Reddit', 
-    action: 'content_hidden' as 'content_hidden', 
+    action: 'content_hidden', 
     date: '2 days ago', 
-    status: 'completed' as 'completed'
+    status: 'completed'
   },
   { 
     id: '4', 
     platform: 'Facebook', 
-    action: 'removal_requested' as 'removal_requested', 
+    action: 'removal_requested', 
     date: '3 days ago', 
-    status: 'rejected' as 'rejected'
+    status: 'rejected'
   }
 ];
 
@@ -125,8 +152,8 @@ const Index = () => {
           platform: randomPlatform,
           content: `New ${randomSeverity === 'high' ? 'negative' : randomSeverity === 'medium' ? 'mixed' : 'positive'} mention found during the latest scan.`,
           date: 'Just now',
-          severity: randomSeverity as 'high' | 'medium' | 'low',
-          status: 'new' as 'new'
+          severity: randomSeverity,
+          status: 'new'
         });
         
         setAlerts(newAlerts);
@@ -232,6 +259,7 @@ const Index = () => {
         <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
           <DateRangePicker onDateRangeChange={handleDateRangeChange} />
           <ProfileTestPanel onSelectTestProfile={handleSelectTestProfile} />
+          <ContentIntelligencePanel />
         </div>
         <Button 
           onClick={handleScan} 

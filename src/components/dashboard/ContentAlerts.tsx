@@ -1,10 +1,16 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Ban, Loader } from "lucide-react";
+import { Ban, Loader, Eye, Shield, Flag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { 
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from "@/components/ui/tooltip";
 
 interface ContentAlert {
   id: string;
@@ -13,6 +19,8 @@ interface ContentAlert {
   date: string;
   severity: 'high' | 'medium' | 'low';
   status: 'new' | 'reviewing' | 'actioned';
+  threatType?: 'falseReviews' | 'coordinatedAttack' | 'competitorSmear' | 'botActivity';
+  confidenceScore?: number;
 }
 
 interface ContentAlertsProps {
@@ -27,6 +35,23 @@ const ContentAlerts = ({ alerts, isLoading = false }: ContentAlertsProps) => {
       case 'medium': return 'bg-alert-warning text-white';
       case 'low': return 'bg-brand-light text-white';
       default: return 'bg-gray-200';
+    }
+  };
+
+  const getThreatTypeIcon = (threatType?: string) => {
+    if (!threatType) return null;
+    
+    switch (threatType) {
+      case 'falseReviews': 
+        return <Flag className="h-4 w-4 text-yellow-600" />;
+      case 'coordinatedAttack': 
+        return <Shield className="h-4 w-4 text-red-600" />;
+      case 'competitorSmear': 
+        return <Ban className="h-4 w-4 text-purple-600" />;
+      case 'botActivity': 
+        return <Eye className="h-4 w-4 text-blue-600" />;
+      default: 
+        return null;
     }
   };
 
@@ -95,7 +120,26 @@ const ContentAlerts = ({ alerts, isLoading = false }: ContentAlertsProps) => {
             <div key={alert.id}>
               <div className="p-4">
                 <div className="flex justify-between mb-2">
-                  <div className="font-medium">{alert.platform}</div>
+                  <div className="font-medium flex items-center">
+                    {alert.platform}
+                    {alert.threatType && (
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="ml-2">
+                              {getThreatTypeIcon(alert.threatType)}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="text-xs">
+                              {alert.threatType.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                              {alert.confidenceScore && ` (${alert.confidenceScore}% confidence)`}
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
+                  </div>
                   <Badge className={getSeverityColor(alert.severity)}>
                     {alert.severity === 'high' ? 'High Impact' : 
                      alert.severity === 'medium' ? 'Medium Impact' : 'Low Impact'}
@@ -108,6 +152,10 @@ const ContentAlerts = ({ alerts, isLoading = false }: ContentAlertsProps) => {
                   <Button variant="destructive" size="sm" className="gap-1">
                     <Ban className="h-4 w-4" />
                     <span>Request Removal</span>
+                  </Button>
+                  <Button variant="outline" size="sm" className="ml-auto gap-1">
+                    <Shield className="h-4 w-4" />
+                    <span>Analyze</span>
                   </Button>
                 </div>
               </div>
