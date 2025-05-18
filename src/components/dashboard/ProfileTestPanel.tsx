@@ -44,7 +44,7 @@ const testProfiles = [
         date: '1 day ago',
         severity: 'low' as const,
         status: 'new' as const
-      },
+      }
     ],
     sources: [
       { name: 'Twitter', status: 'good' as const, positiveRatio: 92, total: 120 },
@@ -83,7 +83,7 @@ const testProfiles = [
       {
         id: '3m',
         platform: 'Yelp',
-        content: 'Three stars. Good but not great. There's definitely room for improvement.',
+        content: 'Three stars. Good but not great. There\'s definitely room for improvement.',
         date: '4 days ago',
         severity: 'medium' as const,
         status: 'reviewing' as const
@@ -118,7 +118,7 @@ const testProfiles = [
       {
         id: '2p',
         platform: 'Reddit',
-        content: 'AVOID THIS BUSINESS! They overcharged me and then ghosted me. Customer service doesn't exist.',
+        content: 'AVOID THIS BUSINESS! They overcharged me and then ghosted me. Customer service doesn\'t exist.',
         date: '5 hours ago',
         severity: 'high' as const,
         status: 'new' as const
@@ -134,7 +134,7 @@ const testProfiles = [
       {
         id: '4p',
         platform: 'Facebook',
-        content: 'This business is a complete scam. They sell defective products and don't honor warranties.',
+        content: 'This business is a complete scam. They sell defective products and don\'t honor warranties.',
         date: '3 days ago',
         severity: 'high' as const,
         status: 'new' as const
