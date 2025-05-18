@@ -7,6 +7,7 @@ import RecentActions from "@/components/dashboard/RecentActions";
 import DarkWebSurveillance from "@/components/dashboard/DarkWebSurveillance";
 import StrategicResponseEngine from "@/components/dashboard/StrategicResponseEngine";
 import SerpDefense from "@/components/dashboard/SerpDefense";
+import SeoSuppressionPipeline from "@/components/dashboard/SeoSuppressionPipeline";
 import IntelligenceCollection from "@/components/dashboard/IntelligenceCollection";
 import ContentFilter from "@/components/dashboard/ContentFilter";
 import InfoTooltip from "@/components/dashboard/InfoTooltip";
@@ -73,6 +74,10 @@ const DashboardMainContent = ({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <StrategicResponseEngine />
         <SerpDefense />
+      </div>
+      
+      <div className="mb-6">
+        <SeoSuppressionPipeline />
       </div>
     </>
   );

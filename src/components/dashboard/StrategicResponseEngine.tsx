@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,7 +10,10 @@ import {
   ThumbsUp, 
   UserRound, 
   Loader,
-  RefreshCw
+  RefreshCw,
+  Languages,
+  Settings,
+  Sparkles
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { 
@@ -20,9 +24,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { generateAIResponse, ResponseGenerationProps } from "@/services/openaiService";
 import { ContentThreatType } from "@/types/intelligence";
+import { ResponseToneStyle, AutoResponseSettings } from "@/types/dashboard";
 
 interface ResponseTemplateProps {
   type: string;
@@ -48,12 +55,19 @@ const StrategicResponseEngine = ({
   const [responseType, setResponseType] = useState<string>("empathetic");
   const [responseText, setResponseText] = useState<string>("");
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
-  const [toneStyle, setToneStyle] = useState<string>("professional");
+  const [toneStyle, setToneStyle] = useState<ResponseToneStyle>("professional");
   const [contentToRespond, setContentToRespond] = useState<string>(initialContent);
   const [selectedPlatform, setPlatform] = useState<string>(platform || "");
   const [apiKey, setApiKey] = useState<string>(localStorage.getItem("openai_api_key") || "");
   const [usageTokens, setUsageTokens] = useState<number>(0);
   const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
+  const [language, setLanguage] = useState<string>("en");
+  const [autoResponseSettings, setAutoResponseSettings] = useState<AutoResponseSettings>({
+    enabled: false,
+    threshold: 'medium',
+    reviewRequired: true,
+    defaultTone: 'professional'
+  });
   
   const responseTemplates: ResponseTemplateProps[] = [
     {
@@ -74,6 +88,30 @@ const StrategicResponseEngine = ({
       icon: <ThumbsUp className="h-4 w-4" />,
       template: "We sincerely apologize for [ISSUE]. This doesn't reflect our standards, and we're taking immediate steps to [SOLUTION]. We'd appreciate the opportunity to make this right for you."
     }
+  ];
+  
+  const toneOptions: ResponseToneStyle[] = [
+    "professional", 
+    "friendly", 
+    "formal", 
+    "casual", 
+    "humorous", 
+    "apologetic", 
+    "technical", 
+    "empathetic"
+  ];
+  
+  const languageOptions = [
+    { code: "en", name: "English" },
+    { code: "es", name: "Spanish" },
+    { code: "fr", name: "French" },
+    { code: "de", name: "German" },
+    { code: "zh", name: "Chinese" },
+    { code: "ja", name: "Japanese" },
+    { code: "ko", name: "Korean" },
+    { code: "ar", name: "Arabic" },
+    { code: "ru", name: "Russian" },
+    { code: "pt", name: "Portuguese" }
   ];
   
   const handleGenerateResponse = async () => {
@@ -97,7 +135,8 @@ const StrategicResponseEngine = ({
         content: contentToRespond,
         platform: selectedPlatform,
         severity,
-        threatType
+        threatType,
+        language: language !== "en" ? language : undefined
       };
       
       const generatedResponse = await generateAIResponse(props);
@@ -122,6 +161,42 @@ const StrategicResponseEngine = ({
   const handleRegenerateResponse = () => {
     handleGenerateResponse();
   };
+  
+  const handleAutoResponse = async () => {
+    if (!contentToRespond.trim() || !apiKey) {
+      toast.error("Please enter content and API key");
+      return;
+    }
+    
+    setIsGenerating(true);
+    
+    try {
+      const props: ResponseGenerationProps = {
+        responseType: "empathetic",
+        toneStyle: autoResponseSettings.defaultTone,
+        content: contentToRespond,
+        platform: selectedPlatform,
+        severity,
+        threatType,
+        language: language !== "en" ? language : undefined,
+        autoRespond: true
+      };
+      
+      const generatedResponse = await generateAIResponse(props);
+      setResponseText(generatedResponse);
+      
+      toast.success("Auto-response generated", {
+        description: autoResponseSettings.reviewRequired ? 
+          "Please review before sending" : 
+          "Response has been sent automatically"
+      });
+    } catch (error) {
+      console.error("Error generating auto-response:", error);
+      toast.error("Failed to generate auto-response");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   return (
     <Card>
@@ -130,9 +205,10 @@ const StrategicResponseEngine = ({
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="generate">
-          <TabsList className="grid grid-cols-2 mb-4">
+          <TabsList className="grid grid-cols-3 mb-4">
             <TabsTrigger value="generate">Generate Response</TabsTrigger>
             <TabsTrigger value="templates">Response Templates</TabsTrigger>
+            <TabsTrigger value="settings">Auto-Response</TabsTrigger>
           </TabsList>
           
           <TabsContent value="generate">
@@ -175,21 +251,24 @@ const StrategicResponseEngine = ({
                           {template.type.charAt(0).toUpperCase() + template.type.slice(1)}
                         </SelectItem>
                       ))}
+                      <SelectItem value="gratitude">Gratitude</SelectItem>
+                      <SelectItem value="clarification">Clarification</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 
                 <div>
                   <label className="text-sm font-medium mb-1 block">Tone & Style</label>
-                  <Select value={toneStyle} onValueChange={setToneStyle}>
+                  <Select value={toneStyle} onValueChange={(value) => setToneStyle(value as ResponseToneStyle)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select tone" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="professional">Professional</SelectItem>
-                      <SelectItem value="friendly">Friendly</SelectItem>
-                      <SelectItem value="formal">Formal</SelectItem>
-                      <SelectItem value="casual">Casual</SelectItem>
+                      {toneOptions.map((tone) => (
+                        <SelectItem key={tone} value={tone}>
+                          {tone.charAt(0).toUpperCase() + tone.slice(1)}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -206,7 +285,7 @@ const StrategicResponseEngine = ({
                 </Button>
                 
                 {showAdvanced && (
-                  <div className="mt-2 grid grid-cols-1 gap-2">
+                  <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2">
                     <div>
                       <label className="text-xs font-medium mb-1 block">Platform Context</label>
                       <Select value={selectedPlatform} onValueChange={setPlatform}>
@@ -224,6 +303,22 @@ const StrategicResponseEngine = ({
                         </SelectContent>
                       </Select>
                     </div>
+                    
+                    <div>
+                      <label className="text-xs font-medium mb-1 block">Response Language</label>
+                      <Select value={language} onValueChange={setLanguage}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select language" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {languageOptions.map((lang) => (
+                            <SelectItem key={lang.code} value={lang.code}>
+                              {lang.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                 )}
               </div>
@@ -238,7 +333,7 @@ const StrategicResponseEngine = ({
                 />
               </div>
               
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <Button 
                   variant="default" 
                   onClick={handleGenerateResponse} 
@@ -256,6 +351,15 @@ const StrategicResponseEngine = ({
                       Generate Response
                     </>
                   )}
+                </Button>
+                
+                <Button
+                  variant="secondary"
+                  onClick={handleAutoResponse}
+                  disabled={isGenerating || !autoResponseSettings.enabled}
+                >
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Auto-Respond
                 </Button>
                 
                 {responseText && (
@@ -297,6 +401,91 @@ const StrategicResponseEngine = ({
               ))}
             </div>
           </TabsContent>
+          
+          <TabsContent value="settings">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="auto-respond">Enable Auto-Response</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Automatically generate responses to new content
+                  </p>
+                </div>
+                <Switch
+                  id="auto-respond"
+                  checked={autoResponseSettings.enabled}
+                  onCheckedChange={(checked) => 
+                    setAutoResponseSettings({...autoResponseSettings, enabled: checked})
+                  }
+                />
+              </div>
+              
+              <div>
+                <Label>Response Threshold</Label>
+                <Select 
+                  value={autoResponseSettings.threshold}
+                  onValueChange={(val: any) => 
+                    setAutoResponseSettings({...autoResponseSettings, threshold: val})
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select threshold" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Content</SelectItem>
+                    <SelectItem value="high">High Severity Only</SelectItem>
+                    <SelectItem value="medium">Medium & High Severity</SelectItem>
+                    <SelectItem value="none">Disable Auto-Response</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Choose what severity levels will trigger auto-responses
+                </p>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label htmlFor="review-required">Require Review</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Review responses before they are sent
+                  </p>
+                </div>
+                <Switch
+                  id="review-required"
+                  checked={autoResponseSettings.reviewRequired}
+                  onCheckedChange={(checked) => 
+                    setAutoResponseSettings({...autoResponseSettings, reviewRequired: checked})
+                  }
+                />
+              </div>
+              
+              <div>
+                <Label>Default Tone</Label>
+                <Select 
+                  value={autoResponseSettings.defaultTone}
+                  onValueChange={(val: any) => 
+                    setAutoResponseSettings({...autoResponseSettings, defaultTone: val})
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select default tone" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {toneOptions.map((tone) => (
+                      <SelectItem key={tone} value={tone}>
+                        {tone.charAt(0).toUpperCase() + tone.slice(1)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <Button className="w-full" disabled={!autoResponseSettings.enabled}>
+                <Settings className="h-4 w-4 mr-2" />
+                Save Auto-Response Settings
+              </Button>
+            </div>
+          </TabsContent>
         </Tabs>
       </CardContent>
     </Card>
@@ -304,3 +493,4 @@ const StrategicResponseEngine = ({
 };
 
 export default StrategicResponseEngine;
+

@@ -27,7 +27,7 @@ export interface ContentSource {
 export interface ContentAction {
   id: string;
   platform: string;
-  action: 'removal_requested' | 'reported' | 'content_hidden';
+  action: 'removal_requested' | 'reported' | 'content_hidden' | 'auto_responded';
   date: string;
   status: 'completed' | 'pending' | 'rejected';
 }
@@ -44,3 +44,35 @@ export interface TestProfileData {
     removedContent: number;
   };
 }
+
+// Define SEO Content type
+export interface SeoContent {
+  id: string;
+  title: string;
+  keywords: string[];
+  status: 'draft' | 'optimizing' | 'published' | 'indexed';
+  dateCreated: string;
+  publishDate?: string;
+  url?: string;
+  score?: number;
+}
+
+// Define auto-response settings
+export interface AutoResponseSettings {
+  enabled: boolean;
+  threshold: 'all' | 'high' | 'medium' | 'none';
+  reviewRequired: boolean;
+  defaultTone: ResponseToneStyle;
+}
+
+// Define response tone styles
+export type ResponseToneStyle = 
+  'professional' | 
+  'friendly' | 
+  'formal' | 
+  'casual' | 
+  'humorous' | 
+  'apologetic' | 
+  'technical' | 
+  'empathetic';
+

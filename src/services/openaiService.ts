@@ -1,6 +1,7 @@
 
 import { toast } from "sonner";
 import { ContentThreatType } from "@/types/intelligence";
+import { ResponseToneStyle } from "@/types/dashboard";
 
 // Define the types for our OpenAI API responses
 export interface OpenAIMessage {
@@ -23,11 +24,13 @@ export interface OpenAIResponse {
 
 export interface ResponseGenerationProps {
   responseType: string;
-  toneStyle: string;
+  toneStyle: ResponseToneStyle;
   content: string;
   platform?: string; 
   severity?: string;
   threatType?: ContentThreatType | string;
+  language?: string;
+  autoRespond?: boolean;
 }
 
 export interface ThreatClassificationResult {
@@ -38,23 +41,35 @@ export interface ThreatClassificationResult {
 }
 
 // Define system prompts based on response type
-const getSystemPrompt = (responseType: string, toneStyle: string): string => {
+const getSystemPrompt = (responseType: string, toneStyle: ResponseToneStyle, language?: string): string => {
   const basePrompt = "You are a brand reputation agent trained to respond to criticism with professionalism and empathy.";
   
-  const tonePrompts = {
+  const tonePrompts: Record<ResponseToneStyle, string> = {
     professional: "Maintain a professional and authoritative tone that builds trust.",
     friendly: "Use a warm and approachable tone that feels conversational and personable.",
     formal: "Employ a structured, respectful tone that emphasizes precision and clarity.",
-    casual: "Be relaxed and informal while still maintaining brand integrity."
+    casual: "Be relaxed and informal while still maintaining brand integrity.",
+    humorous: "Incorporate appropriate humor to lighten the tone while still addressing the issue seriously.",
+    apologetic: "Express genuine remorse and take ownership of the mistake without making excuses.",
+    technical: "Provide detailed, fact-based information with appropriate technical terminology.",
+    empathetic: "Show deep understanding of the customer's feelings and validate their experience."
   };
   
   const responseTypePrompts = {
     empathetic: "Focus on acknowledging the customer's feelings and showing understanding before addressing the issue.",
     correction: "Politely correct any misinformation with verifiable facts and evidence. Avoid sounding defensive.",
-    apology: "Take full responsibility where appropriate and offer a genuine apology that demonstrates accountability."
+    apology: "Take full responsibility where appropriate and offer a genuine apology that demonstrates accountability.",
+    gratitude: "Express sincere appreciation for positive feedback or customer loyalty.",
+    clarification: "Provide clear and concise information to address confusion or misconceptions."
   };
+
+  let prompt = `${basePrompt} ${responseTypePrompts[responseType as keyof typeof responseTypePrompts] || ""} ${tonePrompts[toneStyle] || ""}`;
   
-  return `${basePrompt} ${responseTypePrompts[responseType as keyof typeof responseTypePrompts] || ""} ${tonePrompts[toneStyle as keyof typeof tonePrompts] || ""}`;
+  if (language && language !== 'en') {
+    prompt += ` Respond in ${language}.`;
+  }
+  
+  return prompt;
 };
 
 const getClassificationPrompt = (): string => {
@@ -71,12 +86,12 @@ const getClassificationPrompt = (): string => {
 
 // Create context-aware messages for the API
 const createContextMessages = (props: ResponseGenerationProps): OpenAIMessage[] => {
-  const { responseType, toneStyle, content, platform, severity, threatType } = props;
+  const { responseType, toneStyle, content, platform, severity, threatType, language } = props;
   
   const messages: OpenAIMessage[] = [
     {
       role: 'system',
-      content: getSystemPrompt(responseType, toneStyle)
+      content: getSystemPrompt(responseType, toneStyle, language)
     }
   ];
   
@@ -143,6 +158,75 @@ export const generateAIResponse = async (props: ResponseGenerationProps): Promis
   }
 };
 
+// Create SEO-optimized content
+export const generateSeoContent = async (
+  keyword: string,
+  title?: string,
+  wordCount: number = 1000
+): Promise<{ title: string, content: string }> => {
+  try {
+    const prompt = `Generate SEO-optimized content about "${keyword}" ${title ? `with the title "${title}"` : ''}.
+    The content should be ${wordCount} words long and include:
+    1. An engaging headline if not provided
+    2. Strategic use of primary and LSI keywords
+    3. Headings and subheadings in a logical structure
+    4. Meta description for the content
+    
+    Format the response as properly formatted markdown with # for main heading, ## for subheadings, etc.`;
+    
+    const messages = [
+      {
+        role: 'system' as const,
+        content: 'You are an expert SEO content creator that specializes in creating content that ranks highly in search engines.'
+      },
+      {
+        role: 'user' as const,
+        content: prompt
+      }
+    ];
+    
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${process.env.OPENAI_API_KEY || localStorage.getItem("openai_api_key")}`
+      },
+      body: JSON.stringify({
+        model: "gpt-4o",
+        messages,
+        temperature: 0.7
+      })
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error?.message || "Error calling OpenAI API");
+    }
+    
+    const data = await response.json() as OpenAIResponse;
+    const content = data.choices[0]?.message?.content || "";
+    
+    // Extract title from the content if it was generated
+    const titleMatch = content.match(/^#\s(.+)$/m);
+    const extractedTitle = titleMatch ? titleMatch[1] : title || keyword;
+    
+    return {
+      title: extractedTitle,
+      content: content
+    };
+    
+  } catch (error) {
+    console.error("SEO Content Generation Error:", error);
+    toast.error("Failed to generate SEO content", {
+      description: error instanceof Error ? error.message : "Unknown error occurred"
+    });
+    return {
+      title: title || keyword,
+      content: "Error generating SEO content. Please check your API key or try again later."
+    };
+  }
+};
+
 // Classify content threat using the OpenAI API
 export const classifyContentThreat = async (content: string): Promise<ThreatClassificationResult | null> => {
   try {
@@ -188,3 +272,4 @@ export const classifyContentThreat = async (content: string): Promise<ThreatClas
     return null;
   }
 };
+
