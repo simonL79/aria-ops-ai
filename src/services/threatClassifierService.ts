@@ -1,7 +1,6 @@
 
 import { ThreatClassifierRequest, ThreatClassificationResult } from "@/types/intelligence";
 import { toast } from "sonner";
-import { generateAIResponse } from "./openaiService";
 
 // Simplified version of the FastAPI threat classifier
 export const classifyThreat = async (data: ThreatClassifierRequest): Promise<ThreatClassificationResult | null> => {
@@ -49,8 +48,8 @@ Return JSON with:
       throw new Error(errorData.error?.message || "Error calling OpenAI API");
     }
     
-    const data = await response.json();
-    const content = data.choices[0]?.message?.content;
+    const responseData = await response.json();
+    const content = responseData.choices[0]?.message?.content;
     
     if (!content) {
       throw new Error("Empty response from API");
@@ -128,8 +127,8 @@ Return JSON with:
       throw new Error(errorData.error?.message || "Error calling OpenAI API");
     }
     
-    const data = await response.json();
-    const content = data.choices[0]?.message?.content;
+    const responseData = await response.json();
+    const content = responseData.choices[0]?.message?.content;
     
     if (!content) {
       throw new Error("Empty response from API");
