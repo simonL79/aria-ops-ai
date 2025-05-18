@@ -1,4 +1,5 @@
 
+import React from 'react';
 import { 
   MessageSquareWarning, 
   AlertTriangle, 
@@ -14,28 +15,28 @@ export const threatTypes: Record<string, ContentThreat> = {
   falseReviews: {
     type: 'falseReviews',
     description: 'Fake negative reviews posted by non-customers',
-    icon: MessageSquareWarning,
+    icon: React.createElement(MessageSquareWarning),
     detectionRate: 78,
     difficulty: 'moderate'
   },
   coordinatedAttack: {
     type: 'coordinatedAttack',
     description: 'Multiple accounts posting similar negative content',
-    icon: AlertTriangle,
+    icon: React.createElement(AlertTriangle),
     detectionRate: 65,
     difficulty: 'hard'
   },
   competitorSmear: {
     type: 'competitorSmear',
     description: 'Negative content from competitor entities',
-    icon: Ban,
+    icon: React.createElement(Ban),
     detectionRate: 58,
     difficulty: 'hard'
   },
   botActivity: {
     type: 'botActivity',
     description: 'Automated negative content from bot accounts',
-    icon: Shield,
+    icon: React.createElement(Shield),
     detectionRate: 89,
     difficulty: 'easy'
   }
@@ -48,7 +49,7 @@ export const strategies: IntelligenceStrategy[] = [
     effectivenessRate: 76,
     platforms: ['Twitter', 'Reddit', 'Facebook'],
     timeToImplement: '1-2 days',
-    icon: Search
+    icon: React.createElement(Search)
   },
   {
     name: 'Linguistic Analysis',
@@ -56,7 +57,7 @@ export const strategies: IntelligenceStrategy[] = [
     effectivenessRate: 82,
     platforms: ['Yelp', 'Google Reviews', 'Amazon'],
     timeToImplement: '3-5 days',
-    icon: Eye
+    icon: React.createElement(Eye)
   },
   {
     name: 'Cross-Platform Monitoring',
@@ -64,6 +65,6 @@ export const strategies: IntelligenceStrategy[] = [
     effectivenessRate: 94,
     platforms: ['All Major Platforms'],
     timeToImplement: '1 week',
-    icon: ShieldCheck
+    icon: React.createElement(ShieldCheck)
   }
 ];
