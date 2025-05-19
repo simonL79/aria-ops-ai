@@ -14,7 +14,7 @@ import SalesFunnelPage from "./pages/SalesFunnelPage";
 import AboutPage from "./pages/AboutPage";
 import BiographyPage from "./pages/BiographyPage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
-import DisclaimerPage from "./pages/DisclaimerPage"; // Added import
+import DisclaimerPage from "./pages/DisclaimerPage";
 import ReputationScanForm from "./pages/ReputationScanForm";
 import ThankYouPage from "./pages/ThankYouPage";
 import Authentication from "./pages/Authentication";
@@ -23,6 +23,7 @@ import Monitor from "./pages/Monitor";
 import Removal from "./pages/Removal";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+import PricingPage from "./pages/PricingPage"; // Added import
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const DashboardPage = React.lazy(() => import("./pages/dashboard/DashboardPage"));
@@ -66,10 +67,11 @@ function App() {
             <Route path="/about" element={<AboutPage />} />
             <Route path="/biography" element={<BiographyPage />} />
             <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-            <Route path="/disclaimer" element={<DisclaimerPage />} /> {/* Added new route */}
+            <Route path="/disclaimer" element={<DisclaimerPage />} />
             <Route path="/scan" element={<ReputationScanForm />} />
             <Route path="/thank-you" element={<ThankYouPage />} />
             <Route path="/auth" element={<Authentication />} />
+            <Route path="/pricing" element={<PricingPage />} /> {/* Added new route */}
             
             {/* Redirect any /sales route to the home page */}
             <Route path="/sales" element={<Navigate to="/" replace />} />
