@@ -17,9 +17,14 @@ import { Toaster } from 'sonner';
 function App() {
   const { isSignedIn, isLoaded } = useUser();
 
-  // Show a simple loading state while Clerk loads
+  // Show a loading state while Clerk loads
   if (!isLoaded) {
-    return <div className="h-screen w-screen flex items-center justify-center">Loading...</div>;
+    return (
+      <div className="h-screen w-screen flex flex-col items-center justify-center">
+        <div className="animate-pulse rounded-md bg-muted h-12 w-64 mb-4" />
+        <div className="animate-pulse rounded-md bg-muted h-4 w-48" />
+      </div>
+    );
   }
 
   return (
@@ -27,7 +32,7 @@ function App() {
       <Router>
         <Routes>
           {/* Public routes */}
-          <Route path="/" element={isSignedIn ? <Navigate to="/dashboard" /> : <Navigate to="/signin" />} />
+          <Route path="/" element={<Index />} />
           <Route path="/signin/*" element={<Authentication />} />
           <Route path="/signup/*" element={<Authentication />} />
           
