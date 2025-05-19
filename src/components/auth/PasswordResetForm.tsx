@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useSignIn } from "@clerk/clerk-react";
 import { Mail, Lock, ArrowLeft, Check } from "lucide-react";
@@ -125,9 +126,10 @@ const PasswordResetForm = ({ onBack }: PasswordResetFormProps) => {
     }
   };
   
-  // Function to handle OTP value change
+  // Function to handle manual OTP value change
   const handleOTPChange = (value: string) => {
-    verifyForm.setValue("code", value, { shouldValidate: true });
+    console.log("OTP changed:", value);
+    verifyForm.setValue("code", value);
   };
   
   if (currentStep === "verify") {
@@ -149,20 +151,28 @@ const PasswordResetForm = ({ onBack }: PasswordResetFormProps) => {
                 <FormItem>
                   <FormLabel>Verification Code</FormLabel>
                   <FormControl>
-                    <InputOTP 
-                      maxLength={6}
-                      value={field.value} 
-                      onChange={field.onChange}
-                    >
-                      <InputOTPGroup>
-                        <InputOTPSlot index={0} />
-                        <InputOTPSlot index={1} />
-                        <InputOTPSlot index={2} />
-                        <InputOTPSlot index={3} />
-                        <InputOTPSlot index={4} />
-                        <InputOTPSlot index={5} />
-                      </InputOTPGroup>
-                    </InputOTP>
+                    <div className="flex flex-col items-center space-y-2">
+                      <InputOTP 
+                        maxLength={6}
+                        value={field.value} 
+                        onChange={(value) => handleOTPChange(value)}
+                      >
+                        <InputOTPGroup>
+                          <InputOTPSlot index={0} />
+                          <InputOTPSlot index={1} />
+                          <InputOTPSlot index={2} />
+                          <InputOTPSlot index={3} />
+                          <InputOTPSlot index={4} />
+                          <InputOTPSlot index={5} />
+                        </InputOTPGroup>
+                      </InputOTP>
+                      {field.value && field.value.length === 6 && (
+                        <span className="text-green-600 flex items-center">
+                          <Check className="h-4 w-4 mr-1" />
+                          Code entered
+                        </span>
+                      )}
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
