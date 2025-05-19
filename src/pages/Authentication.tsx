@@ -2,8 +2,7 @@
 import { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import { 
-  SignIn, 
-  SignUp, 
+  SignIn,
   SignedIn, 
   SignedOut,
   useUser
@@ -11,13 +10,11 @@ import {
 import { Shield } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const Authentication = () => {
-  const [activeTab, setActiveTab] = useState<string>("signin");
-  const { isSignedIn, isLoaded } = useUser();
   const [isReady, setIsReady] = useState(false);
+  const { isSignedIn, isLoaded } = useUser();
   
   useEffect(() => {
     if (isLoaded) {
@@ -63,32 +60,15 @@ const Authentication = () => {
             Admin Login
           </CardTitle>
           <CardDescription className="text-center">
-            {activeTab === "signin" 
-              ? "Enter your credentials to access the admin dashboard" 
-              : "Create an administrator account"}
+            Enter your credentials to access the admin dashboard
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="signin" value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-8">
-              <TabsTrigger value="signin">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
-            </TabsList>
-            <TabsContent value="signin">
-              <SignIn 
-                routing="path" 
-                path="/signin"
-                redirectUrl="/dashboard"
-              />
-            </TabsContent>
-            <TabsContent value="signup">
-              <SignUp 
-                routing="path" 
-                path="/signup"
-                redirectUrl="/dashboard"
-              />
-            </TabsContent>
-          </Tabs>
+          <SignIn 
+            routing="path" 
+            path="/signin"
+            redirectUrl="/dashboard"
+          />
         </CardContent>
       </Card>
 
