@@ -45,7 +45,7 @@ const Authentication = () => {
     return <Navigate to="/dashboard" replace />;
   }
 
-  // Handle click on the login button
+  // Handle direct email signin (this is what we'll use when a user enters credentials)
   const handleSignInWithEmail = async (email: string, password: string) => {
     try {
       if (!signIn) {
@@ -69,63 +69,24 @@ const Authentication = () => {
     }
   };
 
-  // Direct login button handler with improved form activation
+  // This function will now help users get started with signing in using our custom form
   const handleLoginClick = () => {
-    toast.info("Activating sign-in form...");
+    // Instead of trying to interact with Clerk DOM elements, we'll show a login form
+    toast.info("Please enter your credentials in the form below");
     
-    // Force focus on the Clerk form container first
-    const formContainer = document.querySelector('.cl-card, .cl-formContainer');
-    if (formContainer instanceof HTMLElement) {
-      formContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      formContainer.classList.add('highlight-container');
+    // Scroll to the sign-in component
+    const signInElement = document.getElementById('clerk-sign-in');
+    if (signInElement) {
+      signInElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      
+      // Apply focus-grabbing styling
+      signInElement.classList.add('highlight-container');
+      
+      // Add clear instructions for the user
+      toast.success("Enter your email and password to sign in", {
+        duration: 5000
+      });
     }
-    
-    // Use a longer timeout to ensure Clerk components are fully rendered
-    setTimeout(() => {
-      // Try different approaches to activate the form
-      
-      // 1. Try to find and focus on email input
-      const emailInput = document.querySelector('input[name="identifier"], input[type="email"], .cl-input');
-      if (emailInput instanceof HTMLElement) {
-        emailInput.focus();
-        toast.success("Please enter your email address");
-        return;
-      }
-      
-      // 2. Try to find and click any button that might trigger the auth form
-      const signInButton = document.querySelector('.cl-formButtonPrimary, .cl-button-root, button[data-testid="form-submit-button"]');
-      if (signInButton instanceof HTMLElement) {
-        signInButton.click();
-        toast.success("Please complete the sign-in process");
-        return;
-      }
-      
-      // 3. Try to find and click on the Sign In tab if there are tabs
-      const signInTab = document.querySelector('[data-testid="sign-in-tab"], [role="tab"]');
-      if (signInTab instanceof HTMLElement) {
-        signInTab.click();
-        toast.info("Please use the sign-in form below");
-        return;
-      }
-      
-      // 4. As a last resort, try initializing the Clerk root element
-      const clerkRoot = document.querySelector('#cl-root');
-      if (clerkRoot instanceof HTMLElement) {
-        clerkRoot.click();
-        // After clicking, try focusing on any visible input
-        setTimeout(() => {
-          const anyInput = document.querySelector('input:not([type="hidden"])');
-          if (anyInput instanceof HTMLElement) {
-            anyInput.focus();
-          }
-        }, 100);
-        toast.info("Please complete the sign-in process");
-        return;
-      }
-      
-      // If nothing worked, inform the user
-      toast.info("Please click directly on the sign-in form below to begin");
-    }, 500); // Increased timeout to ensure Clerk components are fully rendered
   };
 
   return (
