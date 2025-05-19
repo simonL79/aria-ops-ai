@@ -8,6 +8,7 @@ import {
 } from "react-router-dom";
 import { Toaster } from "sonner";
 import { useAuth } from "./hooks/useAuth";
+import { RbacProvider } from "./hooks/useRbac";
 
 import Index from "./pages/Index";
 import HomePage from "./pages/HomePage";
@@ -41,7 +42,10 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 function App() {
-  const { isLoading } = useAuth();
+  const { isLoading, isAuthenticated } = useAuth();
+
+  // Default to 'user' role, but add 'admin' role if authenticated
+  const userRoles = isAuthenticated ? ['user', 'admin', 'security'] : ['user'];
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -49,85 +53,87 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/home" element={<HomePage />} />
-          <Route path="/auth" element={<Authentication />} />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <DashboardPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/mentions"
-            element={
-              <ProtectedRoute>
-                <React.Suspense fallback={<div>Loading...</div>}>
-                  <MentionsPage />
-                </React.Suspense>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/command-center"
-            element={
-              <ProtectedRoute>
-                <React.Suspense fallback={<div>Loading...</div>}>
-                  <CommandCenterPage />
-                </React.Suspense>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/analytics"
-            element={
-              <ProtectedRoute>
-                <React.Suspense fallback={<div>Loading...</div>}>
-                  <AnalyticsPage />
-                </React.Suspense>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/clients"
-            element={
-              <ProtectedRoute>
-                <Clients />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/monitor"
-            element={
-              <ProtectedRoute>
-                <Monitor />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/removal"
-            element={
-              <ProtectedRoute>
-                <Removal />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/settings"
-            element={
-              <ProtectedRoute>
-                <Settings />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        <Toaster />
-      </Router>
+      <RbacProvider initialRoles={userRoles}>
+        <Router>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/home" element={<HomePage />} />
+            <Route path="/auth" element={<Authentication />} />
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <DashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/mentions"
+              element={
+                <ProtectedRoute>
+                  <React.Suspense fallback={<div>Loading...</div>}>
+                    <MentionsPage />
+                  </React.Suspense>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/command-center"
+              element={
+                <ProtectedRoute>
+                  <React.Suspense fallback={<div>Loading...</div>}>
+                    <CommandCenterPage />
+                  </React.Suspense>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/analytics"
+              element={
+                <ProtectedRoute>
+                  <React.Suspense fallback={<div>Loading...</div>}>
+                    <AnalyticsPage />
+                  </React.Suspense>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/clients"
+              element={
+                <ProtectedRoute>
+                  <Clients />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/monitor"
+              element={
+                <ProtectedRoute>
+                  <Monitor />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/removal"
+              element={
+                <ProtectedRoute>
+                  <Removal />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <ProtectedRoute>
+                  <Settings />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <Toaster />
+        </Router>
+      </RbacProvider>
     </QueryClientProvider>
   );
 }
