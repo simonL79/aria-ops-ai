@@ -6,7 +6,7 @@ import App from './App.tsx'
 import './index.css'
 
 // Get the Clerk publishable key
-const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || 'pk_test_cG9saXRlLXBpZ2xldC0yNS5jbGVyay5hY2NvdW50cy5kZXYk';
+const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
 // Make sure the key is available
 if (!CLERK_PUBLISHABLE_KEY) {

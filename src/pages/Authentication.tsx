@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { 
   SignedIn, 
   SignedOut,
@@ -31,6 +31,9 @@ const Authentication = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { isSignedIn, isLoaded } = useUser();
   const { signIn, setActive } = useSignIn();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || "/dashboard";
   
   // Set up the form with validation
   const form = useForm<LoginFormValues>({
@@ -64,7 +67,7 @@ const Authentication = () => {
   
   // If user is already signed in, redirect to dashboard
   if (isSignedIn) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to={from} replace />;
   }
 
   // Direct email signin implementation
@@ -87,8 +90,9 @@ const Authentication = () => {
       if (result.status === "complete") {
         await setActive({ session: result.createdSessionId });
         toast.success("Login successful");
-        window.location.href = "/dashboard";
+        navigate(from);
       } else {
+        console.error("Incomplete login status:", result);
         toast.error("Login failed. Please check your credentials.");
       }
     } catch (error: any) {
@@ -137,6 +141,7 @@ const Authentication = () => {
                             <Input 
                               placeholder="name@example.com" 
                               className="pl-10"
+                              autoComplete="email"
                               {...field} 
                             />
                           </div>
@@ -159,6 +164,7 @@ const Authentication = () => {
                               type="password"
                               placeholder="••••••••"
                               className="pl-10"
+                              autoComplete="current-password"
                               {...field}
                             />
                           </div>

@@ -1,6 +1,7 @@
+
 import { ReactNode, useEffect, useState } from "react";
 import { useUser } from "@clerk/clerk-react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface ProtectedRouteProps {
@@ -10,6 +11,7 @@ interface ProtectedRouteProps {
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { isSignedIn, isLoaded } = useUser();
   const [showLoading, setShowLoading] = useState(true);
+  const location = useLocation();
   
   // Use effect to add a small delay to avoid UI flashing
   useEffect(() => {
@@ -35,7 +37,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
   // Redirect to sign in if not authenticated
   if (!isSignedIn) {
-    return <Navigate to="/signin" replace />;
+    return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
   // User is authenticated, render the protected content
