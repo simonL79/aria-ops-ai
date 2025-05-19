@@ -1,8 +1,10 @@
 
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { UserPlus, Users } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { UserPlus, Users, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { Client } from "@/types/clients";
 import ClientList from "@/components/clients/ClientList";
@@ -80,11 +82,19 @@ const Clients = () => {
 
   return (
     <DashboardLayout>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold mb-2">Client Management</h1>
-        <p className="text-muted-foreground">
-          Manage client information for monitoring and reputation management.
-        </p>
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-2xl font-bold mb-2">Client Management</h1>
+          <p className="text-muted-foreground">
+            Manage client information for monitoring and reputation management.
+          </p>
+        </div>
+        <Link to="/dashboard">
+          <Button variant="outline" className="flex items-center gap-2">
+            <ArrowLeft className="h-4 w-4" />
+            Back to Dashboard
+          </Button>
+        </Link>
       </div>
       
       <Tabs defaultValue="list">

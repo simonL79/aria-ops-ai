@@ -18,7 +18,7 @@ const DashboardHeader = ({ title, description }: DashboardHeaderProps) => {
       </div>
       <div className="flex gap-2">
         <Link to="/clients">
-          <Button variant="outline" className="flex items-center gap-2">
+          <Button className="flex items-center gap-2">
             <UserPlus className="h-4 w-4" />
             Manage Clients
           </Button>
