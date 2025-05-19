@@ -1,107 +1,156 @@
 import React from 'react';
-import { NavLink } from "react-router-dom";
-import { cn } from "@/lib/utils";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet"
+import { Separator } from "@/components/ui/separator"
 import {
   Home,
-  Search,
+  LayoutDashboard,
+  ListChecks,
+  ListOrdered,
   Bell,
-  Trash2,
   Settings,
-  Users,
-  Shield,
-  Eye,
-  MonitorCheck,
-  MessageCircle
-} from "lucide-react";
-import { useRbac } from "@/hooks/useRbac";
-import { Role } from "@/types";
+  HelpCircle,
+  LogOut,
+  Menu,
+  ShieldCheck,
+  TrendingUp,
+  MessageSquare,
+  Search,
+  AlertTriangle,
+  BarChart4,
+  Network,
+  LucideIcon
+} from "lucide-react"
+import { Link } from 'react-router-dom';
+import { useAuth } from "@/hooks/useAuth";
+import { useClerk, UserButton } from '@clerk/clerk-react';
 
-interface NavItemProps {
-  to: string;
-  icon: React.ReactNode;
-  label: string;
+// Define NavItem interface
+export interface NavItem {
+  title: string;
+  href: string;
+  icon: LucideIcon;
+  disabled?: boolean;
 }
 
-const NavItem = ({ to, icon, label }: NavItemProps) => {
+const navigation: NavItem[] = [
+  {
+    title: "Home",
+    href: "/home",
+    icon: Home,
+  },
+  {
+    title: "Dashboard",
+    href: "/dashboard",
+    icon: LayoutDashboard,
+  },
+  {
+    title: "Command Center",
+    href: "/dashboard/command-center",
+    icon: ShieldCheck,
+  },
+  {
+    title: "Mentions",
+    href: "/dashboard/mentions",
+    icon: MessageSquare,
+  },
+  {
+    title: "Clients",
+    href: "/clients",
+    icon: Network,
+  },
+  {
+    title: "Monitor",
+    href: "/monitor",
+    icon: Search,
+  },
+  {
+    title: "Removal",
+    href: "/removal",
+    icon: AlertTriangle,
+  },
+  {
+    title: "Analytics",
+    href: "#",
+    icon: BarChart4,
+    disabled: true,
+  },
+  {
+    title: "Settings",
+    href: "/settings",
+    icon: Settings,
+  },
+];
+
+export const DashboardSidebar = () => {
+  const { signOut } = useClerk();
+  const { user } = useAuth();
+
   return (
-    <NavLink
-      to={to}
-      className={({ isActive }) =>
-        cn(
-          "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all hover:bg-accent",
-          isActive
-            ? "bg-accent text-accent-foreground"
-            : "text-muted-foreground"
-        )
-      }
-    >
-      {icon}
-      <span>{label}</span>
-    </NavLink>
+    <Sheet>
+      <SheetTrigger asChild>
+        <button className="hover:bg-secondary rounded-sm p-2 inline-flex items-center justify-center md:hidden">
+          <Menu className="h-4 w-4" />
+          <span className="sr-only">Open sidebar</span>
+        </button>
+      </SheetTrigger>
+      <SheetContent className="w-full sm:w-64 border-right p-0 pt-6">
+        <SheetHeader className="pl-6 pr-6 pb-4">
+          <SheetTitle>ARIA</SheetTitle>
+          <SheetDescription>
+            Threat Intelligence
+          </SheetDescription>
+        </SheetHeader>
+        <div className="py-4">
+          {navigation.map((item) => (
+            <div key={item.href} className="mb-2">
+              <Link
+                to={item.href}
+                className="flex items-center gap-3 p-2 rounded-md hover:bg-secondary"
+              >
+                <item.icon className="h-4 w-4" />
+                <span>{item.title}</span>
+              </Link>
+            </div>
+          ))}
+        </div>
+        <Separator className="my-6" />
+        <div className="pl-6 pr-6">
+          <div className="mb-2">
+            <Link
+              to="/settings"
+              className="flex items-center gap-3 p-2 rounded-md hover:bg-secondary"
+            >
+              <Settings className="h-4 w-4" />
+              <span>Settings</span>
+            </Link>
+          </div>
+          <div className="mb-2">
+            <Link
+              to="#"
+              className="flex items-center gap-3 p-2 rounded-md hover:bg-secondary"
+            >
+              <HelpCircle className="h-4 w-4" />
+              <span>Help</span>
+            </Link>
+          </div>
+          <div className="mb-2">
+            <button
+              onClick={() => signOut()}
+              className="flex items-center gap-3 p-2 rounded-md hover:bg-secondary w-full"
+            >
+              <LogOut className="h-4 w-4" />
+              <span>Logout</span>
+            </button>
+          </div>
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 };
-
-interface ProtectedNavItemProps {
-  roles: Role[];
-  fallback?: React.ReactNode;
-  children: React.ReactNode;
-}
-
-const ProtectedNavItem = ({ roles, fallback, children }: ProtectedNavItemProps) => {
-  const { hasPermission } = useRbac();
-  
-  if (hasPermission(roles)) {
-    return <>{children}</>;
-  }
-  
-  return fallback ? <>{fallback}</> : null;
-};
-
-export function DashboardSidebar() {
-  return (
-    <div className="flex h-screen flex-col border-r">
-      <div className="px-3 py-2">
-        <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">
-          Dashboard
-        </h2>
-        <div className="space-y-1">
-          <NavItem to="/dashboard" icon={<Home className="h-4 w-4" />} label="Overview" />
-          <NavItem to="/dashboard/mentions" icon={<MessageCircle className="h-4 w-4" />} label="Mentions" />
-          <NavItem
-            to="/dashboard/command-center"
-            icon={<MonitorCheck className="h-4 w-4" />}
-            label="Command Center"
-          />
-          <NavItem to="/monitor" icon={<Eye className="h-4 w-4" />} label="Monitor" />
-        </div>
-      </div>
-      <div className="px-3 py-2">
-        <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">
-          Management
-        </h2>
-        <div className="space-y-1">
-          <ProtectedNavItem roles={["admin", "manager"]}>
-            <NavItem to="/clients" icon={<Users className="h-4 w-4" />} label="Clients" />
-          </ProtectedNavItem>
-          
-          <ProtectedNavItem roles={["admin", "manager", "analyst"]}>
-            <NavItem to="/removal" icon={<Trash2 className="h-4 w-4" />} label="Removal" />
-          </ProtectedNavItem>
-          
-          <ProtectedNavItem roles={["admin"]}>
-            <NavItem to="/settings" icon={<Settings className="h-4 w-4" />} label="Settings" />
-          </ProtectedNavItem>
-        </div>
-      </div>
-      <div className="mt-auto px-3 py-2">
-        <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">
-          Alerts
-        </h2>
-        <div className="space-y-1">
-          <NavItem to="/dashboard" icon={<Bell className="h-4 w-4" />} label="Notifications" />
-          <NavItem to="/dashboard" icon={<Shield className="h-4 w-4" />} label="Security" />
-        </div>
-      </div>
-    </div>
-  );
-}

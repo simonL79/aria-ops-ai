@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { 
   Card, 
@@ -32,7 +33,7 @@ const AdvancedSecuritySettings = () => {
   };
 
   return (
-    <Protected requiredRoles="admin">
+    <Protected role="admin">
       <Card>
         <CardHeader>
           <div className="flex items-center space-x-2">

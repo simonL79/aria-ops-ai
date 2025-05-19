@@ -1,12 +1,11 @@
 
-// Re-export all types from their respective files
-export * from './core';
-export * from './threats'; 
-export * from './sources';
-export * from './reports';
-export * from './components';
+// Fix the ambiguous export by removing one of the duplicate exports
 export * from './agents';
-export * from './prediction';
+export * from './components';
+export * from './core';
 export * from './memory';
-
-// Note: We've removed the explicit re-export of ThreatSource to fix the ambiguity
+export * from './prediction';
+export * from './reports';
+export * from './sources';
+// Export ThreatSource only from one file to avoid ambiguity
+export * from './threats';
