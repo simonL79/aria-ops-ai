@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -8,23 +9,25 @@ const SalesFunnelPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-100 to-white">
       {/* SECTION 1: HERO / HEADLINE */}
-      <section className="hero bg-gradient-to-r from-premium-black to-premium-darkGray text-white py-28 relative overflow-hidden">
+      <section className="hero bg-gradient-to-r from-premium-black to-premium-darkGray text-white py-16 relative overflow-hidden">
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1557682250-33bd709cbe85?q=80&w=1000')] bg-cover bg-center opacity-5"></div>
         <div className="container mx-auto px-6 relative z-10">
-          <div className="flex flex-col items-center justify-center mb-8">
+          <div className="flex flex-col items-center justify-center mb-6">
             <Logo variant="light" size="10x" className="mb-4" />
           </div>
-          <h1 className="text-4xl md:text-6xl font-bold mb-8 max-w-4xl mx-auto leading-tight text-shadow-lg">
+          <h1 className="text-4xl md:text-6xl font-bold mb-6 max-w-4xl mx-auto leading-tight text-shadow-lg text-center">
             Your Reputation Is Under <span className="text-premium-silver">Surveillance</span>
           </h1>
-          <p className="text-xl md:text-2xl mb-12 max-w-2xl mx-auto leading-relaxed text-gray-300">
+          <p className="text-xl md:text-2xl mb-10 max-w-2xl mx-auto leading-relaxed text-gray-300 text-center">
             A.R.I.A™ monitors, protects, and restores your digital reputation — using artificial intelligence built from real-world experience.
           </p>
-          <Button asChild size="lg" className="bg-white text-premium-black px-8 py-7 text-lg font-semibold rounded-md shadow-lg hover:bg-premium-silver transition-all duration-300 hover:shadow-xl">
-            <a href="#get-started" className="flex items-center gap-2">
-              Start Your Reputation Scan <ArrowRight className="w-5 h-5" />
-            </a>
-          </Button>
+          <div className="flex justify-center">
+            <Button asChild size="lg" className="bg-white text-premium-black px-8 py-7 text-lg font-semibold rounded-md shadow-lg hover:bg-premium-silver transition-all duration-300 hover:shadow-xl">
+              <a href="#get-started" className="flex items-center gap-2">
+                Start Your Reputation Scan <ArrowRight className="w-5 h-5" />
+              </a>
+            </Button>
+          </div>
         </div>
       </section>
 
