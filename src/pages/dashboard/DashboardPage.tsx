@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import DashboardLayout from "@/components/layout/DashboardLayout";
@@ -7,8 +8,11 @@ import DashboardMetrics from "@/components/dashboard/DashboardMetrics";
 import ContentAlerts from "@/components/dashboard/ContentAlerts";
 import RealTimeAlerts from "@/components/dashboard/RealTimeAlerts";
 import IntelligenceDashboard from "@/components/dashboard/IntelligenceDashboard";
+import DigitalRiskFingerprint from "@/components/dashboard/DigitalRiskFingerprint";
+import ReputationRiskScore from "@/components/dashboard/ReputationRiskScore";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { useDashboardScan } from "@/hooks/useDashboardScan";
+import { useClientChanges } from "@/hooks/useClientChanges";
 import { ContentAlert } from "@/types/dashboard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ThreatClassificationResult } from "@/services/openaiService";
@@ -40,8 +44,24 @@ const DashboardPage = () => {
     setNegativeContent
   );
   
+  const { clientChanges, riskFingerprints } = useClientChanges();
+  
   const [selectedTab, setSelectedTab] = useState<string>("intelligence");
   const [selectedAlert, setSelectedAlert] = useState<ContentAlert | null>(null);
+  const [selectedClient, setSelectedClient] = useState<string>("Acme Corp");
+  
+  // Listen for client changes in real-time and notify for unread items
+  useEffect(() => {
+    const unreadChanges = clientChanges.filter(change => !change.read);
+    if (unreadChanges.length > 0) {
+      const highSeverityChanges = unreadChanges.filter(c => c.severity && c.severity >= 7);
+      if (highSeverityChanges.length > 0) {
+        toast.warning(`${highSeverityChanges.length} high-risk client ${highSeverityChanges.length === 1 ? 'alert' : 'alerts'}`, {
+          description: "Urgent attention required for client issues"
+        });
+      }
+    }
+  }, [clientChanges]);
 
   const handleDateRangeChange = (start: Date | undefined, end: Date | undefined) => {
     setStartDate(start);
@@ -54,6 +74,13 @@ const DashboardPage = () => {
     toast.info(`Test profile "${profile.name}" selected`, {
       description: "Dashboard data has been updated to reflect this test scenario."
     });
+    
+    // Update selected client when test profile is selected
+    if (profile.name && profile.name.includes("Acme")) {
+      setSelectedClient("Acme Corp");
+    } else if (profile.name && profile.name.includes("LuxeSkin")) {
+      setSelectedClient("LuxeSkin");
+    }
   };
 
   const handleViewAlertDetail = (alert: ContentAlert, e?: React.MouseEvent) => {
@@ -125,11 +152,12 @@ const DashboardPage = () => {
       </div>
       
       <Tabs value={selectedTab} onValueChange={handleTabChange} className="space-y-4">
-        <TabsList className="w-full grid grid-cols-2 lg:grid-cols-4">
+        <TabsList className="w-full grid grid-cols-2 lg:grid-cols-5">
           <TabsTrigger value="intelligence" type="button">Intelligence</TabsTrigger>
           <TabsTrigger value="content" type="button">Content Alerts</TabsTrigger>
           <TabsTrigger value="realtime" type="button">Real-Time</TabsTrigger>
           <TabsTrigger value="analytics" type="button">Analytics</TabsTrigger>
+          <TabsTrigger value="riskProfile" type="button">Risk Profile</TabsTrigger>
         </TabsList>
         
         <TabsContent value="intelligence" className="mt-6">
@@ -156,6 +184,22 @@ const DashboardPage = () => {
           <div className="bg-muted rounded-md p-12 text-center">
             <h3 className="text-lg font-medium mb-2">Analytics Dashboard</h3>
             <p className="text-muted-foreground">Detailed analytics and trend visualization will be available in the next update.</p>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="riskProfile" className="mt-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <DigitalRiskFingerprint selectedClient={selectedClient} />
+            <ReputationRiskScore selectedClient={selectedClient} />
+          </div>
+          
+          <div className="mt-6 p-4 border rounded-md bg-blue-50 border-blue-200">
+            <h3 className="text-lg font-medium mb-2 text-blue-800">Digital Risk Fingerprint™</h3>
+            <p className="text-sm text-blue-700">
+              This proprietary risk profile is custom-built for each client and adapts over time. 
+              It analyzes sensitivity to keywords, known threats, and preferred response tones to provide
+              intelligent monitoring and protection specifically tailored to this organization.
+            </p>
           </div>
         </TabsContent>
       </Tabs>
