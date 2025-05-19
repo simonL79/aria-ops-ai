@@ -150,14 +150,14 @@ const AboutPage = () => {
                 <div className="flex flex-col md:flex-row gap-6 justify-center">
                   <div className="flex items-center gap-2">
                     <Mail className="h-4 w-4" />
-                    <a href="mailto:contact@aria-security.com" className="text-primary hover:underline">
-                      contact@aria-security.com
+                    <a href="mailto:simon@ariaops.co.uk" className="text-primary hover:underline">
+                      simon@ariaops.co.uk
                     </a>
                   </div>
                   <div className="flex items-center gap-2">
                     <Globe className="h-4 w-4" />
-                    <a href="https://www.aria-security.com" className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">
-                      www.aria-security.com
+                    <a href="https://www.ariaops.co.uk" className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">
+                      www.ariaops.co.uk
                     </a>
                   </div>
                   <div className="flex items-center gap-2">

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -99,6 +98,12 @@ const BiographyPage = () => {
                     <Globe className="h-4 w-4 text-premium-gray" />
                     <a href="https://www.ariaops.co.uk" className="text-premium-darkGray hover:text-premium-black hover:underline" target="_blank" rel="noopener noreferrer">
                       www.ariaops.co.uk
+                    </a>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Mail className="h-4 w-4 text-premium-gray" />
+                    <a href="mailto:simon@ariaops.co.uk" className="text-premium-darkGray hover:text-premium-black hover:underline">
+                      simon@ariaops.co.uk
                     </a>
                   </div>
                 </div>
