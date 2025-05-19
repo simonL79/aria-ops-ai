@@ -16,7 +16,8 @@ export const fetchClients = async (): Promise<Client[]> => {
       throw error;
     }
     
-    return data || [];
+    // Type assertion to ensure the data matches our Client interface
+    return (data || []) as Client[];
   } catch (error) {
     console.error("Error fetching clients:", error);
     toast.error("Failed to load clients", {
@@ -33,7 +34,15 @@ export const addClient = async (clientData: Omit<Client, 'id'>): Promise<Client 
   try {
     const { data, error } = await supabase
       .from('clients')
-      .insert(clientData)
+      .insert({
+        name: clientData.name,
+        industry: clientData.industry,
+        contactName: clientData.contactName,
+        contactEmail: clientData.contactEmail,
+        website: clientData.website || null,
+        notes: clientData.notes || null,
+        keywordTargets: clientData.keywordTargets || null
+      })
       .select()
       .single();
     
@@ -41,7 +50,8 @@ export const addClient = async (clientData: Omit<Client, 'id'>): Promise<Client 
       throw error;
     }
     
-    return data;
+    // Type assertion to ensure the data matches our Client interface
+    return data as Client;
   } catch (error) {
     console.error("Error adding client:", error);
     toast.error("Failed to add client", {
@@ -58,7 +68,15 @@ export const updateClient = async (id: string, clientData: Partial<Client>): Pro
   try {
     const { data, error } = await supabase
       .from('clients')
-      .update(clientData)
+      .update({
+        name: clientData.name,
+        industry: clientData.industry,
+        contactName: clientData.contactName,
+        contactEmail: clientData.contactEmail,
+        website: clientData.website,
+        notes: clientData.notes,
+        keywordTargets: clientData.keywordTargets
+      })
       .eq('id', id)
       .select()
       .single();
@@ -67,7 +85,8 @@ export const updateClient = async (id: string, clientData: Partial<Client>): Pro
       throw error;
     }
     
-    return data;
+    // Type assertion to ensure the data matches our Client interface
+    return data as Client;
   } catch (error) {
     console.error("Error updating client:", error);
     toast.error("Failed to update client", {

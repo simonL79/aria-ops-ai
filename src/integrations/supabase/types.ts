@@ -9,6 +9,45 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      clients: {
+        Row: {
+          contactemail: string
+          contactname: string
+          created_at: string
+          id: string
+          industry: string
+          keywordtargets: string | null
+          name: string
+          notes: string | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          contactemail: string
+          contactname: string
+          created_at?: string
+          id?: string
+          industry: string
+          keywordtargets?: string | null
+          name: string
+          notes?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          contactemail?: string
+          contactname?: string
+          created_at?: string
+          id?: string
+          industry?: string
+          keywordtargets?: string | null
+          name?: string
+          notes?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
       reputation_scan_submissions: {
         Row: {
           admin_notes: string | null
