@@ -61,6 +61,12 @@ interface IntelligenceDashboardProps {
 }
 
 const IntelligenceDashboard = ({ onAlertDetected }: IntelligenceDashboardProps) => {
+  // Prevent default on form submissions to avoid page refreshes
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Process form data here
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       {/* Left Column */}
@@ -69,6 +75,7 @@ const IntelligenceDashboard = ({ onAlertDetected }: IntelligenceDashboardProps) 
           sampleReport={sampleReport}
           threatVectors={threatVectors}
           sourceStats={sourceStats}
+          onFormSubmit={handleFormSubmit}
         />
         
         <ThreatAnalysisHub />

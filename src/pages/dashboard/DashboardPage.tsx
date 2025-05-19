@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import DashboardLayout from "@/components/layout/DashboardLayout";
@@ -49,21 +48,26 @@ const DashboardPage = () => {
     setEndDate(end);
   };
 
-  const handleSelectTestProfile = (profile: any) => {
+  const handleSelectTestProfile = (profile: any, e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
+    
     toast.info(`Test profile "${profile.name}" selected`, {
       description: "Dashboard data has been updated to reflect this test scenario."
     });
   };
 
-  const handleViewAlertDetail = (alert: ContentAlert) => {
+  const handleViewAlertDetail = (alert: ContentAlert, e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
+    
     setSelectedAlert(alert);
-    // You could navigate to a detail view or open a modal here
     toast.info("Alert selected for analysis", {
       description: `You can now analyze and respond to this ${alert.severity} severity mention.`
     });
   };
 
-  const handleMarkAlertAsRead = (alertId: string) => {
+  const handleMarkAlertAsRead = (alertId: string, e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
+    
     setFilteredAlerts(prev => 
       prev.map(alert => alert.id === alertId 
         ? { ...alert, status: 'read' } 
@@ -79,7 +83,9 @@ const DashboardPage = () => {
     );
   };
 
-  const handleDismissAlert = (alertId: string) => {
+  const handleDismissAlert = (alertId: string, e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
+    
     setFilteredAlerts(prev => prev.filter(alert => alert.id !== alertId));
     setAlerts(prev => prev.filter(alert => alert.id !== alertId));
   };
@@ -88,6 +94,10 @@ const DashboardPage = () => {
     toast.info(`Content classified as "${result.category}"`, {
       description: `Severity: ${result.severity}/10. Recommended action: ${result.action}`
     });
+  };
+
+  const handleTabChange = (value: string) => {
+    setSelectedTab(value);
   };
 
   return (
@@ -114,12 +124,12 @@ const DashboardPage = () => {
         />
       </div>
       
-      <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-4">
+      <Tabs value={selectedTab} onValueChange={handleTabChange} className="space-y-4">
         <TabsList className="w-full grid grid-cols-2 lg:grid-cols-4">
-          <TabsTrigger value="intelligence">Intelligence</TabsTrigger>
-          <TabsTrigger value="content">Content Alerts</TabsTrigger>
-          <TabsTrigger value="realtime">Real-Time</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsTrigger value="intelligence" type="button">Intelligence</TabsTrigger>
+          <TabsTrigger value="content" type="button">Content Alerts</TabsTrigger>
+          <TabsTrigger value="realtime" type="button">Real-Time</TabsTrigger>
+          <TabsTrigger value="analytics" type="button">Analytics</TabsTrigger>
         </TabsList>
         
         <TabsContent value="intelligence" className="mt-6">

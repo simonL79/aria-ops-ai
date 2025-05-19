@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -15,12 +14,14 @@ interface IntelligenceDashboardContainerProps {
   sampleReport: IntelligenceReport;
   threatVectors: ThreatVector[];
   sourceStats: DataSourceStats[];
+  onFormSubmit?: (e: React.FormEvent) => void;
 }
 
 const IntelligenceDashboardContainer = ({ 
   sampleReport,
   threatVectors,
-  sourceStats
+  sourceStats,
+  onFormSubmit
 }: IntelligenceDashboardContainerProps) => {
   const [activeTab, setActiveTab] = useState<string>('overview');
   const [isRunningAnalysis, setIsRunningAnalysis] = useState<boolean>(false);
@@ -39,6 +40,18 @@ const IntelligenceDashboardContainer = ({
       startMonitoring();
     }
     
+    // Prevent any auto-refreshes from useEffect
+    const getInitialData = async () => {
+      setAvailableSources(getAvailableSources());
+      setMonitoringStatus(getMonitoringStatus());
+      
+      if (!getMonitoringStatus().isActive) {
+        startMonitoring();
+      }
+    };
+    
+    getInitialData();
+    
     // Refresh monitoring status every minute
     const statusInterval = setInterval(() => {
       setMonitoringStatus(getMonitoringStatus());
@@ -49,7 +62,8 @@ const IntelligenceDashboardContainer = ({
     };
   }, []);
   
-  const handleRunAnalysis = async () => {
+  const handleRunAnalysis = async (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent page refresh
     setIsRunningAnalysis(true);
     
     try {
@@ -67,6 +81,7 @@ const IntelligenceDashboardContainer = ({
           onClick={handleRunAnalysis} 
           disabled={isRunningAnalysis}
           variant="default"
+          type="button" // Explicitly set type to button to prevent form submission
         >
           {isRunningAnalysis ? (
             <>
@@ -115,6 +130,7 @@ const IntelligenceDashboardContainer = ({
           <DataSourcesPanel 
             sourceStats={sourceStats} 
             availableSources={availableSources} 
+            onFormSubmit={onFormSubmit}
           />
         </TabsContent>
       </Tabs>

@@ -19,6 +19,13 @@ const DashboardControls = ({
   onDateRangeChange,
   onSelectTestProfile
 }: DashboardControlsProps) => {
+  
+  // Prevent default behavior when scanning
+  const handleScan = (e: React.MouseEvent) => {
+    e.preventDefault();
+    onScan();
+  };
+
   return (
     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
       <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
@@ -27,9 +34,10 @@ const DashboardControls = ({
         <ContentIntelligencePanel />
       </div>
       <Button 
-        onClick={onScan} 
+        onClick={handleScan} 
         disabled={isScanning}
         className="w-full md:w-auto"
+        type="button" // Explicitly set type to button
       >
         {isScanning ? (
           <>
