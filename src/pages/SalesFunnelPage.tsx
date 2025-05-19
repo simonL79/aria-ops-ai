@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -68,7 +67,7 @@ const SalesFunnelPage = () => {
               </NavigationMenu>
               
               <Button asChild size="sm" className="ml-4">
-                <Link to="/dashboard">Scan My Name Now</Link>
+                <Link to="/scan">Scan My Name Now</Link>
               </Button>
             </div>
             
@@ -129,7 +128,7 @@ const SalesFunnelPage = () => {
                 </li>
                 <li className="pt-4">
                   <Button asChild className="w-full" onClick={() => setMobileMenuOpen(false)}>
-                    <Link to="/dashboard">Scan My Name Now</Link>
+                    <Link to="/scan">Scan My Name Now</Link>
                   </Button>
                 </li>
               </ul>
@@ -153,9 +152,9 @@ const SalesFunnelPage = () => {
           </p>
           <div className="flex justify-center">
             <Button asChild size="lg" className="bg-white text-premium-black px-8 py-7 text-lg font-semibold rounded-md shadow-lg hover:bg-premium-silver transition-all duration-300 hover:shadow-xl">
-              <a href="#get-started" className="flex items-center gap-2">
+              <Link to="/scan" className="flex items-center gap-2">
                 Start Your Reputation Scan <ArrowRight className="w-5 h-5" />
-              </a>
+              </Link>
             </Button>
           </div>
         </div>
@@ -248,12 +247,7 @@ const SalesFunnelPage = () => {
             </div>
             <div className="flex items-center justify-center h-12">
               <svg className="h-8 text-gray-400" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2.04C6.5 2.04 2 6.53 2 12.06C2 17.06 5.66 21.21 10.44 21.96V14.96H7.9V12.06H10.44V9.85C10.44 7.34 11.93 5.96 14.22 5.96C15.31 5.96 16.45 6.15 16.45 6.15V8.62H15.19C13.95 8.62 13.56 9.39 13.56 10.18V12.06H16.34L15.89 14.96H13.56V21.96A10 10 0 0 0 22 12.06C22 6.53 17.5 2.04 12 2.04Z"/>
-              </svg>
-            </div>
-            <div className="flex items-center justify-center h-12">
-              <svg className="h-8 text-gray-400" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                <path d="M12 2.04C6.5 2.04 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
               </svg>
             </div>
             <div className="flex items-center justify-center h-12">
@@ -313,7 +307,7 @@ const SalesFunnelPage = () => {
           </p>
           <div className="space-y-6">
             <Button asChild size="lg" className="bg-white text-premium-black px-12 py-7 text-lg font-bold rounded-md shadow-lg hover:bg-premium-silver hover:shadow-xl transition-all duration-300">
-              <Link to="/dashboard">Scan My Name Now</Link>
+              <Link to="/scan">Scan My Name Now</Link>
             </Button>
             <div className="flex flex-wrap items-center justify-center gap-6 mt-8">
               <div className="flex items-center gap-2 text-sm">
