@@ -1,24 +1,31 @@
 
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
+import { hasValidKey } from "@/utils/secureKeyStorage";
 import SecuritySettings from "@/components/settings/SecuritySettings";
+import { Key } from "lucide-react";
 
 const Settings = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<string>("general");
+  const hasApiKey = hasValidKey('openai_api_key');
   
   // Set active tab based on URL
   useEffect(() => {
     if (location.pathname.includes("/security")) {
       setActiveTab("security");
+    } else if (!hasApiKey) {
+      // Auto-select security tab if no API key is set
+      setActiveTab("security");
     } else {
       setActiveTab("general");
     }
-  }, [location.pathname]);
+  }, [location.pathname, hasApiKey]);
   
   return (
     <DashboardLayout>
@@ -36,7 +43,16 @@ const Settings = () => {
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
-          <TabsTrigger value="security">Security</TabsTrigger>
+          <TabsTrigger value="security" className={!hasApiKey ? "relative font-bold text-primary" : ""}>
+            {!hasApiKey && (
+              <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+              </span>
+            )}
+            Security
+            {!hasApiKey && <Key className="ml-1 h-3 w-3 text-primary" />}
+          </TabsTrigger>
         </TabsList>
         
         <TabsContent value="general" className="mt-4">

@@ -5,9 +5,11 @@ import { classifyThreat } from "@/services";
 import { toast } from "sonner";
 import { ThreatClassificationResult, ThreatClassifierRequest } from "@/types/intelligence";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Key } from "lucide-react";
 import ThreatClassifierForm from "./ThreatClassifierForm";
 import ThreatClassificationResultDisplay from "./ThreatClassificationResult";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 interface ThreatClassifierProps {
   initialContent?: string;
@@ -20,21 +22,30 @@ const ThreatClassifierContainer = ({
 }: ThreatClassifierProps) => {
   const [isClassifying, setIsClassifying] = useState<boolean>(false);
   const [result, setResult] = useState<ThreatClassificationResult | null>(null);
+  const navigate = useNavigate();
   
   useEffect(() => {
     // Check for API key on component mount
     if (!hasValidKey('openai_api_key')) {
       toast.info("API Key Required", {
-        description: "Please set your OpenAI API key in the settings panel before using this feature"
+        description: "Please set your OpenAI API key in the settings panel before using this feature",
+        action: {
+          label: "Settings",
+          onClick: () => navigate('/settings')
+        }
       });
     }
-  }, []);
+  }, [navigate]);
   
   const handleClassify = async (request: ThreatClassifierRequest) => {
     // Check if we have an API key
     if (!hasValidKey('openai_api_key')) {
       toast.error("API Key Required", {
-        description: "Please set your OpenAI API key in the settings panel"
+        description: "Please set your OpenAI API key in the settings panel",
+        action: {
+          label: "Settings",
+          onClick: () => navigate('/settings')
+        }
       });
       return;
     }
@@ -53,6 +64,9 @@ const ThreatClassifierContainer = ({
       }
     } catch (error) {
       console.error("Classification failed:", error);
+      toast.error("Classification failed", {
+        description: "There was an error while analyzing the content. Please try again."
+      });
     } finally {
       setIsClassifying(false);
     }
