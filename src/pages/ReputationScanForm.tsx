@@ -14,6 +14,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription
 } from "@/components/ui/form";
 import Logo from '@/components/ui/logo';
 
@@ -126,6 +127,9 @@ const ReputationScanForm = () => {
                           {...field} 
                         />
                       </FormControl>
+                      <FormDescription className="text-sm text-gray-500 mt-1">
+                        Examples: "John Smith, JS Enterprises, @johnsmith, web developer, Chicago business, johnsmith.com"
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
