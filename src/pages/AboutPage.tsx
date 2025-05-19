@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,8 +8,8 @@ import Logo from '@/components/ui/logo';
 
 const AboutPage = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      <header className="py-6 bg-white border-b border-gray-200">
+    <div className="min-h-screen bg-gradient-to-b from-gray-100 to-gray-50">
+      <header className="py-6 bg-gray-50 border-b border-gray-200">
         <div className="container mx-auto px-6">
           <div className="flex justify-between items-center">
             <Link to="/" className="flex items-center gap-2">
