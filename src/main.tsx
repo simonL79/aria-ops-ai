@@ -22,10 +22,9 @@ createRoot(document.getElementById("root")!).render(
     appearance={{
       variables: { colorPrimary: '#0f766e' }
     }}
-    // Add fallback UI if clerk fails to load
-    afterSignInUrl="/dashboard"
-    afterSignUpUrl="/dashboard"
-    onClerkLoaded={(clerk) => {
+    // Replace afterSignInUrl and afterSignUpUrl with redirectUrl
+    fallbackRedirectUrl="/dashboard"
+    onLoaded={() => {
       console.log("Clerk loaded successfully");
     }}
   >
