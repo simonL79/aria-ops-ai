@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -26,7 +25,7 @@ interface ClientUpdate {
   timestamp: Date;
   severity?: number;
   platform?: string;
-  read: boolean; // This is now required to match our hook
+  read: boolean;
 }
 
 interface AIAssistantProps {
@@ -60,7 +59,7 @@ const AIAssistant = ({ clientUpdates = [], className }: AIAssistantProps) => {
   const [activeTab, setActiveTab] = useState('assistant');
   const [notificationCount, setNotificationCount] = useState(0);
   const [alerts, setAlerts] = useState<ClientUpdate[]>([]);
-  const clientChangesList = useClientChanges();
+  const { clientChanges } = useClientChanges();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [voiceCommandActive, setVoiceCommandActive] = useState(false);
   const [escalationCriteria, setEscalationCriteria] = useState({
@@ -119,11 +118,11 @@ const AIAssistant = ({ clientUpdates = [], className }: AIAssistantProps) => {
     }
   ]);
 
-  // Process client changes from the hook
+  // Process client changes from the props
   useEffect(() => {
-    if (clientChangesList.length > 0) {
+    if (clientUpdates && clientUpdates.length > 0) {
       // Process new client changes
-      const newChanges = clientChangesList.filter(
+      const newChanges = clientUpdates.filter(
         change => !alerts.some(alert => alert.id === change.id)
       );
       
@@ -167,7 +166,7 @@ const AIAssistant = ({ clientUpdates = [], className }: AIAssistantProps) => {
         }
       }
     }
-  }, [clientChangesList]);
+  }, [clientUpdates]);
 
   // Check if an alert meets escalation criteria
   const checkEscalationCriteria = (alert: ClientUpdate): boolean => {
@@ -351,7 +350,7 @@ const AIAssistant = ({ clientUpdates = [], className }: AIAssistantProps) => {
         
         // Simulate processing the voice command
         setTimeout(() => {
-          handleSubmit(new Event('submit') as React.FormEvent);
+          handleSubmit(new React.FormEvent<HTMLFormElement>());
           setVoiceCommandActive(false);
           
           toast.success("Voice command processed", {
@@ -364,7 +363,7 @@ const AIAssistant = ({ clientUpdates = [], className }: AIAssistantProps) => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<Element>) => {
     e.preventDefault();
     
     if (!query.trim()) return;

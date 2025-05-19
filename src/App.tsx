@@ -21,7 +21,7 @@ import { useClientChanges } from '@/hooks/useClientChanges';
 function App() {
   const { isLoaded } = useUser();
   const [isReady, setIsReady] = useState(false);
-  const clientChanges = useClientChanges();
+  const { clientChanges } = useClientChanges();
   
   useEffect(() => {
     if (isLoaded) {

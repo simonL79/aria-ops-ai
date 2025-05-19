@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -136,11 +136,12 @@ const ReputationRiskScore = ({ selectedClient, className }: ReputationRiskScoreP
             <Progress 
               value={riskScore} 
               max={100} 
-              className="h-2.5"
-              indicatorClassName={riskScore >= 80 ? "bg-red-500" : 
-                                riskScore >= 60 ? "bg-orange-500" : 
-                                riskScore >= 40 ? "bg-yellow-500" : 
-                                "bg-green-500"}
+              className={`h-2.5 ${
+                riskScore >= 80 ? "bg-red-500" : 
+                riskScore >= 60 ? "bg-orange-500" : 
+                riskScore >= 40 ? "bg-yellow-500" : 
+                "bg-green-500"
+              }`}
             />
             
             <div className="flex text-xs justify-between">

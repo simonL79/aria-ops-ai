@@ -1,5 +1,6 @@
+
 // Simulate data ingestion and threat monitoring
-import { availableSources } from "@/services/dataIngestionService";
+import { getAvailableSources } from "@/services/dataIngestionService";
 
 // Add import for risk profile utilities
 import { quickRiskAssessment } from "@/utils/riskProfileUtils";
@@ -17,7 +18,7 @@ let monitoringStatus: MonitoringStatus = {
   isActive: false,
   lastRun: new Date(),
   nextRun: new Date(),
-  sources: availableSources.filter(s => s.active).length
+  sources: getAvailableSources().filter(s => s.active).length
 };
 
 export const getMonitoringStatus = (): MonitoringStatus => {
@@ -30,7 +31,7 @@ export const startMonitoring = () => {
     isActive: true,
     lastRun: new Date(),
     nextRun: new Date(),
-    sources: availableSources.filter(s => s.active).length
+    sources: getAvailableSources().filter(s => s.active).length
   };
   
   // Set next run time
@@ -55,7 +56,7 @@ export const runMonitoringScan = async () => {
         isActive: true,
         lastRun,
         nextRun,
-        sources: availableSources.filter(s => s.active).length
+        sources: getAvailableSources().filter(s => s.active).length
       };
       
       // Pretend to find new threats and analyze them with risk fingerprints
