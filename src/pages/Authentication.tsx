@@ -1,6 +1,7 @@
+
 import { useState, useEffect } from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { SignedIn, SignedOut, useUser } from "@clerk/clerk-react";
+import { SignedIn, SignedOut, useUser, useAuth } from "@clerk/clerk-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import AuthHeader from "@/components/auth/AuthHeader";
 import AuthenticationForm from "@/components/auth/AuthenticationForm";
@@ -15,6 +16,7 @@ const Authentication = () => {
   const [isReady, setIsReady] = useState(false);
   const [loadingTimeout, setLoadingTimeout] = useState(false);
   const { isSignedIn, isLoaded, user } = useUser();
+  const { signOut } = useAuth();
   const location = useLocation();
   const from = location.state?.from?.pathname || "/dashboard";
   
@@ -42,6 +44,19 @@ const Authentication = () => {
     
     return () => clearTimeout(timer);
   }, [isLoaded]);
+  
+  // Check for "reset_password" query parameter to detect if we're coming from a reset flow
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const resetPassword = params.get('reset_password');
+    
+    if (resetPassword === 'true' && isSignedIn) {
+      // User is already signed in but trying to reset password
+      // We need to sign them out first
+      toast.info("Please sign out before resetting your password");
+      signOut().catch(err => console.error("Error signing out:", err));
+    }
+  }, [location.search, isSignedIn, signOut]);
   
   // Display a toast when the component mounts to help with debugging
   useEffect(() => {
@@ -81,9 +96,14 @@ const Authentication = () => {
     );
   }
   
-  // If user is already signed in, redirect to dashboard
+  // If user is already signed in and not in the reset password flow, redirect to dashboard
   if (isSignedIn) {
-    return <Navigate to={from} replace />;
+    const params = new URLSearchParams(location.search);
+    const resetPassword = params.get('reset_password');
+    
+    if (resetPassword !== 'true') {
+      return <Navigate to={from} replace />;
+    }
   }
 
   return (
@@ -105,12 +125,11 @@ const Authentication = () => {
               <AuthenticationForm />
             </div>
           </SignedOut>
+          <SignedIn>
+            <SignedInRedirect />
+          </SignedIn>
         </CardContent>
       </Card>
-
-      <SignedIn>
-        <SignedInRedirect />
-      </SignedIn>
     </div>
   );
 };

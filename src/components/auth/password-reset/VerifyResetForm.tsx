@@ -63,15 +63,24 @@ const VerifyResetForm = ({ resetEmail, onSuccess, onBack }: VerifyResetFormProps
       console.log("Password reset verification result:", result);
       
       if (result.status === "complete") {
+        // Don't try to set active session here, just inform the user of success
         toast.success("Password reset successful. You can now sign in with your new password.");
-        onSuccess(); // Return to sign in form
+        setTimeout(() => {
+          onSuccess(); // Return to sign in form after a short delay
+        }, 500);
       } else {
         console.error("Unexpected verification status:", result);
         toast.error("Failed to reset password. Please try again.");
       }
     } catch (error: any) {
       console.error("Error verifying code:", error);
-      toast.error(error?.errors?.[0]?.message || "Invalid code or unable to reset password. Please try again.");
+      
+      // Provide more specific error messages for common issues
+      if (error?.errors?.[0]?.message?.includes("session already exists")) {
+        toast.error("You're already signed in. Please sign out before resetting your password.");
+      } else {
+        toast.error(error?.errors?.[0]?.message || "Invalid code or unable to reset password. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }
