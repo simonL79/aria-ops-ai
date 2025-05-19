@@ -52,4 +52,7 @@ export const Protected = ({ roles, fallback, children }: ProtectedProps) => {
   return fallback ? <>{fallback}</> : null;
 };
 
+// Add RoleProtected as an alias of Protected for backward compatibility
+export const RoleProtected = Protected;
+
 export default useRbac;

@@ -40,6 +40,8 @@ export interface ContentSource {
   mentionCount: number;
   sentiment: number;
   status?: string;
+  positiveRatio: number; // Added missing property
+  total: number; // Added missing property
 }
 
 // Define content action interface

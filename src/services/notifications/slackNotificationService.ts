@@ -79,19 +79,17 @@ export const sendSlackNotification = async (
     if (payload.dashboardUrl) {
       message.blocks.push({
         type: "actions",
-        elements: [
-          {
-            type: "button",
-            text: {
-              type: "plain_text",
-              text: "View in Dashboard",
-              emoji: true
-            },
-            url: payload.dashboardUrl,
-            style: "primary"
-          }
-        ]
-      });
+        elements: [{
+          type: "button",
+          text: {
+            type: "plain_text",
+            text: "View in Dashboard",
+            emoji: true
+          },
+          url: payload.dashboardUrl,
+          style: "primary"
+        }]
+      } as any); // Using type assertion to avoid TypeScript errors
     }
 
     // Send the notification to Slack

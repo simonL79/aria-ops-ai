@@ -57,5 +57,4 @@ export interface ThreatSource {
   };
 }
 
-// Re-export to fix the ambiguity
-export type { ThreatSource };
+// No re-export here to avoid conflict

@@ -17,12 +17,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Slider,
-  SliderTrack,
-  SliderRange,
-  SliderThumb,
-} from "@/components/ui/slider";
+import { Slider } from "@/components/ui/slider";
 import {
   Select,
   SelectContent,
@@ -37,7 +32,7 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
-import { CalendarIcon, FlagIcon, CheckCircleIcon, ExternalLinkIcon, FilterIcon } from "lucide-react";
+import { CalendarIcon, Flag, Check, ExternalLink, Filter } from "lucide-react";
 import { ContentAlert } from "@/types/dashboard";
 
 interface MentionsTableProps {
@@ -223,7 +218,7 @@ const MentionsTable = ({
                 min={1}
                 step={1}
                 value={severityRange}
-                onValueChange={(value: number[]) => setSeverityRange([value[0], value[1]])}
+                onValueChange={(value: [number, number]) => setSeverityRange(value)}
               />
             </div>
 
@@ -290,7 +285,7 @@ const MentionsTable = ({
             {/* Filter actions */}
             <div className="flex gap-2">
               <Button onClick={applyFilters} className="gap-2">
-                <FilterIcon className="h-4 w-4" />
+                <Filter className="h-4 w-4" />
                 Apply Filters
               </Button>
               <Button variant="outline" onClick={resetFilters}>
@@ -346,21 +341,21 @@ const MentionsTable = ({
                           size="sm"
                           onClick={() => onViewDetail && onViewDetail(mention)}
                         >
-                          <ExternalLinkIcon className="h-4 w-4" />
+                          <ExternalLink className="h-4 w-4" />
                         </Button>
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => onMarkResolved && onMarkResolved(mention.id)}
                         >
-                          <CheckCircleIcon className="h-4 w-4" />
+                          <Check className="h-4 w-4" />
                         </Button>
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => onEscalate && onEscalate(mention.id)}
                         >
-                          <FlagIcon className="h-4 w-4" />
+                          <Flag className="h-4 w-4" />
                         </Button>
                       </div>
                     </TableCell>
