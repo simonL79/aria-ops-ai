@@ -45,11 +45,6 @@ const Authentication = () => {
     return <Navigate to="/dashboard" replace />;
   }
 
-  // Handle tab change without form submissions
-  const handleTabChange = (value: string) => {
-    setActiveTab(value);
-  };
-
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
       <div className="mb-8 flex flex-col items-center">
@@ -74,25 +69,23 @@ const Authentication = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+          <Tabs defaultValue="signin" value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-8">
-              <TabsTrigger value="signin" type="button">Sign In</TabsTrigger>
-              <TabsTrigger value="signup" type="button">Sign Up</TabsTrigger>
+              <TabsTrigger value="signin">Sign In</TabsTrigger>
+              <TabsTrigger value="signup">Sign Up</TabsTrigger>
             </TabsList>
             <TabsContent value="signin">
               <SignIn 
                 routing="path" 
                 path="/signin"
-                signUpUrl="/signup"
-                fallbackRedirectUrl="/dashboard"
+                redirectUrl="/dashboard"
               />
             </TabsContent>
             <TabsContent value="signup">
               <SignUp 
                 routing="path" 
                 path="/signup"
-                signInUrl="/signin"
-                fallbackRedirectUrl="/dashboard"
+                redirectUrl="/dashboard"
               />
             </TabsContent>
           </Tabs>
