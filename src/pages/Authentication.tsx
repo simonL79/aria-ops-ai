@@ -65,12 +65,12 @@ const Authentication = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">
-            {activeTab === "signin" ? "Sign in to your account" : "Create an account"}
+            Admin Login
           </CardTitle>
           <CardDescription className="text-center">
             {activeTab === "signin" 
-              ? "Enter your credentials to access your dashboard" 
-              : "Create your A.R.I.A. account to get started"}
+              ? "Enter your credentials to access the admin dashboard" 
+              : "Create an administrator account"}
           </CardDescription>
         </CardHeader>
         <CardContent>

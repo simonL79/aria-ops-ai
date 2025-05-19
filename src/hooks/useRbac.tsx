@@ -1,20 +1,61 @@
 
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useAuth } from './useAuth';
+import { supabase } from '@/integrations/supabase/client';
 
 export type Role = 'admin' | 'manager' | 'analyst' | 'user' | 'security';
 
 interface RbacContextType {
   roles: Role[];
   hasPermission: (requiredRoles: Role | Role[]) => boolean;
+  isLoading: boolean;
 }
 
 const RbacContext = createContext<RbacContextType>({
   roles: ['user'],
   hasPermission: () => false,
+  isLoading: true,
 });
 
 export const RbacProvider = ({ children, initialRoles = ['user'] }: { children: React.ReactNode, initialRoles?: Role[] }) => {
-  const [roles] = useState<Role[]>(initialRoles);
+  const { isAuthenticated, userId } = useAuth();
+  const [roles, setRoles] = useState<Role[]>(initialRoles);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  useEffect(() => {
+    if (isAuthenticated && userId) {
+      fetchUserRoles(userId);
+    } else {
+      setRoles(['user']);
+      setIsLoading(false);
+    }
+  }, [isAuthenticated, userId]);
+  
+  const fetchUserRoles = async (userId: string) => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId);
+      
+      if (error) {
+        console.error('Error fetching user roles:', error);
+        setRoles(['user']); // Default to user role on error
+      } else if (data && data.length > 0) {
+        const userRoles = data.map(r => r.role as Role);
+        setRoles([...userRoles, 'user']); // Always include 'user' role
+        console.log('User roles:', userRoles);
+      } else {
+        setRoles(['user']); // Default to user role if no roles found
+      }
+    } catch (error) {
+      console.error('Error fetching user roles:', error);
+      setRoles(['user']);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   
   const hasPermission = (requiredRoles: Role | Role[]) => {
     if (!requiredRoles || (Array.isArray(requiredRoles) && requiredRoles.length === 0)) {
@@ -28,7 +69,7 @@ export const RbacProvider = ({ children, initialRoles = ['user'] }: { children: 
   };
   
   return (
-    <RbacContext.Provider value={{ roles, hasPermission }}>
+    <RbacContext.Provider value={{ roles, hasPermission, isLoading }}>
       {children}
     </RbacContext.Provider>
   );
@@ -43,7 +84,11 @@ interface ProtectedProps {
 }
 
 export const Protected = ({ roles, fallback, children }: ProtectedProps) => {
-  const { hasPermission } = useRbac();
+  const { hasPermission, isLoading } = useRbac();
+  
+  if (isLoading) {
+    return <div>Loading permissions...</div>;
+  }
   
   if (hasPermission(roles)) {
     return <>{children}</>;
