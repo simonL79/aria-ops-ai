@@ -69,40 +69,63 @@ const Authentication = () => {
     }
   };
 
-  // Direct login button handler that focuses on the form
+  // Direct login button handler with improved form activation
   const handleLoginClick = () => {
-    toast.info("Opening sign-in form...");
+    toast.info("Activating sign-in form...");
     
+    // Force focus on the Clerk form container first
+    const formContainer = document.querySelector('.cl-card, .cl-formContainer');
+    if (formContainer instanceof HTMLElement) {
+      formContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      formContainer.classList.add('highlight-container');
+    }
+    
+    // Use a longer timeout to ensure Clerk components are fully rendered
     setTimeout(() => {
-      // Try different selectors to find the Clerk form elements
-      const emailInput = document.querySelector('input[name="identifier"], input[type="email"]');
-      const signInButton = document.querySelector('.cl-formButtonPrimary, .cl-button-root');
-      const formContainer = document.querySelector('.cl-card, .cl-formContainer');
+      // Try different approaches to activate the form
       
+      // 1. Try to find and focus on email input
+      const emailInput = document.querySelector('input[name="identifier"], input[type="email"], .cl-input');
       if (emailInput instanceof HTMLElement) {
-        // Focus on the email input if found
         emailInput.focus();
         toast.success("Please enter your email address");
-      } else if (signInButton instanceof HTMLElement) {
-        // Click the sign-in button if found
+        return;
+      }
+      
+      // 2. Try to find and click any button that might trigger the auth form
+      const signInButton = document.querySelector('.cl-formButtonPrimary, .cl-button-root, button[data-testid="form-submit-button"]');
+      if (signInButton instanceof HTMLElement) {
         signInButton.click();
         toast.success("Please complete the sign-in process");
-      } else if (formContainer instanceof HTMLElement) {
-        // Make the form container visible and bring focus to it
-        formContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        formContainer.classList.add('highlight-container');
-        toast.info("Please use the sign-in form below");
-      } else {
-        // If we can't find any elements, provide instructions
-        toast.info("Click the 'Login to Dashboard' button again to activate the form");
-        
-        // Try to initialize the Clerk form
-        const clerkRoot = document.querySelector('#cl-root');
-        if (clerkRoot instanceof HTMLElement) {
-          clerkRoot.click();
-        }
+        return;
       }
-    }, 200); // Increased timeout to ensure Clerk components are fully rendered
+      
+      // 3. Try to find and click on the Sign In tab if there are tabs
+      const signInTab = document.querySelector('[data-testid="sign-in-tab"], [role="tab"]');
+      if (signInTab instanceof HTMLElement) {
+        signInTab.click();
+        toast.info("Please use the sign-in form below");
+        return;
+      }
+      
+      // 4. As a last resort, try initializing the Clerk root element
+      const clerkRoot = document.querySelector('#cl-root');
+      if (clerkRoot instanceof HTMLElement) {
+        clerkRoot.click();
+        // After clicking, try focusing on any visible input
+        setTimeout(() => {
+          const anyInput = document.querySelector('input:not([type="hidden"])');
+          if (anyInput instanceof HTMLElement) {
+            anyInput.focus();
+          }
+        }, 100);
+        toast.info("Please complete the sign-in process");
+        return;
+      }
+      
+      // If nothing worked, inform the user
+      toast.info("Please click directly on the sign-in form below to begin");
+    }, 500); // Increased timeout to ensure Clerk components are fully rendered
   };
 
   return (
@@ -131,7 +154,7 @@ const Authentication = () => {
             <div className="space-y-6">
               {/* Prominent Login button at the top with enhanced visibility */}
               <Button 
-                className="w-full bg-primary hover:bg-primary/90 text-white font-medium" 
+                className="w-full bg-primary hover:bg-primary/90 text-white font-medium animate-pulse" 
                 variant="default" 
                 size="lg"
                 onClick={handleLoginClick}
@@ -157,8 +180,8 @@ const Authentication = () => {
                 `}
               </style>
               
-              {/* Use standard SignIn component with clear redirectUrl */}
-              <div id="clerk-sign-in" className="clerk-form-container">
+              {/* Make the Clerk container more visible with distinct styling */}
+              <div id="clerk-sign-in" className="clerk-form-container border-2 border-primary rounded-lg p-4">
                 <SignIn 
                   path="/signin"
                   routing="path" 
