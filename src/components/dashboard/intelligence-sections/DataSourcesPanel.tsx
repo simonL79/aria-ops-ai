@@ -8,9 +8,16 @@ import { DataSourceStats } from "@/types/intelligence";
 interface DataSourcesPanelProps {
   sourceStats: DataSourceStats[];
   availableSources: any[];
+  onFormSubmit?: (e: React.FormEvent) => void;
 }
 
-const DataSourcesPanel = ({ sourceStats, availableSources }: DataSourcesPanelProps) => {
+const DataSourcesPanel = ({ sourceStats, availableSources, onFormSubmit }: DataSourcesPanelProps) => {
+  // Add event handler for buttons to prevent default form submission
+  const handleButtonClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    // Additional button logic can go here
+  };
+
   return (
     <Card>
       <CardContent className="pt-6">
@@ -37,7 +44,15 @@ const DataSourcesPanel = ({ sourceStats, availableSources }: DataSourcesPanelPro
                     {source.active ? (
                       <div className="text-green-600">Connected</div>
                     ) : (
-                      <Button size="sm" variant="outline" className="h-7 text-xs">Connect</Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="h-7 text-xs"
+                        onClick={handleButtonClick}
+                        type="button"
+                      >
+                        Connect
+                      </Button>
                     )}
                   </div>
                 </div>
