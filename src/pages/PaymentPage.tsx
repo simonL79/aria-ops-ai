@@ -1,17 +1,43 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Check, Shield, CreditCard } from 'lucide-react';
+import { Check, Shield, CreditCard, Loader2 } from 'lucide-react';
 import Logo from '@/components/ui/logo';
 import Footer from '@/components/layout/Footer';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const PaymentPage = () => {
-  const handlePaymentClick = (planName: string, price: string) => {
-    // This will be connected to Stripe later
-    console.log(`Selected plan: ${planName}, Price: ${price}`);
-    alert(`You've selected the ${planName} plan. Stripe integration will be connected later.`);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const handlePaymentClick = async (planName: string, price: string) => {
+    setIsLoading(true);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: { planName, price }
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      if (data?.url) {
+        // Redirect to Stripe checkout
+        window.location.href = data.url;
+      } else {
+        throw new Error('No checkout URL returned');
+      }
+    } catch (error) {
+      console.error('Payment error:', error);
+      toast.error('Unable to process payment', {
+        description: 'Please try again later or contact support.'
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -80,10 +106,18 @@ const PaymentPage = () => {
             </CardContent>
             <CardFooter>
               <Button 
-                onClick={() => handlePaymentClick("PRO Monitoring", "£97.00")} 
+                onClick={() => handlePaymentClick("PRO Monitoring Plan", "£97.00")} 
                 className="w-full"
+                disabled={isLoading}
               >
-                Proceed to Payment
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  "Proceed to Payment"
+                )}
               </Button>
             </CardFooter>
           </Card>

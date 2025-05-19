@@ -1,3 +1,4 @@
+
 import React from "react";
 import {
   BrowserRouter as Router,
@@ -23,7 +24,7 @@ import Removal from "./pages/Removal";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import PricingPage from "./pages/PricingPage";
-import PaymentPage from "./pages/PaymentPage"; // Added new page
+import PaymentPage from "./pages/PaymentPage";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const DashboardPage = React.lazy(() => import("./pages/dashboard/DashboardPage"));
@@ -72,7 +73,7 @@ function App() {
             <Route path="/thank-you" element={<ThankYouPage />} />
             <Route path="/auth" element={<Authentication />} />
             <Route path="/pricing" element={<PricingPage />} />
-            <Route path="/payment" element={<PaymentPage />} /> {/* Added new route */}
+            <Route path="/payment" element={<PaymentPage />} />
             
             {/* Redirect any /sales route to the home page */}
             <Route path="/sales" element={<Navigate to="/" replace />} />
