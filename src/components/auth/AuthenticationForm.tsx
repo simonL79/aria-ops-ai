@@ -11,6 +11,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import PasswordResetForm from "./PasswordResetForm";
 
 // Define a schema for login form validation
 const loginSchema = z.object({
@@ -31,6 +32,7 @@ type SignupFormValues = z.infer<typeof signupSchema>;
 
 const AuthenticationForm = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [showResetForm, setShowResetForm] = useState(false);
   const { signIn, setActive: setActiveSignIn, isLoaded: isSignInLoaded } = useSignIn();
   const { signUp, setActive: setActiveSignUp, isLoaded: isSignUpLoaded } = useSignUp();
   
@@ -134,6 +136,10 @@ const AuthenticationForm = () => {
     }
   };
 
+  if (showResetForm) {
+    return <PasswordResetForm onBack={() => setShowResetForm(false)} />;
+  }
+
   return (
     <Tabs defaultValue="signin" className="w-full">
       <TabsList className="grid grid-cols-2 mb-6">
@@ -194,6 +200,18 @@ const AuthenticationForm = () => {
                 </FormItem>
               )}
             />
+            
+            <div className="text-right">
+              <Button 
+                type="button" 
+                variant="link" 
+                size="sm" 
+                className="px-0" 
+                onClick={() => setShowResetForm(true)}
+              >
+                Forgot your password?
+              </Button>
+            </div>
             
             <Button 
               type="submit" 
