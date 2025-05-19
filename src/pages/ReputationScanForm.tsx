@@ -48,7 +48,7 @@ const ReputationScanForm = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-100 to-gray-50 flex flex-col">
+    <div className="min-h-screen bg-premium-silver/10 flex flex-col">
       {/* Simple header */}
       <header className="bg-premium-black text-white py-4">
         <div className="container mx-auto px-6">
