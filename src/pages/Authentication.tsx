@@ -69,14 +69,27 @@ const Authentication = () => {
     }
   };
 
-  // Login button handler
+  // Improved login button handler with direct form interaction
   const handleLoginClick = () => {
-    toast.info("Please use the form below to sign in");
-    // Focus the first input field in the SignIn component
+    toast.info("Initiating login process...");
+    
+    // Try to find email input and make it visible
     setTimeout(() => {
-      const input = document.querySelector('.cl-formButtonPrimary, .cl-internal-1v2gdho');
-      if (input instanceof HTMLElement) {
-        input.focus();
+      // Find the email input field in the Clerk form
+      const emailInput = document.querySelector('input[name="identifier"]');
+      if (emailInput instanceof HTMLElement) {
+        emailInput.focus();
+        toast.success("Please enter your credentials");
+      } else {
+        // If we can't find the specific input, try to find any button that might trigger the form
+        const signInButton = document.querySelector('.cl-formButtonPrimary');
+        if (signInButton instanceof HTMLElement) {
+          signInButton.click();
+          toast.success("Please complete the sign-in process");
+        } else {
+          // Last resort - inform user to interact with the form directly
+          toast.info("Please use the sign-in form below to access your account");
+        }
       }
     }, 100);
   };
@@ -105,9 +118,9 @@ const Authentication = () => {
         <CardContent>
           <SignedOut>
             <div className="space-y-6">
-              {/* Prominent Login button at the top */}
+              {/* Prominent Login button at the top with enhanced visibility */}
               <Button 
-                className="w-full" 
+                className="w-full bg-primary hover:bg-primary/90 text-white font-medium" 
                 variant="default" 
                 size="lg"
                 onClick={handleLoginClick}
