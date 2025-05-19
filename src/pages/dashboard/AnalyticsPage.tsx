@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import AnalyticsPanel from "@/components/dashboard/analytics/AnalyticsPanel";
 import { useRealTimeUpdates } from "@/hooks/useRealTimeUpdates";
 import { useDashboardData } from "@/hooks/useDashboardData";
+import { DataSourceStats } from "@/types/intelligence";
 
 const AnalyticsPage = () => {
   const [timeRange, setTimeRange] = useState<string>("7d");
@@ -43,6 +44,14 @@ const AnalyticsPage = () => {
     { date: "May 17", score: 78, mentions: 32 },
     { date: "May 18", score: 82, mentions: 28 },
   ];
+  
+  // Convert ContentSource[] to DataSourceStats[] to match the expected type
+  const sourceStats: DataSourceStats[] = sources.map(source => ({
+    source: source.name,
+    mentions: source.mentionCount,
+    sentiment: source.sentiment,
+    coverage: source.positiveRatio,
+  }));
   
   const handleRefresh = () => {
     toast.success("Analytics data refreshed", {

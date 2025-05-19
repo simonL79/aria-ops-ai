@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -24,6 +23,7 @@ import {
 import { DataSourceStats, ThreatVector } from '@/types/intelligence';
 import { ContentAlert } from '@/types/dashboard';
 import { AreaChart, Area } from 'recharts';
+import RealTimeAlerts from "@/components/dashboard/real-time-alerts";
 
 // Colors for charts
 const COLORS = {
