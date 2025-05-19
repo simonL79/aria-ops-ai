@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { SignedIn, SignedOut, useUser } from "@clerk/clerk-react";
@@ -94,19 +93,16 @@ const Authentication = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">
-            Admin Login
+            Account Access
           </CardTitle>
           <CardDescription className="text-center">
-            Enter your credentials to access the admin dashboard
+            Sign in to your account or create a new one
           </CardDescription>
         </CardHeader>
         <CardContent>
           <SignedOut>
             <div className="space-y-6">
               <AuthenticationForm />
-              <p className="text-center text-sm text-muted-foreground">
-                Admin access only. No new registrations permitted.
-              </p>
             </div>
           </SignedOut>
         </CardContent>
