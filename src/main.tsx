@@ -4,16 +4,14 @@ import { ClerkProvider } from '@clerk/clerk-react'
 import { AuthProvider } from './hooks/useAuth'
 import App from './App.tsx'
 import './index.css'
-import { toast } from 'sonner'
+import { toast, Toaster } from 'sonner'
 
 // Get the Clerk publishable key
-// Providing a fallback key for development/testing purposes
-const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || 'pk_test_Z29vZC1jb2NrYXRvby05MC5jbGVyay5hY2NvdW50cy5kZXYk';
+const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
-// Display a warning if using the fallback key
-if (!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY) {
-  console.warn('Using fallback Clerk Publishable Key. For production, set the VITE_CLERK_PUBLISHABLE_KEY environment variable.');
-  console.log('Current key being used:', CLERK_PUBLISHABLE_KEY);
+// Check if key is available
+if (!CLERK_PUBLISHABLE_KEY) {
+  console.error('Clerk publishable key is missing. Please set the VITE_CLERK_PUBLISHABLE_KEY environment variable.');
 }
 
 createRoot(document.getElementById("root")!).render(
@@ -22,7 +20,6 @@ createRoot(document.getElementById("root")!).render(
     appearance={{
       variables: { colorPrimary: '#0f766e' }
     }}
-    // Using correct redirect prop names
     signInUrl="/auth"
     signUpUrl="/auth"
     afterSignInUrl="/dashboard"
@@ -31,5 +28,6 @@ createRoot(document.getElementById("root")!).render(
     <AuthProvider>
       <App />
     </AuthProvider>
+    <Toaster />
   </ClerkProvider>
 );
