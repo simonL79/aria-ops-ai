@@ -33,7 +33,7 @@ const AdvancedSecuritySettings = () => {
   };
 
   return (
-    <Protected role="admin">
+    <Protected roles="admin">
       <Card>
         <CardHeader>
           <div className="flex items-center space-x-2">

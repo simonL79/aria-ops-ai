@@ -6,6 +6,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   userId: string | null;
+  user: any; // Add user property to fix the type error
   signOut: () => Promise<void>;
 }
 
@@ -13,6 +14,7 @@ const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
   isLoading: true,
   userId: null,
+  user: null, // Initialize with null
   signOut: async () => {}
 });
 
@@ -29,6 +31,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     isAuthenticated: isSignedIn || false,
     isLoading,
     userId: user?.id || null,
+    user, // Pass the user object
     signOut
   };
   

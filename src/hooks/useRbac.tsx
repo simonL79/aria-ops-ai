@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useState } from 'react';
 
-export type Role = 'admin' | 'manager' | 'analyst' | 'user';
+export type Role = 'admin' | 'manager' | 'analyst' | 'user' | 'security';
 
 interface RbacContextType {
   roles: Role[];
@@ -37,7 +37,7 @@ export const RbacProvider = ({ children, initialRoles = ['user'] }: { children: 
 export const useRbac = () => useContext(RbacContext);
 
 interface ProtectedProps {
-  roles: Role[];
+  roles: Role | Role[];
   fallback?: React.ReactNode;
   children: React.ReactNode;
 }

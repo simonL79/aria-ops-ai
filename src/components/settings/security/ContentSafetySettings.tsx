@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { 
   Card, 
@@ -39,7 +40,7 @@ const ContentSafetySettings = () => {
   };
 
   return (
-    <Protected role={["admin", "security"]} fallback={<AccessDenied />}>
+    <Protected roles={["admin", "security"]} fallback={<AccessDenied />}>
       <Card>
         <CardHeader>
           <CardTitle>Content Safety Settings</CardTitle>
