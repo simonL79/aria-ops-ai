@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   Sheet,
@@ -25,7 +26,8 @@ import {
   AlertTriangle,
   BarChart4,
   Network,
-  LucideIcon
+  LucideIcon,
+  Info
 } from "lucide-react"
 import { Link } from 'react-router-dom';
 import { useAuth } from "@/hooks/useAuth";
@@ -80,6 +82,11 @@ const navigation: NavItem[] = [
     href: "#",
     icon: BarChart4,
     disabled: true,
+  },
+  {
+    title: "About",
+    href: "/about",
+    icon: Info,
   },
   {
     title: "Settings",

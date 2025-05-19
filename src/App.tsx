@@ -12,6 +12,7 @@ import { RbacProvider, Role } from "./hooks/useRbac";
 
 import Index from "./pages/Index";
 import HomePage from "./pages/HomePage";
+import AboutPage from "./pages/AboutPage";
 import Authentication from "./pages/Authentication";
 import Clients from "./pages/Clients";
 import Monitor from "./pages/Monitor";
@@ -58,6 +59,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/home" element={<HomePage />} />
+            <Route path="/about" element={<AboutPage />} />
             <Route path="/auth" element={<Authentication />} />
             <Route
               path="/dashboard"
