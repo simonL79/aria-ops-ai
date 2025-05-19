@@ -26,17 +26,14 @@ const AlertsList = ({
   return (
     <>
       {filteredAlerts.map((alert, index) => (
-        <div 
+        <AlertItem 
           key={alert.id} 
-          className={index !== filteredAlerts.length - 1 ? 'border-b' : ''}
-        >
-          <AlertItem 
-            alert={alert}
-            handleDismiss={handleDismiss}
-            handleMarkAsRead={handleMarkAsRead}
-            onViewDetail={onViewDetail}
-          />
-        </div>
+          alert={alert}
+          isLast={index === filteredAlerts.length - 1}
+          onDismiss={handleDismiss}
+          onMarkAsRead={handleMarkAsRead}
+          onViewDetail={onViewDetail}
+        />
       ))}
     </>
   );
