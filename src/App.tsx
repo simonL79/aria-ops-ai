@@ -8,7 +8,7 @@ import {
 } from "react-router-dom";
 import { Toaster } from "sonner";
 import { useAuth } from "./hooks/useAuth";
-import { RbacProvider } from "./hooks/useRbac";
+import { RbacProvider, Role } from "./hooks/useRbac";
 
 import Index from "./pages/Index";
 import HomePage from "./pages/HomePage";
@@ -45,7 +45,7 @@ function App() {
   const { isLoading, isAuthenticated } = useAuth();
 
   // Default to 'user' role, but add 'admin' role if authenticated
-  const userRoles = isAuthenticated ? ['user', 'admin', 'security'] : ['user'];
+  const userRoles: Role[] = isAuthenticated ? ['user', 'admin', 'security'] : ['user'];
 
   if (isLoading) {
     return <div>Loading...</div>;

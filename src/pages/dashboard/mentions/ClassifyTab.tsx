@@ -1,5 +1,5 @@
 
-import ManualClassificationForm from "@/components/dashboard/ManualClassificationForm";
+import ManualClassificationForm from "@/components/dashboard/threatClassifier/ManualClassification";
 import { ContentAlert } from "@/types/dashboard";
 import { toast } from "sonner";
 
