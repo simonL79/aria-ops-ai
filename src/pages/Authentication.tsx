@@ -69,29 +69,40 @@ const Authentication = () => {
     }
   };
 
-  // Improved login button handler with direct form interaction
+  // Direct login button handler that focuses on the form
   const handleLoginClick = () => {
-    toast.info("Initiating login process...");
+    toast.info("Opening sign-in form...");
     
-    // Try to find email input and make it visible
     setTimeout(() => {
-      // Find the email input field in the Clerk form
-      const emailInput = document.querySelector('input[name="identifier"]');
+      // Try different selectors to find the Clerk form elements
+      const emailInput = document.querySelector('input[name="identifier"], input[type="email"]');
+      const signInButton = document.querySelector('.cl-formButtonPrimary, .cl-button-root');
+      const formContainer = document.querySelector('.cl-card, .cl-formContainer');
+      
       if (emailInput instanceof HTMLElement) {
+        // Focus on the email input if found
         emailInput.focus();
-        toast.success("Please enter your credentials");
+        toast.success("Please enter your email address");
+      } else if (signInButton instanceof HTMLElement) {
+        // Click the sign-in button if found
+        signInButton.click();
+        toast.success("Please complete the sign-in process");
+      } else if (formContainer instanceof HTMLElement) {
+        // Make the form container visible and bring focus to it
+        formContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        formContainer.classList.add('highlight-container');
+        toast.info("Please use the sign-in form below");
       } else {
-        // If we can't find the specific input, try to find any button that might trigger the form
-        const signInButton = document.querySelector('.cl-formButtonPrimary');
-        if (signInButton instanceof HTMLElement) {
-          signInButton.click();
-          toast.success("Please complete the sign-in process");
-        } else {
-          // Last resort - inform user to interact with the form directly
-          toast.info("Please use the sign-in form below to access your account");
+        // If we can't find any elements, provide instructions
+        toast.info("Click the 'Login to Dashboard' button again to activate the form");
+        
+        // Try to initialize the Clerk form
+        const clerkRoot = document.querySelector('#cl-root');
+        if (clerkRoot instanceof HTMLElement) {
+          clerkRoot.click();
         }
       }
-    }, 100);
+    }, 200); // Increased timeout to ensure Clerk components are fully rendered
   };
 
   return (
@@ -129,14 +140,31 @@ const Authentication = () => {
                 Login to Dashboard
               </Button>
               
+              {/* Add CSS to highlight the Clerk component */}
+              <style jsx>{`
+                .highlight-container {
+                  animation: pulse 2s infinite;
+                  border: 2px solid #3b82f6;
+                  border-radius: 8px;
+                  padding: 8px;
+                }
+                @keyframes pulse {
+                  0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+                  70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+                  100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+                }
+              `}</style>
+              
               {/* Use standard SignIn component with clear redirectUrl */}
-              <SignIn 
-                path="/signin"
-                routing="path" 
-                signUpUrl="/signin"
-                afterSignInUrl="/dashboard"
-                afterSignUpUrl="/dashboard"
-              />
+              <div id="clerk-sign-in" className="clerk-form-container">
+                <SignIn 
+                  path="/signin"
+                  routing="path" 
+                  signUpUrl="/signin"
+                  afterSignInUrl="/dashboard"
+                  afterSignUpUrl="/dashboard"
+                />
+              </div>
               
               <p className="text-center text-sm text-muted-foreground">
                 Admin access only. No new registrations permitted.
