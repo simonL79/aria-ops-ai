@@ -176,7 +176,7 @@ const AboutPage = () => {
 
       <footer className="bg-gray-900 text-gray-400 py-10 text-center text-sm mt-16">
         <p>&copy; 2025 A.R.I.A™ — AI Reputation Intelligence Agent</p>
-        <p>Built with integrity by Simon Lindsay | <Link to="/biography" className="underline">Simon Lindsay</Link> | <Link to="/" className="underline">Home</Link></p>
+        <p><Link to="/biography" className="underline">Simon Lindsay</Link> | <Link to="/" className="underline">Home</Link> | <Link to="/pricing" className="underline">Pricing</Link></p>
       </footer>
     </div>
   );
