@@ -30,9 +30,9 @@ const PricingPage = () => {
       <main className="py-12 container mx-auto px-6">
         <div className="max-w-5xl mx-auto">
           <div className="mb-12 text-center">
-            <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">Choose Your Reputation Protection Plan</h1>
+            <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">🛡️ Your Reputation Has a Plan Now</h1>
             <p className="text-xl text-premium-gray max-w-2xl mx-auto">
-              From basic monitoring to full-scale defense, we have a solution for every need and budget.
+              Not everyone needs the same level of protection. Whether you're just watching your name or dealing with negative articles or viral posts, A.R.I.A™ adapts to your risk level.
             </p>
           </div>
 
@@ -44,7 +44,7 @@ const PricingPage = () => {
                   <CardTitle>FREE TIER</CardTitle>
                   <Search className="h-5 w-5 text-premium-gray" />
                 </div>
-                <CardDescription className="font-medium text-lg">"Watch & Wait"</CardDescription>
+                <CardDescription className="font-medium text-lg">Just Watching</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="text-center mb-4">
@@ -53,35 +53,30 @@ const PricingPage = () => {
                 </div>
                 
                 <div>
-                  <h3 className="font-medium mb-2">Who it's for:</h3>
-                  <p className="text-premium-gray mb-4">People who just want to quietly monitor their name or brand and see what's out there.</p>
+                  <h3 className="font-medium mb-2">Best for:</h3>
+                  <p className="text-premium-gray mb-4">Individuals or small brands who want peace of mind.</p>
                 </div>
                 
                 <div>
-                  <h3 className="font-medium mb-2">What you get:</h3>
+                  <h3 className="font-medium mb-2">You'll get:</h3>
                   <ul className="space-y-2">
                     <li className="flex items-start gap-2">
                       <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span>Scans your name or brand once a week</span>
+                      <span>A weekly scan of your name or business</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span>Alerts you if something serious shows up</span>
+                      <span>A monthly report with any mentions we find</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span>One simple report sent monthly</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span>No tools or responses — just awareness</span>
+                      <span>An email if something serious pops up</span>
                     </li>
                   </ul>
                 </div>
                 
                 <div className="bg-gray-50 p-4 rounded-md">
-                  <h3 className="font-medium mb-2">Good if you're:</h3>
-                  <p className="text-premium-gray">New to this, on a budget, or just curious what's online about you.</p>
+                  <p className="text-premium-gray italic">📩 Think of it as your early warning system.</p>
                 </div>
               </CardContent>
               <CardFooter>
@@ -101,7 +96,7 @@ const PricingPage = () => {
                   <CardTitle>PRO TIER</CardTitle>
                   <Bell className="h-5 w-5 text-premium-silver" />
                 </div>
-                <CardDescription className="font-medium text-lg">"Monitor & Manage"</CardDescription>
+                <CardDescription className="font-medium text-lg">Active Monitoring</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="text-center mb-4">
@@ -110,39 +105,34 @@ const PricingPage = () => {
                 </div>
                 
                 <div>
-                  <h3 className="font-medium mb-2">Who it's for:</h3>
-                  <p className="text-premium-gray mb-4">Business owners, public figures, or professionals who need real-time alerts and basic protection.</p>
+                  <h3 className="font-medium mb-2">Best for:</h3>
+                  <p className="text-premium-gray mb-4">Entrepreneurs, professionals, or businesses with visibility.</p>
                 </div>
                 
                 <div>
-                  <h3 className="font-medium mb-2">What you get:</h3>
+                  <h3 className="font-medium mb-2">You'll get:</h3>
                   <ul className="space-y-2">
                     <li className="flex items-start gap-2">
                       <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span>24/7 scanning of Google, social media, news, Reddit, etc.</span>
+                      <span>24/7 scanning of the internet (Google, Reddit, news, social)</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span>A.R.I.A™ uses AI to rate how serious each mention is</span>
+                      <span>AI-powered threat scoring (what's serious, what's not)</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span>Email alerts when something needs action</span>
+                      <span>Monthly reports with guidance on what to do</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span>Monthly strategy reports (what's changed, what to fix)</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span>Advice on how to respond or what content to create to push bad links down</span>
+                      <span>Alerts sent straight to your inbox or Slack</span>
                     </li>
                   </ul>
                 </div>
                 
                 <div className="bg-gray-50 p-4 rounded-md">
-                  <h3 className="font-medium mb-2">Good if you're:</h3>
-                  <p className="text-premium-gray">Actively building your brand and want to stay ahead of threats.</p>
+                  <p className="text-premium-gray italic">📊 Smart reputation defense for people who can't afford surprises.</p>
                 </div>
               </CardContent>
               <CardFooter>
@@ -159,7 +149,7 @@ const PricingPage = () => {
                   <CardTitle>ELITE TIER</CardTitle>
                   <Shield className="h-5 w-5 text-premium-black" />
                 </div>
-                <CardDescription className="font-medium text-lg">"Defend & Suppress"</CardDescription>
+                <CardDescription className="font-medium text-lg">Full Suppression + Support</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="text-center mb-4">
@@ -168,44 +158,31 @@ const PricingPage = () => {
                 </div>
                 
                 <div>
-                  <h3 className="font-medium mb-2">Who it's for:</h3>
-                  <p className="text-premium-gray mb-4">People in the public eye, high-risk businesses, or anyone with bad press, viral posts, or serious defamation to handle.</p>
+                  <h3 className="font-medium mb-2">Best for:</h3>
+                  <p className="text-premium-gray mb-4">Public figures, high-profile businesses, or anyone under fire.</p>
                 </div>
                 
                 <div>
-                  <h3 className="font-medium mb-2">What you get:</h3>
+                  <h3 className="font-medium mb-2">You'll get:</h3>
                   <p className="text-premium-gray mb-2">Everything in PRO — plus:</p>
                   <ul className="space-y-2">
                     <li className="flex items-start gap-2">
                       <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span>Direct access to our private response team</span>
+                      <span>Hands-on help with removing or burying bad content</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span>Custom content creation to bury negative links (blogs, SEO, videos, PR)</span>
+                      <span>Custom blog/SEO/PR campaigns to push threats off Google</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span>Help removing or reporting harmful content</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span>Suppression strategies and timelines</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span>Dark web/pastebin scanning if needed</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span>Full confidentiality + NDA</span>
+                      <span>1-on-1 support under NDA</span>
                     </li>
                   </ul>
                 </div>
                 
                 <div className="bg-gray-50 p-4 rounded-md">
-                  <h3 className="font-medium mb-2">Good if you're:</h3>
-                  <p className="text-premium-gray">Dealing with active threats or rebuilding after bad press, legal issues, or cancellation.</p>
+                  <p className="text-premium-gray italic">🧨 This is crisis management with intelligence-grade tools.</p>
                 </div>
               </CardContent>
               <CardFooter>
@@ -221,15 +198,27 @@ const PricingPage = () => {
             <CardHeader className="bg-gray-50">
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
-                  <Zap className="h-5 w-5 text-amber-500" /> BONUS OFFER
+                  <Zap className="h-5 w-5 text-amber-500" /> One-Time Scan (Optional)
                 </CardTitle>
               </div>
-              <CardDescription className="font-medium">One-Time "Scan & Report" (£49–£99)</CardDescription>
+              <CardDescription className="font-medium">Want to try it first?</CardDescription>
             </CardHeader>
             <CardContent className="pt-4">
-              <p className="text-premium-gray">
-                A full audit of your name or brand — what's out there, what it means, and how to fix it — no subscription needed.
-              </p>
+              <h3 className="font-bold mb-3">📍 A.R.I.A™ Threat Audit – £49</h3>
+              <ul className="space-y-2 mb-4">
+                <li className="flex items-start gap-2">
+                  <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                  <span>Full scan of your name, brand, or business</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                  <span>AI risk score + recommendations</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Check className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                  <span>Delivered to your inbox in 24–48 hours</span>
+                </li>
+              </ul>
             </CardContent>
             <CardFooter>
               <Button asChild variant="outline" className="w-full">
@@ -237,6 +226,19 @@ const PricingPage = () => {
               </Button>
             </CardFooter>
           </Card>
+          
+          {/* Final CTA */}
+          <div className="text-center mt-16 bg-gray-50 p-8 rounded-xl shadow-sm">
+            <h2 className="text-2xl md:text-3xl font-bold mb-4">Ready to protect your name before it's too late?</h2>
+            <div className="flex flex-col sm:flex-row justify-center gap-4 mt-6">
+              <Button asChild size="lg" className="bg-premium-black hover:bg-premium-black/90">
+                <Link to="/scan">Book a Free Scan</Link>
+              </Button>
+              <Button asChild size="lg" variant="outline" className="border-premium-black text-premium-black hover:bg-premium-black hover:text-white">
+                <Link to="/scan">Schedule 1-on-1 Call</Link>
+              </Button>
+            </div>
+          </div>
         </div>
       </main>
 
