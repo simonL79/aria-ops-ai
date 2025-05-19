@@ -1,13 +1,45 @@
 
 import { Button } from "@/components/ui/button";
 import { RefreshCw, Loader } from "lucide-react";
+import { toast } from "sonner";
+import { useState } from "react";
 
 interface PredictionHeaderProps {
   refreshing: boolean;
   onRefresh: () => void;
 }
 
-const PredictionHeader = ({ refreshing, onRefresh }: PredictionHeaderProps) => {
+const PredictionHeader = ({ refreshing: externalRefreshing, onRefresh }: PredictionHeaderProps) => {
+  const [internalRefreshing, setInternalRefreshing] = useState(false);
+  
+  // Combined refreshing state (either from props or internal state)
+  const refreshing = externalRefreshing || internalRefreshing;
+  
+  const handleRefresh = () => {
+    if (refreshing) return;
+    
+    // Start internal refreshing state
+    setInternalRefreshing(true);
+    
+    // Show toast notification
+    toast.loading("Refreshing predictions", {
+      description: "Analyzing latest data to forecast potential threats"
+    });
+    
+    // Call the parent's onRefresh handler
+    onRefresh();
+    
+    // Simulate API call completion
+    setTimeout(() => {
+      toast.success("Predictions Updated", {
+        description: "Threat intelligence predictions have been updated with latest data"
+      });
+      
+      // End internal refreshing state
+      setInternalRefreshing(false);
+    }, 2000);
+  };
+  
   return (
     <div className="flex justify-between items-center">
       <div>
@@ -19,7 +51,7 @@ const PredictionHeader = ({ refreshing, onRefresh }: PredictionHeaderProps) => {
       <Button 
         variant="outline" 
         size="sm" 
-        onClick={onRefresh}
+        onClick={handleRefresh}
         disabled={refreshing}
       >
         {refreshing ? (

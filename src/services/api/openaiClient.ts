@@ -58,6 +58,11 @@ export const callOpenAI = async (options: OpenAIRequestOptions): Promise<OpenAIR
     // Update last request time in sessionStorage
     sessionStorage.setItem("last_api_request_time", currentTime.toString());
     
+    // Show a notification that we're processing the request
+    const toastId = toast.loading("Processing with AI...", {
+      description: "Analyzing content with OpenAI"
+    });
+    
     // Make the API call with appropriate headers
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -67,6 +72,9 @@ export const callOpenAI = async (options: OpenAIRequestOptions): Promise<OpenAIR
       },
       body: JSON.stringify(options)
     });
+    
+    // Dismiss the loading toast
+    toast.dismiss(toastId);
     
     if (!response.ok) {
       const errorData = await response.json();
@@ -101,6 +109,11 @@ export const callOpenAI = async (options: OpenAIRequestOptions): Promise<OpenAIR
       
       throw new Error(errorMessage);
     }
+    
+    // Show success message for completed API calls
+    toast.success("Analysis complete", { 
+      description: "AI processing completed successfully"
+    });
     
     return await response.json() as OpenAIResponse;
     

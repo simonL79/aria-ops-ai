@@ -5,6 +5,9 @@ import { Loader } from "lucide-react";
 import DateRangePicker from "@/components/dashboard/DateRangePicker";
 import ProfileTestPanel from "@/components/dashboard/ProfileTestPanel";
 import ContentIntelligencePanel from "@/components/dashboard/ContentIntelligencePanel";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { hasOpenAIKey } from "@/services/api/openaiClient";
 
 interface DashboardControlsProps {
   isScanning: boolean;
@@ -19,10 +22,25 @@ const DashboardControls = ({
   onDateRangeChange,
   onSelectTestProfile
 }: DashboardControlsProps) => {
+  const navigate = useNavigate();
   
   // Prevent default behavior when scanning
   const handleScan = (e: React.MouseEvent) => {
     e.preventDefault();
+    
+    // Check if API key is available before scanning
+    if (!hasOpenAIKey()) {
+      toast.error("API Key Required", {
+        description: "Please set your OpenAI API key in the settings panel before scanning",
+        action: {
+          label: "Settings",
+          onClick: () => navigate("/settings")
+        },
+        duration: 7000
+      });
+      return;
+    }
+    
     onScan();
   };
 

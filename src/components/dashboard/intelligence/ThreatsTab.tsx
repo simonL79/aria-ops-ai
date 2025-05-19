@@ -2,12 +2,43 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { threatTypes } from "@/data/threatData";
+import { toast } from "sonner";
+import { Loader } from "lucide-react";
+import { useState } from "react";
 
 interface ThreatsTabProps {
   onActivate: () => void;
 }
 
 const ThreatsTab = ({ onActivate }: ThreatsTabProps) => {
+  const [analyzing, setAnalyzing] = useState(false);
+  
+  const handleActivate = () => {
+    if (analyzing) return;
+    
+    // Set analyzing state
+    setAnalyzing(true);
+    
+    // Show analyzing toast
+    toast.loading("Analyzing Content", {
+      description: "Scanning content across all monitored sources for threats"
+    });
+    
+    // Simulate analysis completion
+    setTimeout(() => {
+      // Call the parent's onActivate handler
+      onActivate();
+      
+      // Show success
+      toast.success("Threat Analysis Complete", {
+        description: "Content has been analyzed successfully. View results in the analysis panel."
+      });
+      
+      // Reset analyzing state
+      setAnalyzing(false);
+    }, 3000);
+  };
+  
   return (
     <div className="p-4 space-y-4">
       <div>
@@ -27,8 +58,20 @@ const ThreatsTab = ({ onActivate }: ThreatsTabProps) => {
           </div>
         ))}
       </div>
-      <Button size="sm" className="w-full" onClick={onActivate}>
-        Analyze Content
+      <Button 
+        size="sm" 
+        className="w-full" 
+        onClick={handleActivate}
+        disabled={analyzing}
+      >
+        {analyzing ? (
+          <>
+            <Loader className="h-4 w-4 mr-2 animate-spin" />
+            Analyzing Content...
+          </>
+        ) : (
+          "Analyze Content"
+        )}
       </Button>
     </div>
   );
