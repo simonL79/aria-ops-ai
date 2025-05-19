@@ -27,6 +27,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const { signOut } = useClerk();
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [authError, setAuthError] = useState<Error | null>(null);
   
   useEffect(() => {
     // Set a maximum timeout for loading state
@@ -34,11 +35,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (isLoading) {
         setIsLoading(false);
         console.warn("Auth loading timed out - forcing completion");
+        
+        // If clerk hasn't loaded by now, we might have an issue with the key or network
+        if (!isLoaded) {
+          const error = new Error("Authentication service failed to load");
+          console.error(error);
+          setAuthError(error);
+          toast.error("Authentication service is not responding. Please refresh the page.");
+        }
       }
     }, 5000); // 5 second maximum loading time
     
     return () => clearTimeout(timeoutId);
-  }, [isLoading]);
+  }, [isLoading, isLoaded]);
   
   useEffect(() => {
     if (isLoaded) {

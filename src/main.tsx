@@ -4,6 +4,7 @@ import { ClerkProvider } from '@clerk/clerk-react'
 import { AuthProvider } from './hooks/useAuth'
 import App from './App.tsx'
 import './index.css'
+import { toast } from 'sonner'
 
 // Get the Clerk publishable key
 // Providing a fallback key for development/testing purposes
@@ -20,6 +21,12 @@ createRoot(document.getElementById("root")!).render(
     publishableKey={CLERK_PUBLISHABLE_KEY}
     appearance={{
       variables: { colorPrimary: '#0f766e' }
+    }}
+    // Add fallback UI if clerk fails to load
+    afterSignInUrl="/dashboard"
+    afterSignUpUrl="/dashboard"
+    onClerkLoaded={(clerk) => {
+      console.log("Clerk loaded successfully");
     }}
   >
     <AuthProvider>

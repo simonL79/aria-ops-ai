@@ -8,9 +8,13 @@ import AuthenticationForm from "@/components/auth/AuthenticationForm";
 import AuthLoadingState from "@/components/auth/AuthLoadingState";
 import SignedInRedirect from "@/components/auth/SignedInRedirect";
 import { toast } from "sonner";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const Authentication = () => {
   const [isReady, setIsReady] = useState(false);
+  const [loadingTimeout, setLoadingTimeout] = useState(false);
   const { isSignedIn, isLoaded, user } = useUser();
   const location = useLocation();
   const from = location.state?.from?.pathname || "/dashboard";
@@ -29,14 +33,53 @@ const Authentication = () => {
     }
   }, [isLoaded, isSignedIn, user]);
   
+  // Set a timeout to show an error if loading takes too long
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!isLoaded) {
+        setLoadingTimeout(true);
+      }
+    }, 7000); // 7 seconds timeout
+    
+    return () => clearTimeout(timer);
+  }, [isLoaded]);
+  
   // Display a toast when the component mounts to help with debugging
   useEffect(() => {
     toast.info("Authentication page loaded");
   }, []);
   
-  // If still loading, show a loading state
-  if (!isLoaded || !isReady) {
+  const handleRefresh = () => {
+    window.location.reload();
+  };
+  
+  // If still loading and hasn't timed out, show a loading state
+  if ((!isLoaded || !isReady) && !loadingTimeout) {
     return <AuthLoadingState />;
+  }
+  
+  // If loading has timed out, show an error message
+  if ((!isLoaded || !isReady) && loadingTimeout) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
+        <AuthHeader />
+        
+        <Alert variant="destructive" className="mb-6 max-w-md">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            Authentication service is not responding. This might be due to an incorrect API key or network issues.
+          </AlertDescription>
+        </Alert>
+        
+        <Button 
+          onClick={handleRefresh}
+          className="flex items-center gap-2"
+        >
+          <RefreshCw className="h-4 w-4" />
+          Refresh Page
+        </Button>
+      </div>
+    );
   }
   
   // If user is already signed in, redirect to dashboard
