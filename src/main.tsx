@@ -1,6 +1,7 @@
 
 import { createRoot } from 'react-dom/client'
 import { ClerkProvider } from '@clerk/clerk-react'
+import { AuthProvider } from './hooks/useAuth'
 import App from './App.tsx'
 import './index.css'
 
@@ -14,6 +15,8 @@ if (!CLERK_PUBLISHABLE_KEY) {
 
 createRoot(document.getElementById("root")!).render(
   <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY}>
-    <App />
+    <AuthProvider>
+      <App />
+    </AuthProvider>
   </ClerkProvider>
 );

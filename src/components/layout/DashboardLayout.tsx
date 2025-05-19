@@ -28,10 +28,10 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               <div className="flex items-center gap-2">
                 {user && (
                   <span className="text-sm hidden md:inline-block">
-                    {user.firstName || user.emailAddresses[0]?.emailAddress}
+                    {user.firstName || user.emailAddresses?.[0]?.emailAddress}
                   </span>
                 )}
-                <UserButton afterSignOutUrl="/signin" />
+                <UserButton afterSignOutUrl="/home" />
               </div>
             </div>
           </div>

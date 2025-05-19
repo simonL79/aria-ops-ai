@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -28,7 +28,7 @@ const Index = () => {
     );
   }
 
-  return isSignedIn ? <Navigate to="/dashboard" replace /> : <Navigate to="/signin" replace />;
+  return isSignedIn ? <Navigate to="/dashboard" replace /> : <Navigate to="/home" replace />;
 };
 
 export default Index;
