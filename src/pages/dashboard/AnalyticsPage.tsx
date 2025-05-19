@@ -122,7 +122,7 @@ const AnalyticsPage = () => {
       <div className="space-y-6">
         <AnalyticsPanel 
           alerts={[...realtimeAlerts, ...filteredAlerts].slice(0, 50)}
-          sourceStats={sources}
+          sourceStats={sourceStats}
           threatVectors={threatVectors}
           reputationHistory={reputationHistory}
           onRefresh={handleRefresh}

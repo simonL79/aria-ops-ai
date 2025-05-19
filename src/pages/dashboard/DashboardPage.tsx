@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import DashboardLayout from "@/components/layout/DashboardLayout";
@@ -6,7 +5,7 @@ import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import DashboardControls from "@/components/dashboard/DashboardControls";
 import DashboardMetrics from "@/components/dashboard/DashboardMetrics";
 import ContentAlerts from "@/components/dashboard/ContentAlerts";
-import RealTimeAlerts from "@/components/dashboard/RealTimeAlerts";
+import RealTimeAlerts from "@/components/dashboard/real-time-alerts";
 import IntelligenceDashboard from "@/components/dashboard/IntelligenceDashboard";
 import DigitalRiskFingerprint from "@/components/dashboard/DigitalRiskFingerprint";
 import ReputationRiskScore from "@/components/dashboard/ReputationRiskScore";
