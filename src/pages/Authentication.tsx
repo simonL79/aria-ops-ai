@@ -12,6 +12,7 @@ import { Shield, LogIn } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 
 const Authentication = () => {
   const [isReady, setIsReady] = useState(false);
@@ -47,28 +48,37 @@ const Authentication = () => {
   // Handle click on the login button
   const handleLoginClick = async () => {
     try {
-      // First, attempt to focus the SignIn component for a better UX
+      toast.info("Opening login form...");
+      
+      // Attempt to focus the SignIn component for a better UX
       const signInElement = document.querySelector('.cl-rootBox');
       if (signInElement) {
         signInElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        
-        // Try to find and focus the first input field
-        const firstInput = signInElement.querySelector('input');
-        if (firstInput) {
-          firstInput.focus();
-        }
       }
       
       console.log("Login button clicked");
       
-      // If we have the signIn object from Clerk, open the sign-in modal as a fallback
+      // Directly open Clerk's sign-in modal
       if (signIn) {
         await signIn.create({
-          identifier: ''  // This opens the sign-in modal with empty identifier
+          identifier: '',  // Empty identifier opens the modal with email field
+          redirectUrl: '/dashboard'
+        }).then(result => {
+          if (result.status === 'complete') {
+            // Login successful - handled by the SignIn component's redirect
+            console.log("Sign in complete");
+          } 
+        }).catch(err => {
+          console.error("Sign in error:", err);
+          toast.error("Login failed. Please try again.");
         });
+      } else {
+        console.error("SignIn object not available");
+        toast.error("Authentication service not available. Please try again later.");
       }
     } catch (error) {
       console.error("Error with login button:", error);
+      toast.error("Something went wrong. Please try again.");
     }
   };
 
