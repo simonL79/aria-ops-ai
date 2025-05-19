@@ -137,7 +137,7 @@ const PricingPage = () => {
               </CardContent>
               <CardFooter>
                 <Button asChild className="w-full">
-                  <Link to="/scan">Get Started</Link>
+                  <Link to="/payment">Get Started</Link>
                 </Button>
               </CardFooter>
             </Card>
