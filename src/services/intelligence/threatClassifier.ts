@@ -3,6 +3,13 @@ import { toast } from "sonner";
 import { ThreatClassifierRequest, ThreatClassificationResult } from "@/types/intelligence";
 import { callOpenAI } from "../api/openaiClient";
 
+// Safely extract JSON from potentially non-JSON text
+const extractJSON = (text: string): string => {
+  // Look for JSON-like pattern starting with { and ending with }
+  const jsonMatch = text.match(/\{[\s\S]*\}/);
+  return jsonMatch ? jsonMatch[0] : text;
+};
+
 // Simplified version of the FastAPI threat classifier
 export const classifyThreat = async (data: ThreatClassifierRequest): Promise<ThreatClassificationResult | null> => {
   try {
@@ -18,6 +25,8 @@ Return JSON with:
 - severity: 1-10
 - recommendation: next step (e.g. auto-response, escalation)
 - ai_reasoning: why you classified it this way
+
+IMPORTANT: Reply ONLY with valid JSON. Do not include any other text, markdown formatting, or explanations outside of the JSON structure.
 `;
 
     const messages = [
@@ -45,10 +54,20 @@ Return JSON with:
       }
       
       try {
-        const parsed = JSON.parse(content);
+        // Extract JSON from potential text and parse it
+        const jsonContent = extractJSON(content);
+        const parsed = JSON.parse(jsonContent);
+        
+        // Validate the response has required fields
+        if (!parsed.category || !parsed.severity || !parsed.recommendation) {
+          console.error("Invalid classification response structure:", parsed);
+          throw new Error("The API response is missing required fields");
+        }
+        
         return parsed as ThreatClassificationResult;
       } catch (parseError) {
         console.error("Failed to parse classification result:", parseError);
+        console.error("Raw content:", content);
         throw new Error("Invalid classification response format");
       }
     } catch (apiError) {
@@ -104,6 +123,8 @@ Return JSON with:
 - severity: 1-10
 - recommendation: next step (e.g. auto-response, human review, escalation, legal team)
 - ai_reasoning: why you classified it this way
+
+IMPORTANT: Reply ONLY with valid JSON. Do not include any other text, markdown formatting, or explanations outside of the JSON structure.
 `;
 
     const messages = [
@@ -130,10 +151,20 @@ Return JSON with:
     }
     
     try {
-      const parsed = JSON.parse(content);
+      // Extract JSON from potential text and parse it
+      const jsonContent = extractJSON(content);
+      const parsed = JSON.parse(jsonContent);
+      
+      // Validate the response has required fields
+      if (!parsed.category || !parsed.severity || !parsed.recommendation) {
+        console.error("Invalid classification response structure:", parsed);
+        throw new Error("The API response is missing required fields");
+      }
+      
       return parsed as ThreatClassificationResult;
     } catch (parseError) {
       console.error("Failed to parse classification result:", parseError);
+      console.error("Raw content:", content);
       throw new Error("Invalid classification response format");
     }
     
