@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useSignIn } from "@clerk/clerk-react";
 import { Mail, Lock, ArrowLeft, Check } from "lucide-react";
@@ -151,12 +150,9 @@ const PasswordResetForm = ({ onBack }: PasswordResetFormProps) => {
                   <FormLabel>Verification Code</FormLabel>
                   <FormControl>
                     <InputOTP 
-                      maxLength={6} 
-                      value={field.value}
-                      onChange={(value) => {
-                        field.onChange(value);
-                        handleOTPChange(value);
-                      }}
+                      maxLength={6}
+                      value={field.value} 
+                      onChange={field.onChange}
                     >
                       <InputOTPGroup>
                         <InputOTPSlot index={0} />
