@@ -7,6 +7,7 @@ import { Bot, X, Maximize2, Minimize2, PanelRightOpen } from "lucide-react";
 import { toast } from "sonner";
 import { callOpenAI } from "@/services/api/openaiClient";
 import { hasOpenAIKey } from "@/services/api/openaiClient";
+import { OpenAIMessage } from "@/services/api/openaiClient";
 
 interface AIAssistantProps {
   clientUpdates?: Array<{
@@ -94,7 +95,7 @@ const AIAssistant = ({ clientUpdates = [], className }: AIAssistantProps) => {
 
     try {
       // Create context for the AI with previous messages
-      const messages = [
+      const messages: OpenAIMessage[] = [
         {
           role: 'system',
           content: `You are ARIA's AI Assistant, an expert in reputation management and brand intelligence.
@@ -104,7 +105,7 @@ const AIAssistant = ({ clientUpdates = [], className }: AIAssistantProps) => {
           If asked about something outside your expertise, kindly redirect to reputation management topics.`
         },
         ...conversation.map(msg => ({
-          role: msg.role,
+          role: msg.role as 'user' | 'assistant',
           content: msg.content
         })),
         {
