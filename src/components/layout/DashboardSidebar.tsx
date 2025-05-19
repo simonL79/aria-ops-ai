@@ -27,7 +27,8 @@ import {
   BarChart4,
   Network,
   LucideIcon,
-  Info
+  Info,
+  User
 } from "lucide-react"
 import { Link } from 'react-router-dom';
 import { useAuth } from "@/hooks/useAuth";
@@ -87,6 +88,11 @@ const navigation: NavItem[] = [
     title: "About",
     href: "/about",
     icon: Info,
+  },
+  {
+    title: "Simon Lindsay",
+    href: "/biography",
+    icon: User,
   },
   {
     title: "Settings",
