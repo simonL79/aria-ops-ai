@@ -66,7 +66,7 @@ const StatusBadge = ({ status }: { status: ScanSubmission['status'] }) => {
     case 'in_review':
       return <Badge variant="secondary">In Review</Badge>;
     case 'complete':
-      return <Badge variant="success" className="bg-green-500 text-white">Complete</Badge>;
+      return <Badge className="bg-green-500 text-white">Complete</Badge>;
     case 'archived':
       return <Badge variant="outline">Archived</Badge>;
     default:

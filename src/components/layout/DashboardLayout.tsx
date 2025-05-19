@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { DashboardSidebar } from '@/components/layout/DashboardSidebar';
+import DashboardSidebar from '@/components/layout/DashboardSidebar';
 import { ReactNode } from 'react';
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { UserButton, useUser } from '@clerk/clerk-react';
