@@ -6,7 +6,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   userId: string | null;
-  user: any; // Add user property to fix the type error
+  user: any;
   signOut: () => Promise<void>;
 }
 
@@ -14,7 +14,7 @@ const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
   isLoading: true,
   userId: null,
-  user: null, // Initialize with null
+  user: null,
   signOut: async () => {}
 });
 
@@ -24,14 +24,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
-    setIsLoading(!isLoaded);
-  }, [isLoaded]);
+    if (isLoaded) {
+      setIsLoading(false);
+      console.log("Auth loaded, user:", user?.id || "not signed in");
+    }
+  }, [isLoaded, user]);
   
   const value = {
     isAuthenticated: isSignedIn || false,
     isLoading,
     userId: user?.id || null,
-    user, // Pass the user object
+    user,
     signOut
   };
   
