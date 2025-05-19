@@ -25,7 +25,7 @@ const SalesFunnelPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-100 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-gray-100 to-gray-50">
       {/* STICKY NAVIGATION */}
       <StickyHeader isScrolled={isScrolled} />
 
