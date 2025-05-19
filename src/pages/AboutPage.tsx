@@ -1,8 +1,9 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Mail, Linkedin, Globe, Heart, ArrowLeft, Shield, Search, Bell } from 'lucide-react';
+import { Mail, Linkedin, Globe, ArrowLeft, Shield, Search, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Logo from '@/components/ui/logo';
 
@@ -169,12 +170,6 @@ const AboutPage = () => {
                 </div>
               </CardContent>
             </Card>
-
-            <div className="text-center text-muted-foreground text-sm mt-4">
-              <p className="flex items-center justify-center gap-1">
-                Made with <Heart className="h-4 w-4 text-red-500" /> by the ARIA Team
-              </p>
-            </div>
           </div>
         </div>
       </main>
