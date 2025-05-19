@@ -26,6 +26,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { callOpenAI } from "@/services/api/openaiClient";
 import { generateAIResponse, ResponseGenerationProps } from "@/services";
 import { ContentThreatType } from "@/types/intelligence";
 import { ResponseToneStyle, AutoResponseSettings } from "@/types/dashboard";

@@ -10,7 +10,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Key, Clock } from "lucide-react";
-import { storeSecureKey, getSecureKey, clearSecureKey } from "@/utils/secureKeyStorage";
+import { storeSecureKey, getSecureKey, clearSecureKey, hasValidKey } from "@/utils/secureKeyStorage";
+import { toast } from "sonner";
 
 const ApiKeyManagement = () => {
   const [apiKey, setApiKey] = useState<string>('');
@@ -32,6 +33,9 @@ const ApiKeyManagement = () => {
       
       setApiKey('');
       setApiKeyMask('•'.repeat(20) + apiKey.slice(-5));
+      toast.success("API key saved successfully");
+    } else {
+      toast.error("Please enter an API key");
     }
   };
   
