@@ -7,7 +7,7 @@ import {
   SignedOut,
   useUser
 } from "@clerk/clerk-react";
-import { Shield } from "lucide-react";
+import { Shield, LogIn } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -64,11 +64,19 @@ const Authentication = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <SignIn 
-            routing="path" 
-            path="/signin"
-            redirectUrl="/dashboard"
-          />
+          <SignedOut>
+            <div className="space-y-6">
+              <Button className="w-full" size="lg">
+                <LogIn className="mr-2 h-4 w-4" />
+                <SignIn routing="path" path="/signin" redirectUrl="/dashboard">
+                  Sign In
+                </SignIn>
+              </Button>
+              <p className="text-center text-sm text-muted-foreground">
+                Admin access only. No new registrations permitted.
+              </p>
+            </div>
+          </SignedOut>
         </CardContent>
       </Card>
 
