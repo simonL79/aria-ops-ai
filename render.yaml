@@ -20,3 +20,6 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      - key: SUPABASE_SECURITY_FIX
+        value: "true"
+        # This environment variable can be used to track if the security fix has been applied
