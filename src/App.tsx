@@ -15,10 +15,13 @@ import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { Toaster } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useEffect, useState } from 'react';
+import AIAssistant from '@/components/assistant/AIAssistant';
+import { useClientChanges } from '@/hooks/useClientChanges';
 
 function App() {
   const { isLoaded } = useUser();
   const [isReady, setIsReady] = useState(false);
+  const clientChanges = useClientChanges();
   
   useEffect(() => {
     if (isLoaded) {
@@ -89,6 +92,11 @@ function App() {
           {/* Catch-all route */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        
+        {/* AI Assistant is global across all protected routes */}
+        <ProtectedRoute>
+          <AIAssistant clientUpdates={clientChanges} />
+        </ProtectedRoute>
       </Router>
       <Toaster position="top-right" />
     </RbacProvider>
