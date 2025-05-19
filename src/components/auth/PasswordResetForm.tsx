@@ -92,6 +92,7 @@ const PasswordResetForm = ({ onBack }: PasswordResetFormProps) => {
   const handleCompletePasswordReset = async (values: CompleteResetFormValues) => {
     setIsLoading(true);
     console.log("Attempting to verify code and set new password");
+    console.log("Code value:", values.code); // Add this for debugging
     
     try {
       if (!signIn || !isSignInLoaded) {
@@ -125,6 +126,11 @@ const PasswordResetForm = ({ onBack }: PasswordResetFormProps) => {
     }
   };
   
+  // Function to handle OTP value change
+  const handleOTPChange = (value: string) => {
+    verifyForm.setValue("code", value, { shouldValidate: true });
+  };
+  
   if (currentStep === "verify") {
     return (
       <div className="space-y-4">
@@ -144,7 +150,14 @@ const PasswordResetForm = ({ onBack }: PasswordResetFormProps) => {
                 <FormItem>
                   <FormLabel>Verification Code</FormLabel>
                   <FormControl>
-                    <InputOTP maxLength={6} {...field}>
+                    <InputOTP 
+                      maxLength={6} 
+                      value={field.value}
+                      onChange={(value) => {
+                        field.onChange(value);
+                        handleOTPChange(value);
+                      }}
+                    >
                       <InputOTPGroup>
                         <InputOTPSlot index={0} />
                         <InputOTPSlot index={1} />
