@@ -24,7 +24,7 @@ const StickyHeader = ({ isScrolled }: StickyHeaderProps) => {
       <div className="container mx-auto px-6">
         <div className="flex items-center justify-between py-4">
           <Link to="/" className="flex items-center">
-            <Logo variant={isScrolled ? "light" : "default"} size="sm" />
+            <Logo variant={isScrolled ? "light" : "default"} size="lg" />
           </Link>
           
           {/* Desktop Navigation */}
