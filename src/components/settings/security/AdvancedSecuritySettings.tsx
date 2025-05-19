@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { 
   Card, 
@@ -9,7 +8,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { RoleProtected } from "@/hooks/useRbac";
+import { Protected } from "@/hooks/useRbac";
 import { Lock } from "lucide-react";
 import { toast } from "sonner";
 
@@ -33,7 +32,7 @@ const AdvancedSecuritySettings = () => {
   };
 
   return (
-    <RoleProtected requiredRoles="admin">
+    <Protected requiredRoles="admin">
       <Card>
         <CardHeader>
           <div className="flex items-center space-x-2">
@@ -64,7 +63,7 @@ const AdvancedSecuritySettings = () => {
           </div>
         </CardContent>
       </Card>
-    </RoleProtected>
+    </Protected>
   );
 };
 

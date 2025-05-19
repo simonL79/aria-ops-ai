@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { 
   Card, 
@@ -9,7 +8,7 @@ import {
 } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { RoleProtected } from "@/hooks/useRbac";
+import { Protected } from "@/hooks/useRbac";
 import { Shield, AlertTriangle } from "lucide-react";
 
 const ContentSafetySettings = () => {
@@ -87,7 +86,7 @@ const ContentSafetySettings = () => {
           />
         </div>
         
-        <RoleProtected requiredRoles={['admin', 'manager']} fallback={
+        <Protected requiredRoles={['admin', 'manager']} fallback={
           <div className="bg-yellow-50 border border-yellow-200 p-3 rounded-md text-sm text-yellow-800 flex items-center space-x-2">
             <AlertTriangle className="h-4 w-4" />
             <span>Additional settings require manager or admin role</span>
@@ -118,7 +117,7 @@ const ContentSafetySettings = () => {
               onCheckedChange={handleToggleEncryption} 
             />
           </div>
-        </RoleProtected>
+        </Protected>
       </CardContent>
     </Card>
   );

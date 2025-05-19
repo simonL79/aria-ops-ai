@@ -40,7 +40,9 @@ const DEMO_CONTENT: SeoContent[] = [
     dateCreated: "2023-05-12",
     publishDate: "2023-05-15",
     url: "https://yourbrand.com/blog/improve-online-reputation",
-    score: 87
+    score: 87,
+    type: "blog",
+    date: "2023-05-12"
   },
   {
     id: "seo-2",
@@ -48,14 +50,18 @@ const DEMO_CONTENT: SeoContent[] = [
     keywords: ["customer feedback", "brand management", "customer satisfaction"],
     status: "optimizing",
     dateCreated: "2023-06-01",
-    score: 72
+    score: 72,
+    type: "article",
+    date: "2023-06-01"
   },
   {
     id: "seo-3",
     title: "Top 10 Reputation Management Strategies for 2023",
     keywords: ["reputation strategies", "reputation management", "brand protection"],
     status: "draft",
-    dateCreated: "2023-06-10"
+    dateCreated: "2023-06-10",
+    type: "press",
+    date: "2023-06-10"
   }
 ];
 
@@ -127,7 +133,9 @@ const SeoSuppressionPipeline = () => {
         title: result.title,
         keywords: keywords.split(",").map(k => k.trim()),
         status: "draft",
-        dateCreated: new Date().toISOString().split("T")[0]
+        dateCreated: new Date().toISOString().split("T")[0],
+        type: "blog",
+        date: new Date().toISOString().split("T")[0]
       };
       
       setSeoContent([newContent, ...seoContent]);

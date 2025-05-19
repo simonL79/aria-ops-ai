@@ -39,9 +39,9 @@ export interface ContentSource {
   lastUpdated: string;
   mentionCount: number;
   sentiment: number;
-  status?: string;
-  positiveRatio: number; // Added missing property
-  total: number; // Added missing property
+  status: "critical" | "good" | "warning"; // Updated to match the required type
+  positiveRatio: number;
+  total: number;
 }
 
 // Define content action interface
@@ -91,7 +91,7 @@ export interface SourceData {
   lastUpdated: string;
   mentionCount: number;
   sentiment: number;
-  status: string;
+  status: "critical" | "good" | "warning";
   positiveRatio: number;
   total: number;
 }

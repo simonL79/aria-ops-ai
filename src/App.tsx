@@ -10,6 +10,7 @@ import { Toaster } from "sonner";
 import { useAuth } from "./hooks/useAuth";
 
 import Index from "./pages/Index";
+import HomePage from "./pages/HomePage";
 import Authentication from "./pages/Authentication";
 import Clients from "./pages/Clients";
 import Monitor from "./pages/Monitor";
@@ -50,6 +51,7 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/home" element={<HomePage />} />
           <Route path="/auth" element={<Authentication />} />
           <Route
             path="/dashboard"
