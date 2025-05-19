@@ -26,11 +26,37 @@ let socket: WebSocket | null = null;
 let reconnectTimer: number | null = null;
 const RECONNECT_DELAY = 5000; // 5 seconds between reconnection attempts
 
+// Audio notification elements
+let notificationSound: HTMLAudioElement | null = null;
+let urgentNotificationSound: HTMLAudioElement | null = null;
+
+// Initialize audio elements (preload them)
+const initializeAudio = () => {
+  try {
+    if (!notificationSound) {
+      notificationSound = new Audio('/notification-sound.mp3');
+      notificationSound.preload = 'auto';
+      notificationSound.volume = 0.3;
+    }
+    
+    if (!urgentNotificationSound) {
+      urgentNotificationSound = new Audio('/urgent-notification.mp3');
+      urgentNotificationSound.preload = 'auto';
+      urgentNotificationSound.volume = 0.5;
+    }
+  } catch (err) {
+    console.log('Audio initialization failed:', err);
+  }
+};
+
 /**
  * Initialize WebSocket connection
  */
 export const initializeWebSocket = (url: string) => {
   try {
+    // Initialize audio for notifications
+    initializeAudio();
+    
     // Close existing connection if any
     if (socket) {
       socket.close();
@@ -84,12 +110,26 @@ export const initializeWebSocket = (url: string) => {
         // Handle message based on type
         switch (message.type) {
           case 'alert':
+            // Play sound for high-severity alerts
+            if (message.data.severity === 'high') {
+              try {
+                urgentNotificationSound?.play().catch(e => console.log('Audio play prevented:', e));
+              } catch (err) {
+                console.log('Audio notification failed:', err);
+              }
+            }
             // Dispatch an alert event
             window.dispatchEvent(new CustomEvent('ws:alert', { 
               detail: message.data 
             }));
             break;
           case 'threat':
+            // Play normal notification for threats
+            try {
+              notificationSound?.play().catch(e => console.log('Audio play prevented:', e));
+            } catch (err) {
+              console.log('Audio notification failed:', err);
+            }
             // Dispatch a threat event
             window.dispatchEvent(new CustomEvent('ws:threat', { 
               detail: message.data 

@@ -1,47 +1,62 @@
 
-import { ContentAlert } from "@/types/dashboard";
+import React from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Clock, X, CheckCircle2 } from "lucide-react";
+import { ContentAlert } from "@/types/dashboard";
 
 interface AlertItemProps {
   alert: ContentAlert;
-  handleDismiss: (alertId: string) => void;
-  handleMarkAsRead: (alertId: string) => void;
+  isLast: boolean;
+  onDismiss: (id: string) => void;
+  onMarkAsRead: (id: string) => void;
   onViewDetail?: (alert: ContentAlert) => void;
 }
 
-export const getSeverityColor = (severity: string) => {
-  switch (severity) {
-    case 'high': return 'bg-red-500 text-white';
-    case 'medium': return 'bg-yellow-500 text-white';
-    case 'low': return 'bg-green-500 text-white';
-    default: return 'bg-gray-500 text-white';
-  }
-};
-
-const AlertItem = ({
-  alert,
-  handleDismiss,
-  handleMarkAsRead,
-  onViewDetail
-}: AlertItemProps) => {
+const AlertItem: React.FC<AlertItemProps> = ({ 
+  alert, 
+  isLast, 
+  onDismiss, 
+  onMarkAsRead,
+  onViewDetail 
+}) => {
+  const getSeverityColor = (severity: string) => {
+    switch (severity) {
+      case 'high': return 'bg-red-500 text-white';
+      case 'medium': return 'bg-yellow-500 text-white';
+      case 'low': return 'bg-green-500 text-white';
+      default: return 'bg-gray-500 text-white';
+    }
+  };
+  
+  const isHighSeverity = alert.severity === 'high';
+  
   return (
-    <div className={`p-4 ${alert.status === 'new' ? 'bg-blue-50' : ''}`}>
+    <div 
+      className={`p-4 ${alert.status === 'new' ? 'bg-blue-50' : ''} 
+      ${isHighSeverity && alert.status === 'new' ? 'border-l-4 border-red-500' : ''} 
+      ${!isLast ? 'border-b' : ''}`}
+    >
       <div className="flex justify-between items-start">
         <div>
           <div className="flex items-center gap-2">
             <Badge className={getSeverityColor(alert.severity)}>
               {alert.severity.toUpperCase()}
+              {isHighSeverity && alert.status === 'new' && " ⚠️"}
             </Badge>
             <span className="font-medium">{alert.platform}</span>
             {alert.status === 'new' && (
-              <Badge variant="outline" className="bg-blue-100 border-blue-200 text-blue-800">
+              <Badge variant="outline" className={isHighSeverity ? 
+                "bg-red-100 border-red-200 text-red-800 animate-pulse" : 
+                "bg-blue-100 border-blue-200 text-blue-800"
+              }>
                 New
               </Badge>
             )}
           </div>
-          <p className="mt-2">{alert.content}</p>
+          <p className={`mt-2 ${isHighSeverity && alert.status === 'new' ? 'font-medium' : ''}`}>
+            {alert.content}
+          </p>
           <div className="flex items-center gap-1 text-xs text-muted-foreground mt-2">
             <Clock className="h-3 w-3" />
             <span>{alert.date}</span>
@@ -51,7 +66,7 @@ const AlertItem = ({
           <Button 
             size="sm" 
             variant="ghost" 
-            onClick={() => handleDismiss(alert.id)}
+            onClick={() => onDismiss(alert.id)}
             className="h-7 w-7 p-0"
           >
             <X className="h-4 w-4" />
@@ -59,7 +74,7 @@ const AlertItem = ({
           <Button 
             size="sm" 
             variant="ghost" 
-            onClick={() => handleMarkAsRead(alert.id)}
+            onClick={() => onMarkAsRead(alert.id)}
             className="h-7 w-7 p-0"
           >
             <CheckCircle2 className="h-4 w-4" />
@@ -69,11 +84,11 @@ const AlertItem = ({
       <div className="mt-2 flex justify-end">
         <Button 
           size="sm" 
-          variant="outline" 
-          className="text-xs h-7"
-          onClick={() => onViewDetail && onViewDetail(alert)}
+          variant={isHighSeverity && alert.status === 'new' ? "destructive" : "outline"}
+          className={`text-xs h-7 ${isHighSeverity && alert.status === 'new' ? 'animate-pulse' : ''}`}
+          onClick={() => onViewDetail?.(alert)}
         >
-          Analyze & Respond
+          {isHighSeverity && alert.status === 'new' ? 'Respond Now' : 'Analyze & Respond'}
         </Button>
       </div>
     </div>
