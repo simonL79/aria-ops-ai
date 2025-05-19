@@ -66,14 +66,10 @@ const Authentication = () => {
         <CardContent>
           <SignedOut>
             <div className="space-y-6">
-              <Button className="w-full" size="lg" asChild>
-                <SignIn routing="path" path="/signin" redirectUrl="/dashboard">
-                  <div className="flex items-center justify-center w-full">
-                    <LogIn className="mr-2 h-4 w-4" />
-                    <span>Sign In</span>
-                  </div>
-                </SignIn>
-              </Button>
+              {/* SignIn component doesn't accept children, so we use it directly */}
+              <SignIn routing="path" path="/signin" redirectUrl="/dashboard" />
+              
+              {/* Add a text note below to indicate this is admin-only */}
               <p className="text-center text-sm text-muted-foreground">
                 Admin access only. No new registrations permitted.
               </p>
