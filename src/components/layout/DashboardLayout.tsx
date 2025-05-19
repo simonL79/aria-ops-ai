@@ -1,6 +1,7 @@
 
 import { ReactNode } from 'react';
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { UserButton, useUser } from '@clerk/clerk-react';
 import DashboardSidebar from './DashboardSidebar';
 
 interface DashboardLayoutProps {
@@ -8,6 +9,8 @@ interface DashboardLayoutProps {
 }
 
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
+  const { user } = useUser();
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-gray-50">
@@ -17,8 +20,18 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             <div>
               <SidebarTrigger />
             </div>
-            <div className="text-sm text-muted-foreground">
-              <span className="font-medium text-foreground">Last scan:</span> Today, 10:30 AM
+            <div className="flex items-center gap-4">
+              <div className="text-sm text-muted-foreground">
+                <span className="font-medium text-foreground">Last scan:</span> Today, 10:30 AM
+              </div>
+              <div className="flex items-center gap-2">
+                {user && (
+                  <span className="text-sm hidden md:inline-block">
+                    {user.firstName || user.emailAddresses[0]?.emailAddress}
+                  </span>
+                )}
+                <UserButton afterSignOutUrl="/signin" />
+              </div>
             </div>
           </div>
           {children}
