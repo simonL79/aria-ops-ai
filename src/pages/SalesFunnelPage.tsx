@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Check, Bug, Scale, Search, Menu, X, Twitter, Facebook, Linkedin, MessageSquare, Youtube, Star, Database, Shield, TikTok } from 'lucide-react';
+import { ArrowRight, Check, Bug, Scale, Search, Menu, X, Twitter, Facebook, Linkedin, MessageSquare, Youtube, Star, Database, Shield } from 'lucide-react';
 import Logo from '@/components/ui/logo';
 import { useIsMobile } from "@/hooks/use-mobile";
 import { 
@@ -256,9 +255,10 @@ const SalesFunnelPage = () => {
               </div>
             </div>
             
+            {/* Replacing TikTok with MessageSquare as a generic social icon for TikTok */}
             <div className="bg-white p-6 rounded-lg shadow-md flex items-start gap-4 transform hover:-translate-y-1 transition-transform">
               <div className="shrink-0 bg-gray-50 rounded-full p-3">
-                <TikTok className="h-8 w-8 text-premium-silver" />
+                <MessageSquare className="h-8 w-8 text-premium-silver" />
               </div>
               <div>
                 <h4 className="font-bold text-premium-darkGray mb-2">TikTok</h4>
