@@ -92,7 +92,7 @@ const PasswordResetForm = ({ onBack }: PasswordResetFormProps) => {
   const handleCompletePasswordReset = async (values: CompleteResetFormValues) => {
     setIsLoading(true);
     console.log("Attempting to verify code and set new password");
-    console.log("Code value:", values.code); // Add this for debugging
+    console.log("Code value:", values.code); // Debugging log
     
     try {
       if (!signIn || !isSignInLoaded) {
@@ -210,7 +210,10 @@ const PasswordResetForm = ({ onBack }: PasswordResetFormProps) => {
                   Resetting Password...
                 </span>
               ) : (
-                <span>Reset Password</span>
+                <span className="flex items-center">
+                  <Check className="mr-2 h-4 w-4" />
+                  Reset Password
+                </span>
               )}
             </Button>
             
