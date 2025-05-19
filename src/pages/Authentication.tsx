@@ -46,39 +46,26 @@ const Authentication = () => {
   }
 
   // Handle click on the login button
-  const handleLoginClick = async () => {
+  const handleSignInWithEmail = async (email: string, password: string) => {
     try {
-      toast.info("Opening login form...");
-      
-      // Attempt to focus the SignIn component for a better UX
-      const signInElement = document.querySelector('.cl-rootBox');
-      if (signInElement) {
-        signInElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      if (!signIn) {
+        toast.error("Authentication service not available");
+        return;
       }
       
-      console.log("Login button clicked");
+      const result = await signIn.create({
+        identifier: email,
+        password,
+      });
       
-      // Directly open Clerk's sign-in modal
-      if (signIn) {
-        await signIn.create({
-          identifier: '',  // Empty identifier opens the modal with email field
-          redirectUrl: '/dashboard'
-        }).then(result => {
-          if (result.status === 'complete') {
-            // Login successful - handled by the SignIn component's redirect
-            console.log("Sign in complete");
-          } 
-        }).catch(err => {
-          console.error("Sign in error:", err);
-          toast.error("Login failed. Please try again.");
-        });
-      } else {
-        console.error("SignIn object not available");
-        toast.error("Authentication service not available. Please try again later.");
+      if (result.status === "complete") {
+        await setActive({ session: result.createdSessionId });
+        toast.success("Login successful");
+        window.location.href = "/dashboard";
       }
     } catch (error) {
-      console.error("Error with login button:", error);
-      toast.error("Something went wrong. Please try again.");
+      console.error("Error signing in:", error);
+      toast.error("Login failed. Please check your credentials and try again.");
     }
   };
 
@@ -106,26 +93,15 @@ const Authentication = () => {
         <CardContent>
           <SignedOut>
             <div className="space-y-6">
-              {/* SignIn component doesn't accept children, so we use it directly */}
-              <SignIn routing="path" path="/signin" redirectUrl="/dashboard" />
+              {/* Use standard SignIn component with clear redirectUrl */}
+              <SignIn 
+                path="/signin"
+                routing="path" 
+                signUpUrl="/signin"
+                afterSignInUrl="/dashboard"
+                afterSignUpUrl="/dashboard"
+              />
               
-              {/* Add explicit login button for better visibility */}
-              <div className="flex flex-col items-center">
-                <Button 
-                  className="w-full" 
-                  variant="default" 
-                  size="lg"
-                  onClick={handleLoginClick}
-                >
-                  <LogIn className="mr-2" />
-                  Login to Dashboard
-                </Button>
-                <p className="text-center text-sm text-muted-foreground mt-2">
-                  Use the form above or click this button to login
-                </p>
-              </div>
-              
-              {/* Add a text note below to indicate this is admin-only */}
               <p className="text-center text-sm text-muted-foreground">
                 Admin access only. No new registrations permitted.
               </p>
