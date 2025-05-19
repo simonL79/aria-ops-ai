@@ -22,6 +22,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 const DashboardPage = React.lazy(() => import("./pages/dashboard/DashboardPage"));
 const CommandCenterPage = React.lazy(() => import("./pages/dashboard/CommandCenterPage"));
 const MentionsPage = React.lazy(() => import("./pages/dashboard/MentionsPage"));
+const AnalyticsPage = React.lazy(() => import("./pages/dashboard/AnalyticsPage"));
 
 const queryClient = new QueryClient();
 
@@ -77,6 +78,16 @@ function App() {
               <ProtectedRoute>
                 <React.Suspense fallback={<div>Loading...</div>}>
                   <CommandCenterPage />
+                </React.Suspense>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/analytics"
+            element={
+              <ProtectedRoute>
+                <React.Suspense fallback={<div>Loading...</div>}>
+                  <AnalyticsPage />
                 </React.Suspense>
               </ProtectedRoute>
             }
