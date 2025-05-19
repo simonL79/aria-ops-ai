@@ -21,7 +21,6 @@ const Footer = () => {
         </div>
         <div className="border-t border-premium-darkGray pt-8 mt-8">
           <p>&copy; 2025 A.R.I.A™ — AI Reputation Intelligence Agent</p>
-          <p className="mt-2">Built with integrity by Simon Lindsay</p>
         </div>
       </div>
     </footer>

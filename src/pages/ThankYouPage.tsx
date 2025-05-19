@@ -7,7 +7,7 @@ import Logo from '@/components/ui/logo';
 
 const ThankYouPage = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-100 to-white flex flex-col">
+    <div className="min-h-screen bg-gradient-to-b from-premium-silver/20 to-white flex flex-col">
       {/* Simple header */}
       <header className="bg-premium-black text-white py-4">
         <div className="container mx-auto px-6">

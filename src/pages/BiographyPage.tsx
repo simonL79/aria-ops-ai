@@ -9,7 +9,7 @@ import Logo from '@/components/ui/logo';
 
 const BiographyPage = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-100 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-premium-silver/20 to-white">
       <header className="py-6 bg-white border-b border-premium-silver shadow-sm">
         <div className="container mx-auto px-6">
           <div className="flex justify-between items-center">
@@ -110,7 +110,7 @@ const BiographyPage = () => {
 
       <footer className="bg-premium-black text-premium-silver py-10 text-center text-sm mt-16">
         <p>&copy; 2025 A.R.I.A™ — AI Reputation Intelligence Agent</p>
-        <p>Built with integrity by Simon Lindsay | <Link to="/about" className="underline hover:text-white">About</Link> | <Link to="/" className="underline hover:text-white">Home</Link></p>
+        <p><Link to="/about" className="underline hover:text-white">About</Link> | <Link to="/" className="underline hover:text-white">Home</Link></p>
       </footer>
     </div>
   );

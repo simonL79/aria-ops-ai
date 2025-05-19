@@ -11,7 +11,7 @@ const DisclaimerPage = () => {
   });
 
   return (
-    <div className="min-h-screen bg-premium-silver/10">
+    <div className="min-h-screen bg-premium-silver/20">
       {/* Sticky Navigation */}
       <StickyHeader isScrolled={true} />
 
