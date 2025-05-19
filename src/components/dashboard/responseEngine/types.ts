@@ -6,7 +6,7 @@ import { ResponseToneStyle } from "@/types/dashboard";
 export interface ResponseTemplateProps {
   type: string;
   description: string;
-  icon: React.ReactNode;
+  icon: string;
   template: string;
 }
 

@@ -1,6 +1,4 @@
 
-import React from "react";
-import { MessageSquareText, FileCheck, ThumbsUp, UserRound } from "lucide-react";
 import { ResponseTemplateProps, LanguageOption } from "./types";
 import { ResponseToneStyle } from "@/types/dashboard";
 
@@ -9,19 +7,19 @@ export const responseTemplates: ResponseTemplateProps[] = [
   {
     type: "empathetic",
     description: "Show understanding while addressing concerns",
-    icon: <UserRound className="h-4 w-4" />,
+    icon: "UserRound",
     template: "We understand your concerns about [ISSUE]. Our team is committed to resolving this by [ACTION]. Please reach out directly to [CONTACT] so we can make this right for you."
   },
   {
     type: "correction",
     description: "Correct misinformation with facts",
-    icon: <FileCheck className="h-4 w-4" />,
+    icon: "FileCheck",
     template: "Thank you for bringing this to our attention. We'd like to clarify that [CORRECT INFORMATION]. Here's our evidence: [LINK/FACTS]. Please let us know if you have any other questions."
   },
   {
     type: "apology",
     description: "Take responsibility with genuine apology",
-    icon: <ThumbsUp className="h-4 w-4" />,
+    icon: "ThumbsUp",
     template: "We sincerely apologize for [ISSUE]. This doesn't reflect our standards, and we're taking immediate steps to [SOLUTION]. We'd appreciate the opportunity to make this right for you."
   }
 ];
