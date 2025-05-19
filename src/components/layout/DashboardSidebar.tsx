@@ -43,7 +43,7 @@ const DashboardSidebar = () => {
         <SidebarGroup>
           <div className="py-2 px-4 mb-2 flex items-center">
             <Shield className="h-6 w-6 text-primary mr-2" />
-            <span className="font-bold text-xl">RepShield</span>
+            <span className="font-bold text-xl">A.R.I.A.</span>
           </div>
           <div className="space-y-1 mt-2">
             <NavItem href="/" icon={Home}>
