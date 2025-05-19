@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   Sheet,
@@ -33,6 +32,7 @@ import {
 import { Link } from 'react-router-dom';
 import { useAuth } from "@/hooks/useAuth";
 import { useClerk, UserButton } from '@clerk/clerk-react';
+import Logo from '@/components/ui/logo';
 
 // Define NavItem interface
 export interface NavItem {
@@ -115,7 +115,7 @@ export const DashboardSidebar = () => {
       </SheetTrigger>
       <SheetContent className="w-full sm:w-64 border-right p-0 pt-6">
         <SheetHeader className="pl-6 pr-6 pb-4">
-          <SheetTitle>ARIA</SheetTitle>
+          <Logo size="md" className="mx-auto mb-2" />
           <SheetDescription>
             Threat Intelligence
           </SheetDescription>

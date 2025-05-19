@@ -68,7 +68,7 @@ export default {
 					DEFAULT: '#0f4c81', // deep blue
 					light: '#3a7ca5',
 					dark: '#0a2f4e',
-					accent: '#16a3b7' // teal accent
+					accent: '#8B5CF6' // purple accent (was teal before)
 				},
 				alert: {
 					negative: '#e53e3e', // red for negative content

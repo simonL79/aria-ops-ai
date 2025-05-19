@@ -3,8 +3,9 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Mail, Linkedin, Globe, Heart, Shield, ArrowLeft } from 'lucide-react';
+import { Mail, Linkedin, Globe, Heart, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import Logo from '@/components/ui/logo';
 
 const AboutPage = () => {
   return (
@@ -13,8 +14,7 @@ const AboutPage = () => {
         <div className="container mx-auto px-6">
           <div className="flex justify-between items-center">
             <Link to="/" className="flex items-center gap-2">
-              <Shield className="h-6 w-6 text-primary" />
-              <span className="font-bold text-xl">A.R.I.A™</span>
+              <Logo size="md" />
             </Link>
             <Button asChild variant="ghost" className="flex items-center gap-2">
               <Link to="/">

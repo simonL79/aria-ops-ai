@@ -1,8 +1,8 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { Shield, ArrowRight, Check } from 'lucide-react';
+import { ArrowRight, Check } from 'lucide-react';
+import Logo from '@/components/ui/logo';
 
 const SalesFunnelPage = () => {
   return (
@@ -11,9 +11,8 @@ const SalesFunnelPage = () => {
       <section className="hero bg-gradient-to-r from-black to-gray-800 text-white py-28 relative overflow-hidden">
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1557682250-33bd709cbe85?q=80&w=1000')] bg-cover bg-center opacity-10"></div>
         <div className="container mx-auto px-6 relative z-10">
-          <div className="flex items-center justify-center gap-2 mb-8">
-            <Shield className="h-8 w-8 text-primary animate-pulse" />
-            <h2 className="text-xl font-bold">A.R.I.A™</h2>
+          <div className="flex flex-col items-center justify-center mb-8">
+            <Logo variant="light" size="lg" className="mb-4" />
           </div>
           <h1 className="text-4xl md:text-6xl font-bold mb-8 max-w-4xl mx-auto leading-tight">
             Your Reputation Is Under <span className="text-brand-accent">Surveillance</span>
@@ -166,8 +165,7 @@ const SalesFunnelPage = () => {
         <div className="container mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-center mb-8">
             <div className="flex items-center mb-6 md:mb-0">
-              <Shield className="h-6 w-6 mr-2" />
-              <h2 className="text-lg font-bold text-white">A.R.I.A™</h2>
+              <Logo variant="light" size="md" />
             </div>
             <div className="flex space-x-8">
               <Link to="/about" className="text-gray-400 hover:text-white transition-colors">About</Link>
