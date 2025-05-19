@@ -5,7 +5,8 @@ import {
   SignIn,
   SignedIn, 
   SignedOut,
-  useUser
+  useUser,
+  useSignIn
 } from "@clerk/clerk-react";
 import { Shield, LogIn } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +16,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 const Authentication = () => {
   const [isReady, setIsReady] = useState(false);
   const { isSignedIn, isLoaded } = useUser();
+  const { signIn, setActive } = useSignIn();
   
   useEffect(() => {
     if (isLoaded) {
@@ -41,6 +43,20 @@ const Authentication = () => {
   if (isSignedIn) {
     return <Navigate to="/dashboard" replace />;
   }
+
+  // Handle click on the login button
+  const handleLoginClick = () => {
+    // This will focus the SignIn component and scroll to it
+    const signInElement = document.querySelector('.cl-rootBox');
+    if (signInElement) {
+      signInElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // Try to find and focus the first input field
+      const firstInput = signInElement.querySelector('input');
+      if (firstInput) {
+        setTimeout(() => firstInput.focus(), 500);
+      }
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
@@ -71,7 +87,12 @@ const Authentication = () => {
               
               {/* Add explicit login button for better visibility */}
               <div className="flex flex-col items-center">
-                <Button className="w-full" variant="default" size="lg">
+                <Button 
+                  className="w-full" 
+                  variant="default" 
+                  size="lg"
+                  onClick={handleLoginClick}
+                >
                   <LogIn className="mr-2" />
                   Login to Dashboard
                 </Button>
