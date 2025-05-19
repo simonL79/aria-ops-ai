@@ -13,7 +13,7 @@ const SalesFunnelPage = () => {
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1557682250-33bd709cbe85?q=80&w=1000')] bg-cover bg-center opacity-5"></div>
         <div className="container mx-auto px-6 relative z-10">
           <div className="flex flex-col items-center justify-center mb-8">
-            <Logo variant="light" size="lg" className="mb-4" />
+            <Logo variant="light" size="xl" className="mb-4" />
           </div>
           <h1 className="text-4xl md:text-6xl font-bold mb-8 max-w-4xl mx-auto leading-tight text-shadow-lg">
             Your Reputation Is Under <span className="text-premium-silver">Surveillance</span>

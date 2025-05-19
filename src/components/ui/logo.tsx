@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 
 interface LogoProps {
   variant?: 'default' | 'light' | 'dark';
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
 }
 
@@ -24,6 +24,11 @@ const Logo = ({ variant = 'default', size = 'md', className }: LogoProps) => {
       container: 'gap-2.5',
       logo: 'h-16',
       subtitle: 'text-xs leading-tight'
+    },
+    xl: {
+      container: 'gap-3',
+      logo: 'h-32',
+      subtitle: 'text-sm leading-tight'
     }
   }[size];
   
