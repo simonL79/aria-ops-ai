@@ -1,70 +1,65 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { UserPlus, Users, ArrowLeft } from "lucide-react";
+import { UserPlus, Users, ArrowLeft, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Client } from "@/types/clients";
 import ClientList from "@/components/clients/ClientList";
 import ClientFormWrapper from "@/components/clients/ClientFormWrapper";
-
-// Mock data for demonstration
-const mockClients: Client[] = [
-  {
-    id: "1",
-    name: "Acme Corporation",
-    industry: "Technology",
-    contactName: "John Doe",
-    contactEmail: "john@acme.com",
-    website: "https://acme.example.com"
-  },
-  {
-    id: "2",
-    name: "Globex Industries",
-    industry: "Manufacturing",
-    contactName: "Jane Smith",
-    contactEmail: "jane@globex.com",
-    website: "https://globex.example.com"
-  }
-];
+import { fetchClients, addClient, updateClient } from "@/services/clientsService";
 
 const Clients = () => {
-  const [clients, setClients] = useState<Client[]>(mockClients);
+  const [clients, setClients] = useState<Client[]>([]);
   const [activeClient, setActiveClient] = useState<Client | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("list");
   
-  const handleAddClient = (clientData: any) => {
-    const newClient = {
-      id: `${clients.length + 1}`,
-      name: clientData.name,
-      industry: clientData.industry,
-      contactName: clientData.contactName,
-      contactEmail: clientData.contactEmail,
-      website: clientData.website,
-      notes: clientData.notes,
-      keywordTargets: clientData.keywordTargets
+  // Fetch clients on component mount
+  useEffect(() => {
+    const loadClients = async () => {
+      setIsLoading(true);
+      const clientsData = await fetchClients();
+      setClients(clientsData);
+      setIsLoading(false);
     };
     
-    setClients([...clients, newClient]);
-    toast.success(`Client ${clientData.name} added successfully`);
+    loadClients();
+  }, []);
+
+  const handleAddClient = async (clientData: Omit<Client, 'id'>) => {
+    const newClient = await addClient(clientData);
+    
+    if (newClient) {
+      setClients(prev => [...prev, newClient]);
+      toast.success(`Client ${clientData.name} added successfully`);
+      setActiveTab("list");
+    }
   };
 
   const handleEditClient = (client: Client) => {
     setActiveClient(client);
     setIsEditMode(true);
+    setActiveTab("add");
   };
 
-  const handleUpdateClient = (clientData: any) => {
-    const updatedClients = clients.map(client => 
-      client.id === activeClient?.id ? { ...client, ...clientData } : client
-    );
+  const handleUpdateClient = async (clientData: Partial<Client>) => {
+    if (!activeClient) return;
     
-    setClients(updatedClients);
-    setActiveClient(null);
-    setIsEditMode(false);
-    toast.success(`Client ${clientData.name} updated successfully`);
+    const updatedClient = await updateClient(activeClient.id, clientData);
+    
+    if (updatedClient) {
+      setClients(prev => 
+        prev.map(client => client.id === activeClient.id ? updatedClient : client)
+      );
+      setActiveClient(null);
+      setIsEditMode(false);
+      setActiveTab("list");
+      toast.success(`Client ${clientData.name} updated successfully`);
+    }
   };
 
   const handleRunIntelligence = (client: Client) => {
@@ -78,6 +73,15 @@ const Clients = () => {
     toast.info(`${client.name} selected`, {
       description: "View client details and run intelligence operations"
     });
+  };
+  
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    // Reset edit mode when switching to list tab
+    if (value === "list" && isEditMode) {
+      setIsEditMode(false);
+      setActiveClient(null);
+    }
   };
 
   return (
@@ -97,7 +101,7 @@ const Clients = () => {
         </Link>
       </div>
       
-      <Tabs defaultValue="list">
+      <Tabs value={activeTab} onValueChange={handleTabChange}>
         <TabsList className="grid w-full grid-cols-2 mb-6">
           <TabsTrigger value="list">
             <Users className="mr-2 h-4 w-4" />
@@ -105,17 +109,24 @@ const Clients = () => {
           </TabsTrigger>
           <TabsTrigger value="add">
             <UserPlus className="mr-2 h-4 w-4" />
-            Add New Client
+            {isEditMode ? "Edit Client" : "Add New Client"}
           </TabsTrigger>
         </TabsList>
         
         <TabsContent value="list">
-          <ClientList 
-            clients={clients}
-            onSelectClient={handleSelectClient}
-            onEditClient={handleEditClient}
-            onRunIntelligence={handleRunIntelligence}
-          />
+          {isLoading ? (
+            <div className="flex justify-center items-center p-12">
+              <Loader2 className="h-8 w-8 animate-spin mr-2" />
+              <span>Loading clients...</span>
+            </div>
+          ) : (
+            <ClientList 
+              clients={clients}
+              onSelectClient={handleSelectClient}
+              onEditClient={handleEditClient}
+              onRunIntelligence={handleRunIntelligence}
+            />
+          )}
         </TabsContent>
         
         <TabsContent value="add">

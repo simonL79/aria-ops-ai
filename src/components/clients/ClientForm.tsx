@@ -14,8 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import { UserPlus } from "lucide-react";
+import { Loader2, UserPlus, Save } from "lucide-react";
 
 const clientSchema = z.object({
   name: z.string().min(1, "Client name is required"),
@@ -32,9 +31,10 @@ type ClientFormValues = z.infer<typeof clientSchema>;
 interface ClientFormProps {
   onSubmit?: (data: ClientFormValues) => void;
   defaultValues?: Partial<ClientFormValues>;
+  isEditMode?: boolean;
 }
 
-export const ClientForm = ({ onSubmit, defaultValues = {} }: ClientFormProps) => {
+export const ClientForm = ({ onSubmit, defaultValues = {}, isEditMode = false }: ClientFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<ClientFormValues>({
@@ -54,17 +54,10 @@ export const ClientForm = ({ onSubmit, defaultValues = {} }: ClientFormProps) =>
     setIsSubmitting(true);
     try {
       if (onSubmit) {
-        onSubmit(data);
-      } else {
-        // Default behavior if no onSubmit handler is provided
-        console.log("Client data:", data);
-        toast.success("Client information saved", {
-          description: `${data.name} has been added to your clients.`
-        });
+        await onSubmit(data);
       }
     } catch (error) {
-      toast.error("Failed to save client information");
-      console.error(error);
+      console.error("Error submitting client form:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -177,7 +170,15 @@ export const ClientForm = ({ onSubmit, defaultValues = {} }: ClientFormProps) =>
 
         <Button type="submit" className="w-full" disabled={isSubmitting}>
           {isSubmitting ? (
-            "Saving..."
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Saving...
+            </>
+          ) : isEditMode ? (
+            <>
+              <Save className="mr-2 h-4 w-4" />
+              Update Client Details
+            </>
           ) : (
             <>
               <UserPlus className="mr-2 h-4 w-4" />
