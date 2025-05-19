@@ -13,6 +13,16 @@ interface MonitoringStatus {
   sources: number;
 }
 
+// Define platforms we can monitor
+export type MonitorablePlatform = 
+  'twitter' | 
+  'reddit' | 
+  'google_news' | 
+  'discord' | 
+  'tiktok' | 
+  'telegram' | 
+  'whatsapp';
+
 // Mock monitoring status
 let monitoringStatus: MonitoringStatus = {
   isActive: false,
@@ -65,4 +75,15 @@ export const runMonitoringScan = async () => {
       resolve();
     }, 2500);
   });
+};
+
+// Get platforms that we're currently monitoring
+export const getMonitoredPlatforms = (): MonitorablePlatform[] => {
+  const activeSources = getAvailableSources().filter(s => s.active);
+  return activeSources.map(s => s.id as MonitorablePlatform);
+};
+
+// Check if a specific platform is being monitored
+export const isPlatformMonitored = (platform: MonitorablePlatform): boolean => {
+  return getMonitoredPlatforms().includes(platform);
 };

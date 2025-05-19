@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect, useRef, FormEvent } from 'react';
 import { Avatar } from "@/components/ui/avatar";
 import { AvatarImage, AvatarFallback } from "@radix-ui/react-avatar"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card"
+import { Card, CardHeader, CardContent, CardFooter, CardTitle } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Send } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast"

@@ -42,6 +42,50 @@ const availableSources: ThreatSource[] = [
     }
   },
   {
+    id: 'discord',
+    name: 'Discord',
+    type: 'social',
+    platform: 'Discord',
+    active: false,
+    credentials: {
+      type: 'bot',
+      status: 'invalid'
+    }
+  },
+  {
+    id: 'tiktok',
+    name: 'TikTok',
+    type: 'social',
+    platform: 'TikTok',
+    active: false,
+    credentials: {
+      type: 'api',
+      status: 'invalid'
+    }
+  },
+  {
+    id: 'telegram',
+    name: 'Telegram',
+    type: 'social',
+    platform: 'Telegram',
+    active: false,
+    credentials: {
+      type: 'bot',
+      status: 'invalid'
+    }
+  },
+  {
+    id: 'whatsapp',
+    name: 'WhatsApp',
+    type: 'messaging',
+    platform: 'WhatsApp',
+    active: false,
+    credentials: {
+      type: 'business',
+      status: 'invalid'
+    }
+  },
+  {
     id: 'yelp',
     name: 'Yelp',
     type: 'review',
