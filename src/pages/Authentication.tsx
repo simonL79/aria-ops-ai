@@ -69,6 +69,18 @@ const Authentication = () => {
     }
   };
 
+  // Login button handler
+  const handleLoginClick = () => {
+    toast.info("Please use the form below to sign in");
+    // Focus the first input field in the SignIn component
+    setTimeout(() => {
+      const input = document.querySelector('.cl-formButtonPrimary, .cl-internal-1v2gdho');
+      if (input instanceof HTMLElement) {
+        input.focus();
+      }
+    }, 100);
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
       <div className="mb-8 flex flex-col items-center">
@@ -93,6 +105,17 @@ const Authentication = () => {
         <CardContent>
           <SignedOut>
             <div className="space-y-6">
+              {/* Prominent Login button at the top */}
+              <Button 
+                className="w-full" 
+                variant="default" 
+                size="lg"
+                onClick={handleLoginClick}
+              >
+                <LogIn className="mr-2" />
+                Login to Dashboard
+              </Button>
+              
               {/* Use standard SignIn component with clear redirectUrl */}
               <SignIn 
                 path="/signin"
