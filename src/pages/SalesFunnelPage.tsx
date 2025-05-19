@@ -42,21 +42,21 @@ const SalesFunnelPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 max-w-6xl mx-auto">
             <div className="premium-card p-8 rounded-xl transform hover:-translate-y-1">
               <div className="bg-red-50 p-4 rounded-full w-16 h-16 mx-auto mb-6 flex items-center justify-center">
-                <Bug className="h-8 w-8 text-red-500" />
+                <Bug className="h-8 w-8 text-premium-silver" />
               </div>
               <h3 className="text-xl font-bold mb-3 text-premium-darkGray">Viral Complaints</h3>
               <p className="text-premium-gray">Flagged & suppressed before they can spread</p>
             </div>
             <div className="premium-card p-8 rounded-xl transform hover:-translate-y-1">
               <div className="bg-blue-50 p-4 rounded-full w-16 h-16 mx-auto mb-6 flex items-center justify-center">
-                <Scale className="h-8 w-8 text-blue-600" />
+                <Scale className="h-8 w-8 text-premium-silver" />
               </div>
               <h3 className="text-xl font-bold mb-3 text-premium-darkGray">Legal Threats</h3>
               <p className="text-premium-gray">Monitored & classified to reduce risk</p>
             </div>
             <div className="premium-card p-8 rounded-xl transform hover:-translate-y-1">
               <div className="bg-green-50 p-4 rounded-full w-16 h-16 mx-auto mb-6 flex items-center justify-center">
-                <Search className="h-8 w-8 text-green-600" />
+                <Search className="h-8 w-8 text-premium-silver" />
               </div>
               <h3 className="text-xl font-bold mb-3 text-premium-darkGray">Google Results</h3>
               <p className="text-premium-gray">Buried & replaced with positive content</p>
