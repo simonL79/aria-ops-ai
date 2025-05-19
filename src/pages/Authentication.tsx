@@ -45,16 +45,30 @@ const Authentication = () => {
   }
 
   // Handle click on the login button
-  const handleLoginClick = () => {
-    // This will focus the SignIn component and scroll to it
-    const signInElement = document.querySelector('.cl-rootBox');
-    if (signInElement) {
-      signInElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      // Try to find and focus the first input field
-      const firstInput = signInElement.querySelector('input');
-      if (firstInput) {
-        setTimeout(() => firstInput.focus(), 500);
+  const handleLoginClick = async () => {
+    try {
+      // First, attempt to focus the SignIn component for a better UX
+      const signInElement = document.querySelector('.cl-rootBox');
+      if (signInElement) {
+        signInElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        // Try to find and focus the first input field
+        const firstInput = signInElement.querySelector('input');
+        if (firstInput) {
+          firstInput.focus();
+        }
       }
+      
+      console.log("Login button clicked");
+      
+      // If we have the signIn object from Clerk, open the sign-in modal as a fallback
+      if (signIn) {
+        await signIn.create({
+          identifier: ''  // This opens the sign-in modal with empty identifier
+        });
+      }
+    } catch (error) {
+      console.error("Error with login button:", error);
     }
   };
 
