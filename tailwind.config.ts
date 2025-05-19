@@ -63,17 +63,25 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Custom reputation management theme colors
+				// Updated premium theme colors using gray, silver, and black
 				brand: {
-					DEFAULT: '#0f4c81', // deep blue
-					light: '#3a7ca5',
-					dark: '#0a2f4e',
-					accent: '#8B5CF6' // purple accent (was teal before)
+					DEFAULT: '#222222', // dark gray/nearly black
+					light: '#888888', // medium gray
+					dark: '#000000', // pure black
+					accent: '#9F9EA1' // silver gray
 				},
 				alert: {
 					negative: '#e53e3e', // red for negative content
 					warning: '#dd6b20', // orange for questionable content
 					positive: '#38a169' // green for positive content
+				},
+				// Premium UI palette
+				premium: {
+					black: '#000000',
+					darkGray: '#222222',
+					gray: '#888888',
+					silver: '#9F9EA1',
+					lightSilver: '#C8C8C9'
 				}
 			},
 			borderRadius: {

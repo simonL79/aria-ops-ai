@@ -11,21 +11,21 @@ interface LogoProps {
 
 const Logo = ({ variant = 'default', size = 'md', className }: LogoProps) => {
   const textColor = {
-    default: 'text-foreground',
+    default: 'text-premium-black',
     light: 'text-white',
-    dark: 'text-gray-900'
+    dark: 'text-premium-black'
   }[variant];
 
   const shieldColor = {
-    default: 'text-primary',
+    default: 'text-premium-black',
     light: 'text-white',
-    dark: 'text-gray-900'
+    dark: 'text-premium-black'
   }[variant];
 
   const shieldSecondaryColor = {
-    default: 'text-brand-accent',
-    light: 'text-brand-accent',
-    dark: 'text-brand-accent'
+    default: 'text-premium-silver',
+    light: 'text-premium-silver',
+    dark: 'text-premium-silver'
   }[variant];
 
   const logoSize = {
