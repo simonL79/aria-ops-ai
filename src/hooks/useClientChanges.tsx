@@ -9,7 +9,7 @@ interface ClientChange {
   timestamp: Date;
   severity?: number;
   platform?: string;
-  read?: boolean;
+  read: boolean;  // Making this required, not optional
 }
 
 export const useClientChanges = () => {
@@ -26,7 +26,8 @@ export const useClientChanges = () => {
         description: 'Reputation score decreased by 7 points in the last 24 hours due to negative mentions on Twitter.',
         timestamp: new Date(),
         severity: 6,
-        platform: 'Twitter'
+        platform: 'Twitter',
+        read: false  // Initialize with false
       }
     ];
     

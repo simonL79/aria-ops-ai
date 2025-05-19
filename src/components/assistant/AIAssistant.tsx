@@ -3,7 +3,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Bot, X, Maximize2, Minimize2, PanelRightOpen, Bell, AlertTriangle, Clock } from "lucide-react";
+import { 
+  Bot, X, Maximize2, Minimize2, PanelRightOpen, Bell, AlertTriangle, 
+  Clock, FileText, Shield, MessageSquare, Volume 
+} from "lucide-react";
 import { toast } from "sonner";
 import { callOpenAI } from "@/services/api/openaiClient";
 import { hasOpenAIKey } from "@/services/api/openaiClient";
@@ -13,6 +16,7 @@ import { ThreatClassificationResult } from "@/types/intelligence";
 import { Badge } from "@/components/ui/badge";
 import { classifyThreat } from "@/services/intelligence/threatClassifier";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
 
 interface ClientUpdate {
   id: string;
@@ -20,11 +24,31 @@ interface ClientUpdate {
   changeType: string;
   description: string;
   timestamp: Date;
+  severity?: number;
+  platform?: string;
+  read: boolean; // This is now required to match our hook
 }
 
 interface AIAssistantProps {
   clientUpdates?: ClientUpdate[];
   className?: string;
+}
+
+interface TimelineEntry {
+  date: string;
+  client: string;
+  sentiment: number;
+  change: number;
+}
+
+interface LogbookEntry {
+  id: string;
+  clientName: string;
+  date: string;
+  threatType: string;
+  impact: 'high' | 'medium' | 'low';
+  status: 'resolved' | 'ongoing' | 'monitoring';
+  summary: string;
 }
 
 const AIAssistant = ({ clientUpdates = [], className }: AIAssistantProps) => {
@@ -38,8 +62,57 @@ const AIAssistant = ({ clientUpdates = [], className }: AIAssistantProps) => {
   const [alerts, setAlerts] = useState<ClientUpdate[]>([]);
   const clientChangesList = useClientChanges();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [voiceCommandActive, setVoiceCommandActive] = useState(false);
+  const [escalationCriteria, setEscalationCriteria] = useState({
+    severity: 8,
+    clients: ['LuxeSkin', 'TechGiant Inc'],
+    threatTypes: ['legal', 'virality']
+  });
   
-  const [conversation, setConversation] = useState<Array<{ role: 'user' | 'assistant', content: string }>>([
+  // Timeline data
+  const [timelineData, setTimelineData] = useState<TimelineEntry[]>([
+    { date: '5/12', client: 'LuxeSkin', sentiment: 72, change: -3 },
+    { date: '5/13', client: 'LuxeSkin', sentiment: 68, change: -4 },
+    { date: '5/14', client: 'LuxeSkin', sentiment: 65, change: -3 },
+    { date: '5/15', client: 'LuxeSkin', sentiment: 69, change: 4 },
+    { date: '5/16', client: 'LuxeSkin', sentiment: 73, change: 4 },
+    { date: '5/17', client: 'LuxeSkin', sentiment: 65, change: -8 },
+    { date: '5/18', client: 'LuxeSkin', sentiment: 60, change: -5 },
+    { date: '5/19', client: 'LuxeSkin', sentiment: 58, change: -2 },
+  ]);
+
+  // Threat logbook entries
+  const [logbookEntries, setLogbookEntries] = useState<LogbookEntry[]>([
+    {
+      id: 'log-1',
+      clientName: 'LuxeSkin',
+      date: '2025-05-17',
+      threatType: 'Product Criticism',
+      impact: 'high',
+      status: 'ongoing',
+      summary: 'Reddit post claiming chemical burns from eye cream product gained significant traction. PR team notified and customer outreach initiated.'
+    },
+    {
+      id: 'log-2',
+      clientName: 'TechGiant Inc',
+      date: '2025-05-15',
+      threatType: 'Data Privacy',
+      impact: 'medium',
+      status: 'resolved',
+      summary: 'News article alleging improper data handling. Legal team provided statement clarifying compliance with regulations.'
+    },
+    {
+      id: 'log-3',
+      clientName: 'Global Foods',
+      date: '2025-05-10',
+      threatType: 'Product Quality',
+      impact: 'low',
+      status: 'monitoring',
+      summary: 'Isolated complaints about packaging quality on Twitter. Quality control team investigating.'
+    }
+  ]);
+  
+  const [conversation, setConversation] = useState<Array<{ role: 'user' | 'assistant' | 'system', content: string }>>([
     {
       role: 'assistant',
       content: 'Hello! I\'m your ARIA assistant. I can help you understand client profile changes, monitor reputation threats, and provide insights on brand intelligence. How can I assist you today?'
@@ -62,6 +135,9 @@ const AIAssistant = ({ clientUpdates = [], className }: AIAssistantProps) => {
         // Process the most recent update for the assistant
         const latestUpdate = newChanges[0];
         
+        // Check for escalation criteria
+        const needsEscalation = checkEscalationCriteria(latestUpdate);
+        
         // Analyze the change for potential threat
         analyzeClientChange(latestUpdate);
         
@@ -76,9 +152,57 @@ const AIAssistant = ({ clientUpdates = [], className }: AIAssistantProps) => {
             }
           }
         });
+        
+        // Show escalation notification if needed
+        if (needsEscalation) {
+          toast.error(`URGENT: High-risk alert for ${latestUpdate.clientName}`, {
+            description: "This alert matches your escalation criteria and requires immediate attention.",
+            duration: 8000,
+          });
+          
+          // Add to logbook if high severity
+          if ((latestUpdate.severity || 0) >= 8) {
+            addToLogbook(latestUpdate);
+          }
+        }
       }
     }
   }, [clientChangesList]);
+
+  // Check if an alert meets escalation criteria
+  const checkEscalationCriteria = (alert: ClientUpdate): boolean => {
+    if ((alert.severity || 0) >= escalationCriteria.severity) {
+      return true;
+    }
+    
+    if (escalationCriteria.clients.includes(alert.clientName)) {
+      return true;
+    }
+    
+    // Check if description contains any threat types
+    for (const threatType of escalationCriteria.threatTypes) {
+      if (alert.description.toLowerCase().includes(threatType.toLowerCase())) {
+        return true;
+      }
+    }
+    
+    return false;
+  };
+  
+  // Add significant events to the threat logbook
+  const addToLogbook = (alert: ClientUpdate) => {
+    const newEntry: LogbookEntry = {
+      id: `log-${Date.now()}`,
+      clientName: alert.clientName,
+      date: new Date().toISOString().split('T')[0],
+      threatType: alert.changeType || 'General Threat',
+      impact: (alert.severity || 0) >= 8 ? 'high' : (alert.severity || 0) >= 5 ? 'medium' : 'low',
+      status: 'ongoing',
+      summary: alert.description
+    };
+    
+    setLogbookEntries(prev => [newEntry, ...prev]);
+  };
 
   // Scroll to bottom of messages when conversation updates
   useEffect(() => {
@@ -97,9 +221,24 @@ const AIAssistant = ({ clientUpdates = [], className }: AIAssistantProps) => {
       // Classify the threat using our existing threat classifier
       const threatData = await classifyThreat({
         content: clientChange.description,
-        platform: "internal",
+        platform: clientChange.platform || "internal",
         brand: clientChange.clientName
       });
+      
+      // Update timeline data with new sentiment based on severity
+      const newSentimentValue = 100 - ((threatData?.severity || 0) * 10);
+      const prevSentiment = timelineData.length > 0 
+        ? timelineData[0].sentiment 
+        : newSentimentValue;
+      
+      const newTimelineEntry: TimelineEntry = {
+        date: new Date().toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' }).replace('/', '/'),
+        client: clientChange.clientName,
+        sentiment: newSentimentValue,
+        change: newSentimentValue - prevSentiment
+      };
+      
+      setTimelineData(prev => [newTimelineEntry, ...prev].slice(0, 8));
       
       if (threatData && threatData.severity > 5) {
         // For high severity threats, add an assistant message
@@ -125,6 +264,19 @@ const AIAssistant = ({ clientUpdates = [], className }: AIAssistantProps) => {
             content: threatMessage
           }
         ]);
+        
+        // AI suggestion
+        if (threatData.severity >= 7) {
+          setTimeout(() => {
+            setConversation(prev => [
+              ...prev,
+              {
+                role: 'assistant',
+                content: `I suggest posting a response to this ${clientChange.clientName} issue. Would you like me to draft a response template?`
+              }
+            ]);
+          }, 3000);
+        }
       } else {
         // For regular updates, add simpler message
         const updateMessage = `
@@ -185,6 +337,33 @@ const AIAssistant = ({ clientUpdates = [], className }: AIAssistantProps) => {
     );
   };
 
+  const toggleVoiceCommand = () => {
+    setVoiceCommandActive(!voiceCommandActive);
+    
+    if (!voiceCommandActive) {
+      toast.info("Voice command activated", {
+        description: "You can now speak commands to the assistant"
+      });
+      
+      // Simulating voice command recognition (would be implemented with Web Speech API)
+      setTimeout(() => {
+        setQuery("Show me all high severity threats today");
+        
+        // Simulate processing the voice command
+        setTimeout(() => {
+          handleSubmit(new Event('submit') as React.FormEvent);
+          setVoiceCommandActive(false);
+          
+          toast.success("Voice command processed", {
+            description: "Showing high severity threats"
+          });
+        }, 1500);
+      }, 2000);
+    } else {
+      toast.info("Voice command deactivated");
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -214,7 +393,7 @@ const AIAssistant = ({ clientUpdates = [], className }: AIAssistantProps) => {
           If asked about something outside your expertise, kindly redirect to reputation management topics.`
         },
         ...conversation.map(msg => ({
-          role: msg.role as 'user' | 'assistant',
+          role: msg.role,
           content: msg.content
         })),
         {
@@ -313,6 +492,15 @@ const AIAssistant = ({ clientUpdates = [], className }: AIAssistantProps) => {
             <CardTitle className="text-lg">ARIA Assistant</CardTitle>
           </div>
           <div className="flex items-center gap-1">
+            <Button 
+              size="icon" 
+              variant="ghost" 
+              className={`h-7 w-7 ${voiceCommandActive ? 'bg-primary/20' : ''}`} 
+              onClick={toggleVoiceCommand}
+              title="Voice Command"
+            >
+              {voiceCommandActive ? <Volume className="h-4 w-4 text-primary" /> : <Volume className="h-4 w-4" />}
+            </Button>
             <Button size="icon" variant="ghost" className="h-7 w-7" onClick={toggleMinimize}>
               <Minimize2 className="h-4 w-4" />
             </Button>
@@ -322,15 +510,27 @@ const AIAssistant = ({ clientUpdates = [], className }: AIAssistantProps) => {
           </div>
         </div>
         <Tabs value={activeTab} onValueChange={handleTabChange}>
-          <TabsList className="grid grid-cols-2">
-            <TabsTrigger value="assistant">Assistant</TabsTrigger>
+          <TabsList className="grid grid-cols-4">
+            <TabsTrigger value="assistant">
+              <MessageSquare className="h-4 w-4 mr-1" />
+              <span className="hidden sm:inline">Assistant</span>
+            </TabsTrigger>
             <TabsTrigger value="alerts" className="relative">
-              Alerts
+              <Bell className="h-4 w-4 mr-1" />
+              <span className="hidden sm:inline">Alerts</span>
               {notificationCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full h-5 w-5 flex items-center justify-center text-xs">
                   {notificationCount}
                 </span>
               )}
+            </TabsTrigger>
+            <TabsTrigger value="timeline">
+              <Clock className="h-4 w-4 mr-1" />
+              <span className="hidden sm:inline">Timeline</span>
+            </TabsTrigger>
+            <TabsTrigger value="logbook">
+              <FileText className="h-4 w-4 mr-1" />
+              <span className="hidden sm:inline">Logbook</span>
             </TabsTrigger>
           </TabsList>
         </Tabs>
@@ -409,7 +609,7 @@ const AIAssistant = ({ clientUpdates = [], className }: AIAssistantProps) => {
                     onClick={() => markAlertAsRead(alert.id)}
                   >
                     <div className="flex justify-between items-start mb-1">
-                      <Badge className="bg-blue-500">
+                      <Badge className={alert.severity ? getSeverityColor(alert.severity) : "bg-blue-500"}>
                         {alert.changeType}
                       </Badge>
                       <div className="text-xs text-muted-foreground flex items-center">
@@ -419,7 +619,27 @@ const AIAssistant = ({ clientUpdates = [], className }: AIAssistantProps) => {
                     </div>
                     <p className="font-medium text-sm">{alert.clientName}</p>
                     <p className="text-sm truncate text-muted-foreground">{alert.description}</p>
-                    <div className="flex justify-end mt-1">
+                    <div className="flex justify-end mt-1 gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="h-7 text-xs"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // Add AI suggestion
+                          setConversation(prev => [
+                            ...prev,
+                            { 
+                              role: 'assistant', 
+                              content: `Would you like to post a response to this ${alert.clientName} issue?` 
+                            }
+                          ]);
+                          // Switch to assistant tab
+                          setActiveTab('assistant');
+                        }}
+                      >
+                        Suggest Response
+                      </Button>
                       <Button 
                         variant="ghost" 
                         size="sm" 
@@ -441,6 +661,65 @@ const AIAssistant = ({ clientUpdates = [], className }: AIAssistantProps) => {
                         Analyze
                       </Button>
                     </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="timeline" className="m-0">
+          <div className="p-4">
+            <CardDescription className="mb-3">Sentiment trends over time</CardDescription>
+            <div className="space-y-2">
+              {timelineData.map((entry, index) => (
+                <div key={index} className="space-y-1">
+                  <div className="flex justify-between text-xs">
+                    <span>{entry.date} - {entry.client}</span>
+                    <span className={entry.change > 0 ? 'text-green-500' : entry.change < 0 ? 'text-red-500' : ''}>
+                      {entry.change > 0 ? '+' : ''}{entry.change}
+                    </span>
+                  </div>
+                  <Progress value={entry.sentiment} className="h-2" />
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>Sentiment: {entry.sentiment}/100</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="logbook" className="m-0">
+          <div className="px-4 py-2">
+            <CardDescription>AI-curated history of major incidents</CardDescription>
+          </div>
+          <div className="max-h-72 overflow-y-auto">
+            {logbookEntries.length === 0 ? (
+              <div className="p-4 text-center text-muted-foreground">
+                <p>No major incidents recorded</p>
+              </div>
+            ) : (
+              <div className="divide-y">
+                {logbookEntries.map((entry) => (
+                  <div key={entry.id} className="p-3">
+                    <div className="flex justify-between items-start mb-1">
+                      <Badge className={
+                        entry.impact === 'high' ? 'bg-red-500' : 
+                        entry.impact === 'medium' ? 'bg-orange-500' : 
+                        'bg-blue-500'
+                      }>
+                        {entry.threatType}
+                      </Badge>
+                      <Badge variant="outline" className="text-xs">
+                        {entry.status}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <p className="font-medium text-sm">{entry.clientName}</p>
+                      <span className="text-xs text-muted-foreground">{entry.date}</span>
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-1">{entry.summary}</p>
                   </div>
                 ))}
               </div>
