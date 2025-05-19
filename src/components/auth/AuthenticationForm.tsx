@@ -21,7 +21,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 const AuthenticationForm = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn, setActive } = useSignIn();
+  const { signIn, setActive, isLoaded } = useSignIn();
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || "/dashboard";
@@ -38,10 +38,12 @@ const AuthenticationForm = () => {
   // Direct email signin implementation
   const handleSignInWithEmail = async (values: LoginFormValues) => {
     setIsLoading(true);
+    console.log("Attempting to sign in with:", values.email);
     
     try {
-      if (!signIn) {
+      if (!signIn || !isLoaded) {
         toast.error("Authentication service not available");
+        console.error("SignIn not available:", { signIn, isLoaded });
         setIsLoading(false);
         return;
       }
@@ -51,6 +53,8 @@ const AuthenticationForm = () => {
         identifier: values.email,
         password: values.password,
       });
+      
+      console.log("Sign in result:", result);
       
       if (result.status === "complete") {
         await setActive({ session: result.createdSessionId });

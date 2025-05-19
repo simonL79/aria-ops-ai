@@ -12,10 +12,16 @@ const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || 'pk_
 // Display a warning if using the fallback key
 if (!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY) {
   console.warn('Using fallback Clerk Publishable Key. For production, set the VITE_CLERK_PUBLISHABLE_KEY environment variable.');
+  console.log('Current key being used:', CLERK_PUBLISHABLE_KEY);
 }
 
 createRoot(document.getElementById("root")!).render(
-  <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY}>
+  <ClerkProvider 
+    publishableKey={CLERK_PUBLISHABLE_KEY}
+    appearance={{
+      variables: { colorPrimary: '#0f766e' }
+    }}
+  >
     <AuthProvider>
       <App />
     </AuthProvider>

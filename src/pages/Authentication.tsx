@@ -7,14 +7,18 @@ import AuthHeader from "@/components/auth/AuthHeader";
 import AuthenticationForm from "@/components/auth/AuthenticationForm";
 import AuthLoadingState from "@/components/auth/AuthLoadingState";
 import SignedInRedirect from "@/components/auth/SignedInRedirect";
+import { toast } from "sonner";
 
 const Authentication = () => {
   const [isReady, setIsReady] = useState(false);
-  const { isSignedIn, isLoaded } = useUser();
+  const { isSignedIn, isLoaded, user } = useUser();
   const location = useLocation();
   const from = location.state?.from?.pathname || "/dashboard";
   
   useEffect(() => {
+    // Log auth state for debugging
+    console.log("Auth state:", { isLoaded, isSignedIn, userId: user?.id });
+    
     if (isLoaded) {
       // Small timeout to prevent flash
       const timer = setTimeout(() => {
@@ -23,7 +27,12 @@ const Authentication = () => {
       
       return () => clearTimeout(timer);
     }
-  }, [isLoaded]);
+  }, [isLoaded, isSignedIn, user]);
+  
+  // Display a toast when the component mounts to help with debugging
+  useEffect(() => {
+    toast.info("Authentication page loaded");
+  }, []);
   
   // If still loading, show a loading state
   if (!isLoaded || !isReady) {
