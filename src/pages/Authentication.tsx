@@ -66,10 +66,12 @@ const Authentication = () => {
         <CardContent>
           <SignedOut>
             <div className="space-y-6">
-              <Button className="w-full" size="lg">
-                <LogIn className="mr-2 h-4 w-4" />
+              <Button className="w-full" size="lg" asChild>
                 <SignIn routing="path" path="/signin" redirectUrl="/dashboard">
-                  Sign In
+                  <div className="flex items-center justify-center w-full">
+                    <LogIn className="mr-2 h-4 w-4" />
+                    <span>Sign In</span>
+                  </div>
                 </SignIn>
               </Button>
               <p className="text-center text-sm text-muted-foreground">
