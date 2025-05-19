@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useClerk, useUser } from '@clerk/clerk-react';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -28,13 +29,28 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   
   useEffect(() => {
+    // Set a maximum timeout for loading state
+    const timeoutId = setTimeout(() => {
+      if (isLoading) {
+        setIsLoading(false);
+        console.warn("Auth loading timed out - forcing completion");
+      }
+    }, 5000); // 5 second maximum loading time
+    
+    return () => clearTimeout(timeoutId);
+  }, [isLoading]);
+  
+  useEffect(() => {
     if (isLoaded) {
       setIsLoading(false);
       console.log("Auth loaded, user:", user?.id || "not signed in");
       
       // Check if user is admin when signed in
       if (isSignedIn && user?.id) {
-        checkAdminRole(user.id);
+        checkAdminRole(user.id).catch(err => {
+          console.error("Error checking admin role:", err);
+          setIsAdmin(false);
+        });
       } else {
         setIsAdmin(false);
       }
@@ -59,13 +75,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
   
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast.success("Signed out successfully");
+    } catch (error) {
+      console.error("Error signing out:", error);
+      toast.error("Error signing out");
+    }
+  };
+  
   const value = {
     isAuthenticated: isSignedIn || false,
     isLoading,
     userId: user?.id || null,
     user,
     isAdmin,
-    signOut
+    signOut: handleSignOut
   };
   
   return (

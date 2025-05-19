@@ -1,5 +1,4 @@
-
-import React from "react";
+import React, { Suspense } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -9,6 +8,7 @@ import {
 import { Toaster } from "sonner";
 import { useAuth } from "./hooks/useAuth";
 import { RbacProvider, Role, Protected } from "./hooks/useRbac";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import SalesFunnelPage from "./pages/SalesFunnelPage";
 import AboutPage from "./pages/AboutPage";
@@ -39,7 +39,12 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="h-screen w-screen flex flex-col items-center justify-center">
+        <Skeleton className="h-12 w-64 mb-4" />
+        <Skeleton className="h-4 w-48" />
+      </div>
+    );
   }
 
   if (!isAuthenticated) {
@@ -56,7 +61,12 @@ function App() {
   const userRoles: Role[] = isAuthenticated ? ['user', 'admin', 'security'] : ['user'];
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="h-screen w-screen flex flex-col items-center justify-center">
+        <Skeleton className="h-12 w-64 mb-4" />
+        <Skeleton className="h-4 w-48" />
+      </div>
+    );
   }
 
   return (
@@ -84,7 +94,14 @@ function App() {
               path="/dashboard"
               element={
                 <ProtectedRoute>
-                  <DashboardPage />
+                  <Suspense fallback={
+                    <div className="h-screen w-screen flex flex-col items-center justify-center">
+                      <Skeleton className="h-12 w-64 mb-4" />
+                      <Skeleton className="h-4 w-48" />
+                    </div>
+                  }>
+                    <DashboardPage />
+                  </Suspense>
                 </ProtectedRoute>
               }
             />
