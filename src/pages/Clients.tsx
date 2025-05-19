@@ -1,24 +1,14 @@
 
 import { useState } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
-import ClientForm from "@/components/clients/ClientForm";
-import { Button } from "@/components/ui/button";
-import { Search, UserPlus, Users } from "lucide-react";
+import { UserPlus, Users } from "lucide-react";
 import { toast } from "sonner";
+import { Client } from "@/types/clients";
+import ClientList from "@/components/clients/ClientList";
+import ClientFormWrapper from "@/components/clients/ClientFormWrapper";
 
 // Mock data for demonstration
-interface Client {
-  id: string;
-  name: string;
-  industry: string;
-  contactName: string;
-  contactEmail: string;
-  website?: string;
-}
-
 const mockClients: Client[] = [
   {
     id: "1",
@@ -40,13 +30,8 @@ const mockClients: Client[] = [
 
 const Clients = () => {
   const [clients, setClients] = useState<Client[]>(mockClients);
-  const [searchQuery, setSearchQuery] = useState("");
   const [activeClient, setActiveClient] = useState<Client | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
-  
-  const filteredClients = clients.filter(
-    client => client.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
   
   const handleAddClient = (clientData: any) => {
     const newClient = {
@@ -55,7 +40,9 @@ const Clients = () => {
       industry: clientData.industry,
       contactName: clientData.contactName,
       contactEmail: clientData.contactEmail,
-      website: clientData.website
+      website: clientData.website,
+      notes: clientData.notes,
+      keywordTargets: clientData.keywordTargets
     };
     
     setClients([...clients, newClient]);
@@ -65,6 +52,17 @@ const Clients = () => {
   const handleEditClient = (client: Client) => {
     setActiveClient(client);
     setIsEditMode(true);
+  };
+
+  const handleUpdateClient = (clientData: any) => {
+    const updatedClients = clients.map(client => 
+      client.id === activeClient?.id ? { ...client, ...clientData } : client
+    );
+    
+    setClients(updatedClients);
+    setActiveClient(null);
+    setIsEditMode(false);
+    toast.success(`Client ${clientData.name} updated successfully`);
   };
 
   const handleRunIntelligence = (client: Client) => {
@@ -102,70 +100,24 @@ const Clients = () => {
         </TabsList>
         
         <TabsContent value="list">
-          <Card>
-            <CardHeader>
-              <CardTitle>Your Clients</CardTitle>
-              <CardDescription>
-                View and manage your client records
-              </CardDescription>
-              <div className="mt-4 relative">
-                <Search className="absolute top-2.5 left-3 h-4 w-4 text-muted-foreground" />
-                <Input 
-                  placeholder="Search clients..." 
-                  className="pl-10"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {filteredClients.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    No clients found. Add your first client to get started.
-                  </div>
-                ) : (
-                  filteredClients.map((client) => (
-                    <div key={client.id} className="border p-4 rounded-md hover:bg-muted/50 transition-colors">
-                      <div className="flex justify-between items-start mb-2">
-                        <h3 className="font-medium">{client.name}</h3>
-                        <span className="text-sm bg-muted px-2 py-1 rounded-md">{client.industry}</span>
-                      </div>
-                      <div className="text-sm text-muted-foreground mb-1">
-                        Contact: {client.contactName} ({client.contactEmail})
-                      </div>
-                      {client.website && (
-                        <div className="text-sm text-blue-600">
-                          <a href={client.website} target="_blank" rel="noopener noreferrer">
-                            {client.website}
-                          </a>
-                        </div>
-                      )}
-                      <div className="flex gap-2 mt-3">
-                        <Button size="sm" variant="outline" onClick={() => handleSelectClient(client)}>View</Button>
-                        <Button size="sm" variant="outline" onClick={() => handleEditClient(client)}>Edit</Button>
-                        <Button size="sm" variant="outline" onClick={() => handleRunIntelligence(client)}>Run Intelligence</Button>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </CardContent>
-          </Card>
+          <ClientList 
+            clients={clients}
+            onSelectClient={handleSelectClient}
+            onEditClient={handleEditClient}
+            onRunIntelligence={handleRunIntelligence}
+          />
         </TabsContent>
         
         <TabsContent value="add">
-          <Card>
-            <CardHeader>
-              <CardTitle>Add New Client</CardTitle>
-              <CardDescription>
-                Enter client details for monitoring and analysis
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ClientForm onSubmit={handleAddClient} />
-            </CardContent>
-          </Card>
+          {isEditMode && activeClient ? (
+            <ClientFormWrapper 
+              onSubmit={handleUpdateClient} 
+              defaultValues={activeClient}
+              isEditMode={true}
+            />
+          ) : (
+            <ClientFormWrapper onSubmit={handleAddClient} />
+          )}
         </TabsContent>
       </Tabs>
     </DashboardLayout>
