@@ -14,6 +14,7 @@ import Index from "./pages/Index";
 import HomePage from "./pages/HomePage";
 import AboutPage from "./pages/AboutPage";
 import BiographyPage from "./pages/BiographyPage";
+import SalesFunnelPage from "./pages/SalesFunnelPage";
 import Authentication from "./pages/Authentication";
 import Clients from "./pages/Clients";
 import Monitor from "./pages/Monitor";
@@ -62,6 +63,7 @@ function App() {
             <Route path="/home" element={<HomePage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/biography" element={<BiographyPage />} />
+            <Route path="/sales" element={<SalesFunnelPage />} />
             <Route path="/auth" element={<Authentication />} />
             <Route
               path="/dashboard"
