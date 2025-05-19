@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Badge } from "@/components/ui/badge";
-import { Scale } from "lucide-react";
+import { Scale, AlertCircle, ShieldCheck } from "lucide-react";
 import { ThreatClassificationResult } from "@/types/intelligence";
 import ThreatSeverityIndicator from "./ThreatSeverityIndicator";
 
@@ -22,6 +22,22 @@ const ThreatClassificationResultDisplay = ({ result }: ThreatClassificationResul
     }
   };
 
+  const getRecommendationIcon = (recommendation?: string) => {
+    if (!recommendation) return <AlertCircle className="h-4 w-4" />;
+    
+    const lower = recommendation.toLowerCase();
+    
+    if (lower.includes('escalate') || lower.includes('legal')) {
+      return <AlertCircle className="h-4 w-4 text-red-600" />;
+    }
+    
+    if (lower.includes('monitor') || lower.includes('review')) {
+      return <Scale className="h-4 w-4 text-amber-600" />;
+    }
+    
+    return <ShieldCheck className="h-4 w-4 text-green-600" />;
+  };
+
   return (
     <div className="border rounded-md p-4 space-y-3">
       <div className="flex justify-between items-center">
@@ -37,9 +53,12 @@ const ThreatClassificationResultDisplay = ({ result }: ThreatClassificationResul
       <ThreatSeverityIndicator severity={result.severity} />
       
       <div className="space-y-2 pt-2">
-        <div>
-          <span className="text-sm font-medium">Recommended Action:</span>
-          <p className="text-sm">{result.recommendation}</p>
+        <div className="flex items-start gap-2">
+          {getRecommendationIcon(result.recommendation)}
+          <div>
+            <span className="text-sm font-medium block">Recommended Action:</span>
+            <p className="text-sm">{result.recommendation}</p>
+          </div>
         </div>
         
         {result.ai_reasoning && (

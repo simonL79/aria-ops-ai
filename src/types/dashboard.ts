@@ -25,6 +25,9 @@ export interface ContentAlert {
   sentiment?: 'positive' | 'neutral' | 'negative';
   detectedEntities?: string[];
   potentialReach?: number;
+  category?: string;
+  recommendation?: string;
+  ai_reasoning?: string;
 }
 
 // Define content source interface
@@ -45,6 +48,9 @@ export interface ContentAction {
   timestamp: string;
   status: string;
   user: string;
+  platform?: string;
+  date?: string;
+  action?: string;
 }
 
 // Define response tone style enum
@@ -55,7 +61,9 @@ export type ResponseToneStyle =
   'formal' | 
   'technical' | 
   'educational' | 
-  'empathetic';
+  'empathetic' |
+  'humorous' |
+  'apologetic';
 
 // Define SEO content type
 export interface SeoContent {
@@ -65,4 +73,8 @@ export interface SeoContent {
   type: string;
   status: string;
   date: string;
+  keywords?: string[];
+  dateCreated?: string;
+  publishDate?: string;
+  score?: number;
 }

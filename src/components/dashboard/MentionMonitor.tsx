@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Loader, Activity, Globe, Bell, Eye, Ban } from 'lucide-react';
+import { Loader, Activity, Globe, Bell, Eye, Ban, Shield } from 'lucide-react';
 import { 
   getMonitoringStatus, 
   startMonitoring, 
@@ -150,6 +150,19 @@ const MentionMonitor = ({ onNewMentionsFound }: MentionMonitorProps) => {
                       <span className="text-xs text-muted-foreground">{mention.date}</span>
                     </div>
                     <p className="line-clamp-2">{mention.content}</p>
+                    {mention.category && (
+                      <div className="mt-1 flex items-center justify-between">
+                        <Badge variant="secondary" className="text-xs">
+                          <Shield className="h-3 w-3 mr-1" />
+                          {mention.category}
+                        </Badge>
+                        {mention.severity === 'high' && (
+                          <Badge variant="destructive" className="text-xs">
+                            High Priority
+                          </Badge>
+                        )}
+                      </div>
+                    )}
                   </div>
                 ))}
                 {lastMentions.length > 3 && (

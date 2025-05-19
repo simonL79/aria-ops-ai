@@ -1,9 +1,8 @@
 
 // Simulate data ingestion and threat monitoring
 import { getAvailableSources } from "@/services/dataIngestionService";
-
-// Add import for risk profile utilities
-import { quickRiskAssessment } from "@/utils/riskProfileUtils";
+import { classifyThreat } from "@/services/intelligence/threatClassifier";
+import { ThreatClassifierRequest } from "@/types/intelligence";
 import { ContentAlert } from "@/types/dashboard";
 
 // Define monitoring status type
@@ -38,6 +37,10 @@ let mentionsDatabase: Array<{
   content: string;
   url: string;
   timestamp: Date;
+  category?: string;
+  severity?: number;
+  recommendation?: string;
+  ai_reasoning?: string;
 }> = [];
 
 export const getMonitoringStatus = (): MonitoringStatus => {
@@ -62,17 +65,42 @@ export const stopMonitoring = () => {
   monitoringStatus.isActive = false;
 };
 
-// Save a new mention to our in-memory database
-export const saveMention = (source: string, content: string, url: string) => {
-  mentionsDatabase.push({
-    source,
-    content,
-    url,
-    timestamp: new Date()
-  });
-  
-  console.log(`New mention saved from ${source}`);
-  return true;
+// Save a new mention to our in-memory database with AI-based threat classification
+export const saveMention = async (source: string, content: string, url: string) => {
+  try {
+    // Classify the content threat level using our AI service
+    const request: ThreatClassifierRequest = {
+      content,
+      platform: source,
+      brand: "ARIA" // Default brand name
+    };
+    
+    const classification = await classifyThreat(request);
+    
+    mentionsDatabase.push({
+      source,
+      content,
+      url,
+      timestamp: new Date(),
+      category: classification?.category,
+      severity: classification?.severity,
+      recommendation: classification?.recommendation,
+      ai_reasoning: classification?.ai_reasoning
+    });
+    
+    console.log(`New mention saved from ${source} with classification: ${classification?.category}`);
+    return true;
+  } catch (error) {
+    console.error(`Error saving and classifying mention: ${error}`);
+    // Still save the mention without classification
+    mentionsDatabase.push({
+      source,
+      content,
+      url,
+      timestamp: new Date()
+    });
+    return false;
+  }
 };
 
 // Get all stored mentions
@@ -89,7 +117,7 @@ export const clearMentions = () => {
 export const runMonitoringScan = async () => {
   // Simulate an API call to scan for new threats
   return new Promise<void>((resolve) => {
-    setTimeout(() => {
+    setTimeout(async () => {
       const lastRun = new Date();
       const nextRun = new Date();
       nextRun.setHours(lastRun.getHours() + 1);
@@ -103,7 +131,7 @@ export const runMonitoringScan = async () => {
       };
       
       // Simulate monitoring each platform
-      monitorPlatforms();
+      await monitorPlatforms();
       
       resolve();
     }, 2500);
@@ -111,142 +139,142 @@ export const runMonitoringScan = async () => {
 };
 
 // Monitor all active platforms
-const monitorPlatforms = () => {
+const monitorPlatforms = async () => {
   const platforms = getMonitoredPlatforms();
   const keywords = ["ARIA", "Brand Protection", "Reputation Management"];
   
-  platforms.forEach(platform => {
+  for (const platform of platforms) {
     switch(platform) {
       case 'twitter':
-        monitorTwitter(keywords);
+        await monitorTwitter(keywords);
         break;
       case 'reddit':
-        monitorReddit(keywords);
+        await monitorReddit(keywords);
         break;
       case 'google_news':
-        monitorGoogleNews(keywords);
+        await monitorGoogleNews(keywords);
         break;
       case 'discord':
-        monitorDiscord(keywords);
+        await monitorDiscord(keywords);
         break;
       case 'tiktok':
-        monitorTikTok(keywords);
+        await monitorTikTok(keywords);
         break;
       case 'telegram':
-        monitorTelegram(keywords);
+        await monitorTelegram(keywords);
         break;
       case 'whatsapp':
-        monitorWhatsapp(keywords);
+        await monitorWhatsapp(keywords);
         break;
       default:
         console.log(`Platform ${platform} not supported yet`);
     }
-  });
+  }
 };
 
 // Twitter monitoring simulation
-const monitorTwitter = (keywords: string[]) => {
+const monitorTwitter = async (keywords: string[]) => {
   console.log("Monitoring Twitter for keywords:", keywords);
   // Simulate finding mentions
-  keywords.forEach(keyword => {
+  for (const keyword of keywords) {
     if (Math.random() > 0.6) {
-      saveMention(
+      await saveMention(
         "Twitter", 
         `Just found ${keyword} mentioned in a discussion about brand monitoring tools. #RepManagement`, 
         "https://twitter.com/user/status/123456789"
       );
     }
-  });
+  }
 };
 
 // Reddit monitoring simulation
-const monitorReddit = (keywords: string[]) => {
+const monitorReddit = async (keywords: string[]) => {
   console.log("Monitoring Reddit for keywords:", keywords);
   // Simulate finding mentions
-  keywords.forEach(keyword => {
+  for (const keyword of keywords) {
     if (Math.random() > 0.7) {
-      saveMention(
+      await saveMention(
         "Reddit", 
         `${keyword}: A discussion thread about the best reputation management tools in 2025`, 
         "https://reddit.com/r/marketing/comments/abc123"
       );
     }
-  });
+  }
 };
 
 // Google News monitoring simulation
-const monitorGoogleNews = (keywords: string[]) => {
+const monitorGoogleNews = async (keywords: string[]) => {
   console.log("Monitoring Google News for keywords:", keywords);
   // Simulate finding mentions
-  keywords.forEach(keyword => {
+  for (const keyword of keywords) {
     if (Math.random() > 0.8) {
-      saveMention(
+      await saveMention(
         "GoogleNews", 
         `${keyword} featured in new article about emerging AI tools for brand protection`, 
         "https://news.google.com/articles/123456"
       );
     }
-  });
+  }
 };
 
 // Discord monitoring simulation
-const monitorDiscord = (keywords: string[]) => {
+const monitorDiscord = async (keywords: string[]) => {
   console.log("Monitoring Discord for keywords:", keywords);
   // Simulate finding mentions
-  keywords.forEach(keyword => {
+  for (const keyword of keywords) {
     if (Math.random() > 0.75) {
-      saveMention(
+      await saveMention(
         "Discord", 
         `Users discussing ${keyword} in a marketing technology server`, 
         "https://discord.com/channels/123456789"
       );
     }
-  });
+  }
 };
 
 // TikTok monitoring simulation
-const monitorTikTok = (keywords: string[]) => {
+const monitorTikTok = async (keywords: string[]) => {
   console.log("Monitoring TikTok for keywords:", keywords);
   // Simulate finding mentions
-  keywords.forEach(keyword => {
+  for (const keyword of keywords) {
     if (Math.random() > 0.65) {
-      saveMention(
+      await saveMention(
         "TikTok", 
         `Viral video mentioning ${keyword} has 50K+ views`, 
         "https://tiktok.com/@user/video/123456789"
       );
     }
-  });
+  }
 };
 
 // Telegram monitoring simulation
-const monitorTelegram = (keywords: string[]) => {
+const monitorTelegram = async (keywords: string[]) => {
   console.log("Monitoring Telegram for keywords:", keywords);
   // Simulate finding mentions
-  keywords.forEach(keyword => {
+  for (const keyword of keywords) {
     if (Math.random() > 0.85) {
-      saveMention(
+      await saveMention(
         "Telegram", 
         `${keyword} mentioned in industry discussion group with 5K members`, 
         "https://t.me/channel/123456"
       );
     }
-  });
+  }
 };
 
 // WhatsApp monitoring simulation
-const monitorWhatsapp = (keywords: string[]) => {
+const monitorWhatsapp = async (keywords: string[]) => {
   console.log("Monitoring WhatsApp for keywords:", keywords);
   // Simulate finding mentions
-  keywords.forEach(keyword => {
+  for (const keyword of keywords) {
     if (Math.random() > 0.9) {
-      saveMention(
+      await saveMention(
         "WhatsApp", 
         `Business WhatsApp mention for ${keyword} from potential client`, 
         "https://wa.me/123456789"
       );
     }
-  });
+  }
 };
 
 // Get platforms that we're currently monitoring
@@ -263,22 +291,37 @@ export const isPlatformMonitored = (platform: MonitorablePlatform): boolean => {
 // Convert mentions to content alerts for the dashboard
 export const getMentionsAsAlerts = (): ContentAlert[] => {
   return mentionsDatabase.map((mention, index) => {
-    const severity = mention.content.includes('viral') || mention.content.includes('50K') 
-      ? 'high' 
-      : mention.content.includes('discussion') 
-        ? 'medium' 
-        : 'low';
+    // Map severity number to our low/medium/high classification
+    let severityText: 'low' | 'medium' | 'high' = 'low';
+    
+    if (mention.severity) {
+      if (mention.severity >= 8) {
+        severityText = 'high';
+      } else if (mention.severity >= 4) {
+        severityText = 'medium';
+      }
+    } else {
+      // Fallback if no AI classification
+      severityText = mention.content.includes('viral') || mention.content.includes('50K') 
+        ? 'high' 
+        : mention.content.includes('discussion') 
+          ? 'medium' 
+          : 'low';
+    }
         
     return {
       id: `mention-${index}-${Date.now()}`,
       platform: mention.source,
       content: mention.content,
       date: mention.timestamp.toLocaleTimeString(),
-      severity: severity as 'low' | 'medium' | 'high',
+      severity: severityText,
       status: 'new',
       sourceType: getPlatformType(mention.source),
       confidenceScore: Math.floor(Math.random() * 100),
-      sentiment: getSentimentFromContent(mention.content)
+      sentiment: getSentimentFromContent(mention.content),
+      category: mention.category,
+      recommendation: mention.recommendation,
+      ai_reasoning: mention.ai_reasoning
     };
   });
 };
