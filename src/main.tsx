@@ -6,11 +6,12 @@ import App from './App.tsx'
 import './index.css'
 
 // Get the Clerk publishable key
-const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+// Providing a fallback key for development/testing purposes
+const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || 'pk_test_Z29vZC1jb2NrYXRvby05MC5jbGVyay5hY2NvdW50cy5kZXYk';
 
-// Make sure the key is available
-if (!CLERK_PUBLISHABLE_KEY) {
-  throw new Error('Missing Clerk Publishable Key');
+// Display a warning if using the fallback key
+if (!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY) {
+  console.warn('Using fallback Clerk Publishable Key. For production, set the VITE_CLERK_PUBLISHABLE_KEY environment variable.');
 }
 
 createRoot(document.getElementById("root")!).render(
