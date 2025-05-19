@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Check } from 'lucide-react';
+import { ArrowRight, Check, Virus, Gavel, Search } from 'lucide-react';
 import Logo from '@/components/ui/logo';
 
 const SalesFunnelPage = () => {
@@ -41,22 +41,22 @@ const SalesFunnelPage = () => {
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 max-w-6xl mx-auto">
             <div className="premium-card p-8 rounded-xl transform hover:-translate-y-1">
-              <div className="bg-red-50 p-4 rounded-full w-16 h-16 mx-auto mb-6 flex items-center justify-center text-2xl">
-                🧨
+              <div className="bg-red-50 p-4 rounded-full w-16 h-16 mx-auto mb-6 flex items-center justify-center">
+                <Virus className="h-8 w-8 text-red-500" />
               </div>
               <h3 className="text-xl font-bold mb-3 text-premium-darkGray">Viral Complaints</h3>
               <p className="text-premium-gray">Flagged & suppressed before they can spread</p>
             </div>
             <div className="premium-card p-8 rounded-xl transform hover:-translate-y-1">
-              <div className="bg-blue-50 p-4 rounded-full w-16 h-16 mx-auto mb-6 flex items-center justify-center text-2xl">
-                ⚖️
+              <div className="bg-blue-50 p-4 rounded-full w-16 h-16 mx-auto mb-6 flex items-center justify-center">
+                <Gavel className="h-8 w-8 text-blue-600" />
               </div>
               <h3 className="text-xl font-bold mb-3 text-premium-darkGray">Legal Threats</h3>
               <p className="text-premium-gray">Monitored & classified to reduce risk</p>
             </div>
             <div className="premium-card p-8 rounded-xl transform hover:-translate-y-1">
-              <div className="bg-green-50 p-4 rounded-full w-16 h-16 mx-auto mb-6 flex items-center justify-center text-2xl">
-                🔎
+              <div className="bg-green-50 p-4 rounded-full w-16 h-16 mx-auto mb-6 flex items-center justify-center">
+                <Search className="h-8 w-8 text-green-600" />
               </div>
               <h3 className="text-xl font-bold mb-3 text-premium-darkGray">Google Results</h3>
               <p className="text-premium-gray">Buried & replaced with positive content</p>
