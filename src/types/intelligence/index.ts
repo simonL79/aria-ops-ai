@@ -7,6 +7,6 @@ export * from './memory';
 export * from './prediction';
 export * from './reports';
 // Export only DataSourceStats from sources to avoid ambiguity
-export { DataSourceStats } from './sources';
+export type { DataSourceStats } from './sources';
 // Export ThreatSource only from threats to avoid ambiguity
 export * from './threats';
