@@ -140,20 +140,22 @@ const Authentication = () => {
                 Login to Dashboard
               </Button>
               
-              {/* Add CSS to highlight the Clerk component */}
-              <style jsx>{`
-                .highlight-container {
-                  animation: pulse 2s infinite;
-                  border: 2px solid #3b82f6;
-                  border-radius: 8px;
-                  padding: 8px;
-                }
-                @keyframes pulse {
-                  0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
-                  70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
-                  100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
-                }
-              `}</style>
+              {/* Add CSS for animation using standard style tag */}
+              <style>
+                {`
+                  .highlight-container {
+                    animation: pulse 2s infinite;
+                    border: 2px solid #3b82f6;
+                    border-radius: 8px;
+                    padding: 8px;
+                  }
+                  @keyframes pulse {
+                    0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+                    70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+                    100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+                  }
+                `}
+              </style>
               
               {/* Use standard SignIn component with clear redirectUrl */}
               <div id="clerk-sign-in" className="clerk-form-container">
