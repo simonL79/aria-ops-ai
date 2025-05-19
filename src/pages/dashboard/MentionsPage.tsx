@@ -3,6 +3,7 @@ import { useState } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import MentionsTable from "@/components/dashboard/MentionsTable";
+import ManualClassificationForm from "@/components/dashboard/ManualClassificationForm";
 import { ContentAlert } from "@/types/dashboard";
 import { toast } from "sonner";
 import { 
@@ -15,6 +16,7 @@ import {
   AlertDialogCancel, 
   AlertDialogAction 
 } from "@/components/ui/alert-dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Sample mock data for initial development
 const mockMentions: ContentAlert[] = [
@@ -117,6 +119,7 @@ const MentionsPage = () => {
   const [selectedMention, setSelectedMention] = useState<ContentAlert | null>(null);
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
   const [actionType, setActionType] = useState<"view" | "resolve" | "escalate">("view");
+  const [activeTab, setActiveTab] = useState<string>("mentions");
 
   const handleViewDetail = (mention: ContentAlert) => {
     setSelectedMention(mention);
@@ -154,6 +157,30 @@ const MentionsPage = () => {
     }
     
     setDialogOpen(false);
+  };
+
+  const handleClassificationResult = (result: any) => {
+    if (!result) return;
+    
+    // Create a new mention from the classification result
+    const newMention: ContentAlert = {
+      id: `manual-${Date.now()}`,
+      platform: "Manual Entry",
+      content: result.content || "Manually classified content",
+      date: new Date().toISOString().split('T')[0],
+      severity: result.severity >= 7 ? "high" : result.severity >= 4 ? "medium" : "low",
+      status: "new",
+      category: result.category,
+      recommendation: result.recommendation,
+      ai_reasoning: result.ai_reasoning || result.explanation,
+      url: ""
+    };
+    
+    setMentions(prev => [newMention, ...prev]);
+    toast.success("New classification added to mentions");
+    
+    // Switch to mentions tab to show the new item
+    setActiveTab("mentions");
   };
 
   // Get dialog title based on action type
@@ -231,16 +258,29 @@ const MentionsPage = () => {
     <DashboardLayout>
       <DashboardHeader
         title="Brand Mentions Monitor"
-        description="View and analyze mentions across multiple platforms"
+        description="View, analyze, and classify mentions across multiple platforms"
       />
       
       <div className="mt-6">
-        <MentionsTable
-          mentions={mentions}
-          onViewDetail={handleViewDetail}
-          onMarkResolved={handleMarkResolved}
-          onEscalate={handleEscalate}
-        />
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid grid-cols-2 mb-6">
+            <TabsTrigger value="mentions">Mentions Table</TabsTrigger>
+            <TabsTrigger value="classify">Classify Content</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="mentions">
+            <MentionsTable
+              mentions={mentions}
+              onViewDetail={handleViewDetail}
+              onMarkResolved={handleMarkResolved}
+              onEscalate={handleEscalate}
+            />
+          </TabsContent>
+          
+          <TabsContent value="classify">
+            <ManualClassificationForm onClassified={handleClassificationResult} />
+          </TabsContent>
+        </Tabs>
       </div>
       
       <AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>

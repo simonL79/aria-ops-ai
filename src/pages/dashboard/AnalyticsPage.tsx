@@ -9,6 +9,7 @@ import AnalyticsPanel from "@/components/dashboard/analytics/AnalyticsPanel";
 import { useRealTimeUpdates } from "@/hooks/useRealTimeUpdates";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { DataSourceStats } from "@/types/intelligence";
+import { FileText } from "lucide-react";
 
 const AnalyticsPage = () => {
   const [timeRange, setTimeRange] = useState<string>("7d");
@@ -73,6 +74,35 @@ const AnalyticsPage = () => {
     });
   };
   
+  // Export analytics data to CSV
+  const exportAnalytics = () => {
+    // Build headers
+    const headers = ["Date", "Reputation Score", "Mentions"];
+    
+    // Create CSV content from reputation history
+    const csvContent = [
+      headers.join(','),
+      ...reputationHistory.map(item => 
+        `"${item.date}","${item.score}","${item.mentions}"`
+      )
+    ].join('\n');
+    
+    // Create and download file
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `analytics_export_${new Date().toISOString().slice(0,10)}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast.success("Analytics data exported", {
+      description: `${reputationHistory.length} data points exported to CSV`
+    });
+  };
+  
   return (
     <DashboardLayout>
       <DashboardHeader 
@@ -116,6 +146,15 @@ const AnalyticsPage = () => {
           </Select>
           
           <Button onClick={handleRefresh}>Refresh Data</Button>
+          
+          <Button 
+            variant="outline" 
+            onClick={exportAnalytics}
+            className="flex items-center gap-2"
+          >
+            <FileText className="h-4 w-4" />
+            Export to CSV
+          </Button>
         </div>
       </div>
       
