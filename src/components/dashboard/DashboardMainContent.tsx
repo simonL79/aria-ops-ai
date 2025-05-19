@@ -5,7 +5,7 @@ import ContentAlerts from "@/components/dashboard/ContentAlerts";
 import SourceOverview from "@/components/dashboard/SourceOverview";
 import RecentActions from "@/components/dashboard/RecentActions";
 import DarkWebSurveillance from "@/components/dashboard/DarkWebSurveillance";
-import StrategicResponseEngine from "@/components/dashboard/StrategicResponseEngine";
+import StrategicResponseEngine from "@/components/dashboard/responseEngine";
 import SerpDefense from "@/components/dashboard/SerpDefense";
 import SeoSuppressionPipeline from "@/components/dashboard/SeoSuppressionPipeline";
 import IntelligenceCollection from "@/components/dashboard/IntelligenceCollection";

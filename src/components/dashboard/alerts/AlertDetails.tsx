@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,7 +12,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ResponseGenerationProps } from "@/services/openaiService";
-import StrategicResponseEngine from "@/components/dashboard/StrategicResponseEngine";
+import StrategicResponseEngine from "@/components/dashboard/responseEngine";
 
 interface AlertDetailsProps {
   alert: ContentAlert;
