@@ -11,9 +11,10 @@ const Footer = () => {
           <div className="flex items-center mb-6 md:mb-0">
             <Logo variant="light" size="md" />
           </div>
-          <div className="flex space-x-8">
+          <div className="flex flex-wrap justify-center gap-6 md:gap-8">
             <Link to="/about" className="text-premium-silver hover:text-white transition-colors">About</Link>
             <Link to="/biography" className="text-premium-silver hover:text-white transition-colors">Simon Lindsay</Link>
+            <Link to="/privacy-policy" className="text-premium-silver hover:text-white transition-colors">Privacy Policy</Link>
             <Link to="/auth" className="text-premium-silver hover:text-white transition-colors">Login</Link>
           </div>
         </div>

@@ -13,6 +13,7 @@ import { RbacProvider, Role } from "./hooks/useRbac";
 import SalesFunnelPage from "./pages/SalesFunnelPage";
 import AboutPage from "./pages/AboutPage";
 import BiographyPage from "./pages/BiographyPage";
+import PrivacyPolicyPage from "./pages/PrivacyPolicyPage"; // Added import
 import ReputationScanForm from "./pages/ReputationScanForm";
 import ThankYouPage from "./pages/ThankYouPage";
 import Authentication from "./pages/Authentication";
@@ -63,6 +64,7 @@ function App() {
             <Route path="/" element={<SalesFunnelPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/biography" element={<BiographyPage />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicyPage />} /> {/* Added new route */}
             <Route path="/scan" element={<ReputationScanForm />} />
             <Route path="/thank-you" element={<ThankYouPage />} />
             <Route path="/auth" element={<Authentication />} />
