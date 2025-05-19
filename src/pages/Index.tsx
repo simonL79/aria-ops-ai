@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { useUser } from "@clerk/clerk-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -28,7 +28,8 @@ const Index = () => {
     );
   }
 
-  return isSignedIn ? <Navigate to="/dashboard" replace /> : <Navigate to="/home" replace />;
+  // Redirect authenticated users to dashboard, others to the sales funnel page
+  return isSignedIn ? <Navigate to="/dashboard" replace /> : <Navigate to="/" replace />;
 };
 
 export default Index;
