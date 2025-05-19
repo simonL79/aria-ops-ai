@@ -22,8 +22,11 @@ createRoot(document.getElementById("root")!).render(
     appearance={{
       variables: { colorPrimary: '#0f766e' }
     }}
-    // Replace afterSignInUrl and afterSignUpUrl with redirectUrl
-    fallbackRedirectUrl="/dashboard"
+    // Using correct redirect prop names
+    signInUrl="/auth"
+    signUpUrl="/auth"
+    afterSignInUrl="/dashboard"
+    afterSignUpUrl="/dashboard"
     onLoaded={() => {
       console.log("Clerk loaded successfully");
     }}
