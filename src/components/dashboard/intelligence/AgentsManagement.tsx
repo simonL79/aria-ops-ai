@@ -1,12 +1,9 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { AgentRole, IntelligenceAgent } from "@/types/intelligence";
-import { Shield, MessageSquare, Scale, Users, Search, BarChart3, AlertTriangle, Check, Loader } from "lucide-react";
+import { IntelligenceAgent } from "@/types/intelligence";
+import AgentList from "./agents/AgentList";
+import SimulationButton from "./agents/SimulationButton";
 
 // Sample agent data
 const initialAgents: IntelligenceAgent[] = [
@@ -72,26 +69,6 @@ const initialAgents: IntelligenceAgent[] = [
   }
 ];
 
-// Get icon for agent role
-const getAgentIcon = (role: AgentRole) => {
-  switch (role) {
-    case "sentinel":
-      return <Shield className="h-5 w-5 text-blue-500" />;
-    case "liaison":
-      return <MessageSquare className="h-5 w-5 text-green-500" />;
-    case "legal":
-      return <Scale className="h-5 w-5 text-amber-500" />;
-    case "outreach":
-      return <Users className="h-5 w-5 text-purple-500" />;
-    case "researcher":
-      return <Search className="h-5 w-5 text-indigo-500" />;
-    case "predictor":
-      return <BarChart3 className="h-5 w-5 text-red-500" />;
-    default:
-      return <AlertTriangle className="h-5 w-5 text-gray-500" />;
-  }
-};
-
 const AgentsManagement = () => {
   const [agents, setAgents] = useState<IntelligenceAgent[]>(initialAgents);
   const [activeTab, setActiveTab] = useState<string>("active");
@@ -135,20 +112,10 @@ const AgentsManagement = () => {
               Autonomous agents working together to protect your brand
             </CardDescription>
           </div>
-          <Button 
-            variant="outline" 
-            onClick={handleRunSimulation} 
-            disabled={runningSimulation}
-          >
-            {runningSimulation ? (
-              <>
-                <Loader className="h-4 w-4 mr-2 animate-spin" />
-                Running Simulation
-              </>
-            ) : (
-              <>Run Red Team Simulation</>
-            )}
-          </Button>
+          <SimulationButton 
+            running={runningSimulation} 
+            onRun={handleRunSimulation} 
+          />
         </div>
       </CardHeader>
       <CardContent>
@@ -159,68 +126,12 @@ const AgentsManagement = () => {
           </TabsList>
         </Tabs>
 
-        <div className="space-y-4">
-          {filteredAgents.map(agent => (
-            <div key={agent.id} className="border rounded-lg p-4 space-y-3">
-              <div className="flex justify-between items-start">
-                <div className="flex items-center">
-                  {getAgentIcon(agent.role)}
-                  <div className="ml-3">
-                    <h3 className="font-medium">{agent.name}</h3>
-                    <p className="text-sm text-muted-foreground">{agent.description}</p>
-                  </div>
-                </div>
-                <Switch
-                  checked={agent.active}
-                  onCheckedChange={() => handleToggleAgent(agent.id)}
-                />
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                {agent.capabilities && agent.capabilities.map(capability => (
-                  <Badge key={capability} variant="secondary" className="text-xs">
-                    {capability}
-                  </Badge>
-                ))}
-              </div>
-
-              {agent.memory && (
-                <div className="grid grid-cols-3 gap-2 text-sm">
-                  <div>
-                    <div className="text-muted-foreground">Analyzed</div>
-                    <div className="font-medium">{agent.memory.incidentsAnalyzed}</div>
-                  </div>
-                  <div>
-                    <div className="text-muted-foreground">Decisions</div>
-                    <div className="font-medium">{agent.memory.decisionsRecorded}</div>
-                  </div>
-                  <div>
-                    <div className="text-muted-foreground">Memory</div>
-                    <div className="font-medium">{agent.memory.memoryVectors} vectors</div>
-                  </div>
-                </div>
-              )}
-
-              <div className="pt-2">
-                <Button 
-                  size="sm" 
-                  variant="outline"
-                  onClick={() => handleActivateAgent(agent.id)}
-                  className="w-full"
-                >
-                  {activatedAgent === agent.id ? (
-                    <>
-                      <Check className="h-4 w-4 mr-2" />
-                      Agent Activated
-                    </>
-                  ) : (
-                    <>Activate Individually</>
-                  )}
-                </Button>
-              </div>
-            </div>
-          ))}
-        </div>
+        <AgentList 
+          agents={filteredAgents}
+          onToggleAgent={handleToggleAgent}
+          onActivateAgent={handleActivateAgent}
+          activatedAgent={activatedAgent}
+        />
       </CardContent>
       <CardFooter className="border-t pt-4">
         <div className="w-full flex flex-col items-start space-y-2">
