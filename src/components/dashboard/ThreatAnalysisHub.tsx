@@ -2,7 +2,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import ThreatClassifier from "@/components/dashboard/ThreatClassifier";
-import StrategicResponseEngine from "@/components/dashboard/StrategicResponseEngine";
+import StrategicResponseEngine from "@/components/dashboard/responseEngine";
 import AdvancedIntelligencePanel from "@/components/dashboard/AdvancedIntelligencePanel";
 
 interface ThreatAnalysisHubProps {
