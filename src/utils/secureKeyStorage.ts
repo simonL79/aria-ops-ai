@@ -15,6 +15,12 @@ const sessionKeyStore = new Map<string, SecureKey>();
 // Check if we have localStorage available
 const hasLocalStorage = typeof localStorage !== 'undefined';
 
+// Validate API key format (basic check)
+const isValidOpenAIKey = (key: string): boolean => {
+  // OpenAI API keys typically start with "sk-" and are 51 characters long
+  return key.startsWith('sk-') && key.length >= 40;
+};
+
 export const storeSecureKey = (
   keyName: string, 
   keyValue: string,
@@ -24,6 +30,15 @@ export const storeSecureKey = (
   if (!keyValue) {
     console.warn("Attempted to store empty key");
     return;
+  }
+
+  // Add validation for specific key types
+  if (keyName === 'openai_api_key' && !isValidOpenAIKey(keyValue)) {
+    toast.error("Invalid API Key Format", {
+      description: "The OpenAI API key format appears to be incorrect. Please check your key.",
+      duration: 7000
+    });
+    // Still store it in case the validation is outdated, but warn the user
   }
   
   // Calculate expiration if provided

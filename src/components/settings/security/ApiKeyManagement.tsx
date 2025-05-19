@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Key, Clock, Save, Lock } from "lucide-react";
+import { Key, Clock, Save, Lock, AlertCircle, Check } from "lucide-react";
 import { storeSecureKey, getSecureKey, clearSecureKey, hasValidKey } from "@/utils/secureKeyStorage";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
@@ -19,6 +19,7 @@ const ApiKeyManagement = () => {
   const [apiKeyMask, setApiKeyMask] = useState<string>('');
   const [keyExpiration, setKeyExpiration] = useState<number>(0); // 0 means no expiration (persistent)
   const [persistentStorage, setPersistentStorage] = useState<boolean>(true);
+  const [isValidFormat, setIsValidFormat] = useState<boolean>(true);
   
   // When component mounts, check if API key exists and mask it
   useEffect(() => {
@@ -28,8 +29,32 @@ const ApiKeyManagement = () => {
     }
   }, []);
   
+  // Validate OpenAI API key format
+  const validateApiKeyFormat = (key: string): boolean => {
+    // OpenAI API keys typically start with "sk-" and are 51 characters long
+    return key.startsWith('sk-') && key.length >= 40;
+  };
+
+  // Update validation state when API key changes
+  const handleApiKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newKey = e.target.value;
+    setApiKey(newKey);
+    
+    if (newKey && newKey.length > 5) {
+      setIsValidFormat(validateApiKeyFormat(newKey));
+    } else {
+      setIsValidFormat(true); // Don't show validation error for empty/short keys
+    }
+  };
+  
   const handleSaveApiKey = () => {
     if (apiKey) {
+      if (!validateApiKeyFormat(apiKey)) {
+        toast.warning("API Key Format Warning", {
+          description: "The key format doesn't match typical OpenAI API keys. You can still save it, but it may not work."
+        });
+      }
+      
       // Store API key with or without expiration based on settings
       storeSecureKey(
         'openai_api_key', 
@@ -57,7 +82,7 @@ const ApiKeyManagement = () => {
       <CardHeader>
         <div className="flex items-center space-x-2">
           <Key className="h-5 w-5 text-primary" />
-          <CardTitle>API Key</CardTitle>
+          <CardTitle>OpenAI API Key</CardTitle>
         </div>
         <CardDescription>
           Set your OpenAI API key for A.R.I.A. functionality
@@ -65,18 +90,34 @@ const ApiKeyManagement = () => {
       </CardHeader>
       <CardContent>
         <div className="flex flex-col space-y-4">
-          <div className="flex space-x-2">
-            <Input 
-              type="password" 
-              placeholder={apiKeyMask || "Enter your OpenAI API key"} 
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-              className="flex-1"
-            />
-            <Button onClick={handleSaveApiKey}>
-              <Save className="h-4 w-4 mr-2" />
-              Save
-            </Button>
+          <div className="space-y-2">
+            <div className="flex space-x-2">
+              <Input 
+                type="password" 
+                placeholder={apiKeyMask || "Enter your OpenAI API key"} 
+                value={apiKey}
+                onChange={handleApiKeyChange}
+                className={`flex-1 ${!isValidFormat && apiKey.length > 5 ? 'border-red-300' : ''}`}
+              />
+              <Button onClick={handleSaveApiKey}>
+                <Save className="h-4 w-4 mr-2" />
+                Save
+              </Button>
+            </div>
+            
+            {!isValidFormat && apiKey.length > 5 && (
+              <div className="flex items-center text-red-500 text-xs mt-1">
+                <AlertCircle className="h-3 w-3 mr-1" />
+                <span>API key format doesn't match OpenAI pattern (should start with sk-)</span>
+              </div>
+            )}
+            
+            {isValidFormat && apiKey.length > 5 && (
+              <div className="flex items-center text-green-500 text-xs mt-1">
+                <Check className="h-3 w-3 mr-1" />
+                <span>Valid API key format</span>
+              </div>
+            )}
           </div>
           
           <div className="flex justify-between items-center">
@@ -121,6 +162,16 @@ const ApiKeyManagement = () => {
               ? "Your API key is stored securely on this device and will be available next time you use the app."
               : "Your API key is stored securely in memory and will be cleared when the expiration time is reached."}
           </p>
+          
+          <div className="bg-amber-50 p-3 rounded-md border border-amber-200 text-sm">
+            <p className="font-medium text-amber-800 mb-1">Need an OpenAI API Key?</p>
+            <ol className="text-amber-700 text-xs pl-5 list-decimal">
+              <li>Sign in to your OpenAI account</li>
+              <li>Go to API Keys in your account settings</li>
+              <li>Create a new secret key and copy it</li>
+              <li>Paste the key above (it should start with "sk-")</li>
+            </ol>
+          </div>
         </div>
       </CardContent>
     </Card>

@@ -38,7 +38,8 @@ export const callOpenAI = async (options: OpenAIRequestOptions): Promise<OpenAIR
         action: {
           label: "Settings",
           onClick: () => window.location.href = "/settings"
-        }
+        },
+        duration: 7000
       });
       throw new Error("OpenAI API key not found");
     }
@@ -70,6 +71,19 @@ export const callOpenAI = async (options: OpenAIRequestOptions): Promise<OpenAIR
     if (!response.ok) {
       const errorData = await response.json();
       const errorMessage = errorData.error?.message || "Error calling OpenAI API";
+      
+      // Check specifically for API key errors
+      if (response.status === 401) {
+        toast.error("Invalid OpenAI API Key", {
+          description: "Your API key is invalid or has expired. Please update your API key in settings.",
+          action: {
+            label: "Update Key",
+            onClick: () => window.location.href = "/settings"
+          },
+          duration: 10000
+        });
+        throw new Error("Invalid API key");
+      }
       
       // Check specifically for quota errors
       if (errorMessage.toLowerCase().includes("quota") ||
