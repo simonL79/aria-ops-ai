@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Loader, AlertTriangle, ShieldCheck, Scale, Building, Globe } from "lucide-react";
 import { ThreatClassificationResult, ThreatClassifierRequest } from "@/types/intelligence";
-import { classifyThreat } from "@/services/threatClassifierService";
+import { classifyThreat } from "@/services";
 import { toast } from "sonner";
 
 interface ThreatClassifierProps {

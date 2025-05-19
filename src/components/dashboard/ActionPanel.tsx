@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ContentAlert } from "@/types/dashboard";
 import { ResponseToneStyle } from "@/types/dashboard";
 import { AlertTriangle, Check, MessageSquare, Send, Copy, X } from "lucide-react";
-import { generateAIResponse } from "@/services/openaiService";
+import { generateAIResponse } from "@/services";
 import { toast } from "sonner";
 
 interface ActionPanelProps {

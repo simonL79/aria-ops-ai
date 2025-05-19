@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -27,7 +26,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { generateAIResponse, ResponseGenerationProps } from "@/services/openaiService";
+import { generateAIResponse, ResponseGenerationProps } from "@/services";
 import { ContentThreatType } from "@/types/intelligence";
 import { ResponseToneStyle, AutoResponseSettings } from "@/types/dashboard";
 
@@ -493,4 +492,3 @@ const StrategicResponseEngine = ({
 };
 
 export default StrategicResponseEngine;
-
