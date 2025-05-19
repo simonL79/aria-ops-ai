@@ -69,6 +69,17 @@ const Authentication = () => {
               {/* SignIn component doesn't accept children, so we use it directly */}
               <SignIn routing="path" path="/signin" redirectUrl="/dashboard" />
               
+              {/* Add explicit login button for better visibility */}
+              <div className="flex flex-col items-center">
+                <Button className="w-full" variant="default" size="lg">
+                  <LogIn className="mr-2" />
+                  Login to Dashboard
+                </Button>
+                <p className="text-center text-sm text-muted-foreground mt-2">
+                  Use the form above or click this button to login
+                </p>
+              </div>
+              
               {/* Add a text note below to indicate this is admin-only */}
               <p className="text-center text-sm text-muted-foreground">
                 Admin access only. No new registrations permitted.
