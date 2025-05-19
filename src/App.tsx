@@ -63,6 +63,9 @@ function App() {
             <Route path="/biography" element={<BiographyPage />} />
             <Route path="/auth" element={<Authentication />} />
             
+            {/* Redirect any /sales route to the home page */}
+            <Route path="/sales" element={<Navigate to="/" replace />} />
+            
             {/* Protected routes - require authentication */}
             <Route
               path="/dashboard"

@@ -28,8 +28,8 @@ const Index = () => {
     );
   }
 
-  // Redirect authenticated users to dashboard, others to the sales funnel page
-  return isSignedIn ? <Navigate to="/dashboard" replace /> : <Navigate to="/" replace />;
+  // Direct all users to the root path which now displays the SalesFunnel
+  return <Navigate to="/" replace />;
 };
 
 export default Index;
