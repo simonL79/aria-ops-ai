@@ -14,9 +14,16 @@ if (!CLERK_PUBLISHABLE_KEY) {
   console.error('Clerk publishable key is missing. Please set the VITE_CLERK_PUBLISHABLE_KEY environment variable.');
 }
 
+// Fallback key for development only - REMOVE THIS IN PRODUCTION
+// This is just to prevent the app from crashing during development
+const developmentFallbackKey = 'pk_test_Y29vbC1idWxsZHJvZy04MC5jbGVyay5hY2NvdW50cy5kZXYk';
+
+// Use fallback key only in development mode when main key is missing
+const effectiveKey = CLERK_PUBLISHABLE_KEY || (import.meta.env.DEV ? developmentFallbackKey : '');
+
 createRoot(document.getElementById("root")!).render(
   <ClerkProvider 
-    publishableKey={CLERK_PUBLISHABLE_KEY}
+    publishableKey={effectiveKey}
     appearance={{
       variables: { colorPrimary: '#0f766e' }
     }}

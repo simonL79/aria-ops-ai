@@ -9,8 +9,13 @@ import { AlertCircle } from "lucide-react";
 const AuthLoadingState = () => {
   const [isLongLoading, setIsLongLoading] = useState(false);
   const [showClerkInfo, setShowClerkInfo] = useState(false);
+  const [isApiKeyMissing, setIsApiKeyMissing] = useState(false);
 
   useEffect(() => {
+    // Check if the API key is missing
+    const isMissingKey = !import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+    setIsApiKeyMissing(isMissingKey);
+    
     // If loading takes more than 3 seconds, show extended message
     const timer = setTimeout(() => {
       setIsLongLoading(true);
@@ -30,6 +35,47 @@ const AuthLoadingState = () => {
   const handleRefresh = () => {
     window.location.reload();
   };
+
+  // If we know the API key is missing, show that message immediately
+  if (isApiKeyMissing) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
+        <div className="max-w-md w-full">
+          <Alert variant="destructive" className="mb-6">
+            <AlertCircle className="h-4 w-4 mr-2" />
+            <AlertDescription className="font-semibold">
+              Missing Clerk API Key
+            </AlertDescription>
+          </Alert>
+
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <h2 className="text-xl font-semibold mb-4">Authentication Configuration Required</h2>
+            <p className="text-gray-600 mb-4">
+              Your application needs a valid Clerk publishable key to enable authentication.
+            </p>
+            
+            <div className="bg-amber-50 p-4 rounded-md border border-amber-200 mb-4">
+              <p className="font-medium mb-2">Required Steps:</p>
+              <ol className="list-decimal pl-5 text-sm space-y-2">
+                <li>Sign up for a Clerk account at <a href="https://clerk.com" className="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">clerk.com</a></li>
+                <li>Create a new application in the Clerk dashboard</li>
+                <li>Copy your publishable key from the API Keys section</li>
+                <li>Set the <code className="bg-gray-100 px-1 py-0.5 rounded">VITE_CLERK_PUBLISHABLE_KEY</code> environment variable with your key</li>
+              </ol>
+            </div>
+            
+            <Button 
+              onClick={handleRefresh}
+              className="flex items-center gap-2 w-full"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Refresh Page
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
