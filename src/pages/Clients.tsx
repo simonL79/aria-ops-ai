@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import ClientForm from "@/components/clients/ClientForm";
 import { Button } from "@/components/ui/button";
 import { Search, UserPlus, Users } from "lucide-react";
+import { toast } from "sonner";
 
 // Mock data for demonstration
 interface Client {
@@ -40,6 +41,8 @@ const mockClients: Client[] = [
 const Clients = () => {
   const [clients, setClients] = useState<Client[]>(mockClients);
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeClient, setActiveClient] = useState<Client | null>(null);
+  const [isEditMode, setIsEditMode] = useState(false);
   
   const filteredClients = clients.filter(
     client => client.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -56,6 +59,25 @@ const Clients = () => {
     };
     
     setClients([...clients, newClient]);
+    toast.success(`Client ${clientData.name} added successfully`);
+  };
+
+  const handleEditClient = (client: Client) => {
+    setActiveClient(client);
+    setIsEditMode(true);
+  };
+
+  const handleRunIntelligence = (client: Client) => {
+    toast.info(`Running intelligence scan for ${client.name}`, {
+      description: "The scan has been initiated and results will be available soon"
+    });
+  };
+
+  const handleSelectClient = (client: Client) => {
+    setActiveClient(client);
+    toast.info(`${client.name} selected`, {
+      description: "View client details and run intelligence operations"
+    });
   };
 
   return (
@@ -120,9 +142,9 @@ const Clients = () => {
                         </div>
                       )}
                       <div className="flex gap-2 mt-3">
-                        <Button size="sm" variant="outline">View</Button>
-                        <Button size="sm" variant="outline">Edit</Button>
-                        <Button size="sm" variant="outline">Run Intelligence</Button>
+                        <Button size="sm" variant="outline" onClick={() => handleSelectClient(client)}>View</Button>
+                        <Button size="sm" variant="outline" onClick={() => handleEditClient(client)}>Edit</Button>
+                        <Button size="sm" variant="outline" onClick={() => handleRunIntelligence(client)}>Run Intelligence</Button>
                       </div>
                     </div>
                   ))

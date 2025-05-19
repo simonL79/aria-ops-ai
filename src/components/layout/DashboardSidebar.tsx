@@ -59,6 +59,21 @@ const DashboardSidebar = ({ className }: DashboardSidebarProps) => {
               <Home className="h-4 w-4" />
               <span>Home</span>
             </Link>
+            
+            {/* Moved Clients link higher in the navigation for better visibility */}
+            <Link
+              to="/clients"
+              className={cn(
+                "flex items-center gap-2 rounded-lg px-3 py-2 transition-all",
+                pathname === "/clients"
+                  ? "bg-accent text-accent-foreground"
+                  : "hover:bg-muted"
+              )}
+            >
+              <Users className="h-4 w-4" />
+              <span>Client Management</span>
+            </Link>
+            
             <Link
               to="/dashboard/command-center"
               className={cn(
@@ -96,7 +111,7 @@ const DashboardSidebar = ({ className }: DashboardSidebarProps) => {
               <span>Analytics</span>
             </Link>
             
-            {/* Add a new menu item for scan submissions */}
+            {/* Admin section remains the same */}
             <Protected roles="admin">
               <Link
                 to="/dashboard/scan-submissions"
@@ -114,18 +129,6 @@ const DashboardSidebar = ({ className }: DashboardSidebarProps) => {
             </Protected>
             
             <Separator className="my-4" />
-            <Link
-              to="/clients"
-              className={cn(
-                "flex items-center gap-2 rounded-lg px-3 py-2 transition-all",
-                pathname === "/clients"
-                  ? "bg-accent text-accent-foreground"
-                  : "hover:bg-muted"
-              )}
-            >
-              <Users className="h-4 w-4" />
-              <span>Clients</span>
-            </Link>
             <Link
               to="/settings"
               className={cn(
