@@ -15,7 +15,7 @@ import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { Toaster } from 'sonner';
 
 function App() {
-  const { isSignedIn, isLoaded } = useUser();
+  const { isLoaded } = useUser();
 
   // Show a loading state while Clerk loads
   if (!isLoaded) {
@@ -33,12 +33,8 @@ function App() {
         <Routes>
           {/* Public routes */}
           <Route path="/" element={<Index />} />
-          <Route path="/signin/*" element={
-            isSignedIn ? <Navigate to="/dashboard" replace /> : <Authentication />
-          } />
-          <Route path="/signup/*" element={
-            isSignedIn ? <Navigate to="/dashboard" replace /> : <Authentication />
-          } />
+          <Route path="/signin/*" element={<Authentication />} />
+          <Route path="/signup/*" element={<Authentication />} />
           
           {/* Protected routes */}
           <Route path="/dashboard" element={

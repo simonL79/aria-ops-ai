@@ -15,7 +15,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Authentication = () => {
   const [activeTab, setActiveTab] = useState<string>("signin");
-  const { isSignedIn } = useUser();
+  const { isSignedIn, isLoaded } = useUser();
+  
+  // If still loading, show a loading state
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
+        <div className="animate-pulse rounded-md bg-muted h-12 w-64 mb-4" />
+        <div className="animate-pulse rounded-md bg-muted h-4 w-48" />
+      </div>
+    );
+  }
   
   // If user is already signed in, redirect to dashboard
   if (isSignedIn) {
@@ -48,8 +58,8 @@ const Authentication = () => {
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-8">
-              <TabsTrigger value="signin">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+              <TabsTrigger value="signin" type="button">Sign In</TabsTrigger>
+              <TabsTrigger value="signup" type="button">Sign Up</TabsTrigger>
             </TabsList>
             <TabsContent value="signin">
               <SignIn 
