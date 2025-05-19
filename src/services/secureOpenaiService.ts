@@ -1,4 +1,3 @@
-
 import { toast } from "sonner";
 import { ContentThreatType } from "@/types/intelligence";
 import { ResponseToneStyle } from "@/types/dashboard";
@@ -53,7 +52,8 @@ const getSystemPrompt = (responseType: string, toneStyle: ResponseToneStyle, lan
     humorous: "Incorporate appropriate humor to lighten the tone while still addressing the issue seriously.",
     apologetic: "Express genuine remorse and take ownership of the mistake without making excuses.",
     technical: "Provide detailed, fact-based information with appropriate technical terminology.",
-    empathetic: "Show deep understanding of the customer's feelings and validate their experience."
+    empathetic: "Show deep understanding of the customer's feelings and validate their experience.",
+    educational: "Explain concepts clearly with helpful information to increase customer understanding."
   };
   
   const responseTypePrompts = {

@@ -3,7 +3,9 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Loader, Activity, Globe, Bell, Eye, Ban, Shield } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Loader, Activity, Globe, Bell, Eye, Ban, Shield, Send } from 'lucide-react';
 import { 
   getMonitoringStatus, 
   startMonitoring, 
@@ -12,16 +14,23 @@ import {
   getMentionsAsAlerts
 } from '@/services/monitoringService';
 import { ContentAlert } from '@/types/dashboard';
+import { ThreatClassificationResult } from '@/types/intelligence/threats';
+import { classifyContent, storeMention } from '@/services/api/mentionsApiService';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 interface MentionMonitorProps {
   onNewMentionsFound?: (mentions: ContentAlert[]) => void;
 }
 
 const MentionMonitor = ({ onNewMentionsFound }: MentionMonitorProps) => {
+  const navigate = useNavigate();
   const [isScanning, setIsScanning] = useState(false);
   const [status, setStatus] = useState(getMonitoringStatus());
   const [lastMentions, setLastMentions] = useState<ContentAlert[]>([]);
+  const [customContent, setCustomContent] = useState("");
+  const [customPlatform, setCustomPlatform] = useState("Twitter");
+  const [isClassifying, setIsClassifying] = useState(false);
 
   // Update status periodically
   useEffect(() => {
@@ -67,6 +76,66 @@ const MentionMonitor = ({ onNewMentionsFound }: MentionMonitorProps) => {
       console.error(error);
     } finally {
       setIsScanning(false);
+    }
+  };
+
+  const handleViewAllMentions = () => {
+    navigate('/dashboard/mentions');
+  };
+
+  const handleClassifyContent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!customContent.trim()) {
+      toast.error('Please enter content to classify');
+      return;
+    }
+    
+    setIsClassifying(true);
+    
+    try {
+      // Classify the content
+      const classification = await classifyContent(
+        customContent,
+        customPlatform,
+        "YourBrand" // This would come from context in a real app
+      );
+      
+      if (classification) {
+        // Create a new mention from the classification
+        const severityMap: Record<number, 'low' | 'medium' | 'high'> = {
+          1: 'low', 2: 'low', 3: 'low',
+          4: 'medium', 5: 'medium', 6: 'medium',
+          7: 'high', 8: 'high', 9: 'high', 10: 'high'
+        };
+        
+        const newMention = await storeMention({
+          platform: customPlatform,
+          content: customContent,
+          date: new Date().toISOString().split('T')[0],
+          severity: severityMap[classification.severity] || 'medium',
+          category: classification.category,
+          recommendation: classification.recommendation,
+          ai_reasoning: classification.ai_reasoning,
+          sourceType: 'manual'
+        });
+        
+        // Add to last mentions
+        setLastMentions(prev => [newMention, ...prev].slice(0, 5));
+        
+        // Notify parent component
+        if (onNewMentionsFound) {
+          onNewMentionsFound([newMention]);
+        }
+        
+        toast.success('Content classified and stored');
+        setCustomContent("");
+      }
+    } catch (error) {
+      toast.error('Error classifying content');
+      console.error(error);
+    } finally {
+      setIsClassifying(false);
     }
   };
 
@@ -139,8 +208,65 @@ const MentionMonitor = ({ onNewMentionsFound }: MentionMonitorProps) => {
             </div>
           </div>
           
+          {/* Manual content classification form */}
+          <div className="border rounded-md p-3 mt-2">
+            <h3 className="text-sm font-medium mb-2">Manual Content Classification</h3>
+            <form onSubmit={handleClassifyContent} className="space-y-3">
+              <div className="grid gap-2">
+                <Label htmlFor="platform">Platform</Label>
+                <select
+                  id="platform"
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  value={customPlatform}
+                  onChange={(e) => setCustomPlatform(e.target.value)}
+                >
+                  <option value="Twitter">Twitter</option>
+                  <option value="Reddit">Reddit</option>
+                  <option value="Google News">Google News</option>
+                  <option value="Discord">Discord</option>
+                  <option value="TikTok">TikTok</option>
+                  <option value="Telegram">Telegram</option>
+                  <option value="WhatsApp">WhatsApp</option>
+                </select>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="content">Content</Label>
+                <Input
+                  id="content"
+                  placeholder="Enter content to classify..."
+                  value={customContent}
+                  onChange={(e) => setCustomContent(e.target.value)}
+                />
+              </div>
+              <Button 
+                type="submit" 
+                size="sm" 
+                className="w-full"
+                disabled={isClassifying || !customContent.trim()}
+              >
+                {isClassifying ? (
+                  <>
+                    <Loader className="mr-2 h-4 w-4 animate-spin" />
+                    Classifying...
+                  </>
+                ) : (
+                  <>
+                    <Send className="mr-2 h-4 w-4" />
+                    Classify & Store
+                  </>
+                )}
+              </Button>
+            </form>
+          </div>
+          
           <div>
-            <p className="text-sm font-medium mb-2">Latest Mentions</p>
+            <div className="flex justify-between items-center mb-2">
+              <p className="text-sm font-medium">Latest Mentions</p>
+              <Button variant="ghost" size="sm" onClick={handleViewAllMentions}>
+                <Eye className="mr-2 h-4 w-4" />
+                View All
+              </Button>
+            </div>
             {lastMentions.length > 0 ? (
               <div className="space-y-2 max-h-40 overflow-y-auto">
                 {lastMentions.slice(0, 3).map((mention) => (
@@ -165,12 +291,6 @@ const MentionMonitor = ({ onNewMentionsFound }: MentionMonitorProps) => {
                     )}
                   </div>
                 ))}
-                {lastMentions.length > 3 && (
-                  <Button variant="ghost" size="sm" className="w-full text-xs">
-                    <Eye className="mr-2 h-3 w-3" />
-                    View {lastMentions.length - 3} more mentions
-                  </Button>
-                )}
               </div>
             ) : (
               <div className="text-center py-4 text-sm text-muted-foreground">

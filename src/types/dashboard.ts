@@ -22,12 +22,13 @@ export interface ContentAlert {
   sourceType?: string;
   threatType?: string;
   confidenceScore?: number;
-  sentiment?: 'positive' | 'neutral' | 'negative';
+  sentiment?: 'positive' | 'neutral' | 'negative' | 'threatening';
   detectedEntities?: string[];
   potentialReach?: number;
   category?: string;
   recommendation?: string;
   ai_reasoning?: string;
+  url?: string;
 }
 
 // Define content source interface
@@ -38,6 +39,7 @@ export interface ContentSource {
   lastUpdated: string;
   mentionCount: number;
   sentiment: number;
+  status?: string;
 }
 
 // Define content action interface
@@ -77,4 +79,17 @@ export interface SeoContent {
   dateCreated?: string;
   publishDate?: string;
   score?: number;
+}
+
+// Define SourceData for DashboardMainContent component
+export interface SourceData {
+  id: string;
+  name: string;
+  active: boolean;
+  lastUpdated: string;
+  mentionCount: number;
+  sentiment: number;
+  status: string;
+  positiveRatio: number;
+  total: number;
 }

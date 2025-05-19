@@ -56,3 +56,6 @@ export interface ThreatSource {
     status: 'valid' | 'invalid' | 'expired';
   };
 }
+
+// Re-export to fix the ambiguity
+export type { ThreatSource };

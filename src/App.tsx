@@ -1,105 +1,120 @@
+import React from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import { Toaster } from "sonner";
+import { useAuth } from "./hooks/useAuth";
 
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useUser } from '@clerk/clerk-react';
-import { RbacProvider } from '@/hooks/useRbac';
-import Index from '@/pages/Index';
-import Authentication from '@/pages/Authentication';
-import Monitor from '@/pages/Monitor';
-import Clients from '@/pages/Clients';
-import Removal from '@/pages/Removal';
-import Settings from '@/pages/Settings';
-import CommandCenterPage from '@/pages/dashboard/CommandCenterPage';
-import DashboardPage from '@/pages/dashboard/DashboardPage';
-import NotFound from '@/pages/NotFound';
-import ProtectedRoute from '@/components/auth/ProtectedRoute';
-import { Toaster } from 'sonner';
-import { Skeleton } from '@/components/ui/skeleton';
-import { useEffect, useState } from 'react';
-import AIAssistant from '@/components/assistant/AIAssistant';
-import { useClientChanges } from '@/hooks/useClientChanges';
+import Index from "./pages/Index";
+import Authentication from "./pages/Authentication";
+import Clients from "./pages/Clients";
+import Monitor from "./pages/Monitor";
+import Removal from "./pages/Removal";
+import Settings from "./pages/Settings";
+import NotFound from "./pages/NotFound";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const DashboardPage = React.lazy(() => import("./pages/dashboard/DashboardPage"));
+const CommandCenterPage = React.lazy(() => import("./pages/dashboard/CommandCenterPage"));
+const MentionsPage = React.lazy(() => import("./pages/dashboard/MentionsPage"));
+
+const queryClient = new QueryClient();
+
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/auth" />;
+  }
+
+  return children;
+};
 
 function App() {
-  const { isLoaded } = useUser();
-  const [isReady, setIsReady] = useState(false);
-  const { clientChanges } = useClientChanges();
-  
-  useEffect(() => {
-    if (isLoaded) {
-      const timer = setTimeout(() => {
-        setIsReady(true);
-      }, 200);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [isLoaded]);
+  const { isLoading } = useAuth();
 
-  // Show a loading state until Clerk is fully loaded and we've had a moment to prevent flashing
-  if (!isLoaded || !isReady) {
-    return (
-      <div className="h-screen w-screen flex flex-col items-center justify-center">
-        <Skeleton className="h-12 w-64 mb-4" />
-        <Skeleton className="h-4 w-48" />
-      </div>
-    );
+  if (isLoading) {
+    return <div>Loading...</div>;
   }
 
   return (
-    <RbacProvider>
+    <QueryClientProvider client={queryClient}>
       <Router>
         <Routes>
-          {/* Public routes */}
           <Route path="/" element={<Index />} />
-          <Route path="/signin/*" element={<Authentication />} />
-          <Route path="/signup/*" element={<Authentication />} />
-          
-          {/* Protected routes */}
-          <Route path="/dashboard" element={
-            <ProtectedRoute>
-              <DashboardPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/command-center" element={
-            <ProtectedRoute>
-              <CommandCenterPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/monitor" element={
-            <ProtectedRoute>
-              <Monitor />
-            </ProtectedRoute>
-          } />
-          <Route path="/clients" element={
-            <ProtectedRoute>
-              <Clients />
-            </ProtectedRoute>
-          } />
-          <Route path="/removal" element={
-            <ProtectedRoute>
-              <Removal />
-            </ProtectedRoute>
-          } />
-          <Route path="/settings" element={
-            <ProtectedRoute>
-              <Settings />
-            </ProtectedRoute>
-          } />
-          <Route path="/settings/security" element={
-            <ProtectedRoute>
-              <Settings />
-            </ProtectedRoute>
-          } />
-          
-          {/* Catch-all route */}
+          <Route path="/auth" element={<Authentication />} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <DashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/mentions"
+            element={
+              <ProtectedRoute>
+                <React.Suspense fallback={<div>Loading...</div>}>
+                  <MentionsPage />
+                </React.Suspense>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/command-center"
+            element={
+              <ProtectedRoute>
+                <React.Suspense fallback={<div>Loading...</div>}>
+                  <CommandCenterPage />
+                </React.Suspense>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/clients"
+            element={
+              <ProtectedRoute>
+                <Clients />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/monitor"
+            element={
+              <ProtectedRoute>
+                <Monitor />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/removal"
+            element={
+              <ProtectedRoute>
+                <Removal />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <Settings />
+              </ProtectedRoute>
+            }
+          />
           <Route path="*" element={<NotFound />} />
         </Routes>
-        
-        {/* AI Assistant is global across all protected routes */}
-        <ProtectedRoute>
-          <AIAssistant clientUpdates={clientChanges} />
-        </ProtectedRoute>
+        <Toaster />
       </Router>
-      <Toaster position="top-right" />
-    </RbacProvider>
+    </QueryClientProvider>
   );
 }
 
