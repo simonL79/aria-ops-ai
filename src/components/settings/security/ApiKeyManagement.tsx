@@ -9,14 +9,16 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Key, Clock } from "lucide-react";
+import { Key, Clock, Save, Lock } from "lucide-react";
 import { storeSecureKey, getSecureKey, clearSecureKey, hasValidKey } from "@/utils/secureKeyStorage";
 import { toast } from "sonner";
+import { Switch } from "@/components/ui/switch";
 
 const ApiKeyManagement = () => {
   const [apiKey, setApiKey] = useState<string>('');
   const [apiKeyMask, setApiKeyMask] = useState<string>('');
-  const [keyExpiration, setKeyExpiration] = useState<number>(60); // Default 60 minutes
+  const [keyExpiration, setKeyExpiration] = useState<number>(0); // 0 means no expiration (persistent)
+  const [persistentStorage, setPersistentStorage] = useState<boolean>(true);
   
   // When component mounts, check if API key exists and mask it
   useEffect(() => {
@@ -28,8 +30,13 @@ const ApiKeyManagement = () => {
   
   const handleSaveApiKey = () => {
     if (apiKey) {
-      // Store API key in secure storage with expiration
-      storeSecureKey('openai_api_key', apiKey, keyExpiration);
+      // Store API key with or without expiration based on settings
+      storeSecureKey(
+        'openai_api_key', 
+        apiKey, 
+        keyExpiration > 0 ? keyExpiration : undefined,
+        persistentStorage
+      );
       
       setApiKey('');
       setApiKeyMask('•'.repeat(20) + apiKey.slice(-5));
@@ -50,10 +57,10 @@ const ApiKeyManagement = () => {
       <CardHeader>
         <div className="flex items-center space-x-2">
           <Key className="h-5 w-5 text-primary" />
-          <CardTitle>API Key Management</CardTitle>
+          <CardTitle>API Key</CardTitle>
         </div>
         <CardDescription>
-          Securely store your OpenAI API key for A.R.I.A. functionality
+          Set your OpenAI API key for A.R.I.A. functionality
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -66,26 +73,42 @@ const ApiKeyManagement = () => {
               onChange={(e) => setApiKey(e.target.value)}
               className="flex-1"
             />
-            <Button onClick={handleSaveApiKey}>Save</Button>
+            <Button onClick={handleSaveApiKey}>
+              <Save className="h-4 w-4 mr-2" />
+              Save
+            </Button>
           </div>
           
-          <div className="flex items-center space-x-2">
-            <Clock className="h-4 w-4 text-muted-foreground" />
-            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-              <span>Key expires after:</span>
-              <select 
-                value={keyExpiration}
-                onChange={(e) => setKeyExpiration(parseInt(e.target.value))}
-                className="bg-background border rounded px-2 py-1"
-              >
-                <option value="30">30 minutes</option>
-                <option value="60">1 hour</option>
-                <option value="120">2 hours</option>
-                <option value="240">4 hours</option>
-                <option value="480">8 hours</option>
-              </select>
+          <div className="flex justify-between items-center">
+            <div className="flex items-center space-x-2">
+              <Lock className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">Store permanently</span>
             </div>
+            <Switch 
+              checked={persistentStorage} 
+              onCheckedChange={setPersistentStorage}
+            />
           </div>
+          
+          {!persistentStorage && (
+            <div className="flex items-center space-x-2">
+              <Clock className="h-4 w-4 text-muted-foreground" />
+              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                <span>Key expires after:</span>
+                <select 
+                  value={keyExpiration}
+                  onChange={(e) => setKeyExpiration(parseInt(e.target.value))}
+                  className="bg-background border rounded px-2 py-1"
+                >
+                  <option value="0">Never</option>
+                  <option value="60">1 hour</option>
+                  <option value="240">4 hours</option>
+                  <option value="480">8 hours</option>
+                  <option value="1440">24 hours</option>
+                </select>
+              </div>
+            </div>
+          )}
           
           {apiKeyMask && (
             <Button variant="outline" onClick={handleClearApiKey} size="sm">
@@ -94,7 +117,9 @@ const ApiKeyManagement = () => {
           )}
           
           <p className="text-sm text-muted-foreground">
-            Your API key is stored securely in memory and will be cleared when your session ends
+            {persistentStorage 
+              ? "Your API key is stored securely on this device and will be available next time you use the app."
+              : "Your API key is stored securely in memory and will be cleared when the expiration time is reached."}
           </p>
         </div>
       </CardContent>

@@ -1,6 +1,6 @@
 
 import { toast } from "sonner";
-import { getSecureKey } from "@/utils/secureKeyStorage";
+import { getSecureKey, hasValidKey } from "@/utils/secureKeyStorage";
 
 export interface OpenAIMessage {
   role: 'system' | 'user' | 'assistant';
@@ -29,11 +29,7 @@ export interface OpenAIResponse {
 export const callOpenAI = async (options: OpenAIRequestOptions): Promise<OpenAIResponse> => {
   try {
     // First try to get the key from our secure storage
-    const secureApiKey = getSecureKey('openai_api_key');
-    
-    // If no key in secure storage, try environment variable
-    // (for production deployments)
-    const apiKey = secureApiKey || import.meta.env.VITE_OPENAI_API_KEY;
+    const apiKey = getSecureKey('openai_api_key') || import.meta.env.VITE_OPENAI_API_KEY;
     
     // If no API key is available, show error
     if (!apiKey) {
@@ -54,7 +50,7 @@ export const callOpenAI = async (options: OpenAIRequestOptions): Promise<OpenAIR
       throw new Error("Rate limit exceeded");
     }
     
-    // Update last request time in sessionStorage (not localStorage)
+    // Update last request time in sessionStorage
     sessionStorage.setItem("last_api_request_time", currentTime.toString());
     
     // Make the API call with appropriate headers
@@ -81,4 +77,9 @@ export const callOpenAI = async (options: OpenAIRequestOptions): Promise<OpenAIR
     });
     throw error;
   }
+};
+
+// Helper function that checks if we have a valid API key or environment variable
+export const hasOpenAIKey = (): boolean => {
+  return hasValidKey('openai_api_key') || !!import.meta.env.VITE_OPENAI_API_KEY;
 };
