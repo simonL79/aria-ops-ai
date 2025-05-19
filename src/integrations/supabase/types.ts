@@ -9,6 +9,42 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      reputation_scan_submissions: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          keywords: string
+          phone: string | null
+          status: Database["public"]["Enums"]["reputation_scan_status"]
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          keywords: string
+          phone?: string | null
+          status?: Database["public"]["Enums"]["reputation_scan_status"]
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          keywords?: string
+          phone?: string | null
+          status?: Database["public"]["Enums"]["reputation_scan_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -52,6 +88,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user" | "security"
+      reputation_scan_status: "new" | "in_review" | "complete" | "archived"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -168,6 +205,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user", "security"],
+      reputation_scan_status: ["new", "in_review", "complete", "archived"],
     },
   },
 } as const

@@ -8,7 +8,7 @@ import {
 } from "react-router-dom";
 import { Toaster } from "sonner";
 import { useAuth } from "./hooks/useAuth";
-import { RbacProvider, Role } from "./hooks/useRbac";
+import { RbacProvider, Role, Protected } from "./hooks/useRbac";
 
 import SalesFunnelPage from "./pages/SalesFunnelPage";
 import AboutPage from "./pages/AboutPage";
@@ -31,6 +31,7 @@ const DashboardPage = React.lazy(() => import("./pages/dashboard/DashboardPage")
 const CommandCenterPage = React.lazy(() => import("./pages/dashboard/CommandCenterPage"));
 const MentionsPage = React.lazy(() => import("./pages/dashboard/MentionsPage"));
 const AnalyticsPage = React.lazy(() => import("./pages/dashboard/AnalyticsPage"));
+const ScanSubmissionsPage = React.lazy(() => import("./pages/dashboard/ScanSubmissionsPage"));
 
 const queryClient = new QueryClient();
 
@@ -113,6 +114,18 @@ function App() {
                 <ProtectedRoute>
                   <React.Suspense fallback={<div>Loading...</div>}>
                     <AnalyticsPage />
+                  </React.Suspense>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/scan-submissions"
+              element={
+                <ProtectedRoute>
+                  <React.Suspense fallback={<div>Loading...</div>}>
+                    <Protected roles="admin" fallback={<Navigate to="/dashboard" />}>
+                      <ScanSubmissionsPage />
+                    </Protected>
                   </React.Suspense>
                 </ProtectedRoute>
               }

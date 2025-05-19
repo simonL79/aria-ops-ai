@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -16,7 +16,10 @@ import {
   FormMessage,
   FormDescription
 } from "@/components/ui/form";
+import { Loader } from 'lucide-react';
 import Logo from '@/components/ui/logo';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 // Form validation schema
 const formSchema = z.object({
@@ -30,6 +33,8 @@ type FormData = z.infer<typeof formSchema>;
 
 const ReputationScanForm = () => {
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -40,11 +45,32 @@ const ReputationScanForm = () => {
     },
   });
 
-  const onSubmit = (data: FormData) => {
-    console.log('Form submitted:', data);
-    // In a real app, you'd send this data to your backend
-    // For now, we'll just redirect to the thank you page
-    navigate('/thank-you');
+  const onSubmit = async (data: FormData) => {
+    setIsSubmitting(true);
+    try {
+      // Insert the data into Supabase
+      const { data: insertedData, error } = await supabase
+        .from('reputation_scan_submissions')
+        .insert({
+          full_name: data.fullName,
+          email: data.email,
+          phone: data.phone || null,
+          keywords: data.keywords,
+        });
+        
+      if (error) {
+        throw error;
+      }
+      
+      toast.success('Your scan request has been submitted!');
+      // Redirect to thank you page
+      navigate('/thank-you');
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      toast.error('There was an error submitting your request. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -135,8 +161,20 @@ const ReputationScanForm = () => {
                   )}
                 />
 
-                <Button type="submit" className="w-full py-6" size="lg">
-                  Submit and Get Your Report
+                <Button 
+                  type="submit" 
+                  className="w-full py-6" 
+                  size="lg"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader className="mr-2 h-4 w-4 animate-spin" />
+                      Submitting...
+                    </>
+                  ) : (
+                    "Submit and Get Your Report"
+                  )}
                 </Button>
               </form>
             </Form>
