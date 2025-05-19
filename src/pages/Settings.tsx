@@ -1,14 +1,24 @@
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import SecuritySettings from "@/components/settings/SecuritySettings";
-import { RoleProtected } from "@/hooks/useRbac";
 
 const Settings = () => {
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState<string>("general");
+  
+  // Set active tab based on URL
+  useEffect(() => {
+    if (location.pathname.includes("/security")) {
+      setActiveTab("security");
+    } else {
+      setActiveTab("general");
+    }
+  }, [location.pathname]);
   
   return (
     <DashboardLayout>

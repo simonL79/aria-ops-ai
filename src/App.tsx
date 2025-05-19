@@ -33,8 +33,12 @@ function App() {
         <Routes>
           {/* Public routes */}
           <Route path="/" element={<Index />} />
-          <Route path="/signin/*" element={<Authentication />} />
-          <Route path="/signup/*" element={<Authentication />} />
+          <Route path="/signin/*" element={
+            isSignedIn ? <Navigate to="/dashboard" replace /> : <Authentication />
+          } />
+          <Route path="/signup/*" element={
+            isSignedIn ? <Navigate to="/dashboard" replace /> : <Authentication />
+          } />
           
           {/* Protected routes */}
           <Route path="/dashboard" element={
