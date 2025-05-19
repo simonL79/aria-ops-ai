@@ -27,9 +27,6 @@ createRoot(document.getElementById("root")!).render(
     signUpUrl="/auth"
     afterSignInUrl="/dashboard"
     afterSignUpUrl="/dashboard"
-    onLoaded={() => {
-      console.log("Clerk loaded successfully");
-    }}
   >
     <AuthProvider>
       <App />
