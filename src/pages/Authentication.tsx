@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import { 
   SignIn, 
@@ -17,9 +17,21 @@ import { Skeleton } from "@/components/ui/skeleton";
 const Authentication = () => {
   const [activeTab, setActiveTab] = useState<string>("signin");
   const { isSignedIn, isLoaded } = useUser();
+  const [isReady, setIsReady] = useState(false);
+  
+  useEffect(() => {
+    if (isLoaded) {
+      // Small timeout to prevent flash
+      const timer = setTimeout(() => {
+        setIsReady(true);
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isLoaded]);
   
   // If still loading, show a loading state
-  if (!isLoaded) {
+  if (!isLoaded || !isReady) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
         <Skeleton className="h-12 w-64 mb-4" />

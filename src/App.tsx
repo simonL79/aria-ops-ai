@@ -13,16 +13,29 @@ import DashboardPage from '@/pages/dashboard/DashboardPage';
 import NotFound from '@/pages/NotFound';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import { Toaster } from 'sonner';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useEffect, useState } from 'react';
 
 function App() {
   const { isLoaded } = useUser();
+  const [isReady, setIsReady] = useState(false);
+  
+  useEffect(() => {
+    if (isLoaded) {
+      const timer = setTimeout(() => {
+        setIsReady(true);
+      }, 200);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isLoaded]);
 
-  // Show a loading state while Clerk loads
-  if (!isLoaded) {
+  // Show a loading state until Clerk is fully loaded and we've had a moment to prevent flashing
+  if (!isLoaded || !isReady) {
     return (
       <div className="h-screen w-screen flex flex-col items-center justify-center">
-        <div className="animate-pulse rounded-md bg-muted h-12 w-64 mb-4" />
-        <div className="animate-pulse rounded-md bg-muted h-4 w-48" />
+        <Skeleton className="h-12 w-64 mb-4" />
+        <Skeleton className="h-4 w-48" />
       </div>
     );
   }
