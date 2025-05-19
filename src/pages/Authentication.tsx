@@ -12,6 +12,7 @@ import { Shield } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Authentication = () => {
   const [activeTab, setActiveTab] = useState<string>("signin");
@@ -21,8 +22,8 @@ const Authentication = () => {
   if (!isLoaded) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
-        <div className="animate-pulse rounded-md bg-muted h-12 w-64 mb-4" />
-        <div className="animate-pulse rounded-md bg-muted h-4 w-48" />
+        <Skeleton className="h-12 w-64 mb-4" />
+        <Skeleton className="h-4 w-48" />
       </div>
     );
   }
@@ -31,6 +32,11 @@ const Authentication = () => {
   if (isSignedIn) {
     return <Navigate to="/dashboard" replace />;
   }
+
+  // Handle tab change without form submissions
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+  };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
@@ -56,7 +62,7 @@ const Authentication = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-8">
               <TabsTrigger value="signin" type="button">Sign In</TabsTrigger>
               <TabsTrigger value="signup" type="button">Sign Up</TabsTrigger>
