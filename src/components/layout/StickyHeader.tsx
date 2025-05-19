@@ -32,22 +32,22 @@ const StickyHeader = ({ isScrolled }: StickyHeaderProps) => {
             <NavigationMenu>
               <NavigationMenuList>
                 <NavigationMenuItem>
-                  <Link to="/" className={`${navigationMenuTriggerStyle()} ${isScrolled ? 'text-white hover:text-premium-silver' : 'text-premium-black hover:text-premium-darkGray'}`}>
+                  <Link to="/" className={`${navigationMenuTriggerStyle()} transition-colors duration-300 ${isScrolled ? 'text-white hover:text-premium-silver' : 'text-premium-black hover:text-premium-darkGray'}`}>
                     Home
                   </Link>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
-                  <Link to="/about" className={`${navigationMenuTriggerStyle()} ${isScrolled ? 'text-white hover:text-premium-silver' : 'text-premium-black hover:text-premium-darkGray'}`}>
+                  <Link to="/about" className={`${navigationMenuTriggerStyle()} transition-colors duration-300 ${isScrolled ? 'text-white hover:text-premium-silver' : 'text-premium-black hover:text-premium-darkGray'}`}>
                     About
                   </Link>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
-                  <a href="#how-it-works" className={`${navigationMenuTriggerStyle()} ${isScrolled ? 'text-white hover:text-premium-silver' : 'text-premium-black hover:text-premium-darkGray'}`}>
+                  <a href="#how-it-works" className={`${navigationMenuTriggerStyle()} transition-colors duration-300 ${isScrolled ? 'text-white hover:text-premium-silver' : 'text-premium-black hover:text-premium-darkGray'}`}>
                     How It Works
                   </a>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
-                  <Link to="/biography" className={`${navigationMenuTriggerStyle()} ${isScrolled ? 'text-white hover:text-premium-silver' : 'text-premium-black hover:text-premium-darkGray'}`}>
+                  <Link to="/biography" className={`${navigationMenuTriggerStyle()} transition-colors duration-300 ${isScrolled ? 'text-white hover:text-premium-silver' : 'text-premium-black hover:text-premium-darkGray'}`}>
                     Simon Lindsay
                   </Link>
                 </NavigationMenuItem>
@@ -65,9 +65,9 @@ const StickyHeader = ({ isScrolled }: StickyHeaderProps) => {
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? (
-              <X className={`h-6 w-6 ${isScrolled ? 'text-white' : 'text-premium-black'}`} />
+              <X className={`h-6 w-6 transition-colors duration-300 ${isScrolled ? 'text-white' : 'text-premium-black'}`} />
             ) : (
-              <Menu className={`h-6 w-6 ${isScrolled ? 'text-white' : 'text-premium-black'}`} />
+              <Menu className={`h-6 w-6 transition-colors duration-300 ${isScrolled ? 'text-white' : 'text-premium-black'}`} />
             )}
           </button>
         </div>
