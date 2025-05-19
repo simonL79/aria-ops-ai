@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -29,6 +29,7 @@ import { toast } from "sonner";
 import { generateAIResponse, ResponseGenerationProps } from "@/services";
 import { ContentThreatType } from "@/types/intelligence";
 import { ResponseToneStyle, AutoResponseSettings } from "@/types/dashboard";
+import { storeSecureKey, getSecureKey, hasValidKey } from "@/utils/secureKeyStorage";
 
 interface ResponseTemplateProps {
   type: string;
@@ -57,7 +58,11 @@ const StrategicResponseEngine = ({
   const [toneStyle, setToneStyle] = useState<ResponseToneStyle>("professional");
   const [contentToRespond, setContentToRespond] = useState<string>(initialContent);
   const [selectedPlatform, setPlatform] = useState<string>(platform || "");
-  const [apiKey, setApiKey] = useState<string>(localStorage.getItem("openai_api_key") || "");
+  
+  // Update to use secure storage instead of localStorage
+  const [apiKey, setApiKey] = useState<string>("");
+  const [apiKeyMasked, setApiKeyMasked] = useState<boolean>(hasValidKey('openai_api_key'));
+  
   const [usageTokens, setUsageTokens] = useState<number>(0);
   const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
   const [language, setLanguage] = useState<string>("en");
@@ -112,6 +117,14 @@ const StrategicResponseEngine = ({
     { code: "ru", name: "Russian" },
     { code: "pt", name: "Portuguese" }
   ];
+
+  // Check for existing API key when component loads
+  useEffect(() => {
+    // If we have a key in secure storage, show that it's masked
+    if (hasValidKey('openai_api_key')) {
+      setApiKeyMasked(true);
+    }
+  }, []);
   
   const handleGenerateResponse = async () => {
     if (!contentToRespond.trim()) {
@@ -119,13 +132,20 @@ const StrategicResponseEngine = ({
       return;
     }
     
-    if (!apiKey) {
+    // Save API key if provided
+    if (apiKey) {
+      storeSecureKey('openai_api_key', apiKey, 60); // Store for 60 minutes
+      setApiKey('');
+      setApiKeyMasked(true);
+    }
+    
+    // Check if we have a key after attempting to save
+    if (!hasValidKey('openai_api_key')) {
       toast.error("Please enter an OpenAI API key");
       return;
     }
     
     setIsGenerating(true);
-    localStorage.setItem("openai_api_key", apiKey);
     
     try {
       const props: ResponseGenerationProps = {
@@ -197,6 +217,7 @@ const StrategicResponseEngine = ({
     }
   };
 
+  // Update the API key input render code
   return (
     <Card>
       <CardHeader className="pb-2">
@@ -215,15 +236,35 @@ const StrategicResponseEngine = ({
               {/* API Key Input */}
               <div>
                 <label className="text-sm font-medium mb-1 block">OpenAI API Key</label>
-                <Input
-                  type="password"
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                  placeholder="Enter your OpenAI API key"
-                  className="font-mono text-sm"
-                />
+                {apiKeyMasked ? (
+                  <div className="flex space-x-2">
+                    <Input
+                      type="password"
+                      value="••••••••••••••••••••••"
+                      disabled
+                      className="font-mono text-sm flex-1"
+                    />
+                    <Button 
+                      variant="outline" 
+                      onClick={() => {
+                        setApiKeyMasked(false);
+                        setApiKey('');
+                      }}
+                    >
+                      Change
+                    </Button>
+                  </div>
+                ) : (
+                  <Input
+                    type="password"
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    placeholder="Enter your OpenAI API key"
+                    className="font-mono text-sm"
+                  />
+                )}
                 <p className="text-xs text-muted-foreground mt-1">
-                  Your API key is stored locally in your browser and is never sent to our servers.
+                  Your API key is stored securely in memory and will be cleared when your session ends.
                 </p>
               </div>
               

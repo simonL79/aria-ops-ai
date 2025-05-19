@@ -1,12 +1,15 @@
 
 import { toast } from "sonner";
+import { getSecureKey } from "@/utils/secureKeyStorage";
 
-interface OpenAIRequestOptions {
+export interface OpenAIMessage {
+  role: 'system' | 'user' | 'assistant';
+  content: string;
+}
+
+export interface OpenAIRequestOptions {
   model: string;
-  messages: {
-    role: 'system' | 'user' | 'assistant';
-    content: string;
-  }[];
+  messages: OpenAIMessage[];
   temperature?: number;
 }
 
@@ -25,11 +28,41 @@ export interface OpenAIResponse {
 
 export const callOpenAI = async (options: OpenAIRequestOptions): Promise<OpenAIResponse> => {
   try {
+    // First try to get the key from our secure storage
+    const secureApiKey = getSecureKey('openai_api_key');
+    
+    // If no key in secure storage, try environment variable
+    // (for production deployments)
+    const apiKey = secureApiKey || import.meta.env.VITE_OPENAI_API_KEY;
+    
+    // If no API key is available, show error
+    if (!apiKey) {
+      toast.error("API Key Required", {
+        description: "Please set your OpenAI API key in the settings panel"
+      });
+      throw new Error("OpenAI API key not found");
+    }
+    
+    // Check for rate limiting
+    const lastRequestTime = sessionStorage.getItem("last_api_request_time");
+    const currentTime = Date.now();
+    
+    if (lastRequestTime && (currentTime - parseInt(lastRequestTime)) < 500) {
+      toast.warning("API Rate Limit", {
+        description: "Please wait before making another request"
+      });
+      throw new Error("Rate limit exceeded");
+    }
+    
+    // Update last request time in sessionStorage (not localStorage)
+    sessionStorage.setItem("last_api_request_time", currentTime.toString());
+    
+    // Make the API call with appropriate headers
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.OPENAI_API_KEY || localStorage.getItem("openai_api_key")}`
+        "Authorization": `Bearer ${apiKey}`
       },
       body: JSON.stringify(options)
     });

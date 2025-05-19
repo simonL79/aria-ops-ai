@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -29,6 +28,8 @@ import { toast } from "sonner";
 
 import { SeoContent } from "@/types/dashboard";
 import { generateSeoContent } from "@/services/openaiService";
+
+import { storeSecureKey, getSecureKey, hasValidKey } from "@/utils/secureKeyStorage";
 
 const DEMO_CONTENT: SeoContent[] = [
   {
@@ -62,7 +63,8 @@ const SeoSuppressionPipeline = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [seoContent, setSeoContent] = useState<SeoContent[]>(DEMO_CONTENT);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [apiKey, setApiKey] = useState<string>(localStorage.getItem("openai_api_key") || "");
+  const [apiKey, setApiKey] = useState<string>("");
+  const [apiKeyMasked, setApiKeyMasked] = useState<boolean>(hasValidKey('openai_api_key'));
   
   // Form states
   const [title, setTitle] = useState("");
@@ -77,19 +79,34 @@ const SeoSuppressionPipeline = () => {
   const draftCount = seoContent.filter(c => c.status === "draft").length;
   const optimizingCount = seoContent.filter(c => c.status === "optimizing").length;
   
+  // Check for existing API key when component loads
+  useEffect(() => {
+    // If we have a key in secure storage, show that it's masked
+    if (hasValidKey('openai_api_key')) {
+      setApiKeyMasked(true);
+    }
+  }, []); 
+  
   const handleGenerateContent = async () => {
     if (!keywords.trim()) {
       toast.error("Please enter at least one keyword");
       return;
     }
     
-    if (!apiKey) {
+    // Save API key if provided
+    if (apiKey) {
+      storeSecureKey('openai_api_key', apiKey, 60); // Store for 60 minutes
+      setApiKey('');
+      setApiKeyMasked(true);
+    }
+    
+    // Check if we have a key after attempting to save
+    if (!hasValidKey('openai_api_key')) {
       toast.error("Please enter an OpenAI API key");
       return;
     }
     
     setIsGenerating(true);
-    localStorage.setItem("openai_api_key", apiKey);
     
     try {
       const mainKeyword = keywords.split(",")[0].trim();
@@ -279,15 +296,35 @@ const SeoSuppressionPipeline = () => {
             <div className="space-y-4">
               <div>
                 <label className="text-sm font-medium mb-1 block">OpenAI API Key</label>
-                <Input
-                  type="password"
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                  placeholder="Enter your OpenAI API key"
-                  className="font-mono text-sm"
-                />
+                {apiKeyMasked ? (
+                  <div className="flex space-x-2">
+                    <Input
+                      type="password"
+                      value="••••••••••••••••••••••"
+                      disabled
+                      className="font-mono text-sm flex-1"
+                    />
+                    <Button 
+                      variant="outline" 
+                      onClick={() => {
+                        setApiKeyMasked(false);
+                        setApiKey('');
+                      }}
+                    >
+                      Change
+                    </Button>
+                  </div>
+                ) : (
+                  <Input
+                    type="password"
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    placeholder="Enter your OpenAI API key"
+                    className="font-mono text-sm"
+                  />
+                )}
                 <p className="text-xs text-muted-foreground mt-1">
-                  Your API key is stored locally in your browser.
+                  Your API key is stored securely in memory and will be cleared when your session ends.
                 </p>
               </div>
               

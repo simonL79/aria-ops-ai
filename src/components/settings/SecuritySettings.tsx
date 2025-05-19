@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Card, 
   CardHeader, 
@@ -21,8 +21,8 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { useRbac, RoleProtected } from "@/hooks/useRbac";
-import { Shield, Lock, Key, AlertTriangle } from "lucide-react";
-import { encryptData } from "@/services/secureApiService";
+import { Shield, Lock, Key, AlertTriangle, Clock } from "lucide-react";
+import { storeSecureKey, getSecureKey, clearSecureKey, hasValidKey } from "@/utils/secureKeyStorage";
 
 const SecuritySettings = () => {
   const [apiKey, setApiKey] = useState<string>('');
@@ -31,41 +31,59 @@ const SecuritySettings = () => {
   const [rateLimiting, setRateLimiting] = useState<boolean>(true);
   const [encryptStorage, setEncryptStorage] = useState<boolean>(true);
   const [autoLogout, setAutoLogout] = useState<number>(30);
+  const [keyExpiration, setKeyExpiration] = useState<number>(60); // Default 60 minutes
   
   const { userRoles } = useRbac();
   const isAdmin = userRoles.includes('admin');
   
   // When component mounts, check if API key exists and mask it
-  useState(() => {
-    const storedKey = localStorage.getItem('openai_api_key');
-    if (storedKey) {
-      setApiKeyMask('•'.repeat(20) + storedKey.slice(-5));
+  useEffect(() => {
+    const securedKey = getSecureKey('openai_api_key');
+    if (securedKey) {
+      setApiKeyMask('•'.repeat(20) + securedKey.slice(-5));
     }
-  });
+    
+    // Load other settings from sessionStorage
+    const contentFilteringValue = sessionStorage.getItem('content_filtering_enabled');
+    if (contentFilteringValue !== null) {
+      setContentFiltering(contentFilteringValue === 'true');
+    }
+    
+    const rateLimitingValue = sessionStorage.getItem('rate_limiting_enabled');
+    if (rateLimitingValue !== null) {
+      setRateLimiting(rateLimitingValue === 'true');
+    }
+    
+    const encryptStorageValue = sessionStorage.getItem('encrypt_storage');
+    if (encryptStorageValue !== null) {
+      setEncryptStorage(encryptStorageValue === 'true');
+    }
+    
+    const autoLogoutValue = sessionStorage.getItem('auto_logout_minutes');
+    if (autoLogoutValue !== null) {
+      setAutoLogout(parseInt(autoLogoutValue));
+    }
+  }, []);
   
   const handleSaveApiKey = () => {
     if (apiKey) {
-      // Encrypt API key before storing
-      if (encryptStorage) {
-        localStorage.setItem('openai_api_key', encryptData(apiKey));
-        localStorage.setItem('openai_api_key_encrypted', 'true');
-      } else {
-        localStorage.setItem('openai_api_key', apiKey);
-        localStorage.setItem('openai_api_key_encrypted', 'false');
-      }
+      // Store API key in secure storage with expiration
+      storeSecureKey('openai_api_key', apiKey, keyExpiration);
       
       setApiKey('');
       setApiKeyMask('•'.repeat(20) + apiKey.slice(-5));
-      
-      toast.success("API Key saved successfully", {
-        description: "Your API key has been securely saved"
-      });
     }
+  };
+  
+  const handleClearApiKey = () => {
+    clearSecureKey('openai_api_key');
+    setApiKey('');
+    setApiKeyMask('');
   };
   
   const handleToggleContentFiltering = () => {
     setContentFiltering(!contentFiltering);
-    localStorage.setItem('content_filtering_enabled', (!contentFiltering).toString());
+    sessionStorage.setItem('content_filtering_enabled', (!contentFiltering).toString());
     
     toast.success("Settings updated", {
       description: `Content filtering ${!contentFiltering ? 'enabled' : 'disabled'}`
@@ -74,7 +92,7 @@ const SecuritySettings = () => {
   
   const handleToggleRateLimiting = () => {
     setRateLimiting(!rateLimiting);
-    localStorage.setItem('rate_limiting_enabled', (!rateLimiting).toString());
+    sessionStorage.setItem('rate_limiting_enabled', (!rateLimiting).toString());
     
     toast.success("Settings updated", {
       description: `Rate limiting ${!rateLimiting ? 'enabled' : 'disabled'}`
@@ -83,16 +101,16 @@ const SecuritySettings = () => {
   
   const handleToggleEncryption = () => {
     setEncryptStorage(!encryptStorage);
-    localStorage.setItem('encrypt_storage', (!encryptStorage).toString());
+    sessionStorage.setItem('encrypt_storage', (!encryptStorage).toString());
     
     toast.success("Settings updated", {
-      description: `Local storage encryption ${!encryptStorage ? 'enabled' : 'disabled'}`
+      description: `Data encryption ${!encryptStorage ? 'enabled' : 'disabled'}`
     });
   };
   
   const handleAutoLogoutChange = (minutes: number) => {
     setAutoLogout(minutes);
-    localStorage.setItem('auto_logout_minutes', minutes.toString());
+    sessionStorage.setItem('auto_logout_minutes', minutes.toString());
     
     toast.success("Settings updated", {
       description: `Auto logout set to ${minutes} minutes`
@@ -112,19 +130,46 @@ const SecuritySettings = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex space-x-2">
-            <Input 
-              type="password" 
-              placeholder={apiKeyMask || "Enter your OpenAI API key"} 
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-              className="flex-1"
-            />
-            <Button onClick={handleSaveApiKey}>Save</Button>
+          <div className="flex flex-col space-y-4">
+            <div className="flex space-x-2">
+              <Input 
+                type="password" 
+                placeholder={apiKeyMask || "Enter your OpenAI API key"} 
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+                className="flex-1"
+              />
+              <Button onClick={handleSaveApiKey}>Save</Button>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Clock className="h-4 w-4 text-muted-foreground" />
+              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                <span>Key expires after:</span>
+                <select 
+                  value={keyExpiration}
+                  onChange={(e) => setKeyExpiration(parseInt(e.target.value))}
+                  className="bg-background border rounded px-2 py-1"
+                >
+                  <option value="30">30 minutes</option>
+                  <option value="60">1 hour</option>
+                  <option value="120">2 hours</option>
+                  <option value="240">4 hours</option>
+                  <option value="480">8 hours</option>
+                </select>
+              </div>
+            </div>
+            
+            {apiKeyMask && (
+              <Button variant="outline" onClick={handleClearApiKey} size="sm">
+                Clear API Key
+              </Button>
+            )}
+            
+            <p className="text-sm text-muted-foreground">
+              Your API key is stored securely in memory and will be cleared when your session ends
+            </p>
           </div>
-          <p className="text-sm text-muted-foreground mt-2">
-            Your API key is encrypted and stored locally on your device
-          </p>
         </CardContent>
       </Card>
       

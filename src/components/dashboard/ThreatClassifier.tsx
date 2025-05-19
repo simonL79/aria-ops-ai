@@ -1,5 +1,5 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { hasValidKey } from "@/utils/secureKeyStorage";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -23,13 +23,32 @@ const ThreatClassifier = ({ initialContent = "", onClassified }: ThreatClassifie
   const [isClassifying, setIsClassifying] = useState<boolean>(false);
   const [result, setResult] = useState<ThreatClassificationResult | null>(null);
   
+  // Add check for API key
+  useEffect(() => {
+    // Check for API key on component mount
+    if (!hasValidKey('openai_api_key')) {
+      toast.info("API Key Required", {
+        description: "Please set your OpenAI API key in the settings panel before using this feature"
+      });
+    }
+  }, []);
+  
   const handleClassify = async () => {
     if (!content.trim()) {
       toast.error("Please enter content to classify");
       return;
     }
     
+    // Check if we have an API key
+    if (!hasValidKey('openai_api_key')) {
+      toast.error("API Key Required", {
+        description: "Please set your OpenAI API key in the settings panel"
+      });
+      return;
+    }
+    
     setIsClassifying(true);
+    
     try {
       const request: ThreatClassifierRequest = {
         content,
