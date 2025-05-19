@@ -115,12 +115,8 @@
     @apply bg-premium-black text-white border border-premium-silver hover:bg-premium-darkGray transition-colors duration-300;
   }
   
-  .logo-network {
-    @apply opacity-70;
-  }
-  
-  .logo-network-line {
-    @apply opacity-60 stroke-current;
+  .aria-logo {
+    filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.1));
   }
 }
 
