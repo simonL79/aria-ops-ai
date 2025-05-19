@@ -34,7 +34,11 @@ export const callOpenAI = async (options: OpenAIRequestOptions): Promise<OpenAIR
     // If no API key is available, show error
     if (!apiKey) {
       toast.error("API Key Required", {
-        description: "Please set your OpenAI API key in the settings panel"
+        description: "Please set your OpenAI API key in the settings panel",
+        action: {
+          label: "Settings",
+          onClick: () => window.location.href = "/settings"
+        }
       });
       throw new Error("OpenAI API key not found");
     }
@@ -65,16 +69,30 @@ export const callOpenAI = async (options: OpenAIRequestOptions): Promise<OpenAIR
     
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error?.message || "Error calling OpenAI API");
+      const errorMessage = errorData.error?.message || "Error calling OpenAI API";
+      
+      // Check specifically for quota errors
+      if (errorMessage.toLowerCase().includes("quota") ||
+          errorMessage.toLowerCase().includes("rate limit") ||
+          errorMessage.toLowerCase().includes("capacity")) {
+        toast.error("OpenAI API Quota Exceeded", {
+          description: "Your API key's usage quota has been exceeded. Please check your OpenAI account.",
+          action: {
+            label: "Manage API Key",
+            onClick: () => window.location.href = "/settings"
+          },
+          duration: 10000
+        });
+      }
+      
+      throw new Error(errorMessage);
     }
     
     return await response.json() as OpenAIResponse;
     
   } catch (error) {
     console.error("OpenAI API Error:", error);
-    toast.error("OpenAI API Error", {
-      description: error instanceof Error ? error.message : "Unknown error occurred"
-    });
+    // Note: We're not showing a toast here as the calling functions will handle specific errors
     throw error;
   }
 };

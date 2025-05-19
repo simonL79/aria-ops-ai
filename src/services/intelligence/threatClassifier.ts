@@ -31,30 +31,50 @@ Return JSON with:
       }
     ];
     
-    const responseData = await callOpenAI({
-      model: "gpt-4o",
-      messages,
-      temperature: 0.4
-    });
-    
-    const content = responseData.choices[0]?.message?.content;
-    
-    if (!content) {
-      throw new Error("Empty response from API");
-    }
-    
     try {
-      const parsed = JSON.parse(content);
-      return parsed as ThreatClassificationResult;
-    } catch (parseError) {
-      console.error("Failed to parse classification result:", parseError);
-      throw new Error("Invalid classification response format");
+      const responseData = await callOpenAI({
+        model: "gpt-4o",
+        messages,
+        temperature: 0.4
+      });
+      
+      const content = responseData?.choices[0]?.message?.content;
+      
+      if (!content) {
+        throw new Error("Empty response from API");
+      }
+      
+      try {
+        const parsed = JSON.parse(content);
+        return parsed as ThreatClassificationResult;
+      } catch (parseError) {
+        console.error("Failed to parse classification result:", parseError);
+        throw new Error("Invalid classification response format");
+      }
+    } catch (apiError) {
+      // Check for quota exceeded error
+      if (apiError.message?.toLowerCase().includes("quota") || 
+          apiError.message?.toLowerCase().includes("rate limit") || 
+          apiError.message?.toLowerCase().includes("capacity")) {
+        toast.error("OpenAI API Quota Exceeded", {
+          description: "Your API key's quota has been exceeded. Please update your API key in settings.",
+          action: {
+            label: "Go to Settings",
+            onClick: () => window.location.href = "/settings"
+          },
+          duration: 10000
+        });
+      }
+      throw apiError;
     }
     
   } catch (error) {
     console.error("Classification API Error:", error);
     toast.error("Failed to classify threat", {
-      description: error instanceof Error ? error.message : "Unknown error occurred"
+      description: error instanceof Error 
+        ? error.message 
+        : "Unknown error occurred. Please check your API key or try again later.",
+      duration: 5000
     });
     return null;
   }
