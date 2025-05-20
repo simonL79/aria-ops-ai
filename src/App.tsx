@@ -32,6 +32,7 @@ const CommandCenterPage = React.lazy(() => import("./pages/dashboard/CommandCent
 const MentionsPage = React.lazy(() => import("./pages/dashboard/MentionsPage"));
 const AnalyticsPage = React.lazy(() => import("./pages/dashboard/AnalyticsPage"));
 const ScanSubmissionsPage = React.lazy(() => import("./pages/dashboard/ScanSubmissionsPage"));
+const RadarPage = React.lazy(() => import("./pages/dashboard/RadarPage"));
 
 const queryClient = new QueryClient();
 
@@ -143,6 +144,16 @@ function App() {
                     <Protected roles="admin" fallback={<Navigate to="/dashboard" />}>
                       <ScanSubmissionsPage />
                     </Protected>
+                  </React.Suspense>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/radar"
+              element={
+                <ProtectedRoute>
+                  <React.Suspense fallback={<div>Loading...</div>}>
+                    <RadarPage />
                   </React.Suspense>
                 </ProtectedRoute>
               }

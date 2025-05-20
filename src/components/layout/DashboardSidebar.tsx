@@ -1,149 +1,163 @@
-import {
-  BarChart3,
-  Bell,
-  ClipboardList,
-  Command,
-  Home,
-  Search,
-  Settings,
-  Users,
-} from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
-
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { useState } from "react";
+import { useLocation, Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@/hooks/useAuth";
-import { Protected } from "@/hooks/useRbac";
+import { Dashboard, Home, Settings, Users, AlertTriangle, Shield, Search, BarChart3, Mail, MessageSquare, FileText, Radar } from "lucide-react";
 
-interface DashboardSidebarProps {
+interface SidebarProps {
   className?: string;
 }
 
-const DashboardSidebar = ({ className }: DashboardSidebarProps) => {
-  const { pathname } = useLocation();
-  const { user } = useAuth();
+const DashboardSidebar = () => {
+  const location = useLocation();
+  const [isDarkTheme, setIsDarkTheme] = useState(false);
+
+  const toggleTheme = () => {
+    setIsDarkTheme(!isDarkTheme);
+    document.documentElement.classList.toggle("dark");
+  };
 
   return (
-    <div className={cn("hidden border-r bg-gray-100/40 dark:bg-gray-800/40 h-full flex-col fixed w-[280px] z-50", className)}>
-      <Sheet>
-        <SheetTrigger asChild className="md:hidden">
-          <Button variant="ghost" size="sm" className="w-full">
-            <Command className="h-4 w-4 mr-2" />
-            Menu
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="w-full sm:w-64">
-          <SheetHeader className="text-left">
-            <SheetTitle>Dashboard Menu</SheetTitle>
-          </SheetHeader>
-          <Separator className="my-4" />
-          <div className="flex flex-col space-y-1">
+    <div className="flex h-full flex-col border-r bg-secondary">
+      <div className="flex-1 overflow-y-auto py-6">
+        <div className="px-3 py-2">
+          <Link
+            to="/"
+            className="mb-2 flex items-center space-x-2 px-4 text-lg font-semibold tracking-tight"
+          >
+            <Shield className="mr-2 h-4 w-4" />
+            <span>A.R.I.A.</span>
+          </Link>
+          <div className="space-y-1">
             <Link
               to="/dashboard"
-              className={cn(
-                "flex items-center gap-2 rounded-lg px-3 py-2 transition-all",
-                pathname === "/dashboard"
-                  ? "bg-accent text-accent-foreground"
-                  : "hover:bg-muted"
-              )}
+              className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
+                location.pathname === '/dashboard' ? 'bg-accent text-accent-foreground' : ''
+              }`}
             >
-              <Home className="h-4 w-4" />
-              <span>Home</span>
-            </Link>
-            
-            {/* Moved Clients link higher in the navigation for better visibility */}
-            <Link
-              to="/clients"
-              className={cn(
-                "flex items-center gap-2 rounded-lg px-3 py-2 transition-all",
-                pathname === "/clients"
-                  ? "bg-accent text-accent-foreground"
-                  : "hover:bg-muted"
-              )}
-            >
-              <Users className="h-4 w-4" />
-              <span>Client Management</span>
-            </Link>
-            
-            <Link
-              to="/dashboard/command-center"
-              className={cn(
-                "flex items-center gap-2 rounded-lg px-3 py-2 transition-all",
-                pathname === "/dashboard/command-center"
-                  ? "bg-accent text-accent-foreground"
-                  : "hover:bg-muted"
-              )}
-            >
-              <Search className="h-4 w-4" />
-              <span>Command Center</span>
+              <div className="flex items-center">
+                <Home className="mr-2 h-4 w-4" />
+                <span>Dashboard</span>
+              </div>
             </Link>
             <Link
-              to="/dashboard/mentions"
-              className={cn(
-                "flex items-center gap-2 rounded-lg px-3 py-2 transition-all",
-                pathname === "/dashboard/mentions"
-                  ? "bg-accent text-accent-foreground"
-                  : "hover:bg-muted"
-              )}
+              to="/monitor"
+              className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
+                location.pathname === '/monitor' ? 'bg-accent text-accent-foreground' : ''
+              }`}
             >
-              <Bell className="h-4 w-4" />
-              <span>Mentions</span>
+              <div className="flex items-center">
+                <Search className="mr-2 h-4 w-4" />
+                <span>Content Monitor</span>
+              </div>
             </Link>
             <Link
-              to="/dashboard/analytics"
-              className={cn(
-                "flex items-center gap-2 rounded-lg px-3 py-2 transition-all",
-                pathname === "/dashboard/analytics"
-                  ? "bg-accent text-accent-foreground"
-                  : "hover:bg-muted"
-              )}
+              to="/engagement"
+              className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
+                location.pathname === '/engagement' ? 'bg-accent text-accent-foreground' : ''
+              }`}
             >
-              <BarChart3 className="h-4 w-4" />
-              <span>Analytics</span>
+              <div className="flex items-center">
+                <MessageSquare className="mr-2 h-4 w-4" />
+                <span>Engagement Hub</span>
+              </div>
             </Link>
-            
-            {/* Admin section remains the same */}
-            <Protected roles="admin">
-              <Link
-                to="/dashboard/scan-submissions"
-                className={cn(
-                  "flex items-center gap-2 rounded-lg px-3 py-2 transition-all",
-                  pathname === "/dashboard/scan-submissions"
-                    ? "bg-accent text-accent-foreground"
-                    : "hover:bg-muted"
-                )}
-              >
-                <ClipboardList className="h-4 w-4" />
-                <span>Scan Submissions</span>
-                <Badge variant="default" className="ml-auto">Admin</Badge>
-              </Link>
-            </Protected>
-            
-            <Separator className="my-4" />
             <Link
-              to="/settings"
-              className={cn(
-                "flex items-center gap-2 rounded-lg px-3 py-2 transition-all",
-                pathname === "/settings"
-                  ? "bg-accent text-accent-foreground"
-                  : "hover:bg-muted"
-              )}
+              to="/seo"
+              className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
+                location.pathname === '/seo' ? 'bg-accent text-accent-foreground' : ''
+              }`}
             >
-              <Settings className="h-4 w-4" />
-              <span>Settings</span>
+              <div className="flex items-center">
+                <BarChart3 className="mr-2 h-4 w-4" />
+                <span>SEO Center</span>
+              </div>
+            </Link>
+            <Link
+              to="/outreach"
+              className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
+                location.pathname === '/outreach' ? 'bg-accent text-accent-foreground' : ''
+              }`}
+            >
+              <div className="flex items-center">
+                <Mail className="mr-2 h-4 w-4" />
+                <span>Outreach Pipeline</span>
+              </div>
+            </Link>
+            <Link
+              to="/reports"
+              className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
+                location.pathname === '/reports' ? 'bg-accent text-accent-foreground' : ''
+              }`}
+            >
+              <div className="flex items-center">
+                <FileText className="mr-2 h-4 w-4" />
+                <span>Reporting</span>
+              </div>
             </Link>
           </div>
-        </SheetContent>
-      </Sheet>
+        </div>
+        
+        <div className="px-3 py-2">
+          <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">
+            Intelligence
+          </h2>
+          <div className="space-y-1">
+            <Link
+              to="/dashboard/intelligence"
+              className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
+                location.pathname === '/dashboard/intelligence' ? 'bg-accent text-accent-foreground' : ''
+              }`}
+            >
+              <div className="flex items-center">
+                <AlertTriangle className="mr-2 h-4 w-4" />
+                <span>Threat Intelligence</span>
+              </div>
+            </Link>
+            
+            <Link
+              to="/dashboard/radar"
+              className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
+                location.pathname === '/dashboard/radar' ? 'bg-accent text-accent-foreground' : ''
+              }`}
+            >
+              <div className="flex items-center">
+                <Radar className="mr-2 h-4 w-4" />
+                <span>Reputation Radar</span>
+              </div>
+            </Link>
+          </div>
+        </div>
+        
+        <div className="px-3 py-2">
+          <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">
+            Administration
+          </h2>
+          <div className="space-y-1">
+            <Link
+              to="/clients"
+              className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
+                location.pathname === '/clients' ? 'bg-accent text-accent-foreground' : ''
+              }`}
+            >
+              <div className="flex items-center">
+                <Users className="mr-2 h-4 w-4" />
+                <span>Clients</span>
+              </div>
+            </Link>
+            <Link
+              to="/settings"
+              className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
+                location.pathname === '/settings' ? 'bg-accent text-accent-foreground' : ''
+              }`}
+            >
+              <div className="flex items-center">
+                <Settings className="mr-2 h-4 w-4" />
+                <span>Settings</span>
+              </div>
+            </Link>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
