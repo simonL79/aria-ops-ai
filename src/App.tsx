@@ -1,3 +1,4 @@
+
 import React, { Suspense } from "react";
 import {
   BrowserRouter as Router,
@@ -25,6 +26,7 @@ import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import PricingPage from "./pages/PricingPage";
 import PaymentPage from "./pages/PaymentPage";
+import NewCoPage from "./pages/NewCoPage";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const DashboardPage = React.lazy(() => import("./pages/dashboard/DashboardPage"));
@@ -155,6 +157,14 @@ function App() {
                   <React.Suspense fallback={<div>Loading...</div>}>
                     <RadarPage />
                   </React.Suspense>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/newco"
+              element={
+                <ProtectedRoute>
+                  <NewCoPage />
                 </ProtectedRoute>
               }
             />

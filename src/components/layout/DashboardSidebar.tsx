@@ -1,7 +1,8 @@
+
 import { useState } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Home, Settings, Users, AlertTriangle, Shield, Search, BarChart3, Mail, MessageSquare, FileText, Radar } from "lucide-react";
+import { Home, Settings, Users, AlertTriangle, Shield, Search, BarChart3, Mail, MessageSquare, FileText, Radar, Building } from "lucide-react";
 
 interface SidebarProps {
   className?: string;
@@ -92,6 +93,17 @@ const DashboardSidebar = () => {
               <div className="flex items-center">
                 <FileText className="mr-2 h-4 w-4" />
                 <span>Reporting</span>
+              </div>
+            </Link>
+            <Link
+              to="/newco"
+              className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
+                location.pathname === '/newco' ? 'bg-accent text-accent-foreground' : ''
+              }`}
+            >
+              <div className="flex items-center">
+                <Building className="mr-2 h-4 w-4" />
+                <span>NewCo Defense</span>
               </div>
             </Link>
           </div>
