@@ -42,7 +42,7 @@ export {
   getMonitoringStatus,
   startMonitoring,
   stopMonitoring,
-  runMonitoringScan: runScan,
+  runScan as runMonitoringScan,
   
   // Mentions services
   saveMention,
