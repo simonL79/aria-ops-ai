@@ -21,6 +21,27 @@ const mockContents = [
   "I found your product through a friend's recommendation. What are your pricing options?"
 ];
 
+// Global array to store all active alert listeners
+const alertListeners: Array<(alert: ContentAlert) => void> = [];
+
+// Register a listener for new alerts
+export const registerAlertListener = (listener: (alert: ContentAlert) => void): void => {
+  alertListeners.push(listener);
+};
+
+// Unregister a listener
+export const unregisterAlertListener = (listener: (alert: ContentAlert) => void): void => {
+  const index = alertListeners.indexOf(listener);
+  if (index !== -1) {
+    alertListeners.splice(index, 1);
+  }
+};
+
+// Notify all registered listeners about a new alert
+export const notifyAlertListeners = (alert: ContentAlert): void => {
+  alertListeners.forEach(listener => listener(alert));
+};
+
 // Generate a random mock alert
 export const generateMockAlert = (): ContentAlert => {
   const isCustomerEnquiry = Math.random() < 0.3;
@@ -52,7 +73,10 @@ export const performLiveScan = async (): Promise<ContentAlert[]> => {
   const alerts: ContentAlert[] = [];
   
   for (let i = 0; i < count; i++) {
-    alerts.push(generateMockAlert());
+    const alert = generateMockAlert();
+    alerts.push(alert);
+    // Notify all listeners about this new alert
+    notifyAlertListeners(alert);
   }
   
   // Show toast notification
@@ -70,6 +94,9 @@ export const startContinuousScan = (
   onNewAlert: (alert: ContentAlert) => void,
   intervalMs = 30000 // Default 30 seconds
 ): () => void => {
+  // Register the provided callback as a listener
+  registerAlertListener(onNewAlert);
+  
   // Immediately run the first scan
   setTimeout(async () => {
     const initialAlerts = await performLiveScan();
@@ -82,6 +109,8 @@ export const startContinuousScan = (
     if (Math.random() < 0.4) {
       const newAlert = generateMockAlert();
       onNewAlert(newAlert);
+      // Also notify all other registered listeners
+      notifyAlertListeners(newAlert);
       
       // For high severity or customer enquiries, show toast
       if (newAlert.severity === 'high' || newAlert.category === 'customer_enquiry') {
@@ -105,6 +134,9 @@ export const startContinuousScan = (
     }
   }, intervalMs);
   
-  // Return a function to stop the scanning
-  return () => clearInterval(interval);
+  // Return a function to stop the scanning and remove the listener
+  return () => {
+    clearInterval(interval);
+    unregisterAlertListener(onNewAlert);
+  };
 };
