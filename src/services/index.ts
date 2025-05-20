@@ -33,14 +33,18 @@ const stopMonitoring = () => {
   };
 };
 
-// Re-export the runMonitoringScan function from scan.ts
+// Import the runMonitoringScan function from scan.ts
 import { runMonitoringScan as runScan } from './monitoring/scan';
 
 // Import the OpenAI service functions
 import { 
   generateAIResponse,
   generateSeoContent,
-  classifyContentThreat,
+  classifyContentThreat
+} from './secureOpenaiService';
+
+// Import types from secureOpenaiService
+import type { 
   ResponseGenerationProps,
   ThreatClassificationResult
 } from './secureOpenaiService';
@@ -48,10 +52,21 @@ import {
 // Import the threat classifier functions
 import {
   classifyThreat,
-  classifyThreatAdvanced,
-  runMultiAgentAnalysis,
-  runPredictiveAnalysis
+  classifyThreatAdvanced
 } from './intelligence/threatClassifier';
+
+// Create and export a monitoring service object
+export const monitoringService = {
+  getMonitoringStatus,
+  startMonitoring,
+  stopMonitoring,
+  runMonitoringScan: runScan,
+  saveMention,
+  getAllMentions,
+  clearMentions,
+  getMentionsByPlatform,
+  getMentionsAsAlerts
+};
 
 // Export all services
 export {
@@ -77,12 +92,14 @@ export {
   generateAIResponse,
   generateSeoContent,
   classifyContentThreat,
-  ResponseGenerationProps,
-  ThreatClassificationResult,
   
   // Threat classifier services
   classifyThreat,
-  classifyThreatAdvanced,
-  runMultiAgentAnalysis,
-  runPredictiveAnalysis
+  classifyThreatAdvanced
 };
+
+// Export types
+export type { ResponseGenerationProps, ThreatClassificationResult };
+
+// Export default monitoring service
+export default monitoringService;
