@@ -1,2 +1,4 @@
 
-export { default } from "./ManualClassificationForm";
+import ManualClassificationForm from './ManualClassificationForm';
+
+export default ManualClassificationForm;
