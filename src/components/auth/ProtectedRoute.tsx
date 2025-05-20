@@ -2,7 +2,8 @@
 import { ReactNode } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import AccessDenied from "@/components/ui/access-denied";
+import { AccessDenied } from "@/components/ui/access-denied";
+import { useRbac } from "@/hooks/useRbac";
 
 export interface ProtectedRouteProps {
   children?: ReactNode;
@@ -16,7 +17,8 @@ const ProtectedRoute = ({
   redirectTo = "/auth" 
 }: ProtectedRouteProps) => {
   const location = useLocation();
-  const { user, isLoading, hasRole } = useAuth();
+  const { user, isLoading } = useAuth();
+  const { hasPermission } = useRbac();
   
   if (isLoading) {
     return <div>Loading...</div>;
@@ -27,7 +29,7 @@ const ProtectedRoute = ({
   }
   
   // If role check is required and user doesn't have the role
-  if (requiredRole && !hasRole(requiredRole)) {
+  if (requiredRole && !hasPermission(requiredRole)) {
     return <AccessDenied />;
   }
   

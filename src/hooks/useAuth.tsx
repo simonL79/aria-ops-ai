@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useClerk, useUser } from '@clerk/clerk-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useRbac, Role } from './useRbac';
 
 interface AuthContextType {
   isAuthenticated: boolean;
