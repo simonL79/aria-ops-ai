@@ -1,15 +1,28 @@
+import { ReactNode } from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 
-import { Button } from "@/components/ui/button";
+interface SignedInRedirectProps {
+  children: ReactNode;
+  redirectTo: string;
+}
 
-const SignedInRedirect = () => {
-  return (
-    <div className="mt-6">
-      <p className="text-muted-foreground mb-2 text-center">You're already signed in</p>
-      <Button asChild>
-        <a href="/dashboard">Go to Dashboard</a>
-      </Button>
-    </div>
-  );
+const SignedInRedirect = ({ children, redirectTo }: SignedInRedirectProps) => {
+  const { isAuthenticated, isLoading } = useAuth();
+  const location = useLocation();
+  
+  // While authentication state is loading, show a loading indicator
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+  
+  // If user is authenticated, redirect them to the specified route
+  if (isAuthenticated) {
+    return <Navigate to={redirectTo} state={{ from: location }} replace />;
+  }
+  
+  // Otherwise, render the children components (authentication forms)
+  return <>{children}</>;
 };
 
 export default SignedInRedirect;

@@ -3,11 +3,11 @@ import { ReactNode } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { AccessDenied } from "@/components/ui/access-denied";
-import { useRbac } from "@/hooks/useRbac";
+import { useRbac, Role } from "@/hooks/useRbac";
 
 export interface ProtectedRouteProps {
   children?: ReactNode;
-  requiredRole?: string;
+  requiredRole?: Role | Role[];
   redirectTo?: string;
 }
 
