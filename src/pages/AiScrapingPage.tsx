@@ -10,6 +10,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertTriangle, Zap, Shield, Coins, Play, Pause } from "lucide-react";
 import { useAlertSimulation } from "@/components/dashboard/real-time-alerts/useAlertSimulation";
 import { ContentAlert } from "@/types/dashboard";
+import { ScanParameters, performLiveScan } from "@/services/aiScraping/mockScanner";
+import ScanParametersForm from "@/components/aiScraping/ScanParametersForm";
 
 const AiScrapingPage = () => {
   const [isScanning, setIsScanning] = useState<boolean>(false);
@@ -22,6 +24,18 @@ const AiScrapingPage = () => {
     setTimeout(() => {
       setIsScanning(false);
     }, 3000);
+  };
+
+  const handleParameterizedScan = async (params: ScanParameters) => {
+    setIsScanning(true);
+    try {
+      const results = await performLiveScan(params);
+      setActiveAlerts(prev => [...results, ...prev]);
+    } catch (error) {
+      console.error("Error performing scan:", error);
+    } finally {
+      setIsScanning(false);
+    }
   };
 
   const handleViewDetail = (alert: ContentAlert) => {
@@ -59,7 +73,7 @@ const AiScrapingPage = () => {
             ) : (
               <>
                 <Play className="h-4 w-4" />
-                Start Scan
+                Start Quick Scan
               </>
             )}
           </Button>
@@ -138,17 +152,24 @@ const AiScrapingPage = () => {
               <AiScrapingDashboard />
             </TabsContent>
             <TabsContent value="scanner" className="pt-4">
-              <div className="bg-muted rounded-lg p-8 text-center">
-                <h3 className="text-xl font-semibold mb-2">Real-time Web Scanner</h3>
-                <p className="text-muted-foreground mb-4">Start a scan to detect online mentions and potential threats</p>
-                <Button 
-                  size="lg" 
-                  className="animate-pulse"
-                  onClick={handleScan}
-                  disabled={isScanning}
-                >
-                  {isScanning ? "Scanning..." : "Start Real-Time Scan"}
-                </Button>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="bg-muted rounded-lg p-8 text-center">
+                  <h3 className="text-xl font-semibold mb-2">Quick Scan</h3>
+                  <p className="text-muted-foreground mb-4">Start a quick scan to detect online mentions and potential threats</p>
+                  <Button 
+                    size="lg" 
+                    className="animate-pulse"
+                    onClick={handleScan}
+                    disabled={isScanning}
+                  >
+                    {isScanning ? "Scanning..." : "Start Quick Scan"}
+                  </Button>
+                </div>
+                
+                <ScanParametersForm 
+                  onStartScan={handleParameterizedScan}
+                  isScanning={isScanning}
+                />
               </div>
             </TabsContent>
             <TabsContent value="analysis" className="pt-4">
@@ -176,6 +197,7 @@ const AiScrapingPage = () => {
         
         <div>
           <RealTimeAlerts 
+            alerts={activeAlerts} 
             onViewDetail={handleViewDetail}
             onMarkAsRead={handleMarkAsRead}
             onDismiss={handleDismiss}

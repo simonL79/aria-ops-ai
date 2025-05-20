@@ -21,6 +21,24 @@ const mockContents = [
   "I found your product through a friend's recommendation. What are your pricing options?"
 ];
 
+// Scan parameter types
+export interface ScanParameters {
+  platforms?: string[];
+  keywordFilters?: string[];
+  prioritizeSeverity?: 'high' | 'medium' | 'low' | null;
+  includeCustomerEnquiries?: boolean;
+  maxResults?: number;
+}
+
+// Default scan parameters
+export const defaultScanParameters: ScanParameters = {
+  platforms: [],
+  keywordFilters: [],
+  prioritizeSeverity: null,
+  includeCustomerEnquiries: true,
+  maxResults: 3
+};
+
 // Global array to store all active alert listeners
 const alertListeners: Array<(alert: ContentAlert) => void> = [];
 
@@ -43,14 +61,44 @@ export const notifyAlertListeners = (alert: ContentAlert): void => {
 };
 
 // Generate a random mock alert
-export const generateMockAlert = (): ContentAlert => {
-  const isCustomerEnquiry = Math.random() < 0.3;
-  const platform = mockPlatforms[Math.floor(Math.random() * mockPlatforms.length)];
-  const content = mockContents[Math.floor(Math.random() * mockContents.length)];
-  const severities: Array<'high' | 'medium' | 'low'> = ['high', 'medium', 'low'];
-  const severity = isCustomerEnquiry ? 
-    (Math.random() < 0.2 ? 'high' : 'medium') : // Customer enquiries are often medium or high priority
-    severities[Math.floor(Math.random() * severities.length)];
+export const generateMockAlert = (params?: ScanParameters): ContentAlert => {
+  const p = params || defaultScanParameters;
+  
+  const isCustomerEnquiry = p.includeCustomerEnquiries && Math.random() < 0.3;
+  
+  // Use specified platforms or default to all
+  const availablePlatforms = p.platforms && p.platforms.length > 0 
+    ? p.platforms 
+    : mockPlatforms;
+    
+  const platform = availablePlatforms[Math.floor(Math.random() * availablePlatforms.length)];
+  
+  // Select content
+  let content = mockContents[Math.floor(Math.random() * mockContents.length)];
+  
+  // Apply keyword filters if provided
+  if (p.keywordFilters && p.keywordFilters.length > 0) {
+    // Insert a random keyword into the content to simulate filter matches
+    const randomKeyword = p.keywordFilters[Math.floor(Math.random() * p.keywordFilters.length)];
+    if (Math.random() > 0.5) {
+      content = content.replace(/product|service|company/, randomKeyword);
+    }
+  }
+  
+  // Determine severity based on parameters
+  let severity: 'high' | 'medium' | 'low';
+  if (p.prioritizeSeverity) {
+    // Higher chance of the requested severity
+    severity = Math.random() < 0.7 ? p.prioritizeSeverity : 
+      (['high', 'medium', 'low'] as const).filter(s => s !== p.prioritizeSeverity)[
+        Math.floor(Math.random() * 2)
+      ];
+  } else {
+    const severities: Array<'high' | 'medium' | 'low'> = ['high', 'medium', 'low'];
+    severity = isCustomerEnquiry ? 
+      (Math.random() < 0.2 ? 'high' : 'medium') : // Customer enquiries are often medium or high priority
+      severities[Math.floor(Math.random() * severities.length)];
+  }
   
   return {
     id: `alert-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
@@ -64,16 +112,18 @@ export const generateMockAlert = (): ContentAlert => {
 };
 
 // Simulate a scan and return mock data
-export const performLiveScan = async (): Promise<ContentAlert[]> => {
+export const performLiveScan = async (params?: ScanParameters): Promise<ContentAlert[]> => {
   // Simulate API call delay
   await new Promise(resolve => setTimeout(resolve, 2000));
   
-  // Generate between 1-3 alerts
-  const count = Math.floor(Math.random() * 3) + 1;
+  const p = params || defaultScanParameters;
+  
+  // Generate between 1-3 alerts (or maxResults if specified)
+  const count = Math.min(Math.floor(Math.random() * 3) + 1, p.maxResults || 3);
   const alerts: ContentAlert[] = [];
   
   for (let i = 0; i < count; i++) {
-    const alert = generateMockAlert();
+    const alert = generateMockAlert(p);
     alerts.push(alert);
     // Notify all listeners about this new alert
     notifyAlertListeners(alert);
@@ -92,14 +142,17 @@ export const performLiveScan = async (): Promise<ContentAlert[]> => {
 // Start a continuous scan process
 export const startContinuousScan = (
   onNewAlert: (alert: ContentAlert) => void,
-  intervalMs = 30000 // Default 30 seconds
+  intervalMs = 30000, // Default 30 seconds
+  params?: ScanParameters
 ): () => void => {
   // Register the provided callback as a listener
   registerAlertListener(onNewAlert);
   
+  const p = params || defaultScanParameters;
+  
   // Immediately run the first scan
   setTimeout(async () => {
-    const initialAlerts = await performLiveScan();
+    const initialAlerts = await performLiveScan(p);
     initialAlerts.forEach(onNewAlert);
   }, 5000);
   
@@ -107,7 +160,7 @@ export const startContinuousScan = (
   const interval = setInterval(async () => {
     // 40% chance of finding new alerts on each scan
     if (Math.random() < 0.4) {
-      const newAlert = generateMockAlert();
+      const newAlert = generateMockAlert(p);
       onNewAlert(newAlert);
       // Also notify all other registered listeners
       notifyAlertListeners(newAlert);
