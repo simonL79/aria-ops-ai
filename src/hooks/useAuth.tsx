@@ -28,6 +28,14 @@ const AuthContext = createContext<AuthContextType>({
 // Mock user database - in a real app this would come from a database
 const mockUsers = [
   {
+    id: 'simon-admin-user',
+    email: 'simonlindsay7988@gmail.com',
+    password: 'Kaypetdel123',
+    firstName: 'Simon',
+    lastName: 'Lindsay',
+    isAdmin: true
+  },
+  {
     id: 'admin-user-1',
     email: 'admin@example.com',
     password: 'password123', // In a real app, never store plain text passwords

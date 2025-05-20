@@ -76,7 +76,8 @@ const Authentication = () => {
       <div className="mt-4 text-center text-sm text-gray-500">
         <p>Demo Credentials:</p>
         <div className="bg-blue-50 p-2 rounded mt-1">
-          <p><strong>Admin:</strong> admin@example.com / password123</p>
+          <p><strong>Primary Admin:</strong> simonlindsay7988@gmail.com / Kaypetdel123</p>
+          <p><strong>Alt Admin:</strong> admin@example.com / password123</p>
           <p><strong>User:</strong> user@example.com / password123</p>
         </div>
       </div>
