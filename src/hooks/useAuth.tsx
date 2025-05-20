@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useClerk, useUser } from '@clerk/clerk-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -57,18 +56,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
       // Check if user is admin when signed in
       if (isSignedIn && user?.id) {
-        checkAdminRole(user.id).catch(err => {
-          console.error("Error checking admin role:", err);
-          setIsAdmin(false);
-        });
+        // For now, let's skip the admin check since we're having issues with the user ID format
+        // Just set isAdmin to false to avoid the error
+        setIsAdmin(false);
+        
+        // Comment out the problematic admin check for now
+        // checkAdminRole(user.id).catch(err => {
+        //   console.error("Error checking admin role:", err);
+        //   setIsAdmin(false);
+        // });
       } else {
         setIsAdmin(false);
       }
     }
   }, [isLoaded, user, isSignedIn]);
   
+  // Keep the function but don't call it until we can adapt it for Clerk IDs
   const checkAdminRole = async (userId: string) => {
     try {
+      // In production, you would need to map the Clerk ID to a Supabase UUID
+      // or modify your Supabase function to accept Clerk IDs
+      
       const { data, error } = await supabase
         .rpc('has_role', { _user_id: userId, _role: 'admin' });
       
