@@ -1,15 +1,14 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge"; 
-import { BellRing, Bell, BellOff } from "lucide-react";
+import { BellRing, Bell, BellOff, Info } from "lucide-react";
 import { ContentAlert } from "@/types/dashboard";
 import { toast } from "sonner";
 import FilterButtons from "./FilterButtons";
 import AlertsList from "./AlertsList";
 import { useAlertSimulation } from "./useAlertSimulation";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import AlertItem from "./AlertItem"; // Import the AlertItem from the real-time-alerts folder
+import AlertItem from "./AlertItem";
 
 interface RealTimeAlertsProps {
   alerts?: ContentAlert[];
