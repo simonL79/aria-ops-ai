@@ -70,11 +70,20 @@ const AiScrapingPage = () => {
     // Find the alert to pass as state
     const alert = activeAlerts.find(a => a.id === alertId);
     
-    // Mark it as being responded to
-    respondToAlert(alertId);
-    
-    // Navigate to engagement hub with this alert
-    navigate(`/dashboard/engagement?alert=${alertId}`);
+    if (alert) {
+      // Mark it as being responded to
+      respondToAlert(alertId);
+      
+      // Store the alert in sessionStorage so it persists through navigation
+      sessionStorage.setItem('selectedAlert', JSON.stringify(alert));
+      
+      // Navigate to engagement hub with this alert ID in the URL
+      navigate(`/dashboard/engagement?alert=${alertId}`);
+    } else {
+      toast.error("Alert not found", {
+        description: "The alert you're trying to respond to could not be found."
+      });
+    }
   };
 
   return (

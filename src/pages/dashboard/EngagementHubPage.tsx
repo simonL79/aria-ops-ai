@@ -31,11 +31,37 @@ const EngagementHubPage = () => {
     emailAddress: ""
   });
 
-  // Handle URL query parameter for direct alert viewing
+  // Handle URL query parameter for direct alert viewing and retrieve from sessionStorage
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
     const alertId = queryParams.get('alert');
     
+    // Try to get the alert from sessionStorage first
+    const storedAlertData = sessionStorage.getItem('selectedAlert');
+    
+    if (storedAlertData) {
+      try {
+        const storedAlert = JSON.parse(storedAlertData);
+        setSelectedAlert(storedAlert);
+        
+        // Remove from sessionStorage to prevent it from persisting across page refreshes
+        sessionStorage.removeItem('selectedAlert');
+        
+        // Add the alert to the alerts list if it's not already there
+        setAlerts(prev => {
+          if (!prev.some(a => a.id === storedAlert.id)) {
+            return [storedAlert, ...prev];
+          }
+          return prev;
+        });
+        
+        return; // We've found our alert, no need to continue
+      } catch (e) {
+        console.error("Error parsing stored alert:", e);
+      }
+    }
+    
+    // If we couldn't get it from sessionStorage, try to find it in the alerts list
     if (alertId && alerts.length > 0) {
       const alert = alerts.find(a => a.id === alertId);
       if (alert) {
@@ -64,6 +90,10 @@ const EngagementHubPage = () => {
 
   const handleDismiss = (id: string) => {
     setAlerts(prev => prev.filter(alert => alert.id !== id));
+    
+    if (selectedAlert && selectedAlert.id === id) {
+      setSelectedAlert(null);
+    }
   };
 
   const handleMarkAsRead = (id: string) => {
