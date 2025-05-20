@@ -1,7 +1,4 @@
 
-import { ContentAlert } from "@/types/dashboard";
-
-// Define monitoring status type
 export interface MonitoringStatus {
   isActive: boolean;
   lastRun: Date;
@@ -9,24 +6,21 @@ export interface MonitoringStatus {
   sources: number;
 }
 
-// Define platforms we can monitor
-export type MonitorablePlatform = 
-  'twitter' | 
-  'reddit' | 
-  'google_news' | 
-  'discord' | 
-  'tiktok' | 
-  'telegram' | 
-  'whatsapp';
+export interface MonitorablePlatform {
+  id: string;
+  name: string;
+  type: string;
+  enabled: boolean;
+  coverage: number;
+}
 
-// Define mention type
 export interface Mention {
-  source: string;
+  id: string;
   content: string;
-  url: string;
+  source: string;
   timestamp: Date;
-  category?: string;
-  severity?: number;
-  recommendation?: string;
-  ai_reasoning?: string;
+  sentiment: number;
+  entities: string[];
+  url?: string;
+  platformId: string;
 }

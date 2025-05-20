@@ -1,4 +1,3 @@
-
 import { ContentAlert } from "@/types/dashboard";
 
 // Event listeners for real-time alerts
@@ -15,6 +14,14 @@ export const registerAlertListener = (listener: Function) => {
   };
 };
 
+// Alias for unregistering listener to maintain compatibility
+export const unregisterAlertListener = (listener: Function) => {
+  const index = alertListeners.indexOf(listener);
+  if (index !== -1) {
+    alertListeners.splice(index, 1);
+  }
+};
+
 // Notify all listeners about a new alert
 export const notifyAlertListeners = (alert: ContentAlert) => {
   alertListeners.forEach(listener => listener(alert));
@@ -27,7 +34,24 @@ export interface ScanParameters {
   timeframe?: 'day' | 'week' | 'month';
   intensity?: 'low' | 'medium' | 'high';
   threatTypes?: string[];
+  keywordFilters?: string[];
+  prioritizeSeverity?: boolean;
+  maxResults?: number;
+  includeCustomerEnquiries?: boolean;
 }
+
+// Default scan parameters
+export const defaultScanParameters: ScanParameters = {
+  platforms: [],
+  keywords: [],
+  timeframe: 'day',
+  intensity: 'medium',
+  threatTypes: [],
+  keywordFilters: [],
+  prioritizeSeverity: true,
+  maxResults: 10,
+  includeCustomerEnquiries: true
+};
 
 // Platforms to scan
 const availablePlatforms = [
@@ -151,6 +175,11 @@ export const startContinuousMonitoring = (callback: (alerts: ContentAlert[]) => 
   return () => {
     isActive = false;
   };
+};
+
+// Additional function to support AiScrapingDashboard component
+export const startContinuousScan = (callback: (alerts: ContentAlert[]) => void) => {
+  return startContinuousMonitoring(callback);
 };
 
 // Get current monitoring status

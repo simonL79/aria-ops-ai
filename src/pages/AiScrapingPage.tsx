@@ -1,28 +1,83 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import RealTimeAlerts from "@/components/dashboard/real-time-alerts";
 import { useAlertSimulation } from "@/components/dashboard/real-time-alerts/useAlertSimulation";
 import { ContentAlert } from "@/types/dashboard";
-import { ScanParameters, performLiveScan } from '@/services/aiScraping/mockScanner';
+import { ScanParameters, performLiveScan, registerAlertListener, startContinuousMonitoring } from '@/services/aiScraping/mockScanner';
 import AiScrapingHeader from "@/components/aiScraping/AiScrapingHeader";
 import AiScrapingTabs from "@/components/aiScraping/AiScrapingTabs";
 import SystemStatusIndicator from "@/components/aiScraping/SystemStatusIndicator";
 import { toast } from "sonner";
+import { runMonitoringScan } from "@/services/monitoring";
 
 const AiScrapingPage = () => {
   const navigate = useNavigate();
   const [isScanning, setIsScanning] = useState<boolean>(false);
   const { activeAlerts, setActiveAlerts, respondToAlert } = useAlertSimulation([]);
   const [selectedAlert, setSelectedAlert] = useState<ContentAlert | null>(null);
+  const [continousMonitoringActive, setContinuousMonitoringActive] = useState<boolean>(true);
 
+  // Set up continuous monitoring for real-time updates
+  useEffect(() => {
+    if (continousMonitoringActive) {
+      // Register for real-time alerts
+      const cleanup = registerAlertListener((alert: ContentAlert) => {
+        setActiveAlerts(prev => [alert, ...prev]);
+        
+        // Show notification for high severity alerts
+        if (alert.severity === 'high') {
+          toast.error("High Risk Alert Detected", {
+            description: alert.content.substring(0, 100) + (alert.content.length > 100 ? '...' : ''),
+            duration: 8000,
+          });
+          
+          // Play notification sound
+          try {
+            const audio = new Audio('/notification-sound.mp3');
+            audio.volume = 0.4;
+            audio.play().catch(e => console.log('Audio play prevented by browser policy:', e));
+          } catch (err) {
+            console.log('Audio notification not supported');
+          }
+        }
+      });
+      
+      // Start continuous monitoring
+      const stopMonitoring = startContinuousMonitoring((alerts: ContentAlert[]) => {
+        if (alerts.length > 0) {
+          setActiveAlerts(prev => [...alerts, ...prev]);
+          
+          const highSeverityCount = alerts.filter(a => a.severity === 'high').length;
+          if (highSeverityCount > 0) {
+            toast.warning(`${highSeverityCount} new high severity threats detected`, {
+              description: "Live monitoring has found new potential reputation threats",
+            });
+          }
+        }
+      });
+      
+      // Clean up when component unmounts
+      return () => {
+        cleanup();
+        stopMonitoring();
+      };
+    }
+  }, [continousMonitoringActive, setActiveAlerts]);
+
+  // Handle manual scan
   const handleScan = () => {
     setIsScanning(true);
-    performLiveScan().then(results => {
-      setActiveAlerts(prev => [...results, ...prev]);
-      toast.success("Scan completed", {
-        description: `Found ${results.length} new mentions.`,
+    
+    // Run both AI scanning and monitoring scan for comprehensive coverage
+    Promise.all([
+      performLiveScan(),
+      runMonitoringScan()
+    ]).then(([aiResults]) => {
+      setActiveAlerts(prev => [...aiResults, ...prev]);
+      toast.success("Comprehensive scan completed", {
+        description: `Found ${aiResults.length} new mentions across multiple platforms.`,
       });
       setIsScanning(false);
     }).catch((error) => {
@@ -39,12 +94,12 @@ const AiScrapingPage = () => {
     try {
       const results = await performLiveScan(params);
       setActiveAlerts(prev => [...results, ...prev]);
-      toast.success("Manual scan completed", {
-        description: `Found ${results.length} new mentions with your parameters.`,
+      toast.success("Advanced scan completed", {
+        description: `Found ${results.length} new mentions with your custom parameters.`,
       });
     } catch (error) {
       console.error("Error performing scan:", error);
-      toast.error("Manual scan failed", {
+      toast.error("Advanced scan failed", {
         description: "An error occurred while scanning with your parameters. Please try again.",
       });
     } finally {
@@ -109,7 +164,7 @@ const AiScrapingPage = () => {
         </div>
         
         <div className="space-y-6">
-          <SystemStatusIndicator />
+          <SystemStatusIndicator isLive={continousMonitoringActive} />
           
           <RealTimeAlerts 
             alerts={activeAlerts} 

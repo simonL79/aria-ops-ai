@@ -1,13 +1,13 @@
 
 import { MonitoringStatus } from "./types";
-import { getAvailableSources } from "@/services/dataIngestion";
+import { getMonitoredPlatforms } from "./platforms";
 
-// Mock monitoring status
+// Monitoring status
 let monitoringStatus: MonitoringStatus = {
-  isActive: false,
+  isActive: true,
   lastRun: new Date(),
-  nextRun: new Date(),
-  sources: getAvailableSources().filter(s => s.active).length
+  nextRun: new Date(Date.now() + 60 * 60 * 1000), // 1 hour from now
+  sources: getMonitoredPlatforms().filter(p => p.enabled).length
 };
 
 /**
@@ -21,24 +21,31 @@ export const getMonitoringStatus = (): MonitoringStatus => {
  * Starts the monitoring process
  */
 export const startMonitoring = () => {
-  // Simulate starting the monitoring process
+  // Start the monitoring process
   monitoringStatus = {
     isActive: true,
     lastRun: new Date(),
-    nextRun: new Date(),
-    sources: getAvailableSources().filter(s => s.active).length
+    nextRun: new Date(Date.now() + 60 * 60 * 1000), // 1 hour from now
+    sources: getMonitoredPlatforms().filter(p => p.enabled).length
   };
   
-  // Set next run time
-  monitoringStatus.nextRun.setHours(monitoringStatus.lastRun.getHours() + 1);
+  return {
+    success: true,
+    started: new Date().toISOString()
+  };
 };
 
 /**
  * Stops the monitoring process
  */
 export const stopMonitoring = () => {
-  // Simulate stopping the monitoring process
+  // Stop the monitoring process
   monitoringStatus.isActive = false;
+  
+  return {
+    success: true,
+    stopped: new Date().toISOString()
+  };
 };
 
 /**
@@ -46,14 +53,13 @@ export const stopMonitoring = () => {
  */
 export const updateMonitoringStatus = () => {
   const lastRun = new Date();
-  const nextRun = new Date();
-  nextRun.setHours(lastRun.getHours() + 1);
+  const nextRun = new Date(Date.now() + 60 * 60 * 1000); // 1 hour from now
   
   // Update monitoring status
   monitoringStatus = {
     isActive: true,
     lastRun,
     nextRun,
-    sources: getAvailableSources().filter(s => s.active).length
+    sources: getMonitoredPlatforms().filter(p => p.enabled).length
   };
 };

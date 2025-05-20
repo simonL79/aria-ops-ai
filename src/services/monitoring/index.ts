@@ -17,7 +17,7 @@ export {
 
 // Platform monitoring
 export { 
-  getMonitoredPlatforms, 
+  getMonitoredPlatforms,
   isPlatformMonitored
 } from './platforms';
 

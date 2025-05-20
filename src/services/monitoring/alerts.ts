@@ -1,79 +1,61 @@
 
-import { ContentAlert } from "@/types/dashboard";
-import { getAllMentions } from "./mentions";
+import { Mention } from './types';
+import { ContentAlert } from '@/types/dashboard';
 
 /**
- * Convert mentions to content alerts for the dashboard
+ * Convert mentions to ContentAlert format
  */
 export const getMentionsAsAlerts = (): ContentAlert[] => {
-  return getAllMentions().map((mention, index) => {
-    // Map severity number to our low/medium/high classification
-    let severityText: 'low' | 'medium' | 'high' = 'low';
-    
-    if (mention.severity) {
-      if (mention.severity >= 8) {
-        severityText = 'high';
-      } else if (mention.severity >= 4) {
-        severityText = 'medium';
-      }
-    } else {
-      // Fallback if no AI classification
-      severityText = mention.content.includes('viral') || mention.content.includes('50K') 
-        ? 'high' 
-        : mention.content.includes('discussion') 
-          ? 'medium' 
-          : 'low';
-    }
-        
+  const mentions = getAllMentions();
+  
+  return mentions.map(mention => {
+    // Convert mention to alert format
     return {
-      id: `mention-${index}-${Date.now()}`,
+      id: mention.id,
       platform: mention.source,
       content: mention.content,
-      date: mention.timestamp.toLocaleTimeString(),
-      severity: severityText,
+      date: new Date(mention.timestamp).toLocaleString(),
+      severity: getSeverityFromSentiment(mention.sentiment),
       status: 'new',
-      sourceType: getPlatformType(mention.source),
-      confidenceScore: Math.floor(Math.random() * 100),
-      sentiment: getSentimentFromContent(mention.content),
-      category: mention.category,
-      recommendation: mention.recommendation,
-      ai_reasoning: mention.ai_reasoning
+      url: mention.url,
+      sourceType: getPlatformType(mention.platformId),
+      sentiment: getSentimentLabel(mention.sentiment)
     };
   });
 };
 
-// Helper function to determine platform type
-const getPlatformType = (platform: string): string => {
-  switch(platform) {
-    case 'Twitter':
-    case 'Reddit':
-    case 'Discord':
-    case 'TikTok':
-      return 'social';
-    case 'GoogleNews':
-      return 'news';
-    case 'Telegram':
-    case 'WhatsApp':
-      return 'messaging';
-    default:
-      return 'other';
-  }
+// Helper function to get severity from sentiment score
+const getSeverityFromSentiment = (sentiment: number): 'low' | 'medium' | 'high' => {
+  if (sentiment < -0.6) return 'high';
+  if (sentiment < -0.3) return 'medium';
+  return 'low';
 };
 
-// Helper function to simulate sentiment analysis
-const getSentimentFromContent = (content: string): 'positive' | 'neutral' | 'negative' => {
-  const positiveWords = ['best', 'great', 'excellent', 'featured', 'viral'];
-  const negativeWords = ['terrible', 'worst', 'bad', 'issue', 'problem'];
-  
-  const contentLower = content.toLowerCase();
-  
-  for (const word of positiveWords) {
-    if (contentLower.includes(word)) return 'positive';
-  }
-  
-  for (const word of negativeWords) {
-    if (contentLower.includes(word)) return 'negative';
-  }
-  
+// Helper function to get sentiment label
+const getSentimentLabel = (sentiment: number): 'positive' | 'neutral' | 'negative' | 'threatening' => {
+  if (sentiment < -0.6) return 'threatening';
+  if (sentiment < -0.1) return 'negative';
+  if (sentiment > 0.1) return 'positive';
   return 'neutral';
 };
+
+// Helper function to get platform type
+const getPlatformType = (platformId: string): string => {
+  const platformTypes: {[key: string]: string} = {
+    'twitter': 'social',
+    'facebook': 'social',
+    'reddit': 'social',
+    'instagram': 'social',
+    'youtube': 'video',
+    'news': 'news',
+    'blogs': 'blog',
+    'review_sites': 'review',
+    'telegram': 'messaging',
+    'darkweb': 'darkweb'
+  };
+  
+  return platformTypes[platformId] || 'other';
+};
+
+// Import needed function from the mentions module
+import { getAllMentions } from './mentions';
