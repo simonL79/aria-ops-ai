@@ -17,8 +17,9 @@ const hasLocalStorage = typeof localStorage !== 'undefined';
 
 // Validate API key format (basic check)
 const isValidOpenAIKey = (key: string): boolean => {
-  // OpenAI API keys typically start with "sk-" and are 51 characters long
-  return key.startsWith('sk-') && key.length >= 40;
+  // We'll be more permissive with validation - just check for reasonable length
+  // and optionally the typical sk- prefix
+  return key.length >= 20; // OpenAI keys are typically longer than this
 };
 
 export const storeSecureKey = (
@@ -34,8 +35,8 @@ export const storeSecureKey = (
 
   // Add validation for specific key types
   if (keyName === 'openai_api_key' && !isValidOpenAIKey(keyValue)) {
-    toast.error("Invalid API Key Format", {
-      description: "The OpenAI API key format appears to be incorrect. Please check your key.",
+    toast.warning("API Key Format Warning", {
+      description: "The API key you provided seems unusually short. Most OpenAI keys are at least 40 characters long.",
       duration: 7000
     });
     // Still store it in case the validation is outdated, but warn the user

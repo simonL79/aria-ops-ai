@@ -32,7 +32,8 @@ const ApiKeyManagement = () => {
   // Validate OpenAI API key format
   const validateApiKeyFormat = (key: string): boolean => {
     // OpenAI API keys typically start with "sk-" and are 51 characters long
-    return key.startsWith('sk-') && key.length >= 40;
+    // But we should be flexible with the validation to account for different key formats
+    return key.length >= 20; // Just check for a reasonable length
   };
 
   // Update validation state when API key changes
@@ -49,9 +50,10 @@ const ApiKeyManagement = () => {
   
   const handleSaveApiKey = () => {
     if (apiKey) {
-      if (!validateApiKeyFormat(apiKey)) {
+      // We'll warn if the key doesn't follow the typical format, but still allow saving
+      if (!apiKey.startsWith('sk-')) {
         toast.warning("API Key Format Warning", {
-          description: "The key format doesn't match typical OpenAI API keys. You can still save it, but it may not work."
+          description: "The key doesn't start with 'sk-' which is typical for OpenAI API keys. It may still work if you're using a different format."
         });
       }
       
@@ -108,7 +110,7 @@ const ApiKeyManagement = () => {
             {!isValidFormat && apiKey.length > 5 && (
               <div className="flex items-center text-red-500 text-xs mt-1">
                 <AlertCircle className="h-3 w-3 mr-1" />
-                <span>API key format doesn't match OpenAI pattern (should start with sk-)</span>
+                <span>API key seems too short. OpenAI keys are typically at least 20 characters.</span>
               </div>
             )}
             
@@ -169,7 +171,7 @@ const ApiKeyManagement = () => {
               <li>Sign in to your OpenAI account</li>
               <li>Go to API Keys in your account settings</li>
               <li>Create a new secret key and copy it</li>
-              <li>Paste the key above (it should start with "sk-")</li>
+              <li>Paste the key above (typically starts with "sk-")</li>
             </ol>
           </div>
         </div>
