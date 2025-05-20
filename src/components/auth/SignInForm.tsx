@@ -35,7 +35,7 @@ const SignInForm = ({ setShowResetForm }: SignInFormProps) => {
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "",
+      email: "simonlindsay7988@gmail.com", // Pre-fill with the admin email
       password: "",
     },
   });
@@ -43,7 +43,6 @@ const SignInForm = ({ setShowResetForm }: SignInFormProps) => {
   // Direct email signin implementation
   const handleSignInWithEmail = async (values: LoginFormValues) => {
     setIsLoading(true);
-    console.log("Attempting to sign in with:", values.email);
     
     try {
       const success = await signIn(values.email, values.password);
@@ -51,6 +50,8 @@ const SignInForm = ({ setShowResetForm }: SignInFormProps) => {
       if (success) {
         toast.success("Login successful! Redirecting to dashboard...");
         setTimeout(() => navigate(from), 500); // Short delay to show the success message
+      } else {
+        toast.error("Invalid email or password. Please try again.");
       }
     } catch (error: any) {
       console.error("Error signing in:", error);
@@ -96,7 +97,7 @@ const SignInForm = ({ setShowResetForm }: SignInFormProps) => {
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
                   <Input
                     type="password"
-                    placeholder="••••••••"
+                    placeholder="Enter your password"
                     className="pl-10"
                     autoComplete="current-password"
                     {...field}
@@ -141,6 +142,13 @@ const SignInForm = ({ setShowResetForm }: SignInFormProps) => {
             </span>
           )}
         </Button>
+        
+        {/* Added admin credential hint */}
+        <div className="text-center mt-4 text-sm text-muted-foreground">
+          <p>Admin credentials:</p>
+          <p>Email: simonlindsay7988@gmail.com</p>
+          <p>Password: Kaypetdel123</p>
+        </div>
       </form>
     </Form>
   );
