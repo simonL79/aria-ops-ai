@@ -8,6 +8,7 @@ import { ContentAlert } from "@/types/dashboard";
 import { ScanParameters, performLiveScan } from '@/services/aiScraping/mockScanner';
 import AiScrapingHeader from "@/components/aiScraping/AiScrapingHeader";
 import AiScrapingTabs from "@/components/aiScraping/AiScrapingTabs";
+import SystemStatusIndicator from "@/components/aiScraping/SystemStatusIndicator";
 import { toast } from "sonner";
 
 const AiScrapingPage = () => {
@@ -95,7 +96,9 @@ const AiScrapingPage = () => {
           />
         </div>
         
-        <div>
+        <div className="space-y-6">
+          <SystemStatusIndicator />
+          
           <RealTimeAlerts 
             alerts={activeAlerts} 
             onViewDetail={handleViewDetail}
