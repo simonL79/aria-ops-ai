@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { Toaster } from 'sonner';
 
 // Import pages from their actual locations
@@ -10,7 +10,7 @@ import AiScrapingPage from "./pages/AiScrapingPage";
 
 function App() {
   return (
-    <BrowserRouter>
+    <>
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/home" element={<HomePage />} />
@@ -27,7 +27,7 @@ function App() {
         <Route path="/register" element={<Index />} />
       </Routes>
       <Toaster richColors />
-    </BrowserRouter>
+    </>
   );
 }
 
