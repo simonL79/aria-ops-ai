@@ -24,8 +24,7 @@ createRoot(document.getElementById("root")!).render(
     }}
     signInUrl="/auth"
     signUpUrl="/auth"
-    afterSignInUrl="/dashboard"
-    afterSignUpUrl="/dashboard"
+    fallbackRedirectUrl="/dashboard"
   >
     <AuthProvider>
       <RbacProvider>

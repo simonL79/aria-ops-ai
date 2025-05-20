@@ -3,7 +3,6 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useClerk, useUser } from '@clerk/clerk-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { useRbac } from './useRbac';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -45,7 +44,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           const error = new Error("Authentication service failed to load");
           console.error(error);
           setAuthError(error);
-          toast.error("Authentication service is not responding. Please refresh the page.");
         }
       }
     }, 5000); // 5 second maximum loading time
@@ -73,28 +71,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     }
   }, [isLoaded, user, isSignedIn]);
-  
-  // Keep the function but don't call it until we can adapt it for Clerk IDs
-  const checkAdminRole = async (userId: string) => {
-    try {
-      // In production, you would need to map the Clerk ID to a Supabase UUID
-      // or modify your Supabase function to accept Clerk IDs
-      
-      const { data, error } = await supabase
-        .rpc('has_role', { _user_id: userId, _role: 'admin' });
-      
-      if (error) {
-        console.error("Error checking admin role:", error);
-        setIsAdmin(false);
-      } else {
-        setIsAdmin(data || false);
-        console.log("User admin status:", data);
-      }
-    } catch (error) {
-      console.error("Error checking admin role:", error);
-      setIsAdmin(false);
-    }
-  };
   
   const handleSignOut = async () => {
     try {

@@ -43,6 +43,13 @@ const Authentication = () => {
   const handleRefresh = () => {
     window.location.reload();
   };
+
+  const scrollToAuthCard = () => {
+    const authCard = document.getElementById('auth-card');
+    if (authCard) {
+      authCard.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
   
   // If still loading and hasn't timed out, show a loading state
   if ((isLoading || !isReady) && !loadingTimeout) {
@@ -85,8 +92,8 @@ const Authentication = () => {
       <div className="w-full max-w-md text-center mb-8">
         <Button 
           size="lg" 
-          className="w-full sm:w-auto animate-pulse bg-blue-600 hover:bg-blue-700 transition-colors hover:animate-none text-lg font-semibold"
-          onClick={() => document.getElementById('auth-card')?.scrollIntoView({ behavior: 'smooth' })}
+          className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 transition-colors text-lg font-semibold"
+          onClick={scrollToAuthCard}
         >
           <LogIn className="mr-2 h-5 w-5" />
           <span>Secure Login</span>

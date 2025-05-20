@@ -154,7 +154,7 @@ const SignInForm = ({ setShowResetForm }: SignInFormProps) => {
         
         <Button 
           type="submit" 
-          className="w-full animate-pulse bg-blue-600 hover:bg-blue-700 transition-colors hover:animate-none text-lg font-semibold"
+          className="w-full bg-blue-600 hover:bg-blue-700 transition-colors text-lg font-semibold"
           disabled={isLoading}
           size="lg"
         >

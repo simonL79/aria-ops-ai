@@ -51,7 +51,7 @@ const AuthLoadingState = () => {
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h2 className="text-xl font-semibold mb-4">Using Test Credentials</h2>
             <p className="text-gray-600 mb-4">
-              Your application is currently using test authentication credentials. This is fine for development but may cause issues in production.
+              The application is currently using test authentication credentials. This is fine for development but may cause issues in production.
             </p>
             
             <div className="bg-amber-50 p-4 rounded-md border border-amber-200 mb-4">
