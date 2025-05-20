@@ -126,7 +126,14 @@ const Authentication = () => {
             </div>
           </SignedOut>
           <SignedIn>
-            <SignedInRedirect />
+            <SignedInRedirect redirectTo="/dashboard">
+              <div className="text-center">
+                <p className="mb-4">You are already signed in.</p>
+                <Button asChild>
+                  <a href="/dashboard">Go to Dashboard</a>
+                </Button>
+              </div>
+            </SignedInRedirect>
           </SignedIn>
         </CardContent>
       </Card>
