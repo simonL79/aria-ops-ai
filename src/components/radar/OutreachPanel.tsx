@@ -170,7 +170,7 @@ const OutreachPanel = ({ entity }: OutreachPanelProps) => {
                   Email Outreach
                 </Button>
                 <Button variant="outline" size="sm" className="w-full justify-start text-xs">
-                  <Twitter className="h-3 w-3 mr-2" />
+                  <Mail className="h-3 w-3 mr-2" />
                   X/X DM
                 </Button>
                 
