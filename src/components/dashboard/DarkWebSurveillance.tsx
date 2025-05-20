@@ -1,10 +1,10 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Globe, AlertTriangle, UserCheck, Users, Database, Bot, ChevronRight } from "lucide-react";
+import { Globe, AlertTriangle, UserCheck, Users, Database, Bot, ChevronRight, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { ContentAlert } from "@/types/dashboard";
@@ -21,7 +21,10 @@ interface ThreatDetection {
 
 const DarkWebSurveillance = () => {
   const [isScanning, setIsScanning] = useState(false);
+  const [scanProgress, setScanProgress] = useState(0);
   const [scanComplete, setScanComplete] = useState(false);
+  const [surveillanceCoverage, setSurveillanceCoverage] = useState(78);
+  const [activeScanInterval, setActiveScanInterval] = useState<number | null>(null);
   const navigate = useNavigate();
   
   const [threatDetections, setThreatDetections] = useState<ThreatDetection[]>([
@@ -51,43 +54,8 @@ const DarkWebSurveillance = () => {
     }
   ]);
 
-  // Simulate live updates periodically
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (Math.random() > 0.7) {
-        // 30% chance of a new dark web threat being detected
-        const newThreat = generateRandomThreat();
-        setThreatDetections(prev => [newThreat, ...prev.slice(0, 4)]);
-        
-        // Create an alert for high severity threats
-        if (newThreat.severity === 'critical' || newThreat.severity === 'high') {
-          const newAlert: ContentAlert = {
-            id: `alert-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-            platform: "Dark Web",
-            content: `DARK WEB ALERT: ${newThreat.description}`,
-            date: "Just now",
-            severity: 'high',
-            status: 'new',
-            threatType: newThreat.type
-          };
-          
-          notifyAlertListeners(newAlert);
-          
-          toast.error("Critical Dark Web Alert", {
-            description: newThreat.description,
-            action: {
-              label: "View Details",
-              onClick: () => navigate("/dashboard/engagement")
-            }
-          });
-        }
-      }
-    }, 40000); // Check every 40 seconds
-    
-    return () => clearInterval(interval);
-  }, [navigate]);
-  
-  const generateRandomThreat = (): ThreatDetection => {
+  // Generate a random threat detection
+  const generateRandomThreat = useCallback((): ThreatDetection => {
     const types: Array<'bot_network' | 'data_leak' | 'coordinated_attack' | 'identity_theft'> = 
       ['bot_network', 'data_leak', 'coordinated_attack', 'identity_theft'];
       
@@ -119,7 +87,80 @@ const DarkWebSurveillance = () => {
       timestamp: 'Just now',
       platform: platforms[Math.floor(Math.random() * platforms.length)]
     };
-  };
+  }, []);
+
+  // Function to create an alert from a threat detection
+  const createAlertFromThreat = useCallback((threat: ThreatDetection): ContentAlert => {
+    return {
+      id: `alert-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      platform: "Dark Web - " + threat.platform,
+      content: `DARK WEB ALERT: ${threat.description}`,
+      date: threat.timestamp,
+      severity: threat.severity === 'critical' || threat.severity === 'high' ? 'high' : 
+              threat.severity === 'medium' ? 'medium' : 'low',
+      status: 'new',
+      threatType: threat.type
+    };
+  }, []);
+
+  // Automatically start scanning on component mount
+  useEffect(() => {
+    handleScanDarkWeb();
+    
+    // Set up automatic scanning interval
+    const interval = window.setInterval(() => {
+      const shouldAutoScan = !isScanning && Math.random() > 0.7; // 30% chance to auto scan
+      if (shouldAutoScan) {
+        handleScanDarkWeb(true); // Auto scan is silent
+      }
+    }, 30000); // Check every 30 seconds
+    
+    setActiveScanInterval(interval);
+    
+    return () => {
+      if (activeScanInterval) {
+        window.clearInterval(activeScanInterval);
+      }
+    };
+  }, []);
+  
+  // Detect threats periodically
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // 40% chance of a new dark web threat being detected
+      if (Math.random() > 0.6) {
+        const newThreat = generateRandomThreat();
+        setThreatDetections(prev => [newThreat, ...prev.slice(0, 4)]);
+        
+        // Create an alert for high severity threats
+        if (newThreat.severity === 'critical' || newThreat.severity === 'high') {
+          const newAlert = createAlertFromThreat(newThreat);
+          notifyAlertListeners(newAlert);
+          
+          toast.error("Critical Dark Web Alert", {
+            description: newThreat.description,
+            action: {
+              label: "View Details",
+              onClick: () => {
+                // Store alert in session storage for engagement hub
+                sessionStorage.setItem('selectedAlert', JSON.stringify(newAlert));
+                navigate("/dashboard/engagement?alert=" + newAlert.id);
+              }
+            }
+          });
+        }
+        
+        // Periodically adjust surveillance coverage to simulate changes
+        setSurveillanceCoverage(prev => {
+          const change = Math.random() > 0.5 ? 1 : -1;
+          const newValue = prev + change;
+          return Math.min(Math.max(newValue, 60), 95); // Keep between 60-95%
+        });
+      }
+    }, 20000); // Check every 20 seconds for more activity
+    
+    return () => clearInterval(interval);
+  }, [navigate, generateRandomThreat, createAlertFromThreat]);
   
   const getThreatIcon = (type: string) => {
     switch (type) {
@@ -151,56 +192,58 @@ const DarkWebSurveillance = () => {
     }
   };
   
-  const handleScanDarkWeb = () => {
+  const handleScanDarkWeb = (silent = false) => {
     setIsScanning(true);
+    setScanProgress(0);
     
     // Simulate scanning with progress updates
-    setTimeout(() => {
-      const newThreat = generateRandomThreat();
-      newThreat.severity = 'high'; // Force high severity for this scan
-      newThreat.timestamp = 'Just now';
-      
-      setThreatDetections(prev => [newThreat, ...prev.slice(0, 4)]);
-      setIsScanning(false);
-      setScanComplete(true);
-      
-      // Create an alert for this threat
-      const newAlert: ContentAlert = {
-        id: `alert-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-        platform: "Dark Web",
-        content: `DARK WEB ALERT: ${newThreat.description}`,
-        date: "Just now",
-        severity: 'high',
-        status: 'new',
-        threatType: newThreat.type
-      };
-      
-      notifyAlertListeners(newAlert);
-      
-      toast.success("Dark web scan complete", {
-        description: `ALERT: ${newThreat.description}`,
-        action: {
-          label: "View Details",
-          onClick: () => navigate("/dashboard/engagement")
-        }
+    const progressInterval = setInterval(() => {
+      setScanProgress(prev => {
+        const newProgress = prev + Math.floor(Math.random() * 15);
+        return newProgress >= 100 ? 100 : newProgress;
       });
+    }, 200);
+    
+    // Simulate scanning completion
+    setTimeout(() => {
+      clearInterval(progressInterval);
+      setScanProgress(100);
       
-      // Reset scan complete after a delay
-      setTimeout(() => setScanComplete(false), 3000);
+      setTimeout(() => {
+        const newThreat = generateRandomThreat();
+        newThreat.severity = Math.random() > 0.4 ? 'high' : 'critical'; // Force high/critical severity
+        newThreat.timestamp = 'Just now';
+        
+        setThreatDetections(prev => [newThreat, ...prev.slice(0, 4)]);
+        setIsScanning(false);
+        setScanComplete(true);
+        
+        // Create an alert for this threat
+        const newAlert = createAlertFromThreat(newThreat);
+        notifyAlertListeners(newAlert);
+        
+        if (!silent) {
+          toast.success("Dark web scan complete", {
+            description: `ALERT: ${newThreat.description}`,
+            action: {
+              label: "View Details",
+              onClick: () => {
+                // Store alert in session storage for engagement hub
+                sessionStorage.setItem('selectedAlert', JSON.stringify(newAlert));
+                navigate("/dashboard/engagement?alert=" + newAlert.id);
+              }
+            }
+          });
+        }
+        
+        // Reset scan complete after a delay
+        setTimeout(() => setScanComplete(false), 3000);
+      }, 500);
     }, 2500);
   };
 
   const handleViewThreat = (threat: ThreatDetection) => {
-    const alert: ContentAlert = {
-      id: `alert-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-      platform: threat.platform,
-      content: threat.description,
-      date: threat.timestamp,
-      severity: threat.severity === 'critical' || threat.severity === 'high' ? 'high' : 
-               threat.severity === 'medium' ? 'medium' : 'low',
-      status: 'new',
-      threatType: threat.type
-    };
+    const alert = createAlertFromThreat(threat);
     
     // Store in session storage for engagement hub
     sessionStorage.setItem('selectedAlert', JSON.stringify(alert));
@@ -213,7 +256,7 @@ const DarkWebSurveillance = () => {
     <Card>
       <CardHeader className="pb-2 flex flex-row items-center justify-between">
         <CardTitle className="text-lg font-medium">Dark Web Surveillance</CardTitle>
-        <Badge variant="outline" className="bg-gray-900 text-white">Live</Badge>
+        <Badge variant="outline" className="bg-gray-900 text-white animate-pulse">Live</Badge>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex justify-between items-center p-3 bg-gray-50 border rounded-md">
@@ -262,37 +305,47 @@ const DarkWebSurveillance = () => {
         <div className="pt-2">
           <div className="flex justify-between text-sm mb-1">
             <span className="font-medium">Surveillance Coverage</span>
-            <span>78%</span>
+            <span>{surveillanceCoverage}%</span>
           </div>
-          <Progress value={78} max={100} className="h-1.5" />
+          <Progress value={surveillanceCoverage} max={100} className="h-1.5" />
           <p className="text-xs text-muted-foreground mt-1">
             Monitoring 6 dark web forums, 4 marketplaces, and 12 Telegram channels
           </p>
         </div>
         
-        <Button 
-          onClick={handleScanDarkWeb}
-          disabled={isScanning}
-          variant="outline"
-          className={`w-full border-dashed ${scanComplete ? "bg-green-50 border-green-300" : ""}`}
-        >
-          {isScanning ? (
-            <span className="flex items-center gap-2">
-              <Globe className="h-4 w-4 animate-pulse" />
-              Scanning Dark Web...
-            </span>
-          ) : scanComplete ? (
-            <span className="flex items-center gap-2 text-green-600">
-              <Globe className="h-4 w-4" />
-              Scan Complete - New Threats Found
-            </span>
-          ) : (
-            <span className="flex items-center gap-2">
-              <Globe className="h-4 w-4" />
-              Scan Dark Web Now
-            </span>
-          )}
-        </Button>
+        {isScanning ? (
+          <div className="space-y-2">
+            <Progress value={scanProgress} max={100} className="h-2" />
+            <Button 
+              disabled
+              variant="outline"
+              className="w-full border-dashed"
+            >
+              <span className="flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Scanning Dark Web... {scanProgress}%
+              </span>
+            </Button>
+          </div>
+        ) : (
+          <Button 
+            onClick={() => handleScanDarkWeb()}
+            variant="outline"
+            className={`w-full border-dashed ${scanComplete ? "bg-green-50 border-green-300" : ""}`}
+          >
+            {scanComplete ? (
+              <span className="flex items-center gap-2 text-green-600">
+                <Globe className="h-4 w-4" />
+                Scan Complete - New Threats Found
+              </span>
+            ) : (
+              <span className="flex items-center gap-2">
+                <Globe className="h-4 w-4" />
+                Scan Dark Web Now
+              </span>
+            )}
+          </Button>
+        )}
       </CardContent>
     </Card>
   );

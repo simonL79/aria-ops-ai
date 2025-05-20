@@ -38,6 +38,8 @@ const AlertItem: React.FC<AlertItemProps> = ({
     e.preventDefault();
     e.stopPropagation();
     if (onViewDetail) {
+      // Store alert in session storage to ensure it can be accessed across pages
+      sessionStorage.setItem('selectedAlert', JSON.stringify(alert));
       onViewDetail(alert);
     }
   };
@@ -46,6 +48,8 @@ const AlertItem: React.FC<AlertItemProps> = ({
     e.preventDefault();
     e.stopPropagation();
     if (onRespond) {
+      // Store alert in session storage to ensure it can be accessed across pages
+      sessionStorage.setItem('selectedAlert', JSON.stringify(alert));
       onRespond(alert.id);
     }
   };

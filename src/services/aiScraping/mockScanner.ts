@@ -1,246 +1,166 @@
 
 import { ContentAlert } from "@/types/dashboard";
-import { toast } from "sonner";
-import { fetchContent } from "@/services/dataIngestion/contentFetcher";
 
-// Define platforms for real-time monitoring
-const availablePlatforms = [
-  'Twitter', 'Reddit', 'News Article', 'Review Site', 
-  'LinkedIn', 'TikTok', 'YouTube', 'Facebook', 'Blog'
-];
+// Event listeners for real-time alerts
+const alertListeners: Function[] = [];
 
-// Scan parameter types
-export interface ScanParameters {
-  platforms?: string[];
-  keywordFilters?: string[];
-  prioritizeSeverity?: 'high' | 'medium' | 'low' | null;
-  includeCustomerEnquiries?: boolean;
-  maxResults?: number;
-}
-
-// Default scan parameters
-export const defaultScanParameters: ScanParameters = {
-  platforms: [],
-  keywordFilters: [],
-  prioritizeSeverity: null,
-  includeCustomerEnquiries: true,
-  maxResults: 5
-};
-
-// Global array to store all active alert listeners
-const alertListeners: Array<(alert: ContentAlert) => void> = [];
-
-// Register a listener for new alerts
-export const registerAlertListener = (listener: (alert: ContentAlert) => void): void => {
+// Register a listener for alerts
+export const registerAlertListener = (listener: Function) => {
   alertListeners.push(listener);
+  return () => {
+    const index = alertListeners.indexOf(listener);
+    if (index !== -1) {
+      alertListeners.splice(index, 1);
+    }
+  };
 };
 
-// Unregister a listener
-export const unregisterAlertListener = (listener: (alert: ContentAlert) => void): void => {
-  const index = alertListeners.indexOf(listener);
-  if (index !== -1) {
-    alertListeners.splice(index, 1);
-  }
-};
-
-// Notify all registered listeners about a new alert
-export const notifyAlertListeners = (alert: ContentAlert): void => {
+// Notify all listeners about a new alert
+export const notifyAlertListeners = (alert: ContentAlert) => {
   alertListeners.forEach(listener => listener(alert));
 };
 
-// Handle direct response from notification
-export const respondToAlert = (alert: ContentAlert): void => {
-  window.location.href = `/dashboard/engagement?alert=${alert.id}`;
+// Types for scan parameters
+export interface ScanParameters {
+  platforms?: string[];
+  keywords?: string[];
+  timeframe?: 'day' | 'week' | 'month';
+  intensity?: 'low' | 'medium' | 'high';
+  threatTypes?: string[];
+}
+
+// Platforms to scan
+const availablePlatforms = [
+  'Twitter', 'Reddit', 'Facebook', 'Instagram', 
+  'TikTok', 'YouTube', 'News Sites', 'Forums',
+  'Telegram', 'Dark Web Marketplaces', 'Private IRC Channels'
+];
+
+// Keywords for the scan
+const defaultKeywords = [
+  'company name', 'brand', 'product', 'service',
+  'CEO name', 'executives', 'scandal', 'lawsuit',
+  'controversy', 'review', 'complaint', 'problem'
+];
+
+// Generate threat type based on content
+const getThreatType = () => {
+  const types = [
+    'falseReviews', 'coordinatedAttack', 'misinformation', 
+    'viralThreat', 'competitorSmear', 'dataBreach', 'securityVulnerability'
+  ];
+  return types[Math.floor(Math.random() * types.length)];
 };
 
-// Process content fetched from real sources into ContentAlert format
-const processContentToAlerts = (contents: any[], params?: ScanParameters): ContentAlert[] => {
-  const p = params || defaultScanParameters;
-  const alerts: ContentAlert[] = [];
-
-  for (const item of contents) {
-    // Determine if this is a customer enquiry based on content analysis
-    const contentLower = item.content.toLowerCase();
-    const isCustomerEnquiry = p.includeCustomerEnquiries && (
-      contentLower.includes('help') || 
-      contentLower.includes('?') || 
-      contentLower.includes('how do i') ||
-      contentLower.includes('contact') ||
-      contentLower.includes('support') ||
-      contentLower.includes('service')
-    );
-
-    // Skip customer enquiries if not including them
-    if (isCustomerEnquiry && !p.includeCustomerEnquiries) {
-      continue;
-    }
-
-    // Apply keyword filters if provided
-    if (p.keywordFilters && p.keywordFilters.length > 0) {
-      const matchesKeyword = p.keywordFilters.some(keyword => 
-        contentLower.includes(keyword.toLowerCase())
-      );
-
-      if (!matchesKeyword) {
-        continue;
-      }
-    }
-
-    // Determine severity based on content sentiment analysis
-    let severity: 'high' | 'medium' | 'low';
-    
-    if (p.prioritizeSeverity) {
-      // Bias toward requested severity while maintaining some variation
-      severity = Math.random() < 0.7 ? p.prioritizeSeverity : 
-        (['high', 'medium', 'low'] as const).filter(s => s !== p.prioritizeSeverity)[
-          Math.floor(Math.random() * 2)
-        ];
-    } else {
-      // Analyze content to determine severity
-      if (contentLower.includes('urgent') || 
-          contentLower.includes('terrible') || 
-          contentLower.includes('worst') ||
-          contentLower.includes('disappointed')) {
-        severity = 'high';
-      } else if (contentLower.includes('issue') || 
-                contentLower.includes('problem') || 
-                contentLower.includes('concerned')) {
-        severity = 'medium';
-      } else {
-        severity = 'low';
-      }
-    }
-
-    // Create alert from content
-    alerts.push({
-      id: `alert-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-      platform: item.platform || item.sourceName || 'Web',
-      content: item.content,
-      date: 'Just now',
-      severity,
-      status: 'new',
-      category: isCustomerEnquiry ? 'customer_enquiry' : undefined
-    });
-
-    // Apply maximum results limit
-    if (alerts.length >= (p.maxResults || 5)) {
-      break;
-    }
-  }
-
-  return alerts;
-};
-
-// Perform a live scan and return real data
-export const performLiveScan = async (params?: ScanParameters): Promise<ContentAlert[]> => {
-  const p = params || defaultScanParameters;
+// Generate real-looking content
+const generateContent = (platform: string) => {
+  const contentTemplates = [
+    "This company has terrible customer service. I waited for hours and no one helped me. #awful #scam",
+    "Just discovered that [COMPANY] is using unethical practices for their products. Sharing this so everyone knows!",
+    "Avoid [BRAND] at all costs! Their quality has gone downhill and they refuse to address customer concerns.",
+    "Has anyone else had issues with [COMPANY]'s latest product? Mine broke after just two days...",
+    "I'm organizing a boycott of [BRAND] due to their recent political statements. RT to spread the word!",
+    "Found evidence that [COMPANY] is buying fake reviews to boost their ratings. Here are screenshots:",
+    "PSA: [BRAND]'s database was compromised yesterday. If you have an account, change your password immediately.",
+    "My experience with [COMPANY] was the worst. They charged me twice and refuse to refund the duplicate charge.",
+    "New report shows [BRAND] products contain harmful chemicals not listed on the label. Be careful!",
+    "I've discovered [COMPANY] employees sharing customer data on this forum. Major privacy breach.",
+    "Coordinated campaign planned against [BRAND] starting tomorrow. Looking for participants.",
+    "Critical security vulnerability discovered in [COMPANY]'s web application. Customer data at risk."
+  ];
   
-  try {
-    // Convert scan parameters to ingestion options
-    const ingestionOptions = {
-      sources: p.platforms?.map(platform => platform.toLowerCase()) || [],
-      keywords: p.keywordFilters || ['brand', 'company', 'product', 'service'],
-      maxResults: p.maxResults || 5
+  const randomContent = contentTemplates[Math.floor(Math.random() * contentTemplates.length)];
+  return randomContent.replace('[COMPANY]', 'Company').replace('[BRAND]', 'Brand');
+};
+
+// Simulate scanning for content
+export const performLiveScan = async (params?: ScanParameters): Promise<ContentAlert[]> => {
+  // Simulate network delay
+  await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 1000));
+  
+  const results: ContentAlert[] = [];
+  const scanIntensity = params?.intensity || 'medium';
+  
+  // Determine number of results based on scan intensity
+  const resultCount = scanIntensity === 'high' ? 
+    5 + Math.floor(Math.random() * 5) : 
+    scanIntensity === 'medium' ? 
+    3 + Math.floor(Math.random() * 3) : 
+    1 + Math.floor(Math.random() * 2);
+  
+  // Get platforms to scan
+  const platformsToScan = params?.platforms && params.platforms.length > 0 ? 
+    params.platforms : 
+    availablePlatforms;
+  
+  // Generate results
+  for (let i = 0; i < resultCount; i++) {
+    const platform = platformsToScan[Math.floor(Math.random() * platformsToScan.length)];
+    const isHighSeverity = Math.random() > 0.7;
+    const isMediumSeverity = !isHighSeverity && Math.random() > 0.5;
+    
+    const result: ContentAlert = {
+      id: `scan-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
+      platform,
+      content: generateContent(platform),
+      date: 'Just now',
+      severity: isHighSeverity ? 'high' : (isMediumSeverity ? 'medium' : 'low'),
+      status: 'new',
+      threatType: getThreatType()
     };
     
-    // Fetch content from real sources
-    const contents = await fetchContent(ingestionOptions);
+    results.push(result);
     
-    // Process content into alerts
-    const alerts = processContentToAlerts(contents, p);
-    
-    // Notify listeners about these new alerts
-    alerts.forEach(alert => {
-      notifyAlertListeners(alert);
-    });
-    
-    // Show toast notification
-    toast.success(`Scan complete: ${alerts.length} new alerts detected`, {
-      description: alerts.some(a => a.severity === 'high') ? 
-        "High priority concerns detected, action recommended." : 
-        "No critical issues detected."
-    });
-    
-    return alerts;
-  } catch (error) {
-    console.error("Error performing live scan:", error);
-    toast.error("Scan failed", {
-      description: "Could not complete the scan. Please try again."
-    });
-    return [];
+    // Notify listeners about high severity threats
+    if (isHighSeverity) {
+      notifyAlertListeners(result);
+    }
   }
+  
+  return results;
 };
 
-// Start a continuous scan process
-export const startContinuousScan = (
-  onNewAlert: (alert: ContentAlert) => void,
-  intervalMs = 60000, // Default 1 minute
-  params?: ScanParameters
-): () => void => {
-  // Register the provided callback as a listener
-  registerAlertListener(onNewAlert);
+// Function to start continuous monitoring
+export const startContinuousMonitoring = (callback: (alerts: ContentAlert[]) => void) => {
+  let isActive = true;
   
-  const p = params || defaultScanParameters;
-  
-  // Run the first scan immediately
-  setTimeout(async () => {
-    try {
-      const initialAlerts = await performLiveScan(p);
-      initialAlerts.forEach(onNewAlert);
-    } catch (error) {
-      console.error("Initial scan error:", error);
-    }
-  }, 5000);
-  
-  // Set up interval for ongoing scans
-  const interval = setInterval(async () => {
-    try {
-      // Run scan with 30% chance each interval
-      if (Math.random() < 0.3) {
-        const newAlerts = await performLiveScan(p);
-        
-        // Process each new alert
-        for (const newAlert of newAlerts) {
-          onNewAlert(newAlert);
-          
-          // For high severity or customer enquiries, show toast
-          if (newAlert.severity === 'high' || newAlert.category === 'customer_enquiry') {
-            const isCustomer = newAlert.category === 'customer_enquiry';
-            
-            toast[isCustomer ? 'info' : 'warning'](
-              `New ${isCustomer ? 'customer enquiry' : 'high priority alert'} detected`,
-              {
-                description: newAlert.content.substring(0, 80) + (newAlert.content.length > 80 ? '...' : ''),
-                action: {
-                  label: isCustomer ? "Respond Now" : "View Details",
-                  onClick: () => {
-                    // Navigate to engagement hub with the alert ID
-                    window.location.href = `/dashboard/engagement?alert=${newAlert.id}`;
-                  },
-                },
-                duration: 10000 // 10 seconds
-              }
-            );
-            
-            // Play notification sound
-            try {
-              const audio = new Audio('/urgent-notification.mp3');
-              audio.volume = 0.5;
-              audio.play().catch(e => console.log('Audio play prevented by browser policy:', e));
-            } catch (err) {
-              console.log('Audio notification not supported');
-            }
-          }
-        }
+  const checkForAlerts = async () => {
+    if (!isActive) return;
+    
+    // Random chance to find new alerts
+    if (Math.random() > 0.6) {
+      const results = await performLiveScan({
+        intensity: 'low',
+        timeframe: 'day'
+      });
+      
+      if (results.length > 0 && callback) {
+        callback(results);
       }
-    } catch (error) {
-      console.error("Continuous scan error:", error);
     }
-  }, intervalMs);
+    
+    // Schedule next check
+    const nextInterval = 30000 + Math.floor(Math.random() * 30000); // 30-60 seconds
+    setTimeout(checkForAlerts, nextInterval);
+  };
   
-  // Return a function to stop the scanning and remove the listener
+  // Start initial check
+  checkForAlerts();
+  
+  // Return function to stop monitoring
   return () => {
-    clearInterval(interval);
-    unregisterAlertListener(onNewAlert);
+    isActive = false;
+  };
+};
+
+// Get current monitoring status
+export const getMonitoringStatus = () => {
+  // In a real app, this would be persisted in a database or state management
+  return {
+    isActive: true,
+    platforms: availablePlatforms.length,
+    keywords: defaultKeywords.length,
+    lastActiveTime: new Date().toISOString(),
+    threatModelsActive: ['Brand Reputation', 'Data Security', 'Competition Analysis']
   };
 };

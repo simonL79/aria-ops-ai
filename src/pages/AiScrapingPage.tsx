@@ -54,6 +54,9 @@ const AiScrapingPage = () => {
 
   const handleViewDetail = (alert: ContentAlert) => {
     setSelectedAlert(alert);
+    
+    // Store the alert in sessionStorage for consistent access
+    sessionStorage.setItem('selectedAlert', JSON.stringify(alert));
   };
 
   const handleMarkAsRead = (alertId: string) => {
