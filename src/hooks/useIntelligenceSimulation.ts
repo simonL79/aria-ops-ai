@@ -22,22 +22,28 @@ export const useIntelligenceSimulation = (options?: {
       description: options?.description || "Analyzing data and generating insights..."
     });
     
-    // Simulate API call or processing
+    // This hook now just manages the UI state for simulations
+    // The actual simulation logic is handled by the caller
+    // (which will call into the appropriate services)
+    
+    // Use a timeout to ensure the UI has time to update
     setTimeout(() => {
-      // Complete simulation
-      setIsSimulating(false);
-      
-      // Show success message
-      toast.success(options?.successMessage || "Simulation complete", {
-        id: toastId,
-        description: "Intelligence data has been updated with new information."
-      });
-      
-      // Run completion callback if provided
-      if (options?.onComplete) {
-        options.onComplete();
-      }
-    }, options?.duration || 2500);
+      // Complete simulation UI after the duration
+      setTimeout(() => {
+        setIsSimulating(false);
+        
+        // Update toast to success
+        toast.success(options?.successMessage || "Simulation complete", {
+          id: toastId,
+          description: "Intelligence data has been updated with new information."
+        });
+        
+        // Run completion callback if provided
+        if (options?.onComplete) {
+          options.onComplete();
+        }
+      }, options?.duration || 2500);
+    }, 0);
   };
   
   return {

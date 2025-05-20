@@ -1,6 +1,7 @@
 
 // Re-export all intelligence services
-export { classifyContentThreat, ThreatClassificationResult } from './contentClassifier';
+export { classifyContentThreat } from './contentClassifier';
+export type { ThreatClassificationResult } from './contentClassifier';
 export { classifyThreat, classifyThreatAdvanced } from './threatClassifier';
 export { runMultiAgentAnalysis } from './multiAgentAnalysis';
 export { runPredictiveAnalysis } from './predictiveAnalysis';
