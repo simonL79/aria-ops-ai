@@ -1,9 +1,11 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { IntelligenceAgent } from "@/types/intelligence";
 import AgentList from "./agents/AgentList";
 import SimulationButton from "./agents/SimulationButton";
+import { Shield, MessageSquare, Scale, Users, BarChart3 } from "lucide-react";
 
 // Sample agent data
 const initialAgents: IntelligenceAgent[] = [
@@ -14,6 +16,8 @@ const initialAgents: IntelligenceAgent[] = [
     description: "Tracks and maps out smear campaigns across platforms",
     capabilities: ["Pattern recognition", "Source tracing", "Campaign mapping"],
     active: true,
+    isAI: true,
+    icon: <Shield className="h-5 w-5 text-blue-500" />,
     memory: {
       incidentsAnalyzed: 124,
       decisionsRecorded: 67,
@@ -28,6 +32,8 @@ const initialAgents: IntelligenceAgent[] = [
     description: "Detects libel, legal risk, and compliance issues",
     capabilities: ["Legal precedent analysis", "Risk assessment", "Regulatory compliance"],
     active: true,
+    isAI: true,
+    icon: <Scale className="h-5 w-5 text-amber-500" />,
     memory: {
       incidentsAnalyzed: 78,
       decisionsRecorded: 45,
@@ -42,6 +48,8 @@ const initialAgents: IntelligenceAgent[] = [
     description: "Crafts multiple response strategies based on situation",
     capabilities: ["Tone analysis", "Audience targeting", "Multichannel strategy"],
     active: true,
+    isAI: true,
+    icon: <MessageSquare className="h-5 w-5 text-green-500" />,
     memory: {
       incidentsAnalyzed: 206,
       decisionsRecorded: 158,
@@ -56,6 +64,8 @@ const initialAgents: IntelligenceAgent[] = [
     description: "Predicts emerging reputation threats before they spread",
     capabilities: ["Anomaly detection", "Virality prediction", "Early warning"],
     active: false,
+    isAI: true,
+    icon: <BarChart3 className="h-5 w-5 text-red-500" />,
     tools: ["predict", "monitor", "alert"]
   },
   {
@@ -65,6 +75,8 @@ const initialAgents: IntelligenceAgent[] = [
     description: "Engages journalists or influencers to amplify positive messaging",
     capabilities: ["Contact management", "Pitch creation", "Relationship tracking"],
     active: false,
+    isAI: false,
+    icon: <Users className="h-5 w-5 text-purple-500" />,
     tools: ["contact", "compose", "track"]
   }
 ];
