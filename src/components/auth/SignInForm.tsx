@@ -142,13 +142,6 @@ const SignInForm = ({ setShowResetForm }: SignInFormProps) => {
             </span>
           )}
         </Button>
-        
-        {/* Added admin credential hint */}
-        <div className="text-center mt-4 text-sm text-muted-foreground">
-          <p>Admin credentials:</p>
-          <p>Email: simonlindsay7988@gmail.com</p>
-          <p>Password: Kaypetdel123</p>
-        </div>
       </form>
     </Form>
   );
