@@ -8,6 +8,7 @@ interface SlackNotificationPayload {
   category: string;
   content: string;
   recommendation: string;
+  targets?: string[];
   dashboardUrl?: string;
 }
 
@@ -57,23 +58,38 @@ export const sendSlackNotification = async (
               text: `*Category:* ${payload.category}`
             }
           ]
-        },
-        {
-          type: "section",
-          text: {
-            type: "mrkdwn",
-            text: `*Summary:* "${payload.content.substring(0, 150)}${payload.content.length > 150 ? '...' : ''}"`
-          }
-        },
-        {
-          type: "section",
-          text: {
-            type: "mrkdwn",
-            text: `*Recommended Action:* ${payload.recommendation}`
-          }
         }
       ]
     };
+    
+    // Add targets section if provided
+    if (payload.targets && payload.targets.length > 0) {
+      message.blocks.push({
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text: `*Targets:* ${payload.targets.join(', ')}`
+        }
+      } as any);
+    }
+    
+    // Content summary
+    message.blocks.push({
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: `*Summary:* "${payload.content.substring(0, 150)}${payload.content.length > 150 ? '...' : ''}"`
+      }
+    } as any);
+
+    // Recommendation
+    message.blocks.push({
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: `*Recommended Action:* ${payload.recommendation}`
+      }
+    } as any);
 
     // Add a button to view in dashboard if URL is provided
     if (payload.dashboardUrl) {
@@ -125,4 +141,37 @@ export const shouldNotify = (severity: number | string): boolean => {
   
   // For numeric severity, notify if >= 7
   return severity >= 7;
+};
+
+// Helper function to extract targets from content
+export const extractTargetsFromContent = (content: string): string[] => {
+  // Look for mentions of entities in the text - common patterns
+  const entityPatterns = [
+    /target(?:s|ed|ing)?:?\s*([^\.]+)/i,
+    /(?:individual|person|company|brand|organization)(?:s)?:?\s*([^\.]+)/i,
+    /(?:directed at|aimed at|focused on):?\s*([^\.]+)/i,
+    /(?:attacking|threatening):?\s*([^\.]+)/i
+  ];
+  
+  let targets: string[] = [];
+  
+  entityPatterns.forEach(pattern => {
+    const match = content.match(pattern);
+    if (match && match[1]) {
+      const extracted = match[1].trim();
+      if (extracted.length > 3 && !targets.includes(extracted)) {
+        targets.push(extracted);
+      }
+    }
+  });
+  
+  // If we still don't have targets, try to extract proper nouns
+  if (targets.length === 0) {
+    const properNouns = content.match(/\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b/g);
+    if (properNouns) {
+      targets = [...new Set(properNouns)].slice(0, 3);
+    }
+  }
+  
+  return targets.length > 0 ? targets : [];
 };

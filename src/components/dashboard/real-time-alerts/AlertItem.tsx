@@ -2,7 +2,7 @@
 import React from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Clock, X, CheckCircle2, MessageSquare, Eye } from "lucide-react";
+import { Clock, X, CheckCircle2, MessageSquare, Eye, Target } from "lucide-react";
 import { ContentAlert } from "@/types/dashboard";
 
 interface AlertItemProps {
@@ -33,6 +33,23 @@ const AlertItem: React.FC<AlertItemProps> = ({
   
   const isHighSeverity = alert.severity === 'high';
   const isCustomerEnquiry = alert.category === 'customer_enquiry';
+  
+  // Extract targets if they're in the alert
+  const getTargets = () => {
+    if (alert.detectedEntities && alert.detectedEntities.length > 0) {
+      return alert.detectedEntities;
+    }
+    
+    if (alert.content) {
+      // Try to extract proper nouns from the content as potential targets
+      const properNouns = alert.content.match(/\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b/g);
+      return properNouns ? [...new Set(properNouns)].slice(0, 2) : null;
+    }
+    
+    return null;
+  };
+  
+  const targets = getTargets();
   
   const handleViewDetail = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -107,6 +124,29 @@ const AlertItem: React.FC<AlertItemProps> = ({
           <p className={`mt-2 ${(isHighSeverity || isCustomerEnquiry) && alert.status === 'new' ? 'font-medium' : ''}`}>
             {alert.content}
           </p>
+          
+          {targets && targets.length > 0 && (
+            <div className="flex items-center gap-1 mt-1 mb-1 text-xs">
+              <Target className="h-3 w-3 text-gray-500" />
+              <span className="text-muted-foreground">Targets:</span>
+              <div className="flex gap-1">
+                {targets.map((target, idx) => (
+                  <Badge key={idx} variant="outline" className="text-xs py-0 px-1">
+                    {target}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {alert.recommendation && (
+            <div className="text-xs text-muted-foreground mt-1">
+              <strong>Recommended:</strong> {alert.recommendation.length > 80 
+                ? `${alert.recommendation.substring(0, 80)}...` 
+                : alert.recommendation}
+            </div>
+          )}
+          
           <div className="flex items-center gap-1 text-xs text-muted-foreground mt-2">
             <Clock className="h-3 w-3" />
             <span>{alert.date}</span>

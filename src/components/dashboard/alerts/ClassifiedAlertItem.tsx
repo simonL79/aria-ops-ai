@@ -3,7 +3,7 @@ import React from 'react';
 import { ContentAlert } from '@/types/dashboard';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, MessageCircle, Shield } from 'lucide-react';
+import { Calendar, MessageCircle, Shield, Users, Target } from 'lucide-react';
 
 interface ClassifiedAlertItemProps {
   alert: ContentAlert;
@@ -44,6 +44,23 @@ const ClassifiedAlertItem = ({ alert, onViewDetails, onMarkAsRead }: ClassifiedA
     
     return <Badge className={color}>{alert.category}</Badge>;
   };
+  
+  // Extract targets if they're in the alert
+  const getTargets = () => {
+    if (alert.detectedEntities && alert.detectedEntities.length > 0) {
+      return alert.detectedEntities;
+    }
+    
+    if (alert.content) {
+      // Try to extract proper nouns from the content as potential targets
+      const properNouns = alert.content.match(/\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b/g);
+      return properNouns ? [...new Set(properNouns)].slice(0, 2) : null;
+    }
+    
+    return null;
+  };
+  
+  const targets = getTargets();
 
   return (
     <div 
@@ -59,6 +76,20 @@ const ClassifiedAlertItem = ({ alert, onViewDetails, onMarkAsRead }: ClassifiedA
       </div>
       
       <p className="text-sm mb-2">{alert.content}</p>
+      
+      {targets && targets.length > 0 && (
+        <div className="flex items-center gap-1 mb-2 text-xs">
+          <Target className="h-3 w-3" />
+          <span className="text-muted-foreground">Targets:</span>
+          <div className="flex gap-1">
+            {targets.map((target, idx) => (
+              <Badge key={idx} variant="outline" className="text-xs py-0 px-1">
+                {target}
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
       
       <div className="flex items-center justify-between text-xs text-muted-foreground">
         <div className="flex items-center">
@@ -82,7 +113,7 @@ const ClassifiedAlertItem = ({ alert, onViewDetails, onMarkAsRead }: ClassifiedA
           {alert.recommendation && (
             <div className="flex items-center">
               <Shield className="h-3 w-3 mr-1" />
-              <span className="truncate max-w-24">{alert.recommendation}</span>
+              <span className="truncate max-w-48">{alert.recommendation}</span>
             </div>
           )}
         </div>

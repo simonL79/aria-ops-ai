@@ -57,8 +57,10 @@ Provide a detailed analysis structured as a JSON object with the following field
 - recommendation: Specific, actionable steps recommended to address this threat
 - ai_reasoning: Your detailed reasoning process for this classification
 - confidence: A number between 0-1 indicating your confidence in this classification
+- detectedEntities: An array of strings listing the specific entities (people, brands, companies) that are being targeted or mentioned in the content
+- detectedBeliefs: If applicable, an array of strings that represent key claims or beliefs expressed that might be problematic
 
-Be specific about who or what is being targeted and the potential impacts. If the content is non-threatening, assign a low severity score and explain why it poses minimal risk.
+Be extremely specific about who or what is being targeted and the potential impacts. If the content is non-threatening, assign a low severity score and explain why it poses minimal risk.
 `;
 
     // Make request to OpenAI API
@@ -94,6 +96,17 @@ Be specific about who or what is being targeted and the potential impacts. If th
     try {
       // Try to parse the response as JSON
       classificationResult = JSON.parse(assistantMessage);
+      
+      // Extract targets manually if they aren't already provided
+      if (!classificationResult.detectedEntities || classificationResult.detectedEntities.length === 0) {
+        // Try to extract from the explanation or reasoning
+        const properNouns = (classificationResult.explanation || classificationResult.ai_reasoning || "")
+          .match(/\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b/g);
+          
+        if (properNouns) {
+          classificationResult.detectedEntities = [...new Set(properNouns)].slice(0, 5);
+        }
+      }
       
       // Log the classification for debugging and analysis
       console.log("Classification completed:", {
@@ -138,8 +151,15 @@ Be specific about who or what is being targeted and the potential impacts. If th
         explanation: "The classification system encountered an issue but detected concerning content.",
         recommendation: "Review this content manually for potential threats.",
         ai_reasoning: assistantMessage,
-        confidence: 0.5
+        confidence: 0.5,
+        detectedEntities: []
       };
+      
+      // Try to extract entities even in the fallback case
+      const properNouns = assistantMessage.match(/\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b/g);
+      if (properNouns) {
+        fallbackResult.detectedEntities = [...new Set(properNouns)].slice(0, 5);
+      }
       
       return new Response(
         JSON.stringify(fallbackResult),
