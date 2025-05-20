@@ -9,6 +9,7 @@ import FilterButtons from "./FilterButtons";
 import AlertsList from "./AlertsList";
 import { useAlertSimulation } from "./useAlertSimulation";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import AlertItem from "./AlertItem"; // Import the AlertItem from the real-time-alerts folder
 
 interface RealTimeAlertsProps {
   alerts?: ContentAlert[];
@@ -180,13 +181,29 @@ const RealTimeAlerts = ({
       
       <CardContent className="p-0 mt-2">
         <div className="max-h-96 overflow-y-auto">
-          <AlertsList 
-            filteredAlerts={filteredAlerts}
-            handleDismiss={handleDismiss}
-            handleMarkAsRead={handleMarkAsRead}
-            onViewDetail={onViewDetail}
-            onRespond={onRespond}
-          />
+          {filteredAlerts.length === 0 ? (
+            <div className="flex flex-col items-center justify-center p-8 text-center">
+              <Info className="h-12 w-12 text-muted-foreground" />
+              <p className="mt-2 text-muted-foreground">No active alerts at this time</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                New alerts will appear here as they are detected
+              </p>
+            </div>
+          ) : (
+            <>
+              {filteredAlerts.map((alert, index) => (
+                <AlertItem
+                  key={alert.id}
+                  alert={alert}
+                  isLast={index === filteredAlerts.length - 1}
+                  onDismiss={handleDismiss}
+                  onMarkAsRead={handleMarkAsRead}
+                  onViewDetail={onViewDetail}
+                  onRespond={onRespond}
+                />
+              ))}
+            </>
+          )}
         </div>
       </CardContent>
     </Card>

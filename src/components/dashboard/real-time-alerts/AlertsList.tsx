@@ -39,10 +39,6 @@ const AlertsList = ({
           key={alert.id}
           alert={alert}
           isLast={index === filteredAlerts.length - 1}
-          onDismiss={handleDismiss}
-          onMarkAsRead={handleMarkAsRead}
-          onViewDetail={onViewDetail}
-          onRespond={onRespond}
         />
       ))}
     </>

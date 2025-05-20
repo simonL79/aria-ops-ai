@@ -49,8 +49,8 @@ export const useAlertSimulation = (initialAlerts: ContentAlert[] = []): UseAlert
   // Add a new alert
   const addAlert = (alert: ContentAlert) => {
     setActiveAlerts(prev => [alert, ...prev]);
-    // Play the appropriate notification sound
-    playNotificationSound(alert.severity === 'high' ? 'urgent' : 'alert');
+    // Play the appropriate notification sound - Fix by using correct parameter values
+    playNotificationSound(alert.severity === 'high' ? 'error' : 'info');
   };
   
   // Remove an alert

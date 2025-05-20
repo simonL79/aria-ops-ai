@@ -8,8 +8,8 @@ import { ContentAlert } from "@/types/dashboard";
 interface AlertItemProps {
   alert: ContentAlert;
   isLast: boolean;
-  onDismiss: (id: string) => void;
-  onMarkAsRead: (id: string) => void;
+  onDismiss?: (id: string) => void;
+  onMarkAsRead?: (id: string) => void;
   onViewDetail?: (alert: ContentAlert) => void;
   onRespond?: (alertId: string) => void;
 }
@@ -47,6 +47,22 @@ const AlertItem: React.FC<AlertItemProps> = ({
     e.stopPropagation();
     if (onRespond) {
       onRespond(alert.id);
+    }
+  };
+
+  const handleDismiss = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onDismiss) {
+      onDismiss(alert.id);
+    }
+  };
+
+  const handleMarkAsRead = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onMarkAsRead) {
+      onMarkAsRead(alert.id);
     }
   };
 
@@ -96,7 +112,7 @@ const AlertItem: React.FC<AlertItemProps> = ({
           <Button 
             size="sm" 
             variant="ghost" 
-            onClick={() => onDismiss(alert.id)}
+            onClick={handleDismiss}
             className="h-7 w-7 p-0"
           >
             <X className="h-4 w-4" />
@@ -104,7 +120,7 @@ const AlertItem: React.FC<AlertItemProps> = ({
           <Button 
             size="sm" 
             variant="ghost" 
-            onClick={() => onMarkAsRead(alert.id)}
+            onClick={handleMarkAsRead}
             className="h-7 w-7 p-0"
           >
             <CheckCircle2 className="h-4 w-4" />
