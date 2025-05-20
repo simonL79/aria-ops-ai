@@ -26,6 +26,14 @@ export default function useThreatClassifier({ onClassified, navigate }: UseThrea
       if (classificationResult) {
         setResult(classificationResult);
         
+        // Show notification for high severity threats
+        if (classificationResult.severity >= 7) {
+          toast.error("High severity threat detected", {
+            description: classificationResult.explanation || classificationResult.category,
+            duration: 6000
+          });
+        }
+        
         if (onClassified) {
           onClassified(classificationResult);
         }
