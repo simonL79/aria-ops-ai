@@ -26,7 +26,7 @@ export { runMultiAgentAnalysis } from './intelligence/multiAgentAnalysis';
 // Predictive Analysis
 export { runPredictiveAnalysis } from './intelligence/predictiveAnalysis';
 
-// Data Ingestion Services (refactored)
+// Data Ingestion Services
 export { 
   fetchContent, 
   connectDataSource, 
@@ -37,3 +37,17 @@ export type {
   IngestionOptions 
 } from './dataIngestion/types';
 
+// Monitoring Services
+export {
+  getMonitoringStatus,
+  startMonitoring,
+  stopMonitoring,
+  runMonitoringScan,
+  getMentionsAsAlerts,
+  getMonitoredPlatforms,
+  isPlatformMonitored
+} from './monitoring';
+export type {
+  MonitoringStatus,
+  MonitorablePlatform
+} from './monitoring';

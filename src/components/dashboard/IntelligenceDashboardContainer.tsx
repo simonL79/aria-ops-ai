@@ -1,10 +1,11 @@
+
 import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Loader, RefreshCw, Clock } from "lucide-react";
 import { IntelligenceReport, ThreatVector, DataSourceStats } from "@/types/intelligence";
-import { runMonitoringScan, getMonitoringStatus, startMonitoring } from "@/services/monitoringService";
+import { runMonitoringScan, getMonitoringStatus, startMonitoring } from "@/services/monitoring";
 import { getAvailableSources } from "@/services/dataIngestion";
 import DashboardOverview from "./intelligence-sections/DashboardOverview";
 import ThreatVectorsDisplay from "./intelligence-sections/ThreatVectorsDisplay";

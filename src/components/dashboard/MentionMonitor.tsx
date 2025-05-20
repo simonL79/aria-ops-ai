@@ -12,7 +12,7 @@ import {
   stopMonitoring, 
   runMonitoringScan,
   getMentionsAsAlerts
-} from '@/services/monitoringService';
+} from '@/services/monitoring';
 import { ContentAlert } from '@/types/dashboard';
 import { ThreatClassificationResult } from '@/types/intelligence/threats';
 import { classifyContent, storeMention } from '@/services/api/mentionsApiService';
