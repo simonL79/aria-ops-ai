@@ -1,12 +1,13 @@
 
-// Define memory entry for AI learning
+// Define memory entry interface for the intelligence system
 export interface MemoryEntry {
   id: string;
-  content: string;
-  context: string;
   timestamp: string;
+  category: 'insight' | 'threat' | 'pattern' | 'response' | 'feedback';
+  content: string;
+  source: string;
+  confidence: number;
   tags: string[];
   relatedEntities?: string[];
-  importance: number;
-  vector?: number[]; // For vector embedding
+  expiresAt?: string;
 }

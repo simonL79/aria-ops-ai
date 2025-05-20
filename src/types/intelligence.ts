@@ -67,3 +67,21 @@ export const getIntelligenceLevelColor = (level: IntelligenceLevel): string => {
       return 'bg-gray-600';
   }
 };
+
+// Re-export types from the new structure
+export type { 
+  ContentThreatType,
+  ContentThreat,
+  AgentRole,
+  IntelligenceAgent,
+  AgentCollaboration,
+  IntelligenceStrategy,
+  AlertSeverity,
+  SourceType,
+  ContentAlertUpdate,
+  MemoryEntry,
+  PredictionModel,
+  RedTeamSimulation,
+  ThreatSource,
+} from './intelligence/index';
+

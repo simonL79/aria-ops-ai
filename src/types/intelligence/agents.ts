@@ -1,41 +1,34 @@
 
-// Define AI agent types
+import React from 'react';
+
+// Define agent roles
 export type AgentRole = 
-  'sentinel' | 
-  'liaison' | 
-  'legal' | 
-  'outreach' | 
-  'researcher' | 
+  'analyst' | 
+  'responder' | 
+  'monitor' | 
+  'researcher' |
+  'coordinator' |
   'predictor';
 
-// Define AI agent interface
+// Define intelligence agent interface
 export interface IntelligenceAgent {
   id: string;
-  role: AgentRole;
   name: string;
+  role: AgentRole;
   description: string;
+  icon: React.ReactElement;
   capabilities: string[];
   active: boolean;
-  lastAction?: string;
-  memory?: {
-    incidentsAnalyzed: number;
-    decisionsRecorded: number;
-    memoryVectors: number;
-  };
-  tools: string[];
+  isAI: boolean;
+  lastActive?: string;
 }
 
-// Define Agent collaboration types
+// For agent collaboration tracking
 export interface AgentCollaboration {
   id: string;
-  title: string;
-  description: string;
-  agents: AgentRole[];
-  status: 'active' | 'paused' | 'completed';
-  createdAt: string;
-  results?: {
-    insights: string[];
-    recommendations: string[];
-    actions: string[];
-  };
+  agents: string[];
+  task: string;
+  status: 'pending' | 'active' | 'completed';
+  created: string;
+  results?: string;
 }

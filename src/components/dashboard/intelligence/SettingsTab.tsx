@@ -1,51 +1,70 @@
 
+import React from 'react';
+import { IntelligenceLevel } from '@/types/intelligence';
 import { Button } from "@/components/ui/button";
-import { IntelligenceLevel, getIntelligenceLevelColor } from "@/types/intelligence";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 
 interface SettingsTabProps {
   level: IntelligenceLevel;
-  setLevel: (level: IntelligenceLevel) => void;
+  setLevel: React.Dispatch<React.SetStateAction<IntelligenceLevel>>;
   onActivate: () => void;
 }
 
 const SettingsTab = ({ level, setLevel, onActivate }: SettingsTabProps) => {
   return (
-    <div className="p-4">
-      <div className="mb-4">
-        <h3 className="font-medium text-sm mb-2">Intelligence Level</h3>
-        <div className="grid grid-cols-3 gap-2">
-          <Button 
-            variant={level === 'basic' ? 'default' : 'outline'} 
-            size="sm" 
-            onClick={() => setLevel('basic')}
-            className={level === 'basic' ? 'bg-blue-500 hover:bg-blue-600' : ''}
-          >
-            Basic
-          </Button>
-          <Button 
-            variant={level === 'advanced' ? 'default' : 'outline'} 
-            size="sm" 
-            onClick={() => setLevel('advanced')}
-            className={level === 'advanced' ? 'bg-purple-600 hover:bg-purple-700' : ''}
-          >
-            Advanced
-          </Button>
-          <Button 
-            variant={level === 'enterprise' ? 'default' : 'outline'} 
-            size="sm" 
-            onClick={() => setLevel('enterprise')}
-            className={level === 'enterprise' ? 'bg-amber-600 hover:bg-amber-700' : ''}
-          >
-            Enterprise
-          </Button>
-        </div>
-        <p className="text-xs text-muted-foreground mt-2">
-          {level === 'basic' ? 'Basic detection of negative content and simple patterns.' : 
-           level === 'advanced' ? 'Advanced linguistic analysis and cross-platform monitoring.' :
-           'Expert-level forensic analysis of coordinated campaigns and sophisticated attacks.'}
-        </p>
+    <div className="p-4 space-y-4">
+      <div>
+        <h3 className="text-sm font-medium mb-3">Intelligence Level</h3>
+        <RadioGroup 
+          value={level} 
+          onValueChange={(value) => setLevel(value as IntelligenceLevel)}
+          className="space-y-2"
+        >
+          <div className="flex items-center space-x-2 p-2 rounded hover:bg-gray-100 cursor-pointer">
+            <RadioGroupItem value="basic" id="basic" />
+            <Label htmlFor="basic" className="cursor-pointer">Basic</Label>
+          </div>
+          <div className="flex items-center space-x-2 p-2 rounded hover:bg-gray-100 cursor-pointer">
+            <RadioGroupItem value="advanced" id="advanced" />
+            <Label htmlFor="advanced" className="cursor-pointer">Advanced</Label>
+          </div>
+          <div className="flex items-center space-x-2 p-2 rounded hover:bg-gray-100 cursor-pointer">
+            <RadioGroupItem value="enterprise" id="enterprise" />
+            <Label htmlFor="enterprise" className="cursor-pointer">Enterprise</Label>
+          </div>
+        </RadioGroup>
       </div>
-      <Button size="sm" className="w-full" onClick={onActivate}>
+      
+      <div>
+        <h3 className="text-sm font-medium mb-2">Monitoring Frequency</h3>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs">Hourly</span>
+            <span className="text-xs font-medium">
+              {level === 'enterprise' ? 'Included' : 'Enterprise Only'}
+            </span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-xs">Daily</span>
+            <span className="text-xs font-medium">
+              {level === 'basic' || level === 'advanced' || level === 'enterprise' ? 'Included' : 'Unavailable'}
+            </span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-xs">Weekly Summary</span>
+            <span className="text-xs font-medium">
+              {level === 'basic' || level === 'advanced' || level === 'enterprise' ? 'Included' : 'Unavailable'}
+            </span>
+          </div>
+        </div>
+      </div>
+      
+      <Button 
+        size="sm" 
+        onClick={onActivate}
+        className="w-full mt-2"
+      >
         Apply Settings
       </Button>
     </div>

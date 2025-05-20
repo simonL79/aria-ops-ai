@@ -24,6 +24,9 @@ export interface EntityMention {
   threatClassification?: ThreatClassificationResult;
   outreachStatus?: 'pending' | 'drafted' | 'sent' | 'responded' | 'converted';
   outreachDraft?: string;
+  // For client matching
+  associatedClientId?: string;
+  associatedClientName?: string;
 }
 
 export type NewsAPISource = 'newsapi' | 'serpapi' | 'newsdata' | 'rss';
@@ -34,4 +37,44 @@ export interface RadarFilters {
   minRiskScore: number;
   sources: string[];
   categories: string[];
+}
+
+// For takedown templates
+export interface TakedownTemplate {
+  id: string;
+  name: string;
+  type: 'dmca' | 'legal' | 'correction' | 'right_to_be_forgotten';
+  template: string;
+  variables: string[];
+}
+
+// For notification preferences
+export interface NotificationPreference {
+  id: string;
+  channel: 'email' | 'slack' | 'sms' | 'app';
+  minSeverity: number;
+  recipients: string[];
+  active: boolean;
+}
+
+// For response suggestions
+export interface ResponseSuggestion {
+  entityId: string;
+  entityName: string;
+  articleId: string;
+  suggestion: string;
+  tone: 'professional' | 'apologetic' | 'clarifying' | 'defensive';
+  generatedAt: string;
+  status: 'pending' | 'approved' | 'rejected' | 'modified';
+}
+
+// For client matching
+export interface ClientMatchConfig {
+  clientId: string;
+  clientName: string;
+  keywords: string[];
+  executives: string[];
+  brands: string[];
+  competitors: string[];
+  alertThreshold: number;
 }

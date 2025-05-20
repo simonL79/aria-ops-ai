@@ -1,27 +1,27 @@
 
-// Define prediction model
+// Define prediction model interface
 export interface PredictionModel {
   id: string;
   name: string;
   description: string;
   accuracy: number;
-  lastTrained: string;
-  predictionType: 'virality' | 'sentiment' | 'seo' | 'attack';
-  activeIndicators: string[];
+  lastUpdated: string;
+  predictionTimeframe: 'hours' | 'days' | 'weeks' | 'months';
+  dataPoints: string[];
+  confidenceScore: number;
+  active: boolean;
 }
 
-// Define simulation scenario
+// Define red team simulation interface
 export interface RedTeamSimulation {
   id: string;
-  title: string;
+  name: string;
   description: string;
   scenario: string;
-  status: 'planned' | 'running' | 'completed';
-  results?: {
-    defenseScore: number;
-    vulnerabilities: string[];
-    recommendations: string[];
-  };
-  createdAt: string;
-  completedAt?: string;
+  impact: number;
+  probability: number;
+  mitigationSteps: string[];
+  stakeholders: string[];
+  status: 'planned' | 'active' | 'completed' | 'reviewed';
+  results?: string;
 }
