@@ -1,31 +1,11 @@
 
 import React, { useState } from 'react';
-import { format } from 'date-fns';
-import { 
-  Building, 
-  ChevronDown, 
-  ChevronUp, 
-  Users, 
-  AlertTriangle, 
-  Shield, 
-  FileText,
-  Calendar,
-  Mail,
-  ArrowUpRight
-} from 'lucide-react';
-import { 
-  Card, 
-  CardHeader, 
-  CardTitle, 
-  CardDescription, 
-  CardContent, 
-  CardFooter 
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Building, Calendar, MapPin, ChevronDown, ChevronUp, Users, AlertTriangle, Shield } from "lucide-react";
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { NewCompany } from '@/types/newco';
-import { toast } from 'sonner';
 
 interface NewCompanyCardProps {
   company: NewCompany;
@@ -34,12 +14,23 @@ interface NewCompanyCardProps {
 const NewCompanyCard: React.FC<NewCompanyCardProps> = ({ company }) => {
   const [expanded, setExpanded] = useState(false);
 
-  const getCleanLaunchColor = (category?: 'green' | 'yellow' | 'red') => {
-    switch (category) {
-      case 'green': return 'bg-green-500';
-      case 'yellow': return 'bg-yellow-500';
-      case 'red': return 'bg-red-500';
-      default: return 'bg-gray-500';
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  };
+
+  const getSourceLabel = (source: string) => {
+    switch (source) {
+      case 'companies_house':
+        return 'Companies House';
+      case 'opencorporates':
+        return 'OpenCorporates';
+      case 'secretary_of_state':
+        return 'Secretary of State';
+      case 'manual':
+        return 'Manual Entry';
+      default:
+        return source;
     }
   };
 
@@ -48,222 +39,155 @@ const NewCompanyCard: React.FC<NewCompanyCardProps> = ({ company }) => {
       case 'new':
         return <Badge variant="outline">New</Badge>;
       case 'scanned':
-        return <Badge variant="secondary">Scanned</Badge>;
+        return <Badge>Scanned</Badge>;
       case 'contacted':
-        return <Badge variant="default">Contacted</Badge>;
+        return <Badge variant="secondary">Contacted</Badge>;
       case 'onboarded':
-        return <Badge variant="success" className="bg-green-500">Onboarded</Badge>;
+        return <Badge>Onboarded</Badge>;
       case 'declined':
         return <Badge variant="destructive">Declined</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
+    }
+  };
+
+  const getCleanLaunchBadge = (category?: string) => {
+    if (!category) return null;
+    
+    switch (category) {
+      case 'green':
+        return <Badge className="bg-green-500">Clean Launch</Badge>;
+      case 'yellow':
+        return <Badge className="bg-yellow-500 text-black">Caution</Badge>;
+      case 'red':
+        return <Badge variant="destructive">High Risk</Badge>;
       default:
         return null;
     }
   };
 
-  const hasReputationIssues = company.directors.some(
-    director => director.reputationScan?.issues.length > 0
-  );
-
-  const handleGenerateReport = () => {
-    toast.success("Report generation initiated", {
-      description: "Your Clean Launch Report will be ready shortly"
-    });
-  };
-
-  const handleCreateOutreach = () => {
-    toast.success("Outreach draft created", {
-      description: "Check the outreach tab to review and send"
-    });
-  };
-
   return (
-    <Card className={`shadow-sm transition-all ${expanded ? 'shadow-md' : ''}`}>
-      <CardHeader className="pb-2">
+    <Card>
+      <CardHeader>
         <div className="flex justify-between items-start">
-          <div className="flex-1">
-            <div className="flex items-center gap-2">
-              <CardTitle className="text-lg">{company.name}</CardTitle>
-              {getStatusBadge(company.status)}
-              {hasReputationIssues && (
-                <Badge variant="destructive" className="flex items-center gap-1">
-                  <AlertTriangle className="h-3 w-3" />
-                  Reputation Issues
-                </Badge>
-              )}
-            </div>
-            <CardDescription className="flex items-center gap-2 mt-1">
-              <span>{company.jurisdiction}</span>
-              <span>•</span>
-              <span>{company.industry}</span>
-              <span>•</span>
-              <Calendar className="h-3 w-3 inline" />
-              <span>
-                Incorporated {format(new Date(company.incorporationDate), 'MMM d, yyyy')}
-              </span>
+          <div>
+            <CardTitle>{company.name}</CardTitle>
+            <CardDescription className="flex items-center mt-1">
+              <Calendar className="h-4 w-4 mr-1" /> {formatDate(company.incorporationDate)}
             </CardDescription>
           </div>
-          <div className="flex flex-col items-end">
-            {company.cleanLaunchScore !== undefined && (
-              <div className="flex flex-col items-end">
-                <span className="text-xs text-muted-foreground mb-1">Clean Launch Score</span>
-                <div className="flex items-center gap-2">
-                  <Progress 
-                    value={company.cleanLaunchScore} 
-                    max={100} 
-                    className="w-24 h-2" 
-                    indicatorClassName={getCleanLaunchColor(company.cleanLaunchCategory)}
-                  />
-                  <span className="text-sm font-medium">{company.cleanLaunchScore}</span>
-                </div>
-              </div>
-            )}
+          <div className="flex flex-col items-end gap-2">
+            {getStatusBadge(company.status)}
+            <Badge variant="outline">{getSourceLabel(company.source)}</Badge>
           </div>
         </div>
       </CardHeader>
       <CardContent>
-        <div className="flex items-center gap-2 text-sm">
-          <Users className="h-4 w-4" />
-          <span className="font-medium">Directors:</span>
-          <span>{company.directors.map(d => d.name).join(', ')}</span>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="flex items-center text-sm">
+            <MapPin className="h-4 w-4 mr-2" />
+            <span>{company.jurisdiction}</span>
+          </div>
+          <div className="flex items-center text-sm">
+            <Building className="h-4 w-4 mr-2" />
+            <span>{company.industry}</span>
+          </div>
         </div>
 
-        {expanded && (
+        {company.cleanLaunchScore !== undefined && (
           <div className="mt-4">
-            <h4 className="text-sm font-medium mb-2">Risk Assessment</h4>
-            {company.directors.map(director => (
-              <div key={director.id} className="mb-3 p-2 bg-secondary/50 rounded-md">
-                <div className="flex justify-between items-center mb-1">
-                  <span className="font-medium">{director.name}</span>
-                  <span className="text-xs">{director.role}</span>
-                </div>
-                
-                {director.reputationScan ? (
-                  <>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-2">
-                      <div className="flex flex-col">
-                        <span className="text-xs text-muted-foreground">Risk Score</span>
-                        <div className="flex items-center gap-1">
-                          <Progress 
-                            value={director.reputationScan.riskScore} 
-                            max={100} 
-                            className="w-16 h-1.5"
-                            indicatorClassName={`${director.reputationScan.riskCategory === 'high' ? 'bg-red-500' : 
-                              director.reputationScan.riskCategory === 'medium' ? 'bg-yellow-500' : 'bg-green-500'}`}
-                          />
-                          <span className="text-xs font-medium">{director.reputationScan.riskScore}</span>
-                        </div>
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-xs text-muted-foreground">Sentiment</span>
-                        <span className="text-xs font-medium">
-                          {(director.reputationScan.overallSentiment * 100).toFixed(0)}%
-                          {director.reputationScan.overallSentiment > 0 ? ' positive' : 
-                           director.reputationScan.overallSentiment < 0 ? ' negative' : ' neutral'}
-                        </span>
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-xs text-muted-foreground">Sources</span>
-                        <span className="text-xs">
-                          {director.reputationScan.sources.news + 
-                           director.reputationScan.sources.social + 
-                           director.reputationScan.sources.legal + 
-                           director.reputationScan.sources.other} total mentions
-                        </span>
-                      </div>
-                    </div>
-                    
-                    {director.reputationScan.issues.length > 0 && (
-                      <div className="mt-2">
-                        <span className="text-xs font-medium text-red-500 flex items-center gap-1">
-                          <AlertTriangle className="h-3 w-3" />
-                          {director.reputationScan.issues.length} reputation issue(s) detected
-                        </span>
-                        <ul className="mt-1 space-y-1">
-                          {director.reputationScan.issues.map(issue => (
-                            <li key={issue.id} className="text-xs p-1.5 bg-secondary rounded">
-                              <div className="flex justify-between">
-                                <span className="font-medium">{issue.title}</span>
-                                <Badge variant={
-                                  issue.severity === 'high' ? 'destructive' :
-                                  issue.severity === 'medium' ? 'secondary' : 'outline'
-                                } className="h-4 px-1">
-                                  {issue.severity}
-                                </Badge>
-                              </div>
-                              <p className="mt-0.5 text-muted-foreground">{issue.description}</p>
-                              {issue.source && (
-                                <div className="mt-1 flex items-center justify-between">
-                                  <span className="text-[10px] text-muted-foreground">
-                                    Source: {issue.source}
-                                    {issue.date && ` • ${format(new Date(issue.date), 'MMM yyyy')}`}
-                                  </span>
-                                  {issue.url && (
-                                    <a 
-                                      href={issue.url} 
-                                      target="_blank" 
-                                      rel="noopener noreferrer"
-                                      className="text-[10px] flex items-center text-blue-500 hover:underline"
-                                    >
-                                      View <ArrowUpRight className="h-2 w-2 ml-0.5" />
-                                    </a>
-                                  )}
-                                </div>
-                              )}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <div className="text-xs text-muted-foreground">
-                    No reputation scan available
+            <div className="flex justify-between items-center mb-1">
+              <span className="text-sm font-medium">Clean Launch™ Score</span>
+              {company.cleanLaunchCategory && (
+                <div>{getCleanLaunchBadge(company.cleanLaunchCategory)}</div>
+              )}
+            </div>
+            <Progress 
+              value={company.cleanLaunchScore} 
+              max={100} 
+              className="h-2"
+              indicatorClassName={
+                company.cleanLaunchCategory === 'green' ? 'bg-green-500' :
+                company.cleanLaunchCategory === 'yellow' ? 'bg-yellow-500' :
+                company.cleanLaunchCategory === 'red' ? 'bg-red-500' : ''
+              }
+            />
+          </div>
+        )}
+
+        {expanded && (
+          <div className="mt-4 border-t pt-4">
+            <h4 className="text-sm font-medium mb-2 flex items-center">
+              <Users className="h-4 w-4 mr-2" /> Directors & Officers
+            </h4>
+            <div className="space-y-3">
+              {company.directors.map((director) => (
+                <div key={director.id} className="text-sm">
+                  <div className="flex justify-between">
+                    <span className="font-medium">{director.name}</span>
+                    <span className="text-muted-foreground">{director.role}</span>
                   </div>
-                )}
-              </div>
-            ))}
+                  
+                  {director.reputationScan && (
+                    <div className="mt-1">
+                      <div className="flex items-center text-xs">
+                        {director.reputationScan.riskCategory === 'high' ? (
+                          <AlertTriangle className="h-3 w-3 mr-1 text-red-500" />
+                        ) : director.reputationScan.riskCategory === 'medium' ? (
+                          <AlertTriangle className="h-3 w-3 mr-1 text-yellow-500" />
+                        ) : (
+                          <Shield className="h-3 w-3 mr-1 text-green-500" />
+                        )}
+                        <span>
+                          {director.reputationScan.riskCategory === 'high' ? 'High' :
+                           director.reputationScan.riskCategory === 'medium' ? 'Medium' : 'Low'} Risk
+                        </span>
+                        <span className="mx-1">•</span>
+                        <span>{director.reputationScan.issues.length} issues found</span>
+                      </div>
+                      
+                      {director.reputationScan.issues.length > 0 && (
+                        <div className="mt-2 space-y-1">
+                          {director.reputationScan.issues.slice(0, 2).map((issue) => (
+                            <div key={issue.id} className="text-xs bg-muted p-2 rounded">
+                              <div className="font-medium">{issue.title}</div>
+                              <div className="line-clamp-1">{issue.description}</div>
+                            </div>
+                          ))}
+                          {director.reputationScan.issues.length > 2 && (
+                            <div className="text-xs text-muted-foreground">
+                              + {director.reputationScan.issues.length - 2} more issues
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </CardContent>
-      <CardFooter className="pt-0 flex justify-between items-center">
+      <CardFooter className="flex justify-between pt-0">
+        <Button variant="outline" size="sm">
+          View Details
+        </Button>
         <Button 
           variant="ghost" 
-          className="p-1 h-auto"
+          size="sm"
           onClick={() => setExpanded(!expanded)}
         >
           {expanded ? (
-            <div className="flex items-center text-xs">
-              <ChevronUp className="h-4 w-4 mr-1" />
-              Collapse
-            </div>
+            <>
+              <ChevronUp className="h-4 w-4 mr-1" /> Less
+            </>
           ) : (
-            <div className="flex items-center text-xs">
-              <ChevronDown className="h-4 w-4 mr-1" />
-              See details
-            </div>
+            <>
+              <ChevronDown className="h-4 w-4 mr-1" /> More
+            </>
           )}
         </Button>
-        
-        <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            size="sm"
-            className="flex items-center h-8"
-            onClick={handleGenerateReport}
-          >
-            <FileText className="h-3.5 w-3.5 mr-1.5" />
-            Clean Launch Report
-          </Button>
-          <Button 
-            variant="default" 
-            size="sm"
-            className="flex items-center h-8"
-            onClick={handleCreateOutreach}
-          >
-            <Mail className="h-3.5 w-3.5 mr-1.5" />
-            Create Outreach
-          </Button>
-        </div>
       </CardFooter>
     </Card>
   );

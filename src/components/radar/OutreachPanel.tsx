@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { EntityMention } from "@/types/radar";
 import { Button } from "@/components/ui/button";
@@ -9,7 +8,7 @@ import { Card, CardHeader, CardContent, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { toast } from "sonner";
-import { Loader2, Send, Wand2, Copy, Users, Building, MapPin, Linkedin, Mail, Twitter, ExternalLink } from "lucide-react";
+import { Loader2, Send, Wand2, Copy, Users, Building, MapPin, Linkedin, Mail, ExternalLink } from "lucide-react";
 
 interface OutreachPanelProps {
   entity: EntityMention;
@@ -172,7 +171,7 @@ const OutreachPanel = ({ entity }: OutreachPanelProps) => {
                 </Button>
                 <Button variant="outline" size="sm" className="w-full justify-start text-xs">
                   <Twitter className="h-3 w-3 mr-2" />
-                  Twitter/X DM
+                  X/X DM
                 </Button>
                 
                 <div className="pt-2 mt-2 border-t">

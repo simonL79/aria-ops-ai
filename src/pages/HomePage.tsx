@@ -10,7 +10,7 @@ export default function HomePage() {
   useEffect(() => {
     // Mock data since we don't have an actual /api/mentions endpoint
     const mockMentions = [
-      ['Twitter', 'This company has terrible customer service! I waited for 2 hours on hold and no one answered.', 'https://twitter.com/user/status/123', 'Complaint', 6, 'Monitor for escalation'],
+      ['X', 'This company has terrible customer service! I waited for 2 hours on hold and no one answered.', 'https://x.com/user/status/123', 'Complaint', 6, 'Monitor for escalation'],
       ['Reddit', 'DO NOT BUY from this company! They sold me a defective product and refused to refund.', 'https://reddit.com/r/complaints/123', 'Reputation Threat', 9, 'Respond immediately'],
       ['Instagram', 'Having some issues with my recent purchase, hope their support team can help.', 'https://instagram.com/p/123', 'Neutral', 3, 'Standard follow-up'],
       ['Facebook', 'Is this company legitimate? I heard they had some legal troubles recently.', 'https://facebook.com/post/123', 'Misinformation', 7, 'Clarify facts publicly'],

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
@@ -14,7 +13,7 @@ import MentionDetailsDialog from "./MentionDetailsDialog";
 const mockMentions: ContentAlert[] = [
   {
     id: "1",
-    platform: "Twitter",
+    platform: "X",
     content: "This company ruined my skin! I used their Product XYZ and got a terrible rash. #NeverAgain",
     date: "2025-05-18",
     severity: "high",
@@ -24,7 +23,7 @@ const mockMentions: ContentAlert[] = [
     category: "Reputation Threat",
     recommendation: "Respond immediately and offer support",
     ai_reasoning: "Direct product complaint with health implications",
-    url: "https://twitter.com/user/status/123456789"
+    url: "https://x.com/user/status/123456789"
   },
   {
     id: "2",

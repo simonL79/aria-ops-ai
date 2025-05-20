@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Search, Twitter, Facebook, Linkedin, MessageSquare, Youtube, Star, Shield, Database } from 'lucide-react';
+import { Search, Facebook, Linkedin, MessageSquare, Youtube, Star, Shield, Database } from 'lucide-react';
 
 const PlatformsSection = () => {
   return (
@@ -26,10 +26,10 @@ const PlatformsSection = () => {
           
           <div className="bg-white p-6 rounded-lg shadow-md flex items-start gap-4 transform hover:-translate-y-1 transition-transform">
             <div className="shrink-0 bg-gray-50 rounded-full p-3">
-              <Twitter className="h-8 w-8 text-premium-silver" />
+              <MessageSquare className="h-8 w-8 text-premium-silver" />
             </div>
             <div>
-              <h4 className="font-bold text-premium-darkGray mb-2">X (Twitter)</h4>
+              <h4 className="font-bold text-premium-darkGray mb-2">X (formerly Twitter)</h4>
               <p className="text-premium-gray text-sm">Real-time mentions, viral complaints</p>
             </div>
           </div>
