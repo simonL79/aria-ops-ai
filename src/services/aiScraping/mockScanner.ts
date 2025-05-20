@@ -14,6 +14,26 @@ export interface ScanParameters {
   prioritizeSeverity?: "low" | "medium" | "high";
 }
 
+// Export default scan parameters
+export const defaultScanParameters: ScanParameters = {
+  platforms: [],
+  keywordFilters: [],
+  maxResults: 3,
+  includeCustomerEnquiries: true,
+  prioritizeSeverity: undefined
+};
+
+// Export monitoring status function
+export const getMonitoringStatus = () => {
+  return {
+    isActive: true,
+    lastRun: new Date().toISOString(),
+    nextRun: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
+    platforms: Math.floor(15 + Math.random() * 5), // 15-20 platforms
+    activeSince: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString() // 24 hours ago
+  };
+};
+
 // Mock function for performing live scanning
 export const performLiveScan = async (params?: ScanParameters): Promise<ContentAlert[]> => {
   console.log("Performing live scan with parameters:", params);
@@ -52,9 +72,26 @@ export const performLiveScan = async (params?: ScanParameters): Promise<ContentA
   return results;
 };
 
+// Store for alert listeners
+const alertListeners: Array<(alert: ContentAlert) => void> = [];
+
+// Function to notify all registered listeners
+export const notifyAlertListeners = (alert: ContentAlert): void => {
+  alertListeners.forEach(listener => {
+    try {
+      listener(alert);
+    } catch (error) {
+      console.error("Error in alert listener:", error);
+    }
+  });
+};
+
 // Register for real-time alerts
 export const registerAlertListener = (callback: (alert: ContentAlert) => void): () => void => {
   console.log("Registering for real-time alerts");
+  
+  // Add to listeners
+  alertListeners.push(callback);
   
   // Set up interval to simulate incoming alerts
   const intervalId = setInterval(() => {
@@ -74,12 +111,26 @@ export const registerAlertListener = (callback: (alert: ContentAlert) => void): 
         threatType: ['Reputation Risk', 'Customer Service', 'Product Issue'][Math.floor(Math.random() * 3)]
       };
       
-      callback(alert);
+      notifyAlertListeners(alert);
     }
   }, 30000); // Check every 30 seconds
   
   // Return cleanup function
-  return () => clearInterval(intervalId);
+  return () => {
+    const index = alertListeners.indexOf(callback);
+    if (index > -1) {
+      alertListeners.splice(index, 1);
+    }
+    clearInterval(intervalId);
+  };
+};
+
+// Alias for unregisterAlertListener for API consistency
+export const unregisterAlertListener = (callback: (alert: ContentAlert) => void): void => {
+  const index = alertListeners.indexOf(callback);
+  if (index > -1) {
+    alertListeners.splice(index, 1);
+  }
 };
 
 // Start continuous monitoring

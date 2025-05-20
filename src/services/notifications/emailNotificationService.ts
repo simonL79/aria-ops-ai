@@ -83,3 +83,21 @@ export const scheduleNextDigest = (): Date => {
   
   return nextDigestDate;
 };
+
+/**
+ * Schedule a new email digest
+ */
+export const scheduleEmailDigest = async (settings: EmailDigestSettings): Promise<void> => {
+  // Update settings first
+  await saveEmailDigestSettings(settings);
+  
+  // Calculate next run date
+  const nextRunDate = scheduleNextDigest();
+  
+  // Show toast notification
+  toast.success('Email digest scheduled', {
+    description: `Next digest will be sent on ${nextRunDate.toLocaleDateString()} at ${nextRunDate.toLocaleTimeString()}`
+  });
+  
+  console.log(`Email digest scheduled for ${nextRunDate.toISOString()}`);
+};

@@ -95,10 +95,10 @@ const EngagementHubPage = () => {
 
   // Register to listen for alerts from the AI Scraping system
   useEffect(() => {
-    registerAlertListener(handleNewAlert);
+    const cleanupFunction = registerAlertListener(handleNewAlert);
     
     return () => {
-      unregisterAlertListener(handleNewAlert);
+      cleanupFunction();
     };
   }, []);
 
