@@ -60,6 +60,12 @@ export const notifyAlertListeners = (alert: ContentAlert): void => {
   alertListeners.forEach(listener => listener(alert));
 };
 
+// Handle direct response from notification
+export const respondToAlert = (alert: ContentAlert): void => {
+  // In a real app, this would open a response UI or navigate to a response page
+  window.location.href = `/dashboard/engagement-hub?alert=${alert.id}`;
+};
+
 // Generate a random mock alert
 export const generateMockAlert = (params?: ScanParameters): ContentAlert => {
   const p = params || defaultScanParameters;
@@ -168,10 +174,19 @@ export const startContinuousScan = (
       // For high severity or customer enquiries, show toast
       if (newAlert.severity === 'high' || newAlert.category === 'customer_enquiry') {
         const isCustomer = newAlert.category === 'customer_enquiry';
+        
         toast[isCustomer ? 'info' : 'warning'](
           `New ${isCustomer ? 'customer enquiry' : 'high priority alert'} detected`,
           {
-            description: newAlert.content.substring(0, 80) + (newAlert.content.length > 80 ? '...' : '')
+            description: newAlert.content.substring(0, 80) + (newAlert.content.length > 80 ? '...' : ''),
+            action: {
+              label: isCustomer ? "Respond Now" : "View Details",
+              onClick: () => {
+                // Navigate to engagement hub with the alert ID
+                window.location.href = `/dashboard/engagement-hub?alert=${newAlert.id}`;
+              },
+            },
+            duration: 10000 // 10 seconds
           }
         );
         
@@ -193,3 +208,4 @@ export const startContinuousScan = (
     unregisterAlertListener(onNewAlert);
   };
 };
+
