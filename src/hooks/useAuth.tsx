@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useClerk, useUser } from '@clerk/clerk-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -21,6 +22,9 @@ const AuthContext = createContext<AuthContextType>({
   isAdmin: false,
   signOut: async () => {}
 });
+
+// The email address you want to grant admin access to
+const ADMIN_EMAIL = 'simonlindsay7988@gmail.com';
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const { isLoaded, isSignedIn, user } = useUser();
@@ -56,15 +60,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
       // Check if user is admin when signed in
       if (isSignedIn && user?.id) {
-        // For now, let's skip the admin check since we're having issues with the user ID format
-        // Just set isAdmin to false to avoid the error
-        setIsAdmin(false);
-        
-        // Comment out the problematic admin check for now
-        // checkAdminRole(user.id).catch(err => {
-        //   console.error("Error checking admin role:", err);
-        //   setIsAdmin(false);
-        // });
+        // Grant admin access if user's email matches the admin email
+        if (user.primaryEmailAddress?.emailAddress === ADMIN_EMAIL) {
+          console.log("Admin access granted based on email match");
+          setIsAdmin(true);
+        } else {
+          console.log("Not an admin user based on email check");
+          setIsAdmin(false);
+        }
       } else {
         setIsAdmin(false);
       }
