@@ -13,7 +13,6 @@ import {
   SidebarMenuButton,
   SidebarRail
 } from "@/components/ui/sidebar";
-import { UserButton, useUser } from '@clerk/clerk-react';
 import { 
   Home, 
   Search, 
@@ -33,10 +32,9 @@ interface DashboardLayoutProps {
 }
 
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
-  const { user } = useUser();
+  const { user, signOut } = useAuth();
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const { signOut } = useAuth();
   
   const handleSignOut = async () => {
     try {
@@ -139,14 +137,16 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               {user && (
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate">
-                    {user.firstName || user.emailAddresses?.[0]?.emailAddress}
+                    {user.firstName || user.email}
                   </p>
                   <p className="text-xs text-muted-foreground truncate">
-                    {user.emailAddresses?.[0]?.emailAddress}
+                    {user.email}
                   </p>
                 </div>
               )}
-              <UserButton afterSignOutUrl="/auth" />
+              <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground">
+                {user?.firstName?.[0] || user?.email?.[0] || '?'}
+              </div>
             </div>
           </SidebarFooter>
         </Sidebar>
