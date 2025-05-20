@@ -39,7 +39,13 @@ const AddModelDialog = ({
         type: (newModel.type as ModelConfig['type']) || 'huggingface',
         usage: (newModel.usage as ModelConfig['usage']) || 'sentiment',
         isDefault: newModel.isDefault || false,
-        parameters: newModel.parameters || {},
+        parameters: {
+          temperature: newModel.parameters?.temperature || 0.7,
+          maxTokens: newModel.parameters?.maxTokens,
+          topP: newModel.parameters?.topP,
+          frequencyPenalty: newModel.parameters?.frequencyPenalty,
+          presencePenalty: newModel.parameters?.presencePenalty
+        },
         config: {
           model: newModel.config?.model || '',
           temperature: newModel.config?.temperature || 0.7,
