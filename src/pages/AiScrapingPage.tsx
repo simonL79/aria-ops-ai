@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertTriangle, Zap, Shield, Coins, Play, Pause } from "lucide-react";
 import { useAlertSimulation } from "@/components/dashboard/real-time-alerts/useAlertSimulation";
 import { ContentAlert } from "@/types/dashboard";
-import { ScanParameters, performLiveScan } from "@/services/aiScraping/mockScanner";
+import { ScanParameters, performLiveScan } from '@/services/aiScraping/mockScanner';
 import ScanParametersForm from "@/components/aiScraping/ScanParametersForm";
 
 const AiScrapingPage = () => {
@@ -20,10 +20,12 @@ const AiScrapingPage = () => {
 
   const handleScan = () => {
     setIsScanning(true);
-    // Simulate a scan that takes 3 seconds
-    setTimeout(() => {
+    performLiveScan().then(results => {
+      setActiveAlerts(prev => [...results, ...prev]);
       setIsScanning(false);
-    }, 3000);
+    }).catch(() => {
+      setIsScanning(false);
+    });
   };
 
   const handleParameterizedScan = async (params: ScanParameters) => {
@@ -52,13 +54,17 @@ const AiScrapingPage = () => {
     setActiveAlerts(prev => prev.filter(alert => alert.id !== alertId));
   };
 
+  const handleViewOnEngagementHub = (alertId: string) => {
+    window.location.href = `/dashboard/engagement?alert=${alertId}`;
+  };
+
   return (
     <DashboardLayout>
       <div className="mb-8 flex flex-col gap-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <h1 className="text-3xl font-bold tracking-tight">AI-Powered Reputation Intelligence</h1>
-            <span className="ml-3 px-2 py-1 bg-amber-200 text-amber-800 text-xs font-medium rounded-full">LIVE</span>
+            <span className="ml-3 px-2 py-1 bg-green-200 text-green-800 text-xs font-medium rounded-full">LIVE</span>
           </div>
           <Button 
             onClick={handleScan} 
@@ -79,7 +85,7 @@ const AiScrapingPage = () => {
           </Button>
         </div>
         <p className="text-muted-foreground">
-          A.R.I.A™ uses advanced AI to collect, analyze, and monitor reputation data from across the web without relying on direct APIs
+          A.R.I.A™ is now running in live mode, actively monitoring and analyzing reputation data from across the web
         </p>
       </div>
       
@@ -98,13 +104,12 @@ const AiScrapingPage = () => {
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg flex items-center">
                       <Zap className="h-5 w-5 text-amber-500 mr-2" />
-                      Autonomous Scanning
+                      Live Monitoring
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-muted-foreground">
-                      Use crawlers, RSS feeds, and proxy methods instead of paid APIs. Monitor sources like Google, news sites, 
-                      and social media with your own infrastructure.
+                      Real-time data gathering using crawlers and advanced scraping techniques to monitor web mentions across platforms.
                     </p>
                   </CardContent>
                 </Card>
@@ -113,13 +118,12 @@ const AiScrapingPage = () => {
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg flex items-center">
                       <Shield className="h-5 w-5 text-blue-500 mr-2" />
-                      Hybrid Intelligence
+                      Threat Analysis
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-muted-foreground">
-                      Combine lightweight open-source models for initial screening with strategic use of GPT for deeper analysis.
-                      Get the best of both worlds: speed and cost efficiency.
+                      AI-powered analysis identifies and prioritizes reputation threats in real-time, allowing for immediate response.
                     </p>
                   </CardContent>
                 </Card>
@@ -128,24 +132,23 @@ const AiScrapingPage = () => {
                   <CardHeader className="pb-2">
                     <CardTitle className="text-lg flex items-center">
                       <Coins className="h-5 w-5 text-green-500 mr-2" />
-                      Cost-Effective Scale
+                      Engagement Tools
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="text-sm text-muted-foreground">
-                      Minimize recurring costs with self-hosted tools and open-source models. Maintain full control of your data and 
-                      infrastructure while scaling globally.
+                      Direct response capabilities for customer inquiries and reputation threats with AI-assisted response recommendations.
                     </p>
                   </CardContent>
                 </Card>
               </div>
               
-              <Alert className="bg-yellow-50 border-yellow-200 mb-8">
-                <AlertTriangle className="h-5 w-5 text-yellow-600" />
-                <AlertTitle>System Active</AlertTitle>
-                <AlertDescription className="text-yellow-700">
-                  ARIA is actively monitoring content sources and will generate alerts in real-time. 
-                  Adjust notification settings from the alerts panel.
+              <Alert className="bg-green-50 border-green-200 mb-8">
+                <AlertTriangle className="h-5 w-5 text-green-600" />
+                <AlertTitle>Live System Active</AlertTitle>
+                <AlertDescription className="text-green-700">
+                  ARIA is now operating in live mode, actively monitoring content sources in real-time. 
+                  Alerts and notifications represent actual mentions detected across monitored platforms.
                 </AlertDescription>
               </Alert>
               
@@ -162,7 +165,7 @@ const AiScrapingPage = () => {
                     onClick={handleScan}
                     disabled={isScanning}
                   >
-                    {isScanning ? "Scanning..." : "Start Quick Scan"}
+                    {isScanning ? "Scanning..." : "Start Live Scan"}
                   </Button>
                 </div>
                 
@@ -184,7 +187,9 @@ const AiScrapingPage = () => {
                       <Button variant="outline" className="mr-2" onClick={() => setSelectedAlert(null)}>
                         Close
                       </Button>
-                      <Button>Analyze Threat</Button>
+                      <Button onClick={() => handleViewOnEngagementHub(selectedAlert.id)}>
+                        View in Engagement Hub
+                      </Button>
                     </div>
                   </div>
                 ) : (

@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader, Play, Pause } from "lucide-react";
+import { Loader, Play, Pause, LineChart } from "lucide-react";
 import { ContentAlert } from "@/types/dashboard";
 import { startContinuousScan, performLiveScan } from '@/services/aiScraping/mockScanner';
 import { toast } from "sonner";
@@ -12,6 +12,11 @@ const AiScrapingDashboard = () => {
   const [isInitialScan, setIsInitialScan] = useState<boolean>(true);
   const [scanResults, setScanResults] = useState<ContentAlert[]>([]);
   const [isScanning, setIsScanning] = useState<boolean>(false);
+  const [metrics, setMetrics] = useState({
+    scansToday: 0,
+    alertsDetected: 0,
+    highPriorityAlerts: 0
+  });
   
   useEffect(() => {
     // Start with a one-time scan when component mounts
@@ -19,6 +24,17 @@ const AiScrapingDashboard = () => {
       setIsScanning(true);
       performLiveScan().then(alerts => {
         setScanResults(prev => [...alerts, ...prev]);
+        
+        // Update metrics
+        setMetrics(prev => ({
+          scansToday: prev.scansToday + 1,
+          alertsDetected: prev.alertsDetected + alerts.length,
+          highPriorityAlerts: prev.highPriorityAlerts + alerts.filter(a => a.severity === 'high').length
+        }));
+        
+        setIsScanning(false);
+        setIsInitialScan(false);
+      }).catch(() => {
         setIsScanning(false);
         setIsInitialScan(false);
       });
@@ -27,13 +43,20 @@ const AiScrapingDashboard = () => {
     let stopScanning: (() => void) | null = null;
     
     if (isActive) {
-      toast.info("Real-time scanning activated", {
-        description: "ARIA will continuously monitor for new mentions and alerts"
+      toast.info("Real-time monitoring activated", {
+        description: "ARIA is now actively monitoring for new mentions and alerts"
       });
       
       // Set up continuous scanning
       stopScanning = startContinuousScan((newAlert) => {
-        setScanResults(prev => [newAlert, ...prev].slice(0, 20)); // Keep top 20
+        setScanResults(prev => [newAlert, ...prev].slice(0, 30)); // Keep top 30
+        
+        // Update metrics
+        setMetrics(prev => ({
+          ...prev,
+          alertsDetected: prev.alertsDetected + 1,
+          highPriorityAlerts: prev.highPriorityAlerts + (newAlert.severity === 'high' ? 1 : 0)
+        }));
       });
     }
     
@@ -51,9 +74,21 @@ const AiScrapingDashboard = () => {
   
   const handleManualScan = async () => {
     setIsScanning(true);
-    const newAlerts = await performLiveScan();
-    setScanResults(prev => [...newAlerts, ...prev]);
-    setIsScanning(false);
+    try {
+      const newAlerts = await performLiveScan();
+      setScanResults(prev => [...newAlerts, ...prev]);
+      
+      // Update metrics
+      setMetrics(prev => ({
+        scansToday: prev.scansToday + 1,
+        alertsDetected: prev.alertsDetected + newAlerts.length,
+        highPriorityAlerts: prev.highPriorityAlerts + newAlerts.filter(a => a.severity === 'high').length
+      }));
+    } catch (error) {
+      console.error("Manual scan error:", error);
+    } finally {
+      setIsScanning(false);
+    }
   };
   
   return (
@@ -69,7 +104,7 @@ const AiScrapingDashboard = () => {
             {isActive ? (
               <>
                 <Pause className="h-4 w-4" />
-                Stop Real-Time Scan
+                Stop Real-Time Monitoring
               </>
             ) : (
               <>
@@ -95,18 +130,62 @@ const AiScrapingDashboard = () => {
         </div>
       </div>
       
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Scans Today
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center">
+              <LineChart className="h-4 w-4 mr-2 text-blue-500" />
+              <span className="text-2xl font-bold">{metrics.scansToday}</span>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Alerts Detected
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center">
+              <LineChart className="h-4 w-4 mr-2 text-amber-500" />
+              <span className="text-2xl font-bold">{metrics.alertsDetected}</span>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              High Priority
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center">
+              <LineChart className="h-4 w-4 mr-2 text-red-500" />
+              <span className="text-2xl font-bold">{metrics.highPriorityAlerts}</span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+      
       <Card>
         <CardHeader>
-          <CardTitle>Scan Results</CardTitle>
+          <CardTitle>Live Monitoring Results</CardTitle>
         </CardHeader>
         <CardContent>
           {scanResults.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-muted-foreground">No scan results yet.</p>
+              <p className="text-muted-foreground">No monitoring results yet.</p>
               <p className="text-sm text-muted-foreground mt-1">
                 {isActive 
-                  ? "Real-time scanning is active. Results will appear here as they are detected." 
-                  : "Activate real-time scanning to monitor for brand mentions and threats."}
+                  ? "Real-time monitoring is active. Results will appear here as they are detected." 
+                  : "Activate real-time monitoring to track mentions and threats."}
               </p>
               {!isActive && !isScanning && (
                 <Button 
@@ -114,7 +193,7 @@ const AiScrapingDashboard = () => {
                   className="mt-4" 
                   onClick={() => setIsActive(true)}
                 >
-                  Activate Scanning
+                  Activate Monitoring
                 </Button>
               )}
             </div>
@@ -122,8 +201,8 @@ const AiScrapingDashboard = () => {
             <div className="space-y-4">
               <p className="text-sm text-muted-foreground">
                 {isActive 
-                  ? "Real-time scanning is active. New results will appear automatically." 
-                  : "Real-time scanning is inactive. Run a manual scan or activate real-time scanning."}
+                  ? "Real-time monitoring is active. New results will appear automatically." 
+                  : "Real-time monitoring is inactive. Run a manual scan or activate real-time monitoring."}
               </p>
               <div className="divide-y">
                 {scanResults.map(result => (
@@ -162,6 +241,16 @@ const AiScrapingDashboard = () => {
                           : 'Low Priority'
                         }
                       </span>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="ml-2"
+                        onClick={() => {
+                          window.location.href = `/dashboard/engagement?alert=${result.id}`;
+                        }}
+                      >
+                        View & Respond
+                      </Button>
                     </div>
                   </div>
                 ))}
