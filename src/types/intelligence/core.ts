@@ -8,8 +8,7 @@ export type AlertSeverity = 'high' | 'medium' | 'low';
 export type IntelligenceLevel = 
   'basic' | 
   'advanced' | 
-  'enterprise' | 
-  'expert';
+  'enterprise';
 
 // Source types
 export type SourceType = 
@@ -28,8 +27,6 @@ export const getIntelligenceLevelColor = (level: IntelligenceLevel): string => {
       return 'bg-green-500';
     case 'enterprise':
       return 'bg-purple-500';
-    case 'expert':
-      return 'bg-amber-500';
     default:
       return 'bg-gray-500';
   }
