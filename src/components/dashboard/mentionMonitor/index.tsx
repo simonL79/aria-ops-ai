@@ -82,7 +82,7 @@ const MentionMonitor = ({ onNewMentionsFound }: MentionMonitorProps) => {
     navigate('/dashboard/mentions');
   };
 
-  const handleClassifyContent = async (platform: string, content: string) => {
+  const handleClassifyContent = async (platform: string, content: string): Promise<void> => {
     try {
       // Classify the content
       const classification = await classifyContent(
@@ -119,13 +119,10 @@ const MentionMonitor = ({ onNewMentionsFound }: MentionMonitorProps) => {
         }
         
         toast.success('Content classified and stored');
-        return true;
       }
-      return false;
     } catch (error) {
       toast.error('Error classifying content');
       console.error(error);
-      throw error;
     }
   };
 
