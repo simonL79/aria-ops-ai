@@ -1,5 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -7,7 +8,8 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   userId: string | null;
-  user: any;
+  user: User | null;
+  session: Session | null;
   isAdmin: boolean;
   signOut: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<boolean>;
@@ -19,62 +21,60 @@ const AuthContext = createContext<AuthContextType>({
   isLoading: true,
   userId: null,
   user: null,
+  session: null,
   isAdmin: false,
   signOut: async () => {},
   signIn: async () => false,
   signUp: async () => false
 });
 
-// Mock user database - in a real app this would come from a database
-const mockUsers = [
-  {
-    id: 'simon-admin-user',
-    email: 'simonlindsay7988@gmail.com',
-    password: 'Kaypetdel123',
-    firstName: 'Simon',
-    lastName: 'Lindsay',
-    isAdmin: true
-  },
-  {
-    id: 'admin-user-1',
-    email: 'admin@example.com',
-    password: 'password123', // In a real app, never store plain text passwords
-    firstName: 'Admin',
-    lastName: 'User',
-    isAdmin: true
-  },
-  {
-    id: 'test-user-1',
-    email: 'user@example.com',
-    password: 'password123',
-    firstName: 'Test',
-    lastName: 'User',
-    isAdmin: false
-  }
-];
-
-// The email address you want to grant admin access to
+// Define admin email for special treatment
 const ADMIN_EMAIL = 'simonlindsay7988@gmail.com';
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   
   useEffect(() => {
-    // Check if user is already logged in via localStorage
-    const checkAuth = () => {
-      const storedUser = localStorage.getItem('mock_auth_user');
-      if (storedUser) {
-        const parsedUser = JSON.parse(storedUser);
-        setUser(parsedUser);
-        setIsAuthenticated(true);
-        setIsAdmin(parsedUser.isAdmin || parsedUser.email === ADMIN_EMAIL);
-        console.log("User restored from storage:", parsedUser.email);
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, newSession) => {
+        setSession(newSession);
+        setUser(newSession?.user ?? null);
+        setIsAuthenticated(!!newSession);
+        
+        // Check if user is admin based on email
+        if (newSession?.user) {
+          const userEmail = newSession.user.email;
+          setIsAdmin(userEmail === ADMIN_EMAIL);
+          
+          // In a production app, you would check user roles in a database
+          // This is just a simplification for the demo
+          if (event === 'SIGNED_IN') {
+            console.log("User signed in:", userEmail);
+          }
+        } else {
+          setIsAdmin(false);
+        }
       }
+    );
+
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      setSession(currentSession);
+      setUser(currentSession?.user ?? null);
+      setIsAuthenticated(!!currentSession);
+      
+      if (currentSession?.user) {
+        const userEmail = currentSession.user.email;
+        setIsAdmin(userEmail === ADMIN_EMAIL);
+      }
+      
       setIsLoading(false);
-    };
+    });
     
     // Set a maximum timeout for loading state
     const timeoutId = setTimeout(() => {
@@ -82,39 +82,42 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setIsLoading(false);
         console.warn("Auth loading timed out - forcing completion");
       }
-    }, 2000); // 2 second maximum loading time
+    }, 2000);
     
-    checkAuth();
-    return () => clearTimeout(timeoutId);
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(timeoutId);
+    };
   }, []);
   
   const signIn = async (email: string, password: string): Promise<boolean> => {
     try {
-      // In a real app, this would validate against a secure backend
-      const foundUser = mockUsers.find(u => 
-        u.email.toLowerCase() === email.toLowerCase() && u.password === password
-      );
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
       
-      if (foundUser) {
-        // Create a safe user object (without password)
-        const safeUser = { ...foundUser };
-        delete safeUser.password;
-        
-        // Store in state and localStorage
-        setUser(safeUser);
-        setIsAuthenticated(true);
-        setIsAdmin(safeUser.isAdmin || email === ADMIN_EMAIL);
-        localStorage.setItem('mock_auth_user', JSON.stringify(safeUser));
-        
+      if (error) {
+        toast.error("Login failed", {
+          description: error.message
+        });
+        return false;
+      }
+      
+      if (data.user) {
         toast.success("Signed in successfully!");
         return true;
       } else {
-        toast.error("Invalid email or password");
+        toast.error("Login failed", {
+          description: "Invalid email or password"
+        });
         return false;
       }
     } catch (error) {
       console.error("Error signing in:", error);
-      toast.error("Error signing in");
+      toast.error("Error signing in", {
+        description: error instanceof Error ? error.message : "Unknown error occurred"
+      });
       return false;
     }
   };
@@ -126,54 +129,68 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     lastName?: string
   ): Promise<boolean> => {
     try {
-      // Check if user already exists
-      if (mockUsers.some(u => u.email.toLowerCase() === email.toLowerCase())) {
-        toast.error("User with this email already exists");
+      // Create user with metadata
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            firstName,
+            lastName,
+          }
+        }
+      });
+      
+      if (error) {
+        toast.error("Sign up failed", {
+          description: error.message
+        });
         return false;
       }
       
-      // Create new user
-      const newUser = {
-        id: `user-${Date.now()}`,
-        email,
-        password,
-        firstName: firstName || '',
-        lastName: lastName || '',
-        isAdmin: email === ADMIN_EMAIL
-      };
-      
-      // Add to mock database
-      mockUsers.push(newUser);
-      
-      // Create a safe user object (without password)
-      const safeUser = { ...newUser };
-      delete safeUser.password;
-      
-      // Login the user after signup
-      setUser(safeUser);
-      setIsAuthenticated(true);
-      setIsAdmin(safeUser.isAdmin || email === ADMIN_EMAIL);
-      localStorage.setItem('mock_auth_user', JSON.stringify(safeUser));
-      
-      toast.success("Signed up successfully!");
-      return true;
+      if (data.user) {
+        toast.success("Signed up successfully!");
+        
+        // Check if email confirmation is required
+        if (data.session === null) {
+          toast.info("Please check your email to confirm your account");
+        }
+        
+        return true;
+      } else {
+        toast.error("Sign up failed");
+        return false;
+      }
     } catch (error) {
       console.error("Error signing up:", error);
-      toast.error("Error signing up");
+      toast.error("Error signing up", {
+        description: error instanceof Error ? error.message : "Unknown error occurred"
+      });
       return false;
     }
   };
   
   const handleSignOut = async () => {
     try {
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        toast.error("Error signing out", {
+          description: error.message
+        });
+        return;
+      }
+      
       setUser(null);
+      setSession(null);
       setIsAuthenticated(false);
       setIsAdmin(false);
-      localStorage.removeItem('mock_auth_user');
       toast.success("Signed out successfully");
     } catch (error) {
       console.error("Error signing out:", error);
-      toast.error("Error signing out");
+      toast.error("Error signing out", {
+        description: error instanceof Error ? error.message : "Unknown error occurred"
+      });
     }
   };
   
@@ -182,6 +199,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     isLoading,
     userId: user?.id || null,
     user,
+    session,
     isAdmin,
     signOut: handleSignOut,
     signIn,

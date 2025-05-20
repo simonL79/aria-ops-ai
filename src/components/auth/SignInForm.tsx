@@ -10,6 +10,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
+import { logActivity, LogAction } from "@/services/activityLogService";
 
 // Define a schema for login form validation
 const loginSchema = z.object({
@@ -48,6 +49,14 @@ const SignInForm = ({ setShowResetForm }: SignInFormProps) => {
       const success = await signIn(values.email, values.password);
       
       if (success) {
+        // Log successful login activity
+        await logActivity(
+          LogAction.LOGIN,
+          `User login: ${values.email}`,
+          'user',
+          values.email
+        );
+        
         toast.success("Login successful! Redirecting to dashboard...");
         setTimeout(() => navigate(from), 500); // Short delay to show the success message
       } else {

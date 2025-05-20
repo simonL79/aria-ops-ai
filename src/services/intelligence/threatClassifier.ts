@@ -2,8 +2,9 @@
 import { toast } from "sonner";
 import { ThreatClassifierRequest, ThreatClassificationResult } from "@/types/intelligence";
 import { supabase } from "@/integrations/supabase/client";
+import { logActivity, LogAction } from "@/services/activityLogService";
 
-// Simplified version of the threat classifier that now uses a Supabase Edge Function
+// Use the threat classifier edge function
 export const classifyThreat = async (data: ThreatClassifierRequest): Promise<ThreatClassificationResult | null> => {
   try {
     const { data: responseData, error } = await supabase.functions.invoke('threat-classification', {
@@ -22,6 +23,14 @@ export const classifyThreat = async (data: ThreatClassifierRequest): Promise<Thr
     if (!responseData) {
       throw new Error("Empty response from classification service");
     }
+    
+    // Log the classification activity
+    await logActivity(
+      LogAction.CLASSIFY,
+      `Classified content with severity ${responseData.severity}/10 as "${responseData.category}"`,
+      'content',
+      'threat-classification'
+    );
     
     // The edge function returns a properly formatted result
     return responseData as ThreatClassificationResult;
@@ -64,6 +73,14 @@ export const classifyThreatAdvanced = async (
     if (!responseData) {
       throw new Error("Empty response from classification service");
     }
+    
+    // Log advanced classification
+    await logActivity(
+      LogAction.CLASSIFY,
+      `Advanced classification: ${responseData.category} (severity: ${responseData.severity}/10)`,
+      'content',
+      'advanced-classification'
+    );
     
     return responseData as ThreatClassificationResult;
     

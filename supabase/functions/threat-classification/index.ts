@@ -114,26 +114,22 @@ Be extremely specific about who or what is being targeted and the potential impa
         result: JSON.stringify(classificationResult)
       });
       
-      // Create supabase client for logging (optional)
+      // Create supabase client for logging
       const supabase = createClient(supabaseUrl, supabaseAnonKey);
       
-      // Optional: Log the classification to a table for analysis
-      // This is commented out as the table might not exist yet
-      /*
+      // Log the classification to activity_logs
       const { error: logError } = await supabase
-        .from('threat_classifications_log')
+        .from('activity_logs')
         .insert({
-          content_sample: content.substring(0, 500),
-          platform,
-          classification: classificationResult.category,
-          severity: classificationResult.severity,
-          timestamp: new Date().toISOString()
+          action: 'classify',
+          details: `Classified content with severity ${classificationResult.severity}/10 as "${classificationResult.category}"`,
+          entity_type: 'content_classification',
+          entity_id: 'system'
         });
         
       if (logError) {
         console.error("Error logging classification:", logError);
       }
-      */
       
       return new Response(
         JSON.stringify(classificationResult),
@@ -168,6 +164,7 @@ Be extremely specific about who or what is being targeted and the potential impa
     }
   } catch (error) {
     console.error("Error in threat classification function:", error);
+    
     return new Response(
       JSON.stringify({ error: error.message }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

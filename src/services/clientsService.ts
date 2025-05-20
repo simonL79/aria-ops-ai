@@ -1,47 +1,48 @@
 
-import { supabase } from "@/integrations/supabase/client";
-import { Client } from "@/types/clients";
-import { toast } from "sonner";
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { Client } from '@/types/clients';
 
 /**
- * Fetches all clients from the database
+ * Fetch all clients
  */
 export const fetchClients = async (): Promise<Client[]> => {
   try {
     const { data, error } = await supabase
       .from('clients')
-      .select('*');
+      .select('*')
+      .order('name');
     
     if (error) {
-      throw error;
+      console.error("Error fetching clients:", error);
+      toast.error("Failed to fetch clients");
+      return [];
     }
     
-    // Map database column names to Client interface
-    const clients = (data || []).map(item => ({
-      id: item.id,
-      name: item.name,
-      industry: item.industry,
-      contactName: item.contactname,
-      contactEmail: item.contactemail,
-      website: item.website,
-      notes: item.notes,
-      keywordTargets: item.keywordtargets
-    })) as Client[];
+    return data.map(client => ({
+      id: client.id,
+      name: client.name,
+      industry: client.industry,
+      contactName: client.contactname,
+      contactEmail: client.contactemail,
+      website: client.website || '',
+      notes: client.notes || '',
+      keywordTargets: client.keywordtargets || '',
+      createdAt: client.created_at,
+      updatedAt: client.updated_at
+    })) || [];
     
-    return clients;
   } catch (error) {
-    console.error("Error fetching clients:", error);
-    toast.error("Failed to load clients", {
-      description: "There was a problem fetching your client data"
-    });
+    console.error("Error in fetchClients:", error);
+    toast.error("An error occurred while fetching clients");
     return [];
   }
 };
 
 /**
- * Adds a new client to the database
+ * Add a new client
  */
-export const addClient = async (clientData: Omit<Client, 'id'>): Promise<Client | null> => {
+export const addClient = async (clientData: Omit<Client, 'id' | 'createdAt' | 'updatedAt'>): Promise<Client | null> => {
   try {
     const { data, error } = await supabase
       .from('clients')
@@ -58,45 +59,45 @@ export const addClient = async (clientData: Omit<Client, 'id'>): Promise<Client 
       .single();
     
     if (error) {
-      throw error;
+      console.error("Error adding client:", error);
+      toast.error("Failed to add client");
+      return null;
     }
     
-    // Map database response to Client interface
-    const client: Client = {
+    return {
       id: data.id,
       name: data.name,
       industry: data.industry,
       contactName: data.contactname,
       contactEmail: data.contactemail,
-      website: data.website,
-      notes: data.notes,
-      keywordTargets: data.keywordtargets
+      website: data.website || '',
+      notes: data.notes || '',
+      keywordTargets: data.keywordtargets || '',
+      createdAt: data.created_at,
+      updatedAt: data.updated_at
     };
     
-    return client;
   } catch (error) {
-    console.error("Error adding client:", error);
-    toast.error("Failed to add client", {
-      description: "There was a problem saving your client data"
-    });
+    console.error("Error in addClient:", error);
+    toast.error("An error occurred while adding the client");
     return null;
   }
 };
 
 /**
- * Updates an existing client in the database
+ * Update an existing client
  */
 export const updateClient = async (id: string, clientData: Partial<Client>): Promise<Client | null> => {
   try {
     const updateData: any = {};
     
-    if (clientData.name !== undefined) updateData.name = clientData.name;
-    if (clientData.industry !== undefined) updateData.industry = clientData.industry;
-    if (clientData.contactName !== undefined) updateData.contactname = clientData.contactName;
-    if (clientData.contactEmail !== undefined) updateData.contactemail = clientData.contactEmail;
-    if (clientData.website !== undefined) updateData.website = clientData.website;
-    if (clientData.notes !== undefined) updateData.notes = clientData.notes;
-    if (clientData.keywordTargets !== undefined) updateData.keywordtargets = clientData.keywordTargets;
+    if (clientData.name) updateData.name = clientData.name;
+    if (clientData.industry) updateData.industry = clientData.industry;
+    if (clientData.contactName) updateData.contactname = clientData.contactName;
+    if (clientData.contactEmail) updateData.contactemail = clientData.contactEmail;
+    if (clientData.website !== undefined) updateData.website = clientData.website || null;
+    if (clientData.notes !== undefined) updateData.notes = clientData.notes || null;
+    if (clientData.keywordTargets !== undefined) updateData.keywordtargets = clientData.keywordTargets || null;
     
     const { data, error } = await supabase
       .from('clients')
@@ -106,33 +107,33 @@ export const updateClient = async (id: string, clientData: Partial<Client>): Pro
       .single();
     
     if (error) {
-      throw error;
+      console.error("Error updating client:", error);
+      toast.error("Failed to update client");
+      return null;
     }
     
-    // Map database response to Client interface
-    const client: Client = {
+    return {
       id: data.id,
       name: data.name,
       industry: data.industry,
       contactName: data.contactname,
       contactEmail: data.contactemail,
-      website: data.website,
-      notes: data.notes,
-      keywordTargets: data.keywordtargets
+      website: data.website || '',
+      notes: data.notes || '',
+      keywordTargets: data.keywordtargets || '',
+      createdAt: data.created_at,
+      updatedAt: data.updated_at
     };
     
-    return client;
   } catch (error) {
-    console.error("Error updating client:", error);
-    toast.error("Failed to update client", {
-      description: "There was a problem updating your client data"
-    });
+    console.error("Error in updateClient:", error);
+    toast.error("An error occurred while updating the client");
     return null;
   }
 };
 
 /**
- * Deletes a client from the database
+ * Delete a client
  */
 export const deleteClient = async (id: string): Promise<boolean> => {
   try {
@@ -142,15 +143,56 @@ export const deleteClient = async (id: string): Promise<boolean> => {
       .eq('id', id);
     
     if (error) {
-      throw error;
+      console.error("Error deleting client:", error);
+      toast.error("Failed to delete client");
+      return false;
     }
     
+    toast.success("Client deleted successfully");
     return true;
+    
   } catch (error) {
-    console.error("Error deleting client:", error);
-    toast.error("Failed to delete client", {
-      description: "There was a problem removing your client"
-    });
+    console.error("Error in deleteClient:", error);
+    toast.error("An error occurred while deleting the client");
     return false;
+  }
+};
+
+/**
+ * Get a client by ID
+ */
+export const getClientById = async (id: string): Promise<Client | null> => {
+  try {
+    const { data, error } = await supabase
+      .from('clients')
+      .select('*')
+      .eq('id', id)
+      .single();
+    
+    if (error) {
+      console.error("Error fetching client:", error);
+      return null;
+    }
+    
+    if (!data) {
+      return null;
+    }
+    
+    return {
+      id: data.id,
+      name: data.name,
+      industry: data.industry,
+      contactName: data.contactname,
+      contactEmail: data.contactemail,
+      website: data.website || '',
+      notes: data.notes || '',
+      keywordTargets: data.keywordtargets || '',
+      createdAt: data.created_at,
+      updatedAt: data.updated_at
+    };
+    
+  } catch (error) {
+    console.error("Error in getClientById:", error);
+    return null;
   }
 };
