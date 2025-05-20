@@ -166,7 +166,7 @@ export const runCleanLaunchPipeline = async (company: NewCompany): Promise<NewCo
       { id: 'dir1', name: 'Unknown Director', role: 'Director' }
     ];
     
-    // Update directors with reputation scans
+    // Update directors with reputation scans - ensure riskCategory is typed correctly
     const updatedDirectors = directors.map(director => ({
       ...director,
       reputationScan: {
@@ -175,6 +175,7 @@ export const runCleanLaunchPipeline = async (company: NewCompany): Promise<NewCo
         scanDate: new Date().toISOString(),
         overallSentiment: Math.random() * 2 - 1, // -1 to 1
         riskScore: Math.round(Math.random() * 100),
+        // Ensure riskCategory is a valid union value ('high', 'medium', or 'low')
         riskCategory: Math.random() > 0.7 ? 'high' : Math.random() > 0.4 ? 'medium' : 'low',
         issues: [],
         sources: {
