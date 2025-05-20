@@ -1,4 +1,3 @@
-
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -38,6 +37,8 @@ const AddModelDialog = ({
         name: newModel.name || '',
         type: (newModel.type as ModelConfig['type']) || 'huggingface',
         usage: (newModel.usage as ModelConfig['usage']) || 'sentiment',
+        isDefault: newModel.isDefault || false,
+        parameters: newModel.parameters || {},
         config: {
           model: newModel.config?.model || '',
           temperature: newModel.config?.temperature || 0.7,

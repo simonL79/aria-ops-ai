@@ -36,6 +36,23 @@ const stopMonitoring = () => {
 // Re-export the runMonitoringScan function from scan.ts
 import { runMonitoringScan as runScan } from './monitoring/scan';
 
+// Import the OpenAI service functions
+import { 
+  generateAIResponse,
+  generateSeoContent,
+  classifyContentThreat,
+  ResponseGenerationProps,
+  ThreatClassificationResult
+} from './secureOpenaiService';
+
+// Import the threat classifier functions
+import {
+  classifyThreat,
+  classifyThreatAdvanced,
+  runMultiAgentAnalysis,
+  runPredictiveAnalysis
+} from './intelligence/threatClassifier';
+
 // Export all services
 export {
   // Monitoring status services
@@ -54,5 +71,18 @@ export {
   // Platform services
   getMonitoredPlatforms,
   isPlatformMonitored,
-  updatePlatformStatus
+  updatePlatformStatus,
+  
+  // OpenAI services
+  generateAIResponse,
+  generateSeoContent,
+  classifyContentThreat,
+  ResponseGenerationProps,
+  ThreatClassificationResult,
+  
+  // Threat classifier services
+  classifyThreat,
+  classifyThreatAdvanced,
+  runMultiAgentAnalysis,
+  runPredictiveAnalysis
 };

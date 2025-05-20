@@ -4,13 +4,13 @@
 // Import and re-export from new modularized services
 
 import { 
-  classifyThreat as classifyT,
-  classifyThreatAdvanced as classifyTA,
-  runMultiAgentAnalysis as runMA,
-  runPredictiveAnalysis as runPA
-} from './index';
+  classifyThreat,
+  classifyThreatAdvanced,
+  runMultiAgentAnalysis,
+  runPredictiveAnalysis
+} from './intelligence/threatClassifier';
 
-export const classifyThreat = classifyT;
-export const classifyThreatAdvanced = classifyTA;
-export const runMultiAgentAnalysis = runMA;
-export const runPredictiveAnalysis = runPA;
+export const classifyThreat = classifyThreat;
+export const classifyThreatAdvanced = classifyThreatAdvanced;
+export const runMultiAgentAnalysis = runMultiAgentAnalysis;
+export const runPredictiveAnalysis = runPredictiveAnalysis;

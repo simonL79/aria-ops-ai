@@ -4,17 +4,17 @@
 // Import and re-export from new modularized services
 
 import { 
-  generateAIResponse as generateResponse,
+  generateAIResponse,
   ResponseGenerationProps,
-  generateSeoContent as genSeoContent,
-  classifyContentThreat as classifyThreat,
+  generateSeoContent,
+  classifyContentThreat,
   ThreatClassificationResult
-} from './index';
+} from './secureOpenaiService';
 
 // Re-export for backward compatibility
-export type { OpenAIMessage, OpenAIResponse } from './api/openaiClient';
+export type { OpenAIMessage, OpenAIResponse } from './secureOpenaiService';
 export type { ResponseGenerationProps, ThreatClassificationResult };
 
-export const generateAIResponse = generateResponse;
-export const generateSeoContent = genSeoContent;
-export const classifyContentThreat = classifyThreat;
+export const generateAIResponse = generateAIResponse;
+export const generateSeoContent = generateSeoContent;
+export const classifyContentThreat = classifyContentThreat;
