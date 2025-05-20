@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import { supabase } from "@/integrations/supabase/client";
@@ -170,7 +169,50 @@ export const useReputationRadar = () => {
     error,
     lastScanTime,
     fetchRadarData,
-    generateOutreachMessage,
-    updateEntityStatus
+    generateOutreachMessage: useCallback(async (entity: EntityMention) => {
+      try {
+        // In a real implementation, call AI service to generate content
+        // Example implementation:
+        // const { data, error } = await supabase.functions.invoke('generate-outreach', {
+        //   body: { entityName: entity.name, entityType: entity.type, articles: entity.articles }
+        // });
+        
+        // if (error) throw error;
+        
+        // Mock AI-generated content
+        const mockOutreach = entity.type === 'person'
+          ? `Dear ${entity.name},\n\nI noticed the recent media coverage about you and wanted to reach out. Our firm specializes in reputation management and privacy protection, and we may be able to assist during this challenging situation.\n\nWould you be open to a confidential conversation about digital reputation protection strategies?\n\nBest regards,\n[Your Name]\n[Your Company]`
+          : `Dear ${entity.name} team,\n\nI noticed the recent coverage of ${entity.name} in the media. Our agency specializes in corporate reputation management and crisis response, helping organizations navigate challenging media situations.\n\nWould your communications team be available for a brief conversation about our reputation protection and media management services?\n\nBest regards,\n[Your Name]\n[Your Company]`;
+        
+        return {
+          success: true, 
+          outreachMessage: mockOutreach
+        };
+      } catch (err) {
+        console.error('Error generating outreach message:', err);
+        toast.error('Failed to generate outreach message');
+        return { success: false, error: err instanceof Error ? err.message : 'Unknown error' };
+      }
+    }, []),
+    
+    updateEntityStatus: useCallback(async (entityId: string, status: string) => {
+      try {
+        // In a real implementation, update in database
+        // For now, just update local state
+        setEntities(prev => 
+          prev.map(entity => 
+            entity.id === entityId 
+              ? { ...entity, outreachStatus: status as any } 
+              : entity
+          )
+        );
+        
+        return { success: true };
+      } catch (err) {
+        console.error('Error updating entity status:', err);
+        toast.error('Failed to update entity status');
+        return { success: false, error: err instanceof Error ? err.message : 'Unknown error' };
+      }
+    }, [])
   };
 };

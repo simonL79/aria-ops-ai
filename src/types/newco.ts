@@ -1,4 +1,3 @@
-
 export interface NewCompany {
   id: string;
   name: string;
@@ -11,6 +10,7 @@ export interface NewCompany {
   cleanLaunchCategory?: 'green' | 'yellow' | 'red';
   status: 'new' | 'scanned' | 'contacted' | 'onboarded' | 'declined';
   directors: CompanyDirector[];
+  address?: string; // Adding address field
 }
 
 export interface CompanyDirector {

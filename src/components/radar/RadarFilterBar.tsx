@@ -40,6 +40,8 @@ const RadarFilterBar = ({ filters, onChange }: RadarFilterBarProps) => {
             <Button variant="outline" size="sm" className="h-8">
               <CalendarIcon className="h-4 w-4 mr-2" />
               {filters.timeframe === 'last24h' ? 'Last 24 Hours' : 
+               filters.timeframe === 'last7d' ? 'Last 7 Days' : 
+               filters.timeframe === 'last30d' ? 'Last 30 Days' : 
                filters.timeframe === 'last3d' ? 'Last 3 Days' : 'Last Week'}
             </Button>
           </PopoverTrigger>
@@ -68,7 +70,7 @@ const RadarFilterBar = ({ filters, onChange }: RadarFilterBarProps) => {
                     variant="ghost" 
                     size="sm" 
                     className="justify-start h-7 px-2"
-                    onClick={() => onChange({ timeframe: 'lastWeek' })}
+                    onClick={() => onChange({ timeframe: 'last7d' })}
                   >
                     Last Week
                   </Button>

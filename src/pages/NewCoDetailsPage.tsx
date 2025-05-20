@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import DashboardLayout from "@/components/layout/DashboardLayout";
@@ -17,7 +16,7 @@ const NewCoDetailsPage = () => {
   const [loading, setLoading] = useState<boolean>(true);
   
   // Sample mock data for demonstration
-  const mockCompanies = [
+  const mockCompanies: NewCompany[] = [
     {
       id: "nc-1",
       name: "Quantum Innovations Ltd",
@@ -295,27 +294,27 @@ const NewCoDetailsPage = () => {
             <div className="space-y-2">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Incorporated:</span>
-                <span>{new Date(company.incorporationDate).toLocaleDateString()}</span>
+                <span>{new Date(company?.incorporationDate || '').toLocaleDateString()}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Jurisdiction:</span>
-                <span>{company.jurisdiction}</span>
+                <span>{company?.jurisdiction}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Industry:</span>
-                <span>{company.industry}</span>
+                <span>{company?.industry}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">SIC Code:</span>
-                <span>{company.sicCode}</span>
+                <span>{company?.sicCode}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Address:</span>
-                <span>{company.address}</span>
+                <span>{company?.address}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Clean Launch Score:</span>
-                <span className="font-bold">{company.cleanLaunchScore}/100</span>
+                <span className="font-bold">{company?.cleanLaunchScore}/100</span>
               </div>
             </div>
           </CardContent>
