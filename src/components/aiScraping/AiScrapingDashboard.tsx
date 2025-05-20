@@ -8,6 +8,7 @@ import SourcesManager from './SourcesManager';
 import ManualInputForm from './ManualInputForm';
 import ScrapingResults from './ScrapingResults';
 import ScrapingQueryForm from './ScrapingQueryForm';
+import PromptTemplates from './PromptTemplates';
 import { ScrapingQuery, ScrapingResult } from '@/types/aiScraping';
 import { runScraping } from '@/services/aiScrapingService';
 
@@ -36,10 +37,11 @@ const AiScrapingDashboard = () => {
       </CardHeader>
       <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-4 mb-4">
+          <TabsList className="grid grid-cols-5 mb-4">
             <TabsTrigger value="query">Query Builder</TabsTrigger>
             <TabsTrigger value="sources">Sources</TabsTrigger>
             <TabsTrigger value="manual">Manual Input</TabsTrigger>
+            <TabsTrigger value="prompts">AI Prompts</TabsTrigger>
             <TabsTrigger value="results">Results</TabsTrigger>
           </TabsList>
 
@@ -64,6 +66,10 @@ const AiScrapingDashboard = () => {
 
           <TabsContent value="manual">
             <ManualInputForm onSuccess={() => setActiveTab('results')} />
+          </TabsContent>
+          
+          <TabsContent value="prompts">
+            <PromptTemplates />
           </TabsContent>
 
           <TabsContent value="results">

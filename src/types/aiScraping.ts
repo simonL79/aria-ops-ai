@@ -45,3 +45,13 @@ export interface ScrapingQuery {
   };
   maxResults?: number;
 }
+
+export interface GPTPromptTemplate {
+  id: string;
+  name: string;
+  description: string;
+  template: string;
+  usage: 'web' | 'search' | 'social' | 'reputation' | 'response';
+}
+
+export type ResponseToneType = 'empathetic' | 'legal' | 'confident' | 'firm';

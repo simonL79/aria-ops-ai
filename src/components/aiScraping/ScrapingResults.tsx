@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -68,7 +67,7 @@ const ScrapingResults = ({ results: initialResults }: ScrapingResultsProps) => {
     if (sentiment <= -0.5) {
       return <Badge variant="destructive" className="ml-2">Negative</Badge>;
     } else if (sentiment >= 0.5) {
-      return <Badge variant="success" className="ml-2 bg-green-500">Positive</Badge>;
+      return <Badge variant="secondary" className="ml-2 bg-green-500 hover:bg-green-600">Positive</Badge>;
     } else {
       return <Badge variant="outline" className="ml-2">Neutral</Badge>;
     }
