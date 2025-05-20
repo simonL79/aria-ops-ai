@@ -21,17 +21,17 @@ const ThreatAnalysisHub = ({
   return (
     <Card className="w-full">
       <Tabs defaultValue="classify" className="w-full">
-        <TabsList className="grid grid-cols-3 mb-2">
-          <TabsTrigger value="classify">Threat Classification</TabsTrigger>
-          <TabsTrigger value="respond">Response Generation</TabsTrigger>
-          <TabsTrigger value="advanced">Advanced Intelligence</TabsTrigger>
+        <TabsList className="grid grid-cols-3 mb-2 w-full">
+          <TabsTrigger value="classify" className="px-2 py-1.5 text-sm">Threat Classification</TabsTrigger>
+          <TabsTrigger value="respond" className="px-2 py-1.5 text-sm">Response Generation</TabsTrigger>
+          <TabsTrigger value="advanced" className="px-2 py-1.5 text-sm">Advanced Intelligence</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="classify" className="mt-0">
+        <TabsContent value="classify" className="mt-0 p-3">
           <ThreatClassifier initialContent={initialContent} />
         </TabsContent>
         
-        <TabsContent value="respond" className="mt-0">
+        <TabsContent value="respond" className="mt-0 p-3">
           <StrategicResponseEngine 
             initialContent={initialContent}
             threatType={threatType}
@@ -40,7 +40,7 @@ const ThreatAnalysisHub = ({
           />
         </TabsContent>
         
-        <TabsContent value="advanced" className="mt-0">
+        <TabsContent value="advanced" className="mt-0 p-3">
           <AdvancedIntelligencePanel />
         </TabsContent>
       </Tabs>

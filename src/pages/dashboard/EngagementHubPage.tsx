@@ -104,70 +104,72 @@ const EngagementHubPage = () => {
         description="Manage all communication and engagement activities"
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
         <div className="lg:col-span-1">
-          <RealTimeAlerts 
-            alerts={alerts}
-            onViewDetail={handleViewDetails}
-            onMarkAsRead={handleMarkAsRead}
-            onDismiss={handleDismiss}
-          />
-          
-          <Card className="mt-6">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Mail className="mr-2 h-5 w-5" />
-                Email Notifications
-              </CardTitle>
-              <CardDescription>
-                Configure email alerts for high priority items
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center space-x-2">
-                  <Switch 
-                    id="email-notifications" 
-                    checked={emailSettings.enabled}
-                    onCheckedChange={handleEmailToggle}
-                  />
-                  <Label htmlFor="email-notifications">Enable email notifications</Label>
+          <div className="space-y-4">
+            <RealTimeAlerts 
+              alerts={alerts}
+              onViewDetail={handleViewDetails}
+              onMarkAsRead={handleMarkAsRead}
+              onDismiss={handleDismiss}
+            />
+            
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center text-lg">
+                  <Mail className="mr-2 h-5 w-5" />
+                  Email Notifications
+                </CardTitle>
+                <CardDescription>
+                  Configure email alerts for high priority items
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-2">
+                    <Switch 
+                      id="email-notifications" 
+                      checked={emailSettings.enabled}
+                      onCheckedChange={handleEmailToggle}
+                    />
+                    <Label htmlFor="email-notifications">Enable email notifications</Label>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="email-address">Email address</Label>
+                    <Input 
+                      id="email-address" 
+                      placeholder="your@email.com" 
+                      type="email"
+                      value={emailSettings.emailAddress}
+                      onChange={(e) => setEmailSettings(prev => ({ 
+                        ...prev, 
+                        emailAddress: e.target.value 
+                      }))}
+                    />
+                  </div>
+                  
+                  <p className="text-xs text-muted-foreground">
+                    High priority alerts and customer enquiries will be sent to this email address
+                  </p>
                 </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="email-address">Email address</Label>
-                  <Input 
-                    id="email-address" 
-                    placeholder="your@email.com" 
-                    type="email"
-                    value={emailSettings.emailAddress}
-                    onChange={(e) => setEmailSettings(prev => ({ 
-                      ...prev, 
-                      emailAddress: e.target.value 
-                    }))}
-                  />
-                </div>
-                
-                <p className="text-xs text-muted-foreground">
-                  High priority alerts and customer enquiries will be sent to this email address
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         </div>
         
         <div className="lg:col-span-2">
           {selectedAlert ? (
-            <div className="space-y-6">
+            <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold">Alert Analysis</h2>
+                <h2 className="text-xl font-bold">Alert Analysis</h2>
                 <Button variant="outline" onClick={() => setSelectedAlert(null)}>
                   Back to Feed
                 </Button>
               </div>
               
-              <Card className="mb-6">
-                <CardHeader>
+              <Card className="mb-4">
+                <CardHeader className="pb-2">
                   <div className="flex items-center justify-between">
                     <CardTitle>{selectedAlert.platform} Alert</CardTitle>
                     <div className={`px-2 py-1 text-xs rounded-full ${
@@ -183,9 +185,9 @@ const EngagementHubPage = () => {
                   <CardDescription>{selectedAlert.date}</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p className="mb-4">{selectedAlert.content}</p>
+                  <p className="mb-3">{selectedAlert.content}</p>
                   {selectedAlert.category === 'customer_enquiry' && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-md p-3 text-blue-800 text-sm mb-4">
+                    <div className="bg-blue-50 border border-blue-200 rounded-md p-3 text-blue-800 text-sm mb-3">
                       This is a customer enquiry and requires a response.
                     </div>
                   )}
@@ -210,16 +212,16 @@ const EngagementHubPage = () => {
 
       {!selectedAlert && (
         <Tabs defaultValue="messages" className="w-full">
-          <TabsList className="mb-4">
-            <TabsTrigger value="messages">Messages</TabsTrigger>
-            <TabsTrigger value="comments">Comments</TabsTrigger>
-            <TabsTrigger value="mentions">Social Mentions</TabsTrigger>
-            <TabsTrigger value="notifications">Notifications</TabsTrigger>
+          <TabsList className="mb-3 overflow-x-auto flex whitespace-nowrap w-full max-w-full">
+            <TabsTrigger value="messages" className="px-3">Messages</TabsTrigger>
+            <TabsTrigger value="comments" className="px-3">Comments</TabsTrigger>
+            <TabsTrigger value="mentions" className="px-3">Social Mentions</TabsTrigger>
+            <TabsTrigger value="notifications" className="px-3">Notifications</TabsTrigger>
           </TabsList>
           
           <TabsContent value="messages" className="space-y-4">
             <Card>
-              <CardHeader>
+              <CardHeader className="pb-2">
                 <CardTitle className="flex items-center">
                   <MessageSquare className="mr-2 h-5 w-5" />
                   Direct Messages
@@ -236,7 +238,7 @@ const EngagementHubPage = () => {
           
           <TabsContent value="comments" className="space-y-4">
             <Card>
-              <CardHeader>
+              <CardHeader className="pb-2">
                 <CardTitle className="flex items-center">
                   <Users className="mr-2 h-5 w-5" />
                   Comment Management
@@ -253,7 +255,7 @@ const EngagementHubPage = () => {
           
           <TabsContent value="mentions" className="space-y-4">
             <Card>
-              <CardHeader>
+              <CardHeader className="pb-2">
                 <CardTitle className="flex items-center">
                   <Share2 className="mr-2 h-5 w-5" />
                   Social Media Mentions
@@ -270,7 +272,7 @@ const EngagementHubPage = () => {
           
           <TabsContent value="notifications" className="space-y-4">
             <Card>
-              <CardHeader>
+              <CardHeader className="pb-2">
                 <CardTitle className="flex items-center">
                   <Bell className="mr-2 h-5 w-5" />
                   Notification Center

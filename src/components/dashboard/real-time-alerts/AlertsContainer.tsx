@@ -23,7 +23,7 @@ const AlertsContainer = ({
   }
 
   return (
-    <>
+    <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
       {filteredAlerts.map((alert, index) => (
         <AlertItem
           key={alert.id}
@@ -35,7 +35,7 @@ const AlertsContainer = ({
           onRespond={onRespond}
         />
       ))}
-    </>
+    </div>
   );
 };
 
