@@ -9,7 +9,7 @@ import AuthLoadingState from "@/components/auth/AuthLoadingState";
 import SignedInRedirect from "@/components/auth/SignedInRedirect";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, RefreshCw } from "lucide-react";
+import { AlertCircle, RefreshCw, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -81,8 +81,19 @@ const Authentication = () => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
       <AuthHeader />
+      
+      <div className="w-full max-w-md text-center mb-8">
+        <Button 
+          size="lg" 
+          className="w-full sm:w-auto animate-pulse bg-blue-600 hover:bg-blue-700 transition-colors hover:animate-none text-lg font-semibold"
+        >
+          <LogIn className="mr-2 h-5 w-5" />
+          <span>Secure Login</span>
+        </Button>
+        <p className="mt-2 text-sm text-gray-500">Access your A.R.I.A. security dashboard</p>
+      </div>
 
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-md border-2 border-primary shadow-lg">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">
             A.R.I.A. Security Login

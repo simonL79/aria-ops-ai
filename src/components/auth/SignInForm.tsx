@@ -139,8 +139,9 @@ const SignInForm = ({ setShowResetForm }: SignInFormProps) => {
         
         <Button 
           type="submit" 
-          className="w-full" 
+          className="w-full animate-pulse bg-blue-600 hover:bg-blue-700 transition-colors hover:animate-none text-lg font-semibold"
           disabled={isLoading}
+          size="lg"
         >
           {isLoading ? (
             <span className="flex items-center justify-center">
@@ -152,8 +153,8 @@ const SignInForm = ({ setShowResetForm }: SignInFormProps) => {
             </span>
           ) : (
             <span className="flex items-center justify-center">
-              <LogIn className="mr-2 h-4 w-4" />
-              Sign In
+              <LogIn className="mr-2 h-5 w-5" />
+              Sign In Now
             </span>
           )}
         </Button>
