@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import GDPRWalkthrough from "@/components/gdpr/GDPRWalkthrough";
 import PublicLayout from '@/components/layout/PublicLayout';
 
 const HomePage = () => {
@@ -104,14 +103,6 @@ const HomePage = () => {
           </div>
         </section>
         
-        {/* GDPR Compliance Section */}
-        <section className="py-16 px-6 bg-gradient-to-b from-white to-gray-50">
-          <div className="container mx-auto max-w-6xl">
-            <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center">GDPR Compliance & Data Protection</h2>
-            <GDPRWalkthrough />
-          </div>
-        </section>
-        
         {/* Platforms */}
         <section id="platforms" className="platforms-section bg-gray-50 py-20">
           <div className="container mx-auto px-6">
@@ -170,6 +161,11 @@ const HomePage = () => {
                   <a href="/terms" className="text-gray-500 hover:text-gray-700">
                     Terms of Service
                   </a>
+                </li>
+                <li>
+                  <Link to="/gdpr-compliance" className="text-gray-500 hover:text-gray-700">
+                    GDPR Compliance
+                  </Link>
                 </li>
               </ul>
             </nav>

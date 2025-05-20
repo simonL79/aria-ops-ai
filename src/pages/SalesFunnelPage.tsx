@@ -84,6 +84,7 @@ const SalesFunnelPage = () => {
               </div>
             </div>
 
+            {/* Features Section */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 py-12">
               <div className="bg-card p-6 rounded-lg shadow-sm border">
                 <div className="bg-primary/10 p-3 rounded-full w-12 h-12 flex items-center justify-center mb-4">
