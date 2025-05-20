@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/layout/DashboardLayout";
@@ -48,7 +47,8 @@ const AiScrapingPage = () => {
             content: result.content,
             date: new Date(result.date).toLocaleString(),
             severity: result.severity,
-            status: result.status,
+            // Map 'resolved' to 'reviewing' for compatibility
+            status: result.status === 'resolved' ? 'reviewing' : result.status as ContentAlert['status'],
             url: result.url,
             threatType: result.threatType
           }));
@@ -80,7 +80,8 @@ const AiScrapingPage = () => {
                 content: result.content,
                 date: new Date(result.date).toLocaleString(),
                 severity: result.severity,
-                status: result.status,
+                // Map 'resolved' to 'reviewing' for compatibility
+                status: result.status === 'resolved' ? 'reviewing' : result.status as ContentAlert['status'],
                 url: result.url,
                 threatType: result.threatType
               }));
@@ -130,7 +131,8 @@ const AiScrapingPage = () => {
           content: result.content,
           date: new Date(result.date).toLocaleString(),
           severity: result.severity,
-          status: result.status,
+          // Map 'resolved' to 'reviewing' for compatibility
+          status: result.status === 'resolved' ? 'reviewing' : result.status as ContentAlert['status'],
           url: result.url,
           threatType: result.threatType
         }));
@@ -169,7 +171,8 @@ const AiScrapingPage = () => {
           content: result.content,
           date: new Date(result.date).toLocaleString(),
           severity: result.severity,
-          status: result.status,
+          // Map 'resolved' to 'reviewing' for compatibility
+          status: result.status === 'resolved' ? 'reviewing' : result.status as ContentAlert['status'],
           url: result.url,
           threatType: result.threatType
         }));

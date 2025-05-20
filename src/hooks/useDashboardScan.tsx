@@ -27,7 +27,8 @@ export const useDashboardScan = (
           content: result.content,
           date: new Date(result.date).toLocaleString(),
           severity: result.severity,
-          status: result.status,
+          // Map 'resolved' status to 'reviewing' if needed
+          status: result.status === 'resolved' ? 'reviewing' : result.status as ContentAlert['status'],
           threatType: result.threatType,
           confidenceScore: 75, // Default confidence score
           sourceType: 'scan',

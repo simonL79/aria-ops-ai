@@ -1,4 +1,3 @@
-
 // Define client change interface
 export interface ClientChange {
   id: string;
@@ -18,7 +17,7 @@ export interface ContentAlert {
   content: string;
   date: string;
   severity: 'low' | 'medium' | 'high';
-  status: 'new' | 'read' | 'actioned' | 'reviewing';
+  status: 'new' | 'read' | 'actioned' | 'reviewing' | 'resolved';
   sourceType?: string;
   threatType?: string;
   confidenceScore?: number;
@@ -39,7 +38,7 @@ export interface ContentSource {
   lastUpdated: string;
   mentionCount: number;
   sentiment: number;
-  status: "critical" | "good" | "warning"; // Updated to match the required type
+  status: "critical" | "good" | "warning";
   positiveRatio: number;
   total: number;
 }

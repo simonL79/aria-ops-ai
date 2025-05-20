@@ -76,10 +76,10 @@ export const useDashboardData = () => {
         
         // Get monitored platforms
         const platformsData = await getMonitoredPlatforms();
-        const formattedSources = platformsData.map(platform => ({
+        const formattedSources: ContentSource[] = platformsData.map(platform => ({
           id: platform.id,
           name: platform.name,
-          status: platform.sentiment < 0 ? 'critical' : platform.sentiment > 20 ? 'good' : 'warning',
+          status: getSentimentStatus(platform.sentiment || 0),
           positiveRatio: platform.positive_ratio || 0,
           total: platform.total || 0,
           active: platform.active,
@@ -109,6 +109,13 @@ export const useDashboardData = () => {
       } finally {
         setIsLoading(false);
       }
+    };
+    
+    // Helper function to determine status based on sentiment
+    const getSentimentStatus = (sentiment: number): "critical" | "good" | "warning" => {
+      if (sentiment < -10) return "critical";
+      if (sentiment > 10) return "good";
+      return "warning";
     };
     
     fetchInitialData();

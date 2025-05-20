@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { ContentAlert } from '@/types/dashboard';
 import { 
@@ -51,7 +50,8 @@ const useScanningLogic = () => {
             content: result.content,
             date: new Date(result.date).toLocaleString(),
             severity: result.severity,
-            status: result.status,
+            // Map 'resolved' to 'reviewing' for compatibility
+            status: mapStatus(result.status),
             url: result.url,
             threatType: result.threatType
           }));
@@ -72,6 +72,12 @@ const useScanningLogic = () => {
       } catch (error) {
         console.error('Error fetching initial scanning data:', error);
       }
+    };
+    
+    // Helper function to map status values to ContentAlert status type
+    const mapStatus = (status: string): ContentAlert['status'] => {
+      if (status === 'resolved') return 'reviewing';
+      return status as ContentAlert['status'];
     };
     
     fetchInitialData();
@@ -124,7 +130,8 @@ const useScanningLogic = () => {
           content: result.content,
           date: new Date(result.date).toLocaleString(),
           severity: result.severity,
-          status: result.status,
+          // Map 'resolved' to 'reviewing' for compatibility
+          status: result.status === 'resolved' ? 'reviewing' : result.status as ContentAlert['status'],
           url: result.url,
           threatType: result.threatType
         }));
@@ -145,7 +152,7 @@ const useScanningLogic = () => {
         }));
         
         // Return high severity count for notifications
-        return { totalResults: results.length, highSeverity: highSeverityCount };
+        return { totalResults: results.length, highSeverity: results.filter(r => r.severity === 'high').length };
       }
       
       // No results

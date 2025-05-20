@@ -2,8 +2,9 @@
 import { useEffect } from "react";
 import { BrowserRouter as Router } from "react-router-dom";
 import { Toaster } from "sonner";
-import AppRoutes from "./routes";
 import { initializeMonitoringSystem } from "./utils/initializeMonitoring";
+// Import your actual routes file
+import Routes from "./routes/index";
 
 function App() {
   // Initialize monitoring system on app start
@@ -24,7 +25,7 @@ function App() {
     <>
       <Toaster position="top-right" />
       <Router>
-        <AppRoutes />
+        <Routes />
       </Router>
     </>
   );
