@@ -14,6 +14,7 @@ import {
   Trash,
   Eye,
   FileText,
+  MessageSquare
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -91,6 +92,16 @@ export function MainNav({ className }: MainNavProps) {
       >
         <Bell className="h-4 w-4" />
         <span className="group-hover:underline">Mentions</span>
+      </Link>
+      <Link
+        to="/engagement"
+        className={cn(
+          "group flex items-center gap-1 transition-colors hover:text-foreground/80",
+          isActive("/engagement") ? "text-foreground font-medium" : "text-foreground/60"
+        )}
+      >
+        <MessageSquare className="h-4 w-4" />
+        <span className="group-hover:underline">Engagement</span>
       </Link>
       <Link
         to="/dashboard/analytics"

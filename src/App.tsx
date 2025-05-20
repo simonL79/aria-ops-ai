@@ -35,6 +35,7 @@ import IntelligencePage from './pages/dashboard/IntelligencePage';
 import OutreachPipelinePage from './pages/OutreachPipelinePage';
 import SeoCenterPage from './pages/SeoCenterPage';
 import NewCoDetailsPage from './pages/NewCoDetailsPage';
+import EngagementHubPage from './pages/dashboard/EngagementHubPage';
 
 function App() {
   return (
@@ -87,6 +88,7 @@ function App() {
           <Route path="/newco-details/:id" element={<NewCoDetailsPage />} />
           <Route path="/outreach-pipeline" element={<OutreachPipelinePage />} />
           <Route path="/seo-center" element={<SeoCenterPage />} />
+          <Route path="/engagement" element={<EngagementHubPage />} />
         </Route>
 
         {/* Not Found and Redirects */}
