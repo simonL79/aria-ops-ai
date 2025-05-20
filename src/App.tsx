@@ -8,6 +8,9 @@ import HomePage from "./pages/HomePage";
 import Index from "./pages/Index";
 import AiScrapingPage from "./pages/AiScrapingPage";
 import EngagementHubPage from "./pages/dashboard/EngagementHubPage";
+import IntelligencePage from "./pages/dashboard/IntelligencePage";
+import RadarPage from "./pages/dashboard/RadarPage";
+import DashboardPage from "./pages/dashboard/DashboardPage";
 
 function App() {
   return (
@@ -15,9 +18,9 @@ function App() {
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/home" element={<HomePage />} />
-        <Route path="/dashboard" element={<Index />} />
-        <Route path="/dashboard/intelligence" element={<Index />} />
-        <Route path="/dashboard/radar" element={<Index />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/dashboard/intelligence" element={<IntelligencePage />} />
+        <Route path="/dashboard/radar" element={<RadarPage />} />
         <Route path="/dashboard/ai-scraping" element={<AiScrapingPage />} />
         <Route path="/dashboard/monitor" element={<Index />} />
         <Route path="/dashboard/new-companies" element={<Index />} />

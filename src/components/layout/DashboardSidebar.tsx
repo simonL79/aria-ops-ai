@@ -22,7 +22,7 @@ const DashboardSidebar = () => {
       <div className="flex-1 overflow-y-auto py-6">
         <div className="px-3 py-2">
           <Link
-            to="/"
+            to="/dashboard"
             className="mb-2 flex items-center space-x-2 px-4 text-lg font-semibold tracking-tight"
           >
             <Shield className="mr-2 h-4 w-4" />
@@ -74,7 +74,7 @@ const DashboardSidebar = () => {
               </div>
             </Link>
             <Link
-              to="/dashboard/seo-center"
+              to="/dashboard"
               className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
                 location.pathname.includes('/dashboard/seo-center') ? 'bg-accent text-accent-foreground' : ''
               }`}
@@ -93,7 +93,7 @@ const DashboardSidebar = () => {
           </h2>
           <div className="space-y-1">
             <Link
-              to="/dashboard/intelligence"
+              to="/dashboard"
               className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
                 location.pathname.includes('/dashboard/intelligence') ? 'bg-accent text-accent-foreground' : ''
               }`}
@@ -105,7 +105,7 @@ const DashboardSidebar = () => {
             </Link>
             
             <Link
-              to="/dashboard/radar"
+              to="/dashboard"
               className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
                 location.pathname.includes('/dashboard/radar') ? 'bg-accent text-accent-foreground' : ''
               }`}
@@ -124,7 +124,7 @@ const DashboardSidebar = () => {
           </h2>
           <div className="space-y-1">
             <Link
-              to="/dashboard/new-companies"
+              to="/dashboard"
               className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
                 location.pathname.includes('/dashboard/new-companies') ? 'bg-accent text-accent-foreground' : ''
               }`}
@@ -135,7 +135,7 @@ const DashboardSidebar = () => {
               </div>
             </Link>
             <Link
-              to="/dashboard/settings"
+              to="/dashboard"
               className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
                 location.pathname.includes('/dashboard/settings') ? 'bg-accent text-accent-foreground' : ''
               }`}

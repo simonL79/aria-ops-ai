@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import RealTimeAlerts from "@/components/dashboard/real-time-alerts";
 import { useAlertSimulation } from "@/components/dashboard/real-time-alerts/useAlertSimulation";
@@ -10,6 +11,7 @@ import AiScrapingTabs from "@/components/aiScraping/AiScrapingTabs";
 import { toast } from "sonner";
 
 const AiScrapingPage = () => {
+  const navigate = useNavigate();
   const [isScanning, setIsScanning] = useState<boolean>(false);
   const { activeAlerts, setActiveAlerts } = useAlertSimulation([]);
   const [selectedAlert, setSelectedAlert] = useState<ContentAlert | null>(null);
@@ -64,7 +66,7 @@ const AiScrapingPage = () => {
   };
 
   const handleViewOnEngagementHub = (alertId: string) => {
-    window.location.href = `/dashboard/engagement?alert=${alertId}`;
+    navigate(`/dashboard/engagement?alert=${alertId}`);
   };
 
   return (
