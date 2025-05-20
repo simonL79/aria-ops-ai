@@ -1,6 +1,6 @@
 
 // Simulate data ingestion and threat monitoring
-import { getAvailableSources } from "@/services/dataIngestionService";
+import { getAvailableSources } from "@/services/dataIngestion";
 import { classifyThreat } from "@/services/intelligence/threatClassifier";
 import { ThreatClassifierRequest } from "@/types/intelligence";
 import { ContentAlert } from "@/types/dashboard";

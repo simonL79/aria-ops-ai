@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Loader, RefreshCw, Clock } from "lucide-react";
 import { IntelligenceReport, ThreatVector, DataSourceStats } from "@/types/intelligence";
 import { runMonitoringScan, getMonitoringStatus, startMonitoring } from "@/services/monitoringService";
-import { getAvailableSources } from "@/services/dataIngestionService";
+import { getAvailableSources } from "@/services/dataIngestion";
 import DashboardOverview from "./intelligence-sections/DashboardOverview";
 import ThreatVectorsDisplay from "./intelligence-sections/ThreatVectorsDisplay";
 import DataSourcesPanel from "./intelligence-sections/DataSourcesPanel";
