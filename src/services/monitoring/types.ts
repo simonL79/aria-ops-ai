@@ -4,6 +4,7 @@ export interface MonitoringStatus {
   lastRun: string | null;
   nextRun: string | null;
   sources: number;
+  activeSince?: Date;
 }
 
 export interface MonitorablePlatform {

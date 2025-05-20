@@ -3,6 +3,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { runMonitoringScan } from "@/services/monitoring";
 import { ContentAlert } from "@/types/dashboard";
+import { ScanResult } from "@/services/monitoring/types";
 
 export const useDashboardScan = (
   alerts: ContentAlert[],
@@ -21,7 +22,7 @@ export const useDashboardScan = (
       
       if (results.length > 0) {
         // Format the new results to match ContentAlert type
-        const newAlerts: ContentAlert[] = results.map(result => {
+        const newAlerts: ContentAlert[] = results.map((result: ScanResult) => {
           return {
             id: result.id,
             platform: result.platform,
