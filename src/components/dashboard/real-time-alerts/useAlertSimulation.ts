@@ -32,7 +32,7 @@ export const useAlertSimulation = (initialAlerts: ContentAlert[] = []): UseAlert
       content: `New mention on ${platform} about your brand. This might require your attention.`,
       timestamp,
       severity,
-      status: 'unread',
+      status: 'new', // Changed from 'unread' to 'new' to match the ContentAlert type
       url: `/dashboard/engagement?alert=${id}`,
       author: {
         name: `User_${Math.floor(Math.random() * 1000)}`,
@@ -44,7 +44,8 @@ export const useAlertSimulation = (initialAlerts: ContentAlert[] = []): UseAlert
   // Add a new alert
   const addAlert = (alert: ContentAlert) => {
     setActiveAlerts(prev => [alert, ...prev]);
-    playNotificationSound(alert.severity === 'high');
+    // Fixed by passing the correct string type instead of a boolean
+    playNotificationSound(alert.severity === 'high' ? 'urgent' : 'alert');
   };
   
   // Remove an alert
