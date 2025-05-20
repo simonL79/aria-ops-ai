@@ -10,6 +10,7 @@ interface AlertsListProps {
   handleDismiss: (id: string) => void;
   handleMarkAsRead: (id: string) => void;
   onViewDetail?: (alert: ContentAlert) => void;
+  onRespond?: (alertId: string) => void;
   sendEmailForHighPriority?: boolean;
   recipientEmail?: string;
 }
@@ -19,6 +20,7 @@ const AlertsList: React.FC<AlertsListProps> = ({
   handleDismiss, 
   handleMarkAsRead,
   onViewDetail,
+  onRespond,
   sendEmailForHighPriority = false,
   recipientEmail
 }) => {
@@ -46,7 +48,7 @@ const AlertsList: React.FC<AlertsListProps> = ({
               content: alert.content,
               recommendation: alert.recommendation || 'Immediate attention recommended',
               recipient: recipientEmail,
-              dashboardUrl: window.location.origin + '/dashboard/engagement-hub'
+              dashboardUrl: window.location.origin + '/dashboard/engagement'
             }
           );
           
@@ -79,6 +81,7 @@ const AlertsList: React.FC<AlertsListProps> = ({
           onDismiss={handleDismiss}
           onMarkAsRead={handleMarkAsRead}
           onViewDetail={onViewDetail}
+          onRespond={onRespond}
         />
       ))}
     </>

@@ -15,13 +15,15 @@ interface RealTimeAlertsProps {
   onDismiss?: (alertId: string) => void;
   onMarkAsRead?: (alertId: string) => void;
   onViewDetail?: (alert: ContentAlert) => void;
+  onRespond?: (alertId: string) => void;
 }
 
 const RealTimeAlerts = ({
   alerts = [],
   onDismiss,
   onMarkAsRead,
-  onViewDetail
+  onViewDetail,
+  onRespond
 }: RealTimeAlertsProps) => {
   const [filter, setFilter] = useState<'all' | 'high' | 'medium' | 'low' | 'customer'>('all');
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
@@ -65,7 +67,7 @@ const RealTimeAlerts = ({
           duration: 10000, // 10 seconds
           action: {
             label: "Respond",
-            onClick: () => onViewDetail?.(latestAlert),
+            onClick: () => onRespond?.(latestAlert.id),
           }
         });
       } else {
@@ -95,7 +97,7 @@ const RealTimeAlerts = ({
         }
       }
     }
-  }, [activeAlerts, notificationsEnabled, onViewDetail]);
+  }, [activeAlerts, notificationsEnabled, onViewDetail, onRespond]);
   
   const handleDismiss = (alertId: string) => {
     setActiveAlerts(prev => prev.filter(alert => alert.id !== alertId));
@@ -183,6 +185,7 @@ const RealTimeAlerts = ({
             handleDismiss={handleDismiss}
             handleMarkAsRead={handleMarkAsRead}
             onViewDetail={onViewDetail}
+            onRespond={onRespond}
           />
         </div>
       </CardContent>

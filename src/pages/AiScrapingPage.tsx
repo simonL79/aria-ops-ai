@@ -13,7 +13,7 @@ import { toast } from "sonner";
 const AiScrapingPage = () => {
   const navigate = useNavigate();
   const [isScanning, setIsScanning] = useState<boolean>(false);
-  const { activeAlerts, setActiveAlerts } = useAlertSimulation([]);
+  const { activeAlerts, setActiveAlerts, respondToAlert } = useAlertSimulation([]);
   const [selectedAlert, setSelectedAlert] = useState<ContentAlert | null>(null);
 
   const handleScan = () => {
@@ -66,6 +66,13 @@ const AiScrapingPage = () => {
   };
 
   const handleViewOnEngagementHub = (alertId: string) => {
+    // Find the alert to pass as state
+    const alert = activeAlerts.find(a => a.id === alertId);
+    
+    // Mark it as being responded to
+    respondToAlert(alertId);
+    
+    // Navigate to engagement hub with this alert
     navigate(`/dashboard/engagement?alert=${alertId}`);
   };
 
@@ -94,6 +101,7 @@ const AiScrapingPage = () => {
             onViewDetail={handleViewDetail}
             onMarkAsRead={handleMarkAsRead}
             onDismiss={handleDismiss}
+            onRespond={handleViewOnEngagementHub}
           />
         </div>
       </div>

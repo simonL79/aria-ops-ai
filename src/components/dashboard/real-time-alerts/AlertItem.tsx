@@ -11,6 +11,7 @@ interface AlertItemProps {
   onDismiss: (id: string) => void;
   onMarkAsRead: (id: string) => void;
   onViewDetail?: (alert: ContentAlert) => void;
+  onRespond?: (alertId: string) => void;
 }
 
 const AlertItem: React.FC<AlertItemProps> = ({ 
@@ -18,7 +19,8 @@ const AlertItem: React.FC<AlertItemProps> = ({
   isLast, 
   onDismiss, 
   onMarkAsRead,
-  onViewDetail 
+  onViewDetail,
+  onRespond
 }) => {
   const getSeverityColor = (severity: string) => {
     switch (severity) {
@@ -32,6 +34,14 @@ const AlertItem: React.FC<AlertItemProps> = ({
   const isHighSeverity = alert.severity === 'high';
   const isCustomerEnquiry = alert.category === 'customer_enquiry';
   
+  const handleViewDetail = () => {
+    onViewDetail?.(alert);
+  };
+
+  const handleRespond = () => {
+    onRespond?.(alert.id);
+  };
+
   return (
     <div 
       className={`p-4 
@@ -102,7 +112,7 @@ const AlertItem: React.FC<AlertItemProps> = ({
             "outline"
           }
           className={`text-xs h-7 ${(isHighSeverity || isCustomerEnquiry) && alert.status === 'new' ? 'animate-pulse' : ''}`}
-          onClick={() => onViewDetail?.(alert)}
+          onClick={isCustomerEnquiry ? handleRespond : handleViewDetail}
         >
           {isCustomerEnquiry && alert.status === 'new' ? (
             <>
