@@ -33,11 +33,8 @@ export const useAlertSimulation = (initialAlerts: ContentAlert[] = []): UseAlert
       date: currentDate, // Changed from 'timestamp' to 'date' to match the ContentAlert type
       severity,
       status: 'new', // Changed from 'unread' to 'new' to match the ContentAlert type
-      url: `/dashboard/engagement?alert=${id}`,
-      author: {
-        name: `User_${Math.floor(Math.random() * 1000)}`,
-        avatar: ''
-      }
+      url: `/dashboard/engagement?alert=${id}`
+      // Removed the author property as it's not part of the ContentAlert type
     };
   };
   
