@@ -3,12 +3,27 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { IntelligenceReport } from "@/types/intelligence";
+import { useState } from "react";
+import { toast } from "sonner";
 
 interface DashboardOverviewProps {
   report: IntelligenceReport;
 }
 
 const DashboardOverview = ({ report }: DashboardOverviewProps) => {
+  const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
+  
+  const handleTopicClick = (topic: string) => {
+    setSelectedTopic(topic === selectedTopic ? null : topic);
+    
+    // Show a toast notification when a topic is selected
+    if (topic !== selectedTopic) {
+      toast.info(`Filtering by topic: ${topic}`, {
+        description: "In a full implementation, this would filter the dashboard to show only content related to this topic."
+      });
+    }
+  };
+  
   return (
     <Card>
       <CardContent className="pt-6 space-y-4">
@@ -67,9 +82,26 @@ const DashboardOverview = ({ report }: DashboardOverviewProps) => {
           <div className="text-sm font-medium mb-2">Topics</div>
           <div className="flex flex-wrap gap-2">
             {report.topics.map((topic) => (
-              <Badge key={topic} variant="secondary">{topic}</Badge>
+              <Badge 
+                key={topic} 
+                variant={selectedTopic === topic ? "default" : "secondary"}
+                className="cursor-pointer transition-colors hover:bg-muted-foreground/20"
+                onClick={() => handleTopicClick(topic)}
+              >
+                {topic}
+              </Badge>
             ))}
           </div>
+          
+          {selectedTopic && (
+            <div className="mt-2 p-3 bg-muted rounded-md text-sm">
+              <p className="font-medium">Topic: {selectedTopic}</p>
+              <p className="text-muted-foreground">
+                Showing content related to "{selectedTopic}". 
+                In a full implementation, this would filter the dashboard to show only content matching this topic.
+              </p>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
