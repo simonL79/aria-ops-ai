@@ -21,6 +21,7 @@ import ThankYouPage from "./pages/ThankYouPage";
 import Authentication from "./pages/Authentication";
 import Clients from "./pages/Clients";
 import Monitor from "./pages/Monitor";
+import Reports from "./pages/Reports";
 import Removal from "./pages/Removal";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
@@ -181,6 +182,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Monitor />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/reports"
+              element={
+                <ProtectedRoute>
+                  <Reports />
                 </ProtectedRoute>
               }
             />

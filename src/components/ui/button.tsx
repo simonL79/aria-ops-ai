@@ -21,6 +21,11 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
         premium: "bg-gradient-to-br from-premium-darkGray via-premium-gray to-premium-black text-white hover:shadow-md transform hover:scale-105 transition-all duration-200",
         action: "bg-blue-600 text-white hover:bg-blue-700 transform hover:scale-105 transition-all duration-200 shadow-md hover:shadow-lg",
+        scan: "bg-emerald-600 text-white hover:bg-emerald-700 transform hover:scale-105 transition-all duration-200 shadow-md hover:shadow-lg font-bold",
+        generate: "bg-purple-600 text-white hover:bg-purple-700 transform hover:scale-105 transition-all duration-200 shadow-md hover:shadow-lg font-bold",
+        escalate: "bg-amber-600 text-white hover:bg-amber-500 transform hover:scale-105 transition-all duration-200 shadow-md hover:shadow-lg",
+        dismiss: "bg-gray-500 text-white hover:bg-gray-600 transform hover:scale-105 transition-all duration-200",
+        deliver: "bg-indigo-600 text-white hover:bg-indigo-700 transform hover:scale-105 transition-all duration-200 shadow-md hover:shadow-lg font-bold"
       },
       size: {
         default: "h-10 px-4 py-2",
