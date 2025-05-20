@@ -9,6 +9,45 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      clean_launch_targets: {
+        Row: {
+          company_name: string
+          company_number: string
+          created_at: string | null
+          date_of_incorporation: string | null
+          id: string
+          last_scanned: string | null
+          officers: Json | null
+          risk_category: string | null
+          risk_score: number | null
+          scan_status: string | null
+        }
+        Insert: {
+          company_name: string
+          company_number: string
+          created_at?: string | null
+          date_of_incorporation?: string | null
+          id?: string
+          last_scanned?: string | null
+          officers?: Json | null
+          risk_category?: string | null
+          risk_score?: number | null
+          scan_status?: string | null
+        }
+        Update: {
+          company_name?: string
+          company_number?: string
+          created_at?: string | null
+          date_of_incorporation?: string | null
+          id?: string
+          last_scanned?: string | null
+          officers?: Json | null
+          risk_category?: string | null
+          risk_score?: number | null
+          scan_status?: string | null
+        }
+        Relationships: []
+      }
       clients: {
         Row: {
           contactemail: string
