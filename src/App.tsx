@@ -31,6 +31,10 @@ import Reports from './pages/Reports';
 import GDPRCompliancePage from './pages/GDPRCompliancePage';
 import RequestDataAccessPage from './pages/RequestDataAccessPage';
 import DPARequestPage from './pages/DPARequestPage';
+import IntelligencePage from './pages/dashboard/IntelligencePage';
+import OutreachPipelinePage from './pages/OutreachPipelinePage';
+import SeoCenterPage from './pages/SeoCenterPage';
+import NewCoDetailsPage from './pages/NewCoDetailsPage';
 
 function App() {
   return (
@@ -77,9 +81,12 @@ function App() {
           <Route path="/scan-submissions" element={<ScanSubmissionsPage />} />
           <Route path="/mentions" element={<MentionsPage />} />
           <Route path="/analytics" element={<AnalyticsPage />} />
-          <Route path="/intelligence" element={<DashboardPage />} />
+          <Route path="/intelligence" element={<IntelligencePage />} />
           <Route path="/newco" element={<NewCoPage />} />
           <Route path="/reports" element={<Reports />} />
+          <Route path="/newco-details/:id" element={<NewCoDetailsPage />} />
+          <Route path="/outreach-pipeline" element={<OutreachPipelinePage />} />
+          <Route path="/seo-center" element={<SeoCenterPage />} />
         </Route>
 
         {/* Not Found and Redirects */}

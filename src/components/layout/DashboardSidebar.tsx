@@ -63,9 +63,9 @@ const DashboardSidebar = () => {
               </div>
             </Link>
             <Link
-              to="/seo"
+              to="/seo-center"
               className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
-                location.pathname === '/seo' ? 'bg-accent text-accent-foreground' : ''
+                location.pathname === '/seo-center' ? 'bg-accent text-accent-foreground' : ''
               }`}
             >
               <div className="flex items-center">
@@ -74,9 +74,9 @@ const DashboardSidebar = () => {
               </div>
             </Link>
             <Link
-              to="/outreach"
+              to="/outreach-pipeline"
               className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
-                location.pathname === '/outreach' ? 'bg-accent text-accent-foreground' : ''
+                location.pathname === '/outreach-pipeline' ? 'bg-accent text-accent-foreground' : ''
               }`}
             >
               <div className="flex items-center">
@@ -115,9 +115,9 @@ const DashboardSidebar = () => {
           </h2>
           <div className="space-y-1">
             <Link
-              to="/dashboard/intelligence"
+              to="/intelligence"
               className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
-                location.pathname === '/dashboard/intelligence' ? 'bg-accent text-accent-foreground' : ''
+                location.pathname === '/intelligence' ? 'bg-accent text-accent-foreground' : ''
               }`}
             >
               <div className="flex items-center">
@@ -127,9 +127,9 @@ const DashboardSidebar = () => {
             </Link>
             
             <Link
-              to="/dashboard/radar"
+              to="/radar"
               className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
-                location.pathname === '/dashboard/radar' ? 'bg-accent text-accent-foreground' : ''
+                location.pathname === '/radar' ? 'bg-accent text-accent-foreground' : ''
               }`}
             >
               <div className="flex items-center">
