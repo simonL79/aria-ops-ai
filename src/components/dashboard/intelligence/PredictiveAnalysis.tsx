@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart3 } from "lucide-react";
@@ -88,10 +88,28 @@ const threatPredictions = [
 const PredictiveAnalysis = () => {
   const [activeTab, setActiveTab] = useState<string>("threats");
   const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [predictions, setPredictions] = useState(threatPredictions);
 
   const handleRefreshPredictions = () => {
     setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 2000);
+    
+    // Simulate API call to refresh predictions
+    setTimeout(() => {
+      // Generate a new prediction to show refresh effect
+      const newPrediction = {
+        id: `pred-${Date.now()}`,
+        title: "New emerging sentiment shift on social platforms",
+        probability: Math.floor(Math.random() * 30) + 50, // 50-80
+        timeframe: "Next 48 hours",
+        indicators: ["Algorithm change detected", "Engagement pattern shift", "Topic clustering"],
+        severity: Math.random() > 0.5 ? "medium" : "high",
+        action: "Prepare monitoring strategy"
+      };
+      
+      // Add new prediction at top of list
+      setPredictions([newPrediction, ...predictions.slice(0, 2)]);
+      setRefreshing(false);
+    }, 2000);
   };
 
   return (
@@ -111,7 +129,7 @@ const PredictiveAnalysis = () => {
         </Tabs>
         
         {activeTab === "threats" && (
-          <ThreatPredictionsTab predictions={threatPredictions} />
+          <ThreatPredictionsTab predictions={predictions} />
         )}
         
         {activeTab === "models" && (

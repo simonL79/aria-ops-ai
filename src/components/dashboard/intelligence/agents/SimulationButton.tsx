@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Loader } from "lucide-react";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useIntelligenceSimulation } from "@/hooks/useIntelligenceSimulation";
 
 interface SimulationButtonProps {
   running: boolean;
@@ -10,37 +10,18 @@ interface SimulationButtonProps {
 }
 
 const SimulationButton = ({ running: externalRunning, onRun }: SimulationButtonProps) => {
-  const [internalRunning, setInternalRunning] = useState(false);
+  const { isSimulating, runSimulation } = useIntelligenceSimulation({
+    successMessage: "Simulation Complete",
+    description: "Simulating potential attack vectors against your brand",
+    onComplete: onRun
+  });
   
   // Combined running state (either from props or internal state)
-  const running = externalRunning || internalRunning;
+  const running = externalRunning || isSimulating;
   
   const handleRun = () => {
     if (running) return;
-    
-    // Start internal running state
-    setInternalRunning(true);
-    
-    // Show toast notification
-    toast.info("Starting Red Team Simulation", {
-      description: "Simulating potential attack vectors against your brand"
-    });
-    
-    // Simulate some activity
-    setTimeout(() => {
-      // Call the parent's onRun handler
-      onRun();
-      
-      // After 2 seconds, show results
-      setTimeout(() => {
-        toast.success("Simulation Complete", {
-          description: "3 new vulnerabilities detected. View results in the threats panel."
-        });
-        
-        // End internal running state
-        setInternalRunning(false);
-      }, 2000);
-    }, 1500);
+    runSimulation();
   };
   
   return (

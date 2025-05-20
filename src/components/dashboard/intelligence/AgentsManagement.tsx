@@ -1,11 +1,14 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { IntelligenceAgent } from "@/types/intelligence";
 import AgentList from "./agents/AgentList";
 import SimulationButton from "./agents/SimulationButton";
 import { Shield, MessageSquare, Scale, Users, BarChart3 } from "lucide-react";
+import { runRedTeamSimulation } from "@/services/intelligence/agentSimulationService";
+import { toast } from "sonner";
 
 // Sample agent data
 const initialAgents: IntelligenceAgent[] = [
@@ -86,6 +89,7 @@ const AgentsManagement = () => {
   const [activeTab, setActiveTab] = useState<string>("active");
   const [runningSimulation, setRunningSimulation] = useState<boolean>(false);
   const [activatedAgent, setActivatedAgent] = useState<string | null>(null);
+  const [simulationResults, setSimulationResults] = useState<any>(null);
 
   const handleToggleAgent = (agentId: string) => {
     setAgents(prev =>
@@ -93,10 +97,33 @@ const AgentsManagement = () => {
         agent.id === agentId ? { ...agent, active: !agent.active } : agent
       )
     );
+    
+    // Show toast notification when agent is toggled
+    const agent = agents.find(a => a.id === agentId);
+    if (agent) {
+      if (!agent.active) {
+        toast.success(`${agent.name} activated`, {
+          description: "The agent has been added to your intelligence network"
+        });
+      } else {
+        toast.info(`${agent.name} deactivated`, {
+          description: "The agent has been removed from your intelligence network"
+        });
+      }
+    }
   };
 
   const handleActivateAgent = (agentId: string) => {
     setActivatedAgent(agentId);
+    
+    // Get the agent that was activated
+    const agent = agents.find(a => a.id === agentId);
+    if (agent) {
+      toast.success(`${agent.name} performed a targeted analysis`, {
+        description: "Results have been added to the intelligence memory system"
+      });
+    }
+    
     setTimeout(() => {
       setActivatedAgent(null);
     }, 2000);
@@ -104,8 +131,17 @@ const AgentsManagement = () => {
 
   const handleRunSimulation = () => {
     setRunningSimulation(true);
+    
+    // Use the simulation service to generate results
     setTimeout(() => {
+      const results = runRedTeamSimulation(agents);
+      setSimulationResults(results);
       setRunningSimulation(false);
+      
+      // Clear results after some time
+      setTimeout(() => {
+        setSimulationResults(null);
+      }, 15000);
     }, 3000);
   };
   
@@ -131,6 +167,24 @@ const AgentsManagement = () => {
         </div>
       </CardHeader>
       <CardContent>
+        {simulationResults && (
+          <Alert className="mb-4 bg-amber-50 border-amber-200 text-amber-800">
+            <AlertTitle>Red Team Simulation Results</AlertTitle>
+            <AlertDescription>
+              <div className="space-y-2 mt-1">
+                <div>Vulnerabilities identified: <strong>{simulationResults.vulnerabilitiesFound}</strong></div>
+                <div>Threats detected: <strong>{simulationResults.threatsDetected}</strong></div>
+                <div className="text-sm mt-2">Top mitigation strategies:</div>
+                <ul className="list-disc pl-5 text-sm">
+                  {simulationResults.mitigationStrategies.slice(0, 3).map((strategy: string, i: number) => (
+                    <li key={i}>{strategy}</li>
+                  ))}
+                </ul>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
+        
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-4">
           <TabsList className="grid grid-cols-2">
             <TabsTrigger value="active">Active Agents</TabsTrigger>
