@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge'; 
@@ -5,18 +6,18 @@ import { Activity } from 'lucide-react';
 import { 
   getMonitoringStatus, 
   startMonitoring, 
-  stopMonitoring, 
+  stopMonitoring,
   runMonitoringScan
-} from '@/services/monitoring';
+} from '@/services';
 import { 
   getAllMentions, 
   saveMention 
-} from '@/services/monitoring/mentions';
+} from '@/services';
 import { ContentAlert } from '@/types/dashboard';
 import { classifyContent, storeMention } from '@/services/api/mentionsApiService';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
-import { getMentionsAsAlerts } from '@/services/monitoring/alerts';
+import { getMentionsAsAlerts } from '@/services';
 
 // Import the sub-components
 import MonitoringStatus from './MonitoringStatus';

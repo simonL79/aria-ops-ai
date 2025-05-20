@@ -1,195 +1,224 @@
+
+import { toast } from "sonner";
 import { ContentAlert } from "@/types/dashboard";
 
-// Event listeners for real-time alerts
-const alertListeners: Function[] = [];
-
-// Register a listener for alerts
-export const registerAlertListener = (listener: Function) => {
-  alertListeners.push(listener);
-  return () => {
-    const index = alertListeners.indexOf(listener);
-    if (index !== -1) {
-      alertListeners.splice(index, 1);
-    }
-  };
-};
-
-// Alias for unregistering listener to maintain compatibility
-export const unregisterAlertListener = (listener: Function) => {
-  const index = alertListeners.indexOf(listener);
-  if (index !== -1) {
-    alertListeners.splice(index, 1);
-  }
-};
-
-// Notify all listeners about a new alert
-export const notifyAlertListeners = (alert: ContentAlert) => {
-  alertListeners.forEach(listener => listener(alert));
-};
-
-// Types for scan parameters
 export interface ScanParameters {
   platforms?: string[];
   keywords?: string[];
-  timeframe?: 'day' | 'week' | 'month';
-  intensity?: 'low' | 'medium' | 'high';
+  timeframe?: "day" | "week" | "month";
+  intensity?: "low" | "medium" | "high";
   threatTypes?: string[];
   keywordFilters?: string[];
   maxResults?: number;
   includeCustomerEnquiries?: boolean;
-  prioritizeSeverity?: 'high' | 'medium' | 'low';
+  prioritizeSeverity?: "low" | "medium" | "high"; // Changed from boolean to string
 }
 
-// Default scan parameters
-export const defaultScanParameters: ScanParameters = {
-  platforms: [],
-  keywords: [],
-  timeframe: 'day',
-  intensity: 'medium',
-  threatTypes: [],
-  keywordFilters: [],
-  maxResults: 10,
-  includeCustomerEnquiries: true,
-  prioritizeSeverity: 'medium'
-};
-
-// Platforms to scan
+// Sample platforms data
 const availablePlatforms = [
-  'Twitter', 'Reddit', 'Facebook', 'Instagram', 
-  'TikTok', 'YouTube', 'News Sites', 'Forums',
-  'Telegram', 'Dark Web Marketplaces', 'Private IRC Channels'
+  "Twitter", "Facebook", "Reddit", "News Sites", 
+  "Instagram", "TikTok", "YouTube", "Blogs", 
+  "Forums", "Review Sites", "LinkedIn", "Dark Web"
 ];
 
-// Keywords for the scan
-const defaultKeywords = [
-  'company name', 'brand', 'product', 'service',
-  'CEO name', 'executives', 'scandal', 'lawsuit',
-  'controversy', 'review', 'complaint', 'problem'
-];
+let activeScanTimeout: number | null = null;
+let alertListeners: ((alert: ContentAlert) => void)[] = [];
 
-// Generate threat type based on content
-const getThreatType = () => {
-  const types = [
-    'falseReviews', 'coordinatedAttack', 'misinformation', 
-    'viralThreat', 'competitorSmear', 'dataBreach', 'securityVulnerability'
-  ];
-  return types[Math.floor(Math.random() * types.length)];
+/**
+ * Get monitoring status including platform count
+ */
+export const getMonitoringStatus = () => {
+  return {
+    isActive: true,
+    lastRun: new Date().toISOString(),
+    nextRun: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
+    platforms: Math.floor(8 + Math.random() * 4), // 8-12 platforms
+    threats: Math.floor(3 + Math.random() * 5) // 3-8 threats
+  };
 };
 
-// Generate real-looking content
-const generateContent = (platform: string) => {
-  const contentTemplates = [
-    "This company has terrible customer service. I waited for hours and no one helped me. #awful #scam",
-    "Just discovered that [COMPANY] is using unethical practices for their products. Sharing this so everyone knows!",
-    "Avoid [BRAND] at all costs! Their quality has gone downhill and they refuse to address customer concerns.",
-    "Has anyone else had issues with [COMPANY]'s latest product? Mine broke after just two days...",
-    "I'm organizing a boycott of [BRAND] due to their recent political statements. RT to spread the word!",
-    "Found evidence that [COMPANY] is buying fake reviews to boost their ratings. Here are screenshots:",
-    "PSA: [BRAND]'s database was compromised yesterday. If you have an account, change your password immediately.",
-    "My experience with [COMPANY] was the worst. They charged me twice and refuse to refund the duplicate charge.",
-    "New report shows [BRAND] products contain harmful chemicals not listed on the label. Be careful!",
-    "I've discovered [COMPANY] employees sharing customer data on this forum. Major privacy breach.",
-    "Coordinated campaign planned against [BRAND] starting tomorrow. Looking for participants.",
-    "Critical security vulnerability discovered in [COMPANY]'s web application. Customer data at risk."
-  ];
+/**
+ * Register listener for real-time alerts
+ */
+export const registerAlertListener = (callback: (alert: ContentAlert) => void): (() => void) => {
+  alertListeners.push(callback);
   
-  const randomContent = contentTemplates[Math.floor(Math.random() * contentTemplates.length)];
-  return randomContent.replace('[COMPANY]', 'Company').replace('[BRAND]', 'Brand');
+  // Return cleanup function
+  return () => {
+    alertListeners = alertListeners.filter(cb => cb !== callback);
+  };
 };
 
-// Simulate scanning for content
+/**
+ * Perform a live scan with optional parameters
+ */
 export const performLiveScan = async (params?: ScanParameters): Promise<ContentAlert[]> => {
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 1000));
+  // Log scan start with parameters
+  console.log("Starting AI scan with parameters:", params || "default");
   
-  const results: ContentAlert[] = [];
-  const scanIntensity = params?.intensity || 'medium';
+  // Show scanning toast
+  toast.loading("AI scanning in progress", {
+    description: "Analyzing content across multiple platforms..."
+  });
   
-  // Determine number of results based on scan intensity
-  const resultCount = scanIntensity === 'high' ? 
-    5 + Math.floor(Math.random() * 5) : 
-    scanIntensity === 'medium' ? 
-    3 + Math.floor(Math.random() * 3) : 
-    1 + Math.floor(Math.random() * 2);
-  
-  // Get platforms to scan
-  const platformsToScan = params?.platforms && params.platforms.length > 0 ? 
-    params.platforms : 
-    availablePlatforms;
+  // Simulate network delay based on intensity
+  const intensity = params?.intensity || "medium";
+  const delayMap = { low: 1000, medium: 2500, high: 4000 };
+  await new Promise(resolve => setTimeout(resolve, delayMap[intensity]));
   
   // Generate results
+  const resultCount = params?.maxResults || Math.floor(Math.random() * 5) + 2;
+  
+  // Create mock results
+  const results: ContentAlert[] = [];
+  
+  // Use platforms from params or randomly select from available
+  const platforms = params?.platforms || availablePlatforms;
+  
   for (let i = 0; i < resultCount; i++) {
-    const platform = platformsToScan[Math.floor(Math.random() * platformsToScan.length)];
-    const isHighSeverity = Math.random() > 0.7;
-    const isMediumSeverity = !isHighSeverity && Math.random() > 0.5;
+    const platformIndex = Math.floor(Math.random() * platforms.length);
+    const platform = platforms[platformIndex] || "Twitter";
     
-    const result: ContentAlert = {
-      id: `scan-${Date.now()}-${Math.floor(Math.random() * 10000)}`,
-      platform,
-      content: generateContent(platform),
-      date: 'Just now',
-      severity: isHighSeverity ? 'high' : (isMediumSeverity ? 'medium' : 'low'),
-      status: 'new',
-      threatType: getThreatType()
-    };
+    // Generate content with keywords if provided
+    let content = generateRandomContent(platform, params?.keywords);
     
-    results.push(result);
-    
-    // Notify listeners about high severity threats
-    if (isHighSeverity) {
-      notifyAlertListeners(result);
+    // Determine severity, potentially influenced by prioritizeSeverity
+    let severity: 'low' | 'medium' | 'high';
+    if (params?.prioritizeSeverity) {
+      // 70% chance to use the prioritized severity, 30% random
+      severity = Math.random() > 0.3 ? params.prioritizeSeverity : ['low', 'medium', 'high'][Math.floor(Math.random() * 3)] as 'low' | 'medium' | 'high';
+    } else {
+      // Default distribution: 15% high, 35% medium, 50% low
+      const rand = Math.random();
+      severity = rand < 0.15 ? 'high' : rand < 0.5 ? 'medium' : 'low';
     }
+    
+    // Generate threat type
+    const threatTypes = [
+      "Brand Attack", "Misinformation", "Viral Complaint", 
+      "Compliance Risk", "Data Leak", "Competitive Threat"
+    ];
+    const threatType = params?.threatTypes?.[Math.floor(Math.random() * params.threatTypes.length)] || 
+                       threatTypes[Math.floor(Math.random() * threatTypes.length)];
+    
+    results.push({
+      id: `scan-${Date.now()}-${i}`,
+      platform,
+      content,
+      date: new Date().toISOString().split('T')[0],
+      severity,
+      status: 'new',
+      threatType,
+      url: `https://example.com/${platform.toLowerCase()}/post/${Date.now() + i}`
+    });
   }
+  
+  // Dismiss scanning toast
+  toast.dismiss();
+  
+  // Show completion toast
+  toast.success(`AI scan complete`, {
+    description: `Found ${results.length} relevant mentions.`
+  });
   
   return results;
 };
 
-// Function to start continuous monitoring
-export const startContinuousMonitoring = (callback: (alerts: ContentAlert[]) => void) => {
-  let isActive = true;
+/**
+ * Start continuous monitoring with callback for updates
+ */
+export const startContinuousMonitoring = (callback: (alerts: ContentAlert[]) => void): (() => void) => {
+  // Clear any existing monitoring
+  if (activeScanTimeout !== null) {
+    window.clearTimeout(activeScanTimeout);
+  }
   
-  const checkForAlerts = async () => {
-    if (!isActive) return;
+  // Create monitoring function
+  const runMonitoring = () => {
+    // Randomly determine if we found something (1 in 3 chance)
+    const foundSomething = Math.random() < 0.3;
     
-    // Random chance to find new alerts
-    if (Math.random() > 0.6) {
-      const results = await performLiveScan({
-        intensity: 'low',
-        timeframe: 'day'
-      });
+    if (foundSomething) {
+      // Generate 1-2 alerts
+      const alertCount = Math.floor(Math.random() * 2) + 1;
+      const alerts = [];
       
-      if (results.length > 0 && callback) {
-        callback(results);
+      for (let i = 0; i < alertCount; i++) {
+        const platformIndex = Math.floor(Math.random() * availablePlatforms.length);
+        const platform = availablePlatforms[platformIndex];
+        const content = generateRandomContent(platform);
+        const severity = Math.random() < 0.3 ? 'high' : Math.random() < 0.7 ? 'medium' : 'low';
+        
+        const alert: ContentAlert = {
+          id: `monitor-${Date.now()}-${i}`,
+          platform,
+          content,
+          date: new Date().toISOString().split('T')[0],
+          severity: severity as 'low' | 'medium' | 'high',
+          status: 'new',
+          url: `https://example.com/${platform.toLowerCase()}/post/${Date.now() + i}`,
+          threatType: Math.random() < 0.5 ? "Brand Attack" : "Misinformation"
+        };
+        
+        alerts.push(alert);
+        
+        // Also notify any listeners
+        alertListeners.forEach(listener => listener(alert));
+      }
+      
+      // Call the callback with alerts
+      if (alerts.length > 0) {
+        callback(alerts);
       }
     }
     
-    // Schedule next check
-    const nextInterval = 30000 + Math.floor(Math.random() * 30000); // 30-60 seconds
-    setTimeout(checkForAlerts, nextInterval);
+    // Schedule next run (between 30-90 seconds)
+    const nextInterval = 30000 + Math.floor(Math.random() * 60000);
+    activeScanTimeout = window.setTimeout(runMonitoring, nextInterval);
   };
   
-  // Start initial check
-  checkForAlerts();
+  // Start the first run
+  activeScanTimeout = window.setTimeout(runMonitoring, 20000);
   
-  // Return function to stop monitoring
+  // Return cleanup function
   return () => {
-    isActive = false;
+    if (activeScanTimeout !== null) {
+      window.clearTimeout(activeScanTimeout);
+      activeScanTimeout = null;
+    }
   };
 };
 
-// Additional function to support AiScrapingDashboard component
-export const startContinuousScan = (callback: (alerts: ContentAlert[]) => void) => {
-  return startContinuousMonitoring(callback);
-};
-
-// Get current monitoring status
-export const getMonitoringStatus = () => {
-  // In a real app, this would be persisted in a database or state management
-  return {
-    isActive: true,
-    platforms: availablePlatforms.length,
-    keywords: defaultKeywords.length,
-    lastActiveTime: new Date().toISOString(),
-    threatModelsActive: ['Brand Reputation', 'Data Security', 'Competition Analysis']
-  };
+// Helper function to generate random content
+const generateRandomContent = (platform: string, keywords?: string[]): string => {
+  const templates = [
+    "Just saw something about {brand} on {platform}. They're saying {keyword}.",
+    "Someone on {platform} is claiming that {brand} {keyword}. This could be concerning.",
+    "{platform} user posted negative content about {brand}, saying they {keyword}.",
+    "There's a trending post on {platform} about {brand} that mentions {keyword}.",
+    "New {platform} post says {brand} is involved with {keyword}. Worth checking out.",
+    "Potential issue for {brand} spotted on {platform}: {keyword}.",
+    "A {platform} user with large following posted that {brand} {keyword}."
+  ];
+  
+  const brands = ["YourBrand", "BrandX", "TechCorp", "EcoProducts"];
+  const defaultKeywords = [
+    "has poor customer service",
+    "uses unethical practices",
+    "is misleading customers",
+    "has quality issues",
+    "is being unfair",
+    "is facing legal issues",
+    "has security problems"
+  ];
+  
+  const brand = brands[Math.floor(Math.random() * brands.length)];
+  const keywordsToUse = keywords && keywords.length > 0 ? keywords : defaultKeywords;
+  const keyword = keywordsToUse[Math.floor(Math.random() * keywordsToUse.length)];
+  
+  const templateIndex = Math.floor(Math.random() * templates.length);
+  return templates[templateIndex]
+    .replace("{brand}", brand)
+    .replace("{platform}", platform)
+    .replace("{keyword}", keyword);
 };

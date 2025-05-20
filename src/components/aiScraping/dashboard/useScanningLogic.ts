@@ -1,110 +1,77 @@
 
-import { useState, useEffect } from 'react';
-import { ContentAlert } from "@/types/dashboard";
-import { startContinuousScan, performLiveScan } from '@/services/aiScraping/mockScanner';
-import { toast } from "sonner";
+import { useState, useEffect, useCallback } from 'react';
+import { ContentAlert } from '@/types/dashboard';
 
-export const useScanningLogic = () => {
-  const [isActive, setIsActive] = useState<boolean>(false);
-  const [isInitialScan, setIsInitialScan] = useState<boolean>(true);
+/**
+ * Custom hook for handling scanning logic in monitoring dashboards
+ */
+const useScanningLogic = () => {
+  const [isScanning, setIsScanning] = useState(false);
   const [scanResults, setScanResults] = useState<ContentAlert[]>([]);
-  const [isScanning, setIsScanning] = useState<boolean>(false);
-  const [metrics, setMetrics] = useState({
-    scansToday: 0,
-    alertsDetected: 0,
-    highPriorityAlerts: 0
+  const [scanDate, setScanDate] = useState<Date | null>(null);
+  const [scanConfig, setScanConfig] = useState({
+    depth: 'standard',
+    platforms: ['all'],
+    timeframe: '7d'
   });
-  
-  useEffect(() => {
-    // Start with a one-time scan when component mounts
-    if (isInitialScan) {
-      setIsScanning(true);
-      performLiveScan().then(alerts => {
-        setScanResults(prevResults => [...alerts, ...prevResults]);
-        
-        // Update metrics
-        setMetrics(prev => ({
-          scansToday: prev.scansToday + 1,
-          alertsDetected: prev.alertsDetected + alerts.length,
-          highPriorityAlerts: prev.highPriorityAlerts + alerts.filter(a => a.severity === 'high').length
-        }));
-        
-        setIsScanning(false);
-        setIsInitialScan(false);
-      }).catch(() => {
-        setIsScanning(false);
-        setIsInitialScan(false);
-      });
-    }
-    
-    let stopScanning: (() => void) | null = null;
-    
-    if (isActive) {
-      toast.info("Real-time monitoring activated", {
-        description: "ARIA is now actively monitoring for new mentions and alerts"
-      });
-      
-      // Set up continuous scanning
-      stopScanning = startContinuousScan((newAlert: ContentAlert | ContentAlert[]) => {
-        // Fix: Use a properly typed state update
-        setScanResults(prevResults => {
-          // Handle both single alerts and arrays of alerts
-          const alertsToAdd = Array.isArray(newAlert) ? newAlert : [newAlert];
-          return [...alertsToAdd, ...prevResults].slice(0, 30); // Keep top 30
-        });
-        
-        // Update metrics - handle both single alerts and arrays
-        setMetrics(prev => {
-          const alertsToProcess = Array.isArray(newAlert) ? newAlert : [newAlert];
-          return {
-            ...prev,
-            alertsDetected: prev.alertsDetected + alertsToProcess.length,
-            highPriorityAlerts: prev.highPriorityAlerts + alertsToProcess.filter(a => a.severity === 'high').length
-          };
-        });
-      });
-    }
-    
-    // Clean up the scanning when component unmounts or when isActive changes
-    return () => {
-      if (stopScanning) {
-        stopScanning();
-      }
-    };
-  }, [isActive, isInitialScan]);
-  
-  const handleToggleScan = () => {
-    setIsActive(prev => !prev);
-  };
-  
-  const handleManualScan = async () => {
+
+  // Simulate scanning process
+  const performScan = useCallback(async () => {
     setIsScanning(true);
-    try {
-      const newAlerts = await performLiveScan();
-      // Fix: Use a properly typed state update
-      setScanResults(prevResults => [...newAlerts, ...prevResults]);
-      
-      // Update metrics
-      setMetrics(prev => ({
-        scansToday: prev.scansToday + 1,
-        alertsDetected: prev.alertsDetected + newAlerts.length,
-        highPriorityAlerts: prev.highPriorityAlerts + newAlerts.filter(a => a.severity === 'high').length
-      }));
-    } catch (error) {
-      console.error("Manual scan error:", error);
-    } finally {
-      setIsScanning(false);
-    }
-  };
+    
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 2500));
+    
+    // Generate mock results
+    const mockResults: ContentAlert[] = Array.from({ length: Math.floor(Math.random() * 5) + 1 }, (_, i) => ({
+      id: `result-${Date.now()}-${i}`,
+      platform: ['Twitter', 'Reddit', 'News Sites', 'Facebook'][Math.floor(Math.random() * 4)],
+      content: `Sample monitoring result #${i + 1} with some context about the brand mention.`,
+      date: new Date().toISOString().split('T')[0],
+      severity: ['low', 'medium', 'high'][Math.floor(Math.random() * 3)] as 'low' | 'medium' | 'high',
+      status: 'new',
+      url: `https://example.com/result-${i}`,
+      threatType: ['Reputation Risk', 'Customer Service', 'Product Issue'][Math.floor(Math.random() * 3)]
+    }));
+    
+    // Update results
+    setScanResults(prevResults => {
+      // Ensure we're adding proper ContentAlert objects and not arrays
+      return [...mockResults, ...prevResults];
+    });
+    
+    setScanDate(new Date());
+    setIsScanning(false);
+    
+    // Return high severity count for notifications
+    const highSeverityCount = mockResults.filter(result => result.severity === 'high').length;
+    return { totalResults: mockResults.length, highSeverity: highSeverityCount };
+  }, [scanConfig]);
+  
+  // Auto-scan effect on initial load
+  useEffect(() => {
+    const initialScan = async () => {
+      // Wait a bit before initial scan to let UI render
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      await performScan();
+    };
+    
+    initialScan();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty array means run once on mount
+  
+  // Update scan configuration
+  const updateScanConfig = useCallback((newConfig: Partial<typeof scanConfig>) => {
+    setScanConfig(prev => ({ ...prev, ...newConfig }));
+  }, []);
   
   return {
-    isActive,
-    setIsActive,
-    scanResults,
     isScanning,
-    metrics,
-    handleToggleScan,
-    handleManualScan
+    scanResults,
+    scanDate,
+    scanConfig,
+    performScan,
+    updateScanConfig
   };
 };
 

@@ -8,7 +8,7 @@ import { saveMention } from "./mentions";
  */
 export const runMonitoringScan = async (): Promise<{ success: boolean; newMentions: number }> => {
   // Get platforms that are actively being monitored
-  const activePlatforms = getMonitoredPlatforms().filter(p => p.enabled);
+  const activePlatforms = getMonitoredPlatforms().filter(p => p.isActive);
   
   console.log("Running scan on platforms:", activePlatforms.map(p => p.name).join(", "));
   
