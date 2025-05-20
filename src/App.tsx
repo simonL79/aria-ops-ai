@@ -7,6 +7,7 @@ import { Toaster } from 'sonner';
 import HomePage from "./pages/HomePage";
 import Index from "./pages/Index";
 import AiScrapingPage from "./pages/AiScrapingPage";
+import EngagementHubPage from "./pages/dashboard/EngagementHubPage";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
         <Route path="/dashboard/new-companies" element={<Index />} />
         <Route path="/dashboard/new-companies/:id" element={<Index />} />
         <Route path="/dashboard/radar/entity/:id" element={<Index />} />
+        <Route path="/dashboard/engagement" element={<EngagementHubPage />} />
         <Route path="/settings" element={<Index />} />
         <Route path="/login" element={<Index />} />
         <Route path="/register" element={<Index />} />

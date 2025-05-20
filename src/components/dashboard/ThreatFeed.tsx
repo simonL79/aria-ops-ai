@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, Clock, Shield, ArrowRight } from "lucide-react";
+import { AlertTriangle, Clock, Shield, ArrowRight, MessageSquare } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ContentAlert } from "@/types/dashboard";
 
@@ -47,7 +47,11 @@ const ThreatFeed = ({ alerts, isLoading = false, onViewDetails }: ThreatFeedProp
     }
   };
   
-  const getStatusIndicator = (status: string) => {
+  const getStatusIndicator = (status: string, category?: string) => {
+    if (category === 'customer_enquiry') {
+      return <span className="inline-block w-2 h-2 bg-blue-500 rounded-full mr-1"></span>;
+    }
+    
     switch (status) {
       case 'new':
         return <span className="inline-block w-2 h-2 bg-red-500 rounded-full mr-1"></span>;
@@ -116,6 +120,8 @@ const ThreatFeed = ({ alerts, isLoading = false, onViewDetails }: ThreatFeedProp
     );
   }
 
+  const customerEnquiries = alerts.filter(a => a.category === 'customer_enquiry' && a.status === 'new').length;
+
   return (
     <Card>
       <CardHeader className="pb-2">
@@ -124,9 +130,16 @@ const ThreatFeed = ({ alerts, isLoading = false, onViewDetails }: ThreatFeedProp
             <AlertTriangle className="h-5 w-5" />
             <span>Threat Feed</span>
           </div>
-          <Badge variant="outline" className="font-normal">
-            {alerts.filter(a => a.status === 'new').length} new
-          </Badge>
+          <div className="flex gap-2">
+            {customerEnquiries > 0 && (
+              <Badge variant="outline" className="font-normal bg-blue-50 text-blue-800">
+                <MessageSquare className="h-3 w-3 mr-1" /> {customerEnquiries} enquiries
+              </Badge>
+            )}
+            <Badge variant="outline" className="font-normal">
+              {alerts.filter(a => a.status === 'new').length} new
+            </Badge>
+          </div>
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0">
@@ -136,11 +149,17 @@ const ThreatFeed = ({ alerts, isLoading = false, onViewDetails }: ThreatFeedProp
               <div className="p-4 hover:bg-muted/30 transition-colors">
                 <div className="flex justify-between items-start mb-1">
                   <div className="flex items-center">
-                    {getStatusIndicator(alert.status)}
-                    <Badge className={getSeverityColor(alert.severity)}>
-                      {alert.severity.toUpperCase()}
-                    </Badge>
-                    {alert.threatType && (
+                    {getStatusIndicator(alert.status, alert.category)}
+                    {alert.category === 'customer_enquiry' ? (
+                      <Badge className="bg-blue-500 text-white">
+                        CUSTOMER
+                      </Badge>
+                    ) : (
+                      <Badge className={getSeverityColor(alert.severity)}>
+                        {alert.severity.toUpperCase()}
+                      </Badge>
+                    )}
+                    {alert.threatType && !alert.category && (
                       <Badge variant="outline" className="ml-2">
                         {alert.threatType.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
                       </Badge>
@@ -165,7 +184,7 @@ const ThreatFeed = ({ alerts, isLoading = false, onViewDetails }: ThreatFeedProp
                     className="h-7 px-2 opacity-0 group-hover:opacity-100 transition-opacity"
                     onClick={() => onViewDetails && onViewDetails(alert)}
                   >
-                    <span className="text-xs">View</span>
+                    <span className="text-xs">{alert.category === 'customer_enquiry' ? 'Respond' : 'View'}</span>
                     <ArrowRight className="h-3 w-3 ml-1" />
                   </Button>
                 </div>

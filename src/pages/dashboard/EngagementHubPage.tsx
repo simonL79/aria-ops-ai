@@ -5,14 +5,41 @@ import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { MessageSquare, Users, Share2, Bell } from "lucide-react";
+import RealTimeAlerts from "@/components/dashboard/real-time-alerts";
+import ThreatFeed from "@/components/dashboard/ThreatFeed";
 
 const EngagementHubPage = () => {
+  const [selectedAlert, setSelectedAlert] = React.useState<any>(null);
+
+  const handleViewDetails = (alert: any) => {
+    setSelectedAlert(alert);
+    // In a real app, you might open a modal or navigate to a details page
+    console.log("Viewing details for:", alert);
+  };
+
   return (
     <DashboardLayout>
       <DashboardHeader
         title="Engagement Hub"
-        description="Manage all communication and engagement activities for your clients"
+        description="Manage all communication and engagement activities"
       />
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <div className="lg:col-span-1">
+          <RealTimeAlerts 
+            onViewDetail={handleViewDetails}
+            onMarkAsRead={(id) => console.log("Marked as read:", id)}
+            onDismiss={(id) => console.log("Dismissed:", id)}
+          />
+        </div>
+        
+        <div className="lg:col-span-2">
+          <ThreatFeed 
+            alerts={[]} // In a real app, you'd fetch these
+            onViewDetails={handleViewDetails}
+          />
+        </div>
+      </div>
 
       <Tabs defaultValue="messages" className="w-full">
         <TabsList className="mb-4">

@@ -23,7 +23,7 @@ const RealTimeAlerts = ({
   onMarkAsRead,
   onViewDetail
 }: RealTimeAlertsProps) => {
-  const [filter, setFilter] = useState<'all' | 'high' | 'medium' | 'low'>('all');
+  const [filter, setFilter] = useState<'all' | 'high' | 'medium' | 'low' | 'customer'>('all');
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   
   // Use our simulation hook
@@ -38,14 +38,14 @@ const RealTimeAlerts = ({
   useEffect(() => {
     if (!notificationsEnabled) return;
     
-    // Check if there's a new high severity alert
-    const highSeverityAlerts = activeAlerts.filter(
-      alert => alert.severity === 'high' && alert.status === 'new'
+    // Check if there's a new high severity alert or customer enquiry
+    const highPriorityAlerts = activeAlerts.filter(
+      alert => (alert.severity === 'high' || alert.category === 'customer_enquiry') && alert.status === 'new'
     );
     
-    if (highSeverityAlerts.length > 0) {
-      // Get most recent high severity alert
-      const latestAlert = highSeverityAlerts[0];
+    if (highPriorityAlerts.length > 0) {
+      // Get most recent high priority alert
+      const latestAlert = highPriorityAlerts[0];
       
       // Play notification sound if browser supports it
       try {
@@ -56,22 +56,37 @@ const RealTimeAlerts = ({
         console.log('Audio notification not supported');
       }
       
-      // Show toast with more urgency for high priority
-      toast.error(`🚨 HIGH RISK ALERT: ${latestAlert.platform}`, {
-        description: latestAlert.content.length > 60 ? 
-          `${latestAlert.content.substring(0, 60)}...` : 
-          latestAlert.content,
-        duration: 10000, // 10 seconds
-        action: {
-          label: "View Now",
-          onClick: () => onViewDetail?.(latestAlert),
-        }
-      });
+      // Show toast with different styling based on if it's a customer enquiry or high alert
+      if (latestAlert.category === 'customer_enquiry') {
+        toast.info(`👤 CUSTOMER ENQUIRY: ${latestAlert.platform}`, {
+          description: latestAlert.content.length > 60 ? 
+            `${latestAlert.content.substring(0, 60)}...` : 
+            latestAlert.content,
+          duration: 10000, // 10 seconds
+          action: {
+            label: "Respond",
+            onClick: () => onViewDetail?.(latestAlert),
+          }
+        });
+      } else {
+        toast.error(`🚨 HIGH RISK ALERT: ${latestAlert.platform}`, {
+          description: latestAlert.content.length > 60 ? 
+            `${latestAlert.content.substring(0, 60)}...` : 
+            latestAlert.content,
+          duration: 10000, // 10 seconds
+          action: {
+            label: "View Now",
+            onClick: () => onViewDetail?.(latestAlert),
+          }
+        });
+      }
       
       // If browser supports notifications API, send browser notification too
       if ("Notification" in window) {
         if (Notification.permission === "granted") {
-          new Notification("ARIA - High Risk Alert", {
+          new Notification(latestAlert.category === 'customer_enquiry' ? 
+            "Customer Enquiry" : 
+            "ARIA - High Risk Alert", {
             body: `${latestAlert.platform}: ${latestAlert.content.substring(0, 120)}...`,
             icon: "/favicon.ico"
           });
@@ -110,9 +125,12 @@ const RealTimeAlerts = ({
   
   const filteredAlerts = filter === 'all' 
     ? activeAlerts 
-    : activeAlerts.filter(alert => alert.severity === filter);
+    : filter === 'customer'
+      ? activeAlerts.filter(alert => alert.category === 'customer_enquiry')
+      : activeAlerts.filter(alert => alert.severity === filter);
   
   const highSeverityCount = activeAlerts.filter(a => a.severity === 'high' && a.status === 'new').length;
+  const customerEnquiryCount = activeAlerts.filter(a => a.category === 'customer_enquiry' && a.status === 'new').length;
   
   return (
     <Card>
@@ -123,6 +141,11 @@ const RealTimeAlerts = ({
           {highSeverityCount > 0 && (
             <Badge variant="destructive" className="animate-pulse">
               {highSeverityCount} High Risk
+            </Badge>
+          )}
+          {customerEnquiryCount > 0 && (
+            <Badge variant="outline" className="bg-blue-100 border-blue-300 text-blue-800 animate-pulse">
+              {customerEnquiryCount} Customer Enquiries
             </Badge>
           )}
         </CardTitle>

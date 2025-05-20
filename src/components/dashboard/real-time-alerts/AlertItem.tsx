@@ -2,7 +2,7 @@
 import React from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Clock, X, CheckCircle2 } from "lucide-react";
+import { Clock, X, CheckCircle2, MessageSquare } from "lucide-react";
 import { ContentAlert } from "@/types/dashboard";
 
 interface AlertItemProps {
@@ -30,23 +30,35 @@ const AlertItem: React.FC<AlertItemProps> = ({
   };
   
   const isHighSeverity = alert.severity === 'high';
+  const isCustomerEnquiry = alert.category === 'customer_enquiry';
   
   return (
     <div 
-      className={`p-4 ${alert.status === 'new' ? 'bg-blue-50' : ''} 
-      ${isHighSeverity && alert.status === 'new' ? 'border-l-4 border-red-500' : ''} 
-      ${!isLast ? 'border-b' : ''}`}
+      className={`p-4 
+        ${alert.status === 'new' ? isCustomerEnquiry ? 'bg-blue-50' : 'bg-blue-50' : ''} 
+        ${isHighSeverity && alert.status === 'new' ? 'border-l-4 border-red-500' : ''}
+        ${isCustomerEnquiry && alert.status === 'new' ? 'border-l-4 border-blue-500' : ''}
+        ${!isLast ? 'border-b' : ''}`}
     >
       <div className="flex justify-between items-start">
         <div>
           <div className="flex items-center gap-2">
-            <Badge className={getSeverityColor(alert.severity)}>
-              {alert.severity.toUpperCase()}
-              {isHighSeverity && alert.status === 'new' && " ⚠️"}
-            </Badge>
+            {isCustomerEnquiry ? (
+              <Badge className="bg-blue-500 text-white">
+                CUSTOMER
+              </Badge>
+            ) : (
+              <Badge className={getSeverityColor(alert.severity)}>
+                {alert.severity.toUpperCase()}
+                {isHighSeverity && alert.status === 'new' && " ⚠️"}
+              </Badge>
+            )}
             <span className="font-medium">{alert.platform}</span>
             {alert.status === 'new' && (
-              <Badge variant="outline" className={isHighSeverity ? 
+              <Badge variant="outline" className={
+                isCustomerEnquiry ? 
+                "bg-blue-100 border-blue-200 text-blue-800 animate-pulse" : 
+                isHighSeverity ? 
                 "bg-red-100 border-red-200 text-red-800 animate-pulse" : 
                 "bg-blue-100 border-blue-200 text-blue-800"
               }>
@@ -54,7 +66,7 @@ const AlertItem: React.FC<AlertItemProps> = ({
               </Badge>
             )}
           </div>
-          <p className={`mt-2 ${isHighSeverity && alert.status === 'new' ? 'font-medium' : ''}`}>
+          <p className={`mt-2 ${(isHighSeverity || isCustomerEnquiry) && alert.status === 'new' ? 'font-medium' : ''}`}>
             {alert.content}
           </p>
           <div className="flex items-center gap-1 text-xs text-muted-foreground mt-2">
@@ -84,11 +96,23 @@ const AlertItem: React.FC<AlertItemProps> = ({
       <div className="mt-2 flex justify-end">
         <Button 
           size="sm" 
-          variant={isHighSeverity && alert.status === 'new' ? "destructive" : "outline"}
-          className={`text-xs h-7 ${isHighSeverity && alert.status === 'new' ? 'animate-pulse' : ''}`}
+          variant={
+            isCustomerEnquiry && alert.status === 'new' ? "default" : 
+            isHighSeverity && alert.status === 'new' ? "destructive" : 
+            "outline"
+          }
+          className={`text-xs h-7 ${(isHighSeverity || isCustomerEnquiry) && alert.status === 'new' ? 'animate-pulse' : ''}`}
           onClick={() => onViewDetail?.(alert)}
         >
-          {isHighSeverity && alert.status === 'new' ? 'Respond Now' : 'Analyze & Respond'}
+          {isCustomerEnquiry && alert.status === 'new' ? (
+            <>
+              <MessageSquare className="h-3 w-3 mr-1" /> Respond Now
+            </>
+          ) : isHighSeverity && alert.status === 'new' ? (
+            'Address Now'
+          ) : (
+            'Analyze & Respond'
+          )}
         </Button>
       </div>
     </div>
