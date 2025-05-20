@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { ContentAlert } from "@/types/dashboard";
-import { ScanParameters, performLiveScan } from "@/services/aiScraping/mockScanner";
+import { ScanParameters } from '@/services/aiScraping/mockScanner';
 import AiScrapingDashboard from "@/components/aiScraping/AiScrapingDashboard";
 import StrategyOverviewCards from "@/components/aiScraping/StrategyOverviewCards";
 import SystemStatusAlert from "@/components/aiScraping/SystemStatusAlert";
@@ -54,6 +54,7 @@ const AiScrapingTabs = ({
               className="animate-pulse"
               onClick={onScan}
               disabled={isScanning}
+              variant="scan"
             >
               {isScanning ? "Scanning..." : "Start Live Scan"}
             </Button>

@@ -19,6 +19,7 @@ const AiScrapingHeader = ({ isScanning, onScan }: AiScrapingHeaderProps) => {
           onClick={onScan} 
           disabled={isScanning}
           className="gap-2"
+          variant="scan"
         >
           {isScanning ? (
             <>

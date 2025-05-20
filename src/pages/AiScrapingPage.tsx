@@ -7,6 +7,7 @@ import { ContentAlert } from "@/types/dashboard";
 import { ScanParameters, performLiveScan } from '@/services/aiScraping/mockScanner';
 import AiScrapingHeader from "@/components/aiScraping/AiScrapingHeader";
 import AiScrapingTabs from "@/components/aiScraping/AiScrapingTabs";
+import { toast } from "sonner";
 
 const AiScrapingPage = () => {
   const [isScanning, setIsScanning] = useState<boolean>(false);
@@ -17,8 +18,15 @@ const AiScrapingPage = () => {
     setIsScanning(true);
     performLiveScan().then(results => {
       setActiveAlerts(prev => [...results, ...prev]);
+      toast.success("Scan completed", {
+        description: `Found ${results.length} new mentions.`,
+      });
       setIsScanning(false);
-    }).catch(() => {
+    }).catch((error) => {
+      console.error("Error performing scan:", error);
+      toast.error("Scan failed", {
+        description: "An error occurred while scanning. Please try again.",
+      });
       setIsScanning(false);
     });
   };
@@ -28,8 +36,14 @@ const AiScrapingPage = () => {
     try {
       const results = await performLiveScan(params);
       setActiveAlerts(prev => [...results, ...prev]);
+      toast.success("Manual scan completed", {
+        description: `Found ${results.length} new mentions with your parameters.`,
+      });
     } catch (error) {
       console.error("Error performing scan:", error);
+      toast.error("Manual scan failed", {
+        description: "An error occurred while scanning with your parameters. Please try again.",
+      });
     } finally {
       setIsScanning(false);
     }

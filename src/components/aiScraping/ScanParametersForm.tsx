@@ -61,6 +61,13 @@ const ScanParametersForm = ({ onStartScan, isScanning }: ScanParametersFormProps
     onStartScan(parameters);
   };
   
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddKeyword();
+    }
+  };
+  
   return (
     <Card>
       <CardHeader>
@@ -103,6 +110,7 @@ const ScanParametersForm = ({ onStartScan, isScanning }: ScanParametersFormProps
               placeholder="Add keyword to filter by..."
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
+              onKeyDown={handleKeyDown}
               className="flex-1"
             />
             <Button onClick={handleAddKeyword} type="button" variant="outline">Add</Button>
@@ -174,6 +182,7 @@ const ScanParametersForm = ({ onStartScan, isScanning }: ScanParametersFormProps
           onClick={handleStartScan} 
           className="w-full" 
           disabled={isScanning}
+          variant="scan"
         >
           {isScanning ? (
             <>
