@@ -36,7 +36,7 @@ const SignInForm = ({ setShowResetForm }: SignInFormProps) => {
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "simonlindsay7988@gmail.com", // Pre-fill with the admin email
+      email: "",
       password: "",
     },
   });
