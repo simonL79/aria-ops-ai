@@ -55,6 +55,13 @@ const EngagementHubPage = () => {
           return prev;
         });
         
+        // Show toast notification for high severity alerts
+        if (storedAlert.severity === 'high') {
+          toast.warning(`Analyzing ${storedAlert.platform} alert`, {
+            description: "Our threat analysis system is analyzing this alert."
+          });
+        }
+        
         return; // We've found our alert, no need to continue
       } catch (e) {
         console.error("Error parsing stored alert:", e);
@@ -73,6 +80,17 @@ const EngagementHubPage = () => {
   // Function to handle new alerts from AI Scraping
   const handleNewAlert = (alert: ContentAlert) => {
     setAlerts(prev => [alert, ...prev]);
+    
+    // If this is a high priority alert, show toast
+    if (alert.severity === 'high' && alert.status === 'new') {
+      toast.warning(`New ${alert.platform} alert`, {
+        description: alert.content.substring(0, 60) + (alert.content.length > 60 ? '...' : ''),
+        action: {
+          label: "View Details",
+          onClick: () => setSelectedAlert(alert)
+        }
+      });
+    }
   };
 
   // Register to listen for alerts from the AI Scraping system
@@ -86,6 +104,13 @@ const EngagementHubPage = () => {
 
   const handleViewDetails = (alert: ContentAlert) => {
     setSelectedAlert(alert);
+    
+    // Show analysis toast for high severity alerts
+    if (alert.severity === 'high') {
+      toast.info(`Analyzing ${alert.platform} content`, {
+        description: "Our threat analysis system is processing this content."
+      });
+    }
   };
 
   const handleDismiss = (id: string) => {
@@ -219,6 +244,11 @@ const EngagementHubPage = () => {
                   {selectedAlert.category === 'customer_enquiry' && (
                     <div className="bg-blue-50 border border-blue-200 rounded-md p-3 text-blue-800 text-sm mb-3">
                       This is a customer enquiry and requires a response.
+                    </div>
+                  )}
+                  {selectedAlert.threatType && (
+                    <div className="bg-amber-50 border border-amber-200 rounded-md p-3 text-amber-800 text-sm mb-3">
+                      Threat type detected: <strong>{selectedAlert.threatType.replace('_', ' ')}</strong>
                     </div>
                   )}
                 </CardContent>
