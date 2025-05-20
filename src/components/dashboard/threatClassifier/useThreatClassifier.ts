@@ -1,9 +1,8 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { NavigateFunction } from "react-router-dom";
 import { toast } from "sonner";
-import { hasValidKey } from "@/utils/secureKeyStorage";
-import { classifyThreat } from "@/services";
+import { classifyThreat } from "@/services/intelligence";
 import { ThreatClassificationResult, ThreatClassifierRequest } from "@/types/intelligence";
 
 interface UseThreatClassifierProps {
@@ -16,35 +15,9 @@ export default function useThreatClassifier({ onClassified, navigate }: UseThrea
   const [result, setResult] = useState<ThreatClassificationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   
-  useEffect(() => {
-    // Check for API key on component mount
-    if (!hasValidKey('openai_api_key')) {
-      toast.info("API Key Required", {
-        description: "Please set your OpenAI API key in the settings panel before using this feature",
-        action: {
-          label: "Settings",
-          onClick: () => navigate('/settings')
-        }
-      });
-    }
-  }, [navigate]);
-  
   const handleClassify = async (request: ThreatClassifierRequest) => {
     // Reset previous error state
     setError(null);
-    
-    // Check if we have an API key
-    if (!hasValidKey('openai_api_key')) {
-      toast.error("API Key Required", {
-        description: "Please set your OpenAI API key in the settings panel",
-        action: {
-          label: "Settings",
-          onClick: () => navigate('/settings')
-        }
-      });
-      return;
-    }
-    
     setIsClassifying(true);
     
     try {
@@ -58,11 +31,11 @@ export default function useThreatClassifier({ onClassified, navigate }: UseThrea
         }
       } else {
         // If classifyThreat returns null, it means there was an error
-        setError("Unable to classify content. Check your API key or try again later.");
+        setError("Unable to classify content. Please try again later.");
       }
     } catch (error) {
       console.error("Classification failed:", error);
-      setError("Classification failed. Please check your API key or try again.");
+      setError("Classification failed. Please try again.");
       toast.error("Classification failed", {
         description: error instanceof Error 
           ? error.message 

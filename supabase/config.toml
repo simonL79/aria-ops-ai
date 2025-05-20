@@ -1,4 +1,6 @@
 
+# A string used to distinguish different Supabase projects on the same host. Defaults to the working
+# directory name when running `supabase init`.
 project_id = "ssvskbejfacmjemphmry"
 
 [api]
@@ -9,13 +11,15 @@ port = 54321
 schemas = ["public", "storage", "graphql_public"]
 # Extra schemas to add to the search_path of every request. public is always included.
 extra_search_path = ["public", "extensions"]
-# Maximum rows returns in a single response. Default is 1000.
+# The maximum number of rows returns from a view, table, or stored procedure. Limits payload size
+# for accidental or malicious requests.
 max_rows = 1000
 
 [db]
 # Port to use for the local database URL.
 port = 54322
-# Port used by the database to accept connections from the API.
+# The database major version to use. This has to be the same as your remote database's. Run `SHOW
+# server_version;` on the remote database to check.
 major_version = 15
 
 [studio]
@@ -40,57 +44,26 @@ file_size_limit = "50MiB"
 site_url = "http://localhost:3000"
 # A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
 additional_redirect_urls = ["https://localhost:3000"]
-# How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
+# How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 seconds (one
+# week).
 jwt_expiry = 3600
 # Allow/disallow new user signups to your project.
 enable_signup = true
-# If enabled, a user will be required to confirm any email change on both the old, and new email
-# addresses. If disabled, only the new email is required to confirm.
-double_confirm_changes = true
-# If enabled, users need to confirm their email address before signing in.
+# If disabled, the user will be signed up but will get no welcome email.
 enable_confirmations = false
 
-# Configure one of the supported auth providers.
 [auth.email]
-# Allow/disallow sign in with email/password.
-enable_signup = true
-# If enabled, users need to confirm their email address before signing in.
-enable_confirmations = false
-
-[auth.sms]
 enable_signup = true
 enable_confirmations = false
 
-# Configure Storage Exchange Integration
-[analytics]
+# Use an external OAuth provider. The full list of providers are: `apple`, `azure`, `bitbucket`,
+# `discord`, `facebook`, `github`, `gitlab`, `google`, `keycloak`, `linkedin`, `notion`, `twitch`,
+# `twitter`, `slack`, `spotify`, `workos`, `zoom`.
+[auth.external.apple]
 enabled = false
-port = 54327
-vector_port = 54328
+client_id = ""
+secret = ""
 
-# Define functions with their names, and schedules
 [functions]
-[functions.companies-house-daily-import]
+[functions.threat-classification]
 verify_jwt = false
-[functions.reputation-scan]
-verify_jwt = false
-[functions.email-digest]
-verify_jwt = false
-[functions.slack-alert]
-verify_jwt = false
-
-# Define scheduled jobs
-[functions.cron_jobs]
-[functions.cron_jobs.daily_import]
-schedule = "0 6 * * *"  # Run daily at 6AM
-function = "companies-house-daily-import"
-body = "{}"
-
-[functions.cron_jobs.daily_digest]
-schedule = "0 7 * * *"  # Run daily at 7AM
-function = "email-digest"
-body = "{}"
-
-[functions.cron_jobs.scan_pending]
-schedule = "30 6 * * *"  # Run daily at 6:30AM after import
-function = "reputation-scan"
-body = "{}"
