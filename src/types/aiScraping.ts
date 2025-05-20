@@ -79,10 +79,20 @@ export interface ScanResultStats {
   sourcesDistribution: Record<string, number>;
 }
 
-// ModelConfig definition
+// Extended ModelConfig definition to match what's being used in ModelSettings.tsx
 export interface ModelConfig {
   id: string;
   name: string;
+  type: 'openai' | 'huggingface' | 'custom';
+  usage: 'sentiment' | 'classification' | 'response' | 'summary';
+  config: {
+    model: string;
+    temperature: number;
+    maxTokens?: number;
+    apiKey?: string;
+    endpoint?: string;
+    useLocal?: boolean;
+  };
   isDefault: boolean;
   parameters: {
     temperature: number;
@@ -91,6 +101,8 @@ export interface ModelConfig {
     frequencyPenalty?: number;
     presencePenalty?: number;
   };
+  costPerToken?: number;
+  active?: boolean;
 }
 
 // EmailDigestSettings definition

@@ -11,9 +11,9 @@ const useScanningLogic = () => {
   const [scanDate, setScanDate] = useState<Date | null>(null);
   const [isActive, setIsActive] = useState(true);
   const [metrics, setMetrics] = useState({
-    totalScans: 0,
-    risksIdentified: 0,
-    avgResponseTime: 0
+    scansToday: 0,
+    alertsDetected: 0,
+    highPriorityAlerts: 0
   });
   const [scanConfig, setScanConfig] = useState({
     depth: 'standard',
@@ -53,15 +53,15 @@ const useScanningLogic = () => {
     setScanDate(new Date());
     setIsScanning(false);
     
-    // Update metrics
+    // Update metrics with the correct properties
+    const highSeverityCount = mockResults.filter(r => r.severity === 'high').length;
     setMetrics(prev => ({
-      totalScans: prev.totalScans + 1,
-      risksIdentified: prev.risksIdentified + mockResults.filter(r => r.severity === 'high').length,
-      avgResponseTime: (prev.avgResponseTime + Math.random() * 2) / 2
+      scansToday: prev.scansToday + 1,
+      alertsDetected: prev.alertsDetected + mockResults.length,
+      highPriorityAlerts: prev.highPriorityAlerts + highSeverityCount
     }));
     
     // Return high severity count for notifications
-    const highSeverityCount = mockResults.filter(result => result.severity === 'high').length;
     return { totalResults: mockResults.length, highSeverity: highSeverityCount };
   }, [scanConfig]);
   

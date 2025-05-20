@@ -1,59 +1,38 @@
 
-import { toast } from "sonner";
-import { getMonitoredPlatforms } from "./platforms";
-import { saveMention } from "./mentions";
+import { Mention } from './types';
+import { saveMention } from './mentions';
+import { getMonitoredPlatforms } from './platforms';
 
 /**
- * Run a manual monitoring scan
+ * Run a monitoring scan to detect mentions
  */
-export const runMonitoringScan = async (): Promise<{ success: boolean; newMentions: number }> => {
-  // Get platforms that are actively being monitored
-  const activePlatforms = getMonitoredPlatforms().filter(p => p.isActive);
+export const runMonitoringScan = async (): Promise<Mention[]> => {
+  console.log("Running monitoring scan...");
   
-  console.log("Running scan on platforms:", activePlatforms.map(p => p.name).join(", "));
+  const platforms = getMonitoredPlatforms();
+  const enabledPlatforms = platforms.filter(p => p.isActive);
+  const results: Mention[] = [];
   
-  // Simulate network request
-  await new Promise(resolve => setTimeout(resolve, 2500 + Math.random() * 1500));
+  // Simulate network delay
+  await new Promise(resolve => setTimeout(resolve, 1500));
   
-  // Simulate finding new mentions
-  const newMentionsCount = Math.floor(Math.random() * 5); // 0-4 new mentions
-  
-  // Generate mock mentions
-  for (let i = 0; i < newMentionsCount; i++) {
-    const randomPlatformIndex = Math.floor(Math.random() * activePlatforms.length);
-    const platform = activePlatforms[randomPlatformIndex];
+  // Generate mock results for each enabled platform
+  for (const platform of enabledPlatforms) {
+    const count = Math.floor(Math.random() * 2) + 1; // 1-2 mentions per platform
     
-    saveMention(
-      platform.name,
-      generateRandomContent(platform.name),
-      `https://example.com/${platform.id}/post/${Date.now() + i}`
-    );
+    for (let i = 0; i < count; i++) {
+      const severity = Math.random() > 0.7 ? 'high' : Math.random() > 0.5 ? 'medium' : 'low';
+      
+      const mention = saveMention(
+        platform.name,
+        `New mention detected on ${platform.name} during automated scan.`,
+        `https://example.com/${platform.name.toLowerCase()}/scan-result-${Date.now()}-${i}`,
+        severity as 'high' | 'medium' | 'low'
+      );
+      
+      results.push(mention);
+    }
   }
   
-  // Toast notification for user feedback
-  toast.success("Analysis complete", {
-    description: `Found ${newMentionsCount} new mentions and updated reputation metrics.`
-  });
-  
-  return {
-    success: true,
-    newMentions: newMentionsCount
-  };
-};
-
-// Helper function to generate random content for mock mentions
-const generateRandomContent = (platform: string): string => {
-  const contentTemplates = [
-    "Just heard about {brand}. Their product seems interesting.",
-    "Has anyone tried {brand} products? Thinking of buying one.",
-    "I'm not happy with my experience with {brand}. Customer service was terrible.",
-    "Love the new release from {brand}! Definitely recommend it.",
-    "Saw an ad for {brand} today. Looks promising but not sure yet."
-  ];
-  
-  const brandNames = ["YourBrand", "RepShield", "TechGiant", "EcoFriendly"];
-  const randomBrand = brandNames[Math.floor(Math.random() * brandNames.length)];
-  
-  const templateIndex = Math.floor(Math.random() * contentTemplates.length);
-  return contentTemplates[templateIndex].replace("{brand}", randomBrand);
+  return results;
 };

@@ -33,13 +33,16 @@ const stopMonitoring = () => {
   };
 };
 
+// Re-export the runMonitoringScan function from scan.ts
+import { runMonitoringScan as runScan } from './monitoring/scan';
+
 // Export all services
 export {
   // Monitoring status services
   getMonitoringStatus,
   startMonitoring,
   stopMonitoring,
-  runMonitoringScan,
+  runMonitoringScan: runScan,
   
   // Mentions services
   saveMention,

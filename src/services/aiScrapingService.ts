@@ -150,3 +150,51 @@ export const executeScrapingQuery = async (query: ScrapingQuery): Promise<Scrapi
   
   return results;
 };
+
+/**
+ * Add manual result with AI analysis
+ */
+export const addManualResult = async (params: {
+  entityName: string;
+  entityType: string;
+  content: string;
+  url?: string;
+}): Promise<ScrapingResult> => {
+  // Simulate AI processing delay
+  await new Promise(resolve => setTimeout(resolve, 3000));
+  
+  // Generate sentiment and risk score based on content length and randomness
+  const sentiment = ((Math.random() * 2) - 1) * (params.content.length > 100 ? 0.8 : 0.5);
+  const riskScore = Math.floor(Math.random() * 10) + 1;
+  
+  // Create the result with AI analysis
+  const result: ScrapingResult = {
+    id: `manual-${Date.now()}`,
+    sourceId: 'source-3', // Manual input source
+    sourceName: 'Manual Input',
+    sourceType: 'manual',
+    entityName: params.entityName,
+    entityType: params.entityType,
+    content: params.content,
+    url: params.url || 'https://example.com/manual-input',
+    timestamp: new Date().toISOString(),
+    sentiment,
+    riskScore,
+    aiAnalysis: {
+      summary: `This is an AI-generated analysis of manually input content about "${params.entityName}".`,
+      recommendation: riskScore > 7 ? 'Requires immediate attention' : 
+                       riskScore > 4 ? 'Monitor closely' : 
+                       'No immediate action required',
+      threatClassification: riskScore > 7 ? 'High Risk' : 
+                             riskScore > 4 ? 'Medium Risk' : 
+                             'Low Risk'
+    },
+    processed: true,
+    notified: false
+  };
+  
+  // Add to storage
+  scrapingResultsStorage = [result, ...scrapingResultsStorage];
+  
+  return result;
+};
