@@ -146,7 +146,45 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      clean_launch_dashboard: {
+        Row: {
+          company_name: string | null
+          company_number: string | null
+          created_at: string | null
+          date_of_incorporation: string | null
+          id: string | null
+          last_scanned: string | null
+          officers: Json | null
+          risk_category: string | null
+          risk_score: number | null
+          scan_status: string | null
+        }
+        Insert: {
+          company_name?: string | null
+          company_number?: string | null
+          created_at?: string | null
+          date_of_incorporation?: string | null
+          id?: string | null
+          last_scanned?: string | null
+          officers?: Json | null
+          risk_category?: string | null
+          risk_score?: number | null
+          scan_status?: string | null
+        }
+        Update: {
+          company_name?: string | null
+          company_number?: string | null
+          created_at?: string | null
+          date_of_incorporation?: string | null
+          id?: string | null
+          last_scanned?: string | null
+          officers?: Json | null
+          risk_category?: string | null
+          risk_score?: number | null
+          scan_status?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {

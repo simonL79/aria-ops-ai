@@ -120,6 +120,11 @@ const storeCompaniesInDatabase = async (companies: any[]): Promise<void> => {
     
     if (error) {
       console.error('Error storing companies in database:', error);
+      
+      // Check if it's an RLS policy error and provide a specific message
+      if (error.message.includes('new row violates row-level security policy')) {
+        toast.error('Permission denied: Cannot store companies (RLS policy violation)');
+      }
     }
   } catch (error) {
     console.error('Error in storeCompaniesInDatabase:', error);
@@ -127,7 +132,7 @@ const storeCompaniesInDatabase = async (companies: any[]): Promise<void> => {
 };
 
 /**
- * Fetch companies from the database
+ * Fetch companies from the database using the dashboard view
  */
 export const fetchCompaniesFromDatabase = async (options: {
   status?: string;
@@ -137,7 +142,7 @@ export const fetchCompaniesFromDatabase = async (options: {
 }): Promise<any[]> => {
   try {
     let query = supabase
-      .from('clean_launch_targets')
+      .from('clean_launch_dashboard')
       .select('*');
     
     // Apply filters if provided
@@ -164,12 +169,20 @@ export const fetchCompaniesFromDatabase = async (options: {
     const { data, error } = await query;
     
     if (error) {
-      throw error;
+      // Check if it's an RLS policy error and provide a specific message
+      if (error.message.includes('permission denied for')) {
+        toast.error('Permission denied: You need admin privileges to view companies');
+        console.error('RLS Policy Error: Admin privileges required', error);
+      } else {
+        throw error;
+      }
+      return [];
     }
     
     return data || [];
   } catch (error) {
     console.error('Error fetching companies from database:', error);
+    toast.error('Failed to fetch companies from database');
     return [];
   }
 };
@@ -340,6 +353,11 @@ const updateCompanyStatus = async (companyNumber: string, status: string): Promi
     
     if (error) {
       console.error('Error updating company status:', error);
+      
+      // Check if it's an RLS policy error
+      if (error.message.includes('new row violates row-level security policy')) {
+        toast.error('Permission denied: Cannot update company status (RLS policy violation)');
+      }
     }
   } catch (error) {
     console.error('Error in updateCompanyStatus:', error);
@@ -367,6 +385,11 @@ const updateCompanyScore = async (
     
     if (error) {
       console.error('Error updating company score:', error);
+      
+      // Check if it's an RLS policy error
+      if (error.message.includes('new row violates row-level security policy')) {
+        toast.error('Permission denied: Cannot update company score (RLS policy violation)');
+      }
     }
   } catch (error) {
     console.error('Error in updateCompanyScore:', error);
@@ -415,6 +438,11 @@ export const saveCompany = async (company: NewCompany): Promise<void> => {
     
     if (error) {
       console.error('Error saving company to database:', error);
+      
+      // Check if it's an RLS policy error
+      if (error.message.includes('new row violates row-level security policy')) {
+        toast.error('Permission denied: Cannot save company data (RLS policy violation)');
+      }
     }
   } catch (error) {
     console.error('Error saving company:', error);
