@@ -3,7 +3,7 @@ import React from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ThreatClassificationResult } from "@/types/intelligence";
-import { AlertTriangle, AlertCircle, Info, Shield, ChevronDown, ChevronUp } from "lucide-react";
+import { AlertTriangle, AlertCircle, Info, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useState } from "react";
@@ -84,7 +84,7 @@ const ThreatClassificationResultDisplay = ({ result }: ThreatClassificationResul
   const actions = getRecommendedActions();
 
   return (
-    <Card className="p-4 border-l-4" style={{ borderLeftColor: severity >= 8 ? '#ef4444' : severity >= 5 ? '#f59e0b' : '#3b82f6' }}>
+    <Card className="p-4 border-l-4" style={{ borderLeftColor: result.severity >= 8 ? '#ef4444' : result.severity >= 5 ? '#f59e0b' : '#3b82f6' }}>
       <div className="flex justify-between items-start mb-2">
         <div className="flex items-center space-x-2">
           {getSeverityIcon(result.severity)}
