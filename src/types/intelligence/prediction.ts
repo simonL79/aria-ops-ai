@@ -10,6 +10,9 @@ export interface PredictionModel {
   dataPoints: string[];
   confidenceScore: number;
   active: boolean;
+  lastTrained?: string;
+  predictionType?: string;
+  activeIndicators?: string[];
 }
 
 // Define red team simulation interface

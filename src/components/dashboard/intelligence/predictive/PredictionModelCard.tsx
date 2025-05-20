@@ -32,18 +32,18 @@ const PredictionModelCard = ({ model }: PredictionModelCardProps) => {
       <div className="grid grid-cols-2 gap-2 text-sm">
         <div>
           <div className="text-muted-foreground">Type</div>
-          <div className="font-medium capitalize">{model.predictionType} prediction</div>
+          <div className="font-medium capitalize">{model.predictionType || 'General'} prediction</div>
         </div>
         <div>
           <div className="text-muted-foreground">Last trained</div>
-          <div className="font-medium">{formatDate(model.lastTrained)}</div>
+          <div className="font-medium">{model.lastTrained ? formatDate(model.lastTrained) : 'Not available'}</div>
         </div>
       </div>
       
       <div className="pt-1">
         <div className="text-sm font-medium">Active indicators:</div>
         <div className="flex flex-wrap gap-2 mt-2">
-          {model.activeIndicators.map((indicator, idx) => (
+          {model.activeIndicators?.map((indicator, idx) => (
             <Badge key={idx} variant="outline" className="text-xs">
               {indicator}
             </Badge>

@@ -8,7 +8,11 @@ export type AgentRole =
   'monitor' | 
   'researcher' |
   'coordinator' |
-  'predictor';
+  'predictor' |
+  'sentinel' |
+  'legal' |
+  'liaison' |
+  'outreach';
 
 // Define intelligence agent interface
 export interface IntelligenceAgent {
@@ -21,6 +25,12 @@ export interface IntelligenceAgent {
   active: boolean;
   isAI: boolean;
   lastActive?: string;
+  tools?: string[];
+  memory?: {
+    incidentsAnalyzed: number;
+    decisionsRecorded: number;
+    memoryVectors: number;
+  };
 }
 
 // For agent collaboration tracking

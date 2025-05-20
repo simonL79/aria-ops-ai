@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -11,45 +10,55 @@ import { useState } from "react";
 const sampleMemories: MemoryEntry[] = [
   {
     id: "mem-1",
-    content: "Competitor launched negative campaign on Twitter",
-    context: "Social media monitoring detected coordinated pattern",
+    content: "Competitor launched negative campaign on Twitter. Social media monitoring detected coordinated pattern",
     timestamp: "2025-05-12T09:15:00Z",
     tags: ["competitor", "social-media", "attack"],
     relatedEntities: ["CompetitorX", "Twitter"],
-    importance: 8
+    importance: 8,
+    category: 'threat',
+    source: 'social-monitoring',
+    confidence: 0.85
   },
   {
     id: "mem-2",
-    content: "Legal response template effective for copyright claims",
-    context: "Used in 12 cases with 92% success rate",
+    content: "Legal response template effective for copyright claims. Used in 12 cases with 92% success rate",
     timestamp: "2025-05-10T14:30:00Z",
     tags: ["legal", "template", "copyright", "effective"],
-    importance: 7
+    importance: 7,
+    category: 'insight',
+    source: 'legal-team',
+    confidence: 0.92
   },
   {
     id: "mem-3",
-    content: "Media coverage spike after CSR initiative announcement",
-    context: "Press release picked up by 23 outlets within 48 hours",
+    content: "Media coverage spike after CSR initiative announcement. Press release picked up by 23 outlets within 48 hours",
     timestamp: "2025-05-08T11:20:00Z",
     tags: ["CSR", "press", "positive"],
     relatedEntities: ["GreenInitiative"],
-    importance: 6
+    importance: 6,
+    category: 'pattern',
+    source: 'press-monitoring',
+    confidence: 0.88
   },
   {
     id: "mem-4",
-    content: "Customer complaint pattern identified in product returns",
-    context: "Recurring issue with packaging mentioned in 18% of returns",
+    content: "Customer complaint pattern identified in product returns. Recurring issue with packaging mentioned in 18% of returns",
     timestamp: "2025-05-05T16:45:00Z",
     tags: ["customer", "complaint", "packaging", "product"],
-    importance: 9
+    importance: 9,
+    category: 'pattern',
+    source: 'customer-service',
+    confidence: 0.78
   },
   {
     id: "mem-5",
-    content: "CEO interview response led to positive sentiment increase",
-    context: "Transparency approach increased trust metrics by 14%",
+    content: "CEO interview response led to positive sentiment increase. Transparency approach increased trust metrics by 14%",
     timestamp: "2025-05-01T10:30:00Z",
     tags: ["interview", "CEO", "positive", "transparency"],
-    importance: 7
+    importance: 7,
+    category: 'response',
+    source: 'media-analysis',
+    confidence: 0.81
   }
 ];
 

@@ -16,6 +16,14 @@ export const getAgentIcon = (role: AgentRole) => {
       return <Search className="h-5 w-5 text-indigo-500" />;
     case "predictor":
       return <BarChart3 className="h-5 w-5 text-red-500" />;
+    case "analyst":
+      return <Shield className="h-5 w-5 text-cyan-500" />;
+    case "responder":
+      return <Shield className="h-5 w-5 text-green-700" />;
+    case "monitor":
+      return <Shield className="h-5 w-5 text-violet-500" />;
+    case "coordinator":
+      return <Shield className="h-5 w-5 text-orange-500" />;
     default:
       return <AlertTriangle className="h-5 w-5 text-gray-500" />;
   }
