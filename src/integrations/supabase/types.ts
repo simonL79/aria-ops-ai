@@ -123,6 +123,115 @@ export type Database = {
         }
         Relationships: []
       }
+      content_actions: {
+        Row: {
+          action: string
+          alert_id: string | null
+          created_at: string | null
+          description: string
+          id: string
+          platform: string
+          status: string | null
+          type: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          alert_id?: string | null
+          created_at?: string | null
+          description: string
+          id?: string
+          platform: string
+          status?: string | null
+          type: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          alert_id?: string | null
+          created_at?: string | null
+          description?: string
+          id?: string
+          platform?: string
+          status?: string | null
+          type?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_actions_alert_id_fkey"
+            columns: ["alert_id"]
+            isOneToOne: false
+            referencedRelation: "content_alerts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      content_alerts: {
+        Row: {
+          client_id: string | null
+          confidence_score: number | null
+          content: string
+          created_at: string | null
+          detected_entities: Json | null
+          id: string
+          platform: string
+          potential_reach: number | null
+          sentiment: number | null
+          severity: string | null
+          source_type: string | null
+          status: string | null
+          threat_type: string | null
+          updated_at: string | null
+          url: string | null
+        }
+        Insert: {
+          client_id?: string | null
+          confidence_score?: number | null
+          content: string
+          created_at?: string | null
+          detected_entities?: Json | null
+          id?: string
+          platform: string
+          potential_reach?: number | null
+          sentiment?: number | null
+          severity?: string | null
+          source_type?: string | null
+          status?: string | null
+          threat_type?: string | null
+          updated_at?: string | null
+          url?: string | null
+        }
+        Update: {
+          client_id?: string | null
+          confidence_score?: number | null
+          content?: string
+          created_at?: string | null
+          detected_entities?: Json | null
+          id?: string
+          platform?: string
+          potential_reach?: number | null
+          sentiment?: number | null
+          severity?: string | null
+          source_type?: string | null
+          status?: string | null
+          threat_type?: string | null
+          updated_at?: string | null
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_alerts_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       generated_responses: {
         Row: {
           client_id: string | null
@@ -157,6 +266,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      monitored_platforms: {
+        Row: {
+          active: boolean | null
+          created_at: string | null
+          id: string
+          last_updated: string | null
+          mention_count: number | null
+          name: string
+          positive_ratio: number | null
+          sentiment: number | null
+          status: string | null
+          total: number | null
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          created_at?: string | null
+          id?: string
+          last_updated?: string | null
+          mention_count?: number | null
+          name: string
+          positive_ratio?: number | null
+          sentiment?: number | null
+          status?: string | null
+          total?: number | null
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          created_at?: string | null
+          id?: string
+          last_updated?: string | null
+          mention_count?: number | null
+          name?: string
+          positive_ratio?: number | null
+          sentiment?: number | null
+          status?: string | null
+          total?: number | null
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       monitoring_sources: {
         Row: {
@@ -254,12 +408,16 @@ export type Database = {
       scan_results: {
         Row: {
           client_id: string | null
+          confidence_score: number | null
           content: string
           created_at: string | null
+          detected_entities: Json | null
           id: string
           platform: string
+          potential_reach: number | null
           sentiment: number | null
           severity: string | null
+          source_type: string | null
           status: string | null
           threat_type: string | null
           updated_at: string | null
@@ -267,12 +425,16 @@ export type Database = {
         }
         Insert: {
           client_id?: string | null
+          confidence_score?: number | null
           content: string
           created_at?: string | null
+          detected_entities?: Json | null
           id?: string
           platform: string
+          potential_reach?: number | null
           sentiment?: number | null
           severity?: string | null
+          source_type?: string | null
           status?: string | null
           threat_type?: string | null
           updated_at?: string | null
@@ -280,12 +442,16 @@ export type Database = {
         }
         Update: {
           client_id?: string | null
+          confidence_score?: number | null
           content?: string
           created_at?: string | null
+          detected_entities?: Json | null
           id?: string
           platform?: string
+          potential_reach?: number | null
           sentiment?: number | null
           severity?: string | null
+          source_type?: string | null
           status?: string | null
           threat_type?: string | null
           updated_at?: string | null
@@ -375,6 +541,26 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
         }
         Returns: boolean
+      }
+      run_scan: {
+        Args: { scan_depth?: string }
+        Returns: {
+          client_id: string | null
+          confidence_score: number | null
+          content: string
+          created_at: string | null
+          detected_entities: Json | null
+          id: string
+          platform: string
+          potential_reach: number | null
+          sentiment: number | null
+          severity: string | null
+          source_type: string | null
+          status: string | null
+          threat_type: string | null
+          updated_at: string | null
+          url: string
+        }[]
       }
       set_role: {
         Args: {

@@ -20,6 +20,8 @@ export interface ScanResult {
   status: 'new' | 'read' | 'actioned' | 'resolved';
   threatType?: string;
   client_id?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 /**
@@ -139,10 +141,8 @@ export const runMonitoringScan = async (): Promise<ScanResult[]> => {
       console.error("Error updating monitoring status:", statusError);
     }
 
-    // Invoke the monitoring scan edge function
-    const { data, error } = await supabase.functions.invoke('monitoring-scan', {
-      body: { fullScan: true }
-    });
+    // Call the run_scan function via RPC
+    const { data, error } = await supabase.rpc('run_scan', { scan_depth: 'standard' });
     
     if (error) {
       console.error("Error running monitoring scan:", error);
@@ -150,31 +150,41 @@ export const runMonitoringScan = async (): Promise<ScanResult[]> => {
       return [];
     }
     
-    if (data && data.results) {
-      // Store the scan results in the database
-      const { error: insertError } = await supabase
-        .from('scan_results')
-        .insert(data.results.map((result: any) => ({
-          content: result.content,
-          platform: result.platform,
-          url: result.url || '',
-          sentiment: result.sentiment || 0,
-          severity: result.severity || 'medium',
-          status: 'new',
-          threat_type: result.threatType || null,
-          client_id: result.clientId || null
-        })));
+    // Get the latest scan results
+    const { data: scanResults, error: fetchError } = await supabase
+      .from('scan_results')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(10);
       
-      if (insertError) {
-        console.error("Error storing scan results:", insertError);
-      }
-      
-      toast.success(`Scan completed: ${data.results.length} mentions found`);
-      return data.results;
+    if (fetchError) {
+      console.error("Error fetching scan results:", fetchError);
+      return [];
     }
     
-    toast.info("Scan completed: No new mentions found");
-    return [];
+    // Convert to the expected format
+    const results = scanResults?.map(item => ({
+      id: item.id,
+      content: item.content,
+      platform: item.platform,
+      url: item.url || '',
+      date: item.created_at,
+      sentiment: item.sentiment || 0,
+      severity: item.severity as 'low' | 'medium' | 'high',
+      status: item.status as 'new' | 'read' | 'actioned' | 'resolved',
+      threatType: item.threat_type,
+      client_id: item.client_id,
+      created_at: item.created_at,
+      updated_at: item.updated_at
+    })) || [];
+    
+    if (results.length > 0) {
+      toast.success(`Scan completed: ${results.length} mentions found`);
+    } else {
+      toast.info("Scan completed: No new mentions found");
+    }
+    
+    return results;
     
   } catch (error) {
     console.error("Error in runMonitoringScan:", error);
@@ -228,13 +238,15 @@ export const getScanResults = async (limit: number = 10): Promise<ScanResult[]> 
       id: item.id,
       content: item.content,
       platform: item.platform,
-      url: item.url,
+      url: item.url || '',
       date: item.created_at,
-      sentiment: item.sentiment,
+      sentiment: item.sentiment || 0,
       severity: item.severity as 'low' | 'medium' | 'high',
       status: item.status as 'new' | 'read' | 'actioned' | 'resolved',
       threatType: item.threat_type,
-      client_id: item.client_id
+      client_id: item.client_id,
+      created_at: item.created_at,
+      updated_at: item.updated_at
     }));
     
   } catch (error) {
@@ -293,12 +305,53 @@ export const getMentionsAsAlerts = async (): Promise<any[]> => {
       date: item.created_at,
       severity: item.severity,
       status: item.status,
-      url: item.url,
+      url: item.url || '',
       threatType: item.threat_type
     }));
     
   } catch (error) {
     console.error("Error in getMentionsAsAlerts:", error);
     return [];
+  }
+};
+
+/**
+ * Insert default monitoring platforms if none exist
+ */
+export const initializeMonitoringPlatforms = async (): Promise<void> => {
+  try {
+    // Check if we have any platforms
+    const { data, error } = await supabase
+      .from('monitored_platforms')
+      .select('count')
+      .single();
+    
+    if (error) {
+      console.error("Error checking monitored platforms:", error);
+      return;
+    }
+    
+    const count = data?.count || 0;
+    
+    // Only add default platforms if none exist
+    if (count === 0) {
+      const defaultPlatforms = [
+        { name: 'Twitter', type: 'social', status: 'active' },
+        { name: 'Facebook', type: 'social', status: 'active' },
+        { name: 'Reddit', type: 'forum', status: 'active' },
+        { name: 'Yelp', type: 'review', status: 'active' },
+        { name: 'Google Reviews', type: 'review', status: 'active' }
+      ];
+      
+      const { error: insertError } = await supabase
+        .from('monitored_platforms')
+        .insert(defaultPlatforms);
+      
+      if (insertError) {
+        console.error("Error initializing monitoring platforms:", insertError);
+      }
+    }
+  } catch (error) {
+    console.error("Error in initializeMonitoringPlatforms:", error);
   }
 };

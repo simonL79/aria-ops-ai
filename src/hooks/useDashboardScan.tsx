@@ -1,56 +1,66 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
+import { runMonitoringScan } from "@/services/monitoring";
+import { ContentAlert } from "@/types/dashboard";
 
 export const useDashboardScan = (
-  alerts: any[],
-  setAlerts: (alerts: any[]) => void,
-  setFilteredAlerts: (alerts: any[]) => void, 
+  alerts: ContentAlert[],
+  setAlerts: (alerts: ContentAlert[]) => void,
+  setFilteredAlerts: (alerts: ContentAlert[]) => void, 
   setNegativeContent: React.Dispatch<React.SetStateAction<number>>
 ) => {
   const [isScanning, setIsScanning] = useState(false);
 
-  const handleScan = () => {
+  const handleScan = async () => {
     setIsScanning(true);
-    // Simulate scanning delay
-    setTimeout(() => {
-      setIsScanning(false);
+    
+    try {
+      // Run a real scan and get results
+      const results = await runMonitoringScan();
       
-      // Simulate finding new content
-      const newAlerts = [...alerts];
-      
-      // 50% chance to find new content
-      if (Math.random() > 0.5) {
-        const platforms = ['Twitter', 'Facebook', 'Reddit', 'Yelp', 'Instagram'];
-        const randomPlatform = platforms[Math.floor(Math.random() * platforms.length)];
-        const randomSeverity = Math.random() > 0.7 ? 'high' : Math.random() > 0.4 ? 'medium' : 'low';
+      if (results.length > 0) {
+        // Format the new results to match ContentAlert type
+        const newAlerts: ContentAlert[] = results.map(result => ({
+          id: result.id,
+          platform: result.platform,
+          content: result.content,
+          date: new Date(result.date).toLocaleString(),
+          severity: result.severity,
+          status: result.status,
+          threatType: result.threatType,
+          confidenceScore: 75, // Default confidence score
+          sourceType: 'scan',
+          sentiment: result.sentiment,
+        }));
         
-        newAlerts.unshift({
-          id: `new-${Date.now()}`,
-          platform: randomPlatform,
-          content: `New ${randomSeverity === 'high' ? 'negative' : randomSeverity === 'medium' ? 'mixed' : 'positive'} mention found during the latest scan.`,
-          date: 'Just now',
-          severity: randomSeverity,
-          status: 'new'
-        });
+        // Update alerts with new results
+        const updatedAlerts = [...newAlerts, ...alerts];
+        setAlerts(updatedAlerts);
+        setFilteredAlerts(updatedAlerts);
         
-        setAlerts(newAlerts);
-        setFilteredAlerts(newAlerts);
-        
-        // Fixed TypeScript error by directly passing a number instead of a function
-        if (randomSeverity === 'high') {
-          setNegativeContent(prev => prev + 1);
+        // Count new negative content
+        const newNegativeCount = results.filter(r => r.severity === 'high').length;
+        if (newNegativeCount > 0) {
+          setNegativeContent(prev => prev + newNegativeCount);
         }
         
         toast.success("Scan completed", {
-          description: `Found new content on ${randomPlatform}.`,
+          description: `Found ${results.length} new mentions.`,
         });
       } else {
         toast.success("Scan completed", {
           description: "No new mentions found across monitored platforms.",
         });
       }
-    }, 2000);
+    } catch (error) {
+      console.error("Scan error:", error);
+      toast.error("Error during scan", {
+        description: "Could not complete the scan. Please try again.",
+      });
+    } finally {
+      setIsScanning(false);
+    }
   };
 
   return {

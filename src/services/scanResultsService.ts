@@ -14,6 +14,10 @@ export interface ScanResult {
   client_id?: string;
   created_at: string;
   updated_at: string;
+  source_type?: string;
+  confidence_score?: number;
+  potential_reach?: number;
+  detected_entities?: any;
 }
 
 /**
@@ -108,6 +112,149 @@ export const updateScanResultStatus = async (id: string, status: 'read' | 'actio
     return true;
   } catch (error) {
     console.error("Error in updateScanResultStatus:", error);
+    return false;
+  }
+};
+
+/**
+ * Run a new scan and return the results
+ */
+export const runScan = async (depth: string = 'standard'): Promise<ScanResult[]> => {
+  try {
+    // Call the stored function to run a scan
+    const { data, error } = await supabase
+      .rpc('run_scan', { scan_depth: depth });
+    
+    if (error) {
+      console.error("Error running scan:", error);
+      toast.error("Failed to run scan");
+      return [];
+    }
+    
+    // Get the latest scan results after running the scan
+    return await getScanResults(10, 0);
+  } catch (error) {
+    console.error("Error in runScan:", error);
+    toast.error("An error occurred during the scan");
+    return [];
+  }
+};
+
+/**
+ * Get content alerts with pagination
+ */
+export const getContentAlerts = async (limit: number = 20, page: number = 0): Promise<any[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('content_alerts')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .range(page * limit, (page + 1) * limit - 1);
+    
+    if (error) {
+      console.error("Error fetching content alerts:", error);
+      toast.error("Failed to fetch content alerts");
+      return [];
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error("Error in getContentAlerts:", error);
+    toast.error("An error occurred while fetching alerts");
+    return [];
+  }
+};
+
+/**
+ * Get all monitored platforms
+ */
+export const getMonitoredPlatforms = async (): Promise<any[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('monitored_platforms')
+      .select('*')
+      .order('name');
+    
+    if (error) {
+      console.error("Error fetching monitored platforms:", error);
+      return [];
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error("Error in getMonitoredPlatforms:", error);
+    return [];
+  }
+};
+
+/**
+ * Create/update a monitored platform
+ */
+export const upsertMonitoredPlatform = async (platform: any): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from('monitored_platforms')
+      .upsert({
+        ...platform,
+        updated_at: new Date().toISOString()
+      });
+    
+    if (error) {
+      console.error("Error upserting monitored platform:", error);
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error("Error in upsertMonitoredPlatform:", error);
+    return false;
+  }
+};
+
+/**
+ * Get content actions with pagination
+ */
+export const getContentActions = async (limit: number = 20, page: number = 0): Promise<any[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('content_actions')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .range(page * limit, (page + 1) * limit - 1);
+    
+    if (error) {
+      console.error("Error fetching content actions:", error);
+      return [];
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error("Error in getContentActions:", error);
+    return [];
+  }
+};
+
+/**
+ * Create a new content action
+ */
+export const createContentAction = async (action: any): Promise<boolean> => {
+  try {
+    const { error } = await supabase
+      .from('content_actions')
+      .insert({
+        ...action,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      });
+    
+    if (error) {
+      console.error("Error creating content action:", error);
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error("Error in createContentAction:", error);
     return false;
   }
 };
