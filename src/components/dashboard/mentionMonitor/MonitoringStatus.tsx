@@ -12,13 +12,16 @@ interface MonitoringStatusProps {
 }
 
 const MonitoringStatus = ({ status, onStart, onStop }: MonitoringStatusProps) => {
+  // Parse the string dates to show formatted time
+  const nextRunTime = new Date(status.nextRun).toLocaleTimeString();
+  
   return (
     <div className="flex items-center justify-between">
       <div>
         <p className="text-sm font-medium">Monitoring Status</p>
         <p className="text-sm text-muted-foreground">
           {status.isActive 
-            ? `Next automated scan at ${status.nextRun.toLocaleTimeString()}`
+            ? `Next automated scan at ${nextRunTime}`
             : 'Monitoring is currently disabled'}
         </p>
       </div>

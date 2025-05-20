@@ -1,9 +1,10 @@
 
 export interface MonitoringStatus {
   isActive: boolean;
-  lastRun: Date;
-  nextRun: Date;
+  lastRun: string; // Changed from Date to string to match implementation
+  nextRun: string; // Changed from Date to string to match implementation
   sources: number;
+  activeSince?: string;
 }
 
 export interface MonitorablePlatform {

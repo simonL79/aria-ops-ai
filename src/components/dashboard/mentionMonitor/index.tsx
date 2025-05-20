@@ -7,10 +7,12 @@ import {
   getMonitoringStatus, 
   startMonitoring, 
   stopMonitoring, 
-  runMonitoringScan,
-  getAllMentions,
-  saveMention
+  runMonitoringScan
 } from '@/services/monitoring';
+import { 
+  getAllMentions, 
+  saveMention 
+} from '@/services/monitoring/mentions';
 import { ContentAlert } from '@/types/dashboard';
 import { classifyContent, storeMention } from '@/services/api/mentionsApiService';
 import { toast } from 'sonner';

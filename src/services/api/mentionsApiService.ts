@@ -2,7 +2,7 @@
 import { ContentAlert } from '@/types/dashboard';
 import { classifyThreat } from '@/services/intelligence/threatClassifier';
 import { ThreatClassificationResult } from '@/types/intelligence';
-import { saveMention } from '@/services/monitoring';
+import { saveMention } from '@/services/monitoring/mentions';
 import { toast } from 'sonner';
 
 // Interface for storing mentions

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -68,6 +67,16 @@ const ScanParametersForm = ({ onStartScan, isScanning }: ScanParametersFormProps
     }
   };
   
+  // Fix for the priority level selection to handle the type correctly
+  const handlePriorityChange = (value: string) => {
+    setParameters(prev => ({
+      ...prev,
+      // If value is 'none', set prioritizeSeverity to undefined, 
+      // otherwise set it to the appropriate severity type
+      prioritizeSeverity: value === "none" ? undefined : (value as "high" | "medium" | "low")
+    }));
+  };
+  
   return (
     <Card>
       <CardHeader>
@@ -135,10 +144,7 @@ const ScanParametersForm = ({ onStartScan, isScanning }: ScanParametersFormProps
           <Label>Priority Level</Label>
           <Select 
             value={parameters.prioritizeSeverity || "none"}
-            onValueChange={(value) => setParameters(prev => ({
-              ...prev, 
-              prioritizeSeverity: value === "none" ? undefined : value as "high" | "medium" | "low"
-            }))}
+            onValueChange={handlePriorityChange}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select priority level" />

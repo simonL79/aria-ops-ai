@@ -46,7 +46,11 @@ export const useScanningLogic = () => {
       
       // Set up continuous scanning
       stopScanning = startContinuousScan((newAlert) => {
-        setScanResults(prevResults => [newAlert, ...prevResults].slice(0, 30)); // Keep top 30
+        // Fix: Use a properly typed state update that doesn't mix types
+        setScanResults(prevResults => {
+          const updatedResults = [newAlert, ...prevResults];
+          return updatedResults.slice(0, 30); // Keep top 30
+        });
         
         // Update metrics
         setMetrics(prev => ({
@@ -73,6 +77,7 @@ export const useScanningLogic = () => {
     setIsScanning(true);
     try {
       const newAlerts = await performLiveScan();
+      // Fix: Use a properly typed state update
       setScanResults(prevResults => [...newAlerts, ...prevResults]);
       
       // Update metrics
