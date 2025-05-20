@@ -24,13 +24,13 @@ export const useAlertSimulation = (initialAlerts: ContentAlert[] = []): UseAlert
     const id = Math.random().toString(36).substring(2, 11);
     const platform = PLATFORMS[Math.floor(Math.random() * PLATFORMS.length)];
     const severity = SEVERITY[Math.floor(Math.random() * SEVERITY.length)];
-    const timestamp = new Date().toISOString();
+    const currentDate = new Date().toISOString();
     
     return {
       id,
       platform,
       content: `New mention on ${platform} about your brand. This might require your attention.`,
-      timestamp,
+      date: currentDate, // Changed from 'timestamp' to 'date' to match the ContentAlert type
       severity,
       status: 'new', // Changed from 'unread' to 'new' to match the ContentAlert type
       url: `/dashboard/engagement?alert=${id}`,
