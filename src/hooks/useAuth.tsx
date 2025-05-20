@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { logActivity, LogAction } from '@/services/activityLogService';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -51,10 +52,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           const userEmail = newSession.user.email;
           setIsAdmin(userEmail === ADMIN_EMAIL);
           
-          // In a production app, you would check user roles in a database
-          // This is just a simplification for the demo
+          // Log activity for sign in/out events
           if (event === 'SIGNED_IN') {
-            console.log("User signed in:", userEmail);
+            setTimeout(() => {
+              logActivity(
+                LogAction.LOGIN, 
+                `User signed in: ${userEmail}`, 
+                'user', 
+                userEmail || ''
+              );
+            }, 0);
+          } else if (event === 'SIGNED_OUT') {
+            // We don't log sign out here because the session is already gone
           }
         } else {
           setIsAdmin(false);
@@ -106,6 +115,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
       if (data.user) {
         toast.success("Signed in successfully!");
+        
+        // Activity log is handled by the auth state change listener
         return true;
       } else {
         toast.error("Login failed", {
@@ -129,6 +140,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     lastName?: string
   ): Promise<boolean> => {
     try {
+      // Block signup for non-admin users as per requirements
+      if (email !== ADMIN_EMAIL) {
+        toast.error("Sign up is restricted", {
+          description: "Only administrators can create new accounts"
+        });
+        return false;
+      }
+      
       // Create user with metadata
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -172,6 +191,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   
   const handleSignOut = async () => {
     try {
+      // First log the activity before signing out
+      if (user?.email) {
+        await logActivity(
+          LogAction.LOGOUT,
+          `User signed out: ${user.email}`,
+          'user',
+          user.email
+        );
+      }
+      
       const { error } = await supabase.auth.signOut();
       
       if (error) {

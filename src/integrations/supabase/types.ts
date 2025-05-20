@@ -223,6 +223,10 @@ export type Database = {
       }
     }
     Functions: {
+      assign_staff_role: {
+        Args: { user_email: string }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _user_id: string
@@ -239,7 +243,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "user" | "security"
+      app_role: "admin" | "user" | "security" | "staff"
       reputation_scan_status: "new" | "in_review" | "complete" | "archived"
     }
     CompositeTypes: {
@@ -356,7 +360,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user", "security"],
+      app_role: ["admin", "user", "security", "staff"],
       reputation_scan_status: ["new", "in_review", "complete", "archived"],
     },
   },

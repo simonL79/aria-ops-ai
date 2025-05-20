@@ -3,7 +3,7 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
 
-// Import pages from their actual locations
+// Import pages
 import HomePage from "./pages/HomePage";
 import Index from "./pages/Index";
 import AiScrapingPage from "./pages/AiScrapingPage";
@@ -23,8 +23,13 @@ function App() {
         <Route path="/home" element={<HomePage />} />
         <Route path="/auth" element={<Authentication />} />
         
-        {/* Protected routes requiring authentication */}
-        <Route element={<ProtectedRoute redirectTo="/auth" />}>
+        {/* Admin-only routes */}
+        <Route element={<ProtectedRoute requiredRole={["admin"]} redirectTo="/auth" />}>
+          <Route path="/dashboard/settings" element={<Settings />} />
+        </Route>
+        
+        {/* Admin or staff routes */}
+        <Route element={<ProtectedRoute requiredRole={["admin", "staff"]} redirectTo="/auth" />}>
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/dashboard/intelligence" element={<IntelligencePage />} />
           <Route path="/dashboard/radar" element={<RadarPage />} />
@@ -34,7 +39,6 @@ function App() {
           <Route path="/dashboard/new-companies/:id" element={<Index />} />
           <Route path="/dashboard/radar/entity/:id" element={<Index />} />
           <Route path="/dashboard/engagement" element={<EngagementHubPage />} />
-          <Route path="/dashboard/settings" element={<Settings />} />
         </Route>
         
         {/* Redirect legacy routes */}

@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import AuthHeader from "@/components/auth/AuthHeader";
 import AuthenticationForm from "@/components/auth/AuthenticationForm";
 import AuthLoadingState from "@/components/auth/AuthLoadingState";
-import { LogIn } from "lucide-react";
+import { LogIn, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -52,9 +52,19 @@ const Authentication = () => {
           onClick={scrollToAuthCard}
         >
           <LogIn className="mr-2 h-5 w-5" />
-          <span>Secure Login</span>
+          <span>Staff Login Only</span>
         </Button>
         <p className="mt-2 text-sm text-gray-500">Access your A.R.I.A. security dashboard</p>
+        
+        <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-md">
+          <div className="flex items-center text-amber-700 mb-1">
+            <ShieldAlert className="h-4 w-4 mr-1" />
+            <span className="font-medium">Internal Access Only</span>
+          </div>
+          <p className="text-xs text-amber-800">
+            This system is for authorized staff only. Customer reports are delivered externally.
+          </p>
+        </div>
       </div>
 
       <Card id="auth-card" className="w-full max-w-md border-2 border-primary shadow-lg">
@@ -63,7 +73,7 @@ const Authentication = () => {
             A.R.I.A. Security Login
           </CardTitle>
           <CardDescription className="text-center">
-            Sign in to access your A.R.I.A. dashboard
+            Sign in to access the A.R.I.A. admin dashboard
           </CardDescription>
         </CardHeader>
         <CardContent>

@@ -2,10 +2,12 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Wifi, Clock, Shield, Server, AlertCircle } from "lucide-react";
+import { Wifi, Clock, Shield, Server, AlertCircle, UserCheck } from "lucide-react";
 import { useState, useEffect } from "react";
 import { getMonitoringStatus } from "@/services/monitoring";
 import { getMonitoringStatus as getAiScanningStatus } from "@/services/aiScraping/mockScanner";
+import { useAuth } from "@/hooks/useAuth";
+import { useRbac } from "@/hooks/useRbac";
 
 interface SystemStatusIndicatorProps {
   isLive?: boolean;
@@ -19,6 +21,9 @@ const SystemStatusIndicator = ({ isLive = true }: SystemStatusIndicatorProps) =>
     activeSources: 0,
     lastScanTime: new Date().toLocaleTimeString()
   });
+  
+  const { user } = useAuth();
+  const { roles } = useRbac();
 
   // Update stats periodically for real-time effect
   useEffect(() => {
@@ -53,20 +58,37 @@ const SystemStatusIndicator = ({ isLive = true }: SystemStatusIndicatorProps) =>
     return () => clearInterval(interval);
   }, [isLive]);
 
+  const isAdmin = roles.includes('admin');
+  const isStaff = roles.includes('staff');
+
   return (
     <Card>
       <CardContent className="p-4">
         <div className="flex justify-between items-center mb-4">
           <h3 className="font-semibold text-sm">System Status</h3>
-          {isLive ? (
-            <Badge variant="outline" className="bg-green-50 text-green-600 border-green-200 animate-pulse">
-              <Wifi className="h-3 w-3 mr-1" /> LIVE
-            </Badge>
-          ) : (
-            <Badge variant="outline" className="bg-amber-50 text-amber-600 border-amber-200">
-              <AlertCircle className="h-3 w-3 mr-1" /> OFFLINE
-            </Badge>
-          )}
+          <div className="flex gap-2">
+            {isLive ? (
+              <Badge variant="outline" className="bg-green-50 text-green-600 border-green-200 animate-pulse">
+                <Wifi className="h-3 w-3 mr-1" /> LIVE
+              </Badge>
+            ) : (
+              <Badge variant="outline" className="bg-amber-50 text-amber-600 border-amber-200">
+                <AlertCircle className="h-3 w-3 mr-1" /> OFFLINE
+              </Badge>
+            )}
+            
+            {isAdmin && (
+              <Badge variant="outline" className="bg-purple-50 text-purple-600 border-purple-200">
+                <Shield className="h-3 w-3 mr-1" /> ADMIN
+              </Badge>
+            )}
+            
+            {isStaff && !isAdmin && (
+              <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200">
+                <UserCheck className="h-3 w-3 mr-1" /> STAFF
+              </Badge>
+            )}
+          </div>
         </div>
         
         <div className="space-y-2 text-sm">
@@ -106,6 +128,12 @@ const SystemStatusIndicator = ({ isLive = true }: SystemStatusIndicatorProps) =>
             </span>
             <span>{lastRefresh.toLocaleTimeString()}</span>
           </div>
+          
+          {user && (
+            <div className="text-xs text-muted-foreground mt-2 pt-2 border-t border-gray-100">
+              Logged in as: {user.email}
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

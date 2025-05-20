@@ -2,12 +2,11 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './useAuth';
 import { supabase } from '@/integrations/supabase/client';
-
-export type Role = 'admin' | 'manager' | 'analyst' | 'user' | 'security';
+import { AppRole } from '@/services/api/userService';
 
 interface RbacContextType {
-  roles: Role[];
-  hasPermission: (requiredRoles: Role | Role[]) => boolean;
+  roles: AppRole[];
+  hasPermission: (requiredRoles: AppRole | AppRole[]) => boolean;
   isLoading: boolean;
 }
 
@@ -17,9 +16,9 @@ const RbacContext = createContext<RbacContextType>({
   isLoading: true,
 });
 
-export const RbacProvider = ({ children, initialRoles = ['user'] }: { children: React.ReactNode, initialRoles?: Role[] }) => {
+export const RbacProvider = ({ children, initialRoles = ['user'] }: { children: React.ReactNode, initialRoles?: AppRole[] }) => {
   const { isAuthenticated, userId } = useAuth();
-  const [roles, setRoles] = useState<Role[]>(initialRoles);
+  const [roles, setRoles] = useState<AppRole[]>(initialRoles);
   const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
@@ -43,7 +42,7 @@ export const RbacProvider = ({ children, initialRoles = ['user'] }: { children: 
         console.error('Error fetching user roles:', error);
         setRoles(['user']); // Default to user role on error
       } else if (data && data.length > 0) {
-        const userRoles = data.map(r => r.role as Role);
+        const userRoles = data.map(r => r.role as AppRole);
         setRoles([...userRoles, 'user']); // Always include 'user' role
         console.log('User roles:', userRoles);
       } else {
@@ -57,7 +56,7 @@ export const RbacProvider = ({ children, initialRoles = ['user'] }: { children: 
     }
   };
   
-  const hasPermission = (requiredRoles: Role | Role[]) => {
+  const hasPermission = (requiredRoles: AppRole | AppRole[]) => {
     if (!requiredRoles || (Array.isArray(requiredRoles) && requiredRoles.length === 0)) {
       return true;
     }
@@ -78,7 +77,7 @@ export const RbacProvider = ({ children, initialRoles = ['user'] }: { children: 
 export const useRbac = () => useContext(RbacContext);
 
 interface ProtectedProps {
-  roles: Role | Role[];
+  roles: AppRole | AppRole[];
   fallback?: React.ReactNode;
   children: React.ReactNode;
 }

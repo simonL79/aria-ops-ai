@@ -49,14 +49,6 @@ const SignInForm = ({ setShowResetForm }: SignInFormProps) => {
       const success = await signIn(values.email, values.password);
       
       if (success) {
-        // Log successful login activity
-        await logActivity(
-          LogAction.LOGIN,
-          `User login: ${values.email}`,
-          'user',
-          values.email
-        );
-        
         toast.success("Login successful! Redirecting to dashboard...");
         setTimeout(() => navigate(from), 500); // Short delay to show the success message
       } else {
