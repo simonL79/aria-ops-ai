@@ -68,9 +68,10 @@ const SimulationButton = ({ running: externalRunning, onRun }: SimulationButtonP
   
   return (
     <Button 
-      variant="outline" 
+      variant="action" 
       onClick={handleRun} 
       disabled={running}
+      className="font-medium"
     >
       {running ? (
         <>

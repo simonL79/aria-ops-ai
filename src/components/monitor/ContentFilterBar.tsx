@@ -49,7 +49,7 @@ const ContentFilterBar = ({
           </SelectContent>
         </Select>
         
-        <Button onClick={onFilter}>Filter</Button>
+        <Button variant="action" onClick={onFilter}>Filter</Button>
       </div>
     </div>
   );

@@ -75,6 +75,7 @@ const SerpDefenseTabTactics = () => {
         </p>
         <Button 
           size="sm" 
+          variant="action"
           className="w-full"
           disabled={deploying !== null}
           onClick={() => handleDeploy("Content Shield")}

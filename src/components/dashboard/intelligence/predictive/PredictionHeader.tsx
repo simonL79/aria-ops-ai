@@ -32,10 +32,11 @@ const PredictionHeader = ({ refreshing: externalRefreshing, onRefresh }: Predict
         </p>
       </div>
       <Button 
-        variant="outline" 
+        variant="action" 
         size="sm" 
         onClick={handleRefresh}
         disabled={refreshing}
+        className="shadow-sm"
       >
         {refreshing ? (
           <>

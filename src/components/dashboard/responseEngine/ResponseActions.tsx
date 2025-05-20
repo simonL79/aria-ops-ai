@@ -57,7 +57,7 @@ const ResponseActions = ({
   return (
     <div className="flex flex-wrap gap-2">
       <Button 
-        variant="default" 
+        variant="action" 
         onClick={onGenerate} 
         disabled={isGenerating}
         className="flex-1"
@@ -76,7 +76,7 @@ const ResponseActions = ({
       </Button>
       
       <Button
-        variant="secondary"
+        variant="premium"
         onClick={handleAutoRespond}
         disabled={isGenerating || !autoResponseEnabled || !responseText}
       >
@@ -87,7 +87,7 @@ const ResponseActions = ({
       {responseText && (
         <>
           <Button 
-            variant="outline" 
+            variant="secondary" 
             onClick={onRegenerate}
             disabled={isGenerating}
           >

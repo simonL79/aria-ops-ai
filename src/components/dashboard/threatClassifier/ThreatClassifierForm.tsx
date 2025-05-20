@@ -59,7 +59,7 @@ const ThreatClassifierForm = ({
             To use the threat analysis feature, you need to set your OpenAI API key
             in the security settings.
           </p>
-          <Button onClick={goToSettings} className="w-full">
+          <Button onClick={goToSettings} variant="action" className="w-full">
             Go to Security Settings
           </Button>
         </CardContent>
@@ -111,6 +111,7 @@ const ThreatClassifierForm = ({
         onClick={handleSubmit} 
         disabled={isClassifying || !content.trim()}
         className="w-full"
+        variant="action"
       >
         {isClassifying ? (
           <>

@@ -56,6 +56,7 @@ const DashboardControls = ({
         disabled={isScanning}
         className="w-full md:w-auto"
         type="button" // Explicitly set type to button
+        variant="action"
       >
         {isScanning ? (
           <>

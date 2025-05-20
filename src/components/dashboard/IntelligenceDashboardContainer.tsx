@@ -81,8 +81,9 @@ const IntelligenceDashboardContainer = ({
         <Button 
           onClick={handleRunAnalysis} 
           disabled={isRunningAnalysis}
-          variant="default"
+          variant="action"
           type="button" // Explicitly set type to button to prevent form submission
+          className="shadow-sm"
         >
           {isRunningAnalysis ? (
             <>
