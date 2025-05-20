@@ -16,9 +16,15 @@ const Settings = () => {
   const [activeTab, setActiveTab] = useState<string>("general");
   const hasApiKey = hasValidKey('openai_api_key');
   
-  // Set active tab based on URL
+  // Set active tab based on URL parameters or default selection
   useEffect(() => {
-    if (location.pathname.includes("/security")) {
+    // Check for tab parameter in URL
+    const params = new URLSearchParams(location.search);
+    const tabParam = params.get('tab');
+    
+    if (tabParam && ['general', 'profile', 'notifications', 'security', 'gdpr'].includes(tabParam)) {
+      setActiveTab(tabParam);
+    } else if (location.pathname.includes("/security")) {
       setActiveTab("security");
     } else if (location.pathname.includes("/gdpr")) {
       setActiveTab("gdpr");
@@ -28,7 +34,13 @@ const Settings = () => {
     } else {
       setActiveTab("general");
     }
-  }, [location.pathname, hasApiKey]);
+  }, [location.pathname, location.search, hasApiKey]);
+  
+  // Update URL when tab changes
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    navigate(`/settings?tab=${value}`, { replace: true });
+  };
   
   return (
     <DashboardLayout>
@@ -39,7 +51,7 @@ const Settings = () => {
       
       <Tabs 
         value={activeTab} 
-        onValueChange={setActiveTab} 
+        onValueChange={handleTabChange} 
         className="w-full"
       >
         <TabsList>

@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Loader, ShieldCheck, Key } from "lucide-react";
-import { Building, Globe } from "lucide-react";
+import { Building, Globe, ExternalLink } from "lucide-react";
 import { ThreatClassifierRequest } from "@/types/intelligence";
 import { hasValidKey } from "@/utils/secureKeyStorage";
 import { useNavigate } from "react-router-dom";
@@ -46,7 +46,7 @@ const ThreatClassifierForm = ({
   };
 
   const goToSettings = () => {
-    navigate('/settings');
+    navigate('/settings?tab=security');
   };
 
   if (!hasApiKey) {
@@ -54,14 +54,28 @@ const ThreatClassifierForm = ({
       <Card className="border-dashed border-red-200">
         <CardContent className="p-6 text-center">
           <Key className="mx-auto h-12 w-12 text-red-400 mb-4" />
-          <h3 className="text-lg font-medium mb-2">API Key Required</h3>
+          <h3 className="text-lg font-medium mb-2">OpenAI API Key Required</h3>
           <p className="text-sm text-muted-foreground mb-4">
-            To use the threat analysis feature, you need to set your OpenAI API key
-            in the security settings.
+            The Threat Intelligence Classifier uses OpenAI's API to analyze content for potential threats.
+            Please set your OpenAI API key in the Security Settings.
           </p>
-          <Button onClick={goToSettings} variant="action" className="w-full">
-            Go to Security Settings
-          </Button>
+          <div className="space-y-2">
+            <Button onClick={goToSettings} variant="default" className="w-full">
+              Go to Security Settings
+              <ExternalLink className="ml-2 h-4 w-4" />
+            </Button>
+            <div className="text-xs text-muted-foreground mt-4">
+              <a 
+                href="https://platform.openai.com/api-keys" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-blue-500 hover:underline inline-flex items-center"
+              >
+                Get an OpenAI API key
+                <ExternalLink className="ml-1 h-3 w-3" />
+              </a>
+            </div>
+          </div>
         </CardContent>
       </Card>
     );
