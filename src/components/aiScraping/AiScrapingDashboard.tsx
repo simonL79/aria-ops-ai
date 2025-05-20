@@ -1,107 +1,176 @@
 
-import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
-import { Loader } from 'lucide-react';
-import SourcesManager from './SourcesManager';
-import ManualInputForm from './ManualInputForm';
-import ScrapingResults from './ScrapingResults';
-import ScrapingQueryForm from './ScrapingQueryForm';
-import PromptTemplates from './PromptTemplates';
-import NotificationSettings from './NotificationSettings';
-import EntityWatchlist from './EntityWatchlist';
-import ModelSettings from './ModelSettings';
-import ScanStats from './ScanStats';
-import { ScrapingQuery, ScrapingResult } from '@/types/aiScraping';
-import { runScraping } from '@/services/aiScrapingService';
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Loader, Play, Pause } from "lucide-react";
+import { ContentAlert } from "@/types/dashboard";
+import { startContinuousScan, performLiveScan } from '@/services/aiScraping/mockScanner';
+import { toast } from "sonner";
 
 const AiScrapingDashboard = () => {
-  const [activeTab, setActiveTab] = useState('results');
-  const [isLoading, setIsLoading] = useState(false);
-  const [results, setResults] = useState<ScrapingResult[]>([]);
-
-  const handleRunScraping = async (query: ScrapingQuery) => {
-    setIsLoading(true);
-    try {
-      const newResults = await runScraping(query);
-      setResults(newResults);
-      setActiveTab('results');
-    } catch (error) {
-      console.error('Error running scraping:', error);
-    } finally {
-      setIsLoading(false);
+  const [isActive, setIsActive] = useState<boolean>(false);
+  const [isInitialScan, setIsInitialScan] = useState<boolean>(true);
+  const [scanResults, setScanResults] = useState<ContentAlert[]>([]);
+  const [isScanning, setIsScanning] = useState<boolean>(false);
+  
+  useEffect(() => {
+    // Start with a one-time scan when component mounts
+    if (isInitialScan) {
+      setIsScanning(true);
+      performLiveScan().then(alerts => {
+        setScanResults(prev => [...alerts, ...prev]);
+        setIsScanning(false);
+        setIsInitialScan(false);
+      });
     }
+    
+    let stopScanning: (() => void) | null = null;
+    
+    if (isActive) {
+      toast.info("Real-time scanning activated", {
+        description: "ARIA will continuously monitor for new mentions and alerts"
+      });
+      
+      // Set up continuous scanning
+      stopScanning = startContinuousScan((newAlert) => {
+        setScanResults(prev => [newAlert, ...prev].slice(0, 20)); // Keep top 20
+      });
+    }
+    
+    // Clean up the scanning when component unmounts or when isActive changes
+    return () => {
+      if (stopScanning) {
+        stopScanning();
+      }
+    };
+  }, [isActive, isInitialScan]);
+  
+  const handleToggleScan = () => {
+    setIsActive(prev => !prev);
   };
-
+  
+  const handleManualScan = async () => {
+    setIsScanning(true);
+    const newAlerts = await performLiveScan();
+    setScanResults(prev => [...newAlerts, ...prev]);
+    setIsScanning(false);
+  };
+  
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle className="text-xl">AI Scraping & Data Collection</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-9 mb-4">
-            <TabsTrigger value="query">Query Builder</TabsTrigger>
-            <TabsTrigger value="sources">Sources</TabsTrigger>
-            <TabsTrigger value="manual">Manual Input</TabsTrigger>
-            <TabsTrigger value="watchlist">Watchlist</TabsTrigger>
-            <TabsTrigger value="models">Models</TabsTrigger>
-            <TabsTrigger value="prompts">AI Prompts</TabsTrigger>
-            <TabsTrigger value="stats">Scan Stats</TabsTrigger>
-            <TabsTrigger value="notifications">Notifications</TabsTrigger>
-            <TabsTrigger value="results">Results</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="query">
-            <div className="space-y-4">
-              <ScrapingQueryForm 
-                onSubmit={handleRunScraping} 
-                isLoading={isLoading} 
-              />
-              {isLoading && (
-                <div className="flex items-center justify-center py-8">
-                  <Loader className="h-8 w-8 animate-spin text-muted-foreground" />
-                  <p className="ml-2 text-muted-foreground">Running AI-powered scraping...</p>
-                </div>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-semibold">Reputation Intelligence</h2>
+        <div className="flex items-center gap-2">
+          <Button
+            variant={isActive ? "destructive" : "default"}
+            onClick={handleToggleScan}
+            className="gap-2"
+          >
+            {isActive ? (
+              <>
+                <Pause className="h-4 w-4" />
+                Stop Real-Time Scan
+              </>
+            ) : (
+              <>
+                <Play className="h-4 w-4" />
+                Activate Real-Time
+              </>
+            )}
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={handleManualScan}
+            disabled={isScanning}
+          >
+            {isScanning ? (
+              <>
+                <Loader className="h-4 w-4 animate-spin mr-2" />
+                Scanning...
+              </>
+            ) : (
+              "Run Manual Scan"
+            )}
+          </Button>
+        </div>
+      </div>
+      
+      <Card>
+        <CardHeader>
+          <CardTitle>Scan Results</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {scanResults.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">No scan results yet.</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                {isActive 
+                  ? "Real-time scanning is active. Results will appear here as they are detected." 
+                  : "Activate real-time scanning to monitor for brand mentions and threats."}
+              </p>
+              {!isActive && !isScanning && (
+                <Button 
+                  variant="outline" 
+                  className="mt-4" 
+                  onClick={() => setIsActive(true)}
+                >
+                  Activate Scanning
+                </Button>
               )}
             </div>
-          </TabsContent>
-
-          <TabsContent value="sources">
-            <SourcesManager />
-          </TabsContent>
-
-          <TabsContent value="manual">
-            <ManualInputForm onSuccess={() => setActiveTab('results')} />
-          </TabsContent>
-          
-          <TabsContent value="watchlist">
-            <EntityWatchlist />
-          </TabsContent>
-          
-          <TabsContent value="models">
-            <ModelSettings />
-          </TabsContent>
-          
-          <TabsContent value="prompts">
-            <PromptTemplates />
-          </TabsContent>
-          
-          <TabsContent value="stats">
-            <ScanStats />
-          </TabsContent>
-
-          <TabsContent value="notifications">
-            <NotificationSettings />
-          </TabsContent>
-
-          <TabsContent value="results">
-            <ScrapingResults results={results} />
-          </TabsContent>
-        </Tabs>
-      </CardContent>
-    </Card>
+          ) : (
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                {isActive 
+                  ? "Real-time scanning is active. New results will appear automatically." 
+                  : "Real-time scanning is inactive. Run a manual scan or activate real-time scanning."}
+              </p>
+              <div className="divide-y">
+                {scanResults.map(result => (
+                  <div key={result.id} className="py-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <span className={`h-2 w-2 rounded-full mr-2 ${
+                          result.severity === 'high' 
+                            ? 'bg-red-500' 
+                            : result.severity === 'medium' 
+                            ? 'bg-yellow-500' 
+                            : 'bg-green-500'
+                        }`} />
+                        <span className="font-medium">{result.platform}</span>
+                      </div>
+                      <span className="text-xs text-muted-foreground">{result.date}</span>
+                    </div>
+                    <p className="mt-1 text-sm">{result.content}</p>
+                    <div className="mt-2">
+                      {result.category === 'customer_enquiry' && (
+                        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">
+                          Customer Enquiry
+                        </span>
+                      )}
+                      <span className={`ml-2 text-xs px-2 py-0.5 rounded-full ${
+                        result.severity === 'high' 
+                          ? 'bg-red-100 text-red-800' 
+                          : result.severity === 'medium' 
+                          ? 'bg-yellow-100 text-yellow-800' 
+                          : 'bg-green-100 text-green-800'
+                      }`}>
+                        {result.severity === 'high' 
+                          ? 'High Priority' 
+                          : result.severity === 'medium' 
+                          ? 'Medium Priority' 
+                          : 'Low Priority'
+                        }
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

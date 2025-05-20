@@ -1,24 +1,25 @@
 
+import React from 'react';
 import { ContentAlert } from "@/types/dashboard";
 import AlertItem from "./AlertItem";
 
 interface AlertsListProps {
   filteredAlerts: ContentAlert[];
-  handleDismiss: (alertId: string) => void;
-  handleMarkAsRead: (alertId: string) => void;
+  handleDismiss: (id: string) => void;
+  handleMarkAsRead: (id: string) => void;
   onViewDetail?: (alert: ContentAlert) => void;
 }
 
-const AlertsList = ({
-  filteredAlerts,
-  handleDismiss,
+const AlertsList: React.FC<AlertsListProps> = ({ 
+  filteredAlerts, 
+  handleDismiss, 
   handleMarkAsRead,
   onViewDetail
-}: AlertsListProps) => {
+}) => {
   if (filteredAlerts.length === 0) {
     return (
-      <div className="py-8 text-center">
-        <p className="text-muted-foreground">No alerts matching your filter</p>
+      <div className="p-6 text-center">
+        <p className="text-muted-foreground">No alerts to display</p>
       </div>
     );
   }
@@ -26,8 +27,8 @@ const AlertsList = ({
   return (
     <>
       {filteredAlerts.map((alert, index) => (
-        <AlertItem 
-          key={alert.id} 
+        <AlertItem
+          key={alert.id}
           alert={alert}
           isLast={index === filteredAlerts.length - 1}
           onDismiss={handleDismiss}
