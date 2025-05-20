@@ -40,7 +40,7 @@ const PredictionHeader = ({ refreshing: externalRefreshing, onRefresh }: Predict
       >
         {refreshing ? (
           <>
-            <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+            <Loader className="h-4 w-4 mr-2 animate-spin" />
             Refreshing
           </>
         ) : (

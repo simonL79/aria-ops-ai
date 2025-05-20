@@ -1,220 +1,92 @@
 
-import React, { Suspense } from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
-import { Toaster } from "sonner";
-import { useAuth } from "./hooks/useAuth";
-import { RbacProvider, Role, Protected } from "./hooks/useRbac";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'sonner';
 
-import SalesFunnelPage from "./pages/SalesFunnelPage";
-import AboutPage from "./pages/AboutPage";
-import BiographyPage from "./pages/BiographyPage";
-import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
-import DisclaimerPage from "./pages/DisclaimerPage";
-import ReputationScanForm from "./pages/ReputationScanForm";
-import ThankYouPage from "./pages/ThankYouPage";
-import Authentication from "./pages/Authentication";
-import Clients from "./pages/Clients";
-import Monitor from "./pages/Monitor";
-import Reports from "./pages/Reports";
-import Removal from "./pages/Removal";
-import Settings from "./pages/Settings";
-import NotFound from "./pages/NotFound";
-import PricingPage from "./pages/PricingPage";
-import PaymentPage from "./pages/PaymentPage";
-import NewCoPage from "./pages/NewCoPage";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-
-const DashboardPage = React.lazy(() => import("./pages/dashboard/DashboardPage"));
-const CommandCenterPage = React.lazy(() => import("./pages/dashboard/CommandCenterPage"));
-const MentionsPage = React.lazy(() => import("./pages/dashboard/MentionsPage"));
-const AnalyticsPage = React.lazy(() => import("./pages/dashboard/AnalyticsPage"));
-const ScanSubmissionsPage = React.lazy(() => import("./pages/dashboard/ScanSubmissionsPage"));
-const RadarPage = React.lazy(() => import("./pages/dashboard/RadarPage"));
-
-const queryClient = new QueryClient();
-
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, isLoading } = useAuth();
-
-  if (isLoading) {
-    return (
-      <div className="h-screen w-screen flex flex-col items-center justify-center">
-        <Skeleton className="h-12 w-64 mb-4" />
-        <Skeleton className="h-4 w-48" />
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return <Navigate to="/auth" />;
-  }
-
-  return children;
-};
+import HomePage from './pages/HomePage';
+import AboutPage from './pages/AboutPage';
+import BiographyPage from './pages/BiographyPage';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
+import DisclaimerPage from './pages/DisclaimerPage';
+import NotFound from './pages/NotFound';
+import Authentication from './pages/Authentication';
+import Monitor from './pages/Monitor';
+import Removal from './pages/Removal';
+import Settings from './pages/Settings';
+import ThankYouPage from './pages/ThankYouPage';
+import DashboardPage from './pages/dashboard/DashboardPage';
+import ReputationScanForm from './pages/ReputationScanForm';
+import SalesFunnelPage from './pages/SalesFunnelPage';
+import PricingPage from './pages/PricingPage';
+import PaymentPage from './pages/PaymentPage';
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import SignedInRedirect from './components/auth/SignedInRedirect';
+import Clients from './pages/Clients';
+import CommandCenterPage from './pages/dashboard/CommandCenterPage';
+import RadarPage from './pages/dashboard/RadarPage';
+import ScanSubmissionsPage from './pages/dashboard/ScanSubmissionsPage';
+import NewCoPage from './pages/NewCoPage';
+import MentionsPage from './pages/dashboard/MentionsPage';
+import AnalyticsPage from './pages/dashboard/AnalyticsPage';
+import Reports from './pages/Reports';
+import GDPRCompliancePage from './pages/GDPRCompliancePage';
+import RequestDataAccessPage from './pages/RequestDataAccessPage';
+import DPARequestPage from './pages/DPARequestPage';
 
 function App() {
-  const { isLoading, isAuthenticated } = useAuth();
-
-  // Default to 'user' role, but add 'admin' role if authenticated
-  const userRoles: Role[] = isAuthenticated ? ['user', 'admin', 'security'] : ['user'];
-
-  if (isLoading) {
-    return (
-      <div className="h-screen w-screen flex flex-col items-center justify-center">
-        <Skeleton className="h-12 w-64 mb-4" />
-        <Skeleton className="h-4 w-48" />
-      </div>
-    );
-  }
-
   return (
-    <QueryClientProvider client={queryClient}>
-      <RbacProvider initialRoles={userRoles}>
-        <Router>
-          <Routes>
-            {/* Public routes */}
-            <Route path="/" element={<SalesFunnelPage />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/biography" element={<BiographyPage />} />
-            <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-            <Route path="/disclaimer" element={<DisclaimerPage />} />
-            <Route path="/scan" element={<ReputationScanForm />} />
-            <Route path="/thank-you" element={<ThankYouPage />} />
-            <Route path="/auth" element={<Authentication />} />
-            <Route path="/pricing" element={<PricingPage />} />
-            <Route path="/payment" element={<PaymentPage />} />
-            
-            {/* Redirect any /sales route to the home page */}
-            <Route path="/sales" element={<Navigate to="/" replace />} />
-            
-            {/* Protected routes - require authentication */}
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <Suspense fallback={
-                    <div className="h-screen w-screen flex flex-col items-center justify-center">
-                      <Skeleton className="h-12 w-64 mb-4" />
-                      <Skeleton className="h-4 w-48" />
-                    </div>
-                  }>
-                    <DashboardPage />
-                  </Suspense>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard/mentions"
-              element={
-                <ProtectedRoute>
-                  <React.Suspense fallback={<div>Loading...</div>}>
-                    <MentionsPage />
-                  </React.Suspense>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard/command-center"
-              element={
-                <ProtectedRoute>
-                  <React.Suspense fallback={<div>Loading...</div>}>
-                    <CommandCenterPage />
-                  </React.Suspense>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard/analytics"
-              element={
-                <ProtectedRoute>
-                  <React.Suspense fallback={<div>Loading...</div>}>
-                    <AnalyticsPage />
-                  </React.Suspense>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard/scan-submissions"
-              element={
-                <ProtectedRoute>
-                  <React.Suspense fallback={<div>Loading...</div>}>
-                    <Protected roles="admin" fallback={<Navigate to="/dashboard" />}>
-                      <ScanSubmissionsPage />
-                    </Protected>
-                  </React.Suspense>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard/radar"
-              element={
-                <ProtectedRoute>
-                  <React.Suspense fallback={<div>Loading...</div>}>
-                    <RadarPage />
-                  </React.Suspense>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/newco"
-              element={
-                <ProtectedRoute>
-                  <NewCoPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/clients"
-              element={
-                <ProtectedRoute>
-                  <Clients />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/monitor"
-              element={
-                <ProtectedRoute>
-                  <Monitor />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/reports"
-              element={
-                <ProtectedRoute>
-                  <Reports />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/removal"
-              element={
-                <ProtectedRoute>
-                  <Removal />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/settings"
-              element={
-                <ProtectedRoute>
-                  <Settings />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          <Toaster />
-        </Router>
-      </RbacProvider>
-    </QueryClientProvider>
+    <>
+      <Toaster richColors position="top-center" />
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/" element={<HomePage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/biography" element={<BiographyPage />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+        <Route path="/disclaimer" element={<DisclaimerPage />} />
+        <Route path="/funnel" element={<SalesFunnelPage />} />
+        <Route path="/pricing" element={<PricingPage />} />
+        <Route path="/pay" element={<PaymentPage />} />
+        <Route path="/thankyou" element={<ThankYouPage />} />
+        <Route path="/thank-you" element={<ThankYouPage />} />
+        <Route path="/reputation-scan" element={<ReputationScanForm />} />
+        
+        {/* GDPR Routes */}
+        <Route path="/gdpr-compliance" element={<GDPRCompliancePage />} />
+        <Route path="/request-data-access" element={<RequestDataAccessPage />} />
+        <Route path="/dpa-request" element={<DPARequestPage />} />
+
+        {/* Authentication Routes with Redirect for signed-in users */}
+        <Route 
+          path="/auth/*" 
+          element={
+            <SignedInRedirect>
+              <Authentication />
+            </SignedInRedirect>
+          } 
+        />
+
+        {/* Protected Routes */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/monitor" element={<Monitor />} />
+          <Route path="/removal" element={<Removal />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/clients" element={<Clients />} />
+          <Route path="/command-center" element={<CommandCenterPage />} />
+          <Route path="/radar" element={<RadarPage />} />
+          <Route path="/scan-submissions" element={<ScanSubmissionsPage />} />
+          <Route path="/mentions" element={<MentionsPage />} />
+          <Route path="/analytics" element={<AnalyticsPage />} />
+          <Route path="/intelligence" element={<DashboardPage />} />
+          <Route path="/newco" element={<NewCoPage />} />
+          <Route path="/reports" element={<Reports />} />
+        </Route>
+
+        {/* Not Found and Redirects */}
+        <Route path="/index" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </>
   );
 }
 

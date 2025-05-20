@@ -7,7 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { hasValidKey } from "@/utils/secureKeyStorage";
 import SecuritySettings from "@/components/settings/SecuritySettings";
-import { Key } from "lucide-react";
+import GDPRSettings from "@/components/settings/GDPRSettings";
+import { Key, Shield } from "lucide-react";
 
 const Settings = () => {
   const location = useLocation();
@@ -19,6 +20,8 @@ const Settings = () => {
   useEffect(() => {
     if (location.pathname.includes("/security")) {
       setActiveTab("security");
+    } else if (location.pathname.includes("/gdpr")) {
+      setActiveTab("gdpr");
     } else if (!hasApiKey) {
       // Auto-select security tab if no API key is set
       setActiveTab("security");
@@ -53,6 +56,10 @@ const Settings = () => {
             Security
             {!hasApiKey && <Key className="ml-1 h-3 w-3 text-primary" />}
           </TabsTrigger>
+          <TabsTrigger value="gdpr" className="flex items-center gap-1">
+            <Shield className="h-4 w-4" />
+            GDPR
+          </TabsTrigger>
         </TabsList>
         
         <TabsContent value="general" className="mt-4">
@@ -84,6 +91,10 @@ const Settings = () => {
         
         <TabsContent value="security" className="mt-4">
           <SecuritySettings />
+        </TabsContent>
+        
+        <TabsContent value="gdpr" className="mt-4">
+          <GDPRSettings />
         </TabsContent>
       </Tabs>
     </DashboardLayout>

@@ -54,8 +54,8 @@ const DashboardControls = ({
       <Button 
         onClick={handleScan} 
         disabled={isScanning}
-        className="w-full md:w-auto"
-        type="button" // Explicitly set type to button
+        className="w-full md:w-auto shadow-md"
+        type="button"
         variant="scan"
       >
         {isScanning ? (
