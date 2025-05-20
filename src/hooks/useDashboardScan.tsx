@@ -32,7 +32,12 @@ export const useDashboardScan = (
           threatType: result.threatType,
           confidenceScore: 75, // Default confidence score
           sourceType: 'scan',
-          sentiment: result.sentiment,
+          // Fix for the type error: map numeric sentiment to string values
+          sentiment: mapNumericSentimentToString(result.sentiment),
+          // Add optional properties if they exist in the result
+          ...(result.detectedEntities && { detectedEntities: result.detectedEntities }),
+          ...(result.potentialReach && { potentialReach: result.potentialReach }),
+          ...(result.url && { url: result.url })
         }));
         
         // Update alerts with new results
@@ -62,6 +67,16 @@ export const useDashboardScan = (
     } finally {
       setIsScanning(false);
     }
+  };
+
+  // Helper function to map numeric sentiment to string values expected by ContentAlert
+  const mapNumericSentimentToString = (sentiment?: number): ContentAlert["sentiment"] => {
+    if (sentiment === undefined) return "neutral";
+    
+    if (sentiment < -50) return "threatening";
+    if (sentiment < 0) return "negative";
+    if (sentiment > 50) return "positive";
+    return "neutral";
   };
 
   return {
