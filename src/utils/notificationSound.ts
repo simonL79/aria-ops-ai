@@ -1,31 +1,24 @@
 
 /**
- * Play a notification sound for important alerts
- * @param type The type of notification sound to play
+ * Utility function to play notification sounds
  */
-export const playNotificationSound = (type: 'alert' | 'success' | 'urgent' = 'alert') => {
+export const playNotificationSound = (type: 'success' | 'warning' | 'error' | 'info' = 'info') => {
   try {
     let soundFile = '/notification-sound.mp3';
     
-    if (type === 'urgent') {
+    // Use different sounds based on notification type
+    if (type === 'error' || type === 'warning') {
       soundFile = '/urgent-notification.mp3';
     }
     
     const audio = new Audio(soundFile);
-    audio.volume = 0.5;
-    audio.play().catch(err => {
-      console.log('Could not play notification sound:', err);
+    audio.volume = type === 'error' ? 0.6 : 0.4;
+    
+    // Play the sound and handle any errors
+    audio.play().catch(error => {
+      console.log('Could not play notification sound:', error);
     });
-  } catch (error) {
-    console.error('Error playing notification sound:', error);
+  } catch (err) {
+    console.log('Audio notification not supported:', err);
   }
-};
-
-/**
- * Check if a result should trigger an alert based on risk score
- * @param riskScore The risk score of the result
- * @returns boolean indicating if alert should be triggered
- */
-export const shouldTriggerAlert = (riskScore?: number): boolean => {
-  return !!riskScore && riskScore >= 8;
 };

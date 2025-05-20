@@ -2,7 +2,7 @@
 import React from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Clock, X, CheckCircle2, MessageSquare } from "lucide-react";
+import { Clock, X, CheckCircle2, MessageSquare, Eye } from "lucide-react";
 import { ContentAlert } from "@/types/dashboard";
 
 interface AlertItemProps {
@@ -34,12 +34,20 @@ const AlertItem: React.FC<AlertItemProps> = ({
   const isHighSeverity = alert.severity === 'high';
   const isCustomerEnquiry = alert.category === 'customer_enquiry';
   
-  const handleViewDetail = () => {
-    onViewDetail?.(alert);
+  const handleViewDetail = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onViewDetail) {
+      onViewDetail(alert);
+    }
   };
 
-  const handleRespond = () => {
-    onRespond?.(alert.id);
+  const handleRespond = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onRespond) {
+      onRespond(alert.id);
+    }
   };
 
   return (
@@ -119,9 +127,13 @@ const AlertItem: React.FC<AlertItemProps> = ({
               <MessageSquare className="h-3 w-3 mr-1" /> Respond Now
             </>
           ) : isHighSeverity && alert.status === 'new' ? (
-            'Address Now'
+            <>
+              <Eye className="h-3 w-3 mr-1" /> View Now
+            </>
           ) : (
-            'Analyze & Respond'
+            <>
+              <Eye className="h-3 w-3 mr-1" /> Analyze & Respond
+            </>
           )}
         </Button>
       </div>
