@@ -56,14 +56,11 @@ function App() {
         <Route path="/dpa-request" element={<DPARequestPage />} />
 
         {/* Authentication Routes with Redirect for signed-in users */}
-        <Route 
-          path="/auth/*" 
-          element={
-            <SignedInRedirect>
-              <Authentication />
-            </SignedInRedirect>
-          } 
-        />
+        <Route path="/auth/*" element={
+          <SignedInRedirect>
+            <Authentication />
+          </SignedInRedirect>
+        } />
 
         {/* Protected Routes */}
         <Route element={<ProtectedRoute />}>

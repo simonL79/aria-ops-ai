@@ -1,47 +1,37 @@
 
-import { ReactNode, useEffect, useState } from "react";
-import { useUser } from "@clerk/clerk-react";
-import { Navigate, useLocation } from "react-router-dom";
-import { Skeleton } from "@/components/ui/skeleton";
+import { ReactNode } from "react";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import AccessDenied from "@/components/ui/access-denied";
 
-interface ProtectedRouteProps {
-  children: ReactNode;
+export interface ProtectedRouteProps {
+  children?: ReactNode;
+  requiredRole?: string;
+  redirectTo?: string;
 }
 
-const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { isSignedIn, isLoaded } = useUser();
-  const [showLoading, setShowLoading] = useState(true);
+const ProtectedRoute = ({ 
+  children, 
+  requiredRole, 
+  redirectTo = "/auth" 
+}: ProtectedRouteProps) => {
   const location = useLocation();
+  const { user, isLoading, hasRole } = useAuth();
   
-  // Use effect to add a small delay to avoid UI flashing
-  useEffect(() => {
-    if (isLoaded) {
-      // Small timeout to prevent flash
-      const timer = setTimeout(() => {
-        setShowLoading(false);
-      }, 100);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [isLoaded]);
-
-  // Keep showing loading state until we're sure
-  if (!isLoaded || showLoading) {
-    return (
-      <div className="h-screen w-screen flex flex-col items-center justify-center">
-        <Skeleton className="h-12 w-64 mb-4" />
-        <Skeleton className="h-4 w-48" />
-      </div>
-    );
+  if (isLoading) {
+    return <div>Loading...</div>;
   }
-
-  // Redirect to sign in if not authenticated
-  if (!isSignedIn) {
-    return <Navigate to="/auth" state={{ from: location }} replace />;
+  
+  if (!user) {
+    return <Navigate to={redirectTo} state={{ from: location }} replace />;
   }
-
-  // User is authenticated, render the protected content
-  return <>{children}</>;
+  
+  // If role check is required and user doesn't have the role
+  if (requiredRole && !hasRole(requiredRole)) {
+    return <AccessDenied />;
+  }
+  
+  return children ? <>{children}</> : <Outlet />;
 };
 
 export default ProtectedRoute;

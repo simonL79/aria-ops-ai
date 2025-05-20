@@ -1,78 +1,107 @@
+import React from 'react';
+import HeroSection from '@/components/home/HeroSection';
+import ProblemSection from '@/components/home/ProblemSection';
+import HowItWorksSection from '@/components/home/HowItWorksSection';
+import PlatformsSection from '@/components/home/PlatformsSection';
+import TestimonialsSection from '@/components/home/TestimonialsSection';
+import CTASection from '@/components/home/CTASection';
+import GDPRWalkthrough from "@/components/gdpr/GDPRWalkthrough";
 
-import { useState, useEffect } from 'react';
-import { Slider } from "@/components/ui/slider";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-
-export default function HomePage() {
-  const [mentions, setMentions] = useState<any[]>([]);
-  const [severity, setSeverity] = useState<number>(1);
-
-  useEffect(() => {
-    // Mock data since we don't have an actual /api/mentions endpoint
-    const mockMentions = [
-      ['X', 'This company has terrible customer service! I waited for 2 hours on hold and no one answered.', 'https://x.com/user/status/123', 'Complaint', 6, 'Monitor for escalation'],
-      ['Reddit', 'DO NOT BUY from this company! They sold me a defective product and refused to refund.', 'https://reddit.com/r/complaints/123', 'Reputation Threat', 9, 'Respond immediately'],
-      ['Instagram', 'Having some issues with my recent purchase, hope their support team can help.', 'https://instagram.com/p/123', 'Neutral', 3, 'Standard follow-up'],
-      ['Facebook', 'Is this company legitimate? I heard they had some legal troubles recently.', 'https://facebook.com/post/123', 'Misinformation', 7, 'Clarify facts publicly'],
-      ['News Site', 'Company XYZ faces allegations of poor product quality, spokesperson denies claims', 'https://news.com/article/123', 'Reputation Threat', 8, 'Press response needed'],
-    ];
-    
-    setMentions(mockMentions);
-    
-    // Uncomment this when we have an actual API endpoint
-    // fetch(`/api/mentions`)
-    //   .then(res => res.json())
-    //   .then(data => setMentions(data));
-  }, []);
-
-  const handleSeverityChange = (value: number[]) => {
-    setSeverity(value[0]);
-  };
-
+const HomePage = () => {
+  
   return (
-    <main className="p-8">
-      <h1 className="text-3xl font-bold mb-4">ARIA Threat Dashboard</h1>
-
-      <div className="mb-6">
-        <label className="block mb-2 font-medium">Filter by Severity ≥ {severity}</label>
-        <div className="w-full max-w-md">
-          <Slider 
-            defaultValue={[1]} 
-            max={10} 
-            step={1} 
-            min={1} 
-            value={[severity]} 
-            onValueChange={handleSeverityChange} 
-          />
+    <div className="min-h-screen bg-white">
+      {/* Header and Navigation */}
+      <header className="bg-premium-black text-white py-4">
+        <div className="container mx-auto px-6 flex items-center justify-between">
+          <a href="/" className="text-2xl font-bold">
+            A.R.I.A™
+          </a>
+          <nav>
+            <ul className="flex space-x-6">
+              <li>
+                <a href="/about" className="hover:text-gray-300">
+                  About
+                </a>
+              </li>
+              <li>
+                <a href="/pricing" className="hover:text-gray-300">
+                  Pricing
+                </a>
+              </li>
+              <li>
+                <a href="/auth/sign-in" className="hover:text-gray-300">
+                  Sign In
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/auth/sign-up"
+                  className="bg-premium-yellow text-premium-black py-2 px-4 rounded hover:bg-yellow-400"
+                >
+                  Get Started
+                </a>
+              </li>
+            </ul>
+          </nav>
         </div>
-      </div>
-
-      <Table>
-        <TableHeader className="bg-muted">
-          <TableRow>
-            <TableHead>Platform</TableHead>
-            <TableHead>Content</TableHead>
-            <TableHead>Severity</TableHead>
-            <TableHead>Category</TableHead>
-            <TableHead>Recommendation</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {mentions
-            .filter(m => m[4] >= severity)
-            .map((m, i) => (
-              <TableRow key={i}>
-                <TableCell>{m[0]}</TableCell>
-                <TableCell>{m[1].slice(0, 80)}...</TableCell>
-                <TableCell className={`${m[4] >= 8 ? 'text-destructive font-medium' : m[4] >= 5 ? 'text-amber-600' : 'text-muted-foreground'}`}>
-                  {m[4]}
-                </TableCell>
-                <TableCell>{m[3]}</TableCell>
-                <TableCell>{m[5]}</TableCell>
-              </TableRow>
-            ))}
-        </TableBody>
-      </Table>
-    </main>
+      </header>
+      
+      {/* Hero Section */}
+      <HeroSection />
+      
+      {/* Problem Statement */}
+      <ProblemSection />
+      
+      {/* How It Works */}
+      <HowItWorksSection />
+      
+      {/* GDPR Compliance Section */}
+      <section className="py-16 px-6 bg-gradient-to-b from-white to-gray-50">
+        <div className="container mx-auto max-w-6xl">
+          <h2 className="text-3xl md:text-4xl font-bold mb-12 text-center">GDPR Compliance & Data Protection</h2>
+          <GDPRWalkthrough />
+        </div>
+      </section>
+      
+      {/* Platforms */}
+      <PlatformsSection />
+      
+      {/* Testimonials */}
+      <TestimonialsSection />
+      
+      {/* CTA */}
+      <CTASection />
+      
+      {/* Footer */}
+      <footer className="bg-gray-100 py-8">
+        <div className="container mx-auto px-6 text-center">
+          <p className="text-gray-500">
+            &copy; {new Date().getFullYear()} A.R.I.A™. All rights reserved.
+          </p>
+          <nav className="mt-4">
+            <ul className="flex justify-center space-x-6">
+              <li>
+                <a href="/privacy-policy" className="text-gray-500 hover:text-gray-700">
+                  Privacy Policy
+                </a>
+              </li>
+              <li>
+                <a href="/disclaimer" className="text-gray-500 hover:text-gray-700">
+                  Disclaimer
+                </a>
+              </li>
+              <li>
+                <a href="/terms" className="text-gray-500 hover:text-gray-700">
+                  Terms of Service
+                </a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </footer>
+    </div>
   );
-}
+};
+
+export default HomePage;
