@@ -33,7 +33,18 @@ export const getScanResults = async (limit: number = 20, page: number = 0): Prom
       return [];
     }
     
-    return data || [];
+    // Convert and validate the severity field to ensure it matches the expected type
+    return data?.map(item => ({
+      ...item,
+      // Ensure severity is one of the allowed values, defaulting to 'medium' if invalid
+      severity: (item.severity === 'low' || item.severity === 'medium' || item.severity === 'high') 
+        ? item.severity as 'low' | 'medium' | 'high'
+        : 'medium',
+      // Ensure status is one of the allowed values, defaulting to 'new' if invalid
+      status: (item.status === 'new' || item.status === 'read' || item.status === 'actioned' || item.status === 'resolved')
+        ? item.status as 'new' | 'read' | 'actioned' | 'resolved'
+        : 'new'
+    })) || [];
   } catch (error) {
     console.error("Error in getScanResults:", error);
     toast.error("An error occurred while fetching scan results");
@@ -57,7 +68,18 @@ export const getScanResultById = async (id: string): Promise<ScanResult | null> 
       return null;
     }
     
-    return data;
+    if (!data) return null;
+    
+    // Convert and validate the severity and status fields
+    return {
+      ...data,
+      severity: (data.severity === 'low' || data.severity === 'medium' || data.severity === 'high') 
+        ? data.severity as 'low' | 'medium' | 'high'
+        : 'medium',
+      status: (data.status === 'new' || data.status === 'read' || data.status === 'actioned' || data.status === 'resolved')
+        ? data.status as 'new' | 'read' | 'actioned' | 'resolved'
+        : 'new'
+    };
   } catch (error) {
     console.error("Error in getScanResultById:", error);
     return null;
