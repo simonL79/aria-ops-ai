@@ -1,7 +1,6 @@
 
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useSignIn } from "@clerk/clerk-react";
 import { LogIn, Mail, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +9,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
 
 // Define a schema for login form validation
 const loginSchema = z.object({
@@ -25,7 +25,7 @@ interface SignInFormProps {
 
 const SignInForm = ({ setShowResetForm }: SignInFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn, setActive: setActiveSignIn, isLoaded: isSignInLoaded } = useSignIn();
+  const { signIn } = useAuth();
   
   const navigate = useNavigate();
   const location = useLocation();
@@ -46,47 +46,15 @@ const SignInForm = ({ setShowResetForm }: SignInFormProps) => {
     console.log("Attempting to sign in with:", values.email);
     
     try {
-      if (!signIn || !isSignInLoaded) {
-        toast.error("Authentication service not available");
-        console.error("SignIn not available:", { signIn, isSignInLoaded });
-        setIsLoading(false);
-        return;
-      }
+      const success = await signIn(values.email, values.password);
       
-      // Attempt to sign in with provided credentials
-      const result = await signIn.create({
-        identifier: values.email,
-        password: values.password,
-      });
-      
-      console.log("Sign in result:", result);
-      
-      if (result.status === "complete") {
-        await setActiveSignIn({ session: result.createdSessionId });
+      if (success) {
         toast.success("Login successful! Redirecting to dashboard...");
         setTimeout(() => navigate(from), 500); // Short delay to show the success message
-      } else if (result.status === "needs_second_factor") {
-        // Handle 2FA if implemented
-        toast.info("Please complete two-factor authentication");
-      } else if (result.status === "needs_new_password") {
-        toast.info("You need to update your password");
-      } else {
-        console.error("Incomplete login status:", result);
-        toast.error("Login incomplete. Please try again.");
       }
     } catch (error: any) {
       console.error("Error signing in:", error);
-      
-      // Provide more specific error messages
-      if (error?.errors?.[0]?.code === "form_identifier_not_found") {
-        toast.error("Account not found. Please check your email or sign up.");
-      } else if (error?.errors?.[0]?.code === "form_password_incorrect") {
-        toast.error("Incorrect password. Please try again.");
-      } else if (error?.errors?.[0]?.message) {
-        toast.error(error.errors[0].message);
-      } else {
-        toast.error("Login failed. Please check your credentials.");
-      }
+      toast.error("Login failed. Please check your credentials.");
     } finally {
       setIsLoading(false);
     }

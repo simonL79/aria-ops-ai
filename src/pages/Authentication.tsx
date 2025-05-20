@@ -1,21 +1,16 @@
 
 import { useState, useEffect } from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { SignedIn, SignedOut, useUser } from "@clerk/clerk-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import AuthHeader from "@/components/auth/AuthHeader";
 import AuthenticationForm from "@/components/auth/AuthenticationForm";
 import AuthLoadingState from "@/components/auth/AuthLoadingState";
-import SignedInRedirect from "@/components/auth/SignedInRedirect";
-import { toast } from "sonner";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, RefreshCw, LogIn } from "lucide-react";
+import { LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 
 const Authentication = () => {
   const [isReady, setIsReady] = useState(false);
-  const [loadingTimeout, setLoadingTimeout] = useState(false);
   const { isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
   const from = location.state?.from?.pathname || "/dashboard";
@@ -29,21 +24,6 @@ const Authentication = () => {
     return () => clearTimeout(timer);
   }, [isLoading, isAuthenticated]);
   
-  // Set a timeout to show an error if loading takes too long
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (isLoading) {
-        setLoadingTimeout(true);
-      }
-    }, 7000); // 7 seconds timeout
-    
-    return () => clearTimeout(timer);
-  }, [isLoading]);
-  
-  const handleRefresh = () => {
-    window.location.reload();
-  };
-
   const scrollToAuthCard = () => {
     const authCard = document.getElementById('auth-card');
     if (authCard) {
@@ -52,32 +32,8 @@ const Authentication = () => {
   };
   
   // If still loading and hasn't timed out, show a loading state
-  if ((isLoading || !isReady) && !loadingTimeout) {
+  if ((isLoading || !isReady)) {
     return <AuthLoadingState />;
-  }
-  
-  // If loading has timed out, show an error message
-  if ((isLoading || !isReady) && loadingTimeout) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
-        <AuthHeader />
-        
-        <Alert variant="destructive" className="mb-6 max-w-md">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            Authentication service is not responding. This might be due to an incorrect API key or network issues.
-          </AlertDescription>
-        </Alert>
-        
-        <Button 
-          onClick={handleRefresh}
-          className="flex items-center gap-2"
-        >
-          <RefreshCw className="h-4 w-4" />
-          Refresh Page
-        </Button>
-      </div>
-    );
   }
   
   // If already authenticated, redirect to the dashboard
@@ -111,23 +67,19 @@ const Authentication = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <SignedOut>
-            <div className="space-y-6">
-              <AuthenticationForm />
-            </div>
-          </SignedOut>
-          <SignedIn>
-            <SignedInRedirect redirectTo="/dashboard">
-              <div className="text-center">
-                <p className="mb-4">You are already signed in.</p>
-                <Button asChild>
-                  <a href="/dashboard">Go to Dashboard</a>
-                </Button>
-              </div>
-            </SignedInRedirect>
-          </SignedIn>
+          <div className="space-y-6">
+            <AuthenticationForm />
+          </div>
         </CardContent>
       </Card>
+      
+      <div className="mt-4 text-center text-sm text-gray-500">
+        <p>Demo Credentials:</p>
+        <div className="bg-blue-50 p-2 rounded mt-1">
+          <p><strong>Admin:</strong> admin@example.com / password123</p>
+          <p><strong>User:</strong> user@example.com / password123</p>
+        </div>
+      </div>
     </div>
   );
 };

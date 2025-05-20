@@ -1,7 +1,6 @@
 
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useSignUp } from "@clerk/clerk-react";
 import { UserPlus, Mail, Lock, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +9,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
 
 // Define a schema for signup form validation with additional fields
 const signupSchema = z.object({
@@ -23,7 +23,7 @@ type SignupFormValues = z.infer<typeof signupSchema>;
 
 const SignUpForm = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const { signUp, setActive: setActiveSignUp, isLoaded: isSignUpLoaded } = useSignUp();
+  const { signUp } = useAuth();
   
   const navigate = useNavigate();
   const location = useLocation();
@@ -46,34 +46,20 @@ const SignUpForm = () => {
     console.log("Attempting to sign up with:", values.email);
     
     try {
-      if (!signUp || !isSignUpLoaded) {
-        toast.error("Authentication service not available");
-        console.error("SignUp not available:", { signUp, isSignUpLoaded });
-        setIsLoading(false);
-        return;
-      }
+      const success = await signUp(
+        values.email, 
+        values.password, 
+        values.firstName, 
+        values.lastName
+      );
       
-      // Attempt to sign up with provided credentials
-      const result = await signUp.create({
-        emailAddress: values.email,
-        password: values.password,
-        firstName: values.firstName,
-        lastName: values.lastName,
-      });
-      
-      console.log("Sign up result:", result);
-      
-      if (result.status === "complete") {
-        await setActiveSignUp({ session: result.createdSessionId });
-        toast.success("Registration successful");
-        navigate(from);
-      } else {
-        // Handle verification step if needed
-        toast.info("Please check your email to complete registration");
+      if (success) {
+        toast.success("Registration successful! Redirecting to dashboard...");
+        setTimeout(() => navigate(from), 500); // Short delay to show the success message
       }
     } catch (error: any) {
       console.error("Error signing up:", error);
-      toast.error(error?.errors?.[0]?.message || "Registration failed. Please try again.");
+      toast.error("Registration failed. Please try again.");
     } finally {
       setIsLoading(false);
     }

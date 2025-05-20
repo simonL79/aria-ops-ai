@@ -1,6 +1,5 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useClerk, useUser } from '@clerk/clerk-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -11,6 +10,8 @@ interface AuthContextType {
   user: any;
   isAdmin: boolean;
   signOut: () => Promise<void>;
+  signIn: (email: string, password: string) => Promise<boolean>;
+  signUp: (email: string, password: string, firstName?: string, lastName?: string) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -19,62 +20,148 @@ const AuthContext = createContext<AuthContextType>({
   userId: null,
   user: null,
   isAdmin: false,
-  signOut: async () => {}
+  signOut: async () => {},
+  signIn: async () => false,
+  signUp: async () => false
 });
+
+// Mock user database - in a real app this would come from a database
+const mockUsers = [
+  {
+    id: 'admin-user-1',
+    email: 'admin@example.com',
+    password: 'password123', // In a real app, never store plain text passwords
+    firstName: 'Admin',
+    lastName: 'User',
+    isAdmin: true
+  },
+  {
+    id: 'test-user-1',
+    email: 'user@example.com',
+    password: 'password123',
+    firstName: 'Test',
+    lastName: 'User',
+    isAdmin: false
+  }
+];
 
 // The email address you want to grant admin access to
 const ADMIN_EMAIL = 'simonlindsay7988@gmail.com';
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const { isLoaded, isSignedIn, user } = useUser();
-  const { signOut } = useClerk();
-  const [isLoading, setIsLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [authError, setAuthError] = useState<Error | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [user, setUser] = useState<any>(null);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
   
   useEffect(() => {
+    // Check if user is already logged in via localStorage
+    const checkAuth = () => {
+      const storedUser = localStorage.getItem('mock_auth_user');
+      if (storedUser) {
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
+        setIsAuthenticated(true);
+        setIsAdmin(parsedUser.isAdmin || parsedUser.email === ADMIN_EMAIL);
+        console.log("User restored from storage:", parsedUser.email);
+      }
+      setIsLoading(false);
+    };
+    
     // Set a maximum timeout for loading state
     const timeoutId = setTimeout(() => {
       if (isLoading) {
         setIsLoading(false);
         console.warn("Auth loading timed out - forcing completion");
-        
-        // If clerk hasn't loaded by now, we might have an issue with the key or network
-        if (!isLoaded) {
-          const error = new Error("Authentication service failed to load");
-          console.error(error);
-          setAuthError(error);
-        }
       }
-    }, 5000); // 5 second maximum loading time
+    }, 2000); // 2 second maximum loading time
     
+    checkAuth();
     return () => clearTimeout(timeoutId);
-  }, [isLoading, isLoaded]);
+  }, []);
   
-  useEffect(() => {
-    if (isLoaded) {
-      setIsLoading(false);
-      console.log("Auth loaded, user:", user?.id || "not signed in");
+  const signIn = async (email: string, password: string): Promise<boolean> => {
+    try {
+      // In a real app, this would validate against a secure backend
+      const foundUser = mockUsers.find(u => 
+        u.email.toLowerCase() === email.toLowerCase() && u.password === password
+      );
       
-      // Check if user is admin when signed in
-      if (isSignedIn && user?.id) {
-        // Grant admin access if user's email matches the admin email
-        if (user.primaryEmailAddress?.emailAddress === ADMIN_EMAIL) {
-          console.log("Admin access granted based on email match");
-          setIsAdmin(true);
-        } else {
-          console.log("Not an admin user based on email check");
-          setIsAdmin(false);
-        }
+      if (foundUser) {
+        // Create a safe user object (without password)
+        const safeUser = { ...foundUser };
+        delete safeUser.password;
+        
+        // Store in state and localStorage
+        setUser(safeUser);
+        setIsAuthenticated(true);
+        setIsAdmin(safeUser.isAdmin || email === ADMIN_EMAIL);
+        localStorage.setItem('mock_auth_user', JSON.stringify(safeUser));
+        
+        toast.success("Signed in successfully!");
+        return true;
       } else {
-        setIsAdmin(false);
+        toast.error("Invalid email or password");
+        return false;
       }
+    } catch (error) {
+      console.error("Error signing in:", error);
+      toast.error("Error signing in");
+      return false;
     }
-  }, [isLoaded, user, isSignedIn]);
+  };
+  
+  const signUp = async (
+    email: string, 
+    password: string, 
+    firstName?: string, 
+    lastName?: string
+  ): Promise<boolean> => {
+    try {
+      // Check if user already exists
+      if (mockUsers.some(u => u.email.toLowerCase() === email.toLowerCase())) {
+        toast.error("User with this email already exists");
+        return false;
+      }
+      
+      // Create new user
+      const newUser = {
+        id: `user-${Date.now()}`,
+        email,
+        password,
+        firstName: firstName || '',
+        lastName: lastName || '',
+        isAdmin: email === ADMIN_EMAIL
+      };
+      
+      // Add to mock database
+      mockUsers.push(newUser);
+      
+      // Create a safe user object (without password)
+      const safeUser = { ...newUser };
+      delete safeUser.password;
+      
+      // Login the user after signup
+      setUser(safeUser);
+      setIsAuthenticated(true);
+      setIsAdmin(safeUser.isAdmin || email === ADMIN_EMAIL);
+      localStorage.setItem('mock_auth_user', JSON.stringify(safeUser));
+      
+      toast.success("Signed up successfully!");
+      return true;
+    } catch (error) {
+      console.error("Error signing up:", error);
+      toast.error("Error signing up");
+      return false;
+    }
+  };
   
   const handleSignOut = async () => {
     try {
-      await signOut();
+      setUser(null);
+      setIsAuthenticated(false);
+      setIsAdmin(false);
+      localStorage.removeItem('mock_auth_user');
       toast.success("Signed out successfully");
     } catch (error) {
       console.error("Error signing out:", error);
@@ -83,12 +170,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
   
   const value = {
-    isAuthenticated: isSignedIn || false,
+    isAuthenticated,
     isLoading,
     userId: user?.id || null,
     user,
     isAdmin,
-    signOut: handleSignOut
+    signOut: handleSignOut,
+    signIn,
+    signUp
   };
   
   return (
