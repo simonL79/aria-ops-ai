@@ -1,124 +1,45 @@
 
-import { toast } from 'sonner';
-import { ScanResultStats } from '@/types/aiScraping';
-
-// Mock scan result statistics
-const mockStats: Record<string, ScanResultStats> = {
-  '24h': {
-    totalScanned: 127,
-    risksIdentified: 14,
-    averageRiskScore: 5.7,
-    sourcesDistribution: {
-      'Google': 45,
-      'News': 22,
-      'RSS': 18,
-      'Crawler': 25,
-      'Manual': 12,
-      'Custom': 5
-    },
-    scanDuration: 8.3
-  },
-  '7d': {
-    totalScanned: 493,
-    risksIdentified: 52,
-    averageRiskScore: 6.2,
-    sourcesDistribution: {
-      'Google': 159,
-      'News': 87,
-      'RSS': 75,
-      'Crawler': 102,
-      'Manual': 43,
-      'Custom': 27
-    },
-    scanDuration: 7.9
-  },
-  '30d': {
-    totalScanned: 1845,
-    risksIdentified: 215,
-    averageRiskScore: 5.9,
-    sourcesDistribution: {
-      'Google': 572,
-      'News': 324,
-      'RSS': 295,
-      'Crawler': 398,
-      'Manual': 185,
-      'Custom': 71
-    },
-    scanDuration: 8.1
-  },
-  'all': {
-    totalScanned: 5782,
-    risksIdentified: 643,
-    averageRiskScore: 6.1,
-    sourcesDistribution: {
-      'Google': 1872,
-      'News': 1023,
-      'RSS': 876,
-      'Crawler': 1245,
-      'Manual': 527,
-      'Custom': 239
-    },
-    scanDuration: 8.5
-  }
-};
+import { toast } from "sonner";
+import { ScanResultStats } from "@/types/aiScraping";
 
 /**
  * Get scan statistics for a specific timeframe
  */
-export const getScanStats = async (timeframe: string = '24h'): Promise<ScanResultStats> => {
-  // In a real implementation, this would be fetched from a database
-  // For now, we'll use mock data
-  await new Promise(resolve => setTimeout(resolve, 500)); // Simulate API delay
+export const getScanStats = async (timeframe: string): Promise<ScanResultStats> => {
+  // In a real implementation, this would fetch data from a backend API
+  // Here we're just generating mock data
   
-  return mockStats[timeframe] || mockStats['24h'];
+  // Simulate network delay
+  await new Promise(resolve => setTimeout(resolve, 1500));
+  
+  // Generate mock stats
+  return {
+    totalScanned: Math.floor(Math.random() * 1000) + 500,
+    risksIdentified: Math.floor(Math.random() * 50) + 10,
+    averageRiskScore: 4 + Math.random() * 3,
+    scanDuration: 1.5 + Math.random() * 2,
+    sourcesDistribution: {
+      'Twitter': Math.floor(Math.random() * 30) + 20,
+      'Reddit': Math.floor(Math.random() * 25) + 15,
+      'News': Math.floor(Math.random() * 20) + 10,
+      'Facebook': Math.floor(Math.random() * 15) + 5,
+      'LinkedIn': Math.floor(Math.random() * 10) + 5,
+      'Other': Math.floor(Math.random() * 5) + 1
+    }
+  };
 };
 
 /**
- * Export statistics to CSV
+ * Export statistics as CSV
  */
-export const exportStats = async (timeframe: string = '24h'): Promise<void> => {
-  // Get the stats
-  const stats = await getScanStats(timeframe);
+export const exportStats = async (timeframe: string): Promise<void> => {
+  // In a real implementation, this would generate and download a CSV file
+  // Here we're just showing a toast
   
-  // Convert stats to CSV format
-  const sourceDistributionCSV = Object.entries(stats.sourcesDistribution)
-    .map(([source, count]) => `${source},${count}`)
-    .join('\n');
-  
-  const csv = `
-A.R.I.A™ Scan Statistics Export (${timeframe})
-Generated: ${new Date().toISOString()}
-
-Summary Statistics
------------------
-Total Scanned,${stats.totalScanned}
-Risks Identified,${stats.risksIdentified}
-Average Risk Score,${stats.averageRiskScore.toFixed(1)}
-Scan Duration (s),${stats.scanDuration.toFixed(1)}
-
-Source Distribution
-------------------
-Source,Count
-${sourceDistributionCSV}
-`;
-  
-  // Create a Blob containing the CSV data
-  const blob = new Blob([csv], { type: 'text/csv' });
-  
-  // Create a link element to trigger the download
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `aria_stats_${timeframe}_${new Date().toISOString().slice(0, 10)}.csv`;
-  
-  // Trigger the download
-  document.body.appendChild(a);
-  a.click();
-  
-  // Clean up
-  document.body.removeChild(a);
-  URL.revokeObjectURL(a.href);
+  // Simulate processing delay
+  await new Promise(resolve => setTimeout(resolve, 1000));
   
   toast.success('Statistics exported', {
-    description: `Exported ${timeframe} stats to CSV file`
+    description: `The ${timeframe} statistics have been exported to CSV`
   });
 };

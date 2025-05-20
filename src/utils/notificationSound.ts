@@ -1,24 +1,22 @@
 
 /**
- * Utility function to play notification sounds
+ * Play a notification sound
  */
-export const playNotificationSound = (type: 'success' | 'warning' | 'error' | 'info' = 'info') => {
+export const playNotificationSound = (type: 'success' | 'warning' | 'error' = 'success'): void => {
   try {
-    let soundFile = '/notification-sound.mp3';
+    let soundUrl = '/notification-sound.mp3';
     
     // Use different sounds based on notification type
     if (type === 'error' || type === 'warning') {
-      soundFile = '/urgent-notification.mp3';
+      soundUrl = '/urgent-notification.mp3';
     }
     
-    const audio = new Audio(soundFile);
-    audio.volume = type === 'error' ? 0.6 : 0.4;
-    
-    // Play the sound and handle any errors
-    audio.play().catch(error => {
-      console.log('Could not play notification sound:', error);
+    const audio = new Audio(soundUrl);
+    audio.volume = type === 'error' ? 0.5 : 0.3;
+    audio.play().catch(err => {
+      console.log('Audio play prevented by browser policy:', err);
     });
   } catch (err) {
-    console.log('Audio notification not supported:', err);
+    console.log('Audio notification not supported');
   }
 };

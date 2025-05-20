@@ -1,43 +1,48 @@
 
 import { Mention } from "./types";
 
-// Store for mentions (this would be a database in a real app)
-const mentionsStore: Mention[] = [];
+// In-memory storage for mentions
+let mentionsStorage: Mention[] = [];
 
 /**
- * Save a new mention to the store
+ * Save a new mention
  */
-export const saveMention = (platform: string, content: string, source: string): Mention => {
+export const saveMention = (
+  platform: string,
+  content: string,
+  source: string,
+  severity: 'high' | 'medium' | 'low' = 'medium'
+): Mention => {
   const newMention: Mention = {
-    id: `mention-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+    id: `mention-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
     platform,
     content,
     source,
     date: new Date(),
-    severity: Math.random() > 0.7 ? 'high' : (Math.random() > 0.5 ? 'medium' : 'low')
+    severity
   };
   
-  mentionsStore.unshift(newMention);
+  mentionsStorage.push(newMention);
   return newMention;
 };
 
 /**
- * Get all mentions from the store
+ * Get all recorded mentions
  */
 export const getAllMentions = (): Mention[] => {
-  return [...mentionsStore];
+  return [...mentionsStorage];
 };
 
 /**
- * Clear all mentions from the store
+ * Clear all mentions
  */
 export const clearMentions = (): void => {
-  mentionsStore.length = 0;
+  mentionsStorage = [];
 };
 
 /**
- * Get mentions filtered by platform
+ * Get mentions for a specific platform
  */
 export const getMentionsByPlatform = (platform: string): Mention[] => {
-  return mentionsStore.filter(mention => mention.platform === platform);
+  return mentionsStorage.filter(mention => mention.platform === platform);
 };

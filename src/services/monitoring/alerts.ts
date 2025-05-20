@@ -1,9 +1,10 @@
 
+import { Mention } from "./types";
 import { ContentAlert } from "@/types/dashboard";
 import { getAllMentions } from "./mentions";
 
 /**
- * Convert mentions to ContentAlert format for dashboard display
+ * Convert mentions to content alerts format
  */
 export const getMentionsAsAlerts = (): ContentAlert[] => {
   const mentions = getAllMentions();
@@ -12,27 +13,10 @@ export const getMentionsAsAlerts = (): ContentAlert[] => {
     id: mention.id,
     platform: mention.platform,
     content: mention.content,
-    date: mention.date instanceof Date ? 
-      mention.date.toLocaleDateString() : 
-      new Date(mention.date).toLocaleDateString(),
+    date: mention.date.toISOString().split('T')[0],
     severity: mention.severity,
     status: 'new',
     url: mention.source,
-    threatType: getRandomThreatType()
+    threatType: mention.platform.includes('Twitter') ? 'Social Media Mention' : 'Web Mention'
   }));
-};
-
-// Helper function to generate random threat types for demo purposes
-const getRandomThreatType = (): string => {
-  const threatTypes = [
-    'falseReviews',
-    'coordinatedAttack',
-    'misinformation',
-    'viralThreat',
-    'competitorSmear',
-    'dataBreach',
-    'securityVulnerability'
-  ];
-  
-  return threatTypes[Math.floor(Math.random() * threatTypes.length)];
 };

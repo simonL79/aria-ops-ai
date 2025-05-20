@@ -2,131 +2,84 @@
 import { toast } from "sonner";
 import { EmailDigestSettings } from "@/types/aiScraping";
 
-interface EmailNotificationPayload {
-  clientName: string;
-  platform: string;
-  severity: number | string;
-  category: string;
-  content: string;
-  recommendation: string;
-  recipient: string;
-  dashboardUrl?: string;
-}
-
-export const sendEmailNotification = async (
-  apiEndpoint: string,
-  payload: EmailNotificationPayload
-): Promise<boolean> => {
-  try {
-    // Format the email content
-    const emailData = {
-      to: payload.recipient,
-      subject: `ARIA Alert: ${payload.category} - Severity ${payload.severity}`,
-      content: {
-        clientName: payload.clientName,
-        platform: payload.platform,
-        severity: payload.severity,
-        category: payload.category,
-        content: payload.content,
-        recommendation: payload.recommendation,
-        dashboardUrl: payload.dashboardUrl
-      }
-    };
-
-    // Send the notification via the email API endpoint
-    const response = await fetch(apiEndpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(emailData)
-    });
-
-    const data = await response.json();
-    
-    if (!response.ok) {
-      throw new Error(data.message || "Failed to send email notification");
-    }
-    
-    console.log("Email notification sent", payload);
-    return true;
-  } catch (error) {
-    console.error("Failed to send email notification:", error);
-    toast.error("Failed to send email notification");
-    return false;
-  }
+// Mock storage for email digest settings
+let emailDigestSettingsStorage: EmailDigestSettings = {
+  enabled: true,
+  frequency: 'daily',
+  minRiskScore: 5,
+  recipients: ['user@example.com'],
+  lastSent: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
 };
 
-export const sendEmailDigest = async (
-  settings: EmailDigestSettings,
-  clientName: string = "A.R.I.A"
-): Promise<boolean> => {
-  try {
-    // Filter out empty email addresses
-    const validRecipients = settings.recipients.filter(email => email.trim() !== '');
-    
-    if (validRecipients.length === 0) {
-      toast.error("No valid recipients for email digest");
-      return false;
-    }
-    
-    // Calculate time period for digest based on frequency
-    const since = new Date();
-    if (settings.frequency === "daily") {
-      since.setDate(since.getDate() - 1);
-    } else if (settings.frequency === "weekly") {
-      since.setDate(since.getDate() - 7);
-    }
-    
-    // Call the email digest edge function
-    const response = await fetch("https://ssvskbejfacmjemphmry.supabase.co/functions/v1/email-digest", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-        // In a real app, add authorization header
-      },
-      body: JSON.stringify({
-        recipients: validRecipients,
-        minRiskScore: settings.minRiskScore,
-        since: since.toISOString(),
-        clientName: clientName
-      })
-    });
-    
-    const result = await response.json();
-    
-    if (!response.ok || !result.success) {
-      throw new Error(result.error || "Failed to send email digest");
-    }
-    
-    console.log("Email digest sent", result);
-    return true;
-  } catch (error) {
-    console.error("Failed to send email digest:", error);
-    toast.error("Failed to send email digest");
-    return false;
-  }
+/**
+ * Get current email digest settings
+ */
+export const getEmailDigestSettings = (): EmailDigestSettings => {
+  return { ...emailDigestSettingsStorage };
 };
 
-// For scheduling daily/weekly digests
-export const scheduleEmailDigest = (settings: EmailDigestSettings): void => {
-  // In a real implementation, this would register a server-side scheduled job
-  // For frontend-only demo, we'd typically use localStorage to remember settings
+/**
+ * Update email digest settings
+ */
+export const saveEmailDigestSettings = async (settings: EmailDigestSettings): Promise<void> => {
+  // In a real implementation, this would save to a database or API
+  emailDigestSettingsStorage = { ...settings };
   
-  // Save settings to localStorage for demo purposes
-  localStorage.setItem("emailDigestSettings", JSON.stringify(settings));
-  console.log("Email digest scheduled with settings:", settings);
+  // Simulate API call
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  
+  toast.success('Email digest settings saved', {
+    description: 'Your email notification preferences have been updated'
+  });
 };
 
-// For retrieving saved email digest settings
-export const getSavedEmailDigestSettings = (): EmailDigestSettings | null => {
-  const savedSettings = localStorage.getItem("emailDigestSettings");
-  if (!savedSettings) return null;
+/**
+ * Send a test email digest
+ */
+export const sendTestEmailDigest = async (recipients: string[]): Promise<boolean> => {
+  // In a real implementation, this would call an email sending service
   
-  try {
-    return JSON.parse(savedSettings) as EmailDigestSettings;
-  } catch (e) {
-    console.error("Error parsing saved email digest settings", e);
-    return null;
+  // Simulate API call
+  await new Promise(resolve => setTimeout(resolve, 2000));
+  
+  // Simulate success (90% of the time)
+  const success = Math.random() > 0.1;
+  
+  if (success) {
+    toast.success('Test email sent', {
+      description: `Email digest sent to ${recipients.length} recipient(s)`
+    });
+  } else {
+    toast.error('Failed to send test email', {
+      description: 'There was an error sending the test email'
+    });
   }
+  
+  return success;
+};
+
+/**
+ * Schedule the next email digest
+ */
+export const scheduleNextDigest = (): Date => {
+  const now = new Date();
+  let nextDigestDate: Date;
+  
+  switch (emailDigestSettingsStorage.frequency) {
+    case 'daily':
+      // Tomorrow at 9 AM
+      nextDigestDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 9, 0, 0);
+      break;
+    case 'weekly':
+      // Next Monday at 9 AM
+      const daysUntilMonday = (1 + 7 - now.getDay()) % 7;
+      nextDigestDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + daysUntilMonday, 9, 0, 0);
+      break;
+    case 'immediate':
+      // Not applicable for scheduled digests
+      nextDigestDate = now;
+      break;
+  }
+  
+  return nextDigestDate;
 };

@@ -9,11 +9,22 @@ const useScanningLogic = () => {
   const [isScanning, setIsScanning] = useState(false);
   const [scanResults, setScanResults] = useState<ContentAlert[]>([]);
   const [scanDate, setScanDate] = useState<Date | null>(null);
+  const [isActive, setIsActive] = useState(true);
+  const [metrics, setMetrics] = useState({
+    totalScans: 0,
+    risksIdentified: 0,
+    avgResponseTime: 0
+  });
   const [scanConfig, setScanConfig] = useState({
     depth: 'standard',
     platforms: ['all'],
     timeframe: '7d'
   });
+
+  // Toggle active state
+  const handleToggleScan = useCallback(() => {
+    setIsActive(prev => !prev);
+  }, []);
 
   // Simulate scanning process
   const performScan = useCallback(async () => {
@@ -34,19 +45,30 @@ const useScanningLogic = () => {
       threatType: ['Reputation Risk', 'Customer Service', 'Product Issue'][Math.floor(Math.random() * 3)]
     }));
     
-    // Update results
+    // Update results - fixed to properly handle the ContentAlert array
     setScanResults(prevResults => {
-      // Ensure we're adding proper ContentAlert objects and not arrays
       return [...mockResults, ...prevResults];
     });
     
     setScanDate(new Date());
     setIsScanning(false);
     
+    // Update metrics
+    setMetrics(prev => ({
+      totalScans: prev.totalScans + 1,
+      risksIdentified: prev.risksIdentified + mockResults.filter(r => r.severity === 'high').length,
+      avgResponseTime: (prev.avgResponseTime + Math.random() * 2) / 2
+    }));
+    
     // Return high severity count for notifications
     const highSeverityCount = mockResults.filter(result => result.severity === 'high').length;
     return { totalResults: mockResults.length, highSeverity: highSeverityCount };
   }, [scanConfig]);
+  
+  // Handle manual scan
+  const handleManualScan = useCallback(async () => {
+    await performScan();
+  }, [performScan]);
   
   // Auto-scan effect on initial load
   useEffect(() => {
@@ -70,6 +92,11 @@ const useScanningLogic = () => {
     scanResults,
     scanDate,
     scanConfig,
+    isActive,
+    setIsActive,
+    metrics,
+    handleToggleScan,
+    handleManualScan,
     performScan,
     updateScanConfig
   };

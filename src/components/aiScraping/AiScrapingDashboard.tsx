@@ -8,10 +8,10 @@ import useScanningLogic from './dashboard/useScanningLogic';
 
 const AiScrapingDashboard = () => {
   const {
+    isScanning,
+    scanResults,
     isActive,
     setIsActive,
-    scanResults,
-    isScanning,
     metrics,
     handleToggleScan,
     handleManualScan

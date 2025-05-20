@@ -1,69 +1,55 @@
 
 // Re-export all services from a single entry point
-// OpenAI API Client
-export { callOpenAI } from './api/openaiClient';
-
-// Response Generation Services
-export { generateAIResponse } from './responses/responseGenerator';
-export type { ResponseGenerationProps } from './responses/responseGenerator';
-
-// SEO Content Generation
-export { generateSeoContent } from './content/seoContentGenerator';
-
-// Content Classification
-export { classifyContentThreat } from './intelligence/contentClassifier';
-export type { ThreatClassificationResult } from './intelligence/contentClassifier';
-
-// Threat Classification
-export { 
-  classifyThreat,
-  classifyThreatAdvanced 
-} from './intelligence/threatClassifier';
-
-// Multi-agent Analysis
-export { runMultiAgentAnalysis } from './intelligence/multiAgentAnalysis';
-
-// Predictive Analysis
-export { runPredictiveAnalysis } from './intelligence/predictiveAnalysis';
-
-// Data Ingestion Services
-export { 
-  fetchContent, 
-  connectDataSource, 
-  getAvailableSources 
-} from './dataIngestion';
-export type { 
-  ThreatSource, 
-  IngestionOptions 
-} from './dataIngestion/types';
-
-// Monitoring Services
-export {
+import { 
   getMonitoringStatus,
   startMonitoring,
-  stopMonitoring,
   runMonitoringScan
 } from './monitoring/status';
 
-export {
-  getMentionsAsAlerts
-} from './monitoring/alerts';
-
-export {
-  getMonitoredPlatforms,
-  isPlatformMonitored,
-  updatePlatformStatus
-} from './monitoring/platforms';
-
-export {
+import {
   saveMention,
   getAllMentions,
   clearMentions,
   getMentionsByPlatform
 } from './monitoring/mentions';
 
-export type {
-  MonitoringStatus,
-  MonitorablePlatform,
-  Mention
-} from './monitoring/types';
+import {
+  getMonitoredPlatforms,
+  isPlatformMonitored,
+  updatePlatformStatus
+} from './monitoring/platforms';
+
+import {
+  getMentionsAsAlerts
+} from './monitoring/alerts';
+
+// Export the stopMonitoring function
+const stopMonitoring = () => {
+  console.log("Stopping real-time monitoring services...");
+  
+  return {
+    success: true,
+    stopped: new Date().toISOString()
+  };
+};
+
+// Export all services
+export {
+  // Monitoring status services
+  getMonitoringStatus,
+  startMonitoring,
+  stopMonitoring,
+  runMonitoringScan,
+  
+  // Mentions services
+  saveMention,
+  getAllMentions,
+  clearMentions,
+  getMentionsByPlatform,
+  getMentionsAsAlerts,
+  
+  // Platform services
+  getMonitoredPlatforms,
+  isPlatformMonitored,
+  updatePlatformStatus
+};

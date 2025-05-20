@@ -1,185 +1,129 @@
 
-import { toast } from 'sonner';
-import { ModelConfig } from '@/types/aiScraping';
+import { toast } from "sonner";
+import { ModelConfig } from "@/types/aiScraping";
 
-// Mock storage for AI models
-let modelsStorage: ModelConfig[] = [
+// Mock storage for model configurations
+let modelConfigsStorage: ModelConfig[] = [
   {
-    id: 'model-001',
-    name: 'Local Sentiment Analyzer',
-    type: 'huggingface',
-    usage: 'sentiment',
-    config: {
-      model: 'distilbert-base-uncased-finetuned-sst-2-english',
-      temperature: 0.3,
-      maxTokens: 100,
-      useLocal: true
-    },
-    active: true
+    id: 'model-1',
+    name: 'Standard Model',
+    isDefault: true,
+    parameters: {
+      temperature: 0.7,
+      maxTokens: 1000,
+      topP: 0.9,
+      frequencyPenalty: 0.2,
+      presencePenalty: 0.5
+    }
   },
   {
-    id: 'model-002',
-    name: 'GPT Response Generator',
-    type: 'openai',
-    usage: 'response',
-    config: {
-      model: 'gpt-3.5-turbo',
-      temperature: 0.7,
-      maxTokens: 500
-    },
-    costPerToken: 0.002,
-    active: true
+    id: 'model-2',
+    name: 'Conservative Model',
+    isDefault: false,
+    parameters: {
+      temperature: 0.3,
+      maxTokens: 1000,
+      topP: 0.8,
+      frequencyPenalty: 0.5,
+      presencePenalty: 0.7
+    }
+  },
+  {
+    id: 'model-3',
+    name: 'Creative Model',
+    isDefault: false,
+    parameters: {
+      temperature: 0.9,
+      maxTokens: 1200,
+      topP: 1.0,
+      frequencyPenalty: 0.1,
+      presencePenalty: 0.3
+    }
   }
 ];
 
 /**
- * Get all available AI models
+ * Get all model configurations
  */
-export const getModels = async (): Promise<ModelConfig[]> => {
-  // In a real implementation, this would be fetched from a database
-  return modelsStorage;
+export const getModelConfigs = (): ModelConfig[] => {
+  return [...modelConfigsStorage];
 };
 
 /**
- * Get models for a specific usage
+ * Get the default model configuration
  */
-export const getModelsForUsage = async (usage: ModelConfig['usage']): Promise<ModelConfig[]> => {
-  return modelsStorage.filter(model => model.usage === usage && model.active);
+export const getDefaultModelConfig = (): ModelConfig => {
+  const defaultModel = modelConfigsStorage.find(model => model.isDefault);
+  return defaultModel || modelConfigsStorage[0];
 };
 
 /**
- * Get a specific model by ID
+ * Update a model configuration
  */
-export const getModel = async (id: string): Promise<ModelConfig | undefined> => {
-  return modelsStorage.find(model => model.id === id);
-};
-
-/**
- * Create or update an AI model
- */
-export const updateModel = async (model: ModelConfig): Promise<ModelConfig> => {
-  // Check if the model already exists
-  const existingIndex = modelsStorage.findIndex(m => m.id === model.id);
+export const updateModelConfig = (config: ModelConfig): void => {
+  const index = modelConfigsStorage.findIndex(model => model.id === config.id);
   
-  if (existingIndex >= 0) {
-    // Update existing model
-    modelsStorage[existingIndex] = model;
-  } else {
-    // Create new model
-    modelsStorage.push(model);
-  }
-  
-  return model;
-};
-
-/**
- * Delete an AI model
- */
-export const deleteModel = async (id: string): Promise<boolean> => {
-  const initialLength = modelsStorage.length;
-  modelsStorage = modelsStorage.filter(m => m.id !== id);
-  return modelsStorage.length < initialLength;
-};
-
-/**
- * Test a model to ensure it's working
- */
-export const testModel = async (id: string): Promise<{ success: boolean, message?: string, error?: string }> => {
-  const model = await getModel(id);
-  if (!model) {
-    return { success: false, error: `Model with ID ${id} not found` };
-  }
-  
-  // Simulate testing process
-  await new Promise(resolve => setTimeout(resolve, 1500));
-  
-  // For demonstration, we'll simulate success for most models
-  if (Math.random() > 0.9) {
-    // 10% chance of failure
-    return { 
-      success: false, 
-      error: "Connection timed out. Check API key or endpoint." 
-    };
-  }
-  
-  switch (model.type) {
-    case 'openai':
-      return { 
-        success: true, 
-        message: "Successfully connected to OpenAI API and tested model." 
-      };
+  if (index >= 0) {
+    // If this model is being set as default, unset any other defaults
+    if (config.isDefault) {
+      modelConfigsStorage = modelConfigsStorage.map(model => ({
+        ...model,
+        isDefault: model.id === config.id
+      }));
+    } else {
+      modelConfigsStorage[index] = config;
+    }
     
-    case 'huggingface':
-      if (model.config.useLocal) {
-        return { 
-          success: true, 
-          message: "Model loaded and running locally in the browser." 
-        };
-      } else {
-        return { 
-          success: true, 
-          message: "Successfully connected to HuggingFace Inference API." 
-        };
-      }
-    
-    case 'custom':
-      return { 
-        success: true, 
-        message: "Successfully connected to custom model endpoint." 
-      };
-    
-    default:
-      return { 
-        success: false, 
-        error: "Unknown model type" 
-      };
+    toast.success(`Model "${config.name}" updated`, {
+      description: 'Your changes have been saved'
+    });
   }
 };
 
 /**
- * Use a model to analyze content
+ * Create a new model configuration
  */
-export const analyzeWithModel = async (modelId: string, content: string): Promise<any> => {
-  const model = await getModel(modelId);
-  if (!model) {
-    throw new Error(`Model with ID ${modelId} not found`);
+export const createModelConfig = (config: Omit<ModelConfig, 'id'>): ModelConfig => {
+  const newConfig: ModelConfig = {
+    ...config,
+    id: `model-${Date.now()}`
+  };
+  
+  // If this model is being set as default, unset any other defaults
+  if (newConfig.isDefault) {
+    modelConfigsStorage = modelConfigsStorage.map(model => ({
+      ...model,
+      isDefault: false
+    }));
   }
   
-  if (!model.active) {
-    throw new Error(`Model ${model.name} is not active`);
+  modelConfigsStorage.push(newConfig);
+  
+  toast.success(`Model "${newConfig.name}" created`, {
+    description: 'Your new model configuration has been saved'
+  });
+  
+  return newConfig;
+};
+
+/**
+ * Delete a model configuration
+ */
+export const deleteModelConfig = (id: string): void => {
+  const modelToDelete = modelConfigsStorage.find(model => model.id === id);
+  if (!modelToDelete) return;
+  
+  // Don't allow deleting the default model
+  if (modelToDelete.isDefault) {
+    toast.error('Cannot delete default model', {
+      description: 'Please set another model as default before deleting this one'
+    });
+    return;
   }
   
-  // Simulate analysis process
-  await new Promise(resolve => setTimeout(resolve, 1000));
+  modelConfigsStorage = modelConfigsStorage.filter(model => model.id !== id);
   
-  // Mock results based on model usage
-  switch (model.usage) {
-    case 'sentiment':
-      return {
-        sentiment: Math.random() * 2 - 1, // -1 to 1
-        confidence: Math.random() * 0.5 + 0.5 // 0.5 to 1
-      };
-    
-    case 'classification':
-      const categories = ['Neutral', 'Positive', 'Complaint', 'Reputation Threat', 'Misinformation', 'Legal Risk'];
-      const category = categories[Math.floor(Math.random() * categories.length)];
-      return {
-        category,
-        severity: Math.floor(Math.random() * 10) + 1, // 1 to 10
-        confidence: Math.random() * 0.5 + 0.5 // 0.5 to 1
-      };
-    
-    case 'response':
-      return {
-        response: `This is a mock response for the content: "${content.substring(0, 50)}..."`
-      };
-    
-    case 'summary':
-      return {
-        summary: `This is a mock summary of the content: "${content.substring(0, 50)}..."`
-      };
-    
-    default:
-      throw new Error(`Unsupported model usage: ${model.usage}`);
-  }
+  toast.success(`Model "${modelToDelete.name}" deleted`, {
+    description: 'The model configuration has been removed'
+  });
 };

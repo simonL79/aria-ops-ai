@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -7,8 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ScanParameters, defaultScanParameters } from "@/services/aiScraping/mockScanner";
+import { ScanParameters } from "@/types/aiScraping";
 import { Search, Settings, X, Loader } from "lucide-react";
+import { defaultScanParameters } from "@/services/aiScraping/mockScanner";
 
 // Available platforms for scanning
 const AVAILABLE_PLATFORMS = [
@@ -70,7 +72,7 @@ const ScanParametersForm = ({ onStartScan, isScanning }: ScanParametersFormProps
   // Fix for the priority level selection to handle the type correctly
   const handlePriorityChange = (value: string) => {
     setParameters(prev => {
-      const updatedParams: ScanParameters = { ...prev };
+      const updatedParams = { ...prev } as ScanParameters;
       // If value is 'none', set prioritizeSeverity to undefined, 
       // otherwise set it to the appropriate severity type
       if (value === "none") {
