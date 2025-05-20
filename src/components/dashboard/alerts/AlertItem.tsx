@@ -22,6 +22,15 @@ const AlertItem = ({ alert, isLast }: AlertItemProps) => {
     setIsExpanded(!isExpanded);
   };
 
+  const handleRequestRemoval = async () => {
+    // Track the request removal action in the database
+    const success = await requestContentRemoval(alert);
+    
+    if (success) {
+      // No need to update UI here as the alert status will be fetched again
+    }
+  };
+
   return (
     <Collapsible open={isExpanded} onOpenChange={toggleExpansion}>
       <div>
@@ -72,7 +81,12 @@ const AlertItem = ({ alert, isLast }: AlertItemProps) => {
                 {isExpanded ? 'Less Details' : 'Analysis'}
               </Button>
             </CollapsibleTrigger>
-            <Button variant="destructive" size="sm" className="gap-1">
+            <Button 
+              variant="destructive" 
+              size="sm" 
+              className="gap-1"
+              onClick={handleRequestRemoval}
+            >
               <Ban className="h-4 w-4" />
               <span>Request Removal</span>
             </Button>

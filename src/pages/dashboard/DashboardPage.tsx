@@ -91,29 +91,45 @@ const DashboardPage = () => {
     });
   };
 
-  const handleMarkAlertAsRead = (alertId: string, e?: React.MouseEvent) => {
+  const handleMarkAlertAsRead = async (alertId: string, e?: React.MouseEvent) => {
     if (e) e.preventDefault();
     
-    setFilteredAlerts(prev => 
-      prev.map(alert => alert.id === alertId 
-        ? { ...alert, status: 'read' } 
-        : alert
-      )
-    );
+    const alertToUpdate = alerts.find(alert => alert.id === alertId);
+    if (!alertToUpdate) return;
     
-    setAlerts(prev => 
-      prev.map(alert => alert.id === alertId 
-        ? { ...alert, status: 'read' } 
-        : alert
-      )
-    );
+    // Use the contentActionService to mark as read in the database
+    const success = await markAlertAsRead(alertToUpdate);
+    
+    if (success) {
+      setFilteredAlerts(prev => 
+        prev.map(alert => alert.id === alertId 
+          ? { ...alert, status: 'read' } 
+          : alert
+        )
+      );
+      
+      setAlerts(prev => 
+        prev.map(alert => alert.id === alertId 
+          ? { ...alert, status: 'read' } 
+          : alert
+        )
+      );
+    }
   };
 
-  const handleDismissAlert = (alertId: string, e?: React.MouseEvent) => {
+  const handleDismissAlert = async (alertId: string, e?: React.MouseEvent) => {
     if (e) e.preventDefault();
     
-    setFilteredAlerts(prev => prev.filter(alert => alert.id !== alertId));
-    setAlerts(prev => prev.filter(alert => alert.id !== alertId));
+    const alertToUpdate = alerts.find(alert => alert.id === alertId);
+    if (!alertToUpdate) return;
+    
+    // Use the contentActionService to dismiss in the database
+    const success = await dismissAlert(alertToUpdate);
+    
+    if (success) {
+      setFilteredAlerts(prev => prev.filter(alert => alert.id !== alertId));
+      setAlerts(prev => prev.filter(alert => alert.id !== alertId));
+    }
   };
 
   const handleClassificationResult = (result: ThreatClassificationResult) => {

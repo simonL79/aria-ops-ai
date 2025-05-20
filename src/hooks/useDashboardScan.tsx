@@ -3,6 +3,8 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { runMonitoringScan } from "@/services/monitoring";
 import { ContentAlert } from "@/types/dashboard";
+import { detectEntities } from "@/services/api/entityDetectionService";
+import { calculatePotentialReach } from "@/services/api/entityDetectionService";
 
 export const useDashboardScan = (
   alerts: ContentAlert[],
@@ -32,12 +34,12 @@ export const useDashboardScan = (
           threatType: result.threatType,
           confidenceScore: 75, // Default confidence score
           sourceType: 'scan',
-          // Fix for the type error: map numeric sentiment to string values
+          // Map numeric sentiment to string values
           sentiment: mapNumericSentimentToString(result.sentiment),
           // Add optional properties if they exist in the result
-          ...(result.detectedEntities && { detectedEntities: result.detectedEntities }),
-          ...(result.potentialReach && { potentialReach: result.potentialReach }),
-          ...(result.url && { url: result.url })
+          detectedEntities: result.detectedEntities,
+          potentialReach: result.potentialReach,
+          url: result.url
         }));
         
         // Update alerts with new results

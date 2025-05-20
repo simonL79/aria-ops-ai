@@ -41,6 +41,20 @@ const DashboardControls = ({
       return;
     }
     
+    // Track scan in analytics
+    try {
+      // Log scan to Supabase
+      fetch('/api/log-scan', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ type: 'manual_scan' })
+      }).catch(err => console.error('Error logging scan:', err));
+    } catch (error) {
+      console.error("Error tracking scan:", error);
+    }
+    
     onScan();
   };
 

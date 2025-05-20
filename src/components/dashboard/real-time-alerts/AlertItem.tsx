@@ -1,9 +1,9 @@
-
 import React from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Clock, X, CheckCircle2, MessageSquare, Eye, Target } from "lucide-react";
 import { ContentAlert } from "@/types/dashboard";
+import { dismissAlert, markAlertAsRead, requestContentRemoval } from '@/services/contentActionService';
 
 interface AlertItemProps {
   alert: ContentAlert;
@@ -49,7 +49,7 @@ const AlertItem: React.FC<AlertItemProps> = ({
     return null;
   };
   
-  const targets = getTargets();
+  const targets = alert.detectedEntities || getTargets();
   
   const handleViewDetail = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -71,18 +71,26 @@ const AlertItem: React.FC<AlertItemProps> = ({
     }
   };
 
-  const handleDismiss = (e: React.MouseEvent) => {
+  const handleDismiss = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (onDismiss) {
+    
+    // Track the dismissal action in the database
+    const success = await dismissAlert(alert);
+    
+    if (success && onDismiss) {
       onDismiss(alert.id);
     }
   };
 
-  const handleMarkAsRead = (e: React.MouseEvent) => {
+  const handleMarkAsRead = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (onMarkAsRead) {
+    
+    // Track the read action in the database
+    const success = await markAlertAsRead(alert);
+    
+    if (success && onMarkAsRead) {
       onMarkAsRead(alert.id);
     }
   };
