@@ -44,23 +44,22 @@ const AuthLoadingState = () => {
           <Alert variant="destructive" className="mb-6">
             <AlertCircle className="h-4 w-4 mr-2" />
             <AlertDescription className="font-semibold">
-              Missing Clerk API Key
+              Authentication Configuration Notice
             </AlertDescription>
           </Alert>
 
           <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-semibold mb-4">Authentication Configuration Required</h2>
+            <h2 className="text-xl font-semibold mb-4">Using Test Credentials</h2>
             <p className="text-gray-600 mb-4">
-              Your application needs a valid Clerk publishable key to enable authentication.
+              Your application is currently using test authentication credentials. This is fine for development but may cause issues in production.
             </p>
             
             <div className="bg-amber-50 p-4 rounded-md border border-amber-200 mb-4">
-              <p className="font-medium mb-2">Required Steps:</p>
+              <p className="font-medium mb-2">If you encounter login issues:</p>
               <ol className="list-decimal pl-5 text-sm space-y-2">
-                <li>Sign up for a Clerk account at <a href="https://clerk.com" className="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">clerk.com</a></li>
-                <li>Create a new application in the Clerk dashboard</li>
-                <li>Copy your publishable key from the API Keys section</li>
-                <li>Set the <code className="bg-gray-100 px-1 py-0.5 rounded">VITE_CLERK_PUBLISHABLE_KEY</code> environment variable with your key</li>
+                <li>Try refreshing the page</li>
+                <li>Ensure you're using the correct credentials</li>
+                <li>Contact support if problems persist</li>
               </ol>
             </div>
             
@@ -69,7 +68,7 @@ const AuthLoadingState = () => {
               className="flex items-center gap-2 w-full"
             >
               <RefreshCw className="h-4 w-4" />
-              Refresh Page
+              Continue to Login
             </Button>
           </div>
         </div>
@@ -89,22 +88,24 @@ const AuthLoadingState = () => {
 
       {isLongLoading && (
         <div className="mt-8 text-center max-w-md">
-          <Alert variant="destructive" className="mb-4">
-            <AlertCircle className="h-4 w-4 mr-2" />
-            <AlertDescription>
-              Authentication is taking longer than expected.
-            </AlertDescription>
-          </Alert>
+          {showClerkInfo && (
+            <Alert variant="default" className="mb-4 bg-blue-50 border-blue-200">
+              <AlertCircle className="h-4 w-4 mr-2 text-blue-500" />
+              <AlertDescription>
+                Authentication is taking longer than expected.
+              </AlertDescription>
+            </Alert>
+          )}
           
-          <p className="text-sm text-gray-600 mb-4">This might be due to network issues or incorrect API credentials.</p>
+          <p className="text-sm text-gray-600 mb-4">Please wait while we securely authenticate you...</p>
           
           {showClerkInfo && (
-            <div className="bg-amber-50 p-4 rounded-md border border-amber-200 mb-4 text-left">
-              <p className="font-medium mb-2">Troubleshooting steps:</p>
+            <div className="bg-blue-50 p-4 rounded-md border border-blue-200 mb-4 text-left">
+              <p className="font-medium mb-2">If you continue to experience delays:</p>
               <ol className="list-decimal pl-5 text-sm space-y-2">
-                <li>Ensure you have set a valid <code className="bg-gray-100 px-1 py-0.5 rounded">VITE_CLERK_PUBLISHABLE_KEY</code> environment variable</li>
-                <li>Check that your Clerk instance is properly configured and online</li>
-                <li>Verify that your browser is not blocking authentication requests</li>
+                <li>Check your network connection</li>
+                <li>Try refreshing the page</li>
+                <li>Clear your browser cache and cookies</li>
               </ol>
             </div>
           )}

@@ -63,15 +63,30 @@ const SignInForm = ({ setShowResetForm }: SignInFormProps) => {
       
       if (result.status === "complete") {
         await setActiveSignIn({ session: result.createdSessionId });
-        toast.success("Login successful");
-        navigate(from);
+        toast.success("Login successful! Redirecting to dashboard...");
+        setTimeout(() => navigate(from), 500); // Short delay to show the success message
+      } else if (result.status === "needs_second_factor") {
+        // Handle 2FA if implemented
+        toast.info("Please complete two-factor authentication");
+      } else if (result.status === "needs_new_password") {
+        toast.info("You need to update your password");
       } else {
         console.error("Incomplete login status:", result);
-        toast.error("Login failed. Please check your credentials.");
+        toast.error("Login incomplete. Please try again.");
       }
     } catch (error: any) {
       console.error("Error signing in:", error);
-      toast.error(error?.errors?.[0]?.message || "Login failed. Please check your credentials.");
+      
+      // Provide more specific error messages
+      if (error?.errors?.[0]?.code === "form_identifier_not_found") {
+        toast.error("Account not found. Please check your email or sign up.");
+      } else if (error?.errors?.[0]?.code === "form_password_incorrect") {
+        toast.error("Incorrect password. Please try again.");
+      } else if (error?.errors?.[0]?.message) {
+        toast.error(error.errors[0].message);
+      } else {
+        toast.error("Login failed. Please check your credentials.");
+      }
     } finally {
       setIsLoading(false);
     }
