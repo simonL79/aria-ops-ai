@@ -8,12 +8,14 @@ import {
   startMonitoring, 
   stopMonitoring, 
   runMonitoringScan,
-  getMentionsAsAlerts
+  getAllMentions,
+  saveMention
 } from '@/services/monitoring';
 import { ContentAlert } from '@/types/dashboard';
 import { classifyContent, storeMention } from '@/services/api/mentionsApiService';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { getMentionsAsAlerts } from '@/services/monitoring/alerts';
 
 // Import the sub-components
 import MonitoringStatus from './MonitoringStatus';

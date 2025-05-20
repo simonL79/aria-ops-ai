@@ -3,7 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Ban, Bell } from 'lucide-react';
-import { MonitoringStatus as StatusType } from '@/services/monitoring';
+import { MonitoringStatus as StatusType } from '@/services/monitoring/types';
 
 interface MonitoringStatusProps {
   status: StatusType;

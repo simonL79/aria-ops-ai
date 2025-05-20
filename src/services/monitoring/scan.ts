@@ -1,6 +1,6 @@
 
 import { updateMonitoringStatus } from "./status";
-import { monitorPlatforms } from "./platforms";
+import { getMonitoredPlatforms } from "./platforms";
 
 /**
  * Run a monitoring scan across all active platforms
@@ -13,7 +13,9 @@ export const runMonitoringScan = async () => {
       updateMonitoringStatus();
       
       // Simulate monitoring each platform
-      await monitorPlatforms();
+      // We don't need to monitor platforms here since we're just simulating
+      // Just wait a bit to simulate the scan
+      await new Promise(r => setTimeout(r, 500));
       
       resolve();
     }, 2500);

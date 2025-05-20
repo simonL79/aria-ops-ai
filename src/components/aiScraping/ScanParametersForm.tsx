@@ -137,7 +137,7 @@ const ScanParametersForm = ({ onStartScan, isScanning }: ScanParametersFormProps
             value={parameters.prioritizeSeverity || "none"}
             onValueChange={(value) => setParameters(prev => ({
               ...prev, 
-              prioritizeSeverity: value === "none" ? null : value as 'high' | 'medium' | 'low'
+              prioritizeSeverity: value === "none" ? undefined : value as "high" | "medium" | "low"
             }))}
           >
             <SelectTrigger>

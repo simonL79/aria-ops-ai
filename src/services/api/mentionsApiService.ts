@@ -46,7 +46,7 @@ export const classifyContent = async (
  */
 export const storeMention = async (mentionRequest: MentionStoreRequest): Promise<ContentAlert> => {
   // Store the mention using the monitoring service
-  await saveMention(
+  saveMention(
     mentionRequest.platform,
     mentionRequest.content,
     mentionRequest.sourceType === 'manual' ? 'Manual Entry' : 'https://example.com'

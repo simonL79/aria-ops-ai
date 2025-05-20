@@ -12,13 +12,15 @@ export {
 export { 
   saveMention, 
   getAllMentions, 
-  clearMentions 
+  clearMentions,
+  getMentionsByPlatform
 } from './mentions';
 
 // Platform monitoring
 export { 
   getMonitoredPlatforms,
-  isPlatformMonitored
+  isPlatformMonitored,
+  updatePlatformStatus
 } from './platforms';
 
 // Alert conversion

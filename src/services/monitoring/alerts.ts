@@ -1,6 +1,7 @@
 
 import { Mention } from './types';
 import { ContentAlert } from '@/types/dashboard';
+import { getAllMentions } from './mentions';
 
 /**
  * Convert mentions to ContentAlert format
@@ -56,6 +57,3 @@ const getPlatformType = (platformId: string): string => {
   
   return platformTypes[platformId] || 'other';
 };
-
-// Import needed function from the mentions module
-import { getAllMentions } from './mentions';
