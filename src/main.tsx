@@ -2,9 +2,10 @@
 import { createRoot } from 'react-dom/client'
 import { ClerkProvider } from '@clerk/clerk-react'
 import { AuthProvider } from './hooks/useAuth'
+import { BrowserRouter } from 'react-router-dom'
 import App from './App.tsx'
 import './index.css'
-import { toast, Toaster } from 'sonner'
+import { Toaster } from 'sonner'
 
 // Get the Clerk publishable key
 const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
@@ -29,7 +30,9 @@ createRoot(document.getElementById("root")!).render(
     afterSignUpUrl="/dashboard"
   >
     <AuthProvider>
-      <App />
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
     </AuthProvider>
     <Toaster />
   </ClerkProvider>
