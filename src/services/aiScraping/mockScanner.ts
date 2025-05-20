@@ -1,4 +1,3 @@
-
 import { ContentAlert } from "@/types/dashboard";
 import { toast } from "sonner";
 
@@ -63,7 +62,7 @@ export const notifyAlertListeners = (alert: ContentAlert): void => {
 // Handle direct response from notification
 export const respondToAlert = (alert: ContentAlert): void => {
   // In a real app, this would open a response UI or navigate to a response page
-  window.location.href = `/dashboard/engagement-hub?alert=${alert.id}`;
+  window.location.href = `/dashboard/engagement?alert=${alert.id}`;
 };
 
 // Generate a random mock alert
@@ -183,7 +182,7 @@ export const startContinuousScan = (
               label: isCustomer ? "Respond Now" : "View Details",
               onClick: () => {
                 // Navigate to engagement hub with the alert ID
-                window.location.href = `/dashboard/engagement-hub?alert=${newAlert.id}`;
+                window.location.href = `/dashboard/engagement?alert=${newAlert.id}`;
               },
             },
             duration: 10000 // 10 seconds
@@ -208,4 +207,3 @@ export const startContinuousScan = (
     unregisterAlertListener(onNewAlert);
   };
 };
-

@@ -1,5 +1,6 @@
 
 import React, { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom"; 
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -19,6 +20,7 @@ import { EmailDigestSettings } from "@/types/aiScraping";
 import { scheduleEmailDigest } from "@/services/notifications/emailNotificationService";
 
 const EngagementHubPage = () => {
+  const location = useLocation();
   const [selectedAlert, setSelectedAlert] = useState<ContentAlert | null>(null);
   const [alerts, setAlerts] = useState<ContentAlert[]>([]);
   const [emailSettings, setEmailSettings] = useState<{
@@ -28,6 +30,19 @@ const EngagementHubPage = () => {
     enabled: false,
     emailAddress: ""
   });
+
+  // Handle URL query parameter for direct alert viewing
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const alertId = queryParams.get('alert');
+    
+    if (alertId && alerts.length > 0) {
+      const alert = alerts.find(a => a.id === alertId);
+      if (alert) {
+        setSelectedAlert(alert);
+      }
+    }
+  }, [location.search, alerts]);
 
   // Function to handle new alerts from AI Scraping
   const handleNewAlert = (alert: ContentAlert) => {

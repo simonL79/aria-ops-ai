@@ -24,7 +24,7 @@ function App() {
         <Route path="/dashboard/new-companies/:id" element={<Index />} />
         <Route path="/dashboard/radar/entity/:id" element={<Index />} />
         <Route path="/dashboard/engagement" element={<EngagementHubPage />} />
-        <Route path="/settings" element={<Index />} />
+        <Route path="/dashboard/settings" element={<Index />} />
         <Route path="/login" element={<Index />} />
         <Route path="/register" element={<Index />} />
       </Routes>
