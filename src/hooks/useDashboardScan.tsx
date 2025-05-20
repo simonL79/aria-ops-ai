@@ -3,8 +3,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { runMonitoringScan } from "@/services/monitoring";
 import { ContentAlert } from "@/types/dashboard";
-import { detectEntities } from "@/services/api/entityDetectionService";
-import { calculatePotentialReach } from "@/services/api/entityDetectionService";
+import { detectEntities, calculatePotentialReach } from "@/services/api/entityDetectionService";
 
 export const useDashboardScan = (
   alerts: ContentAlert[],
@@ -23,23 +22,31 @@ export const useDashboardScan = (
       
       if (results.length > 0) {
         // Format the new results to match ContentAlert type
-        const newAlerts: ContentAlert[] = results.map(result => ({
-          id: result.id,
-          platform: result.platform,
-          content: result.content,
-          date: new Date(result.date).toLocaleString(),
-          severity: result.severity,
-          // Map 'resolved' status to 'reviewing' if needed
-          status: result.status === 'resolved' ? 'reviewing' : result.status as ContentAlert['status'],
-          threatType: result.threatType,
-          confidenceScore: 75, // Default confidence score
-          sourceType: 'scan',
-          // Map numeric sentiment to string values
-          sentiment: mapNumericSentimentToString(result.sentiment),
-          // Add optional properties if they exist in the result
-          detectedEntities: result.detectedEntities,
-          potentialReach: result.potentialReach,
-          url: result.url
+        const newAlerts: ContentAlert[] = await Promise.all(results.map(async result => {
+          // Detect entities for each result if not already present
+          const entities = await detectEntities(result.content, result.platform);
+          
+          // Calculate potential reach if not already present
+          const reach = calculatePotentialReach(result.platform);
+          
+          return {
+            id: result.id,
+            platform: result.platform,
+            content: result.content,
+            date: new Date(result.date).toLocaleString(),
+            severity: result.severity,
+            // Map 'resolved' status to 'reviewing' if needed
+            status: result.status === 'resolved' ? 'reviewing' : result.status as ContentAlert['status'],
+            threatType: result.threatType,
+            confidenceScore: 75, // Default confidence score
+            sourceType: 'scan',
+            // Map numeric sentiment to string values
+            sentiment: mapNumericSentimentToString(result.sentiment),
+            // Add detected entities and potential reach
+            detectedEntities: entities,
+            potentialReach: reach,
+            url: result.url
+          };
         }));
         
         // Update alerts with new results

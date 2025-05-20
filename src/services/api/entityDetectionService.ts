@@ -34,13 +34,14 @@ export const detectEntities = async (content: string, platform: string): Promise
       entities.push(defaultEntities[Math.floor(Math.random() * defaultEntities.length)]);
     }
     
-    // Log the detected entities to database
-    await supabase.from('detection_logs').insert({
-      content_snippet: content.substring(0, 100),
-      platform,
-      detected_entities: entities,
-      detection_method: 'regex'
-    }).select();
+    // Log the detection to activity logs instead of trying to use a non-existent table
+    await supabase.from("activity_logs").insert({
+      action: "entity_detection",
+      details: content.substring(0, 100),
+      entity_type: platform,
+      entity_id: "entity_detection",
+      user_email: "system"
+    });
     
     return entities;
   } catch (error) {

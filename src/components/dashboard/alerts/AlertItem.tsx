@@ -8,6 +8,7 @@ import { TooltipProvider, Tooltip, TooltipContent, TooltipTrigger } from "@/comp
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ContentAlert } from "@/types/dashboard";
 import { getSeverityColor, getThreatTypeIcon, getSourceTypeLabel, formatThousands } from "@/utils/alertUtils";
+import { requestContentRemoval } from "@/services/contentActionService";
 import AlertDetails from "./AlertDetails";
 
 interface AlertItemProps {

@@ -2,6 +2,7 @@
 import { Mention, ScanResult } from './types';
 import { saveMention } from './mentions';
 import { getMonitoredPlatforms } from './platforms';
+import { detectEntities } from '@/services/api/entityDetectionService';
 
 /**
  * Run a monitoring scan to detect mentions
@@ -23,14 +24,17 @@ export const runMonitoringScan = async (): Promise<ScanResult[]> => {
     for (let i = 0; i < count; i++) {
       const severity = Math.random() > 0.7 ? 'high' : Math.random() > 0.5 ? 'medium' : 'low';
       const sentiment = Math.floor(Math.random() * 200) - 100; // -100 to 100
+      const content = `New mention detected on ${platform.name} during automated scan.`;
       
-      // Add entity detection
-      const entities = detectEntities(`New mention detected on ${platform.name} during automated scan.`);
+      // Add entity detection - use the new function
+      const entities = await detectEntities(content, platform.name);
+      
+      // Calculate potential reach
       const reach = Math.floor(Math.random() * 10000) + 500; // 500 to 10,500 potential reach
       
       const mention = saveMention(
         platform.name,
-        `New mention detected on ${platform.name} during automated scan.`,
+        content,
         `https://example.com/${platform.name.toLowerCase()}/scan-result-${Date.now()}-${i}`,
         severity as 'high' | 'medium' | 'low'
       );
@@ -42,7 +46,7 @@ export const runMonitoringScan = async (): Promise<ScanResult[]> => {
         date: mention.date.toISOString(),
         severity: mention.severity,
         status: mention.status || 'new',
-        url: mention.url,
+        url: mention.source, // Use source as url
         threatType: mention.threatType,
         sentiment: sentiment,
         detectedEntities: entities,
@@ -55,36 +59,3 @@ export const runMonitoringScan = async (): Promise<ScanResult[]> => {
   
   return results;
 };
-
-/**
- * Detect entities in content using AI or regex
- * This is a simple implementation that will be replaced with AI-powered entity detection
- */
-function detectEntities(content: string): string[] {
-  const entities: string[] = [];
-  
-  // Simple regex-based entity detection
-  // Detect company names (capitalized words followed by Inc, Corp, LLC, etc.)
-  const companyRegex = /\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\s+(Inc|Corp|LLC|Ltd|Limited|Company)\b/g;
-  let match;
-  
-  while ((match = companyRegex.exec(content)) !== null) {
-    entities.push(match[1] + ' ' + match[2]);
-  }
-  
-  // Detect people names (consecutive capitalized words)
-  const nameRegex = /\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)+\b/g;
-  while ((match = nameRegex.exec(content)) !== null) {
-    if (!entities.includes(match[0])) {
-      entities.push(match[0]);
-    }
-  }
-  
-  // Add some default entities for demo purposes if none found
-  if (entities.length === 0) {
-    const defaultEntities = ['Brand', 'Company', 'Product', 'Service'];
-    entities.push(defaultEntities[Math.floor(Math.random() * defaultEntities.length)]);
-  }
-  
-  return entities;
-}

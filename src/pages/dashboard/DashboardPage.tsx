@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import DashboardLayout from "@/components/layout/DashboardLayout";
@@ -13,6 +14,7 @@ import { useDashboardData } from "@/hooks/useDashboardData";
 import { useDashboardScan } from "@/hooks/useDashboardScan";
 import { useClientChanges } from "@/hooks/useClientChanges";
 import { ContentAlert } from "@/types/dashboard";
+import { markAlertAsRead, dismissAlert } from "@/services/contentActionService";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ThreatClassificationResult } from "@/services/openaiService";
 

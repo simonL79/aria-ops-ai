@@ -1,41 +1,76 @@
 
-import { supabase } from '@/integrations/supabase/client';
-import { ContentAlert } from '@/types/dashboard';
-import { toast } from 'sonner';
+import { ContentAlert } from "@/types/dashboard";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 /**
- * Store a content action in the database
+ * Request removal of content
  */
-export const trackContentAction = async (
-  alertId: string,
-  action: string,
-  type: string,
-  description: string,
-  platform: string
-): Promise<boolean> => {
+export const requestContentRemoval = async (alert: ContentAlert): Promise<boolean> => {
   try {
-    const { data, error } = await supabase
-      .from('content_actions')
-      .insert({
-        alert_id: alertId,
-        action,
-        type,
-        description,
-        platform,
-        status: 'pending',
-        user_id: supabase.auth.getUser() ? (await supabase.auth.getUser()).data.user?.id : null
-      })
-      .select();
-      
+    // Log the content removal request in the database
+    const { data, error } = await supabase.from("content_actions").insert({
+      alert_id: alert.id,
+      action: "request_removal",
+      type: "content_removal",
+      platform: alert.platform,
+      description: `Requested removal of content: "${alert.content.substring(0, 50)}..."`,
+      status: "pending"
+    }).select();
+
     if (error) {
-      console.error("Error tracking content action:", error);
-      toast.error("Failed to track content action");
+      console.error("Error requesting content removal:", error);
+      toast.error("Failed to request content removal");
       return false;
     }
-    
+
+    toast.success("Removal requested", {
+      description: "Content has been flagged for removal. Our team will process this request."
+    });
+
     return true;
   } catch (error) {
-    console.error("Exception in trackContentAction:", error);
+    console.error("Error requesting content removal:", error);
+    toast.error("Failed to request content removal");
+    return false;
+  }
+};
+
+/**
+ * Mark alert as read
+ */
+export const markAlertAsRead = async (alert: ContentAlert): Promise<boolean> => {
+  try {
+    // Log the mark as read action in the database
+    const { data, error } = await supabase.from("content_actions").insert({
+      alert_id: alert.id,
+      action: "mark_as_read",
+      type: "content_status_update",
+      platform: alert.platform,
+      description: `Marked alert as read: "${alert.content.substring(0, 50)}..."`,
+      status: "completed"
+    }).select();
+
+    if (error) {
+      console.error("Error marking alert as read:", error);
+      toast.error("Failed to mark alert as read");
+      return false;
+    }
+
+    // Also update the status in the content_alerts table
+    const { error: updateError } = await supabase
+      .from("content_alerts")
+      .update({ status: "read" })
+      .eq("id", alert.id);
+
+    if (updateError) {
+      console.error("Error updating alert status:", updateError);
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error marking alert as read:", error);
+    toast.error("Failed to mark alert as read");
     return false;
   }
 };
@@ -45,119 +80,26 @@ export const trackContentAction = async (
  */
 export const dismissAlert = async (alert: ContentAlert): Promise<boolean> => {
   try {
-    // Track the dismiss action
-    const tracked = await trackContentAction(
-      alert.id,
-      'dismiss',
-      'moderation',
-      `Alert "${alert.content.substring(0, 20)}..." was dismissed`,
-      alert.platform
-    );
-    
-    if (!tracked) {
-      return false;
-    }
-    
-    // Update the alert status in the content_alerts table
-    const { error } = await supabase
-      .from('content_alerts')
-      .update({
-        status: 'resolved',
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', alert.id);
-      
-    if (error) {
-      console.error("Error updating alert status:", error);
-      toast.error("Failed to update alert status");
-      return false;
-    }
-    
-    toast.success("Alert dismissed successfully");
-    return true;
-  } catch (error) {
-    console.error("Exception in dismissAlert:", error);
-    return false;
-  }
-};
+    // Log the dismiss action in the database
+    const { data, error } = await supabase.from("content_actions").insert({
+      alert_id: alert.id,
+      action: "dismiss",
+      type: "content_status_update",
+      platform: alert.platform,
+      description: `Dismissed alert: "${alert.content.substring(0, 50)}..."`,
+      status: "completed"
+    }).select();
 
-/**
- * Mark an alert as read
- */
-export const markAlertAsRead = async (alert: ContentAlert): Promise<boolean> => {
-  try {
-    // Track the read action
-    const tracked = await trackContentAction(
-      alert.id,
-      'read',
-      'viewing',
-      `Alert "${alert.content.substring(0, 20)}..." was marked as read`,
-      alert.platform
-    );
-    
-    if (!tracked) {
-      return false;
-    }
-    
-    // Update the alert status in the content_alerts table
-    const { error } = await supabase
-      .from('content_alerts')
-      .update({
-        status: 'read',
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', alert.id);
-      
     if (error) {
-      console.error("Error updating alert status:", error);
-      toast.error("Failed to update alert status");
+      console.error("Error dismissing alert:", error);
+      toast.error("Failed to dismiss alert");
       return false;
     }
-    
-    return true;
-  } catch (error) {
-    console.error("Exception in markAlertAsRead:", error);
-    return false;
-  }
-};
 
-/**
- * Request content removal
- */
-export const requestContentRemoval = async (alert: ContentAlert): Promise<boolean> => {
-  try {
-    // Track the removal request
-    const tracked = await trackContentAction(
-      alert.id,
-      'removal_request',
-      'moderation',
-      `Removal requested for content "${alert.content.substring(0, 20)}..."`,
-      alert.platform
-    );
-    
-    if (!tracked) {
-      return false;
-    }
-    
-    // Update the alert status
-    const { error } = await supabase
-      .from('content_alerts')
-      .update({
-        status: 'actioned',
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', alert.id);
-      
-    if (error) {
-      console.error("Error updating alert status:", error);
-      toast.error("Failed to update alert status");
-      return false;
-    }
-    
-    toast.success("Removal request submitted");
     return true;
   } catch (error) {
-    console.error("Exception in requestContentRemoval:", error);
+    console.error("Error dismissing alert:", error);
+    toast.error("Failed to dismiss alert");
     return false;
   }
 };

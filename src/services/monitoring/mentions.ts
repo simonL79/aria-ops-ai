@@ -19,7 +19,8 @@ export const saveMention = (
     content,
     source,
     date: new Date(),
-    severity
+    severity,
+    status: 'new' // Set the default status for new mentions
   };
   
   mentionsStorage.push(newMention);
