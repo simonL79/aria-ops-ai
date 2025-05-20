@@ -33,6 +33,7 @@ export interface ScrapingResult {
     threatClassification?: string;
   };
   processed: boolean;
+  notified?: boolean; // Whether this result has been included in a notification
 }
 
 export interface ScrapingQuery {
@@ -55,3 +56,11 @@ export interface GPTPromptTemplate {
 }
 
 export type ResponseToneType = 'empathetic' | 'legal' | 'confident' | 'firm';
+
+export interface EmailDigestSettings {
+  enabled: boolean;
+  frequency: 'daily' | 'weekly' | 'immediate';
+  minRiskScore: number;
+  recipients: string[];
+  lastSent?: string;
+}

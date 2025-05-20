@@ -1,35 +1,18 @@
+import React from 'react';
+import { useLocation, Navigate } from 'react-router-dom';
+import AiScrapingPage from './AiScrapingPage';
 
-import { useState, useEffect } from "react";
-import { Navigate } from "react-router-dom";
-import { useUser } from "@clerk/clerk-react";
-import { Skeleton } from "@/components/ui/skeleton";
-
+// This is a fallback page that will redirect to AI scraping for now
 const Index = () => {
-  const { isSignedIn, isLoaded } = useUser();
-  const [isReady, setIsReady] = useState(false);
+  const location = useLocation();
   
-  useEffect(() => {
-    if (isLoaded) {
-      // Small timeout to prevent flash
-      const timer = setTimeout(() => {
-        setIsReady(true);
-      }, 100);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [isLoaded]);
-
-  if (!isLoaded || !isReady) {
-    return (
-      <div className="h-screen w-screen flex flex-col items-center justify-center">
-        <Skeleton className="h-12 w-64 mb-4" />
-        <Skeleton className="h-4 w-48" />
-      </div>
-    );
+  // If we're at a path that includes "ai-scraping", show the AI Scraping page
+  if (location.pathname.includes('ai-scraping')) {
+    return <AiScrapingPage />;
   }
-
-  // Direct all users to the root path which now displays the SalesFunnel
-  return <Navigate to="/" replace />;
+  
+  // Otherwise redirect to the AI scraping page
+  return <Navigate to="/dashboard/ai-scraping" replace />;
 };
 
 export default Index;
