@@ -27,8 +27,9 @@ export interface ScanResult {
  */
 export const getMonitoringStatus = async (): Promise<MonitoringStatus> => {
   try {
-    const { data, error } = await supabase
-      .from('monitoring_status')
+    // Using 'as any' to bypass type checking for tables not in the Supabase schema yet
+    const { data, error } = await (supabase
+      .from('monitoring_status') as any)
       .select('*')
       .order('created_at', { ascending: false })
       .limit(1)

@@ -70,15 +70,17 @@ export const generateResponse = async (data: ResponseRequest): Promise<ResponseR
   }
 };
 
-// Save generated response to database
+// Save generated response to database - using any type to bypass type checking temporarily
+// This is a workaround until the Supabase types are regenerated
 export const saveGeneratedResponse = async (
   response: string, 
   originalContentId?: string,
   clientId?: string
 ): Promise<boolean> => {
   try {
-    const { error } = await supabase
-      .from('generated_responses')
+    // Using 'as any' to bypass type checking for tables not in the Supabase schema yet
+    const { error } = await (supabase
+      .from('generated_responses') as any)
       .insert({
         response_text: response,
         original_content_id: originalContentId,
@@ -106,11 +108,12 @@ export const saveGeneratedResponse = async (
   }
 };
 
-// Get response history
+// Get response history - using any type to bypass type checking temporarily
 export const getResponseHistory = async (limit: number = 10): Promise<any[]> => {
   try {
-    const { data, error } = await supabase
-      .from('generated_responses')
+    // Using 'as any' to bypass type checking for tables not in the Supabase schema yet
+    const { data, error } = await (supabase
+      .from('generated_responses') as any)
       .select(`
         *,
         clients:client_id (name),

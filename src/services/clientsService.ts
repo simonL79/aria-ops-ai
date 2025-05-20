@@ -28,8 +28,8 @@ export const fetchClients = async (): Promise<Client[]> => {
       website: client.website || '',
       notes: client.notes || '',
       keywordTargets: client.keywordtargets || '',
-      createdAt: client.created_at,
-      updatedAt: client.updated_at
+      created_at: client.created_at,
+      updated_at: client.updated_at
     })) || [];
     
   } catch (error) {
@@ -42,7 +42,7 @@ export const fetchClients = async (): Promise<Client[]> => {
 /**
  * Add a new client
  */
-export const addClient = async (clientData: Omit<Client, 'id' | 'createdAt' | 'updatedAt'>): Promise<Client | null> => {
+export const addClient = async (clientData: Omit<Client, 'id' | 'created_at' | 'updated_at'>): Promise<Client | null> => {
   try {
     const { data, error } = await supabase
       .from('clients')
@@ -73,8 +73,8 @@ export const addClient = async (clientData: Omit<Client, 'id' | 'createdAt' | 'u
       website: data.website || '',
       notes: data.notes || '',
       keywordTargets: data.keywordtargets || '',
-      createdAt: data.created_at,
-      updatedAt: data.updated_at
+      created_at: data.created_at,
+      updated_at: data.updated_at
     };
     
   } catch (error) {
@@ -121,8 +121,8 @@ export const updateClient = async (id: string, clientData: Partial<Client>): Pro
       website: data.website || '',
       notes: data.notes || '',
       keywordTargets: data.keywordtargets || '',
-      createdAt: data.created_at,
-      updatedAt: data.updated_at
+      created_at: data.created_at,
+      updated_at: data.updated_at
     };
     
   } catch (error) {

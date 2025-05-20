@@ -123,6 +123,71 @@ export type Database = {
         }
         Relationships: []
       }
+      generated_responses: {
+        Row: {
+          client_id: string | null
+          created_at: string | null
+          id: string
+          original_content_id: string | null
+          response_text: string
+          updated_at: string | null
+        }
+        Insert: {
+          client_id?: string | null
+          created_at?: string | null
+          id?: string
+          original_content_id?: string | null
+          response_text: string
+          updated_at?: string | null
+        }
+        Update: {
+          client_id?: string | null
+          created_at?: string | null
+          id?: string
+          original_content_id?: string | null
+          response_text?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "generated_responses_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      monitoring_status: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          last_run: string | null
+          next_run: string | null
+          sources_count: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_run?: string | null
+          next_run?: string | null
+          sources_count?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_run?: string | null
+          next_run?: string | null
+          sources_count?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       reputation_scan_submissions: {
         Row: {
           admin_notes: string | null
