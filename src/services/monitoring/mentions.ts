@@ -11,7 +11,8 @@ export const saveMention = (
   platform: string,
   content: string,
   source: string,
-  severity: 'high' | 'medium' | 'low' = 'medium'
+  severity: 'high' | 'medium' | 'low' = 'medium',
+  threatType?: string
 ): Mention => {
   const newMention: Mention = {
     id: `mention-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
@@ -20,7 +21,8 @@ export const saveMention = (
     source,
     date: new Date(),
     severity,
-    status: 'new' // Set the default status for new mentions
+    status: 'new', // Set the default status for new mentions
+    threatType
   };
   
   mentionsStorage.push(newMention);
