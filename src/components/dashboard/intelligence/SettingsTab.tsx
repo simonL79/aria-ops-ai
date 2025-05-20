@@ -31,12 +31,12 @@ const SettingsTab = ({ level, setLevel, onActivate }: SettingsTabProps) => {
             Advanced
           </Button>
           <Button 
-            variant={level === 'expert' ? 'default' : 'outline'} 
+            variant={level === 'enterprise' ? 'default' : 'outline'} 
             size="sm" 
-            onClick={() => setLevel('expert')}
-            className={level === 'expert' ? 'bg-red-600 hover:bg-red-700' : ''}
+            onClick={() => setLevel('enterprise')}
+            className={level === 'enterprise' ? 'bg-amber-600 hover:bg-amber-700' : ''}
           >
-            Expert
+            Enterprise
           </Button>
         </div>
         <p className="text-xs text-muted-foreground mt-2">

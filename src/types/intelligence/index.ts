@@ -1,12 +1,13 @@
 
-// Fix the ambiguous export by removing one of the duplicate exports
+// Export all intelligence types from one central file
 export * from './agents';
 export * from './components';
 export * from './core';
 export * from './memory';
 export * from './prediction';
 export * from './reports';
-// Export only DataSourceStats from sources to avoid ambiguity
-export type { DataSourceStats } from './sources';
-// Export ThreatSource only from threats to avoid ambiguity
+export * from './sources';
 export * from './threats';
+
+// Also re-export the types from the main intelligence.ts file
+export * from '../intelligence';

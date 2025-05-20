@@ -34,6 +34,7 @@ export interface ThreatClassifierRequest {
   content: string;
   platform: string;
   brand: string;
+  context?: string;
 }
 
 export interface ThreatClassificationResult {
@@ -41,6 +42,9 @@ export interface ThreatClassificationResult {
   severity: number; // 1-10
   recommendation: string;
   ai_reasoning: string;
+  explanation?: string;
+  confidence?: number;
+  action?: string;
 }
 
 // For managing threat collection sources
@@ -57,4 +61,5 @@ export interface ThreatSource {
   };
 }
 
-// No re-export here to avoid conflict
+// Alert severity definition
+export type AlertSeverity = 'low' | 'medium' | 'high';
