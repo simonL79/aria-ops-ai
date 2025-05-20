@@ -45,14 +45,12 @@ export const useScanningLogic = () => {
       });
       
       // Set up continuous scanning
-      stopScanning = startContinuousScan((newAlert) => {
+      stopScanning = startContinuousScan((newAlert: ContentAlert | ContentAlert[]) => {
         // Fix: Use a properly typed state update
         setScanResults(prevResults => {
-          // Ensure we're adding single ContentAlert objects, not arrays
-          const updatedResults = Array.isArray(newAlert) 
-            ? [...newAlert, ...prevResults]
-            : [newAlert, ...prevResults];
-          return updatedResults.slice(0, 30); // Keep top 30
+          // Handle both single alerts and arrays of alerts
+          const alertsToAdd = Array.isArray(newAlert) ? newAlert : [newAlert];
+          return [...alertsToAdd, ...prevResults].slice(0, 30); // Keep top 30
         });
         
         // Update metrics - handle both single alerts and arrays

@@ -1,27 +1,26 @@
 
+// Monitoring status interface
 export interface MonitoringStatus {
   isActive: boolean;
-  lastRun: string; // Changed from Date to string to match implementation
-  nextRun: string; // Changed from Date to string to match implementation
+  lastRun: Date;
+  nextRun: Date;
   sources: number;
-  activeSince?: string;
+  activeSince: Date;
 }
 
+// Platform monitoring interface
 export interface MonitorablePlatform {
   id: string;
   name: string;
-  type: string;
-  enabled: boolean;
-  coverage: number;
+  isActive: boolean;
 }
 
+// Mention data structure
 export interface Mention {
   id: string;
+  platform: string;
   content: string;
   source: string;
-  timestamp: Date;
-  sentiment: number;
-  entities: string[];
-  url?: string;
-  platformId: string;
+  date: Date;
+  severity: 'high' | 'medium' | 'low';
 }

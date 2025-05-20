@@ -42,15 +42,26 @@ export {
   getMonitoringStatus,
   startMonitoring,
   stopMonitoring,
-  runMonitoringScan,
-  getMentionsAsAlerts,
+  runMonitoringScan
+} from './monitoring/status';
+
+export {
+  getMentionsAsAlerts
+} from './monitoring/alerts';
+
+export {
   getMonitoredPlatforms,
   isPlatformMonitored,
+  updatePlatformStatus
+} from './monitoring/platforms';
+
+export {
   saveMention,
   getAllMentions,
   clearMentions,
   getMentionsByPlatform
-} from './monitoring';
+} from './monitoring/mentions';
+
 export type {
   MonitoringStatus,
   MonitorablePlatform,
