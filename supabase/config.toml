@@ -61,3 +61,7 @@ serve_local_documentation = true
 
 [functions.rss-scraper]
 
+[functions.google-search-crawler]
+
+[functions.companies-house-scanner]
+
