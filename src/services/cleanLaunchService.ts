@@ -166,26 +166,39 @@ export const runCleanLaunchPipeline = async (company: NewCompany): Promise<NewCo
       { id: 'dir1', name: 'Unknown Director', role: 'Director' }
     ];
     
-    // Update directors with reputation scans - ensure riskCategory is typed correctly
-    const updatedDirectors = directors.map(director => ({
-      ...director,
-      reputationScan: {
-        id: `scan_${Math.random().toString(36).substring(2, 11)}`,
-        personId: director.id,
-        scanDate: new Date().toISOString(),
-        overallSentiment: Math.random() * 2 - 1, // -1 to 1
-        riskScore: Math.round(Math.random() * 100),
-        // Ensure riskCategory is a valid union value ('high', 'medium', or 'low')
-        riskCategory: Math.random() > 0.7 ? 'high' : Math.random() > 0.4 ? 'medium' : 'low',
-        issues: [],
-        sources: {
-          news: Math.floor(Math.random() * 10),
-          social: Math.floor(Math.random() * 20),
-          legal: Math.floor(Math.random() * 3),
-          other: Math.floor(Math.random() * 5)
-        }
+    // Update directors with reputation scans - ensure riskCategory is typed correctly as a union type
+    const updatedDirectors = directors.map(director => {
+      // Determine risk category with proper type assertion
+      const randomValue = Math.random();
+      let riskCategory: 'low' | 'medium' | 'high';
+      
+      if (randomValue > 0.7) {
+        riskCategory = 'high';
+      } else if (randomValue > 0.4) {
+        riskCategory = 'medium';
+      } else {
+        riskCategory = 'low';
       }
-    }));
+      
+      return {
+        ...director,
+        reputationScan: {
+          id: `scan_${Math.random().toString(36).substring(2, 11)}`,
+          personId: director.id,
+          scanDate: new Date().toISOString(),
+          overallSentiment: Math.random() * 2 - 1, // -1 to 1
+          riskScore: Math.round(Math.random() * 100),
+          riskCategory,
+          issues: [],
+          sources: {
+            news: Math.floor(Math.random() * 10),
+            social: Math.floor(Math.random() * 20),
+            legal: Math.floor(Math.random() * 3),
+            other: Math.floor(Math.random() * 5)
+          }
+        }
+      };
+    });
     
     // 4. Calculate Clean Launch score
     const { score, category } = await calculateCleanLaunchScore({
