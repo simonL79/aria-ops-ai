@@ -2,7 +2,7 @@
 export interface ScrapingSource {
   id: string;
   name: string;
-  type: 'google' | 'news' | 'manual' | 'crawler' | 'zapier';
+  type: 'google' | 'news' | 'manual' | 'crawler' | 'zapier' | 'rss' | 'custom-search' | 'headless' | 'common-crawl';
   enabled: boolean;
   lastScan?: string;
   config?: {
@@ -11,6 +11,14 @@ export interface ScrapingSource {
     customHeaders?: Record<string, string>;
     cronSchedule?: string;
     maxResults?: number;
+    feedUrl?: string;
+    useProxy?: boolean;
+    browserOptions?: {
+      headless: boolean;
+      userAgent?: string;
+      waitForSelector?: string;
+    };
+    filterKeywords?: string[];
   };
 }
 
@@ -63,4 +71,43 @@ export interface EmailDigestSettings {
   minRiskScore: number;
   recipients: string[];
   lastSent?: string;
+}
+
+export interface EntityWatchlist {
+  id: string;
+  name: string;
+  type: 'person' | 'organization' | 'location';
+  keywords: string[];
+  sources: string[];
+  alertThreshold: number; // Risk score threshold for alerts
+  lastScan?: string;
+  scanFrequency: 'daily' | 'weekly' | 'monthly';
+  autoRespond: boolean; // Whether to generate responses automatically
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ModelConfig {
+  id: string;
+  name: string;
+  type: 'openai' | 'huggingface' | 'custom';
+  usage: 'sentiment' | 'classification' | 'response' | 'summary';
+  config: {
+    model: string;
+    apiKey?: string;
+    temperature?: number;
+    maxTokens?: number;
+    endpoint?: string;
+    useLocal?: boolean;
+  };
+  costPerToken?: number;
+  active: boolean;
+}
+
+export interface ScanResultStats {
+  totalScanned: number;
+  risksIdentified: number;
+  averageRiskScore: number;
+  sourcesDistribution: Record<string, number>;
+  scanDuration: number;
 }

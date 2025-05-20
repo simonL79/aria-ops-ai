@@ -10,6 +10,9 @@ import ScrapingResults from './ScrapingResults';
 import ScrapingQueryForm from './ScrapingQueryForm';
 import PromptTemplates from './PromptTemplates';
 import NotificationSettings from './NotificationSettings';
+import EntityWatchlist from './EntityWatchlist';
+import ModelSettings from './ModelSettings';
+import ScanStats from './ScanStats';
 import { ScrapingQuery, ScrapingResult } from '@/types/aiScraping';
 import { runScraping } from '@/services/aiScrapingService';
 
@@ -38,11 +41,14 @@ const AiScrapingDashboard = () => {
       </CardHeader>
       <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-6 mb-4">
+          <TabsList className="grid grid-cols-9 mb-4">
             <TabsTrigger value="query">Query Builder</TabsTrigger>
             <TabsTrigger value="sources">Sources</TabsTrigger>
             <TabsTrigger value="manual">Manual Input</TabsTrigger>
+            <TabsTrigger value="watchlist">Watchlist</TabsTrigger>
+            <TabsTrigger value="models">Models</TabsTrigger>
             <TabsTrigger value="prompts">AI Prompts</TabsTrigger>
+            <TabsTrigger value="stats">Scan Stats</TabsTrigger>
             <TabsTrigger value="notifications">Notifications</TabsTrigger>
             <TabsTrigger value="results">Results</TabsTrigger>
           </TabsList>
@@ -70,8 +76,20 @@ const AiScrapingDashboard = () => {
             <ManualInputForm onSuccess={() => setActiveTab('results')} />
           </TabsContent>
           
+          <TabsContent value="watchlist">
+            <EntityWatchlist />
+          </TabsContent>
+          
+          <TabsContent value="models">
+            <ModelSettings />
+          </TabsContent>
+          
           <TabsContent value="prompts">
             <PromptTemplates />
+          </TabsContent>
+          
+          <TabsContent value="stats">
+            <ScanStats />
           </TabsContent>
 
           <TabsContent value="notifications">
