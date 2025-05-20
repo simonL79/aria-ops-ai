@@ -1,6 +1,8 @@
 
+import { supabase } from '@/integrations/supabase/client';
+
 // Define the type for the user roles available in the application
-export type AppRole = 'admin' | 'user' | 'staff' | 'analyst';
+export type AppRole = 'admin' | 'user' | 'staff' | 'analyst' | 'security';
 
 // Get current user profile information
 export const getCurrentUserProfile = async () => {

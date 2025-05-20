@@ -27,9 +27,8 @@ export interface ScanResult {
  */
 export const getMonitoringStatus = async (): Promise<MonitoringStatus> => {
   try {
-    // Using 'as any' to bypass type checking for tables not in the Supabase schema yet
-    const { data, error } = await (supabase
-      .from('monitoring_status') as any)
+    const { data, error } = await supabase
+      .from('monitoring_status')
       .select('*')
       .order('created_at', { ascending: false })
       .limit(1)
@@ -222,6 +221,9 @@ export const getScanResults = async (limit: number = 10): Promise<ScanResult[]> 
       return [];
     }
     
+    if (!data) return [];
+
+    // Map database columns to ScanResult interface  
     return data.map(item => ({
       id: item.id,
       content: item.content,
@@ -229,11 +231,11 @@ export const getScanResults = async (limit: number = 10): Promise<ScanResult[]> 
       url: item.url,
       date: item.created_at,
       sentiment: item.sentiment,
-      severity: item.severity,
-      status: item.status,
+      severity: item.severity as 'low' | 'medium' | 'high',
+      status: item.status as 'new' | 'read' | 'actioned' | 'resolved',
       threatType: item.threat_type,
       client_id: item.client_id
-    })) || [];
+    }));
     
   } catch (error) {
     console.error("Error in getScanResults:", error);
@@ -281,6 +283,9 @@ export const getMentionsAsAlerts = async (): Promise<any[]> => {
       return [];
     }
     
+    if (!data) return [];
+
+    // Map the database results to the expected format
     return data.map(item => ({
       id: item.id,
       platform: item.platform,
@@ -290,7 +295,7 @@ export const getMentionsAsAlerts = async (): Promise<any[]> => {
       status: item.status,
       url: item.url,
       threatType: item.threat_type
-    })) || [];
+    }));
     
   } catch (error) {
     console.error("Error in getMentionsAsAlerts:", error);

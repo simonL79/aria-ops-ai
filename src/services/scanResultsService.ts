@@ -21,9 +21,8 @@ export interface ScanResult {
  */
 export const getScanResults = async (limit: number = 20, page: number = 0): Promise<ScanResult[]> => {
   try {
-    // Using 'as any' to bypass type checking for tables not in the Supabase schema yet
-    const { data, error } = await (supabase
-      .from('scan_results') as any)
+    const { data, error } = await supabase
+      .from('scan_results')
       .select('*')
       .order('created_at', { ascending: false })
       .range(page * limit, (page + 1) * limit - 1);
@@ -47,9 +46,8 @@ export const getScanResults = async (limit: number = 20, page: number = 0): Prom
  */
 export const getScanResultById = async (id: string): Promise<ScanResult | null> => {
   try {
-    // Using 'as any' to bypass type checking for tables not in the Supabase schema yet
-    const { data, error } = await (supabase
-      .from('scan_results') as any)
+    const { data, error } = await supabase
+      .from('scan_results')
       .select('*')
       .eq('id', id)
       .single();
@@ -71,9 +69,8 @@ export const getScanResultById = async (id: string): Promise<ScanResult | null> 
  */
 export const updateScanResultStatus = async (id: string, status: 'read' | 'actioned' | 'resolved'): Promise<boolean> => {
   try {
-    // Using 'as any' to bypass type checking for tables not in the Supabase schema yet
-    const { error } = await (supabase
-      .from('scan_results') as any)
+    const { error } = await supabase
+      .from('scan_results')
       .update({
         status,
         updated_at: new Date().toISOString()

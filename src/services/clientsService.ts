@@ -187,8 +187,8 @@ export const getClientById = async (id: string): Promise<Client | null> => {
       website: data.website || '',
       notes: data.notes || '',
       keywordTargets: data.keywordtargets || '',
-      createdAt: data.created_at,
-      updatedAt: data.updated_at
+      created_at: data.created_at,
+      updated_at: data.updated_at
     };
     
   } catch (error) {

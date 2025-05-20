@@ -158,6 +158,33 @@ export type Database = {
           },
         ]
       }
+      monitoring_sources: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       monitoring_status: {
         Row: {
           created_at: string | null
@@ -223,6 +250,56 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      scan_results: {
+        Row: {
+          client_id: string | null
+          content: string
+          created_at: string | null
+          id: string
+          platform: string
+          sentiment: number | null
+          severity: string | null
+          status: string | null
+          threat_type: string | null
+          updated_at: string | null
+          url: string
+        }
+        Insert: {
+          client_id?: string | null
+          content: string
+          created_at?: string | null
+          id?: string
+          platform: string
+          sentiment?: number | null
+          severity?: string | null
+          status?: string | null
+          threat_type?: string | null
+          updated_at?: string | null
+          url?: string
+        }
+        Update: {
+          client_id?: string | null
+          content?: string
+          created_at?: string | null
+          id?: string
+          platform?: string
+          sentiment?: number | null
+          severity?: string | null
+          status?: string | null
+          threat_type?: string | null
+          updated_at?: string | null
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scan_results_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -308,7 +385,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "user" | "security" | "staff"
+      app_role: "admin" | "user" | "security" | "staff" | "analyst"
       reputation_scan_status: "new" | "in_review" | "complete" | "archived"
     }
     CompositeTypes: {
@@ -425,7 +502,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user", "security", "staff"],
+      app_role: ["admin", "user", "security", "staff", "analyst"],
       reputation_scan_status: ["new", "in_review", "complete", "archived"],
     },
   },

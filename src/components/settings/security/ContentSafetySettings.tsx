@@ -10,6 +10,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Protected } from "@/hooks/useRbac";
+import { AppRole } from "@/services/api/userService";
 import { AccessDenied } from "@/components/ui/access-denied";
 import { toast } from "sonner";
 
@@ -39,8 +40,10 @@ const ContentSafetySettings = () => {
     });
   };
 
+  const allowedRoles: AppRole[] = ["admin", "security"];
+
   return (
-    <Protected roles={["admin", "security"]} fallback={<AccessDenied />}>
+    <Protected roles={allowedRoles} fallback={<AccessDenied />}>
       <Card>
         <CardHeader>
           <CardTitle>Content Safety Settings</CardTitle>
