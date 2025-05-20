@@ -46,18 +46,24 @@ export const useScanningLogic = () => {
       
       // Set up continuous scanning
       stopScanning = startContinuousScan((newAlert) => {
-        // Fix: Use a properly typed state update that doesn't mix types
+        // Fix: Use a properly typed state update
         setScanResults(prevResults => {
-          const updatedResults = [newAlert, ...prevResults];
+          // Ensure we're adding single ContentAlert objects, not arrays
+          const updatedResults = Array.isArray(newAlert) 
+            ? [...newAlert, ...prevResults]
+            : [newAlert, ...prevResults];
           return updatedResults.slice(0, 30); // Keep top 30
         });
         
-        // Update metrics
-        setMetrics(prev => ({
-          ...prev,
-          alertsDetected: prev.alertsDetected + 1,
-          highPriorityAlerts: prev.highPriorityAlerts + (newAlert.severity === 'high' ? 1 : 0)
-        }));
+        // Update metrics - handle both single alerts and arrays
+        setMetrics(prev => {
+          const alertsToProcess = Array.isArray(newAlert) ? newAlert : [newAlert];
+          return {
+            ...prev,
+            alertsDetected: prev.alertsDetected + alertsToProcess.length,
+            highPriorityAlerts: prev.highPriorityAlerts + alertsToProcess.filter(a => a.severity === 'high').length
+          };
+        });
       });
     }
     

@@ -35,9 +35,9 @@ export interface ScanParameters {
   intensity?: 'low' | 'medium' | 'high';
   threatTypes?: string[];
   keywordFilters?: string[];
-  prioritizeSeverity?: boolean;
   maxResults?: number;
   includeCustomerEnquiries?: boolean;
+  prioritizeSeverity?: 'high' | 'medium' | 'low';
 }
 
 // Default scan parameters
@@ -48,9 +48,9 @@ export const defaultScanParameters: ScanParameters = {
   intensity: 'medium',
   threatTypes: [],
   keywordFilters: [],
-  prioritizeSeverity: true,
   maxResults: 10,
-  includeCustomerEnquiries: true
+  includeCustomerEnquiries: true,
+  prioritizeSeverity: 'medium'
 };
 
 // Platforms to scan

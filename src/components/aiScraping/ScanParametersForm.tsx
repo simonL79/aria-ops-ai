@@ -69,12 +69,17 @@ const ScanParametersForm = ({ onStartScan, isScanning }: ScanParametersFormProps
   
   // Fix for the priority level selection to handle the type correctly
   const handlePriorityChange = (value: string) => {
-    setParameters(prev => ({
-      ...prev,
+    setParameters(prev => {
+      const updatedParams: ScanParameters = { ...prev };
       // If value is 'none', set prioritizeSeverity to undefined, 
       // otherwise set it to the appropriate severity type
-      prioritizeSeverity: value === "none" ? undefined : (value as "high" | "medium" | "low")
-    }));
+      if (value === "none") {
+        updatedParams.prioritizeSeverity = undefined;
+      } else if (value === "high" || value === "medium" || value === "low") {
+        updatedParams.prioritizeSeverity = value;
+      }
+      return updatedParams;
+    });
   };
   
   return (
