@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -30,37 +29,36 @@ const IntelligenceDashboardContainer = ({
   const [monitoringStatus, setMonitoringStatus] = useState<any>(null);
   
   useEffect(() => {
-    // Get available sources
-    setAvailableSources(getAvailableSources());
-    
-    // Get monitoring status
-    setMonitoringStatus(getMonitoringStatus());
-    
-    // Set up monitoring if not yet active
-    if (!getMonitoringStatus().isActive) {
-      startMonitoring();
-    }
-    
-    // Prevent any auto-refreshes from useEffect
-    const getInitialData = async () => {
-      setAvailableSources(getAvailableSources());
-      setMonitoringStatus(getMonitoringStatus());
-      
-      if (!getMonitoringStatus().isActive) {
-        startMonitoring();
+    // Set up async function to load data and handle promises
+    const loadData = async () => {
+      try {
+        // Get available sources
+        setAvailableSources(getAvailableSources());
+        
+        // Get monitoring status
+        const status = await getMonitoringStatus();
+        setMonitoringStatus(status);
+        
+        // Set up monitoring if not yet active
+        if (status && !status.isActive) {
+          await startMonitoring();
+        }
+        
+        // Refresh monitoring status every minute
+        const statusInterval = setInterval(async () => {
+          const updatedStatus = await getMonitoringStatus();
+          setMonitoringStatus(updatedStatus);
+        }, 60000);
+        
+        return () => {
+          clearInterval(statusInterval);
+        };
+      } catch (error) {
+        console.error("Error loading dashboard data:", error);
       }
     };
     
-    getInitialData();
-    
-    // Refresh monitoring status every minute
-    const statusInterval = setInterval(() => {
-      setMonitoringStatus(getMonitoringStatus());
-    }, 60000);
-    
-    return () => {
-      clearInterval(statusInterval);
-    };
+    loadData();
   }, []);
   
   const handleRunAnalysis = async (e: React.MouseEvent) => {

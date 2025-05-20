@@ -24,18 +24,22 @@ const SystemStatusIndicator = ({ isLive = true }: SystemStatusIndicatorProps) =>
   useEffect(() => {
     if (!isLive) return;
 
-    const updateStats = () => {
-      const monitoringStatus = getMonitoringStatus();
-      const aiScanningStatus = getAiScanningStatus();
-      
-      setStatsData({
-        platformsMonitored: monitoringStatus.sources,
-        threatModelsActive: 4, // Simplified for demo - would come from real threat models count
-        activeSources: aiScanningStatus.platforms,
-        lastScanTime: new Date(monitoringStatus.lastRun).toLocaleTimeString()
-      });
-      
-      setLastRefresh(new Date());
+    const updateStats = async () => {
+      try {
+        const monitoringStatus = await getMonitoringStatus();
+        const aiScanningStatus = await getAiScanningStatus();
+        
+        setStatsData({
+          platformsMonitored: monitoringStatus?.sources || 0,
+          threatModelsActive: 4, // Simplified for demo - would come from real threat models count
+          activeSources: aiScanningStatus?.platforms || 0,
+          lastScanTime: monitoringStatus?.lastRun ? new Date(monitoringStatus.lastRun).toLocaleTimeString() : 'N/A'
+        });
+        
+        setLastRefresh(new Date());
+      } catch (error) {
+        console.error("Error updating system status:", error);
+      }
     };
     
     // Update immediately

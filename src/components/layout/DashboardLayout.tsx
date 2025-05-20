@@ -47,6 +47,21 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     }
   };
   
+  // Get display name from user object, safely handling different user object structures
+  const getUserDisplayName = () => {
+    if (!user) return '';
+    
+    // Try to get name from various possible properties
+    // @ts-ignore - We need to handle different user shapes
+    return user.firstName || user.user_metadata?.firstName || user.email || '';
+  };
+  
+  // Get first letter for avatar
+  const getAvatarInitial = () => {
+    const displayName = getUserDisplayName();
+    return displayName ? displayName[0] : (user?.email?.[0] || '?');
+  };
+  
   const routes = [
     {
       label: "Dashboard",
@@ -137,7 +152,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               {user && (
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate">
-                    {user.firstName || user.email}
+                    {getUserDisplayName()}
                   </p>
                   <p className="text-xs text-muted-foreground truncate">
                     {user.email}
@@ -145,7 +160,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                 </div>
               )}
               <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground">
-                {user?.firstName?.[0] || user?.email?.[0] || '?'}
+                {getAvatarInitial()}
               </div>
             </div>
           </SidebarFooter>

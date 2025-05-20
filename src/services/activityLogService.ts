@@ -55,7 +55,7 @@ export const logActivity = async (
         user_email: userEmail,
         entity_type: entityType,
         entity_id: entityId
-      });
+      } as any); // Using type assertion as a workaround until db types are updated
     
     if (error) {
       console.error("Error logging activity:", error);
@@ -78,14 +78,14 @@ export const getRecentActivities = async (limit: number = 10): Promise<ActivityL
       .from('activity_logs')
       .select('*')
       .order('created_at', { ascending: false })
-      .limit(limit);
+      .limit(limit) as any; // Using type assertion as a workaround until db types are updated
     
     if (error) {
       console.error("Error fetching activity logs:", error);
       return [];
     }
     
-    return data.map(log => ({
+    return data?.map(log => ({
       id: log.id,
       action: log.action,
       details: log.details,
@@ -112,14 +112,14 @@ export const getEntityActivities = async (entityType: string, entityId: string):
       .select('*')
       .eq('entity_type', entityType)
       .eq('entity_id', entityId)
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false }) as any; // Using type assertion as a workaround until db types are updated
     
     if (error) {
       console.error("Error fetching entity activities:", error);
       return [];
     }
     
-    return data.map(log => ({
+    return data?.map(log => ({
       id: log.id,
       action: log.action,
       details: log.details,
