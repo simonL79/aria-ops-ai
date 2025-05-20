@@ -1,6 +1,12 @@
 
+// NOTE: These are legacy types that are gradually being moved to the more organized structure
+// in the intelligence/ directory. New code should import from @/types/intelligence directly
+// which will provide types from the more organized files.
+
 export type IntelligenceLevel = 'basic' | 'advanced' | 'enterprise';
 
+// These interfaces are now defined in their respective files in the intelligence/ directory
+// but are kept here for backward compatibility
 export interface IntelligenceReport {
   id: string;
   title: string;

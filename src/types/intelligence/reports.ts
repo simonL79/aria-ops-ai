@@ -15,13 +15,3 @@ export interface IntelligenceReport {
     negative: number;
   };
 }
-
-// Define intelligence strategy
-export interface IntelligenceStrategy {
-  name: string;
-  description: string;
-  effectivenessRate: number;
-  platforms: string[];
-  timeToImplement: string;
-  icon: React.ReactElement;
-}
