@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -6,8 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Check, Save, X, Plus, Edit2 } from 'lucide-react';
-import { getAvailableSources } from '@/services/dataIngestionService';
-import { connectDataSource } from '@/services/dataIngestionService';
+import { getAvailableSources, connectDataSource } from '@/services/dataIngestion';
 import { toast } from 'sonner';
 
 const MonitorConfig = () => {

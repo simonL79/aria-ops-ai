@@ -25,3 +25,15 @@ export { runMultiAgentAnalysis } from './intelligence/multiAgentAnalysis';
 
 // Predictive Analysis
 export { runPredictiveAnalysis } from './intelligence/predictiveAnalysis';
+
+// Data Ingestion Services (refactored)
+export { 
+  fetchContent, 
+  connectDataSource, 
+  getAvailableSources 
+} from './dataIngestion';
+export type { 
+  ThreatSource, 
+  IngestionOptions 
+} from './dataIngestion/types';
+
