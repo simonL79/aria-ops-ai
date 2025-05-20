@@ -19,7 +19,7 @@ const NotificationSettings = () => {
     enabled: true,
     frequency: 'daily',
     minRiskScore: 5,
-    recipients: [''],
+    recipients: ['simon@ariaops.co.uk'],
     lastSent: undefined
   });
 
