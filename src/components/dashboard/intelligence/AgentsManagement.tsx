@@ -132,16 +132,21 @@ const AgentsManagement = () => {
   const handleRunSimulation = () => {
     setRunningSimulation(true);
     
-    // Use the simulation service to generate results
+    // Use the simulation service to generate results - Fix: Remove the agents parameter
     setTimeout(() => {
-      const results = runRedTeamSimulation(agents);
-      setSimulationResults(results);
-      setRunningSimulation(false);
-      
-      // Clear results after some time
-      setTimeout(() => {
-        setSimulationResults(null);
-      }, 15000);
+      runRedTeamSimulation().then(results => {
+        setSimulationResults({
+          vulnerabilitiesFound: results.vulnerabilities.length,
+          threatsDetected: Math.floor(Math.random() * 3) + 2, // Simulate 2-4 threats
+          mitigationStrategies: results.mitigations
+        });
+        setRunningSimulation(false);
+        
+        // Clear results after some time
+        setTimeout(() => {
+          setSimulationResults(null);
+        }, 15000);
+      });
     }, 3000);
   };
   
