@@ -21,9 +21,12 @@ import {
   Radar, 
   Activity, 
   Building2, 
-  Settings 
+  Settings, 
+  LogOut 
 } from 'lucide-react';
 import { useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -33,6 +36,18 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const { user } = useUser();
   const { pathname } = useLocation();
   const navigate = useNavigate();
+  const { signOut } = useAuth();
+  
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast.success("Signed out successfully");
+      navigate("/auth");
+    } catch (error) {
+      console.error("Error signing out:", error);
+      toast.error("Error signing out");
+    }
+  };
   
   const routes = [
     {
@@ -106,6 +121,17 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  tooltip="Sign Out"
+                  onClick={handleSignOut}
+                  className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span>Sign Out</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarContent>
           <SidebarFooter className="border-t p-4">
@@ -120,7 +146,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                   </p>
                 </div>
               )}
-              <UserButton afterSignOutUrl="/home" />
+              <UserButton afterSignOutUrl="/auth" />
             </div>
           </SidebarFooter>
         </Sidebar>

@@ -1,6 +1,6 @@
 
 import * as React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import {
   BarChart,
@@ -14,9 +14,11 @@ import {
   Trash,
   Eye,
   FileText,
-  MessageSquare
+  MessageSquare,
+  LogIn
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
 
 interface MainNavProps {
   className?: string;
@@ -24,40 +26,51 @@ interface MainNavProps {
 
 export function MainNav({ className }: MainNavProps) {
   const location = useLocation();
+  const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
 
   // If not authenticated, only show limited navigation
   if (!isAuthenticated) {
     return (
-      <nav className={cn("flex items-center gap-6 text-sm", className)}>
-        <Link
-          to="/"
-          className={cn(
-            "transition-colors hover:text-foreground/80",
-            location.pathname === "/" ? "text-foreground font-medium" : "text-foreground/60"
-          )}
+      <div className={cn("flex items-center justify-between w-full", className)}>
+        <nav className="flex items-center gap-6 text-sm">
+          <Link
+            to="/"
+            className={cn(
+              "transition-colors hover:text-foreground/80",
+              location.pathname === "/" ? "text-foreground font-medium" : "text-foreground/60"
+            )}
+          >
+            Home
+          </Link>
+          <Link
+            to="/pricing"
+            className={cn(
+              "transition-colors hover:text-foreground/80",
+              location.pathname === "/pricing" ? "text-foreground font-medium" : "text-foreground/60"
+            )}
+          >
+            Pricing
+          </Link>
+          <Link
+            to="/about"
+            className={cn(
+              "transition-colors hover:text-foreground/80",
+              location.pathname === "/about" ? "text-foreground font-medium" : "text-foreground/60"
+            )}
+          >
+            About
+          </Link>
+        </nav>
+        <Button 
+          onClick={() => navigate("/auth")}
+          variant="outline"
+          className="ml-4"
         >
-          Home
-        </Link>
-        <Link
-          to="/pricing"
-          className={cn(
-            "transition-colors hover:text-foreground/80",
-            location.pathname === "/pricing" ? "text-foreground font-medium" : "text-foreground/60"
-          )}
-        >
-          Pricing
-        </Link>
-        <Link
-          to="/about"
-          className={cn(
-            "transition-colors hover:text-foreground/80",
-            location.pathname === "/about" ? "text-foreground font-medium" : "text-foreground/60"
-          )}
-        >
-          About
-        </Link>
-      </nav>
+          <LogIn className="mr-2 h-4 w-4" />
+          Sign In
+        </Button>
+      </div>
     );
   }
 
@@ -94,10 +107,10 @@ export function MainNav({ className }: MainNavProps) {
         <span className="group-hover:underline">Mentions</span>
       </Link>
       <Link
-        to="/engagement"
+        to="/dashboard/engagement"
         className={cn(
           "group flex items-center gap-1 transition-colors hover:text-foreground/80",
-          isActive("/engagement") ? "text-foreground font-medium" : "text-foreground/60"
+          isActive("/dashboard/engagement") ? "text-foreground font-medium" : "text-foreground/60"
         )}
       >
         <MessageSquare className="h-4 w-4" />
@@ -114,26 +127,6 @@ export function MainNav({ className }: MainNavProps) {
         <span className="group-hover:underline">Analytics</span>
       </Link>
       <Link
-        to="/clients"
-        className={cn(
-          "group flex items-center gap-1 transition-colors hover:text-foreground/80",
-          isActive("/clients") ? "text-foreground font-medium" : "text-foreground/60"
-        )}
-      >
-        <Users className="h-4 w-4" />
-        <span className="group-hover:underline">Clients</span>
-      </Link>
-      <Link
-        to="/monitor"
-        className={cn(
-          "group flex items-center gap-1 transition-colors hover:text-foreground/80",
-          isActive("/monitor") ? "text-foreground font-medium" : "text-foreground/60"
-        )}
-      >
-        <Eye className="h-4 w-4" />
-        <span className="group-hover:underline">Monitor</span>
-      </Link>
-      <Link
         to="/dashboard/radar"
         className={cn(
           "group flex items-center gap-1 transition-colors hover:text-foreground/80",
@@ -144,30 +137,10 @@ export function MainNav({ className }: MainNavProps) {
         <span className="group-hover:underline">Radar</span>
       </Link>
       <Link
-        to="/reports"
+        to="/dashboard/settings"
         className={cn(
           "group flex items-center gap-1 transition-colors hover:text-foreground/80",
-          isActive("/reports") ? "text-foreground font-medium" : "text-foreground/60"
-        )}
-      >
-        <FileText className="h-4 w-4" />
-        <span className="group-hover:underline">Reports</span>
-      </Link>
-      <Link
-        to="/removal"
-        className={cn(
-          "group flex items-center gap-1 transition-colors hover:text-foreground/80",
-          isActive("/removal") ? "text-foreground font-medium" : "text-foreground/60"
-        )}
-      >
-        <Trash className="h-4 w-4" />
-        <span className="group-hover:underline">Removal</span>
-      </Link>
-      <Link
-        to="/settings"
-        className={cn(
-          "group flex items-center gap-1 transition-colors hover:text-foreground/80",
-          isActive("/settings") ? "text-foreground font-medium" : "text-foreground/60"
+          isActive("/dashboard/settings") ? "text-foreground font-medium" : "text-foreground/60"
         )}
       >
         <Settings className="h-4 w-4" />

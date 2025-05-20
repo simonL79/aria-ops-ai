@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
 
 // Import pages from their actual locations
@@ -11,6 +11,9 @@ import EngagementHubPage from "./pages/dashboard/EngagementHubPage";
 import IntelligencePage from "./pages/dashboard/IntelligencePage";
 import RadarPage from "./pages/dashboard/RadarPage";
 import DashboardPage from "./pages/dashboard/DashboardPage";
+import Authentication from "./pages/Authentication";
+import Settings from "./pages/Settings";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 function App() {
   return (
@@ -18,18 +21,28 @@ function App() {
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/home" element={<HomePage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/dashboard/intelligence" element={<IntelligencePage />} />
-        <Route path="/dashboard/radar" element={<RadarPage />} />
-        <Route path="/dashboard/ai-scraping" element={<AiScrapingPage />} />
-        <Route path="/dashboard/monitor" element={<Index />} />
-        <Route path="/dashboard/new-companies" element={<Index />} />
-        <Route path="/dashboard/new-companies/:id" element={<Index />} />
-        <Route path="/dashboard/radar/entity/:id" element={<Index />} />
-        <Route path="/dashboard/engagement" element={<EngagementHubPage />} />
-        <Route path="/dashboard/settings" element={<Index />} />
-        <Route path="/login" element={<Index />} />
-        <Route path="/register" element={<Index />} />
+        <Route path="/auth" element={<Authentication />} />
+        
+        {/* Protected routes requiring authentication */}
+        <Route element={<ProtectedRoute redirectTo="/auth" />}>
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/dashboard/intelligence" element={<IntelligencePage />} />
+          <Route path="/dashboard/radar" element={<RadarPage />} />
+          <Route path="/dashboard/ai-scraping" element={<AiScrapingPage />} />
+          <Route path="/dashboard/monitor" element={<Index />} />
+          <Route path="/dashboard/new-companies" element={<Index />} />
+          <Route path="/dashboard/new-companies/:id" element={<Index />} />
+          <Route path="/dashboard/radar/entity/:id" element={<Index />} />
+          <Route path="/dashboard/engagement" element={<EngagementHubPage />} />
+          <Route path="/dashboard/settings" element={<Settings />} />
+        </Route>
+        
+        {/* Redirect legacy routes */}
+        <Route path="/login" element={<Navigate to="/auth" replace />} />
+        <Route path="/register" element={<Navigate to="/auth" replace />} />
+        
+        {/* Catch all unmatched routes */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <Toaster richColors />
     </>

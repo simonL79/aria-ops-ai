@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { SignedIn, SignedOut, useUser, useAuth } from "@clerk/clerk-react";
+import { SignedIn, SignedOut, useUser } from "@clerk/clerk-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import AuthHeader from "@/components/auth/AuthHeader";
 import AuthenticationForm from "@/components/auth/AuthenticationForm";
@@ -11,69 +11,46 @@ import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
 
 const Authentication = () => {
   const [isReady, setIsReady] = useState(false);
   const [loadingTimeout, setLoadingTimeout] = useState(false);
-  const { isSignedIn, isLoaded, user } = useUser();
-  const { signOut } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
   const from = location.state?.from?.pathname || "/dashboard";
   
   useEffect(() => {
-    // Log auth state for debugging
-    console.log("Auth state:", { isLoaded, isSignedIn, userId: user?.id });
+    // Small timeout to prevent flash
+    const timer = setTimeout(() => {
+      setIsReady(true);
+    }, 100);
     
-    if (isLoaded) {
-      // Small timeout to prevent flash
-      const timer = setTimeout(() => {
-        setIsReady(true);
-      }, 100);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [isLoaded, isSignedIn, user]);
+    return () => clearTimeout(timer);
+  }, [isLoading, isAuthenticated]);
   
   // Set a timeout to show an error if loading takes too long
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (!isLoaded) {
+      if (isLoading) {
         setLoadingTimeout(true);
       }
     }, 7000); // 7 seconds timeout
     
     return () => clearTimeout(timer);
-  }, [isLoaded]);
-  
-  // Check for "reset_password" query parameter to detect if we're coming from a reset flow
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const resetPassword = params.get('reset_password');
-    
-    if (resetPassword === 'true' && isSignedIn) {
-      // User is already signed in but trying to reset password
-      // We need to sign them out first
-      toast.info("Please sign out before resetting your password");
-      signOut().catch(err => console.error("Error signing out:", err));
-    }
-  }, [location.search, isSignedIn, signOut]);
-  
-  // Display a toast when the component mounts to help with debugging
-  useEffect(() => {
-    toast.info("Authentication page loaded");
-  }, []);
+  }, [isLoading]);
   
   const handleRefresh = () => {
     window.location.reload();
   };
   
   // If still loading and hasn't timed out, show a loading state
-  if ((!isLoaded || !isReady) && !loadingTimeout) {
+  if ((isLoading || !isReady) && !loadingTimeout) {
     return <AuthLoadingState />;
   }
   
   // If loading has timed out, show an error message
-  if ((!isLoaded || !isReady) && loadingTimeout) {
+  if ((isLoading || !isReady) && loadingTimeout) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
         <AuthHeader />
@@ -96,14 +73,9 @@ const Authentication = () => {
     );
   }
   
-  // If user is already signed in and not in the reset password flow, redirect to dashboard
-  if (isSignedIn) {
-    const params = new URLSearchParams(location.search);
-    const resetPassword = params.get('reset_password');
-    
-    if (resetPassword !== 'true') {
-      return <Navigate to={from} replace />;
-    }
+  // If already authenticated, redirect to the dashboard
+  if (isAuthenticated) {
+    return <Navigate to={from} replace />;
   }
 
   return (
@@ -113,10 +85,10 @@ const Authentication = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">
-            Account Access
+            A.R.I.A. Security Login
           </CardTitle>
           <CardDescription className="text-center">
-            Sign in to your account or create a new one
+            Sign in to access your A.R.I.A. dashboard
           </CardDescription>
         </CardHeader>
         <CardContent>

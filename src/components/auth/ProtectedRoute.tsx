@@ -17,14 +17,17 @@ const ProtectedRoute = ({
   redirectTo = "/auth" 
 }: ProtectedRouteProps) => {
   const location = useLocation();
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, isAuthenticated } = useAuth();
   const { hasPermission } = useRbac();
   
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div className="flex h-screen items-center justify-center">
+      <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
+      <span className="ml-2">Authenticating...</span>
+    </div>;
   }
   
-  if (!user) {
+  if (!user || !isAuthenticated) {
     return <Navigate to={redirectTo} state={{ from: location }} replace />;
   }
   
