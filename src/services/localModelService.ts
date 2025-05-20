@@ -1,5 +1,6 @@
 
 import { toast } from 'sonner';
+import { pipeline, PipelineType } from '@huggingface/transformers';
 
 // Interface for model loading status
 interface ModelStatus {
@@ -36,16 +37,16 @@ export const loadLocalModel = async (modelId: string, taskType: string): Promise
   
   try {
     // Import the transformers package dynamically
-    // This feature requires installing @huggingface/transformers
-    const { pipeline } = await import('@huggingface/transformers');
-    
     console.log(`Loading model ${modelId} for task ${taskType}...`);
     
     // Determine device to use (prefer WebGPU if available)
     const device = 'webgpu'; // This will fall back to 'cpu' if WebGPU is not available
     
+    // Convert string taskType to PipelineType
+    const pipelineType = taskType as PipelineType;
+    
     // Load the model
-    loadedModels[modelId] = await pipeline(taskType, modelId, { device });
+    loadedModels[modelId] = await pipeline(pipelineType, modelId, { device });
     
     // Update model status
     modelStatus[modelId] = {
