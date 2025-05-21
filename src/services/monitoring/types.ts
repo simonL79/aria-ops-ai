@@ -1,17 +1,13 @@
 
+/**
+ * Type definitions for monitoring service
+ */
+
 export interface MonitoringStatus {
   isActive: boolean;
-  lastRun: string | null;
-  nextRun: string | null;
-  sources: number;
-  activeSince?: Date;
-}
-
-export interface MonitorablePlatform {
-  id: string;
-  name: string;
-  isActive: boolean;
-  type?: string;
+  lastRun: Date | null;
+  nextRun: Date | null;
+  sourcesCount: number;
 }
 
 export interface Mention {
@@ -21,7 +17,7 @@ export interface Mention {
   source: string;
   date: Date;
   severity: 'high' | 'medium' | 'low';
-  status?: 'new' | 'read' | 'actioned' | 'resolved' | 'reviewing';
+  status: 'new' | 'read' | 'actioned' | 'resolved' | 'reviewing';
   threatType?: string;
 }
 
@@ -34,12 +30,19 @@ export interface ScanResult {
   status: 'new' | 'read' | 'actioned' | 'resolved' | 'reviewing';
   url: string;
   threatType?: string;
+  source_type?: string;
+  sourceType?: string;
+  confidence_score?: number;
+  confidenceScore?: number;
   sentiment?: number;
   detectedEntities?: string[];
+  potential_reach?: number;
   potentialReach?: number;
   category?: string;
-  sourceType?: string;
-  confidenceScore?: number;
 }
 
-export type MentionUpdate = Partial<Mention> & { id: string };
+export interface MonitoringConfig {
+  depth: 'quick' | 'standard' | 'deep';
+  platforms: string[];
+  timeframe: string;
+}
