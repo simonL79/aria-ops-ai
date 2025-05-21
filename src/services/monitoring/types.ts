@@ -8,6 +8,15 @@ export interface MonitoringStatus {
   lastRun: Date | null;
   nextRun: Date | null;
   sourcesCount: number;
+  sources?: number; // For backward compatibility
+  activeSince?: Date;
+}
+
+export interface MonitorablePlatform {
+  id: string;
+  name: string;
+  isActive: boolean;
+  type?: string;
 }
 
 export interface Mention {

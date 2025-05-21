@@ -183,12 +183,12 @@ const useScanningLogic = () => {
           status: result.status === 'resolved' ? 'reviewing' : result.status as ContentAlert['status'],
           url: result.url,
           threatType: result.threatType,
-          sourceType: result.source_type || mapPlatformToSourceType(result.platform),
-          confidenceScore: result.confidence_score || 75,
+          sourceType: result.sourceType || result.source_type || mapPlatformToSourceType(result.platform),
+          confidenceScore: result.confidenceScore || result.confidence_score || 75,
           sentiment: mapNumericSentimentToString(result.sentiment),
           detectedEntities: Array.isArray(result.detectedEntities) ? 
             result.detectedEntities.map(entity => String(entity)) : [],
-          potentialReach: result.potential_reach || 0,
+          potentialReach: result.potentialReach || result.potential_reach || 0,
           category: result.category
         }));
         

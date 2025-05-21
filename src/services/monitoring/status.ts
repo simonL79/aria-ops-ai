@@ -30,7 +30,7 @@ export const getMonitoringStatus = async (): Promise<MonitoringStatus> => {
         isActive: false,
         lastRun: null,
         nextRun: null,
-        sources: 0,
+        sourcesCount: 0,
         activeSince: activeSince
       };
     }
@@ -38,9 +38,9 @@ export const getMonitoringStatus = async (): Promise<MonitoringStatus> => {
     // Map database fields to our type
     return {
       isActive: data.is_active,
-      lastRun: data.last_run,
-      nextRun: data.next_run,
-      sources: data.sources_count || 0,
+      lastRun: data.last_run ? new Date(data.last_run) : null,
+      nextRun: data.next_run ? new Date(data.next_run) : null,
+      sourcesCount: data.sources_count || 0,
       activeSince: data.created_at ? new Date(data.created_at) : undefined
     };
   } catch (error) {
@@ -54,7 +54,7 @@ export const getMonitoringStatus = async (): Promise<MonitoringStatus> => {
       isActive: false,
       lastRun: null,
       nextRun: null,
-      sources: 0,
+      sourcesCount: 0,
       activeSince: activeSince
     };
   }
