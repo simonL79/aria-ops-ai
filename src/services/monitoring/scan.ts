@@ -77,7 +77,8 @@ export const runMonitoringScan = async (): Promise<ScanResult[]> => {
           threatType: mention.threatType,
           sentiment: sentiment,
           detectedEntities: entities || [],
-          potentialReach: reach || 0
+          potentialReach: reach || 0,
+          category: threatType === 'customerInquiry' ? 'customer_enquiry' : undefined
         };
         
         results.push(result);

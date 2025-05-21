@@ -37,6 +37,7 @@ export interface ScanResult {
   sentiment?: number;
   detectedEntities?: string[];
   potentialReach?: number;
+  category?: string;
 }
 
 export type MentionUpdate = Partial<Mention> & { id: string };

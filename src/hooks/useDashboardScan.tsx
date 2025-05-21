@@ -12,30 +12,33 @@ export const useDashboardScan = (
   setNegativeContent: React.Dispatch<React.SetStateAction<number>>
 ) => {
   const [isScanning, setIsScanning] = useState(false);
+  const [scanComplete, setScanComplete] = useState(false);
+  const [newAlerts, setNewAlerts] = useState<ContentAlert[]>([]);
 
   const handleScan = async () => {
     setIsScanning(true);
+    setNewAlerts([]);
     
     try {
       // Run a real scan and get results
       const results = await runMonitoringScan();
       
-      if (results && results.length > 0) {
+      if (results && Array.isArray(results) && results.length > 0) {
         // Format the new results to match ContentAlert type
         const newAlerts: ContentAlert[] = results.map((result: ScanResult) => {
           return {
-            id: result.id,
-            platform: result.platform,
-            content: result.content,
-            date: new Date(result.date).toLocaleString(),
-            severity: result.severity,
-            status: result.status as ContentAlert['status'],
-            sourceType: result.platform.toLowerCase().includes('news') ? 'news' :
-                       result.platform.toLowerCase().includes('reddit') ? 'forum' :
-                       ['Twitter', 'Facebook', 'Instagram', 'LinkedIn'].includes(result.platform) ? 'social' : 
+            id: result.id || `alert-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+            platform: result.platform || 'Unknown',
+            content: result.content || '',
+            date: result.date ? new Date(result.date).toLocaleString() : new Date().toLocaleString(),
+            severity: result.severity || 'low',
+            status: (result.status as ContentAlert['status']) || 'new',
+            sourceType: result.platform?.toLowerCase().includes('news') ? 'news' :
+                       result.platform?.toLowerCase().includes('reddit') ? 'forum' :
+                       ['Twitter', 'Facebook', 'Instagram', 'LinkedIn'].includes(result.platform || '') ? 'social' : 
                        'scan',
-            url: result.url,
-            threatType: result.threatType || undefined,
+            url: result.url || '',
+            threatType: result.threatType,
             confidenceScore: 75, // Default confidence score
             sentiment: mapNumericSentimentToString(result.sentiment),
             detectedEntities: Array.isArray(result.detectedEntities) ? result.detectedEntities : [],
@@ -48,6 +51,7 @@ export const useDashboardScan = (
         const updatedAlerts = [...newAlerts, ...alerts];
         setAlerts(updatedAlerts);
         setFilteredAlerts(updatedAlerts);
+        setNewAlerts(newAlerts);
         
         // Count new negative content
         const newNegativeCount = results.filter(r => r.severity === 'high').length;
@@ -63,6 +67,15 @@ export const useDashboardScan = (
           description: "No new mentions found across monitored platforms.",
         });
       }
+      
+      // Set scan complete
+      setScanComplete(true);
+      
+      // Reset scan complete after a delay
+      setTimeout(() => {
+        setScanComplete(false);
+      }, 1000);
+      
     } catch (error) {
       console.error("Scan error:", error);
       toast.error("Error during scan", {
@@ -71,6 +84,11 @@ export const useDashboardScan = (
     } finally {
       setIsScanning(false);
     }
+  };
+
+  const onResetScanStatus = () => {
+    setScanComplete(false);
+    setNewAlerts([]);
   };
 
   // Helper function to map numeric sentiment to string values expected by ContentAlert
@@ -85,6 +103,9 @@ export const useDashboardScan = (
 
   return {
     isScanning,
-    handleScan
+    handleScan,
+    scanComplete,
+    newAlerts,
+    onResetScanStatus
   };
 };

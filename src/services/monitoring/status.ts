@@ -1,4 +1,3 @@
-
 import { toast } from "sonner";
 import { MonitoringStatus } from "./types";
 
@@ -6,12 +5,16 @@ import { MonitoringStatus } from "./types";
  * Get current monitoring status
  */
 export const getMonitoringStatus = (): MonitoringStatus => {
+  const now = new Date();
+  const nextRun = new Date(now.getTime() + 5 * 60 * 1000); // 5 minutes from now
+  const activeSince = new Date(now.getTime() - 24 * 60 * 60 * 1000); // 24 hours ago
+  
   return {
     isActive: true,
-    lastRun: new Date().toISOString(),
-    nextRun: new Date(Date.now() + 5 * 60 * 1000).toISOString(), // 5 minutes from now
+    lastRun: now.toISOString(),
+    nextRun: nextRun.toISOString(), 
     sources: Math.floor(15 + Math.random() * 5), // 15-20 sources
-    activeSince: new Date(Date.now() - 24 * 60 * 60 * 1000) // 24 hours ago
+    activeSince: activeSince
   };
 };
 
