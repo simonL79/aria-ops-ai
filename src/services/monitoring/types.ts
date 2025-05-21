@@ -38,6 +38,8 @@ export interface ScanResult {
   detectedEntities?: string[];
   potentialReach?: number;
   category?: string;
+  sourceType?: string;
+  confidenceScore?: number;
 }
 
 export type MentionUpdate = Partial<Mention> & { id: string };

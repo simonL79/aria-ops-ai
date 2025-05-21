@@ -33,17 +33,19 @@ export const useDashboardScan = (
             date: result.date ? new Date(result.date).toLocaleString() : new Date().toLocaleString(),
             severity: result.severity || 'low',
             status: (result.status as ContentAlert['status']) || 'new',
-            sourceType: result.platform?.toLowerCase().includes('news') ? 'news' :
-                       result.platform?.toLowerCase().includes('reddit') ? 'forum' :
-                       ['Twitter', 'Facebook', 'Instagram', 'LinkedIn'].includes(result.platform || '') ? 'social' : 
-                       'scan',
+            sourceType: result.sourceType || (
+              result.platform?.toLowerCase().includes('news') ? 'news' :
+              result.platform?.toLowerCase().includes('reddit') ? 'forum' :
+              ['Twitter', 'Facebook', 'Instagram', 'LinkedIn'].includes(result.platform || '') ? 'social' : 
+              'scan'
+            ),
             url: result.url || '',
             threatType: result.threatType,
-            confidenceScore: 75, // Default confidence score
+            confidenceScore: result.confidenceScore || 75, // Default confidence score
             sentiment: mapNumericSentimentToString(result.sentiment),
             detectedEntities: Array.isArray(result.detectedEntities) ? result.detectedEntities : [],
             potentialReach: typeof result.potentialReach === 'number' ? result.potentialReach : undefined,
-            category: result.threatType === 'customerInquiry' ? 'customer_enquiry' : undefined
+            category: result.category || (result.threatType === 'customerInquiry' ? 'customer_enquiry' : undefined)
           };
         });
         

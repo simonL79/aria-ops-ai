@@ -1,3 +1,4 @@
+
 import { toast } from "sonner";
 import { MonitoringStatus } from "./types";
 
@@ -60,20 +61,10 @@ export const stopMonitoring = () => {
 /**
  * Run a manual monitoring scan
  */
-export const runMonitoringScan = async (): Promise<{ success: boolean; newMentions: number }> => {
-  // Simulate network request
-  await new Promise(resolve => setTimeout(resolve, 2500 + Math.random() * 1500));
+export const runMonitoringScan = async (): Promise<ScanResult[]> => {
+  // Import the scan function to prevent circular dependencies
+  const { runMonitoringScan: runScan } = await import('./scan');
   
-  // Simulate finding new mentions
-  const newMentionsCount = Math.floor(Math.random() * 5); // 0-4 new mentions
-  
-  // Toast notification for user feedback
-  toast.success("Analysis complete", {
-    description: `Found ${newMentionsCount} new mentions and updated reputation metrics.`
-  });
-  
-  return {
-    success: true,
-    newMentions: newMentionsCount
-  };
+  // Call the actual scan function
+  return runScan();
 };
