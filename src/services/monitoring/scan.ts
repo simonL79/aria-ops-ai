@@ -1,4 +1,3 @@
-
 import { Mention, ScanResult } from './types';
 import { saveMention } from './mentions';
 import { getMonitoredPlatforms } from './platforms';
@@ -11,93 +10,99 @@ import { supabase } from '@/integrations/supabase/client';
 export const runMonitoringScan = async (): Promise<ScanResult[]> => {
   console.log("Running monitoring scan...");
   
-  const platforms = getMonitoredPlatforms();
-  const enabledPlatforms = platforms.filter(p => p.isActive);
-  const results: ScanResult[] = [];
-  
-  // Log scan activity
   try {
-    await supabase.from("activity_logs").insert({
-      action: "monitoring_scan",
-      details: `Scan initiated for ${enabledPlatforms.length} platforms`,
-      entity_type: "monitoring",
-      entity_id: "scan",
-      user_email: "system"
-    });
-  } catch (error) {
-    console.error("Error logging scan activity:", error);
-  }
-  
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 1500));
-  
-  // Generate results for each enabled platform
-  for (const platform of enabledPlatforms) {
-    const count = Math.floor(Math.random() * 3) + 1; // 1-3 mentions per platform
+    const platforms = getMonitoredPlatforms();
+    const enabledPlatforms = platforms.filter(p => p.isActive);
+    const results: ScanResult[] = [];
     
-    for (let i = 0; i < count; i++) {
-      // Generate more realistic content based on platform
-      const content = generatePlatformSpecificContent(platform.name);
-      
-      // Use a more accurate sentiment algorithm that returns a number between -100 and 100
-      const sentiment = calculateSentiment(content);
-      
-      // Determine severity based on sentiment and a probability factor
-      // More negative sentiment has higher probability of being high severity
-      const severityProbability = (sentiment < -50) ? 0.7 : (sentiment < 0) ? 0.3 : 0.1;
-      const severity = Math.random() < severityProbability ? 'high' : 
-                       Math.random() < 0.5 ? 'medium' : 'low';
-      
-      // Add entity detection - use the existing function with improved content
-      const entities = await detectEntities(content, platform.name);
-      
-      // Calculate potential reach based on platform-specific algorithm
-      const reach = calculatePotentialReach(platform.name);
-      
-      // Determine threat type based on content and platform
-      const threatType = determineThreatType(content, platform.name);
-      
-      // Save the mention with more detailed information
-      const mention = saveMention(
-        platform.name,
-        content,
-        generateRealisticURL(platform.name),
-        severity as 'high' | 'medium' | 'low',
-        threatType
-      );
-      
-      const result: ScanResult = {
-        id: mention.id,
-        platform: mention.platform,
-        content: mention.content,
-        date: mention.date.toISOString(),
-        severity: mention.severity,
-        status: mention.status || 'new',
-        url: mention.source,
-        threatType: mention.threatType,
-        sentiment: sentiment,
-        detectedEntities: entities,
-        potentialReach: reach
-      };
-      
-      results.push(result);
+    // Log scan activity
+    try {
+      await supabase.from("activity_logs").insert({
+        action: "monitoring_scan",
+        details: `Scan initiated for ${enabledPlatforms.length} platforms`,
+        entity_type: "monitoring",
+        entity_id: "scan",
+        user_email: "system"
+      });
+    } catch (error) {
+      console.error("Error logging scan activity:", error);
     }
-  }
-  
-  // Log the scan results
-  try {
-    await supabase.from("activity_logs").insert({
-      action: "monitoring_results",
-      details: `Found ${results.length} mentions across ${enabledPlatforms.length} platforms`,
-      entity_type: "monitoring",
-      entity_id: "scan_results",
-      user_email: "system"
-    });
+    
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    // Generate results for each enabled platform
+    for (const platform of enabledPlatforms) {
+      const count = Math.floor(Math.random() * 3) + 1; // 1-3 mentions per platform
+      
+      for (let i = 0; i < count; i++) {
+        // Generate more realistic content based on platform
+        const content = generatePlatformSpecificContent(platform.name);
+        
+        // Use a more accurate sentiment algorithm that returns a number between -100 and 100
+        const sentiment = calculateSentiment(content);
+        
+        // Determine severity based on sentiment and a probability factor
+        // More negative sentiment has higher probability of being high severity
+        const severityProbability = (sentiment < -50) ? 0.7 : (sentiment < 0) ? 0.3 : 0.1;
+        const severity = Math.random() < severityProbability ? 'high' : 
+                        Math.random() < 0.5 ? 'medium' : 'low';
+        
+        // Add entity detection - use the existing function with improved content
+        const entities = await detectEntities(content, platform.name);
+        
+        // Calculate potential reach based on platform-specific algorithm
+        const reach = calculatePotentialReach(platform.name);
+        
+        // Determine threat type based on content and platform
+        const threatType = determineThreatType(content, platform.name);
+        
+        // Save the mention with more detailed information
+        const mention = saveMention(
+          platform.name,
+          content,
+          generateRealisticURL(platform.name),
+          severity as 'high' | 'medium' | 'low',
+          threatType
+        );
+        
+        const result: ScanResult = {
+          id: mention.id,
+          platform: mention.platform,
+          content: mention.content,
+          date: mention.date.toISOString(),
+          severity: mention.severity,
+          status: mention.status || 'new',
+          url: mention.source,
+          threatType: mention.threatType,
+          sentiment: sentiment,
+          detectedEntities: entities || [],
+          potentialReach: reach || 0
+        };
+        
+        results.push(result);
+      }
+    }
+    
+    // Log the scan results
+    try {
+      await supabase.from("activity_logs").insert({
+        action: "monitoring_results",
+        details: `Found ${results.length} mentions across ${enabledPlatforms.length} platforms`,
+        entity_type: "monitoring",
+        entity_id: "scan_results",
+        user_email: "system"
+      });
+    } catch (error) {
+      console.error("Error logging scan results:", error);
+    }
+    
+    return results;
+    
   } catch (error) {
-    console.error("Error logging scan results:", error);
+    console.error("Error during monitoring scan:", error);
+    return []; // Return empty array on error instead of crashing
   }
-  
-  return results;
 };
 
 /**

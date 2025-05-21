@@ -20,7 +20,7 @@ export const useDashboardScan = (
       // Run a real scan and get results
       const results = await runMonitoringScan();
       
-      if (results.length > 0) {
+      if (results && results.length > 0) {
         // Format the new results to match ContentAlert type
         const newAlerts: ContentAlert[] = results.map((result: ScanResult) => {
           return {
@@ -35,11 +35,11 @@ export const useDashboardScan = (
                        ['Twitter', 'Facebook', 'Instagram', 'LinkedIn'].includes(result.platform) ? 'social' : 
                        'scan',
             url: result.url,
-            threatType: result.threatType,
+            threatType: result.threatType || undefined,
             confidenceScore: 75, // Default confidence score
             sentiment: mapNumericSentimentToString(result.sentiment),
-            detectedEntities: result.detectedEntities,
-            potentialReach: result.potentialReach,
+            detectedEntities: Array.isArray(result.detectedEntities) ? result.detectedEntities : [],
+            potentialReach: typeof result.potentialReach === 'number' ? result.potentialReach : undefined,
             category: result.threatType === 'customerInquiry' ? 'customer_enquiry' : undefined
           };
         });

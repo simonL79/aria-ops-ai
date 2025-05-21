@@ -16,7 +16,7 @@ const ScanNotification: React.FC<ScanNotificationProps> = ({
   onResetScanStatus 
 }) => {
   useEffect(() => {
-    if (!scanComplete || newAlerts.length === 0) return;
+    if (!scanComplete || !newAlerts || newAlerts.length === 0) return;
     
     // Show notification for high severity items
     const highSeverityAlerts = newAlerts.filter(alert => alert.severity === 'high');
