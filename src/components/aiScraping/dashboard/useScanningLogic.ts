@@ -1,14 +1,14 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { ContentAlert } from '@/types/dashboard';
 import { 
   getMonitoringStatus, 
-  getScanResults, 
-  runMonitoringScan,
-  MonitoringStatus,
   startMonitoring,
-  stopMonitoring 
+  stopMonitoring,
+  runMonitoringScan
 } from '@/services/monitoring';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 /**
  * Custom hook for handling scanning logic in monitoring dashboards
@@ -18,7 +18,7 @@ const useScanningLogic = () => {
   const [scanResults, setScanResults] = useState<ContentAlert[]>([]);
   const [scanDate, setScanDate] = useState<Date | null>(null);
   const [isActive, setIsActive] = useState(false);
-  const [monitoringStatus, setMonitoringStatus] = useState<MonitoringStatus | null>(null);
+  const [monitoringStatus, setMonitoringStatus] = useState<any>(null);
   const [metrics, setMetrics] = useState({
     scansToday: 0,
     alertsDetected: 0,
@@ -40,20 +40,33 @@ const useScanningLogic = () => {
         setIsActive(status.isActive);
         
         // Get recent scan results
-        const results = await getScanResults(10);
+        const { data: resultsData, error: resultsError } = await supabase
+          .from('scan_results')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(10);
         
-        if (results.length > 0) {
+        if (resultsError) {
+          console.error("Error fetching scan results:", resultsError);
+          return;
+        }
+        
+        if (resultsData && resultsData.length > 0) {
           // Format the results to match ContentAlert type
-          const formattedResults: ContentAlert[] = results.map(result => ({
+          const formattedResults: ContentAlert[] = resultsData.map(result => ({
             id: result.id,
             platform: result.platform,
             content: result.content,
-            date: new Date(result.date).toLocaleString(),
-            severity: result.severity,
-            // Map 'resolved' to 'reviewing' for compatibility
-            status: mapStatus(result.status),
-            url: result.url,
-            threatType: result.threatType
+            date: new Date(result.created_at).toLocaleString(),
+            severity: result.severity as 'high' | 'medium' | 'low',
+            status: mapStatus(result.status || 'new'),
+            url: result.url || '',
+            threatType: result.threat_type,
+            sourceType: result.source_type || mapPlatformToSourceType(result.platform),
+            confidenceScore: result.confidence_score || 75,
+            sentiment: mapNumericSentimentToString(result.sentiment),
+            detectedEntities: result.detected_entities || [],
+            potentialReach: result.potential_reach
           }));
           
           setScanResults(formattedResults);
@@ -62,12 +75,21 @@ const useScanningLogic = () => {
             setScanDate(new Date(status.lastRun));
           }
           
-          // Update metrics
-          setMetrics({
-            scansToday: status.lastRun ? 1 : 0,
-            alertsDetected: formattedResults.length,
-            highPriorityAlerts: formattedResults.filter(r => r.severity === 'high').length
-          });
+          // Count scans today
+          const { data: scansToday, error: scanCountError } = await supabase
+            .from('activity_logs')
+            .select('count')
+            .eq('action', 'monitoring_scan')
+            .gte('created_at', new Date().toISOString().split('T')[0]);
+          
+          if (!scanCountError) {
+            // Update metrics
+            setMetrics({
+              scansToday: scansToday?.[0]?.count || 0,
+              alertsDetected: formattedResults.length,
+              highPriorityAlerts: formattedResults.filter(r => r.severity === 'high').length
+            });
+          }
         }
       } catch (error) {
         console.error('Error fetching initial scanning data:', error);
@@ -77,7 +99,10 @@ const useScanningLogic = () => {
     // Helper function to map status values to ContentAlert status type
     const mapStatus = (status: string): ContentAlert['status'] => {
       if (status === 'resolved') return 'reviewing';
-      return status as ContentAlert['status'];
+      if (['new', 'read', 'actioned', 'reviewing'].includes(status)) {
+        return status as ContentAlert['status'];
+      }
+      return 'new';
     };
     
     fetchInitialData();
@@ -95,6 +120,31 @@ const useScanningLogic = () => {
     
     return () => clearInterval(intervalId);
   }, []);
+
+  // Map platform to source type based on name
+  const mapPlatformToSourceType = (platform: string): string => {
+    if (!platform) return 'other';
+    
+    const platformLower = platform.toLowerCase();
+    
+    if (platformLower.includes('news')) return 'news';
+    if (platformLower.includes('reddit')) return 'forum';
+    if (['twitter', 'facebook', 'instagram', 'linkedin'].some(p => platformLower.includes(p))) {
+      return 'social';
+    }
+    
+    return 'other';
+  };
+  
+  // Map numeric sentiment to string sentiment
+  const mapNumericSentimentToString = (sentiment?: number): ContentAlert['sentiment'] => {
+    if (sentiment === undefined || sentiment === null) return 'neutral';
+    
+    if (sentiment < -70) return 'threatening';
+    if (sentiment < -20) return 'negative';
+    if (sentiment > 50) return 'positive';
+    return 'neutral';
+  };
 
   // Toggle active state
   const handleToggleScan = useCallback(async () => {
@@ -130,10 +180,15 @@ const useScanningLogic = () => {
           content: result.content,
           date: new Date(result.date).toLocaleString(),
           severity: result.severity,
-          // Map 'resolved' to 'reviewing' for compatibility
           status: result.status === 'resolved' ? 'reviewing' : result.status as ContentAlert['status'],
           url: result.url,
-          threatType: result.threatType
+          threatType: result.threatType,
+          sourceType: result.sourceType,
+          confidenceScore: result.confidenceScore,
+          sentiment: mapNumericSentimentToString(result.sentiment),
+          detectedEntities: result.detectedEntities || [],
+          potentialReach: result.potentialReach,
+          category: result.category
         }));
         
         // Update results - properly handle the ContentAlert array

@@ -1,4 +1,4 @@
-import { Mention, ScanResult } from './types';
+import { ScanResult } from './types';
 import { saveMention } from './mentions';
 import { getMonitoredPlatforms } from './platforms';
 import { detectEntities, calculatePotentialReach } from '@/services/api/entityDetectionService';
@@ -11,7 +11,7 @@ export const runMonitoringScan = async (): Promise<ScanResult[]> => {
   console.log("Running monitoring scan...");
   
   try {
-    const platforms = getMonitoredPlatforms();
+    const platforms = await getMonitoredPlatforms();
     const enabledPlatforms = platforms.filter(p => p.isActive);
     const results: ScanResult[] = [];
     
@@ -57,31 +57,28 @@ export const runMonitoringScan = async (): Promise<ScanResult[]> => {
         // Determine threat type based on content and platform
         const threatType = determineThreatType(content, platform.name);
         
-        // Save the mention with more detailed information
-        const mention = saveMention(
-          platform.name,
-          content,
-          generateRealisticURL(platform.name),
-          severity as 'high' | 'medium' | 'low',
-          threatType
-        );
-        
-        const result: ScanResult = {
-          id: mention.id,
-          platform: mention.platform,
-          content: mention.content,
-          date: mention.date.toISOString(),
-          severity: mention.severity,
-          status: mention.status || 'new',
-          url: mention.source,
-          threatType: mention.threatType,
+        // Create a scan result directly
+        const scanResult: ScanResult = {
+          id: `scan-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+          platform: platform.name,
+          content: content,
+          date: new Date().toISOString(),
+          severity: severity as 'high' | 'medium' | 'low',
+          status: 'new',
+          url: generateRealisticURL(platform.name),
+          threatType: threatType,
           sentiment: sentiment,
           detectedEntities: entities || [],
           potentialReach: reach || 0,
-          category: threatType === 'customerInquiry' ? 'customer_enquiry' : undefined
+          category: threatType === 'customerInquiry' ? 'customer_enquiry' : undefined,
+          sourceType: mapPlatformToSourceType(platform.name),
+          confidenceScore: Math.floor(65 + Math.random() * 30) // 65-95 confidence score
         };
         
-        results.push(result);
+        // Save the scan result to the database
+        await saveScanResultToDatabase(scanResult);
+        
+        results.push(scanResult);
       }
     }
     
@@ -98,12 +95,78 @@ export const runMonitoringScan = async (): Promise<ScanResult[]> => {
       console.error("Error logging scan results:", error);
     }
     
+    // Update monitoring status
+    try {
+      const now = new Date();
+      const nextRun = new Date(now.getTime() + 5 * 60 * 1000); // 5 minutes from now
+      
+      await supabase
+        .from('monitoring_status')
+        .update({
+          last_run: now.toISOString(),
+          next_run: nextRun.toISOString(),
+          updated_at: now.toISOString()
+        })
+        .eq('id', '1');
+    } catch (error) {
+      console.error("Error updating monitoring status:", error);
+    }
+    
     return results;
     
   } catch (error) {
     console.error("Error during monitoring scan:", error);
     return []; // Return empty array on error instead of crashing
   }
+};
+
+/**
+ * Save scan result to database
+ */
+const saveScanResultToDatabase = async (result: ScanResult): Promise<void> => {
+  try {
+    const { error } = await supabase
+      .from('scan_results')
+      .insert({
+        id: result.id,
+        platform: result.platform,
+        content: result.content,
+        url: result.url,
+        severity: result.severity,
+        status: result.status,
+        threat_type: result.threatType,
+        source_type: result.sourceType,
+        sentiment: result.sentiment,
+        detected_entities: result.detectedEntities,
+        potential_reach: result.potentialReach,
+        confidence_score: result.confidenceScore,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      });
+    
+    if (error) {
+      console.error("Error saving scan result to database:", error);
+    }
+  } catch (error) {
+    console.error("Error in saveScanResultToDatabase:", error);
+  }
+};
+
+/**
+ * Map platform to source type based on name
+ */
+const mapPlatformToSourceType = (platform: string): string => {
+  if (!platform) return 'other';
+  
+  const platformLower = platform.toLowerCase();
+  
+  if (platformLower.includes('news')) return 'news';
+  if (platformLower.includes('reddit')) return 'forum';
+  if (['twitter', 'facebook', 'instagram', 'linkedin'].some(p => platformLower.includes(p))) {
+    return 'social';
+  }
+  
+  return 'other';
 };
 
 /**

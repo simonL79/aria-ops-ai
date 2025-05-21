@@ -5,7 +5,8 @@
 export { 
   getMonitoringStatus, 
   startMonitoring, 
-  stopMonitoring 
+  stopMonitoring,
+  runMonitoringScan
 } from './status';
 
 // Mention management
@@ -28,14 +29,10 @@ export {
   getMentionsAsAlerts 
 } from './alerts';
 
-// Scan functionality
-export { 
-  runMonitoringScan 
-} from './scan';
-
 // Types
 export type { 
   MonitoringStatus, 
   MonitorablePlatform, 
-  Mention 
+  Mention,
+  ScanResult
 } from './types';

@@ -1,61 +1,152 @@
 
 import { toast } from "sonner";
-import { MonitoringStatus } from "./types";
+import { MonitoringStatus, ScanResult } from "./types";
 
 /**
  * Get current monitoring status
  */
-export const getMonitoringStatus = (): MonitoringStatus => {
-  const now = new Date();
-  const nextRun = new Date(now.getTime() + 5 * 60 * 1000); // 5 minutes from now
-  const activeSince = new Date(now.getTime() - 24 * 60 * 60 * 1000); // 24 hours ago
-  
-  return {
-    isActive: true,
-    lastRun: now.toISOString(),
-    nextRun: nextRun.toISOString(), 
-    sources: Math.floor(15 + Math.random() * 5), // 15-20 sources
-    activeSince: activeSince
-  };
+export const getMonitoringStatus = async (): Promise<MonitoringStatus> => {
+  try {
+    // Get the monitoring status from Supabase
+    const { supabase } = await import('@/integrations/supabase/client');
+    const { data, error } = await supabase
+      .from('monitoring_status')
+      .select('*')
+      .eq('id', '1')
+      .single();
+    
+    if (error) {
+      console.error("Error fetching monitoring status:", error);
+      throw error;
+    }
+    
+    if (!data) {
+      // Create a default status if not present
+      const now = new Date();
+      const nextRun = new Date(now.getTime() + 5 * 60 * 1000); // 5 minutes from now
+      const activeSince = new Date(now.getTime() - 24 * 60 * 60 * 1000); // 24 hours ago
+      
+      return {
+        isActive: false,
+        lastRun: null,
+        nextRun: null,
+        sources: 0,
+        activeSince: activeSince
+      };
+    }
+    
+    // Map database fields to our type
+    return {
+      isActive: data.is_active,
+      lastRun: data.last_run,
+      nextRun: data.next_run,
+      sources: data.sources_count || 0,
+      activeSince: data.created_at ? new Date(data.created_at) : undefined
+    };
+  } catch (error) {
+    console.error("Error in getMonitoringStatus:", error);
+    // Fallback to a default status on error
+    const now = new Date();
+    const nextRun = new Date(now.getTime() + 5 * 60 * 1000);
+    const activeSince = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    
+    return {
+      isActive: false,
+      lastRun: null,
+      nextRun: null,
+      sources: 0,
+      activeSince: activeSince
+    };
+  }
 };
 
 /**
  * Start monitoring service
- * In a real implementation, this would connect to actual monitoring services
  */
-export const startMonitoring = () => {
+export const startMonitoring = async () => {
   console.log("Starting real-time monitoring services...");
   
-  // Toast notification for user feedback
-  setTimeout(() => {
+  try {
+    // Update database to set monitoring as active
+    const { supabase } = await import('@/integrations/supabase/client');
+    const now = new Date();
+    const nextRun = new Date(now.getTime() + 5 * 60 * 1000);
+    
+    const { error } = await supabase
+      .from('monitoring_status')
+      .update({
+        is_active: true,
+        updated_at: now.toISOString(),
+        next_run: nextRun.toISOString()
+      })
+      .eq('id', '1');
+    
+    if (error) {
+      console.error("Error updating monitoring status:", error);
+      throw error;
+    }
+    
+    // Toast notification for user feedback
     toast.success("Real-time monitoring active", {
       description: "All monitoring systems are now active and collecting data."
     });
-  }, 1000);
-  
-  return {
-    success: true,
-    started: new Date().toISOString()
-  };
+    
+    return {
+      success: true,
+      started: now.toISOString()
+    };
+  } catch (error) {
+    console.error("Error in startMonitoring:", error);
+    toast.error("Failed to start monitoring");
+    return {
+      success: false,
+      error: error.message
+    };
+  }
 };
 
 /**
  * Stop monitoring service
  */
-export const stopMonitoring = () => {
+export const stopMonitoring = async () => {
   console.log("Stopping real-time monitoring services...");
   
-  // Toast notification for user feedback
-  setTimeout(() => {
+  try {
+    // Update database to set monitoring as inactive
+    const { supabase } = await import('@/integrations/supabase/client');
+    const now = new Date();
+    
+    const { error } = await supabase
+      .from('monitoring_status')
+      .update({
+        is_active: false,
+        updated_at: now.toISOString(),
+        next_run: null
+      })
+      .eq('id', '1');
+    
+    if (error) {
+      console.error("Error updating monitoring status:", error);
+      throw error;
+    }
+    
+    // Toast notification for user feedback
     toast.info("Monitoring paused", {
       description: "All monitoring systems have been paused."
     });
-  }, 1000);
-  
-  return {
-    success: true,
-    stopped: new Date().toISOString()
-  };
+    
+    return {
+      success: true,
+      stopped: now.toISOString()
+    };
+  } catch (error) {
+    console.error("Error in stopMonitoring:", error);
+    toast.error("Failed to stop monitoring");
+    return {
+      success: false,
+      error: error.message
+    };
+  }
 };
 
 /**
@@ -68,3 +159,4 @@ export const runMonitoringScan = async (): Promise<ScanResult[]> => {
   // Call the actual scan function
   return runScan();
 };
+

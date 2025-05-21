@@ -1,51 +1,146 @@
 
-import { Mention } from "./types";
-
-// In-memory storage for mentions
-let mentionsStorage: Mention[] = [];
+import { Mention } from './types';
+import { supabase } from '@/integrations/supabase/client';
+import { v4 as uuidv4 } from 'uuid';
 
 /**
- * Save a new mention
+ * Save a mention to the database
  */
 export const saveMention = (
   platform: string,
   content: string,
   source: string,
-  severity: 'high' | 'medium' | 'low' = 'medium',
+  severity: 'high' | 'medium' | 'low',
   threatType?: string
 ): Mention => {
-  const newMention: Mention = {
-    id: `mention-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+  // Create a new mention object
+  const mention: Mention = {
+    id: uuidv4(),
     platform,
     content,
     source,
     date: new Date(),
     severity,
-    status: 'new', // Set the default status for new mentions
+    status: 'new',
     threatType
   };
   
-  mentionsStorage.push(newMention);
-  return newMention;
+  // Save to Supabase (asynchronously)
+  saveMentionToDatabase(mention);
+  
+  return mention;
 };
 
 /**
- * Get all recorded mentions
+ * Save mention to Supabase (internal function)
  */
-export const getAllMentions = (): Mention[] => {
-  return [...mentionsStorage];
+const saveMentionToDatabase = async (mention: Mention) => {
+  try {
+    // Convert Mention type to database format
+    const mentionData = {
+      id: mention.id,
+      platform: mention.platform,
+      content: mention.content,
+      url: mention.source,
+      date: mention.date.toISOString(),
+      severity: mention.severity,
+      status: mention.status,
+      threat_type: mention.threatType,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    
+    const { error } = await supabase
+      .from('scan_results')
+      .insert(mentionData);
+    
+    if (error) {
+      console.error("Error saving mention to database:", error);
+    }
+  } catch (error) {
+    console.error("Error in saveMentionToDatabase:", error);
+  }
 };
 
 /**
- * Clear all mentions
+ * Get all mentions from the database
  */
-export const clearMentions = (): void => {
-  mentionsStorage = [];
+export const getAllMentions = async (): Promise<Mention[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('scan_results')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.error("Error fetching mentions:", error);
+      return [];
+    }
+    
+    // Convert database format to Mention type
+    return data.map(item => ({
+      id: item.id,
+      platform: item.platform,
+      content: item.content,
+      source: item.url,
+      date: new Date(item.created_at),
+      severity: item.severity as 'high' | 'medium' | 'low',
+      status: item.status as 'new' | 'read' | 'actioned' | 'resolved' | 'reviewing',
+      threatType: item.threat_type
+    }));
+  } catch (error) {
+    console.error("Error in getAllMentions:", error);
+    return [];
+  }
 };
 
 /**
- * Get mentions for a specific platform
+ * Clear all mentions from the database
+ * Note: This is for testing purposes only
  */
-export const getMentionsByPlatform = (platform: string): Mention[] => {
-  return mentionsStorage.filter(mention => mention.platform === platform);
+export const clearMentions = async (): Promise<void> => {
+  try {
+    // Truncate scan_results table - only available for admin roles
+    const { error } = await supabase.rpc('truncate_scan_results');
+    
+    if (error) {
+      console.error("Error clearing mentions:", error);
+    }
+  } catch (error) {
+    console.error("Error in clearMentions:", error);
+  }
 };
+
+/**
+ * Get mentions filtered by platform
+ */
+export const getMentionsByPlatform = async (platform: string): Promise<Mention[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('scan_results')
+      .select('*')
+      .eq('platform', platform)
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.error("Error fetching mentions by platform:", error);
+      return [];
+    }
+    
+    // Convert database format to Mention type
+    return data.map(item => ({
+      id: item.id,
+      platform: item.platform,
+      content: item.content,
+      source: item.url,
+      date: new Date(item.created_at),
+      severity: item.severity as 'high' | 'medium' | 'low',
+      status: item.status as 'new' | 'read' | 'actioned' | 'resolved' | 'reviewing',
+      threatType: item.threat_type
+    }));
+  } catch (error) {
+    console.error("Error in getMentionsByPlatform:", error);
+    return [];
+  }
+};
+

@@ -25,7 +25,7 @@ export const initializeMonitoringStatus = async (): Promise<void> => {
         .insert({
           id: '1',
           is_active: false,
-          sources_count: 5,
+          sources_count: 0,
           last_run: null,
           next_run: null
         });
@@ -40,73 +40,39 @@ export const initializeMonitoringStatus = async (): Promise<void> => {
 };
 
 /**
- * Initialize monitoring sources if they don't exist
+ * Initialize database with required data
  */
-export const initializeMonitoringSources = async (): Promise<void> => {
-  try {
-    // Check if monitoring_sources has data
-    const { data, error } = await supabase
-      .from('monitoring_sources')
-      .select('count')
-      .single();
-    
-    if (error) {
-      console.error("Error checking monitoring sources:", error);
-      return;
-    }
-    
-    const count = data?.count || 0;
-    
-    // If no data, create initial monitoring sources
-    if (count === 0) {
-      const defaultSources = [
-        { name: 'Twitter', type: 'social' },
-        { name: 'Facebook', type: 'social' },
-        { name: 'Reddit', type: 'forum' },
-        { name: 'LinkedIn', type: 'business' },
-        { name: 'News Sites', type: 'news' },
-        { name: 'Yelp', type: 'review' },
-        { name: 'Google Reviews', type: 'review' }
-      ];
-      
-      const { error: insertError } = await supabase
-        .from('monitoring_sources')
-        .insert(defaultSources);
-      
-      if (insertError) {
-        console.error("Error initializing monitoring sources:", insertError);
-      }
-    }
-  } catch (error) {
-    console.error("Error in initializeMonitoringSources:", error);
-  }
+export const initializeDatabase = async (): Promise<void> => {
+  await initializeMonitoringStatus();
+  await initializeMonitoredPlatforms();
 };
 
 /**
- * Initialize monitored platforms if they don't exist
+ * Initialize monitored platforms if not exists
  */
 export const initializeMonitoredPlatforms = async (): Promise<void> => {
   try {
-    // Check if monitored_platforms has data
+    // Check if there are any platforms
     const { data, error } = await supabase
       .from('monitored_platforms')
-      .select('count')
-      .single();
+      .select('id')
+      .limit(1);
     
     if (error) {
       console.error("Error checking monitored platforms:", error);
       return;
     }
     
-    const count = data?.count || 0;
-    
-    // If no data, create initial monitored platforms
-    if (count === 0) {
+    // If no platforms, insert defaults
+    if (!data || data.length === 0) {
       const defaultPlatforms = [
-        { name: 'Twitter', type: 'social', positive_ratio: 35, total: 120, sentiment: -15 },
-        { name: 'Facebook', type: 'social', positive_ratio: 87, total: 230, sentiment: 25 },
-        { name: 'Reddit', type: 'forum', positive_ratio: 62, total: 85, sentiment: 5 },
-        { name: 'Yelp', type: 'review', positive_ratio: 78, total: 45, sentiment: 18 }
+        { name: 'Twitter', type: 'social', active: true, positive_ratio: 35, total: 120, sentiment: -15 },
+        { name: 'Facebook', type: 'social', active: true, positive_ratio: 87, total: 230, sentiment: 25 },
+        { name: 'Reddit', type: 'forum', active: true, positive_ratio: 62, total: 85, sentiment: 5 },
+        { name: 'LinkedIn', type: 'business', active: true, positive_ratio: 75, total: 58, sentiment: 15 },
+        { name: 'News Sites', type: 'news', active: true, positive_ratio: 45, total: 42, sentiment: -8 },
+        { name: 'Yelp', type: 'review', active: true, positive_ratio: 78, total: 45, sentiment: 18 },
+        { name: 'Google Reviews', type: 'review', active: true, positive_ratio: 82, total: 90, sentiment: 22 }
       ];
       
       const { error: insertError } = await supabase
@@ -120,13 +86,4 @@ export const initializeMonitoredPlatforms = async (): Promise<void> => {
   } catch (error) {
     console.error("Error in initializeMonitoredPlatforms:", error);
   }
-};
-
-/**
- * Initialize the monitoring system
- */
-export const initializeMonitoringSystem = async (): Promise<void> => {
-  await initializeMonitoringStatus();
-  await initializeMonitoringSources();
-  await initializeMonitoredPlatforms();
 };

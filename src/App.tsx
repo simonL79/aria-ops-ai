@@ -1,32 +1,28 @@
 
 import { useEffect } from "react";
-import { BrowserRouter as Router } from "react-router-dom";
-import { Toaster } from "sonner";
-import { initializeMonitoringSystem } from "./utils/initializeMonitoring";
-// Import your actual routes file
-import Routes from "./routes/index";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Toaster } from "@/components/ui/toaster";
+import { initializeDatabase } from "@/utils/initializeMonitoring";
+
+// Import your pages
+import Dashboard from "@/pages/Dashboard";
+import Monitor from "@/pages/Monitor";
 
 function App() {
-  // Initialize monitoring system on app start
   useEffect(() => {
-    const initialize = async () => {
-      try {
-        await initializeMonitoringSystem();
-        console.log("Monitoring system initialized successfully");
-      } catch (error) {
-        console.error("Failed to initialize monitoring system:", error);
-      }
-    };
-    
-    initialize();
+    // Initialize the database with required data
+    initializeDatabase().catch(console.error);
   }, []);
-
+  
   return (
     <>
-      <Toaster position="top-right" />
-      <Router>
-        <Routes />
-      </Router>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/monitor" element={<Monitor />} />
+        </Routes>
+      </BrowserRouter>
+      <Toaster />
     </>
   );
 }
