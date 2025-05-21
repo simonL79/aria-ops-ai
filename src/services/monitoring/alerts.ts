@@ -31,7 +31,8 @@ export const getMentionsAsAlerts = async (): Promise<ContentAlert[]> => {
       confidenceScore: item.confidence_score || 75,
       sourceType: item.source_type || mapPlatformToSourceType(item.platform),
       sentiment: mapNumericSentimentToString(item.sentiment),
-      detectedEntities: Array.isArray(item.detected_entities) ? item.detected_entities : [],
+      detectedEntities: Array.isArray(item.detected_entities) ? 
+        item.detected_entities.map(entity => String(entity)) : [],
       potentialReach: item.potential_reach
     }));
   } catch (error) {

@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { ContentAlert } from '@/types/dashboard';
 import { 
@@ -65,7 +64,8 @@ const useScanningLogic = () => {
             sourceType: result.source_type || mapPlatformToSourceType(result.platform),
             confidenceScore: result.confidence_score || 75,
             sentiment: mapNumericSentimentToString(result.sentiment),
-            detectedEntities: result.detected_entities || [],
+            detectedEntities: Array.isArray(result.detected_entities) ? 
+              result.detected_entities.map(entity => String(entity)) : [],
             potentialReach: result.potential_reach
           }));
           
@@ -183,11 +183,12 @@ const useScanningLogic = () => {
           status: result.status === 'resolved' ? 'reviewing' : result.status as ContentAlert['status'],
           url: result.url,
           threatType: result.threatType,
-          sourceType: result.sourceType,
-          confidenceScore: result.confidenceScore,
+          sourceType: result.sourceType || mapPlatformToSourceType(result.platform),
+          confidenceScore: result.confidenceScore || 75,
           sentiment: mapNumericSentimentToString(result.sentiment),
-          detectedEntities: result.detectedEntities || [],
-          potentialReach: result.potentialReach,
+          detectedEntities: Array.isArray(result.detectedEntities) ? 
+            result.detectedEntities.map(entity => String(entity)) : [],
+          potentialReach: result.potentialReach || 0,
           category: result.category
         }));
         
