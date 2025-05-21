@@ -41,7 +41,7 @@ const ScanNotification: React.FC<ScanNotificationProps> = ({
       );
     }
     
-    // Show notification for customer inquiries
+    // Show notification for customer inquiries - safely check for category property
     const customerInquiries = newAlerts.filter(alert => alert.category === 'customer_enquiry');
     if (customerInquiries.length > 0) {
       toast(
