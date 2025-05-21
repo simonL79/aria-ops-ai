@@ -1,7 +1,5 @@
 
 import { ContentAlert } from '@/types/dashboard';
-import { classifyThreat } from '@/services/intelligence/threatClassifier';
-import { ThreatClassificationResult } from '@/types/intelligence';
 import { saveMention } from '@/services/monitoring/mentions';
 import { toast } from 'sonner';
 
@@ -18,38 +16,17 @@ interface MentionStoreRequest {
 }
 
 /**
- * Classify content using the threat classifier
- */
-export const classifyContent = async (
-  content: string,
-  platform: string,
-  brand: string
-): Promise<ThreatClassificationResult | null> => {
-  try {
-    // Use the threat classifier to analyze the content
-    const result = await classifyThreat({
-      content,
-      platform,
-      brand
-    });
-    
-    return result;
-  } catch (error) {
-    console.error('Error classifying content:', error);
-    toast.error('Failed to classify content');
-    return null;
-  }
-};
-
-/**
  * Store a mention in the system
  */
 export const storeMention = async (mentionRequest: MentionStoreRequest): Promise<ContentAlert> => {
   // Store the mention using the monitoring service
+  // Using the correct number of arguments for saveMention
   saveMention(
     mentionRequest.platform,
     mentionRequest.content,
-    mentionRequest.sourceType === 'manual' ? 'Manual Entry' : 'https://example.com'
+    mentionRequest.sourceType === 'manual' ? 'Manual Entry' : 'https://example.com',
+    mentionRequest.severity,
+    mentionRequest.category
   );
   
   // Create a ContentAlert from the request

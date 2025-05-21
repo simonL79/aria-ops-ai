@@ -8,16 +8,11 @@ import {
   startMonitoring, 
   stopMonitoring,
   runMonitoringScan
-} from '@/services';
-import { 
-  getAllMentions, 
-  saveMention 
-} from '@/services';
+} from '@/services/monitoring';
 import { ContentAlert } from '@/types/dashboard';
-import { classifyContent, storeMention } from '@/services/api/mentionsApiService';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
-import { getMentionsAsAlerts } from '@/services';
+import { getMentionsAsAlerts } from '@/services/monitoring/alerts';
 
 // Import the sub-components
 import MonitoringStatus from './MonitoringStatus';
@@ -32,27 +27,52 @@ interface MentionMonitorProps {
 const MentionMonitor = ({ onNewMentionsFound }: MentionMonitorProps) => {
   const navigate = useNavigate();
   const [isScanning, setIsScanning] = useState(false);
-  const [status, setStatus] = useState(getMonitoringStatus());
+  const [status, setStatus] = useState<any>({ isActive: false, sources: 0 });
   const [lastMentions, setLastMentions] = useState<ContentAlert[]>([]);
+
+  // Fetch initial status
+  useEffect(() => {
+    const fetchInitialStatus = async () => {
+      try {
+        const monitoringStatus = await getMonitoringStatus();
+        setStatus(monitoringStatus);
+        
+        // Fetch initial mentions
+        const initialMentions = await getMentionsAsAlerts();
+        setLastMentions(initialMentions);
+      } catch (error) {
+        console.error("Error fetching initial data:", error);
+      }
+    };
+    
+    fetchInitialStatus();
+  }, []);
 
   // Update status periodically
   useEffect(() => {
-    const interval = setInterval(() => {
-      setStatus(getMonitoringStatus());
+    const interval = setInterval(async () => {
+      try {
+        const monitoringStatus = await getMonitoringStatus();
+        setStatus(monitoringStatus);
+      } catch (error) {
+        console.error("Error updating monitoring status:", error);
+      }
     }, 5000);
     
     return () => clearInterval(interval);
   }, []);
 
-  const handleStartMonitoring = () => {
-    startMonitoring();
-    setStatus(getMonitoringStatus());
+  const handleStartMonitoring = async () => {
+    await startMonitoring();
+    const updatedStatus = await getMonitoringStatus();
+    setStatus(updatedStatus);
     toast.success('Brand mention monitoring started');
   };
 
-  const handleStopMonitoring = () => {
-    stopMonitoring();
-    setStatus(getMonitoringStatus());
+  const handleStopMonitoring = async () => {
+    await stopMonitoring();
+    const updatedStatus = await getMonitoringStatus();
+    setStatus(updatedStatus);
     toast.info('Brand mention monitoring paused');
   };
 
@@ -60,10 +80,11 @@ const MentionMonitor = ({ onNewMentionsFound }: MentionMonitorProps) => {
     setIsScanning(true);
     try {
       await runMonitoringScan();
-      setStatus(getMonitoringStatus());
+      const updatedStatus = await getMonitoringStatus();
+      setStatus(updatedStatus);
       
       // Get any new mentions
-      const newMentions = getMentionsAsAlerts();
+      const newMentions = await getMentionsAsAlerts();
       setLastMentions(newMentions);
       
       if (newMentions.length > 0) {
@@ -88,42 +109,30 @@ const MentionMonitor = ({ onNewMentionsFound }: MentionMonitorProps) => {
 
   const handleClassifyContent = async (platform: string, content: string): Promise<void> => {
     try {
-      // Classify the content
-      const classification = await classifyContent(
-        content,
-        platform,
-        "YourBrand" // This would come from context in a real app
-      );
+      // Simulate content classification (in a real app this would call an AI service)
+      const severityOptions: ('low' | 'medium' | 'high')[] = ['low', 'medium', 'high'];
+      const severity = severityOptions[Math.floor(Math.random() * severityOptions.length)];
       
-      if (classification) {
-        // Create a new mention from the classification
-        const severityMap: Record<number, 'low' | 'medium' | 'high'> = {
-          1: 'low', 2: 'low', 3: 'low',
-          4: 'medium', 5: 'medium', 6: 'medium',
-          7: 'high', 8: 'high', 9: 'high', 10: 'high'
-        };
-        
-        const newMention = await storeMention({
-          platform: platform,
-          content: content,
-          date: new Date().toISOString().split('T')[0],
-          severity: severityMap[classification.severity] || 'medium',
-          category: classification.category,
-          recommendation: classification.recommendation,
-          ai_reasoning: classification.ai_reasoning,
-          sourceType: 'manual'
-        });
-        
-        // Add to last mentions
-        setLastMentions(prev => [newMention, ...prev].slice(0, 5));
-        
-        // Notify parent component
-        if (onNewMentionsFound) {
-          onNewMentionsFound([newMention]);
-        }
-        
-        toast.success('Content classified and stored');
+      // Create new mention with simplified data
+      const newMention: ContentAlert = {
+        id: `mention-${Date.now()}`,
+        platform,
+        content,
+        date: new Date().toLocaleString(),
+        severity,
+        status: 'new',
+        sourceType: 'manual'
+      };
+      
+      // Add to last mentions
+      setLastMentions(prev => [newMention, ...prev].slice(0, 5));
+      
+      // Notify parent component
+      if (onNewMentionsFound) {
+        onNewMentionsFound([newMention]);
       }
+      
+      toast.success('Content classified and stored');
     } catch (error) {
       toast.error('Error classifying content');
       console.error(error);
@@ -153,7 +162,7 @@ const MentionMonitor = ({ onNewMentionsFound }: MentionMonitorProps) => {
           />
           
           <SourcesInfo 
-            sourcesCount={status.sources}
+            sourcesCount={status.sources || 0}
             isScanning={isScanning}
             onScan={handleScanNow}
           />

@@ -5,7 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { initializeDatabase } from "@/utils/initializeMonitoring";
 
 // Import your pages
-import Dashboard from "@/pages/Dashboard";
+import Dashboard from "@/pages/dashboard/DashboardPage";
 import Monitor from "@/pages/Monitor";
 
 function App() {

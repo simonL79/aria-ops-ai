@@ -87,3 +87,16 @@ export const initializeMonitoredPlatforms = async (): Promise<void> => {
     console.error("Error in initializeMonitoredPlatforms:", error);
   }
 };
+
+/**
+ * Initialize the entire monitoring system
+ * This ensures that both the status and the platforms are properly initialized
+ */
+export const initializeMonitoringSystem = async (): Promise<void> => {
+  try {
+    await initializeDatabase();
+    console.log("Monitoring system initialized successfully");
+  } catch (error) {
+    console.error("Error initializing monitoring system:", error);
+  }
+};

@@ -31,7 +31,7 @@ export const getMentionsAsAlerts = async (): Promise<ContentAlert[]> => {
       confidenceScore: item.confidence_score || 75,
       sourceType: item.source_type || mapPlatformToSourceType(item.platform),
       sentiment: mapNumericSentimentToString(item.sentiment),
-      detectedEntities: item.detected_entities || [],
+      detectedEntities: Array.isArray(item.detected_entities) ? item.detected_entities : [],
       potentialReach: item.potential_reach
     }));
   } catch (error) {
@@ -68,4 +68,3 @@ const mapNumericSentimentToString = (sentiment?: number): ContentAlert['sentimen
   if (sentiment > 50) return 'positive';
   return 'neutral';
 };
-

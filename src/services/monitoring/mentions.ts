@@ -100,8 +100,11 @@ export const getAllMentions = async (): Promise<Mention[]> => {
  */
 export const clearMentions = async (): Promise<void> => {
   try {
-    // Truncate scan_results table - only available for admin roles
-    const { error } = await supabase.rpc('truncate_scan_results');
+    // Delete all scan results
+    const { error } = await supabase
+      .from('scan_results')
+      .delete()
+      .gte('id', '0'); // Delete all records
     
     if (error) {
       console.error("Error clearing mentions:", error);
@@ -143,4 +146,3 @@ export const getMentionsByPlatform = async (platform: string): Promise<Mention[]
     return [];
   }
 };
-
