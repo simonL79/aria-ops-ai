@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { ContentAlert } from '@/types/dashboard';
 import { 
@@ -183,12 +184,12 @@ const useScanningLogic = () => {
           status: result.status === 'resolved' ? 'reviewing' : result.status as ContentAlert['status'],
           url: result.url,
           threatType: result.threatType,
-          sourceType: result.sourceType || mapPlatformToSourceType(result.platform),
-          confidenceScore: result.confidenceScore || 75,
+          sourceType: result.source_type || mapPlatformToSourceType(result.platform),
+          confidenceScore: result.confidence_score || 75,
           sentiment: mapNumericSentimentToString(result.sentiment),
           detectedEntities: Array.isArray(result.detectedEntities) ? 
             result.detectedEntities.map(entity => String(entity)) : [],
-          potentialReach: result.potentialReach || 0,
+          potentialReach: result.potential_reach || 0,
           category: result.category
         }));
         
