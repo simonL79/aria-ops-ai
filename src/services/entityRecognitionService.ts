@@ -113,7 +113,7 @@ export async function getAllEntities(): Promise<Entity[]> {
       
       // Safely check if detected_entities exists and is an array
       if (hasDetectedEntities && hasScanProperty(result, 'detected_entities')) {
-        const detectedEntities = result.detected_entities as any[];
+        const detectedEntities = result.detected_entities;
         if (Array.isArray(detectedEntities)) {
           detectedEntities.forEach((entity: string) => {
             entityCounts.set(entity, (entityCounts.get(entity) || 0) + 1);

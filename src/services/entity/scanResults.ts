@@ -3,10 +3,25 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { checkColumnExists } from '@/utils/databaseUtils';
 
+// Define a more specific return type instead of any[]
+type ScanResult = {
+  id: string;
+  content: string;
+  platform: string;
+  url: string;
+  severity: string;
+  status: string;
+  threat_type?: string;
+  detected_entities?: string[];
+  risk_entity_name?: string | null;
+  risk_entity_type?: string | null;
+  [key: string]: any;
+};
+
 /**
  * Get scan results by entity name
  */
-export const getScanResultsByEntity = async (entityName: string): Promise<any[]> => {
+export const getScanResultsByEntity = async (entityName: string): Promise<ScanResult[]> => {
   try {
     // Check if required columns exist
     const hasDetectedEntities = await checkColumnExists('scan_results', 'detected_entities');
@@ -18,7 +33,7 @@ export const getScanResultsByEntity = async (entityName: string): Promise<any[]>
     }
     
     // Try different approaches based on available columns
-    let results: any[] = [];
+    let results: ScanResult[] = [];
     
     // First try with the risk_entity_name field if it exists
     if (hasRiskEntityName) {
@@ -28,7 +43,7 @@ export const getScanResultsByEntity = async (entityName: string): Promise<any[]>
         .eq('risk_entity_name', entityName);
       
       if (!nameError && nameData && nameData.length > 0) {
-        return nameData;
+        return nameData as ScanResult[];
       }
     }
     
@@ -40,7 +55,7 @@ export const getScanResultsByEntity = async (entityName: string): Promise<any[]>
         .contains('detected_entities', [entityName]);
       
       if (!arrayError && arrayData) {
-        results = arrayData;
+        results = arrayData as ScanResult[];
       }
     }
     
