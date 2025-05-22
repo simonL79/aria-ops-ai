@@ -15,7 +15,7 @@ import ScanRequestForm from "@/components/salesFunnel/ScanRequestForm";
 import LeadMagnetForm from "@/components/lead-magnet/LeadMagnetForm";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
 
 const SalesFunnelPage = () => {
   const { isAuthenticated } = useAuth();
@@ -68,27 +68,21 @@ const SalesFunnelPage = () => {
               <h2 className="text-3xl font-bold mb-6 text-premium-black">
                 Get Your FREE AI Risk Assessment
               </h2>
-              <p className="text-premium-gray mb-6">
+              <p className="text-premium-darkGray mb-6">
                 Discover how AI can be used against you and what you can do to protect yourself with our comprehensive guide:
               </p>
               <ul className="space-y-3 mb-6">
                 <li className="flex items-start gap-2">
-                  <svg className="h-5 w-5 text-green-500 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                  </svg>
-                  <span>Identify AI-generated threats to your reputation</span>
+                  <Check className="h-5 w-5 text-green-500 mt-1" />
+                  <span className="text-premium-darkGray">Identify AI-generated threats to your reputation</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <svg className="h-5 w-5 text-green-500 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                  </svg>
-                  <span>Learn how deepfakes and synthetic media can impact you</span>
+                  <Check className="h-5 w-5 text-green-500 mt-1" />
+                  <span className="text-premium-darkGray">Learn how deepfakes and synthetic media can impact you</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <svg className="h-5 w-5 text-green-500 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                  </svg>
-                  <span>Get a 7-step action plan to protect your digital identity</span>
+                  <Check className="h-5 w-5 text-green-500 mt-1" />
+                  <span className="text-premium-darkGray">Get a 7-step action plan to protect your digital identity</span>
                 </li>
               </ul>
               
