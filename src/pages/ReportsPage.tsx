@@ -37,7 +37,16 @@ const ReportsPage = () => {
       updated_at: new Date().toISOString()
     }
   ]);
-  const [generatedReport, setGeneratedReport] = useState<any>(null);
+  const [generatedReport, setGeneratedReport] = useState<any>({
+    id: "sample-report",
+    title: "Monthly Reputation Report",
+    date: new Date().toISOString(),
+    client: clients[0],
+    sections: [
+      { title: "Executive Summary", content: "Sample summary content" },
+      { title: "Key Metrics", content: "Sample metrics content" }
+    ]
+  });
 
   const handleReportGenerated = (report: any) => {
     setGeneratedReport(report);
@@ -74,16 +83,7 @@ const ReportsPage = () => {
                 />
               </TabsContent>
               <TabsContent value="summary">
-                <ReportSummary report={generatedReport || {
-                  id: "sample-report",
-                  title: "Monthly Reputation Report",
-                  date: new Date().toISOString(),
-                  client: clients[0],
-                  sections: [
-                    { title: "Executive Summary", content: "Sample summary content" },
-                    { title: "Key Metrics", content: "Sample metrics content" }
-                  ]
-                }} />
+                <ReportSummary report={generatedReport} />
               </TabsContent>
             </Tabs>
           </div>

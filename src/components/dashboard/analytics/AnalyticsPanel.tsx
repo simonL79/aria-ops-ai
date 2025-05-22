@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -189,19 +190,19 @@ const AnalyticsPanel = ({
                 </div>
               </div>
               
-              <div className="h-80">
-                <ChartContainer config={chartConfig}>
+              <div className="h-64 md:h-80">
+                <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={threatsByDayData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="date" />
                     <YAxis />
-                    <Tooltip content={<ChartTooltipContent />} />
+                    <Tooltip />
                     <Legend />
                     <Bar dataKey="highSeverity" name="High Severity" stackId="a" fill={COLORS.negative} />
                     <Bar dataKey="mediumSeverity" name="Medium Severity" stackId="a" fill="#F59E0B" />
                     <Bar dataKey="lowSeverity" name="Low Severity" stackId="a" fill="#10B981" />
                   </BarChart>
-                </ChartContainer>
+                </ResponsiveContainer>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
@@ -240,8 +241,8 @@ const AnalyticsPanel = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <h3 className="text-md font-medium mb-4">Content by Platform</h3>
-                <div className="h-80">
-                  <ChartContainer config={chartConfig}>
+                <div className="h-56 md:h-64">
+                  <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
                         data={alertsByPlatformData.length > 0 ? alertsByPlatformData : platformData}
@@ -257,16 +258,16 @@ const AnalyticsPanel = ({
                           <Cell key={`cell-${index}`} fill={COLORS.pie[index % COLORS.pie.length]} />
                         ))}
                       </Pie>
-                      <Tooltip content={<ChartTooltipContent />} />
+                      <Tooltip />
                     </PieChart>
-                  </ChartContainer>
+                  </ResponsiveContainer>
                 </div>
               </div>
               
               <div>
                 <h3 className="text-md font-medium mb-4">Content by Severity</h3>
-                <div className="h-80">
-                  <ChartContainer config={chartConfig}>
+                <div className="h-56 md:h-64">
+                  <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
                         data={severityData}
@@ -282,22 +283,22 @@ const AnalyticsPanel = ({
                         <Cell key="medium" fill="#F59E0B" />
                         <Cell key="low" fill="#10B981" />
                       </Pie>
-                      <Tooltip content={<ChartTooltipContent />} />
+                      <Tooltip />
                     </PieChart>
-                  </ChartContainer>
+                  </ResponsiveContainer>
                 </div>
               </div>
             </div>
             
             <div className="mt-6">
               <h3 className="text-md font-medium mb-4">Platform Engagement Trend</h3>
-              <div className="h-80">
-                <ChartContainer config={chartConfig}>
+              <div className="h-56 md:h-64">
+                <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={threatsByDayData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="date" />
                     <YAxis />
-                    <Tooltip content={<ChartTooltipContent />} />
+                    <Tooltip />
                     <Legend />
                     <Line 
                       type="monotone" 
@@ -307,7 +308,7 @@ const AnalyticsPanel = ({
                       activeDot={{ r: 8 }} 
                     />
                   </LineChart>
-                </ChartContainer>
+                </ResponsiveContainer>
               </div>
             </div>
           </TabsContent>
@@ -354,9 +355,9 @@ const AnalyticsPanel = ({
               </table>
             </div>
             
-            <div className="h-80 mt-6">
+            <div className="h-56 md:h-64 mt-6">
               <h3 className="text-md font-medium mb-4">Platform Activity Over Time</h3>
-              <ChartContainer config={chartConfig}>
+              <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={threatsByDayData}>
                   <defs>
                     <linearGradient id="colorPrimary" x1="0" y1="0" x2="0" y2="1">
@@ -367,7 +368,7 @@ const AnalyticsPanel = ({
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="date" />
                   <YAxis />
-                  <Tooltip content={<ChartTooltipContent />} />
+                  <Tooltip />
                   <Area 
                     type="monotone" 
                     dataKey="count" 
@@ -377,20 +378,20 @@ const AnalyticsPanel = ({
                     fill="url(#colorPrimary)" 
                   />
                 </AreaChart>
-              </ChartContainer>
+              </ResponsiveContainer>
             </div>
           </TabsContent>
           
           {/* Reputation Score Tab */}
           <TabsContent value="reputation" className="pt-4">
             <h3 className="text-md font-medium mb-4">Reputation Score Trend</h3>
-            <div className="h-80">
-              <ChartContainer config={chartConfig}>
+            <div className="h-56 md:h-64">
+              <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={reputationHistory.length > 0 ? reputationHistory : threatsByDayData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="date" />
                   <YAxis domain={[0, 100]} />
-                  <Tooltip content={<ChartTooltipContent />} />
+                  <Tooltip />
                   <Legend />
                   <Line 
                     type="monotone" 
@@ -401,7 +402,7 @@ const AnalyticsPanel = ({
                     activeDot={{ r: 8 }} 
                   />
                 </LineChart>
-              </ChartContainer>
+              </ResponsiveContainer>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">

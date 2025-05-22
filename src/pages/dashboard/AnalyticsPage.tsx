@@ -120,7 +120,7 @@ const AnalyticsPage = () => {
           )}
         </div>
         
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap gap-2">
           <Select value={clientFilter} onValueChange={handleClientFilterChange}>
             <SelectTrigger className="w-[180px] h-9">
               <SelectValue placeholder="Select client" />
@@ -145,15 +145,16 @@ const AnalyticsPage = () => {
             </SelectContent>
           </Select>
           
-          <Button onClick={handleRefresh}>Refresh Data</Button>
+          <Button onClick={handleRefresh} size="sm">Refresh</Button>
           
           <Button 
             variant="outline" 
             onClick={exportAnalytics}
+            size="sm"
             className="flex items-center gap-2"
           >
             <FileText className="h-4 w-4" />
-            Export to CSV
+            Export
           </Button>
         </div>
       </div>
@@ -171,8 +172,7 @@ const AnalyticsPage = () => {
           <h3 className="text-lg font-medium mb-2 text-blue-800">Real-Time Analytics</h3>
           <p className="text-sm text-blue-700">
             This dashboard provides real-time analytics through WebSocket connections, ensuring you always have 
-            the most up-to-date information about your brand's online presence. The system analyzes threats by day, 
-            platform distribution, and overall reputation scores.
+            the most up-to-date information about your brand's online presence.
           </p>
         </div>
       </div>
