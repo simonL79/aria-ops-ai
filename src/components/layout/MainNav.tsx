@@ -16,7 +16,8 @@ import {
   FileText,
   MessageSquare,
   LogIn,
-  Calendar
+  Calendar,
+  BookOpen
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -61,6 +62,18 @@ export function MainNav({ className }: MainNavProps) {
             )}
           >
             About
+          </Link>
+          <Link
+            to="/blog"
+            className={cn(
+              "transition-colors hover:text-foreground/80",
+              location.pathname.startsWith("/blog") ? "text-foreground font-medium" : "text-foreground/60"
+            )}
+          >
+            <span className="flex items-center">
+              <BookOpen className="mr-1 h-4 w-4" />
+              Blog
+            </span>
           </Link>
         </nav>
         <Button 
@@ -146,6 +159,16 @@ export function MainNav({ className }: MainNavProps) {
       >
         <Calendar className="h-4 w-4" />
         <span className="group-hover:underline">Calendar</span>
+      </Link>
+      <Link
+        to="/blog"
+        className={cn(
+          "group flex items-center gap-1 transition-colors hover:text-foreground/80",
+          location.pathname.startsWith("/blog") ? "text-foreground font-medium" : "text-foreground/60"
+        )}
+      >
+        <BookOpen className="h-4 w-4" />
+        <span className="group-hover:underline">Blog</span>
       </Link>
       <Link
         to="/settings"

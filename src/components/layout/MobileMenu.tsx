@@ -55,6 +55,15 @@ const MobileMenu = ({ isOpen, setIsOpen, isScrolled }: MobileMenuProps) => {
           </li>
           <li>
             <Link 
+              to="/blog" 
+              className="block text-white hover:text-premium-silver transition-colors"
+              onClick={() => setIsOpen(false)}
+            >
+              Blog
+            </Link>
+          </li>
+          <li>
+            <Link 
               to="/resources" 
               className="block text-white hover:text-premium-silver transition-colors"
               onClick={() => setIsOpen(false)}

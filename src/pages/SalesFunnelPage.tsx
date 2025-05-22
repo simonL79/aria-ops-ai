@@ -15,7 +15,7 @@ import ScanRequestForm from "@/components/salesFunnel/ScanRequestForm";
 import LeadMagnetForm from "@/components/lead-magnet/LeadMagnetForm";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight, Check, BookOpen } from "lucide-react";
 
 const SalesFunnelPage = () => {
   const { isAuthenticated } = useAuth();
@@ -88,10 +88,15 @@ const SalesFunnelPage = () => {
                 </li>
               </ul>
               
-              <div className="mt-4">
+              <div className="mt-4 flex flex-col sm:flex-row gap-4">
                 <Button asChild variant="outline" className="text-premium-gray">
                   <Link to="/resources" className="flex items-center">
-                    Browse more free resources <ArrowRight className="ml-2 h-4 w-4" />
+                    Browse resources <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" className="text-premium-gray">
+                  <Link to="/blog" className="flex items-center">
+                    Read our blog <BookOpen className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
               </div>

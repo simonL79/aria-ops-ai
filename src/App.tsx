@@ -34,6 +34,8 @@ import RequestDataAccessPage from "@/pages/RequestDataAccessPage";
 import ResourcesPage from "@/pages/ResourcesPage";
 import CalendarPage from "@/pages/CalendarPage";
 import HowItWorksPage from "@/pages/HowItWorksPage";
+import BlogPage from "@/pages/BlogPage";
+import BlogPostPage from "@/pages/BlogPostPage";
 
 function App() {
   useEffect(() => {
@@ -57,6 +59,8 @@ function App() {
         <Route path="/request-data-access" element={<RequestDataAccessPage />} />
         <Route path="/resources" element={<ResourcesPage />} />
         <Route path="/how-it-works" element={<HowItWorksPage />} />
+        <Route path="/blog" element={<BlogPage />} />
+        <Route path="/blog/:slug" element={<BlogPostPage />} />
         
         {/* Authentication Route - Redirects to dashboard if already signed in */}
         <Route 
