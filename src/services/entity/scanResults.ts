@@ -25,7 +25,7 @@ export interface ScanResult {
   created_at?: string;
   confidence_score?: number | null;
   is_identified?: boolean;
-  // Use a safer type for the index signature
+  // Use unknown for any additional properties
   [key: string]: unknown;
 }
 
@@ -89,3 +89,4 @@ export const getScanResultsByEntity = async (entityName: string): Promise<ScanRe
     return [];
   }
 };
+
