@@ -54,7 +54,7 @@ export const runMonitoringScan = async (targetEntity?: string): Promise<ScanResu
       return [];
     }
     
-    // Convert to the expected format
+    // Convert to the expected format with type safety
     // We need to type the return value to match the signature in types.ts
     const results = (scanResults || []).map(item => {
       const typedResult: ScanResult = {
@@ -70,7 +70,7 @@ export const runMonitoringScan = async (targetEntity?: string): Promise<ScanResu
         client_id: item.client_id,
         created_at: item.created_at,
         updated_at: item.updated_at,
-        // Parse the detected entities using our utility - extract only names
+        // Parse the detected entities using our utility - avoid deep type inference
         detectedEntities: parseDetectedEntities(item.detected_entities).map(entity => entity.name),
         // Add additional source information
         sourceType: item.source_type,

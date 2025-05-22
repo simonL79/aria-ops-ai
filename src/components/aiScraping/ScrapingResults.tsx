@@ -4,9 +4,7 @@ import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { ScrapingResult } from '@/types/aiScraping';
 import { getAllResults } from '@/services/aiScrapingService';
-import ScrapingFilterBar from './scrapingComponents/ScrapingFilterBar';
-import ScrapingResultItem from './scrapingComponents/ScrapingResultItem';
-import EmptyScrapingResults from './scrapingComponents/EmptyScrapingResults';
+import { ScrapingFilterBar, ScrapingResultItem, EmptyScrapingResults } from './scrapingComponents';
 
 interface ScrapingResultsProps {
   results?: ScrapingResult[];
