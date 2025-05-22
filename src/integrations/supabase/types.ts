@@ -580,6 +580,10 @@ export type Database = {
         Args: { user_email: string }
         Returns: undefined
       }
+      column_exists: {
+        Args: { p_table_name: string; p_column_name: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _user_id: string
