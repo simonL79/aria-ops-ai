@@ -6,26 +6,12 @@ import { Separator } from '@/components/ui/separator';
 import { Mail, Linkedin, Globe, MapPin, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Logo from '@/components/ui/logo';
+import PublicLayout from '@/components/layout/PublicLayout';
 
 const BiographyPage = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-premium-silver/20 to-white">
-      <header className="py-6 bg-white border-b border-premium-silver shadow-sm">
-        <div className="container mx-auto px-6">
-          <div className="flex justify-between items-center">
-            <Link to="/" className="flex items-center gap-2">
-              <Logo size="md" />
-            </Link>
-            <Button asChild variant="ghost" className="flex items-center gap-2 text-premium-gray hover:text-premium-black">
-              <Link to="/">
-                <ArrowLeft className="h-4 w-4" /> Back to Home
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      <main className="py-12 container mx-auto px-6">
+    <PublicLayout>
+      <div className="container mx-auto px-6 py-12">
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
             <h1 className="text-3xl font-bold tracking-tight text-premium-black">About Simon Lindsay</h1>
@@ -44,7 +30,7 @@ const BiographyPage = () => {
                 <div className="flex flex-col md:flex-row gap-6">
                   <div className="md:w-1/3 flex justify-center">
                     <img 
-                      src="/lovable-uploads/simon-lindsay.jpg" 
+                      src="https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&w=600&q=80" 
                       alt="Simon Lindsay" 
                       className="w-48 h-48 rounded-full object-cover border border-premium-silver shadow-md"
                     />
@@ -114,13 +100,8 @@ const BiographyPage = () => {
             </Card>
           </div>
         </div>
-      </main>
-
-      <footer className="bg-premium-black text-premium-silver py-10 text-center text-sm mt-16">
-        <p>&copy; 2025 A.R.I.A™ — AI Reputation Intelligence Agent</p>
-        <p><Link to="/about" className="underline hover:text-white">About</Link> | <Link to="/" className="underline hover:text-white">Home</Link></p>
-      </footer>
-    </div>
+      </div>
+    </PublicLayout>
   );
 };
 
