@@ -39,6 +39,7 @@ import BlogPostPage from "@/pages/BlogPostPage";
 import BlogAdminPage from "@/pages/BlogAdminPage";
 import AdminLogin from "@/pages/AdminLogin";
 import AuthGuard from "@/components/auth/AuthGuard";
+import Clients from "@/pages/Clients"; // Import the Clients page
 
 function App() {
   useEffect(() => {
@@ -92,6 +93,7 @@ function App() {
           <Route path="/dashboard/engagement" element={<EngagementHubPage />} />
           <Route path="/dashboard/mentions" element={<MentionsPage />} />
           <Route path="/dashboard/new-companies" element={<NewCoPage />} />
+          <Route path="/clients" element={<Clients />} /> {/* Add clients route */}
           <Route path="/settings" element={<Settings />} />
           <Route path="/calendar" element={<CalendarPage />} />
         </Route>

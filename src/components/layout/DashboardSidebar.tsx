@@ -74,6 +74,17 @@ const DashboardSidebar = () => {
               </div>
             </Link>
             <Link
+              to="/clients"
+              className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
+                location.pathname.includes('/clients') ? 'bg-accent text-accent-foreground' : ''
+              }`}
+            >
+              <div className="flex items-center">
+                <Users className="mr-2 h-4 w-4" />
+                <span>Client Management</span>
+              </div>
+            </Link>
+            <Link
               to="/dashboard"
               className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
                 location.pathname.includes('/dashboard/seo-center') ? 'bg-accent text-accent-foreground' : ''
@@ -130,14 +141,14 @@ const DashboardSidebar = () => {
               }`}
             >
               <div className="flex items-center">
-                <Users className="mr-2 h-4 w-4" />
+                <Building className="mr-2 h-4 w-4" />
                 <span>New Companies</span>
               </div>
             </Link>
             <Link
-              to="/dashboard"
+              to="/settings"
               className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
-                location.pathname.includes('/dashboard/settings') ? 'bg-accent text-accent-foreground' : ''
+                location.pathname.includes('/settings') ? 'bg-accent text-accent-foreground' : ''
               }`}
             >
               <div className="flex items-center">
