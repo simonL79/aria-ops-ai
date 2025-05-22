@@ -1,14 +1,18 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import PublicLayout from "@/components/layout/PublicLayout";
 import { blogPosts } from '@/data/blogData';
-import { ArrowRight, Rss, Mail } from 'lucide-react';
+import { ArrowRight, Rss, Mail, Edit, Lock } from 'lucide-react';
 import BlogCard from '@/components/blog/BlogCard';
 import { Button } from '@/components/ui/button';
 import { toast } from "sonner";
+import { useAuth } from '@/hooks/useAuth';
 
 const BlogPage = () => {
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
     toast.success("Thank you for subscribing!");
@@ -21,8 +25,23 @@ const BlogPage = () => {
       <div className="bg-black text-white min-h-screen py-16">
         <div className="container mx-auto px-6">
           <div className="max-w-4xl mx-auto mb-12">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">Insights from Simon Lindsay</h1>
-            <p className="text-gray-400 text-xl">Founder of A.R.I.A™, thought leader in AI-powered digital protection.</p>
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+              <div>
+                <h1 className="text-4xl md:text-5xl font-bold mb-6">Insights from Simon Lindsay</h1>
+                <p className="text-gray-400 text-xl">Founder of A.R.I.A™, thought leader in AI-powered digital protection.</p>
+              </div>
+              
+              {isAuthenticated && (
+                <Button 
+                  onClick={() => navigate('/blog/admin')} 
+                  variant="outline"
+                  className="mt-4 md:mt-0 border-blue-500 text-blue-400 hover:bg-blue-500/10 self-start"
+                >
+                  <Edit className="h-4 w-4 mr-1" />
+                  Manage Blog
+                </Button>
+              )}
+            </div>
             
             <div className="flex items-center gap-4 mt-6">
               <Link to="/rss.xml" className="flex items-center text-blue-500 hover:text-blue-400 transition">
@@ -39,6 +58,17 @@ const BlogPage = () => {
                 <Mail className="h-4 w-4 mr-1" />
                 Email Updates
               </Button>
+              
+              {!isAuthenticated && (
+                <Button 
+                  variant="ghost" 
+                  className="text-gray-400 hover:text-gray-300"
+                  onClick={() => navigate('/auth', { state: { from: '/blog/admin' } })}
+                >
+                  <Lock className="h-4 w-4 mr-1" />
+                  Admin Login
+                </Button>
+              )}
             </div>
           </div>
           

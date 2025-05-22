@@ -37,6 +37,7 @@ import CalendarPage from "@/pages/CalendarPage";
 import HowItWorksPage from "@/pages/HowItWorksPage";
 import BlogPage from "@/pages/BlogPage";
 import BlogPostPage from "@/pages/BlogPostPage";
+import BlogAdminPage from "@/pages/BlogAdminPage";
 
 function App() {
   useEffect(() => {
@@ -97,6 +98,7 @@ function App() {
           <Route path="/dashboard/new-companies" element={<NewCoPage />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/calendar" element={<CalendarPage />} />
+          <Route path="/blog/admin" element={<BlogAdminPage />} />
         </Route>
         
         {/* Catch all route - 404 */}
