@@ -3,6 +3,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { checkColumnExists } from '@/utils/databaseUtils';
 
+// Define a more specific interface for entities to avoid recursive type issues
+export interface DetectedEntity {
+  name: string;
+  type?: string;
+  confidence?: number;
+}
+
 // Define a proper interface to avoid recursive type issues
 export interface ScanResult {
   id: string;
@@ -17,6 +24,7 @@ export interface ScanResult {
   risk_entity_type?: string | null;
   created_at?: string;
   confidence_score?: number;
+  // Use a more specific index signature that allows for various property types
   [key: string]: string | string[] | number | boolean | null | undefined;
 }
 
