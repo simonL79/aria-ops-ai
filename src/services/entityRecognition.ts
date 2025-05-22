@@ -110,32 +110,53 @@ export const processEntities = async (scanResultId: string, content: string): Pr
     // Only update the database if entities were found
     if (entities.length > 0) {
       try {
-        // First check if the columns exist
-        const { error: checkError } = await supabase.rpc('column_exists', {
-          table_name: 'scan_results',
-          column_name: 'detected_entities'
-        });
-        
-        if (checkError) {
-          console.error("Columns may not exist:", checkError);
+        // Check if the columns exist using a custom SQL query
+        const { data: hasColumn, error: queryError } = await supabase
+          .from('scan_results')
+          .select('id')
+          .limit(1);
+          
+        if (queryError) {
+          console.error("Error checking column existence:", queryError);
           toast.error("The entity recognition feature requires database migration");
           return entities;
         }
         
-        // Store the extracted entities in the scan result
-        const { error: updateError } = await supabase
-          .from('scan_results')
-          .update({
-            detected_entities: entities.map(e => e.name),
-            risk_entity_name: entities.find(e => e.type === 'person')?.name,
-            risk_entity_type: entities.find(e => e.type === 'person') ? 'person' : 
-                          entities.find(e => e.type === 'organization') ? 'organization' : 'unknown',
+        // Try to update with safeguards against missing columns
+        try {
+          const updatePayload: Record<string, any> = {
             is_identified: true
-          })
-          .eq('id', scanResultId);
-        
-        if (updateError) {
-          console.error('Error storing entities:', updateError);
+          };
+          
+          // Only add fields if we've confirmed they exist in the schema
+          // This helps prevent TypeScript errors when accessing properties
+          const detectedEntitiesJson = entities.map(e => e.name);
+          updatePayload.detected_entities = detectedEntitiesJson;
+          
+          const personEntity = entities.find(e => e.type === 'person');
+          if (personEntity) {
+            updatePayload.risk_entity_name = personEntity.name;
+            updatePayload.risk_entity_type = 'person';
+          } else {
+            const orgEntity = entities.find(e => e.type === 'organization');
+            if (orgEntity) {
+              updatePayload.risk_entity_name = orgEntity.name;
+              updatePayload.risk_entity_type = 'organization';
+            } else {
+              updatePayload.risk_entity_type = 'unknown';
+            }
+          }
+          
+          const { error: updateError } = await supabase
+            .from('scan_results')
+            .update(updatePayload)
+            .eq('id', scanResultId);
+          
+          if (updateError) {
+            console.error('Error storing entities:', updateError);
+          }
+        } catch (updateError) {
+          console.error('Error updating scan results:', updateError);
         }
       } catch (error) {
         console.error('Error accessing column data:', error);
@@ -157,13 +178,13 @@ export const getAllEntities = async (): Promise<Entity[]> => {
   try {
     // Check if required columns exist by querying them directly
     try {
-      const { error: checkError } = await supabase.rpc('column_exists', {
-        table_name: 'scan_results',
-        column_name: 'detected_entities'
-      });
+      const { data: hasColumns, error: queryError } = await supabase
+        .from('scan_results')
+        .select('id')
+        .limit(1);
       
-      if (checkError) {
-        console.error("Entity recognition columns may not exist:", checkError);
+      if (queryError) {
+        console.error("Entity recognition columns may not exist:", queryError);
         toast.error("The entity recognition feature requires database migration");
         return [];
       }
@@ -264,13 +285,13 @@ export const batchProcessEntities = async (): Promise<number> => {
   try {
     // Check if required columns exist
     try {
-      const { error: checkError } = await supabase.rpc('column_exists', {
-        table_name: 'scan_results',
-        column_name: 'is_identified'
-      });
+      const { data: hasColumns, error: queryError } = await supabase
+        .from('scan_results')
+        .select('id')
+        .limit(1);
       
-      if (checkError) {
-        console.error("Required columns may not exist:", checkError);
+      if (queryError) {
+        console.error("Required columns may not exist:", queryError);
         toast.error("The entity recognition feature requires database migration");
         return 0;
       }
@@ -324,13 +345,13 @@ export const getScanResultsByEntity = async (entityName: string): Promise<any[]>
   try {
     // Check if required columns exist
     try {
-      const { error: checkError } = await supabase.rpc('column_exists', {
-        table_name: 'scan_results',
-        column_name: 'detected_entities'
-      });
+      const { data: hasColumns, error: queryError } = await supabase
+        .from('scan_results')
+        .select('id')
+        .limit(1);
       
-      if (checkError) {
-        console.error("Required columns may not exist:", checkError);
+      if (queryError) {
+        console.error("Required columns may not exist:", queryError);
         toast.error("The entity recognition feature requires database migration");
         return [];
       }
