@@ -25,7 +25,7 @@ export interface ScanResult {
   created_at?: string;
   confidence_score?: number | null;
   is_identified?: boolean;
-  // Use a safer catch-all index signature
+  // Use a safer type for the index signature
   [key: string]: unknown;
 }
 

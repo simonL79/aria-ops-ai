@@ -5,9 +5,9 @@ import { Entity } from '@/types/entity';
 import { 
   processText, 
   processScanResult, 
-  getAllEntities 
+  getAllEntities, 
+  batchProcessScanResults 
 } from '@/services/entityRecognitionService';
-import { batchProcessScanResults } from '@/services/batchEntityService';
 
 export const useEntityRecognition = () => {
   const [loading, setLoading] = useState(false);
