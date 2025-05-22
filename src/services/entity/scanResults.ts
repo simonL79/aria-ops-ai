@@ -4,8 +4,8 @@ import { toast } from 'sonner';
 import { checkColumnExists } from '@/utils/databaseUtils';
 import { parseDetectedEntities, ScanEntity } from '@/utils/parseDetectedEntities';
 
-// Define a more specific interface for scan results to avoid recursive type issues
-export interface ScanResult {
+// Define a strict interface for raw scan results from database
+export interface RawScanResult {
   id: string;
   content: string;
   platform: string;
@@ -13,15 +13,18 @@ export interface ScanResult {
   severity: string;
   status: string;
   threat_type?: string;
-  // Accept unknown for detected_entities at fetch time, but parse it later
-  detected_entities?: unknown;
+  detected_entities?: unknown; // Accept unknown for detected_entities at fetch time
   risk_entity_name?: string | null;
   risk_entity_type?: string | null;
   created_at?: string;
   confidence_score?: number | null;
   is_identified?: boolean;
-  // Use unknown for any additional properties
-  [key: string]: unknown;
+  [key: string]: unknown; // Allow for additional properties
+}
+
+// Define processed scan result type after parsing detected entities
+export interface ScanResult extends Omit<RawScanResult, 'detected_entities'> {
+  detected_entities?: ScanEntity[]; // Always parsed into ScanEntity[]
 }
 
 /**
@@ -60,15 +63,11 @@ export const getScanResultsByEntity = async (entityName: string): Promise<ScanRe
         .eq('risk_entity_name', entityName);
       
       if (!nameError && nameData && nameData.length > 0) {
-        // Process data without deep nesting in types
-        const filteredData = nameData.filter(isScanResult);
-        return filteredData.map(result => {
-          // Create a new object to avoid modifying the original
-          const processed: ScanResult = { ...result };
-          // Parse detected entities using our utility
-          processed.detected_entities = parseDetectedEntities(result.detected_entities);
-          return processed;
-        });
+        // Process raw data into typed ScanResults
+        return nameData.map((row: RawScanResult): ScanResult => ({
+          ...row,
+          detected_entities: parseDetectedEntities(row.detected_entities)
+        }));
       }
     }
     
@@ -80,15 +79,11 @@ export const getScanResultsByEntity = async (entityName: string): Promise<ScanRe
         .contains('detected_entities', [entityName]);
       
       if (!arrayError && arrayData) {
-        // Process data without deep nesting in types
-        const filteredData = arrayData.filter(isScanResult);
-        results = filteredData.map(result => {
-          // Create a new object to avoid modifying the original
-          const processed: ScanResult = { ...result };
-          // Parse detected entities using our utility
-          processed.detected_entities = parseDetectedEntities(result.detected_entities);
-          return processed;
-        });
+        // Process raw data into typed ScanResults
+        results = arrayData.map((row: RawScanResult): ScanResult => ({
+          ...row,
+          detected_entities: parseDetectedEntities(row.detected_entities)
+        }));
       }
     }
     

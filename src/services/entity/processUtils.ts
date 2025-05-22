@@ -6,15 +6,6 @@ import { checkColumnExists } from '@/utils/databaseUtils';
 import { extractEntitiesFromText } from './extractionUtils';
 import { parseDetectedEntities } from '@/utils/parseDetectedEntities';
 
-// Simple interface for scan results to avoid recursive type issues
-interface ScanResultWithEntities {
-  id: string;
-  detected_entities?: unknown;
-  risk_entity_name?: string;
-  risk_entity_type?: string;
-  content: string;
-}
-
 /**
  * Process and store entities from a scan result
  */
@@ -40,6 +31,7 @@ export const processEntities = async (scanResultId: string, content: string): Pr
         }
         
         if (hasDetectedEntities) {
+          // Store only the entity names in the database
           updatePayload.detected_entities = entities.map(e => e.name);
           
           // Add risk entity fields if they exist

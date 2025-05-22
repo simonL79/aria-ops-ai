@@ -55,28 +55,32 @@ export const runMonitoringScan = async (targetEntity?: string): Promise<ScanResu
     }
     
     // Convert to the expected format
-    const results: ScanResult[] = scanResults?.map(item => ({
-      id: item.id,
-      content: item.content,
-      platform: item.platform,
-      url: item.url || '',
-      date: item.created_at,
-      sentiment: item.sentiment || 0,
-      severity: (item.severity as 'low' | 'medium' | 'high') || 'low',
-      status: (item.status as 'new' | 'read' | 'actioned' | 'resolved') || 'new',
-      threatType: item.threat_type,
-      client_id: item.client_id,
-      created_at: item.created_at,
-      updated_at: item.updated_at,
-      // Use our utility function to safely parse detected entities
-      detectedEntities: parseDetectedEntities(item.detected_entities),
-      // Add additional source information
-      sourceType: item.source_type,
-      // Parse potential reach if available
-      potentialReach: item.potential_reach,
-      // Parse confidence score if available  
-      confidenceScore: item.confidence_score
-    })) || [];
+    // We need to type the return value to match the signature in types.ts
+    const results = (scanResults || []).map(item => {
+      const typedResult: ScanResult = {
+        id: item.id,
+        content: item.content,
+        platform: item.platform,
+        url: item.url || '',
+        date: item.created_at,
+        sentiment: item.sentiment || 0,
+        severity: (item.severity as 'low' | 'medium' | 'high') || 'low',
+        status: (item.status as 'new' | 'read' | 'actioned' | 'resolved') || 'new',
+        threatType: item.threat_type,
+        client_id: item.client_id,
+        created_at: item.created_at,
+        updated_at: item.updated_at,
+        // Parse the detected entities using our utility
+        detectedEntities: parseDetectedEntities(item.detected_entities).map(entity => entity.name),
+        // Add additional source information
+        sourceType: item.source_type,
+        // Parse potential reach if available
+        potentialReach: item.potential_reach,
+        // Parse confidence score if available  
+        confidenceScore: item.confidence_score
+      };
+      return typedResult;
+    });
     
     if (results.length > 0) {
       toast.success(`Scan completed: ${results.length} mentions found`);
