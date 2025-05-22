@@ -35,3 +35,11 @@ export async function checkColumnExists(
 export function hasScanProperty(obj: any, property: string): boolean {
   return obj && typeof obj === 'object' && property in obj;
 }
+
+/**
+ * Type guard to check if an object has the expected properties
+ */
+export function hasRequiredProperties(obj: any, properties: string[]): boolean {
+  if (!obj || typeof obj !== 'object') return false;
+  return properties.every(prop => prop in obj);
+}

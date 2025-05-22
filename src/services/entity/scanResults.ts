@@ -19,13 +19,25 @@ export interface ScanResult {
   severity: string;
   status: string;
   threat_type?: string;
-  detected_entities?: string[];
+  detected_entities?: string[] | null;
   risk_entity_name?: string | null;
   risk_entity_type?: string | null;
   created_at?: string;
-  confidence_score?: number;
-  // Use a more specific index signature that allows for various property types
-  [key: string]: string | string[] | number | boolean | null | undefined;
+  confidence_score?: number | null;
+  is_identified?: boolean;
+  // Use a safer catch-all index signature
+  [key: string]: unknown;
+}
+
+/**
+ * Type guard to check if an object is a ScanResult
+ */
+export function isScanResult(obj: any): obj is ScanResult {
+  return obj && 
+         typeof obj === 'object' && 
+         'id' in obj && 
+         'content' in obj &&
+         'platform' in obj;
 }
 
 /**
@@ -53,7 +65,8 @@ export const getScanResultsByEntity = async (entityName: string): Promise<ScanRe
         .eq('risk_entity_name', entityName);
       
       if (!nameError && nameData && nameData.length > 0) {
-        return nameData as unknown as ScanResult[];
+        // Use type guard to ensure we have valid ScanResults
+        return (nameData as any[]).filter(isScanResult);
       }
     }
     
@@ -65,7 +78,8 @@ export const getScanResultsByEntity = async (entityName: string): Promise<ScanRe
         .contains('detected_entities', [entityName]);
       
       if (!arrayError && arrayData) {
-        results = arrayData as unknown as ScanResult[];
+        // Use type guard to ensure we have valid ScanResults
+        results = (arrayData as any[]).filter(isScanResult);
       }
     }
     
