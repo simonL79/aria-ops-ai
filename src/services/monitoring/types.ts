@@ -45,6 +45,7 @@ export interface ScanResult {
   confidence_score?: number;
   sentiment?: number;
   detectedEntities?: string[];
+  detected_entities?: string[];
   potentialReach?: number;
   potential_reach?: number;
   category?: string;

@@ -1,8 +1,8 @@
 
 import { useState } from "react";
 import InfluencerAlertsList from "@/components/influencers/InfluencerAlertsList";
-import { DashboardSidebar } from "@/components/layout/DashboardSidebar";
-import { StickyHeader } from "@/components/layout/StickyHeader";
+import DashboardSidebar from "@/components/layout/DashboardSidebar";
+import StickyHeader from "@/components/layout/StickyHeader";
 
 const InfluencerRadar = () => {
   return (
