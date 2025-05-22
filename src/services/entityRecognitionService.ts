@@ -109,7 +109,7 @@ export async function getAllEntities(): Promise<Entity[]> {
 
     data.forEach(result => {
       // Only process if result is an object (not null or undefined)
-      if (!result || typeof result !== 'object') return;
+      if (result === null || typeof result !== 'object') return;
       
       // Safely check if detected_entities exists and is an array
       if (hasDetectedEntities && hasScanProperty(result, 'detected_entities')) {

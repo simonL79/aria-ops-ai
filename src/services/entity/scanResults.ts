@@ -3,8 +3,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { checkColumnExists } from '@/utils/databaseUtils';
 
-// Define a more specific return type instead of any[]
-type ScanResult = {
+// Define a proper interface to avoid recursive type issues
+export interface ScanResult {
   id: string;
   content: string;
   platform: string;
@@ -15,8 +15,9 @@ type ScanResult = {
   detected_entities?: string[];
   risk_entity_name?: string | null;
   risk_entity_type?: string | null;
+  // Additional properties can be accessed using an index signature
   [key: string]: any;
-};
+}
 
 /**
  * Get scan results by entity name
