@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, Clock, Shield, ArrowRight, MessageSquare } from "lucide-react";
+import { AlertTriangle, Clock, Shield, ArrowRight, MessageSquare, Users, Target } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ContentAlert } from "@/types/dashboard";
 
@@ -68,6 +68,22 @@ const ThreatFeed = ({ alerts, isLoading = false, onViewDetails }: ThreatFeedProp
   
   const handleViewMore = () => {
     setDisplayCount(prev => prev + 5);
+  };
+  
+  // Function to get entities from the alert
+  const getEntities = (alert: ContentAlert): string[] => {
+    if (alert.detectedEntities && Array.isArray(alert.detectedEntities) && alert.detectedEntities.length > 0) {
+      return alert.detectedEntities.map(entity => String(entity));
+    }
+    
+    // Fallback to extracting entities from content
+    if (alert.content) {
+      // Try to extract proper nouns from the content as potential targets
+      const properNouns = alert.content.match(/\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b/g);
+      return properNouns ? [...new Set(properNouns)].slice(0, 2) : [];
+    }
+    
+    return [];
   };
   
   if (isLoading) {
@@ -144,54 +160,71 @@ const ThreatFeed = ({ alerts, isLoading = false, onViewDetails }: ThreatFeedProp
       </CardHeader>
       <CardContent className="p-0">
         <div className="max-h-96 overflow-y-auto">
-          {alerts.slice(0, displayCount).map((alert, idx) => (
-            <div key={alert.id} className="group">
-              <div className="p-4 hover:bg-muted/30 transition-colors">
-                <div className="flex justify-between items-start mb-1">
-                  <div className="flex items-center">
-                    {getStatusIndicator(alert.status, alert.category)}
-                    {alert.category === 'customer_enquiry' ? (
-                      <Badge className="bg-blue-500 text-white">
-                        CUSTOMER
-                      </Badge>
-                    ) : (
-                      <Badge className={getSeverityColor(alert.severity)}>
-                        {alert.severity.toUpperCase()}
-                      </Badge>
-                    )}
-                    {alert.threatType && !alert.category && (
-                      <Badge variant="outline" className="ml-2">
-                        {alert.threatType.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
-                      </Badge>
-                    )}
+          {alerts.slice(0, displayCount).map((alert, idx) => {
+            const entities = getEntities(alert);
+            return (
+              <div key={alert.id} className="group">
+                <div className="p-4 hover:bg-muted/30 transition-colors">
+                  <div className="flex justify-between items-start mb-1">
+                    <div className="flex items-center">
+                      {getStatusIndicator(alert.status, alert.category)}
+                      {alert.category === 'customer_enquiry' ? (
+                        <Badge className="bg-blue-500 text-white">
+                          CUSTOMER
+                        </Badge>
+                      ) : (
+                        <Badge className={getSeverityColor(alert.severity)}>
+                          {alert.severity.toUpperCase()}
+                        </Badge>
+                      )}
+                      {alert.threatType && !alert.category && (
+                        <Badge variant="outline" className="ml-2">
+                          {alert.threatType.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Clock className="h-3 w-3" />
+                      {alert.date}
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <Clock className="h-3 w-3" />
-                    {alert.date}
+                  
+                  {entities.length > 0 && (
+                    <div className="flex items-center gap-1 mb-1 text-xs">
+                      <Target className="h-3 w-3 text-gray-500" />
+                      <span className="text-muted-foreground">Targets:</span>
+                      <div className="flex gap-1">
+                        {entities.map((entity, idx) => (
+                          <Badge key={idx} variant="outline" className="text-xs py-0 px-1">
+                            {entity}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  <p className="text-sm line-clamp-2 mb-2">{alert.content}</p>
+                  
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                      {getSourceIcon(alert.sourceType)}
+                      <span className="text-xs text-muted-foreground">{alert.platform}</span>
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-7 px-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => onViewDetails && onViewDetails(alert)}
+                    >
+                      <span className="text-xs">{alert.category === 'customer_enquiry' ? 'Respond' : 'View'}</span>
+                      <ArrowRight className="h-3 w-3 ml-1" />
+                    </Button>
                   </div>
                 </div>
-                
-                <p className="text-sm line-clamp-2 mb-2">{alert.content}</p>
-                
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-2">
-                    {getSourceIcon(alert.sourceType)}
-                    <span className="text-xs text-muted-foreground">{alert.platform}</span>
-                  </div>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="h-7 px-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={() => onViewDetails && onViewDetails(alert)}
-                  >
-                    <span className="text-xs">{alert.category === 'customer_enquiry' ? 'Respond' : 'View'}</span>
-                    <ArrowRight className="h-3 w-3 ml-1" />
-                  </Button>
-                </div>
+                {idx < Math.min(displayCount, alerts.length) - 1 && <Separator />}
               </div>
-              {idx < Math.min(displayCount, alerts.length) - 1 && <Separator />}
-            </div>
-          ))}
+            );
+          })}
         </div>
         
         {displayCount < alerts.length && (

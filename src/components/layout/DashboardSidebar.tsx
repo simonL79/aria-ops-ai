@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Home, Settings, Users, AlertTriangle, Shield, Search, BarChart3, Mail, MessageSquare, FileText, Radar, Building } from "lucide-react";
+import { Home, Settings, Users, AlertTriangle, Shield, Search, BarChart3, Mail, MessageSquare, FileText, Radar, Building, FileBarChart } from "lucide-react";
 
 interface SidebarProps {
   className?: string;
@@ -85,6 +85,17 @@ const DashboardSidebar = () => {
               </div>
             </Link>
             <Link
+              to="/reports"
+              className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
+                location.pathname.includes('/reports') ? 'bg-accent text-accent-foreground' : ''
+              }`}
+            >
+              <div className="flex items-center">
+                <FileBarChart className="mr-2 h-4 w-4" />
+                <span>Entity Reports</span>
+              </div>
+            </Link>
+            <Link
               to="/dashboard"
               className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
                 location.pathname.includes('/dashboard/seo-center') ? 'bg-accent text-accent-foreground' : ''
@@ -135,7 +146,7 @@ const DashboardSidebar = () => {
           </h2>
           <div className="space-y-1">
             <Link
-              to="/dashboard"
+              to="/dashboard/new-companies"
               className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
                 location.pathname.includes('/dashboard/new-companies') ? 'bg-accent text-accent-foreground' : ''
               }`}
