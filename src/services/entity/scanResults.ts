@@ -103,11 +103,13 @@ export const getScanResultsByEntity = async (entityName: string): Promise<ScanRe
         .eq('risk_entity_name', entityName);
       
       if (!nameError && nameData && nameData.length > 0) {
-        // Process and filter the data
-        return nameData.filter(isScanResult).map(result => ({
-          ...result,
-          detected_entities: processDetectedEntities(result.detected_entities)
-        }));
+        // Process data without deep nesting in types
+        const filteredData = nameData.filter(isScanResult);
+        return filteredData.map(result => {
+          const processed = { ...result };
+          processed.detected_entities = processDetectedEntities(result.detected_entities);
+          return processed as ScanResult;
+        });
       }
     }
     
@@ -119,11 +121,13 @@ export const getScanResultsByEntity = async (entityName: string): Promise<ScanRe
         .contains('detected_entities', [entityName]);
       
       if (!arrayError && arrayData) {
-        // Process and filter the data
-        results = arrayData.filter(isScanResult).map(result => ({
-          ...result,
-          detected_entities: processDetectedEntities(result.detected_entities)
-        }));
+        // Process data without deep nesting in types
+        const filteredData = arrayData.filter(isScanResult);
+        results = filteredData.map(result => {
+          const processed = { ...result };
+          processed.detected_entities = processDetectedEntities(result.detected_entities);
+          return processed as ScanResult;
+        });
       }
     }
     
