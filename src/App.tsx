@@ -7,6 +7,7 @@ import { initializeDatabase } from "@/utils/initializeMonitoring";
 // Import your pages
 import Dashboard from "@/pages/dashboard/DashboardPage";
 import Monitor from "@/pages/Monitor";
+import InfluencerRadar from "@/pages/InfluencerRadar";
 
 function App() {
   useEffect(() => {
@@ -20,6 +21,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/monitor" element={<Monitor />} />
+          <Route path="/influencer-radar" element={<InfluencerRadar />} />
         </Routes>
       </BrowserRouter>
       <Toaster />

@@ -39,14 +39,14 @@ export interface ScanResult {
   status: 'new' | 'read' | 'actioned' | 'resolved' | 'reviewing';
   url: string;
   threatType?: string;
-  source_type?: string;
   sourceType?: string;
-  confidence_score?: number;
+  source_type?: string;
   confidenceScore?: number;
+  confidence_score?: number;
   sentiment?: number;
   detectedEntities?: string[];
-  potential_reach?: number;
   potentialReach?: number;
+  potential_reach?: number;
   category?: string;
 }
 
