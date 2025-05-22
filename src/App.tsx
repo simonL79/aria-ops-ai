@@ -8,7 +8,7 @@ import { HelmetProvider } from "react-helmet-async";
 
 // Import your pages
 import Dashboard from "@/pages/dashboard/DashboardPage";
-import Monitor from "@/pages/Monitor";
+import MonitorPage from "@/pages/Monitor"; // Fixed import
 import InfluencerRadar from "@/pages/InfluencerRadar";
 import AiScrapingPage from "@/pages/AiScrapingPage";
 import IntelligencePage from "@/pages/dashboard/IntelligencePage";
@@ -18,7 +18,7 @@ import CommandCenterPage from "@/pages/dashboard/CommandCenterPage";
 import AnalyticsPage from "@/pages/dashboard/AnalyticsPage";
 import EngagementHubPage from "@/pages/dashboard/EngagementHubPage";
 import Settings from "@/pages/Settings";
-import MentionsPage from "@/pages/dashboard/MentionsPage";
+import MentionsPage from "@/pages/dashboard/mentions";
 import NewCoPage from "@/pages/NewCoPage";
 import Authentication from "@/pages/Authentication";
 import SalesFunnelPage from "@/pages/SalesFunnelPage";
@@ -84,7 +84,7 @@ function App() {
         {/* Protected Dashboard Routes */}
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/monitor" element={<Monitor />} />
+          <Route path="/monitor" element={<MonitorPage />} />
           <Route path="/influencer-radar" element={<InfluencerRadar />} />
           <Route path="/dashboard/ai-scraping" element={<AiScrapingPage />} />
           <Route path="/dashboard/intelligence" element={<IntelligencePage />} />

@@ -1,4 +1,3 @@
-
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -75,14 +74,8 @@ export const fetchCompaniesFromDatabase = async (options: {
     const { data, error } = await query;
     
     if (error) {
-      // Check if it's an RLS policy error and provide a specific message
-      if (error.message.includes('permission denied for')) {
-        toast.error('Permission denied: You need admin privileges to view companies');
-        console.error('RLS Policy Error: Admin privileges required', error);
-      } else {
-        throw error;
-      }
-      return [];
+      console.error("Error fetching companies from database:", error);
+      throw error;
     }
     
     return data || [];

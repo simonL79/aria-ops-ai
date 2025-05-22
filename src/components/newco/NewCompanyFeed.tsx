@@ -10,18 +10,24 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { NewCompany } from '@/types/newco';
-import { AlertTriangle, ChevronRight, Building } from 'lucide-react';
+import { AlertTriangle, ChevronRight, Building, BarChart, MessageSquare } from 'lucide-react';
 
 interface NewCompanyFeedProps {
   companies: NewCompany[];
+  onAnalyze?: (company: NewCompany) => void;
+  onRespond?: (company: NewCompany) => void;
 }
 
-const NewCompanyFeed: React.FC<NewCompanyFeedProps> = ({ companies }) => {
+const NewCompanyFeed: React.FC<NewCompanyFeedProps> = ({ 
+  companies,
+  onAnalyze,
+  onRespond
+}) => {
   const navigate = useNavigate();
 
   if (!companies || companies.length === 0) {
     return (
-      <div className="flex items-center justify-center p-12 border rounded-lg bg-secondary/50">
+      <div className="flex flex-col items-center justify-center p-12 border rounded-lg bg-secondary/50">
         <Building className="h-12 w-12 opacity-50 mb-4" />
         <div className="text-center">
           <h3 className="text-lg font-medium">No Companies Found</h3>
@@ -37,7 +43,25 @@ const NewCompanyFeed: React.FC<NewCompanyFeedProps> = ({ companies }) => {
     navigate(`/newco-details/${companyId}`);
   };
 
-  const getRiskBadge = (category: string) => {
+  const handleAnalyze = (e: React.MouseEvent, company: NewCompany) => {
+    e.stopPropagation();
+    if (onAnalyze) {
+      onAnalyze(company);
+    }
+  };
+
+  const handleRespond = (e: React.MouseEvent, company: NewCompany) => {
+    e.stopPropagation();
+    if (onRespond) {
+      onRespond(company);
+    } else {
+      navigate(`/dashboard/engagement?company=${company.id}`);
+    }
+  };
+
+  const getRiskBadge = (category?: string) => {
+    if (!category) return <Badge>Unknown</Badge>;
+    
     switch (category) {
       case 'green':
         return <Badge className="bg-green-500">Low Risk</Badge>;
@@ -50,16 +74,21 @@ const NewCompanyFeed: React.FC<NewCompanyFeedProps> = ({ companies }) => {
     }
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status?: string) => {
+    if (!status) return <Badge variant="outline">Unknown</Badge>;
+    
     switch (status) {
       case 'new':
+      case 'pending':
         return <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-300">New</Badge>;
+      case 'scanning':
+        return <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-300">Scanning</Badge>;
       case 'scanned':
         return <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-300">Scanned</Badge>;
       case 'contacted':
         return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-300">Contacted</Badge>;
       default:
-        return <Badge variant="outline">Unknown</Badge>;
+        return <Badge variant="outline">{status}</Badge>;
     }
   };
 
@@ -82,7 +111,9 @@ const NewCompanyFeed: React.FC<NewCompanyFeedProps> = ({ companies }) => {
           <CardContent>
             <div className="flex flex-col sm:flex-row justify-between sm:items-center">
               <div className="mb-4 sm:mb-0">
-                <p className="text-sm"><span className="font-medium">Clean Launch Score:</span> {company.cleanLaunchScore}/100</p>
+                <p className="text-sm">
+                  <span className="font-medium">Clean Launch Score:</span> {company.cleanLaunchScore ? `${company.cleanLaunchScore}/100` : 'Not analyzed'}
+                </p>
                 
                 <div className="flex flex-wrap gap-2 mt-2">
                   {company.directors && company.directors.map(director => (
@@ -96,13 +127,36 @@ const NewCompanyFeed: React.FC<NewCompanyFeedProps> = ({ companies }) => {
                 </div>
               </div>
               
-              <Button 
-                onClick={() => handleViewDetails(company.id)}
-                className="flex items-center gap-1"
-              >
-                View Details
-                <ChevronRight className="h-4 w-4" />
-              </Button>
+              <div className="flex gap-2">
+                {company.status === 'pending' || !company.cleanLaunchScore ? (
+                  <Button 
+                    onClick={(e) => handleAnalyze(e, company)}
+                    className="flex items-center gap-1"
+                    variant="default"
+                  >
+                    <BarChart className="h-4 w-4" />
+                    Analyze
+                  </Button>
+                ) : (
+                  <Button 
+                    onClick={(e) => handleRespond(e, company)}
+                    className="flex items-center gap-1"
+                    variant="secondary"
+                  >
+                    <MessageSquare className="h-4 w-4" />
+                    Respond
+                  </Button>
+                )}
+                
+                <Button 
+                  onClick={() => handleViewDetails(company.id)}
+                  className="flex items-center gap-1"
+                  variant="outline"
+                >
+                  View Details
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
