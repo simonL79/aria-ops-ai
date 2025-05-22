@@ -96,19 +96,25 @@ export const extractEntitiesFromText = (text: string): Entity[] => {
 // Helper function to check if a column exists in a table
 const checkColumnExists = async (tableName: string, columnName: string): Promise<boolean> => {
   try {
-    // Use edge function to check column existence
-    const { data, error } = await supabase.functions.invoke('column_exists', {
+    // Use direct fetch to edge function instead of RPC
+    const response = await fetch(`${supabase.supabaseUrl}/functions/v1/column_exists`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${supabase.supabaseKey}`
+      },
       body: JSON.stringify({
         table_name: tableName,
         column_name: columnName
       })
     });
     
-    if (error) {
-      console.error(`Error checking if column ${columnName} exists in ${tableName}:`, error);
+    if (!response.ok) {
+      console.error(`Error checking if column ${columnName} exists in ${tableName}: HTTP ${response.status}`);
       return false;
     }
     
+    const data = await response.json();
     return !!data?.exists;
   } catch (error) {
     console.error(`Error in checkColumnExists for ${columnName}:`, error);
@@ -226,7 +232,8 @@ export const getAllEntities = async (): Promise<Entity[]> => {
     const entityMap = new Map<string, Entity>();
     
     data.forEach(result => {
-      if (!result) return;
+      // Skip if not a valid object
+      if (!result || typeof result !== 'object') return;
       
       // Safely process detected_entities if it exists and is an array
       if (hasDetectedEntities && hasScanProperty(result, 'detected_entities')) {
@@ -341,9 +348,12 @@ export const batchProcessEntities = async (): Promise<number> => {
     
     // Process each scan result
     for (const result of scanResults) {
-      const entities = await processEntities(result.id, result.content);
-      if (entities.length > 0) {
-        processedCount++;
+      // Type guard to ensure result has expected properties
+      if (result && typeof result === 'object' && 'id' in result && 'content' in result) {
+        const entities = await processEntities(result.id, result.content);
+        if (entities.length > 0) {
+          processedCount++;
+        }
       }
     }
     

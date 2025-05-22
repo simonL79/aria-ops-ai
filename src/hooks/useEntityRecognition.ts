@@ -12,11 +12,16 @@ export interface Entity {
 
 // Type guard to check if object has required entity properties
 function isEntityArray(data: any): data is Entity[] {
-  return Array.isArray(data);
+  return Array.isArray(data) && data.every(item => 
+    typeof item === 'object' &&
+    'name' in item &&
+    'type' in item &&
+    'confidence' in item
+  );
 }
 
-// Type guard for scan result properties
-function hasScanResultProperties(obj: any, property: string): boolean {
+// Type guard to safely access scan result properties
+function hasScanProperty(obj: any, property: string): boolean {
   return obj && typeof obj === 'object' && property in obj;
 }
 
@@ -28,19 +33,25 @@ export const useEntityRecognition = () => {
   const checkColumnExists = useCallback(async (columnName: string): Promise<boolean> => {
     try {
       // Use direct edge function invocation
-      const { data, error } = await supabase.functions.invoke('column_exists', {
+      const response = await fetch(`${supabase.supabaseUrl}/functions/v1/column_exists`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${supabase.supabaseKey}`
+        },
         body: JSON.stringify({
           table_name: 'scan_results',
           column_name: columnName
         })
       });
       
-      if (error) {
-        console.error(`Error checking if column ${columnName} exists:`, error);
+      if (!response.ok) {
+        console.error(`Error checking if column ${columnName} exists: HTTP ${response.status}`);
         return false;
       }
       
-      return data?.exists || false;
+      const data = await response.json();
+      return !!data?.exists;
     } catch (error) {
       console.error(`Error in checkColumnExists for ${columnName}:`, error);
       return false;
@@ -64,7 +75,7 @@ export const useEntityRecognition = () => {
         return [];
       }
 
-      const resultEntities = isEntityArray(data?.entities) ? data.entities : [];
+      const resultEntities = data && isEntityArray(data.entities) ? data.entities : [];
       setEntities(resultEntities);
       return resultEntities;
     } catch (error) {
@@ -93,7 +104,7 @@ export const useEntityRecognition = () => {
         return [];
       }
 
-      const resultEntities = isEntityArray(data?.entities) ? data.entities : [];
+      const resultEntities = data && isEntityArray(data.entities) ? data.entities : [];
       setEntities(resultEntities);
       return resultEntities;
     } catch (error) {
@@ -182,10 +193,10 @@ export const useEntityRecognition = () => {
       const entityTypes = new Map<string, string>();
 
       data.forEach(result => {
-        // Safe type guard for each property
-        if (result) {
+        // Only process if result is an object (not an error)
+        if (result && typeof result === 'object') {
           // Safely check if detected_entities exists and is an array
-          if (hasDetectedEntities && hasScanResultProperties(result, 'detected_entities')) {
+          if (hasDetectedEntities && hasScanProperty(result, 'detected_entities')) {
             const detectedEntities = result.detected_entities;
             if (Array.isArray(detectedEntities)) {
               detectedEntities.forEach((entity: string) => {
@@ -208,14 +219,14 @@ export const useEntityRecognition = () => {
           }
           
           // Process risk_entity_name if it exists and is not null/undefined
-          if (hasRiskEntityName && hasScanResultProperties(result, 'risk_entity_name')) {
+          if (hasRiskEntityName && hasScanProperty(result, 'risk_entity_name')) {
             const riskEntityName = result.risk_entity_name;
             if (riskEntityName && typeof riskEntityName === 'string') {
               entityCounts.set(riskEntityName, (entityCounts.get(riskEntityName) || 0) + 1);
               
               // Use risk_entity_type if available, otherwise default to unknown
               let entityType = 'unknown';
-              if (hasRiskEntityType && hasScanResultProperties(result, 'risk_entity_type')) {
+              if (hasRiskEntityType && hasScanProperty(result, 'risk_entity_type')) {
                 const riskEntityType = result.risk_entity_type;
                 if (riskEntityType && typeof riskEntityType === 'string') {
                   const validTypes = ['person', 'organization', 'handle', 'location'];
