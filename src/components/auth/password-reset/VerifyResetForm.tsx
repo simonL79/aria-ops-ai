@@ -50,39 +50,35 @@ const VerifyResetForm = ({ resetEmail, onSuccess, onBack }: VerifyResetFormProps
     console.info("Attempting to update password");
 
     try {
-      // Extract tokens from URL parameters
+      // Check for recovery token in URL parameters (password reset flow)
       const accessToken = searchParams.get("access_token");
-      const refreshToken = searchParams.get("refresh_token");
       
       if (accessToken) {
-        console.info("Found access token, setting session");
+        console.info("Found access token in URL, using it for password reset");
         
-        // If we have an access token from the URL, set the session
+        // First set the session with the access token
+        const refreshToken = searchParams.get("refresh_token");
         if (refreshToken) {
-          const { error: sessionError } = await supabase.auth.setSession({
+          await supabase.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken
           });
-          
-          if (sessionError) {
-            console.error("Error setting session:", sessionError);
-            throw sessionError;
-          }
         }
         
-        // Now update the password
-        const { error: pwError } = await supabase.auth.updateUser({
+        // Then update the password
+        const { error } = await supabase.auth.updateUser({
           password: values.password,
         });
 
-        if (pwError) {
-          console.error("Error updating password after setting session:", pwError);
-          throw pwError;
+        if (error) {
+          throw error;
         }
         
         console.info("Password updated successfully with token from URL");
+        toast.success("Password has been reset successfully!");
+        onSuccess();
       } else {
-        // No tokens in URL, try to use existing session (user must be logged in)
+        // No tokens in URL - user must already be authenticated
         console.info("No tokens in URL, attempting to update with existing session");
         
         const { error } = await supabase.auth.updateUser({
@@ -90,13 +86,12 @@ const VerifyResetForm = ({ resetEmail, onSuccess, onBack }: VerifyResetFormProps
         });
 
         if (error) {
-          console.error("Error updating password with existing session:", error);
           throw error;
         }
+        
+        toast.success("Password has been reset successfully!");
+        onSuccess();
       }
-
-      toast.success("Password has been reset successfully!");
-      onSuccess();
     } catch (error) {
       console.error("Error updating password:", error);
       toast.error("Failed to reset password. Please try again or request a new reset link.");

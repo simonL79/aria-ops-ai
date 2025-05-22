@@ -38,14 +38,7 @@ const RequestResetForm = ({ onSuccess, onBack }: RequestResetFormProps) => {
     console.info("Attempting to send password reset email to:", values.email);
 
     try {
-      // Determine if this is the admin email
-      const isAdminEmail = values.email === "simonlindsay7988@gmail.com";
-      
-      // Use appropriate redirect URL based on user type
-      const redirectURL = isAdminEmail 
-        ? `${window.location.origin}/admin-reset` 
-        : `${window.location.origin}/auth?type=recovery`;
-        
+      const redirectURL = `${window.location.origin}/auth?type=recovery`;
       console.info("Using redirect URL for password reset:", redirectURL);
       
       // Use password reset instead of OTP since OTP is disabled
