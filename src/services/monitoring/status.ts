@@ -1,4 +1,3 @@
-
 import { toast } from "sonner";
 import type { MonitoringStatus, ScanResult } from "./types";
 
@@ -162,4 +161,3 @@ export const runMonitoringScan = async (): Promise<ScanResult[]> => {
   // Call the actual scan function
   return runScan();
 };
-
