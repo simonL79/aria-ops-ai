@@ -153,8 +153,8 @@ const SalesFunnelPage = () => {
       <HeroSection />
 
       {/* Problem Section */}
-      <section className="py-16 px-6 md:px-24 bg-gray-800 text-white">
-        <div className="container mx-auto">
+      <section className="py-16 px-6 md:px-24 bg-gray-800 text-white text-center">
+        <div className="container mx-auto max-w-4xl">
           <h2 className="text-3xl font-bold mb-4">Google never forgets — but now, you don't have to either.</h2>
           <p className="text-lg">Old articles, buried posts, forum rumors — they all still rank. A.R.I.A™ finds what others see.</p>
         </div>
