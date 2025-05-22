@@ -50,8 +50,8 @@ export const getAllEntities = async (): Promise<Entity[]> => {
       if (!result || typeof result !== 'object') return;
       
       // Safely process detected_entities if it exists and is an array
-      if (hasDetectedEntities && result && hasScanProperty(result, 'detected_entities')) {
-        const detectedEntities = result.detected_entities;
+      if (hasDetectedEntities && hasScanProperty(result, 'detected_entities')) {
+        const detectedEntities = result.detected_entities as string[];
         if (Array.isArray(detectedEntities)) {
           detectedEntities.forEach((name: string) => {
             if (entityMap.has(name)) {
@@ -62,13 +62,13 @@ export const getAllEntities = async (): Promise<Entity[]> => {
               let type: Entity['type'] = 'unknown';
               
               if (hasRiskEntityName && hasRiskEntityType && 
-                  result && hasScanProperty(result, 'risk_entity_name') &&
+                  hasScanProperty(result, 'risk_entity_name') &&
                   hasScanProperty(result, 'risk_entity_type') &&
-                  result.risk_entity_name === name &&
-                  typeof result.risk_entity_name === 'string' &&
-                  typeof result.risk_entity_type === 'string') {
+                  (result.risk_entity_name as string) === name &&
+                  typeof (result.risk_entity_name as string) === 'string' &&
+                  typeof (result.risk_entity_type as string) === 'string') {
                   
-                const riskType = result.risk_entity_type;
+                const riskType = result.risk_entity_type as string;
                 if (['person', 'organization', 'handle', 'location'].includes(riskType)) {
                   type = riskType as Entity['type'];
                 }
@@ -88,24 +88,17 @@ export const getAllEntities = async (): Promise<Entity[]> => {
       }
       
       // Safely process risk_entity_name if it exists and is not already included
-      if (hasRiskEntityName && 
-          result && hasScanProperty(result, 'risk_entity_name') && 
-          typeof result.risk_entity_name === 'string' && 
-          result.risk_entity_name) {
-          
-        const riskEntityName = result.risk_entity_name;
+      if (hasRiskEntityName && hasScanProperty(result, 'risk_entity_name')) {
+        const riskEntityName = result.risk_entity_name as string;
         
-        if (!entityMap.has(riskEntityName)) {
+        if (typeof riskEntityName === 'string' && riskEntityName && !entityMap.has(riskEntityName)) {
           let type: Entity['type'] = 'unknown';
           
-          if (hasRiskEntityType && 
-              result && hasScanProperty(result, 'risk_entity_type') && 
-              typeof result.risk_entity_type === 'string' && 
-              result.risk_entity_type) {
-              
-            const riskEntityType = result.risk_entity_type;
+          if (hasRiskEntityType && hasScanProperty(result, 'risk_entity_type')) {
+            const riskEntityType = result.risk_entity_type as string;
             
-            if (['person', 'organization', 'handle', 'location'].includes(riskEntityType)) {
+            if (typeof riskEntityType === 'string' && 
+                ['person', 'organization', 'handle', 'location'].includes(riskEntityType)) {
               type = riskEntityType as Entity['type'];
             }
           }
