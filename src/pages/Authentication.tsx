@@ -62,6 +62,7 @@ const Authentication = () => {
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
       <AuthHeader />
       
+      {/* Only show login button when not in auth flow */}
       {!isAuthFlow && (
         <div className="w-full max-w-md text-center mb-8">
           <Button 

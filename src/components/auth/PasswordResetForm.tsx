@@ -31,7 +31,13 @@ const PasswordResetForm = ({ onBack }: PasswordResetFormProps) => {
   };
   
   const handleBackToRequest = () => {
-    setCurrentStep("request");
+    // Only allow going back if not in a recovery flow
+    if (!isRecovery && !hasAccessToken) {
+      setCurrentStep("request");
+    } else {
+      // If in recovery flow, going back means canceling the reset
+      onBack();
+    }
   };
   
   if (currentStep === "verify") {
