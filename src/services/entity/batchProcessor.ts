@@ -28,7 +28,6 @@ export const batchProcessEntities = async (): Promise<number> => {
     
     // Process each scan result
     for (const result of scanResults) {
-      // Type guard to ensure result has expected properties
       if (result && typeof result === 'object' && 'id' in result && 'content' in result) {
         const entities = await processEntities(result.id, result.content);
         if (entities.length > 0) {

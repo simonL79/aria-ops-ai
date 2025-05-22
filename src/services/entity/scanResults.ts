@@ -103,7 +103,7 @@ export const getScanResultsByEntity = async (entityName: string): Promise<ScanRe
       .eq('risk_entity_name', entityName);
     
     if (!nameError && nameData && nameData.length > 0) {
-      const processedResults = nameData.map((row): ScanResult => ({
+      const processedResults = nameData.map((row: any): ScanResult => ({
         ...row,
         detected_entities: parseDetectedEntities(row.detected_entities)
       }));
@@ -118,7 +118,7 @@ export const getScanResultsByEntity = async (entityName: string): Promise<ScanRe
       .contains('detected_entities', [entityName]);
     
     if (!arrayError && arrayData) {
-      const processedResults = arrayData.map((row): ScanResult => ({
+      const processedResults = arrayData.map((row: any): ScanResult => ({
         ...row,
         detected_entities: parseDetectedEntities(row.detected_entities)
       }));
@@ -150,7 +150,7 @@ export const getAllScanResults = async (): Promise<ScanResult[]> => {
     }
     
     // Process raw data into typed ScanResults
-    return data.map((row): ScanResult => ({
+    return data.map((row: any): ScanResult => ({
       ...row,
       detected_entities: parseDetectedEntities(row.detected_entities)
     }));

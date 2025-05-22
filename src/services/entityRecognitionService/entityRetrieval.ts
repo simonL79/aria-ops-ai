@@ -86,27 +86,24 @@ export async function getAllEntities(): Promise<Entity[]> {
       processRiskEntity(result);
     });
 
-    const formattedEntities: Entity[] = Array.from(entityCounts.entries())
-      .map(([name, mentions]) => {
-        let type: Entity['type'] = 'unknown';
-        const typeName = entityTypes.get(name);
+    // Convert to Entity array
+    const entities: Entity[] = [];
+    
+    entityCounts.forEach((mentions, name) => {
+      const typeStr = entityTypes.get(name) || 'unknown';
+      const type = (['person', 'organization', 'handle', 'location'].includes(typeStr) 
+        ? typeStr 
+        : 'unknown') as Entity['type'];
         
-        if (typeName === 'person' || 
-            typeName === 'organization' || 
-            typeName === 'handle' || 
-            typeName === 'location') {
-          type = typeName as Entity['type'];
-        }
-        
-        return {
-          name,
-          type,
-          confidence: 0.7,
-          mentions
-        };
+      entities.push({
+        name,
+        type,
+        confidence: 0.7,
+        mentions
       });
+    });
 
-    return formattedEntities.sort((a, b) => (b.mentions || 0) - (a.mentions || 0));
+    return entities.sort((a, b) => (b.mentions || 0) - (a.mentions || 0));
   } catch (error) {
     console.error("Error in getAllEntities:", error);
     return [];
