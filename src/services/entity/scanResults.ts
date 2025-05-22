@@ -13,8 +13,8 @@ export interface ScanResult {
   severity: string;
   status: string;
   threat_type?: string;
-  // Use ScanEntity[] for detected_entities to avoid type recursion issues
-  detected_entities?: ScanEntity[] | string[] | null;
+  // Accept unknown for detected_entities at fetch time, but parse it later
+  detected_entities?: unknown;
   risk_entity_name?: string | null;
   risk_entity_type?: string | null;
   created_at?: string;

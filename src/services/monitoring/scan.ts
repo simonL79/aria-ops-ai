@@ -2,6 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { ScanResult } from './types';
 import { toast } from 'sonner';
+import { parseDetectedEntities } from '@/utils/parseDetectedEntities';
 
 interface ScanOptions {
   scan_depth?: string;
@@ -67,8 +68,8 @@ export const runMonitoringScan = async (targetEntity?: string): Promise<ScanResu
       client_id: item.client_id,
       created_at: item.created_at,
       updated_at: item.updated_at,
-      // Ensure detected entities is always a string array
-      detectedEntities: processDetectedEntities(item.detected_entities),
+      // Use our utility function to safely parse detected entities
+      detectedEntities: parseDetectedEntities(item.detected_entities),
       // Add additional source information
       sourceType: item.source_type,
       // Parse potential reach if available
@@ -90,32 +91,4 @@ export const runMonitoringScan = async (targetEntity?: string): Promise<ScanResu
     toast.error("An error occurred while running the scan");
     return [];
   }
-};
-
-/**
- * Process detected entities to always return a string array
- */
-const processDetectedEntities = (entities: any): string[] => {
-  if (!entities) return [];
-  
-  if (Array.isArray(entities)) {
-    return entities.map(entity => String(entity));
-  }
-  
-  if (typeof entities === 'string') {
-    try {
-      // Check if it's a JSON string
-      const parsed = JSON.parse(entities);
-      if (Array.isArray(parsed)) {
-        return parsed.map(entity => String(entity));
-      }
-      return [String(parsed)];
-    } catch {
-      // Not a JSON string, treat as a single entity
-      return [entities];
-    }
-  }
-  
-  // For any other type, convert to string and return as a single-item array
-  return [String(entities)];
 };

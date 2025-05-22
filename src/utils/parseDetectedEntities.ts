@@ -4,7 +4,7 @@
  */
 
 export interface ScanEntity {
-  name: string;
+  name: string;  // Using name instead of label to match existing code
   type?: string;
   confidence?: number;
 }
@@ -25,12 +25,21 @@ export function parseDetectedEntities(input: unknown): ScanEntity[] {
       }
       
       // Handle object items with name property
-      if (item && typeof item === 'object' && 'name' in item) {
-        return {
-          name: String((item as any).name),
-          type: typeof (item as any).type === 'string' ? (item as any).type : undefined,
-          confidence: typeof (item as any).confidence === 'number' ? (item as any).confidence : undefined
-        };
+      if (item && typeof item === 'object') {
+        if ('name' in item && typeof (item as any).name === 'string') {
+          return {
+            name: String((item as any).name),
+            type: typeof (item as any).type === 'string' ? (item as any).type : undefined,
+            confidence: typeof (item as any).confidence === 'number' ? (item as any).confidence : undefined
+          };
+        } else if ('label' in item && typeof (item as any).label === 'string') {
+          // Support label property as an alternative to name
+          return {
+            name: String((item as any).label),
+            type: typeof (item as any).type === 'string' ? (item as any).type : undefined,
+            confidence: typeof (item as any).confidence === 'number' ? (item as any).confidence : undefined
+          };
+        }
       }
       
       // Default fallback for unknown formats
