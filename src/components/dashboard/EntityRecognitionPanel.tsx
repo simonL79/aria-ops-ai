@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,10 +6,11 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Loader2, Users, Building, AtSign, RefreshCcw, Eye } from "lucide-react";
-import { getAllEntities, batchProcessEntities, getEntityStatistics, getScanResultsByEntity } from '@/services/entityRecognition';
+import { getAllEntities, batchProcessEntities, getEntityStatistics, getScanResultsByEntity, Entity } from '@/services/entityRecognition';
 import { toast } from "sonner";
 
-interface Entity {
+// Define local interface to ensure compatibility with both implementations
+interface PanelEntity {
   name: string;
   type: 'person' | 'organization' | 'handle' | 'unknown';
   confidence: number;
@@ -18,8 +18,8 @@ interface Entity {
 }
 
 const EntityRecognitionPanel = () => {
-  const [entities, setEntities] = useState<Entity[]>([]);
-  const [selectedEntity, setSelectedEntity] = useState<Entity | null>(null);
+  const [entities, setEntities] = useState<PanelEntity[]>([]);
+  const [selectedEntity, setSelectedEntity] = useState<PanelEntity | null>(null);
   const [entityResults, setEntityResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
@@ -28,7 +28,7 @@ const EntityRecognitionPanel = () => {
     personEntities: 0,
     orgEntities: 0,
     handleEntities: 0,
-    mostMentioned: null as Entity | null
+    mostMentioned: null as PanelEntity | null
   });
   const [activeTab, setActiveTab] = useState('all');
 
@@ -39,11 +39,32 @@ const EntityRecognitionPanel = () => {
   const loadEntities = async () => {
     setLoading(true);
     try {
+      // Map the service entities to the panel entity type for type safety
       const allEntities = await getAllEntities();
-      setEntities(allEntities);
+      const mappedEntities: PanelEntity[] = allEntities.map(e => ({
+        name: e.name,
+        // Map 'location' type to 'unknown' for compatibility
+        type: e.type === 'location' ? 'unknown' : e.type as PanelEntity['type'],
+        confidence: e.confidence,
+        mentions: e.mentions || 0
+      }));
+      setEntities(mappedEntities);
       
       const statistics = await getEntityStatistics();
-      setStats(statistics);
+      setStats({
+        totalEntities: statistics.totalEntities,
+        personEntities: statistics.personEntities,
+        orgEntities: statistics.orgEntities,
+        handleEntities: statistics.handleEntities,
+        mostMentioned: statistics.mostMentioned ? {
+          name: statistics.mostMentioned.name,
+          // Map 'location' type to 'unknown' for compatibility
+          type: statistics.mostMentioned.type === 'location' ? 'unknown' : 
+                statistics.mostMentioned.type as PanelEntity['type'],
+          confidence: statistics.mostMentioned.confidence,
+          mentions: statistics.mostMentioned.mentions || 0
+        } : null
+      });
     } catch (error) {
       console.error('Error loading entities:', error);
       toast.error('Failed to load entity data');
@@ -70,7 +91,7 @@ const EntityRecognitionPanel = () => {
     }
   };
 
-  const handleViewEntity = async (entity: Entity) => {
+  const handleViewEntity = async (entity: PanelEntity) => {
     setSelectedEntity(entity);
     try {
       const results = await getScanResultsByEntity(entity.name);

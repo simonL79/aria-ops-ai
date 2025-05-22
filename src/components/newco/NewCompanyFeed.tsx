@@ -128,7 +128,10 @@ const NewCompanyFeed: React.FC<NewCompanyFeedProps> = ({
               </div>
               
               <div className="flex gap-2">
-                {(!company.cleanLaunchScore || company.status === 'new' || company.status === 'pending') && (
+                {(!company.cleanLaunchScore || company.status === 'new' || 
+                  // Fix type error by comparing with all valid status values
+                  (company.status !== 'scanned' && company.status !== 'contacted' &&
+                   company.status !== 'onboarded' && company.status !== 'declined')) && (
                   <Button 
                     onClick={(e) => handleAnalyze(e, company)}
                     className="flex items-center gap-1"
@@ -139,7 +142,10 @@ const NewCompanyFeed: React.FC<NewCompanyFeedProps> = ({
                   </Button>
                 )}
                 
-                {company.cleanLaunchScore && company.status !== 'new' && company.status !== 'pending' && (
+                {company.cleanLaunchScore && 
+                  // Fix type error by comparing with all valid status values
+                  (company.status === 'scanned' || company.status === 'contacted' ||
+                   company.status === 'onboarded' || company.status === 'declined') && (
                   <Button 
                     onClick={(e) => handleRespond(e, company)}
                     className="flex items-center gap-1"
