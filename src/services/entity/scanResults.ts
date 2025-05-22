@@ -64,7 +64,9 @@ export const getScanResultsByEntity = async (entityName: string): Promise<ScanRe
       
       if (!nameError && nameData && nameData.length > 0) {
         // Process raw data into typed ScanResults
-        return nameData.map((row: RawScanResult): ScanResult => {
+        // Fix: Explicitly cast to RawScanResult before transformation
+        const rawResults = nameData as RawScanResult[];
+        return rawResults.map((row): ScanResult => {
           // Explicitly handle the detected_entities conversion
           const parsedEntities = parseDetectedEntities(row.detected_entities);
           
@@ -86,7 +88,9 @@ export const getScanResultsByEntity = async (entityName: string): Promise<ScanRe
       
       if (!arrayError && arrayData) {
         // Process raw data into typed ScanResults
-        results = arrayData.map((row: RawScanResult): ScanResult => {
+        // Fix: Explicitly cast to RawScanResult before transformation
+        const rawResults = arrayData as RawScanResult[];
+        results = rawResults.map((row): ScanResult => {
           // Explicitly handle the detected_entities conversion
           const parsedEntities = parseDetectedEntities(row.detected_entities);
           
