@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { initializeDatabase } from "@/utils/initializeMonitoring";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import SignedInRedirect from "@/components/auth/SignedInRedirect";
+import { HelmetProvider } from "react-helmet-async";
 
 // Import your pages
 import Dashboard from "@/pages/dashboard/DashboardPage";
@@ -49,7 +50,7 @@ function App() {
   }, []);
   
   return (
-    <>
+    <HelmetProvider>
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<SalesFunnelPage />} />
@@ -102,7 +103,7 @@ function App() {
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster />
-    </>
+    </HelmetProvider>
   );
 }
 

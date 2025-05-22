@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import Logo from '@/components/ui/logo';
 import PublicLayout from '@/components/layout/PublicLayout';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Helmet } from 'react-helmet-async';
 
 // Error boundary component to catch rendering errors
 class PageErrorBoundary extends React.Component<
@@ -45,8 +46,33 @@ class PageErrorBoundary extends React.Component<
 }
 
 const BiographyPage = () => {
+  // Structured data for Simon Lindsay (Schema.org)
+  const simonLindseySchema = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "Simon Lindsay",
+    "url": "https://www.ariaops.co.uk/simon-lindsay",
+    "jobTitle": "Founder & CEO",
+    "worksFor": {
+      "@type": "Organization",
+      "name": "A.R.I.A™"
+    },
+    "sameAs": [
+      "https://www.linkedin.com/in/simon-lindsay",
+      "https://medium.com/@simon-lindsay"
+    ]
+  };
+
   return (
     <PublicLayout>
+      <Helmet>
+        <title>Simon Lindsay – Founder of A.R.I.A™ | AI Reputation Intelligence</title>
+        <meta name="description" content="Simon Lindsay is the creator of A.R.I.A™, an AI-powered platform protecting digital reputations for influencers, founders, and public figures." />
+        <script type="application/ld+json">
+          {JSON.stringify(simonLindseySchema)}
+        </script>
+      </Helmet>
+      
       <PageErrorBoundary>
         <div className="container mx-auto px-6 py-12">
           <div className="max-w-4xl mx-auto">
