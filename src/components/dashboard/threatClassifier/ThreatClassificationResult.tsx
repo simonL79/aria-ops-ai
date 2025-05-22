@@ -35,9 +35,9 @@ const ThreatClassificationResultDisplay = ({ result }: ThreatClassificationResul
 
   // Extract entities and targets from the reasoning or explanation text
   const extractTargets = (): string[] => {
-    // First check if we have detectedEntities in the result
-    if (result.detectedEntities && Array.isArray(result.detectedEntities) && result.detectedEntities.length > 0) {
-      return result.detectedEntities;
+    // First check if result has entities directly attached
+    if (result.entities && Array.isArray(result.entities) && result.entities.length > 0) {
+      return result.entities;
     }
     
     const text = result.explanation || result.ai_reasoning || "";

@@ -46,6 +46,7 @@ export interface ThreatClassificationResult {
   ai_reasoning: string;
   explanation?: string;
   confidence?: number;
+  entities?: string[];  // Added this field for entity names
 }
 
 export interface ThreatClassifierRequest {
@@ -84,4 +85,3 @@ export type {
   RedTeamSimulation,
   ThreatSource,
 } from './intelligence/index';
-
