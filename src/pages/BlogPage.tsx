@@ -12,8 +12,8 @@ const BlogPage = () => {
       <div className="bg-black text-white min-h-screen py-16">
         <div className="container mx-auto px-6">
           <div className="max-w-4xl mx-auto mb-12">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">A.R.I.A™ Blog</h1>
-            <p className="text-gray-400 text-xl">Insights on digital risk, online visibility, and the future of AI-powered protection.</p>
+            <h1 className="text-4xl md:text-5xl font-bold mb-6">Insights from Simon Lindsay</h1>
+            <p className="text-gray-400 text-xl">Founder of A.R.I.A™, thought leader in AI-powered digital protection.</p>
           </div>
           
           {/* Featured post */}
