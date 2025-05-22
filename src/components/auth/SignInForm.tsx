@@ -69,9 +69,15 @@ const SignInForm = ({ setShowResetForm }: SignInFormProps) => {
       }
     } catch (error: any) {
       console.error("Error signing in:", error);
-      toast.error("Login failed", {
-        description: error?.message || "Please check your credentials."
-      });
+      
+      // Provide more specific error messages
+      if (error?.message?.includes("Invalid login credentials")) {
+        toast.error("Invalid email or password. Please try again.");
+      } else {
+        toast.error("Login failed", {
+          description: error?.message || "Please check your credentials."
+        });
+      }
     } finally {
       setIsLoading(false);
     }

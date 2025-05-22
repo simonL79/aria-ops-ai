@@ -1,120 +1,137 @@
 
 import { useState } from "react";
-import { Mail, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
+import { ArrowLeft, Send } from "lucide-react";
 import { z } from "zod";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import LoadingSpinner from "./LoadingSpinner";
-
-// Define schema for the request reset form
-const requestResetSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
-});
-
-type RequestResetFormValues = z.infer<typeof requestResetSchema>;
 
 interface RequestResetFormProps {
   onSuccess: (email: string) => void;
   onBack: () => void;
 }
 
+const emailSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+});
+
+type EmailFormValues = z.infer<typeof emailSchema>;
+
 const RequestResetForm = ({ onSuccess, onBack }: RequestResetFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
-  
-  // Set up the reset request form with validation
-  const requestForm = useForm<RequestResetFormValues>({
-    resolver: zodResolver(requestResetSchema),
+  const [emailSent, setEmailSent] = useState(false);
+
+  const form = useForm<EmailFormValues>({
+    resolver: zodResolver(emailSchema),
     defaultValues: {
       email: "",
     },
   });
-  
-  const handlePasswordResetRequest = async (values: RequestResetFormValues) => {
+
+  const handleSendResetLink = async (values: EmailFormValues) => {
     setIsLoading(true);
-    console.log("Attempting to send password reset to:", values.email);
-    
+    console.info("Attempting to send password reset to:", values.email);
+
     try {
-      // Use Supabase to send password reset email
-      const { error } = await supabase.auth.resetPasswordForEmail(values.email, {
-        redirectTo: `${window.location.origin}/auth?type=recovery`,
-      });
+      const redirectURL = `${window.location.origin}/auth?type=recovery`;
       
-      if (error) {
-        console.error("Error sending reset email:", error);
-        toast.error("Failed to send reset email", {
-          description: error.message
-        });
-      } else {
-        toast.success("Password reset email sent successfully");
-        onSuccess(values.email);
-      }
-    } catch (error: any) {
-      console.error("Error sending reset email:", error);
-      toast.error("Failed to send reset email", {
-        description: error?.message || "An unexpected error occurred"
+      const { error } = await supabase.auth.resetPasswordForEmail(values.email, {
+        redirectTo: redirectURL
       });
+
+      if (error) {
+        throw error;
+      }
+
+      setEmailSent(true);
+      toast.success("Password reset link sent successfully!");
+      onSuccess(values.email);
+    } catch (error) {
+      console.error("Error sending password reset:", error);
+      toast.error("Failed to send password reset link. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
-  
+
+  if (isLoading) {
+    return <LoadingSpinner message="Sending password reset email..." />;
+  }
+
+  if (emailSent) {
+    return (
+      <div className="space-y-6 text-center">
+        <div className="bg-green-50 text-green-700 p-4 rounded-lg">
+          <h3 className="font-semibold">Email Sent!</h3>
+          <p className="text-sm">Please check your inbox for instructions to reset your password.</p>
+        </div>
+        
+        <Button 
+          variant="outline" 
+          className="w-full" 
+          onClick={onBack}
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to Login
+        </Button>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-4">
-      <h2 className="text-lg font-medium text-center">Reset Your Password</h2>
-      <p className="text-sm text-gray-500 text-center">
-        Enter your email address and we'll send you a link to reset your password.
-      </p>
-      
-      <Form {...requestForm}>
-        <form onSubmit={requestForm.handleSubmit(handlePasswordResetRequest)} className="space-y-4">
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-xl font-semibold">Reset Your Password</h2>
+        <p className="text-sm text-gray-500">
+          Enter your email address and we'll send you instructions to reset your password.
+        </p>
+      </div>
+
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleSendResetLink)} className="space-y-4">
           <FormField
-            control={requestForm.control}
+            control={form.control}
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                <FormLabel>Email Address</FormLabel>
                 <FormControl>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-                    <Input 
-                      placeholder="name@example.com" 
-                      className="pl-10"
-                      autoComplete="email"
-                      {...field} 
-                    />
-                  </div>
+                  <Input
+                    type="email"
+                    placeholder="Enter your email"
+                    autoComplete="email"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          
-          <Button 
-            type="submit" 
-            className="w-full" 
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <LoadingSpinner text="Sending Reset Email..." />
-            ) : (
-              <span>Send Reset Email</span>
-            )}
-          </Button>
-          
-          <Button 
-            type="button" 
-            variant="outline" 
-            className="w-full"
-            onClick={onBack}
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to sign in
-          </Button>
+
+          <div className="flex items-center justify-between pt-2">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={onBack}
+              className="flex items-center gap-1"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </Button>
+            
+            <Button
+              type="submit"
+              className="flex items-center gap-2"
+            >
+              <Send className="h-4 w-4" />
+              Send Reset Link
+            </Button>
+          </div>
         </form>
       </Form>
     </div>

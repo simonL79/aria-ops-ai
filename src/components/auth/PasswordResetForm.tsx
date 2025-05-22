@@ -15,13 +15,14 @@ const PasswordResetForm = ({ onBack }: PasswordResetFormProps) => {
   
   // Check if we're coming back from a reset link click
   const isResetMode = searchParams.get("type") === "recovery";
+  const hasAccessToken = searchParams.get("access_token") !== null;
   
   useEffect(() => {
     // If coming from reset link, go straight to verify step
-    if (isResetMode) {
+    if (isResetMode || hasAccessToken) {
       setCurrentStep("verify");
     }
-  }, [isResetMode]);
+  }, [isResetMode, hasAccessToken]);
   
   const handleRequestSuccess = (email: string) => {
     setResetEmail(email);

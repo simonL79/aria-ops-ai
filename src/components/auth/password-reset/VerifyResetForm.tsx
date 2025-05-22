@@ -1,166 +1,171 @@
 
 import { useState } from "react";
-import { Lock, ArrowLeft, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
+import { ArrowLeft, Check } from "lucide-react";
 import { z } from "zod";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import LoadingSpinner from "./LoadingSpinner";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import { useSearchParams } from "react-router-dom";
-
-// Define schema for the verify reset form
-const completeResetSchema = z.object({
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  confirmPassword: z.string().min(6, "Password must be at least 6 characters"),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords do not match",
-  path: ["confirmPassword"],
-});
-
-type CompleteResetFormValues = z.infer<typeof completeResetSchema>;
+import LoadingSpinner from "./LoadingSpinner";
 
 interface VerifyResetFormProps {
-  resetEmail: string;
+  resetEmail?: string;
   onSuccess: () => void;
   onBack: () => void;
 }
 
+const passwordSchema = z.object({
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+    .regex(/[0-9]/, "Password must contain at least one number"),
+  confirmPassword: z.string(),
+}).refine(data => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
+
+type PasswordFormValues = z.infer<typeof passwordSchema>;
+
 const VerifyResetForm = ({ resetEmail, onSuccess, onBack }: VerifyResetFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [searchParams] = useSearchParams();
-  
-  // Set up the new password form
-  const verifyForm = useForm<CompleteResetFormValues>({
-    resolver: zodResolver(completeResetSchema),
+
+  const form = useForm<PasswordFormValues>({
+    resolver: zodResolver(passwordSchema),
     defaultValues: {
       password: "",
       confirmPassword: "",
     },
   });
-  
-  const handleCompletePasswordReset = async (values: CompleteResetFormValues) => {
+
+  const handleCompletePasswordReset = async (values: PasswordFormValues) => {
     setIsLoading(true);
-    console.log("Attempting to update password");
-    
+    console.info("Attempting to update password");
+
     try {
-      // For Supabase, we don't need the email verification code as the user
-      // has already clicked on the reset link in their email which sets the session
-      const { error } = await supabase.auth.updateUser({ 
-        password: values.password 
-      });
+      // Check if we have access_token and refresh_token from the URL
+      // This happens when the user clicks the reset link in their email
+      const accessToken = searchParams.get("access_token");
+      const refreshToken = searchParams.get("refresh_token");
       
-      if (error) {
-        console.error("Error updating password:", error);
-        toast.error("Failed to update password", {
-          description: error.message
+      if (accessToken && refreshToken) {
+        // If we have tokens from the URL, use them to set a new password
+        const { data, error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken
         });
+        
+        if (error) {
+          throw error;
+        }
+        
+        // Now that we have a session, update the password
+        const { error: pwError } = await supabase.auth.updateUser({
+          password: values.password,
+        });
+
+        if (pwError) {
+          throw pwError;
+        }
       } else {
-        toast.success("Password updated successfully");
-        setTimeout(() => {
-          onSuccess();
-        }, 500);
+        // Try to recover the password using just the email
+        const { error } = await supabase.auth.updateUser({
+          password: values.password,
+        });
+
+        if (error) {
+          throw error;
+        }
       }
-    } catch (error: any) {
+
+      toast.success("Password has been reset successfully!");
+      onSuccess();
+    } catch (error) {
       console.error("Error updating password:", error);
-      toast.error("Failed to update password", {
-        description: error?.message || "An unexpected error occurred"
-      });
+      toast.error("Failed to reset password. Please try again or request a new reset link.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Get display email - either from form flow or from recovery session
-  const displayEmail = resetEmail || "your account";
-  
+  if (isLoading) {
+    return <LoadingSpinner message="Updating your password..." />;
+  }
+
   return (
-    <div className="space-y-4">
-      <h2 className="text-lg font-medium text-center">Reset Your Password</h2>
-      <Alert variant="default" className="bg-blue-50 text-blue-800 border-blue-300">
-        <AlertDescription>
-          Please enter your new password for <span className="font-medium">{displayEmail}</span>.
-        </AlertDescription>
-      </Alert>
-      
-      <Form {...verifyForm}>
-        <form onSubmit={verifyForm.handleSubmit(handleCompletePasswordReset)} className="space-y-4">
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-xl font-semibold">Set New Password</h2>
+        <p className="text-sm text-gray-500">
+          Please enter a new secure password for your account
+          {resetEmail && <span className="font-medium"> ({resetEmail})</span>}
+        </p>
+      </div>
+
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleCompletePasswordReset)} className="space-y-4">
           <FormField
-            control={verifyForm.control}
+            control={form.control}
             name="password"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>New Password</FormLabel>
                 <FormControl>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-                    <Input
-                      type="password"
-                      placeholder="••••••••"
-                      className="pl-10"
-                      autoComplete="new-password"
-                      {...field}
-                    />
-                  </div>
+                  <Input
+                    type="password"
+                    placeholder="Enter your new password"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          
+
           <FormField
-            control={verifyForm.control}
+            control={form.control}
             name="confirmPassword"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Confirm Password</FormLabel>
                 <FormControl>
-                  <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-                    <Input
-                      type="password"
-                      placeholder="••••••••"
-                      className="pl-10"
-                      autoComplete="new-password"
-                      {...field}
-                    />
-                  </div>
+                  <Input
+                    type="password"
+                    placeholder="Confirm your new password"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          
-          <Button 
-            type="submit" 
-            className="w-full" 
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <LoadingSpinner text="Updating Password..." />
-            ) : (
-              <span className="flex items-center">
-                <Check className="mr-2 h-4 w-4" />
-                Update Password
-              </span>
-            )}
-          </Button>
-          
-          {!searchParams.get("type") && (
-            <Button 
-              type="button" 
-              variant="outline" 
-              className="w-full"
+
+          <div className="flex items-center justify-between pt-2">
+            <Button
+              type="button"
+              variant="ghost"
               onClick={onBack}
+              className="flex items-center gap-1"
             >
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Email Form
+              <ArrowLeft className="h-4 w-4" />
+              Back
             </Button>
-          )}
+            
+            <Button
+              type="submit"
+              className="flex items-center gap-2"
+            >
+              <Check className="h-4 w-4" />
+              Reset Password
+            </Button>
+          </div>
         </form>
       </Form>
     </div>
