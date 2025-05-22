@@ -107,6 +107,7 @@ export const useEntityRecognition = () => {
     setLoading(true);
     try {
       // First check if the columns exist to avoid errors
+      let columnExists = true;
       try {
         // Try a simple query first to see if columns exist
         await supabase
@@ -117,6 +118,12 @@ export const useEntityRecognition = () => {
       } catch (columnCheckError) {
         console.error("Error checking scan_results columns:", columnCheckError);
         toast.error("The entity recognition feature requires database migration");
+        columnExists = false;
+        return [];
+      }
+      
+      // If columns don't exist, return an empty array
+      if (!columnExists) {
         return [];
       }
       
@@ -141,7 +148,8 @@ export const useEntityRecognition = () => {
       const entityTypes = new Map<string, string>();
 
       data.forEach(result => {
-        if (result.detected_entities && Array.isArray(result.detected_entities)) {
+        // Safely check if detected_entities exists and is an array
+        if (result && result.detected_entities && Array.isArray(result.detected_entities)) {
           result.detected_entities.forEach((entity: string) => {
             entityCounts.set(entity, (entityCounts.get(entity) || 0) + 1);
             
@@ -160,16 +168,22 @@ export const useEntityRecognition = () => {
           });
         }
         
-        // Process risk_entity_name if not included in detected_entities and if it exists
-        if (result.risk_entity_name && !entityCounts.has(result.risk_entity_name)) {
+        // Process risk_entity_name if it exists and is not null/undefined
+        if (result && result.risk_entity_name && typeof result.risk_entity_name === 'string') {
           entityCounts.set(result.risk_entity_name, (entityCounts.get(result.risk_entity_name) || 0) + 1);
-          entityTypes.set(result.risk_entity_name, result.risk_entity_type || 'unknown');
+          
+          // Use risk_entity_type if available, otherwise default to unknown
+          const entityType = (result.risk_entity_type && typeof result.risk_entity_type === 'string') 
+            ? result.risk_entity_type 
+            : 'unknown';
+            
+          entityTypes.set(result.risk_entity_name, entityType);
         }
       });
 
       const formattedEntities: Entity[] = Array.from(entityCounts.entries()).map(([name, mentions]) => ({
         name,
-        type: entityTypes.get(name) as Entity['type'] || 'unknown',
+        type: (entityTypes.get(name) as Entity['type']) || 'unknown',
         confidence: 0.7,
         mentions
       }));
