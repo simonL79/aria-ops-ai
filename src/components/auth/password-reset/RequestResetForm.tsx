@@ -60,7 +60,7 @@ const RequestResetForm = ({ onSuccess, onBack }: RequestResetFormProps) => {
   };
 
   if (isLoading) {
-    return <LoadingSpinner message="Sending password reset email..." />;
+    return <LoadingSpinner text="Sending password reset email..." />;
   }
 
   if (emailSent) {

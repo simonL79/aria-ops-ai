@@ -96,7 +96,7 @@ const VerifyResetForm = ({ resetEmail, onSuccess, onBack }: VerifyResetFormProps
   };
 
   if (isLoading) {
-    return <LoadingSpinner message="Updating your password..." />;
+    return <LoadingSpinner text="Updating your password..." />;
   }
 
   return (
