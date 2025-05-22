@@ -26,6 +26,11 @@ import ThankYouPage from "@/pages/ThankYouPage";
 import ReputationScanForm from "@/pages/ReputationScanForm";
 import AboutPage from "@/pages/AboutPage";
 import BiographyPage from "@/pages/BiographyPage";
+import PricingPage from "@/pages/PricingPage";
+import PrivacyPolicyPage from "@/pages/PrivacyPolicyPage";
+import DisclaimerPage from "@/pages/DisclaimerPage";
+import GDPRCompliancePage from "@/pages/GDPRCompliancePage";
+import RequestDataAccessPage from "@/pages/RequestDataAccessPage";
 
 function App() {
   useEffect(() => {
@@ -42,6 +47,11 @@ function App() {
         <Route path="/scan" element={<ReputationScanForm />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/biography" element={<BiographyPage />} />
+        <Route path="/pricing" element={<PricingPage />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+        <Route path="/disclaimer" element={<DisclaimerPage />} />
+        <Route path="/gdpr-compliance" element={<GDPRCompliancePage />} />
+        <Route path="/request-data-access" element={<RequestDataAccessPage />} />
         
         {/* Authentication Route - Redirects to dashboard if already signed in */}
         <Route 
