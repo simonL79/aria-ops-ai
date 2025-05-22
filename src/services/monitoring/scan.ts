@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 /**
  * Run a monitoring scan and return results
  */
-export const runMonitoringScan = async (): Promise<ScanResult[]> => {
+export const runMonitoringScan = async (targetEntity?: string): Promise<ScanResult[]> => {
   try {
     // First, update the monitoring status
     const { error: statusError } = await supabase
@@ -22,7 +22,11 @@ export const runMonitoringScan = async (): Promise<ScanResult[]> => {
     }
 
     // Call the run_scan function via RPC
-    const { data, error } = await supabase.rpc('run_scan', { scan_depth: 'standard' });
+    // If a target entity is provided, pass it to the scan function
+    const { data, error } = await supabase.rpc('run_scan', { 
+      scan_depth: 'standard',
+      target_entity: targetEntity || null
+    });
     
     if (error) {
       console.error("Error running monitoring scan:", error);
@@ -55,7 +59,15 @@ export const runMonitoringScan = async (): Promise<ScanResult[]> => {
       threatType: item.threat_type,
       client_id: item.client_id,
       created_at: item.created_at,
-      updated_at: item.updated_at
+      updated_at: item.updated_at,
+      // Make sure to include detected entities
+      detectedEntities: item.detected_entities || [],
+      // Add additional source information
+      sourceType: item.source_type,
+      // Parse potential reach if available
+      potentialReach: item.potential_reach,
+      // Parse confidence score if available  
+      confidenceScore: item.confidence_score
     })) || [];
     
     if (results.length > 0) {
