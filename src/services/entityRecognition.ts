@@ -1,29 +1,11 @@
 
-/**
- * Entity Recognition Utility Functions
- * 
- * This service provides functions to extract and manage entities from content.
- */
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-
-export interface Entity {
-  name: string;
-  type: 'person' | 'organization' | 'handle' | 'location' | 'unknown';
-  confidence: number;
-  mentions: number;
-}
-
-// Type guard to check if an object is a scan result with specific properties
-function hasScanProperty(obj: any, property: string): boolean {
-  return obj && typeof obj === 'object' && property in obj;
-}
+import { Entity } from '@/types/entity';
+import { checkColumnExists, hasScanProperty } from '@/utils/databaseUtils';
 
 /**
  * Extract entities from text content using regex and heuristics
- * 
- * In a production environment, this would be enhanced with NLP or API calls
  */
 export const extractEntitiesFromText = (text: string): Entity[] => {
   if (!text) return [];
@@ -54,7 +36,7 @@ export const extractEntitiesFromText = (text: string): Entity[] => {
     
     if (entities.has(name)) {
       const entity = entities.get(name)!;
-      entities.set(name, { ...entity, mentions: entity.mentions + 1 });
+      entities.set(name, { ...entity, mentions: entity.mentions! + 1 });
     } else {
       entities.set(name, {
         name,
@@ -78,7 +60,7 @@ export const extractEntitiesFromText = (text: string): Entity[] => {
     orgs.forEach(org => {
       if (entities.has(org)) {
         const entity = entities.get(org)!;
-        entities.set(org, { ...entity, type: 'organization', mentions: entity.mentions + 1 });
+        entities.set(org, { ...entity, type: 'organization', mentions: entity.mentions! + 1 });
       } else {
         entities.set(org, {
           name: org,
@@ -91,35 +73,6 @@ export const extractEntitiesFromText = (text: string): Entity[] => {
   });
   
   return Array.from(entities.values());
-};
-
-// Helper function to check if a column exists in a table
-const checkColumnExists = async (tableName: string, columnName: string): Promise<boolean> => {
-  try {
-    // Use direct fetch to edge function instead of RPC
-    const response = await fetch(`${supabase.supabaseUrl}/functions/v1/column_exists`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${supabase.supabaseKey}`
-      },
-      body: JSON.stringify({
-        table_name: tableName,
-        column_name: columnName
-      })
-    });
-    
-    if (!response.ok) {
-      console.error(`Error checking if column ${columnName} exists in ${tableName}: HTTP ${response.status}`);
-      return false;
-    }
-    
-    const data = await response.json();
-    return !!data?.exists;
-  } catch (error) {
-    console.error(`Error in checkColumnExists for ${columnName}:`, error);
-    return false;
-  }
 };
 
 /**
@@ -242,7 +195,7 @@ export const getAllEntities = async (): Promise<Entity[]> => {
           detectedEntities.forEach((name: string) => {
             if (entityMap.has(name)) {
               const entity = entityMap.get(name)!;
-              entityMap.set(name, { ...entity, mentions: entity.mentions + 1 });
+              entityMap.set(name, { ...entity, mentions: (entity.mentions || 0) + 1 });
             } else {
               // Determine entity type based on available data
               let type: Entity['type'] = 'unknown';
@@ -298,7 +251,7 @@ export const getAllEntities = async (): Promise<Entity[]> => {
     });
     
     // Convert Map to Array and sort by mentions count
-    return Array.from(entityMap.values()).sort((a, b) => b.mentions - a.mentions);
+    return Array.from(entityMap.values()).sort((a, b) => (b.mentions || 0) - (a.mentions || 0));
   } catch (error) {
     console.error('Error getting all entities:', error);
     return [];
@@ -434,7 +387,7 @@ export const getEntityStatistics = async (): Promise<{
     const handleEntities = entities.filter(e => e.type === 'handle').length;
     
     // Sort by mentions to find most mentioned
-    const sortedEntities = [...entities].sort((a, b) => b.mentions - a.mentions);
+    const sortedEntities = [...entities].sort((a, b) => (b.mentions || 0) - (a.mentions || 0));
     
     return {
       totalEntities: entities.length,

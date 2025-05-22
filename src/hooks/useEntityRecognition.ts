@@ -1,280 +1,81 @@
 
 import { useState, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-
-export interface Entity {
-  name: string;
-  type: 'person' | 'organization' | 'handle' | 'location' | 'unknown';
-  confidence: number;
-  mentions?: number;
-}
-
-// Type guard to check if object has required entity properties
-function isEntityArray(data: any): data is Entity[] {
-  return Array.isArray(data) && data.every(item => 
-    typeof item === 'object' &&
-    'name' in item &&
-    'type' in item &&
-    'confidence' in item
-  );
-}
-
-// Type guard to safely access scan result properties
-function hasScanProperty(obj: any, property: string): boolean {
-  return obj && typeof obj === 'object' && property in obj;
-}
+import { Entity } from '@/types/entity';
+import { 
+  processText, 
+  processScanResult, 
+  getAllEntities 
+} from '@/services/entityRecognitionService';
+import { batchProcessScanResults } from '@/services/batchEntityService';
 
 export const useEntityRecognition = () => {
   const [loading, setLoading] = useState(false);
   const [entities, setEntities] = useState<Entity[]>([]);
 
-  // Helper to check if a column exists in the scan_results table
-  const checkColumnExists = useCallback(async (columnName: string): Promise<boolean> => {
-    try {
-      // Use direct edge function invocation
-      const response = await fetch(`${supabase.supabaseUrl}/functions/v1/column_exists`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${supabase.supabaseKey}`
-        },
-        body: JSON.stringify({
-          table_name: 'scan_results',
-          column_name: columnName
-        })
-      });
-      
-      if (!response.ok) {
-        console.error(`Error checking if column ${columnName} exists: HTTP ${response.status}`);
-        return false;
-      }
-      
-      const data = await response.json();
-      return !!data?.exists;
-    } catch (error) {
-      console.error(`Error in checkColumnExists for ${columnName}:`, error);
-      return false;
-    }
-  }, []);
-
-  // Process text through the edge function
-  const processText = useCallback(async (text: string, mode: 'simple' | 'advanced' = 'simple') => {
+  // Process text wrapper
+  const processTextHandler = useCallback(async (
+    text: string, 
+    mode: 'simple' | 'advanced' = 'simple'
+  ) => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('entity-recognition', {
-        body: JSON.stringify({
-          content: text,
-          mode
-        })
-      });
-
-      if (error) {
-        console.error("Error processing text:", error);
-        toast.error("Failed to process text for entities");
-        return [];
-      }
-
-      const resultEntities = data && isEntityArray(data.entities) ? data.entities : [];
+      const resultEntities = await processText(text, mode);
       setEntities(resultEntities);
       return resultEntities;
-    } catch (error) {
-      console.error("Error in processText:", error);
-      toast.error("An error occurred during entity recognition");
-      return [];
     } finally {
       setLoading(false);
     }
   }, []);
 
-  // Process a specific scan result
-  const processScanResult = useCallback(async (scanResultId: string, mode: 'simple' | 'advanced' = 'simple') => {
+  // Process scan result wrapper
+  const processScanResultHandler = useCallback(async (
+    scanResultId: string, 
+    mode: 'simple' | 'advanced' = 'simple'
+  ) => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('entity-recognition', {
-        body: JSON.stringify({
-          contentId: scanResultId,
-          mode
-        })
-      });
-
-      if (error) {
-        console.error("Error processing scan result:", error);
-        toast.error("Failed to process scan result for entities");
-        return [];
-      }
-
-      const resultEntities = data && isEntityArray(data.entities) ? data.entities : [];
+      const resultEntities = await processScanResult(scanResultId, mode);
       setEntities(resultEntities);
       return resultEntities;
-    } catch (error) {
-      console.error("Error in processScanResult:", error);
-      toast.error("An error occurred during entity recognition");
-      return [];
     } finally {
       setLoading(false);
     }
   }, []);
 
-  // Process multiple scan results
-  const batchProcessScanResults = useCallback(async (
+  // Batch process wrapper
+  const batchProcessScanResultsHandler = useCallback(async (
     scanResultIds: string[],
     mode: 'simple' | 'advanced' = 'simple',
     onProgress?: (completed: number, total: number) => void
   ) => {
     setLoading(true);
-    const results: Record<string, Entity[]> = {};
-    let completed = 0;
-
     try {
-      for (const id of scanResultIds) {
-        const entities = await processScanResult(id, mode);
-        results[id] = entities;
-        
-        completed++;
-        if (onProgress) {
-          onProgress(completed, scanResultIds.length);
-        }
-      }
-
-      toast.success(`Processed ${completed} scan results for entities`);
-      return results;
-    } catch (error) {
-      console.error("Error in batchProcessScanResults:", error);
-      toast.error("Failed to complete batch processing");
-      return results;
+      return await batchProcessScanResults(scanResultIds, mode, onProgress);
     } finally {
       setLoading(false);
     }
-  }, [processScanResult]);
+  }, []);
 
-  // Get all entities from database
-  const getAllEntities = useCallback(async () => {
+  // Get all entities wrapper
+  const getAllEntitiesHandler = useCallback(async () => {
     setLoading(true);
     try {
-      // Check if the required columns exist
-      const hasDetectedEntities = await checkColumnExists('detected_entities');
-      const hasRiskEntityName = await checkColumnExists('risk_entity_name');
-      const hasRiskEntityType = await checkColumnExists('risk_entity_type');
-      
-      if (!hasDetectedEntities && !hasRiskEntityName) {
-        console.warn("Required entity columns don't exist in the database");
-        toast.error("Entity recognition features require database setup");
-        return [];
-      }
-      
-      // Build the select statement based on what columns exist
-      let selectStatement = '*';
-      if (hasDetectedEntities && hasRiskEntityName && hasRiskEntityType) {
-        selectStatement = 'detected_entities, risk_entity_name, risk_entity_type';
-      } else if (hasDetectedEntities) {
-        selectStatement = 'detected_entities';
-      } else if (hasRiskEntityName) {
-        selectStatement = 'risk_entity_name, risk_entity_type';
-      }
-      
-      // Query with the appropriate select statement
-      const { data, error } = await supabase
-        .from('scan_results')
-        .select(selectStatement);
-
-      if (error) {
-        console.error("Error fetching entities:", error);
-        return [];
-      }
-
-      // Handle null/undefined data safely
-      if (!data || data.length === 0) {
-        return [];
-      }
-
-      // Combine all entities and count occurrences
-      const entityCounts = new Map<string, number>();
-      const entityTypes = new Map<string, string>();
-
-      data.forEach(result => {
-        // Only process if result is an object (not an error)
-        if (result && typeof result === 'object') {
-          // Safely check if detected_entities exists and is an array
-          if (hasDetectedEntities && hasScanProperty(result, 'detected_entities')) {
-            const detectedEntities = result.detected_entities;
-            if (Array.isArray(detectedEntities)) {
-              detectedEntities.forEach((entity: string) => {
-                entityCounts.set(entity, (entityCounts.get(entity) || 0) + 1);
-                
-                // Try to guess entity type based on patterns
-                if (!entityTypes.has(entity)) {
-                  if (entity.startsWith('@')) {
-                    entityTypes.set(entity, 'handle');
-                  } else if (/Inc|Ltd|LLC|Corp|Company/.test(entity)) {
-                    entityTypes.set(entity, 'organization');
-                  } else if (/\b[A-Z][a-z]+ [A-Z][a-z]+\b/.test(entity)) {
-                    entityTypes.set(entity, 'person');
-                  } else {
-                    entityTypes.set(entity, 'unknown');
-                  }
-                }
-              });
-            }
-          }
-          
-          // Process risk_entity_name if it exists and is not null/undefined
-          if (hasRiskEntityName && hasScanProperty(result, 'risk_entity_name')) {
-            const riskEntityName = result.risk_entity_name;
-            if (riskEntityName && typeof riskEntityName === 'string') {
-              entityCounts.set(riskEntityName, (entityCounts.get(riskEntityName) || 0) + 1);
-              
-              // Use risk_entity_type if available, otherwise default to unknown
-              let entityType = 'unknown';
-              if (hasRiskEntityType && hasScanProperty(result, 'risk_entity_type')) {
-                const riskEntityType = result.risk_entity_type;
-                if (riskEntityType && typeof riskEntityType === 'string') {
-                  const validTypes = ['person', 'organization', 'handle', 'location'];
-                  entityType = validTypes.includes(riskEntityType) ? riskEntityType : 'unknown';
-                }
-              }
-              entityTypes.set(riskEntityName, entityType);
-            }
-          }
-        }
-      });
-
-      const formattedEntities: Entity[] = Array.from(entityCounts.entries())
-        .map(([name, mentions]) => {
-          let type: Entity['type'] = 'unknown';
-          const typeName = entityTypes.get(name);
-          
-          if (typeName === 'person' || 
-              typeName === 'organization' || 
-              typeName === 'handle' || 
-              typeName === 'location') {
-            type = typeName as Entity['type'];
-          }
-          
-          return {
-            name,
-            type,
-            confidence: 0.7,
-            mentions
-          };
-        });
-
-      return formattedEntities.sort((a, b) => (b.mentions || 0) - (a.mentions || 0));
-    } catch (error) {
-      console.error("Error in getAllEntities:", error);
-      return [];
+      const allEntities = await getAllEntities();
+      setEntities(allEntities);
+      return allEntities;
     } finally {
       setLoading(false);
     }
-  }, [checkColumnExists]);
+  }, []);
 
   return {
     loading,
     entities,
-    processText,
-    processScanResult,
-    batchProcessScanResults,
-    getAllEntities
+    processText: processTextHandler,
+    processScanResult: processScanResultHandler,
+    batchProcessScanResults: batchProcessScanResultsHandler,
+    getAllEntities: getAllEntitiesHandler
   };
 };
 
