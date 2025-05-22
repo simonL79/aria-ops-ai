@@ -56,7 +56,7 @@ function App() {
         <Route path="/thank-you" element={<ThankYouPage />} />
         <Route path="/scan" element={<ReputationScanForm />} />
         <Route path="/about" element={<AboutPage />} />
-        <Route path="/biography" element={<BiographyPage />} />
+        <Route path="/simon-lindsay" element={<BiographyPage />} />
         <Route path="/pricing" element={<PricingPage />} />
         <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
         <Route path="/disclaimer" element={<DisclaimerPage />} />
@@ -67,6 +67,9 @@ function App() {
         <Route path="/blog" element={<BlogPage />} />
         <Route path="/blog/:slug" element={<BlogPostPage />} />
         <Route path="/rss.xml" element={<Navigate to="https://ssvskbejfacmjemphmry.supabase.co/functions/v1/generate-rss" />} />
+        
+        {/* For backward compatibility - redirect from old route to new route */}
+        <Route path="/biography" element={<Navigate to="/simon-lindsay" replace />} />
         
         {/* Authentication Route - Redirects to dashboard if already signed in */}
         <Route 

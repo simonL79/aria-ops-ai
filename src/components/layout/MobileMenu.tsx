@@ -46,7 +46,7 @@ const MobileMenu = ({ isOpen, setIsOpen, isScrolled }: MobileMenuProps) => {
           </li>
           <li>
             <Link 
-              to="/biography" 
+              to="/simon-lindsay" 
               className="block text-white hover:text-premium-silver transition-colors"
               onClick={() => setIsOpen(false)}
             >
