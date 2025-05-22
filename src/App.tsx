@@ -95,7 +95,7 @@ function App() {
           <Route path="/dashboard/mentions" element={<MentionsPage />} />
           <Route path="/dashboard/new-companies" element={<NewCoPage />} />
           <Route path="/clients" element={<Clients />} />
-          <Route path="/reports" element={<ReportsPage />} /> {/* Add reports route */}
+          <Route path="/reports" element={<ReportsPage />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/calendar" element={<CalendarPage />} />
         </Route>
