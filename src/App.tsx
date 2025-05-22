@@ -4,7 +4,6 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import { initializeDatabase } from "@/utils/initializeMonitoring";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
-import SignedInRedirect from "@/components/auth/SignedInRedirect";
 import { HelmetProvider } from "react-helmet-async";
 
 // Import your pages
@@ -77,15 +76,8 @@ function App() {
         <Route path="/biography" element={<Navigate to="/simon-lindsay" replace />} />
         <Route path="/admin-reset" element={<Navigate to="/admin-login" replace />} />
         
-        {/* Authentication Route - Redirects to dashboard if already signed in */}
-        <Route 
-          path="/auth" 
-          element={
-            <SignedInRedirect redirectTo="/dashboard">
-              <Authentication />
-            </SignedInRedirect>
-          } 
-        />
+        {/* Authentication Route */}
+        <Route path="/auth" element={<Authentication />} />
         
         {/* Protected Dashboard Routes */}
         <Route element={<ProtectedRoute />}>

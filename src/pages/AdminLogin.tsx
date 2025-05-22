@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Mail } from 'lucide-react';
+import { Mail, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import PublicLayout from '@/components/layout/PublicLayout';
 import { useAuth } from '@/hooks/useAuth';
@@ -80,8 +80,17 @@ export default function AdminLogin() {
                 className="w-full" 
                 disabled={isSending}
               >
-                <Mail className="mr-2 h-4 w-4" />
-                {isSending ? "Sending Magic Link..." : "Send Magic Link"}
+                {isSending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Sending Magic Link...
+                  </>
+                ) : (
+                  <>
+                    <Mail className="mr-2 h-4 w-4" />
+                    Send Magic Link
+                  </>
+                )}
               </Button>
               
               <div className="text-center mt-4">

@@ -1,19 +1,17 @@
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import PublicLayout from '@/components/layout/PublicLayout';
 import BlogAdminPanel from '@/components/blog/BlogAdminPanel';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Mail } from 'lucide-react';
+import { Mail, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import AuthGuard from '@/components/auth/AuthGuard';
 
 const BlogAdminPage = () => {
-  const navigate = useNavigate();
+  const [isSending, setIsSending] = React.useState(false);
   const { user } = useAuth();
   
   const handleSendMagicLink = async () => {
@@ -21,6 +19,8 @@ const BlogAdminPage = () => {
       toast.error("User information not available");
       return;
     }
+    
+    setIsSending(true);
     
     try {
       toast.info("Sending magic link...");
@@ -38,6 +38,8 @@ const BlogAdminPage = () => {
     } catch (error) {
       console.error("Error sending magic link:", error);
       toast.error("Failed to send magic link. Please try again.");
+    } finally {
+      setIsSending(false);
     }
   };
   
@@ -56,9 +58,19 @@ const BlogAdminPage = () => {
             variant="outline" 
             onClick={handleSendMagicLink} 
             className="mt-4 md:mt-0"
+            disabled={isSending}
           >
-            <Mail className="mr-2 h-4 w-4" />
-            Send New Magic Link
+            {isSending ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Sending...
+              </>
+            ) : (
+              <>
+                <Mail className="mr-2 h-4 w-4" />
+                Send New Magic Link
+              </>
+            )}
           </Button>
         </div>
         
@@ -68,5 +80,4 @@ const BlogAdminPage = () => {
   );
 };
 
-// We're using the AuthGuard in App.tsx instead of here
 export default BlogAdminPage;

@@ -3,30 +3,25 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { logActivity, LogAction } from '@/services/activityLogService';
 
 interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
-  userId: string | null;
   user: User | null;
   session: Session | null;
   isAdmin: boolean;
-  signOut: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<boolean>;
-  signUp: (email: string, password: string, firstName?: string, lastName?: string) => Promise<boolean>;
+  signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
   isLoading: true,
-  userId: null,
   user: null,
   session: null,
   isAdmin: false,
-  signOut: async () => {},
   signIn: async () => false,
-  signUp: async () => false
+  signOut: async () => {},
 });
 
 // Define admin email for special treatment
@@ -42,29 +37,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, newSession) => {
+      (_event, newSession) => {
         setSession(newSession);
         setUser(newSession?.user ?? null);
         setIsAuthenticated(!!newSession);
         
         // Check if user is admin based on email
         if (newSession?.user) {
-          const userEmail = newSession.user.email;
-          setIsAdmin(userEmail === ADMIN_EMAIL);
-          
-          // Log activity for sign in/out events
-          if (event === 'SIGNED_IN') {
-            setTimeout(() => {
-              logActivity(
-                LogAction.LOGIN, 
-                `User signed in: ${userEmail}`, 
-                'user', 
-                userEmail || ''
-              );
-            }, 0);
-          } else if (event === 'SIGNED_OUT') {
-            // We don't log sign out here because the session is already gone
-          }
+          setIsAdmin(newSession.user.email === ADMIN_EMAIL);
         } else {
           setIsAdmin(false);
         }
@@ -78,8 +58,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setIsAuthenticated(!!currentSession);
       
       if (currentSession?.user) {
-        const userEmail = currentSession.user.email;
-        setIsAdmin(userEmail === ADMIN_EMAIL);
+        setIsAdmin(currentSession.user.email === ADMIN_EMAIL);
       }
       
       setIsLoading(false);
@@ -113,17 +92,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return false;
       }
       
-      if (data.user) {
-        toast.success("Signed in successfully!");
-        
-        // Activity log is handled by the auth state change listener
-        return true;
-      } else {
-        toast.error("Login failed", {
-          description: "Invalid email or password"
-        });
-        return false;
-      }
+      return !!data.user;
     } catch (error) {
       console.error("Error signing in:", error);
       toast.error("Error signing in", {
@@ -133,74 +102,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
   
-  const signUp = async (
-    email: string, 
-    password: string, 
-    firstName?: string, 
-    lastName?: string
-  ): Promise<boolean> => {
-    try {
-      // Block signup for non-admin users as per requirements
-      if (email !== ADMIN_EMAIL) {
-        toast.error("Sign up is restricted", {
-          description: "Only administrators can create new accounts"
-        });
-        return false;
-      }
-      
-      // Create user with metadata
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            firstName,
-            lastName,
-          }
-        }
-      });
-      
-      if (error) {
-        toast.error("Sign up failed", {
-          description: error.message
-        });
-        return false;
-      }
-      
-      if (data.user) {
-        toast.success("Signed up successfully!");
-        
-        // Check if email confirmation is required
-        if (data.session === null) {
-          toast.info("Please check your email to confirm your account");
-        }
-        
-        return true;
-      } else {
-        toast.error("Sign up failed");
-        return false;
-      }
-    } catch (error) {
-      console.error("Error signing up:", error);
-      toast.error("Error signing up", {
-        description: error instanceof Error ? error.message : "Unknown error occurred"
-      });
-      return false;
-    }
-  };
-  
   const handleSignOut = async () => {
     try {
-      // First log the activity before signing out
-      if (user?.email) {
-        await logActivity(
-          LogAction.LOGOUT,
-          `User signed out: ${user.email}`,
-          'user',
-          user.email
-        );
-      }
-      
       const { error } = await supabase.auth.signOut();
       
       if (error) {
@@ -226,13 +129,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const value = {
     isAuthenticated,
     isLoading,
-    userId: user?.id || null,
     user,
     session,
     isAdmin,
-    signOut: handleSignOut,
     signIn,
-    signUp
+    signOut: handleSignOut,
   };
   
   return (
