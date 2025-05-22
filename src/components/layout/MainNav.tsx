@@ -15,7 +15,8 @@ import {
   Eye,
   FileText,
   MessageSquare,
-  LogIn
+  LogIn,
+  Calendar
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -137,10 +138,20 @@ export function MainNav({ className }: MainNavProps) {
         <span className="group-hover:underline">Radar</span>
       </Link>
       <Link
-        to="/dashboard/settings"
+        to="/calendar"
         className={cn(
           "group flex items-center gap-1 transition-colors hover:text-foreground/80",
-          isActive("/dashboard/settings") ? "text-foreground font-medium" : "text-foreground/60"
+          location.pathname === "/calendar" ? "text-foreground font-medium" : "text-foreground/60"
+        )}
+      >
+        <Calendar className="h-4 w-4" />
+        <span className="group-hover:underline">Calendar</span>
+      </Link>
+      <Link
+        to="/settings"
+        className={cn(
+          "group flex items-center gap-1 transition-colors hover:text-foreground/80",
+          isActive("/settings") ? "text-foreground font-medium" : "text-foreground/60"
         )}
       >
         <Settings className="h-4 w-4" />

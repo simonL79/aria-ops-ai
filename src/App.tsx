@@ -32,6 +32,8 @@ import DisclaimerPage from "@/pages/DisclaimerPage";
 import GDPRCompliancePage from "@/pages/GDPRCompliancePage";
 import RequestDataAccessPage from "@/pages/RequestDataAccessPage";
 import ResourcesPage from "@/pages/ResourcesPage";
+import CalendarPage from "@/pages/CalendarPage";
+import HowItWorksPage from "@/pages/HowItWorksPage";
 
 function App() {
   useEffect(() => {
@@ -54,6 +56,7 @@ function App() {
         <Route path="/gdpr-compliance" element={<GDPRCompliancePage />} />
         <Route path="/request-data-access" element={<RequestDataAccessPage />} />
         <Route path="/resources" element={<ResourcesPage />} />
+        <Route path="/how-it-works" element={<HowItWorksPage />} />
         
         {/* Authentication Route - Redirects to dashboard if already signed in */}
         <Route 
@@ -79,6 +82,7 @@ function App() {
           <Route path="/dashboard/mentions" element={<MentionsPage />} />
           <Route path="/dashboard/new-companies" element={<NewCoPage />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/calendar" element={<CalendarPage />} />
         </Route>
         
         {/* Catch all route - 404 */}

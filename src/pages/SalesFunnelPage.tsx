@@ -52,7 +52,9 @@ const SalesFunnelPage = () => {
       <ProblemSection />
 
       {/* How It Works */}
-      <HowItWorksSection />
+      <section id="how-it-works">
+        <HowItWorksSection />
+      </section>
       
       {/* Platforms We Monitor */}
       <PlatformsSection />

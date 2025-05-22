@@ -36,13 +36,13 @@ const MobileMenu = ({ isOpen, setIsOpen, isScrolled }: MobileMenuProps) => {
             </Link>
           </li>
           <li>
-            <a 
-              href="#how-it-works" 
+            <Link 
+              to="/how-it-works" 
               className="block text-white hover:text-premium-silver transition-colors"
               onClick={() => setIsOpen(false)}
             >
               How It Works
-            </a>
+            </Link>
           </li>
           <li>
             <Link 
@@ -51,6 +51,15 @@ const MobileMenu = ({ isOpen, setIsOpen, isScrolled }: MobileMenuProps) => {
               onClick={() => setIsOpen(false)}
             >
               Simon Lindsay
+            </Link>
+          </li>
+          <li>
+            <Link 
+              to="/resources" 
+              className="block text-white hover:text-premium-silver transition-colors"
+              onClick={() => setIsOpen(false)}
+            >
+              Resources
             </Link>
           </li>
           <li className="pt-4">

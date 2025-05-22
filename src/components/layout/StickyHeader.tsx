@@ -43,9 +43,9 @@ const StickyHeader = ({ isScrolled }: StickyHeaderProps) => {
                   </Link>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
-                  <a href="#how-it-works" className={`${navigationMenuTriggerStyle()} font-medium transition-colors duration-300 ${isScrolled ? 'text-white hover:text-premium-silver' : 'text-premium-black hover:text-premium-darkGray'}`}>
+                  <Link to="/how-it-works" className={`${navigationMenuTriggerStyle()} font-medium transition-colors duration-300 ${isScrolled ? 'text-white hover:text-premium-silver' : 'text-premium-black hover:text-premium-darkGray'}`}>
                     How It Works
-                  </a>
+                  </Link>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
                   <Link to="/biography" className={`${navigationMenuTriggerStyle()} font-medium transition-colors duration-300 ${isScrolled ? 'text-white hover:text-premium-silver' : 'text-premium-black hover:text-premium-darkGray'}`}>
