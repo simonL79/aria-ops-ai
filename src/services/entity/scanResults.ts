@@ -66,7 +66,7 @@ export const getScanResultsByEntity = async (entityName: string): Promise<ScanRe
       
       if (!nameError && nameData && nameData.length > 0) {
         // Use type guard to ensure we have valid ScanResults
-        return (nameData as any[]).filter(isScanResult);
+        return nameData.filter(isScanResult);
       }
     }
     
@@ -79,7 +79,7 @@ export const getScanResultsByEntity = async (entityName: string): Promise<ScanRe
       
       if (!arrayError && arrayData) {
         // Use type guard to ensure we have valid ScanResults
-        results = (arrayData as any[]).filter(isScanResult);
+        results = arrayData.filter(isScanResult);
       }
     }
     
