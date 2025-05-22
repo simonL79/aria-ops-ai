@@ -1,205 +1,22 @@
 
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
-
-// Define a strict interface for raw scan results from database
-export interface RawScanResult {
-  id: string;
-  content: string;
-  platform: string;
-  url: string;
-  severity: string;
-  status: string;
-  threat_type?: string;
-  detected_entities?: unknown;
-  risk_entity_name?: string | null;
-  risk_entity_type?: string | null;
-  created_at?: string;
-  confidence_score?: number | null;
-  is_identified?: boolean;
-}
-
-// Define a simple entity structure
-export interface ScanEntity {
-  name: string;
-  type?: string;
-  confidence?: number;
-}
-
-// Define processed scan result type after parsing detected entities
-export interface ScanResult extends Omit<RawScanResult, 'detected_entities'> {
-  detected_entities?: ScanEntity[]; // Always parsed into ScanEntity[]
-}
-
 /**
- * Type guard to check if an object is a ScanResult
+ * Re-export scan result types and functions
+ * This maintains backward compatibility with existing imports
  */
-export function isScanResult(obj: any): obj is ScanResult {
-  return obj && 
-         typeof obj === 'object' && 
-         'id' in obj && 
-         'content' in obj &&
-         'platform' in obj;
-}
 
-/**
- * Simple function to safely parse detected entities from various formats
- */
-export function parseDetectedEntities(input: unknown): ScanEntity[] {
-  if (!input) return [];
-  
-  // Handle array input
-  if (Array.isArray(input)) {
-    return input.map(item => {
-      // Handle string items
-      if (typeof item === 'string') {
-        return { name: item };
-      }
-      
-      // Handle object items
-      if (item && typeof item === 'object') {
-        if ('name' in item && typeof item.name === 'string') {
-          return {
-            name: item.name,
-            type: typeof item.type === 'string' ? item.type : undefined,
-            confidence: typeof item.confidence === 'number' ? item.confidence : undefined
-          };
-        }
-      }
-      
-      // Default fallback
-      return { name: String(item) };
-    });
-  }
-  
-  // Handle string input (e.g., JSON string)
-  if (typeof input === 'string') {
-    try {
-      const parsed = JSON.parse(input);
-      if (Array.isArray(parsed)) {
-        return parseDetectedEntities(parsed);
-      }
-      return [{ name: input }];
-    } catch {
-      return [{ name: input }];
-    }
-  }
-  
-  // Default: empty array
-  return [];
-}
+// Re-export types
+export { 
+  ScanResult, 
+  RawScanResult, 
+  ScanEntity, 
+  isScanResult 
+} from './types/scanTypes';
 
-/**
- * Get scan results by entity name - simplified approach
- */
-export const getScanResultsByEntity = async (entityName: string): Promise<ScanResult[]> => {
-  try {
-    let results: ScanResult[] = [];
-    
-    // Try with risk_entity_name field
-    const { data: nameData, error: nameError } = await supabase
-      .from('scan_results')
-      .select('*')
-      .eq('risk_entity_name', entityName);
-    
-    if (!nameError && nameData && nameData.length > 0) {
-      // Explicitly extract fields to avoid spreading and type recursion
-      const processedResults = (nameData as any[]).map((row: any) => {
-        const result: ScanResult = {
-          id: row.id,
-          content: row.content,
-          platform: row.platform,
-          url: row.url,
-          severity: row.severity,
-          status: row.status,
-          threat_type: row.threat_type,
-          risk_entity_name: row.risk_entity_name,
-          risk_entity_type: row.risk_entity_type,
-          created_at: row.created_at,
-          confidence_score: row.confidence_score,
-          is_identified: row.is_identified,
-          detected_entities: parseDetectedEntities(row.detected_entities)
-        };
-        return result;
-      });
-      
-      return processedResults;
-    }
-    
-    // Try with detected_entities field
-    const { data: arrayData, error: arrayError } = await supabase
-      .from('scan_results')
-      .select('*')
-      .contains('detected_entities', [entityName]);
-    
-    if (!arrayError && arrayData) {
-      // Explicitly extract fields here too
-      const processedResults = (arrayData as any[]).map((row: any) => {
-        const result: ScanResult = {
-          id: row.id,
-          content: row.content,
-          platform: row.platform,
-          url: row.url,
-          severity: row.severity,
-          status: row.status,
-          threat_type: row.threat_type,
-          risk_entity_name: row.risk_entity_name,
-          risk_entity_type: row.risk_entity_type,
-          created_at: row.created_at,
-          confidence_score: row.confidence_score,
-          is_identified: row.is_identified,
-          detected_entities: parseDetectedEntities(row.detected_entities)
-        };
-        return result;
-      });
-      
-      results = processedResults;
-    }
-    
-    return results;
-  } catch (error) {
-    console.error('Error in getScanResultsByEntity:', error);
-    toast.error("Failed to fetch scan results for entity");
-    return [];
-  }
-};
+// Re-export parser function
+export { parseDetectedEntities } from './utils/entityParser';
 
-/**
- * Get all scan results - simplified approach
- */
-export const getAllScanResults = async (): Promise<ScanResult[]> => {
-  try {
-    const { data, error } = await supabase
-      .from('scan_results')
-      .select('*')
-      .order('created_at', { ascending: false });
-    
-    if (error || !data) {
-      console.error("Failed to fetch scan results:", error);
-      return [];
-    }
-    
-    // Process raw data into typed ScanResults with explicit field extraction
-    return (data as any[]).map((row: any) => {
-      const result: ScanResult = {
-        id: row.id,
-        content: row.content,
-        platform: row.platform,
-        url: row.url,
-        severity: row.severity,
-        status: row.status,
-        threat_type: row.threat_type,
-        risk_entity_name: row.risk_entity_name,
-        risk_entity_type: row.risk_entity_type,
-        created_at: row.created_at,
-        confidence_score: row.confidence_score,
-        is_identified: row.is_identified,
-        detected_entities: parseDetectedEntities(row.detected_entities)
-      };
-      return result;
-    });
-  } catch (error) {
-    console.error("Error fetching scan results:", error);
-    return [];
-  }
-};
+// Re-export query functions
+export { 
+  getScanResultsByEntity, 
+  getAllScanResults 
+} from './queries/scanQueries';
