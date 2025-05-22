@@ -7,6 +7,7 @@ import { Mail, Linkedin, Globe, MapPin, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Logo from '@/components/ui/logo';
 import PublicLayout from '@/components/layout/PublicLayout';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 const BiographyPage = () => {
   return (
@@ -29,11 +30,14 @@ const BiographyPage = () => {
               <CardContent className="space-y-4 pt-6">
                 <div className="flex flex-col md:flex-row gap-6">
                   <div className="md:w-1/3 flex justify-center">
-                    <img 
-                      src="https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&w=600&q=80" 
-                      alt="Simon Lindsay" 
-                      className="w-48 h-48 rounded-full object-cover border border-premium-silver shadow-md"
-                    />
+                    <Avatar className="w-48 h-48 border border-premium-silver shadow-md">
+                      <AvatarImage 
+                        src="/lovable-uploads/f716bb9a-039b-4df0-b832-d0b61c2d220d.png"
+                        alt="Simon Lindsay"
+                        className="object-cover"
+                      />
+                      <AvatarFallback className="text-4xl bg-premium-silver/20">SL</AvatarFallback>
+                    </Avatar>
                   </div>
                   <div className="md:w-2/3">
                     <p className="leading-7 mb-4 text-premium-gray">
