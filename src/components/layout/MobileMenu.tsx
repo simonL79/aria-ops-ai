@@ -14,7 +14,7 @@ const MobileMenu = ({ isOpen, setIsOpen, isScrolled }: MobileMenuProps) => {
   if (!isOpen) return null;
   
   return (
-    <div className="md:hidden bg-premium-black/95 backdrop-blur-sm">
+    <div className="md:hidden bg-premium-black/95 backdrop-blur-sm fixed top-16 left-0 right-0 z-50">
       <nav className="container mx-auto px-6 py-4">
         <ul className="space-y-4">
           <li>
@@ -54,8 +54,18 @@ const MobileMenu = ({ isOpen, setIsOpen, isScrolled }: MobileMenuProps) => {
             </Link>
           </li>
           <li className="pt-4">
-            <Button asChild className="w-full" onClick={() => setIsOpen(false)}>
-              <Link to="/scan" className="text-white">Scan My Name Now</Link>
+            <Button asChild className="w-full bg-primary text-white hover:bg-primary/90" onClick={() => setIsOpen(false)}>
+              <Link to="/scan">Scan My Name Now</Link>
+            </Button>
+          </li>
+          <li className="pt-2">
+            <Button 
+              asChild 
+              variant="outline" 
+              className="w-full border-white text-white hover:bg-white hover:text-premium-black"
+              onClick={() => setIsOpen(false)}
+            >
+              <Link to="/auth">Login</Link>
             </Button>
           </li>
         </ul>

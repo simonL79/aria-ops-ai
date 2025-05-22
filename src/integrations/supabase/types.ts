@@ -437,14 +437,19 @@ export type Database = {
       }
       scan_results: {
         Row: {
+          assigned_to: string | null
           client_id: string | null
           confidence_score: number | null
+          contact_status: string | null
+          contact_status_updated_by: string | null
           content: string
           created_at: string | null
           detected_entities: Json | null
           id: string
           platform: string
           potential_reach: number | null
+          resolved_at: string | null
+          responded_at: string | null
           sentiment: number | null
           severity: string | null
           source_type: string | null
@@ -454,14 +459,19 @@ export type Database = {
           url: string
         }
         Insert: {
+          assigned_to?: string | null
           client_id?: string | null
           confidence_score?: number | null
+          contact_status?: string | null
+          contact_status_updated_by?: string | null
           content: string
           created_at?: string | null
           detected_entities?: Json | null
           id?: string
           platform: string
           potential_reach?: number | null
+          resolved_at?: string | null
+          responded_at?: string | null
           sentiment?: number | null
           severity?: string | null
           source_type?: string | null
@@ -471,14 +481,19 @@ export type Database = {
           url?: string
         }
         Update: {
+          assigned_to?: string | null
           client_id?: string | null
           confidence_score?: number | null
+          contact_status?: string | null
+          contact_status_updated_by?: string | null
           content?: string
           created_at?: string | null
           detected_entities?: Json | null
           id?: string
           platform?: string
           potential_reach?: number | null
+          resolved_at?: string | null
+          responded_at?: string | null
           sentiment?: number | null
           severity?: string | null
           source_type?: string | null
@@ -575,14 +590,19 @@ export type Database = {
       run_scan: {
         Args: { scan_depth?: string }
         Returns: {
+          assigned_to: string | null
           client_id: string | null
           confidence_score: number | null
+          contact_status: string | null
+          contact_status_updated_by: string | null
           content: string
           created_at: string | null
           detected_entities: Json | null
           id: string
           platform: string
           potential_reach: number | null
+          resolved_at: string | null
+          responded_at: string | null
           sentiment: number | null
           severity: string | null
           source_type: string | null
