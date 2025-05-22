@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import PublicLayout from "@/components/layout/PublicLayout";
@@ -6,6 +7,13 @@ import { useAuth } from "@/hooks/useAuth";
 import AdminWalkthrough from "@/components/home/AdminWalkthrough";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import StickyHeader from "@/components/layout/StickyHeader";
+import Footer from "@/components/layout/Footer";
+import HeroSection from "@/components/sections/HeroSection";
+import ProblemSection from "@/components/sections/ProblemSection";
+import HowItWorksSection from "@/components/sections/HowItWorksSection";
+import TestimonialsSection from "@/components/sections/TestimonialsSection";
+import CTASection from "@/components/sections/CTASection";
 
 const SalesFunnelPage = () => {
   const navigate = useNavigate();
@@ -26,12 +34,12 @@ const SalesFunnelPage = () => {
   // Track conversion events after successful form submission
   const trackConversionEvents = () => {
     // Facebook Pixel conversion tracking
-    if (window.fbq) {
+    if (typeof window !== 'undefined' && window.fbq) {
       window.fbq('track', 'Lead');
     }
     
     // Google Ads conversion tracking
-    if (window.gtag) {
+    if (typeof window !== 'undefined' && window.gtag) {
       window.gtag('event', 'conversion', {
         'send_to': 'AW-CONVERSION_ID/label' // Replace with your actual conversion ID
       });
@@ -58,6 +66,8 @@ const SalesFunnelPage = () => {
       }
       
       // Check if there are any matching influencer alerts
+      // Note: This is commented out because the table doesn't exist yet
+      /*
       const match = await supabase
         .from('influencer_alerts')
         .select('*')
@@ -71,6 +81,7 @@ const SalesFunnelPage = () => {
           .update({ status: 'responded' })
           .eq('id', match.data.id);
       }
+      */
 
       // Track conversion events
       trackConversionEvents();
@@ -132,43 +143,14 @@ const SalesFunnelPage = () => {
     );
   }
 
-  // For public users, show the new landing page design
+  // For public users, show the landing page with proper navigation
   return (
     <div className="bg-black text-white font-sans min-h-screen flex flex-col">
-      {/* Fixed Header */}
-      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-premium-black/90 shadow-lg' : 'bg-transparent'}`}>
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <span className="font-bold text-xl text-white">A.R.I.A.™</span>
-            </div>
-            <div>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="text-white border-white hover:bg-white/10"
-                onClick={() => navigate("/auth")}
-              >
-                Login
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+      {/* Use the StickyHeader component for consistent navigation */}
+      <StickyHeader isScrolled={isScrolled} />
       
       {/* Hero Section */}
-      <section className="text-center py-24 pt-32 bg-gradient-to-b from-gray-900 to-black">
-        <h1 className="text-4xl md:text-6xl font-bold mb-4">Scan Me. Fix Me. Forget Me Not.</h1>
-        <p className="text-lg mb-8 max-w-xl mx-auto">A.R.I.A™ scans your online reputation before the internet ruins it.</p>
-        <Button 
-          asChild
-          variant="action" 
-          size="lg" 
-          className="px-8 py-7 text-lg"
-        >
-          <a href="#scan-form">Start My Free Scan</a>
-        </Button>
-      </section>
+      <HeroSection />
 
       {/* Problem Section */}
       <section className="py-16 px-6 md:px-24 bg-gray-800 text-white">
@@ -179,7 +161,7 @@ const SalesFunnelPage = () => {
       </section>
 
       {/* How It Works */}
-      <section className="py-16 px-6 md:px-24 bg-gray-900">
+      <section id="how-it-works" className="py-16 px-6 md:px-24 bg-gray-900">
         <div className="container mx-auto">
           <h2 className="text-2xl font-semibold mb-8 text-center">How A.R.I.A™ Works</h2>
           <div className="grid md:grid-cols-3 gap-6 text-center">
@@ -237,17 +219,8 @@ const SalesFunnelPage = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-gray-900 py-6 text-center text-sm text-gray-400 mt-auto">
-        <div className="container mx-auto">
-          <p>© {new Date().getFullYear()} A.R.I.A™ Reputation Intelligence. All rights reserved.</p>
-          <div className="flex justify-center gap-4 mt-4">
-            <a href="/privacy-policy" className="hover:text-white">Privacy Policy</a>
-            <a href="/terms" className="hover:text-white">Terms of Service</a>
-            <a href="/contact" className="hover:text-white">Contact Us</a>
-          </div>
-        </div>
-      </footer>
+      {/* Use the Footer component for consistent navigation */}
+      <Footer />
     </div>
   );
 };

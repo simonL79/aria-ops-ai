@@ -24,6 +24,8 @@ import Authentication from "@/pages/Authentication";
 import SalesFunnelPage from "@/pages/SalesFunnelPage";
 import ThankYouPage from "@/pages/ThankYouPage";
 import ReputationScanForm from "@/pages/ReputationScanForm";
+import AboutPage from "@/pages/AboutPage";
+import BiographyPage from "@/pages/BiographyPage";
 
 function App() {
   useEffect(() => {
@@ -38,6 +40,8 @@ function App() {
         <Route path="/" element={<SalesFunnelPage />} />
         <Route path="/thank-you" element={<ThankYouPage />} />
         <Route path="/scan" element={<ReputationScanForm />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/biography" element={<BiographyPage />} />
         
         {/* Authentication Route - Redirects to dashboard if already signed in */}
         <Route 
