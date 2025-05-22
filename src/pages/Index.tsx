@@ -9,15 +9,19 @@ import RadarPage from './dashboard/RadarPage';
 import Authentication from './Authentication';
 
 // This is a fallback page that will render the appropriate component based on the current path
-// It does NOT include its own Router/BrowserRouter
 const Index = () => {
   const location = useLocation();
   const { isAuthenticated } = useAuth();
   const path = location.pathname;
   
-  // If not authenticated, redirect to auth page
-  if (!isAuthenticated) {
-    return <Navigate to="/" state={{ from: location }} replace />;
+  // Public home route should go to sales funnel page
+  if (path === '/') {
+    return <Navigate to="/" replace />;
+  }
+  
+  // If not authenticated, redirect to auth page for protected routes
+  if (!isAuthenticated && path !== '/auth') {
+    return <Navigate to="/auth" state={{ from: location }} replace />;
   }
   
   // Check the current path and render the appropriate component
