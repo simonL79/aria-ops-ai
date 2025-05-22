@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -42,9 +43,11 @@ const BiographyPage = () => {
               <CardContent className="space-y-4 pt-6">
                 <div className="flex flex-col md:flex-row gap-6">
                   <div className="md:w-1/3 flex justify-center">
-                    <div className="w-48 h-48 rounded-full bg-gray-200 border border-premium-silver flex items-center justify-center shadow-md">
-                      <span className="text-premium-gray">Photo</span>
-                    </div>
+                    <img 
+                      src="/lovable-uploads/f716bb9a-039b-4df0-b832-d0b61c2d220d.png" 
+                      alt="Simon Lindsay" 
+                      className="w-48 h-48 rounded-full object-cover border border-premium-silver shadow-md"
+                    />
                   </div>
                   <div className="md:w-2/3">
                     <p className="leading-7 mb-4 text-premium-gray">
