@@ -106,10 +106,11 @@ export const useEntityRecognition = () => {
   const getAllEntities = useCallback(async () => {
     setLoading(true);
     try {
-      // First check if the columns exist to avoid errors
+      // Check if the column exists using direct query instead of rpc
       let columnsExist = false;
+      
       try {
-        // Try a simple query to check if columns exist
+        // Try a simple query to check if the table exists
         const { data: columnCheck, error: columnCheckError } = await supabase
           .from('scan_results')
           .select('id')
@@ -121,18 +122,16 @@ export const useEntityRecognition = () => {
           return [];
         }
         
-        // Check for the required columns using a Raw SQL select
+        // Check if the detected_entities column exists using raw SQL
         const { data: columnData, error: rawError } = await supabase
-          .rpc('column_exists', {
-            table_name: 'scan_results',
-            column_name: 'detected_entities'
-          });
-        
-        if (rawError) {
-          console.error("Error checking for column existence:", rawError);
-          columnsExist = false;
-        } else {
-          columnsExist = !!columnData;
+          .from('information_schema.columns')
+          .select('column_name')
+          .eq('table_name', 'scan_results')
+          .eq('column_name', 'detected_entities')
+          .single();
+          
+        if (!rawError && columnData) {
+          columnsExist = true;
         }
       } catch (columnCheckError) {
         console.error("Error checking columns:", columnCheckError);

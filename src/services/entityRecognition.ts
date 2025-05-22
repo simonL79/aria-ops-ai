@@ -95,55 +95,56 @@ export const processEntities = async (scanResultId: string, content: string): Pr
   try {
     const entities = extractEntitiesFromText(content);
     
-    // Check if required columns exist by querying them directly
-    const { data: columnsCheck, error: columnsError } = await supabase
-      .from('scan_results')
-      .select('id')
-      .limit(1);
+    // Check if required columns exist
+    const { data: columnsData, error: columnsError } = await supabase
+      .from('information_schema.columns')
+      .select('column_name')
+      .eq('table_name', 'scan_results')
+      .eq('column_name', 'detected_entities');
+    
+    const hasDetectedEntitiesColumn = columnsData && columnsData.length > 0;
     
     if (columnsError) {
-      console.error("Error checking scan_results table:", columnsError);
-      toast.error("Error accessing the database");
+      console.error("Error checking scan_results columns:", columnsError);
+      toast.error("Error accessing the database schema");
       return entities;
     }
     
-    // Only update the database if entities were found
-    if (entities.length > 0) {
+    // Only update the database if entities were found and column exists
+    if (entities.length > 0 && hasDetectedEntitiesColumn) {
       try {
-        // Check if the columns exist using a custom SQL query
-        const { data: hasColumn, error: queryError } = await supabase
-          .from('scan_results')
-          .select('id')
-          .limit(1);
-          
-        if (queryError) {
-          console.error("Error checking column existence:", queryError);
-          toast.error("The entity recognition feature requires database migration");
-          return entities;
-        }
+        // Prepare update payload
+        const updatePayload: Record<string, any> = {
+          is_identified: true
+        };
         
-        // Try to update with safeguards against missing columns
-        try {
-          const updatePayload: Record<string, any> = {
-            is_identified: true
-          };
-          
-          // Only add fields if we've confirmed they exist in the schema
-          // This helps prevent TypeScript errors when accessing properties
+        // Only add detected_entities if the column exists
+        if (hasDetectedEntitiesColumn) {
           const detectedEntitiesJson = entities.map(e => e.name);
           updatePayload.detected_entities = detectedEntitiesJson;
           
-          const personEntity = entities.find(e => e.type === 'person');
-          if (personEntity) {
-            updatePayload.risk_entity_name = personEntity.name;
-            updatePayload.risk_entity_type = 'person';
-          } else {
-            const orgEntity = entities.find(e => e.type === 'organization');
-            if (orgEntity) {
-              updatePayload.risk_entity_name = orgEntity.name;
-              updatePayload.risk_entity_type = 'organization';
+          // Check if risk_entity columns also exist
+          const { data: riskColumns } = await supabase
+            .from('information_schema.columns')
+            .select('column_name')
+            .eq('table_name', 'scan_results')
+            .in('column_name', ['risk_entity_name', 'risk_entity_type']);
+          
+          const hasRiskColumns = riskColumns && riskColumns.length === 2;
+          
+          if (hasRiskColumns) {
+            const personEntity = entities.find(e => e.type === 'person');
+            if (personEntity) {
+              updatePayload.risk_entity_name = personEntity.name;
+              updatePayload.risk_entity_type = 'person';
             } else {
-              updatePayload.risk_entity_type = 'unknown';
+              const orgEntity = entities.find(e => e.type === 'organization');
+              if (orgEntity) {
+                updatePayload.risk_entity_name = orgEntity.name;
+                updatePayload.risk_entity_type = 'organization';
+              } else {
+                updatePayload.risk_entity_type = 'unknown';
+              }
             }
           }
           
@@ -155,12 +156,9 @@ export const processEntities = async (scanResultId: string, content: string): Pr
           if (updateError) {
             console.error('Error storing entities:', updateError);
           }
-        } catch (updateError) {
-          console.error('Error updating scan results:', updateError);
         }
-      } catch (error) {
-        console.error('Error accessing column data:', error);
-        toast.error("Database columns may be missing. Please run the migration.");
+      } catch (updateError) {
+        console.error('Error updating scan results:', updateError);
       }
     }
     
@@ -176,21 +174,23 @@ export const processEntities = async (scanResultId: string, content: string): Pr
  */
 export const getAllEntities = async (): Promise<Entity[]> => {
   try {
-    // Check if required columns exist by querying them directly
-    try {
-      const { data: hasColumns, error: queryError } = await supabase
-        .from('scan_results')
-        .select('id')
-        .limit(1);
-      
-      if (queryError) {
-        console.error("Entity recognition columns may not exist:", queryError);
-        toast.error("The entity recognition feature requires database migration");
-        return [];
-      }
-    } catch (error) {
-      console.error("Error checking column existence:", error);
-      toast.error("Unable to verify database schema");
+    // Check if required columns exist
+    const { data: columnsData, error: columnsError } = await supabase
+      .from('information_schema.columns')
+      .select('column_name')
+      .eq('table_name', 'scan_results')
+      .in('column_name', ['detected_entities', 'risk_entity_name', 'risk_entity_type']);
+    
+    if (columnsError) {
+      console.error("Entity recognition columns may not exist:", columnsError);
+      toast.error("The entity recognition feature requires database migration");
+      return [];
+    }
+
+    const hasRequiredColumns = columnsData && columnsData.length >= 1;
+    
+    if (!hasRequiredColumns) {
+      toast.error("Required database columns for entity recognition are missing");
       return [];
     }
     
@@ -212,8 +212,10 @@ export const getAllEntities = async (): Promise<Entity[]> => {
     const entityMap = new Map<string, Entity>();
     
     data.forEach(result => {
+      if (!result) return;
+      
       // Safely process detected_entities if it exists and is an array
-      if (result && result.detected_entities && Array.isArray(result.detected_entities)) {
+      if (result.detected_entities && Array.isArray(result.detected_entities)) {
         result.detected_entities.forEach((name: string) => {
           if (entityMap.has(name)) {
             const entity = entityMap.get(name)!;
@@ -241,10 +243,9 @@ export const getAllEntities = async (): Promise<Entity[]> => {
       }
       
       // Safely process risk_entity_name if it exists and is not already included
-      if (result && result.risk_entity_name && typeof result.risk_entity_name === 'string' && 
+      if (result.risk_entity_name && typeof result.risk_entity_name === 'string' && 
           !entityMap.has(result.risk_entity_name)) {
         
-        // Ensure risk_entity_type is a valid type, defaulting to 'unknown'
         let type: Entity['type'] = 'unknown';
         
         if (result.risk_entity_type && 
@@ -284,20 +285,22 @@ interface ScanResultWithEntities {
 export const batchProcessEntities = async (): Promise<number> => {
   try {
     // Check if required columns exist
-    try {
-      const { data: hasColumns, error: queryError } = await supabase
-        .from('scan_results')
-        .select('id')
-        .limit(1);
-      
-      if (queryError) {
-        console.error("Required columns may not exist:", queryError);
-        toast.error("The entity recognition feature requires database migration");
-        return 0;
-      }
-    } catch (error) {
-      console.error("Error checking column existence:", error);
-      toast.error("Unable to verify database schema");
+    const { data: columnsData, error: columnsError } = await supabase
+      .from('information_schema.columns')
+      .select('column_name')
+      .eq('table_name', 'scan_results')
+      .in('column_name', ['detected_entities', 'is_identified']);
+    
+    if (columnsError) {
+      console.error("Required columns may not exist:", columnsError);
+      toast.error("The entity recognition feature requires database migration");
+      return 0;
+    }
+
+    const hasRequiredColumns = columnsData && columnsData.length >= 1;
+    
+    if (!hasRequiredColumns) {
+      toast.error("Required database columns for entity recognition are missing");
       return 0;
     }
     
@@ -344,20 +347,22 @@ export const batchProcessEntities = async (): Promise<number> => {
 export const getScanResultsByEntity = async (entityName: string): Promise<any[]> => {
   try {
     // Check if required columns exist
-    try {
-      const { data: hasColumns, error: queryError } = await supabase
-        .from('scan_results')
-        .select('id')
-        .limit(1);
-      
-      if (queryError) {
-        console.error("Required columns may not exist:", queryError);
-        toast.error("The entity recognition feature requires database migration");
-        return [];
-      }
-    } catch (error) {
-      console.error("Error checking column existence:", error);
-      toast.error("Unable to verify database schema");
+    const { data: columnsData, error: columnsError } = await supabase
+      .from('information_schema.columns')
+      .select('column_name')
+      .eq('table_name', 'scan_results')
+      .in('column_name', ['detected_entities', 'risk_entity_name']);
+    
+    if (columnsError) {
+      console.error("Required columns may not exist:", columnsError);
+      toast.error("The entity recognition feature requires database migration");
+      return [];
+    }
+
+    const hasRequiredColumns = columnsData && columnsData.length >= 1;
+    
+    if (!hasRequiredColumns) {
+      toast.error("Required database columns for entity recognition are missing");
       return [];
     }
     
