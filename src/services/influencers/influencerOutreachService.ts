@@ -48,9 +48,21 @@ export const getInfluencerAlerts = async (
   filter?: { status?: string; platform?: string; severity?: string }
 ): Promise<InfluencerAlert[]> => {
   try {
+    // For development, create dummy data if no alerts exist
+    const { count } = await supabase
+      .from('scan_results')
+      .select('*', { count: 'exact', head: true })
+      .eq('source_type', 'influencer');
+    
+    if (count === 0 || count === null) {
+      await createDummyInfluencerAlerts();
+    }
+    
+    // Query alerts from scan_results table
     let query = supabase
-      .from('influencer_alerts')
+      .from('scan_results')
       .select('*')
+      .eq('source_type', 'influencer')
       .order('created_at', { ascending: false });
 
     // Apply filters if provided
@@ -74,7 +86,22 @@ export const getInfluencerAlerts = async (
       return [];
     }
 
-    return data as InfluencerAlert[];
+    // Convert scan_results to InfluencerAlert format
+    return data.map(item => ({
+      id: item.id,
+      influencer_name: item.detected_entities?.[0] || "Unknown Influencer",
+      platform: item.platform,
+      controversy_type: item.threat_type || "Unknown Issue",
+      source: item.source_type || "Social Media",
+      source_url: item.url,
+      content: item.content,
+      severity: item.severity as 'high' | 'medium' | 'low',
+      status: item.status as 'new' | 'contacted' | 'responded' | 'converted' | 'ignored',
+      sentiment_score: item.sentiment,
+      opportunity_score: item.confidence_score,
+      created_at: item.created_at,
+      detected_at: item.created_at
+    }));
   } catch (error) {
     console.error("Error in getInfluencerAlerts:", error);
     return [];
@@ -82,31 +109,147 @@ export const getInfluencerAlerts = async (
 };
 
 /**
+ * Create dummy influencer alerts for development/demo purposes
+ */
+const createDummyInfluencerAlerts = async (): Promise<void> => {
+  try {
+    const dummyAlerts = [
+      {
+        detected_entities: ["JamieStylez"],
+        platform: "Instagram",
+        content: "ASA has ruled against influencer JamieStylez for undisclosed sponsored content related to beauty products.",
+        url: "https://www.asa.org.uk/rulings/example-ruling-123.html",
+        severity: "high",
+        status: "new",
+        threat_type: "Regulatory Warning",
+        source_type: "influencer",
+        confidence_score: 85,
+        sentiment: -75,
+        potential_reach: 450000
+      },
+      {
+        detected_entities: ["FitnessFred"],
+        platform: "YouTube",
+        content: "FitnessFred's supplement line pulled from stores after investigation into ingredient claims.",
+        url: "https://www.bbc.co.uk/news/example-article",
+        severity: "high",
+        status: "new",
+        threat_type: "Product Safety Concern",
+        source_type: "influencer",
+        confidence_score: 92,
+        sentiment: -80,
+        potential_reach: 1200000
+      },
+      {
+        detected_entities: ["TravelWithMia"],
+        platform: "TikTok",
+        content: "Fans criticizing TravelWithMia after controversial statements about local customs during international trip.",
+        url: "https://www.socialmediatrends.com/example-article",
+        severity: "medium",
+        status: "new",
+        threat_type: "Public Backlash",
+        source_type: "influencer",
+        confidence_score: 78,
+        sentiment: -60,
+        potential_reach: 890000
+      },
+      {
+        detected_entities: ["GamingGuru"],
+        platform: "Twitch",
+        content: "GamingGuru loses major sponsor after inappropriate comments during livestream.",
+        url: "https://www.esportsnews.com/example-article",
+        severity: "medium",
+        status: "new",
+        threat_type: "Brand Partnership Issue",
+        source_type: "influencer",
+        confidence_score: 88,
+        sentiment: -65,
+        potential_reach: 750000
+      },
+      {
+        detected_entities: ["StyleIcon"],
+        platform: "Twitter",
+        content: "Fashion brand cuts ties with StyleIcon over allegations of copied designs.",
+        url: "https://www.fashionindustry.com/example-article",
+        severity: "high",
+        status: "new",
+        threat_type: "Intellectual Property Dispute",
+        source_type: "influencer",
+        confidence_score: 86,
+        sentiment: -70,
+        potential_reach: 520000
+      }
+    ];
+
+    for (const alert of dummyAlerts) {
+      await supabase.from('scan_results').insert([alert]);
+    }
+  } catch (error) {
+    console.error("Error creating dummy alerts:", error);
+  }
+};
+
+/**
  * Get outreach templates
  */
 export const getOutreachTemplates = async (type?: OutreachType): Promise<OutreachTemplate[]> => {
-  try {
-    let query = supabase
-      .from('outreach_templates')
-      .select('*')
-      .order('created_at', { ascending: false });
+  // For development, return hardcoded templates
+  const emailTemplates: OutreachTemplate[] = [
+    {
+      id: '1',
+      name: 'Standard Outreach Email',
+      subject: 'A.R.I.A. Reputation Intelligence: Regarding Recent Coverage',
+      content: `Dear {{influencer_name}},
 
-    if (type) {
-      query = query.eq('type', type);
+Our A.R.I.A. monitoring system recently detected coverage about you regarding "{{controversy_type}}" on {{source}}.
+
+At our agency, we specialize in helping public figures and influencers effectively manage their online reputation and navigate challenging media situations.
+
+We noticed this before most people did, and our proactive approach can help you:
+• Assess the potential impact on your online presence
+• Develop a strategic response plan
+• Mitigate negative sentiment and audience response
+• Protect your brand partnerships and revenue streams
+
+Would you be interested in a confidential, no-obligation consultation to discuss how we might help?
+
+Best regards,
+A.R.I.A. Reputation Intelligence Team`,
+      type: 'email',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: '2',
+      name: 'Urgent Intervention Email',
+      subject: 'Urgent: Reputation Management Support Available',
+      content: `Dear {{influencer_name}},
+
+Our A.R.I.A. monitoring system has flagged a high-priority situation regarding "{{controversy_type}}" that could significantly impact your online reputation.
+
+Immediate action may help contain this situation before it escalates further. Our team has extensive experience helping influencers navigate similar challenges.
+
+Would you be available for an urgent consultation to discuss response strategies?
+
+Regards,
+A.R.I.A. Crisis Response Team`,
+      type: 'email',
+      created_at: new Date().toISOString()
     }
-
-    const { data, error } = await query;
-
-    if (error) {
-      console.error("Error fetching outreach templates:", error);
-      return [];
+  ];
+  
+  const dmTemplates: OutreachTemplate[] = [
+    {
+      id: '3',
+      name: 'Brief Platform DM',
+      content: `Hi {{influencer_name}}, I'm reaching out from A.R.I.A. Reputation Intelligence. We've detected some concerning coverage about you regarding "{{controversy_type}}". We help influencers navigate these situations and protect their brand. Would you be interested in hearing how we can help? (This is discreet and confidential)`,
+      type: 'dm',
+      created_at: new Date().toISOString()
     }
-
-    return data as OutreachTemplate[];
-  } catch (error) {
-    console.error("Error in getOutreachTemplates:", error);
-    return [];
-  }
+  ];
+  
+  return type === 'email' ? emailTemplates : 
+         type === 'dm' ? dmTemplates : 
+         [...emailTemplates, ...dmTemplates];
 };
 
 /**
@@ -188,7 +331,7 @@ export const sendEmailOutreach = async (
       return false;
     }
 
-    // Update the influencer status
+    // Update the influencer status in scan_results table
     await updateInfluencerStatus(influencer.id, 'contacted');
     
     // Log the activity
@@ -269,7 +412,7 @@ export const updateInfluencerStatus = async (
 ): Promise<boolean> => {
   try {
     const { error } = await supabase
-      .from('influencer_alerts')
+      .from('scan_results')
       .update({ status, updated_at: new Date().toISOString() })
       .eq('id', id);
 

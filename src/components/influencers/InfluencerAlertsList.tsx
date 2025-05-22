@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -96,7 +95,7 @@ const InfluencerAlertsList = () => {
       case 'high':
         return <Badge variant="destructive">High Risk</Badge>;
       case 'medium':
-        return <Badge variant="warning" className="bg-yellow-500 hover:bg-yellow-600">Medium Risk</Badge>;
+        return <Badge className="bg-yellow-500 hover:bg-yellow-600">Medium Risk</Badge>;
       case 'low':
         return <Badge variant="outline">Low Risk</Badge>;
       default:
