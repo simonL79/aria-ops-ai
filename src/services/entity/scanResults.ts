@@ -16,8 +16,8 @@ export interface ScanResult {
   risk_entity_name?: string | null;
   risk_entity_type?: string | null;
   created_at?: string;
-  // Use a string index signature instead of recursive self-reference
-  [key: string]: any;
+  // Use primitive types instead of recursive self-reference
+  [key: string]: string | string[] | null | undefined;
 }
 
 /**

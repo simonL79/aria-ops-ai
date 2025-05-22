@@ -108,8 +108,8 @@ export async function getAllEntities(): Promise<Entity[]> {
     const entityTypes = new Map<string, string>();
 
     data.forEach(result => {
-      // Only process if result is an object (not null or undefined)
-      if (result === null || typeof result !== 'object') return;
+      // Only process if result is a valid object (not null or undefined)
+      if (!result || typeof result !== 'object') return;
       
       // Safely check if detected_entities exists and is an array
       if (hasDetectedEntities && hasScanProperty(result, 'detected_entities') && result.detected_entities !== null) {
