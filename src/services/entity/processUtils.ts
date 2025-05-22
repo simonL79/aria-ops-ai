@@ -4,11 +4,12 @@ import { toast } from 'sonner';
 import { Entity } from '@/types/entity';
 import { checkColumnExists } from '@/utils/databaseUtils';
 import { extractEntitiesFromText } from './extractionUtils';
+import { parseDetectedEntities } from '@/utils/parseDetectedEntities';
 
 // Simple interface for scan results to avoid recursive type issues
 interface ScanResultWithEntities {
   id: string;
-  detected_entities?: string[];
+  detected_entities?: unknown;
   risk_entity_name?: string;
   risk_entity_type?: string;
   content: string;

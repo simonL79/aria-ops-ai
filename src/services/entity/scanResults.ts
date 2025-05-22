@@ -2,15 +2,9 @@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { checkColumnExists } from '@/utils/databaseUtils';
+import { parseDetectedEntities, ScanEntity } from '@/utils/parseDetectedEntities';
 
-// Define a more specific interface for entities to avoid recursive type issues
-export interface DetectedEntity {
-  name: string;
-  type?: string;
-  confidence?: number;
-}
-
-// Define a proper interface to avoid recursive type issues
+// Define a more specific interface for scan results to avoid recursive type issues
 export interface ScanResult {
   id: string;
   content: string;
@@ -19,8 +13,8 @@ export interface ScanResult {
   severity: string;
   status: string;
   threat_type?: string;
-  // Make detected_entities flexible to handle various formats from the database
-  detected_entities?: string[] | DetectedEntity[] | null;
+  // Use ScanEntity[] for detected_entities to avoid type recursion issues
+  detected_entities?: ScanEntity[] | string[] | null;
   risk_entity_name?: string | null;
   risk_entity_type?: string | null;
   created_at?: string;
@@ -39,43 +33,6 @@ export function isScanResult(obj: any): obj is ScanResult {
          'id' in obj && 
          'content' in obj &&
          'platform' in obj;
-}
-
-/**
- * Process detected entities to ensure consistent format
- */
-function processDetectedEntities(entities: unknown): string[] | null {
-  if (!entities) return null;
-  
-  // If already string array, return as is
-  if (Array.isArray(entities) && entities.every(e => typeof e === 'string')) {
-    return entities;
-  }
-  
-  // If JSON string, try to parse it
-  if (typeof entities === 'string') {
-    try {
-      const parsed = JSON.parse(entities);
-      if (Array.isArray(parsed)) {
-        return parsed.map(e => typeof e === 'string' ? e : e.name || String(e));
-      }
-    } catch {
-      // If parsing fails, treat as a single entity
-      return [entities];
-    }
-  }
-  
-  // For objects or other formats, extract names or convert to strings
-  if (Array.isArray(entities)) {
-    return entities.map(e => {
-      if (typeof e === 'object' && e !== null && 'name' in e) {
-        return String(e.name);
-      }
-      return String(e);
-    });
-  }
-  
-  return null;
 }
 
 /**
@@ -106,9 +63,11 @@ export const getScanResultsByEntity = async (entityName: string): Promise<ScanRe
         // Process data without deep nesting in types
         const filteredData = nameData.filter(isScanResult);
         return filteredData.map(result => {
-          const processed = { ...result };
-          processed.detected_entities = processDetectedEntities(result.detected_entities);
-          return processed as ScanResult;
+          // Create a new object to avoid modifying the original
+          const processed: ScanResult = { ...result };
+          // Parse detected entities using our utility
+          processed.detected_entities = parseDetectedEntities(result.detected_entities);
+          return processed;
         });
       }
     }
@@ -124,9 +83,11 @@ export const getScanResultsByEntity = async (entityName: string): Promise<ScanRe
         // Process data without deep nesting in types
         const filteredData = arrayData.filter(isScanResult);
         results = filteredData.map(result => {
-          const processed = { ...result };
-          processed.detected_entities = processDetectedEntities(result.detected_entities);
-          return processed as ScanResult;
+          // Create a new object to avoid modifying the original
+          const processed: ScanResult = { ...result };
+          // Parse detected entities using our utility
+          processed.detected_entities = parseDetectedEntities(result.detected_entities);
+          return processed;
         });
       }
     }
