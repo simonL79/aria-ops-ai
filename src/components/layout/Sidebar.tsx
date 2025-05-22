@@ -8,7 +8,9 @@ import {
   Activity,
   Settings,
   Search,
-  Building2
+  Building2,
+  MessageSquare,
+  Bell
 } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -68,10 +70,22 @@ export function Sidebar({ isLoading }: SidebarProps) {
       active: pathname === "/dashboard/ai-scraping",
     },
     {
+      label: "Mentions",
+      icon: <Bell className="h-4 w-4" />,
+      href: "/dashboard/mentions",
+      active: pathname === "/dashboard/mentions",
+    },
+    {
+      label: "Engagement",
+      icon: <MessageSquare className="h-4 w-4" />,
+      href: "/dashboard/engagement",
+      active: pathname === "/dashboard/engagement",
+    },
+    {
       label: "Monitor",
       icon: <Activity className="h-4 w-4" />,
       href: "/dashboard/monitor",
-      active: pathname === "/dashboard/monitor",
+      active: pathname === "/dashboard/monitor" || pathname === "/monitor",
     },
     {
       label: "New Companies",

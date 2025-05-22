@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ReactNode } from 'react';
 import { 
@@ -21,7 +20,10 @@ import {
   Activity, 
   Building2, 
   Settings, 
-  LogOut 
+  LogOut,
+  MessageSquare,
+  Bell,
+  BarChart 
 } from 'lucide-react';
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from '@/hooks/useAuth';
@@ -88,10 +90,28 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       active: pathname === "/dashboard/ai-scraping",
     },
     {
+      label: "Mentions",
+      icon: <Bell className="h-4 w-4" />,
+      href: "/dashboard/mentions",
+      active: pathname === "/dashboard/mentions",
+    },
+    {
+      label: "Engagement",
+      icon: <MessageSquare className="h-4 w-4" />,
+      href: "/dashboard/engagement",
+      active: pathname === "/dashboard/engagement",
+    },
+    {
+      label: "Analytics",
+      icon: <BarChart className="h-4 w-4" />,
+      href: "/dashboard/analytics",
+      active: pathname === "/dashboard/analytics",
+    },
+    {
       label: "Monitor",
       icon: <Activity className="h-4 w-4" />,
       href: "/dashboard/monitor",
-      active: pathname === "/dashboard/monitor",
+      active: pathname === "/dashboard/monitor" || pathname === "/monitor",
     },
     {
       label: "New Companies",
@@ -102,8 +122,8 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     {
       label: "Settings",
       icon: <Settings className="h-4 w-4" />,
-      href: "/dashboard/settings",
-      active: pathname === "/dashboard/settings",
+      href: "/settings",
+      active: pathname === "/settings",
     }
   ];
 
