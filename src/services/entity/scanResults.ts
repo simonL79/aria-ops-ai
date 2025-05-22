@@ -11,7 +11,7 @@ export interface RawScanResult {
   severity: string;
   status: string;
   threat_type?: string;
-  detected_entities?: unknown; // Use unknown type to avoid recursive type issues
+  detected_entities?: unknown;
   risk_entity_name?: string | null;
   risk_entity_type?: string | null;
   created_at?: string;
@@ -90,7 +90,7 @@ export function parseDetectedEntities(input: unknown): ScanEntity[] {
 }
 
 /**
- * Get scan results by entity name - simplified approach that doesn't rely on column_exists
+ * Get scan results by entity name - simplified approach
  */
 export const getScanResultsByEntity = async (entityName: string): Promise<ScanResult[]> => {
   try {
@@ -103,15 +103,12 @@ export const getScanResultsByEntity = async (entityName: string): Promise<ScanRe
       .eq('risk_entity_name', entityName);
     
     if (!nameError && nameData && nameData.length > 0) {
-      // Process raw data into typed ScanResults
-      const rawResults = nameData;
+      const processedResults = nameData.map((row): ScanResult => ({
+        ...row,
+        detected_entities: parseDetectedEntities(row.detected_entities)
+      }));
       
-      return rawResults.map((row: any): ScanResult => {
-        return {
-          ...row,
-          detected_entities: parseDetectedEntities(row.detected_entities)
-        };
-      });
+      return processedResults;
     }
     
     // Try with detected_entities field
@@ -121,15 +118,12 @@ export const getScanResultsByEntity = async (entityName: string): Promise<ScanRe
       .contains('detected_entities', [entityName]);
     
     if (!arrayError && arrayData) {
-      // Process raw data into typed ScanResults
-      const rawResults = arrayData;
+      const processedResults = arrayData.map((row): ScanResult => ({
+        ...row,
+        detected_entities: parseDetectedEntities(row.detected_entities)
+      }));
       
-      results = rawResults.map((row: any): ScanResult => {
-        return {
-          ...row,
-          detected_entities: parseDetectedEntities(row.detected_entities)
-        };
-      });
+      results = processedResults;
     }
     
     return results;
@@ -141,7 +135,7 @@ export const getScanResultsByEntity = async (entityName: string): Promise<ScanRe
 };
 
 /**
- * Get all scan results - simplified approach 
+ * Get all scan results - simplified approach
  */
 export const getAllScanResults = async (): Promise<ScanResult[]> => {
   try {
@@ -156,12 +150,10 @@ export const getAllScanResults = async (): Promise<ScanResult[]> => {
     }
     
     // Process raw data into typed ScanResults
-    return data.map((row: any): ScanResult => {
-      return {
-        ...row,
-        detected_entities: parseDetectedEntities(row.detected_entities)
-      };
-    });
+    return data.map((row): ScanResult => ({
+      ...row,
+      detected_entities: parseDetectedEntities(row.detected_entities)
+    }));
   } catch (error) {
     console.error("Error fetching scan results:", error);
     return [];

@@ -2,7 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Entity } from '@/types/entity';
-import { checkColumnExists, hasScanProperty } from '@/utils/databaseUtils';
+import { hasScanProperty } from '@/utils/databaseUtils';
 
 // Define type for scan result rows
 type ScanRow = {
@@ -102,30 +102,10 @@ function processEntityData(data: ScanRow[] | null): Map<string, Entity> {
  */
 export const getAllEntities = async (): Promise<Entity[]> => {
   try {
-    // Check if required columns exist
-    const hasDetectedEntities = await checkColumnExists('scan_results', 'detected_entities');
-    const hasRiskEntityName = await checkColumnExists('scan_results', 'risk_entity_name');
-    const hasRiskEntityType = await checkColumnExists('scan_results', 'risk_entity_type');
-    
-    if (!hasDetectedEntities && !hasRiskEntityName) {
-      toast.error("Required database columns for entity recognition are missing");
-      return [];
-    }
-    
-    // Build query based on available columns
-    let selectStatement = '*';
-    if (hasDetectedEntities && hasRiskEntityName && hasRiskEntityType) {
-      selectStatement = 'detected_entities, risk_entity_name, risk_entity_type';
-    } else if (hasDetectedEntities) {
-      selectStatement = 'detected_entities';
-    } else if (hasRiskEntityName) {
-      selectStatement = 'risk_entity_name, risk_entity_type';
-    }
-    
-    // If columns are accessible, proceed with the query
+    // Query scan results with entity data
     const { data, error } = await supabase
       .from('scan_results')
-      .select(selectStatement);
+      .select('detected_entities, risk_entity_name, risk_entity_type');
     
     if (error) {
       console.error('Error fetching entities:', error);

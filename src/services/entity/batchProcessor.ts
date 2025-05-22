@@ -1,7 +1,6 @@
 
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { checkColumnExists } from '@/utils/databaseUtils';
 import { processEntities } from './processUtils';
 
 /**
@@ -9,15 +8,6 @@ import { processEntities } from './processUtils';
  */
 export const batchProcessEntities = async (): Promise<number> => {
   try {
-    // Check if required columns exist
-    const hasDetectedEntities = await checkColumnExists('scan_results', 'detected_entities');
-    const hasIsIdentified = await checkColumnExists('scan_results', 'is_identified');
-    
-    if (!hasDetectedEntities || !hasIsIdentified) {
-      toast.error("Required database columns for entity recognition are missing");
-      return 0;
-    }
-    
     // Get scan results that haven't been processed
     const { data: scanResults, error } = await supabase
       .from('scan_results')
