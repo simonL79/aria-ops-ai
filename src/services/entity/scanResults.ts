@@ -103,10 +103,21 @@ export const getScanResultsByEntity = async (entityName: string): Promise<ScanRe
       .eq('risk_entity_name', entityName);
     
     if (!nameError && nameData && nameData.length > 0) {
-      // Fix: Use an explicit type declaration for the row parameter
+      // Explicitly extract fields to avoid spreading and type recursion
       const processedResults = (nameData as any[]).map((row: any) => {
         const result: ScanResult = {
-          ...row,
+          id: row.id,
+          content: row.content,
+          platform: row.platform,
+          url: row.url,
+          severity: row.severity,
+          status: row.status,
+          threat_type: row.threat_type,
+          risk_entity_name: row.risk_entity_name,
+          risk_entity_type: row.risk_entity_type,
+          created_at: row.created_at,
+          confidence_score: row.confidence_score,
+          is_identified: row.is_identified,
           detected_entities: parseDetectedEntities(row.detected_entities)
         };
         return result;
@@ -122,10 +133,21 @@ export const getScanResultsByEntity = async (entityName: string): Promise<ScanRe
       .contains('detected_entities', [entityName]);
     
     if (!arrayError && arrayData) {
-      // Fix: Use an explicit type declaration here too
+      // Explicitly extract fields here too
       const processedResults = (arrayData as any[]).map((row: any) => {
         const result: ScanResult = {
-          ...row,
+          id: row.id,
+          content: row.content,
+          platform: row.platform,
+          url: row.url,
+          severity: row.severity,
+          status: row.status,
+          threat_type: row.threat_type,
+          risk_entity_name: row.risk_entity_name,
+          risk_entity_type: row.risk_entity_type,
+          created_at: row.created_at,
+          confidence_score: row.confidence_score,
+          is_identified: row.is_identified,
           detected_entities: parseDetectedEntities(row.detected_entities)
         };
         return result;
@@ -157,10 +179,21 @@ export const getAllScanResults = async (): Promise<ScanResult[]> => {
       return [];
     }
     
-    // Process raw data into typed ScanResults with explicit typing
+    // Process raw data into typed ScanResults with explicit field extraction
     return (data as any[]).map((row: any) => {
       const result: ScanResult = {
-        ...row,
+        id: row.id,
+        content: row.content,
+        platform: row.platform,
+        url: row.url,
+        severity: row.severity,
+        status: row.status,
+        threat_type: row.threat_type,
+        risk_entity_name: row.risk_entity_name,
+        risk_entity_type: row.risk_entity_type,
+        created_at: row.created_at,
+        confidence_score: row.confidence_score,
+        is_identified: row.is_identified,
         detected_entities: parseDetectedEntities(row.detected_entities)
       };
       return result;
