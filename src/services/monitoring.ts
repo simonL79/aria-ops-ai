@@ -1,8 +1,9 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { ScanResult, MonitoringStatus } from './monitoring/types';
+import type { ScanResult, MonitoringStatus } from './monitoring/types';
 
-export { ScanResult, MonitoringStatus };
+export type { ScanResult, MonitoringStatus };
 
 /**
  * Get the current monitoring status
@@ -22,15 +23,17 @@ export const getMonitoringStatus = async (): Promise<MonitoringStatus> => {
         isActive: false,
         lastRun: null,
         nextRun: null,
-        sources: 0
+        sources: 0,
+        sourcesCount: 0
       };
     }
     
     return {
       isActive: data.is_active,
-      lastRun: data.last_run,
-      nextRun: data.next_run,
-      sources: data.sources_count
+      lastRun: data.last_run ? new Date(data.last_run) : null,
+      nextRun: data.next_run ? new Date(data.next_run) : null,
+      sources: data.sources_count,
+      sourcesCount: data.sources_count
     };
     
   } catch (error) {
@@ -39,7 +42,8 @@ export const getMonitoringStatus = async (): Promise<MonitoringStatus> => {
       isActive: false,
       lastRun: null,
       nextRun: null,
-      sources: 0
+      sources: 0,
+      sourcesCount: 0
     };
   }
 };

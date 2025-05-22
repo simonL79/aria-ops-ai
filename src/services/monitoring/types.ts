@@ -49,6 +49,9 @@ export interface ScanResult {
   potentialReach?: number;
   potential_reach?: number;
   category?: string;
+  client_id?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface MonitoringConfig {
