@@ -2,38 +2,17 @@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Entity } from '@/types/entity';
-import { checkColumnExists, hasScanProperty } from '@/utils/databaseUtils';
+import { hasScanProperty } from '@/utils/databaseUtils';
 
 /**
  * Get all entities from database
  */
 export async function getAllEntities(): Promise<Entity[]> {
   try {
-    // Check if the required columns exist
-    const hasDetectedEntities = await checkColumnExists('scan_results', 'detected_entities');
-    const hasRiskEntityName = await checkColumnExists('scan_results', 'risk_entity_name');
-    const hasRiskEntityType = await checkColumnExists('scan_results', 'risk_entity_type');
-    
-    if (!hasDetectedEntities && !hasRiskEntityName) {
-      console.warn("Required entity columns don't exist in the database");
-      toast.error("Entity recognition features require database setup");
-      return [];
-    }
-    
-    // Build the select statement based on what columns exist
-    let selectStatement = '*';
-    if (hasDetectedEntities && hasRiskEntityName && hasRiskEntityType) {
-      selectStatement = 'detected_entities, risk_entity_name, risk_entity_type';
-    } else if (hasDetectedEntities) {
-      selectStatement = 'detected_entities';
-    } else if (hasRiskEntityName) {
-      selectStatement = 'risk_entity_name, risk_entity_type';
-    }
-    
-    // Query with the appropriate select statement
+    // Query all scan results
     const { data, error } = await supabase
       .from('scan_results')
-      .select(selectStatement);
+      .select('detected_entities, risk_entity_name, risk_entity_type');
 
     if (error) {
       console.error("Error fetching entities:", error);
@@ -101,14 +80,10 @@ export async function getAllEntities(): Promise<Entity[]> {
     // Process each scan result
     data.forEach(result => {
       // Process detected_entities if it exists
-      if (hasDetectedEntities) {
-        processDetectedEntities(result);
-      }
+      processDetectedEntities(result);
       
       // Process risk_entity_name if it exists
-      if (hasRiskEntityName) {
-        processRiskEntity(result);
-      }
+      processRiskEntity(result);
     });
 
     const formattedEntities: Entity[] = Array.from(entityCounts.entries())

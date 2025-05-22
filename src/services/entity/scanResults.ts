@@ -1,8 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { checkColumnExists } from '@/utils/databaseUtils';
-import { parseDetectedEntities, ScanEntity } from '@/utils/parseDetectedEntities';
 
 // Define a strict interface for raw scan results from database
 export interface RawScanResult {
@@ -19,7 +17,13 @@ export interface RawScanResult {
   created_at?: string;
   confidence_score?: number | null;
   is_identified?: boolean;
-  [key: string]: unknown; // Allow for additional properties
+}
+
+// Define a simple entity structure
+export interface ScanEntity {
+  name: string;
+  type?: string;
+  confidence?: number;
 }
 
 // Define processed scan result type after parsing detected entities
@@ -39,67 +43,127 @@ export function isScanResult(obj: any): obj is ScanResult {
 }
 
 /**
- * Get scan results by entity name
+ * Simple function to safely parse detected entities from various formats
+ */
+export function parseDetectedEntities(input: unknown): ScanEntity[] {
+  if (!input) return [];
+  
+  // Handle array input
+  if (Array.isArray(input)) {
+    return input.map(item => {
+      // Handle string items
+      if (typeof item === 'string') {
+        return { name: item };
+      }
+      
+      // Handle object items
+      if (item && typeof item === 'object') {
+        if ('name' in item && typeof item.name === 'string') {
+          return {
+            name: item.name,
+            type: typeof item.type === 'string' ? item.type : undefined,
+            confidence: typeof item.confidence === 'number' ? item.confidence : undefined
+          };
+        }
+      }
+      
+      // Default fallback
+      return { name: String(item) };
+    });
+  }
+  
+  // Handle string input (e.g., JSON string)
+  if (typeof input === 'string') {
+    try {
+      const parsed = JSON.parse(input);
+      if (Array.isArray(parsed)) {
+        return parseDetectedEntities(parsed);
+      }
+      return [{ name: input }];
+    } catch {
+      return [{ name: input }];
+    }
+  }
+  
+  // Default: empty array
+  return [];
+}
+
+/**
+ * Get scan results by entity name - simplified approach that doesn't rely on column_exists
  */
 export const getScanResultsByEntity = async (entityName: string): Promise<ScanResult[]> => {
   try {
-    // Check if required columns exist
-    const hasDetectedEntities = await checkColumnExists('scan_results', 'detected_entities');
-    const hasRiskEntityName = await checkColumnExists('scan_results', 'risk_entity_name');
-    
-    if (!hasDetectedEntities && !hasRiskEntityName) {
-      toast.error("Required database columns for entity recognition are missing");
-      return [];
-    }
-    
-    // Try different approaches based on available columns
     let results: ScanResult[] = [];
     
-    // First try with the risk_entity_name field if it exists
-    if (hasRiskEntityName) {
-      const { data: nameData, error: nameError } = await supabase
-        .from('scan_results')
-        .select('*')
-        .eq('risk_entity_name', entityName);
+    // Try with risk_entity_name field
+    const { data: nameData, error: nameError } = await supabase
+      .from('scan_results')
+      .select('*')
+      .eq('risk_entity_name', entityName);
+    
+    if (!nameError && nameData && nameData.length > 0) {
+      // Process raw data into typed ScanResults
+      const rawResults = nameData;
       
-      if (!nameError && nameData && nameData.length > 0) {
-        // Process raw data into typed ScanResults
-        // Cast to RawScanResult explicitly to avoid TS2589
-        const rawResults = nameData as unknown as RawScanResult[];
-        
-        return rawResults.map((row): ScanResult => {
-          return {
-            ...row,
-            detected_entities: parseDetectedEntities(row.detected_entities)
-          };
-        });
-      }
+      return rawResults.map((row: any): ScanResult => {
+        return {
+          ...row,
+          detected_entities: parseDetectedEntities(row.detected_entities)
+        };
+      });
     }
     
-    // Try using the detected_entities array if it exists
-    if (hasDetectedEntities) {
-      const { data: arrayData, error: arrayError } = await supabase
-        .from('scan_results')
-        .select('*')
-        .contains('detected_entities', [entityName]);
+    // Try with detected_entities field
+    const { data: arrayData, error: arrayError } = await supabase
+      .from('scan_results')
+      .select('*')
+      .contains('detected_entities', [entityName]);
+    
+    if (!arrayError && arrayData) {
+      // Process raw data into typed ScanResults
+      const rawResults = arrayData;
       
-      if (!arrayError && arrayData) {
-        // Process raw data into typed ScanResults
-        // Cast to RawScanResult explicitly to avoid TS2589
-        const rawResults = arrayData as unknown as RawScanResult[];
-        
-        results = rawResults.map((row): ScanResult => {
-          return {
-            ...row,
-            detected_entities: parseDetectedEntities(row.detected_entities)
-          };
-        });
-      }
+      results = rawResults.map((row: any): ScanResult => {
+        return {
+          ...row,
+          detected_entities: parseDetectedEntities(row.detected_entities)
+        };
+      });
     }
     
     return results;
   } catch (error) {
     console.error('Error in getScanResultsByEntity:', error);
+    toast.error("Failed to fetch scan results for entity");
+    return [];
+  }
+};
+
+/**
+ * Get all scan results - simplified approach 
+ */
+export const getAllScanResults = async (): Promise<ScanResult[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('scan_results')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (error || !data) {
+      console.error("Failed to fetch scan results:", error);
+      return [];
+    }
+    
+    // Process raw data into typed ScanResults
+    return data.map((row: any): ScanResult => {
+      return {
+        ...row,
+        detected_entities: parseDetectedEntities(row.detected_entities)
+      };
+    });
+  } catch (error) {
+    console.error("Error fetching scan results:", error);
     return [];
   }
 };
