@@ -108,7 +108,7 @@ export async function getAllEntities(): Promise<Entity[]> {
     const entityTypes = new Map<string, string>();
 
     data.forEach(result => {
-      // Only process if result is an object (not an error)
+      // Only process if result is an object (not null or undefined)
       if (!result || typeof result !== 'object') return;
       
       // Safely check if detected_entities exists and is an array
@@ -136,7 +136,7 @@ export async function getAllEntities(): Promise<Entity[]> {
       
       // Process risk_entity_name if it exists and is not null/undefined
       if (hasRiskEntityName && hasScanProperty(result, 'risk_entity_name')) {
-        const riskEntityName = result.risk_entity_name as string;
+        const riskEntityName = result.risk_entity_name as string | null;
         
         if (typeof riskEntityName === 'string' && riskEntityName) {
           entityCounts.set(riskEntityName, (entityCounts.get(riskEntityName) || 0) + 1);
@@ -144,7 +144,7 @@ export async function getAllEntities(): Promise<Entity[]> {
           // Use risk_entity_type if available, otherwise default to unknown
           let entityType = 'unknown';
           if (hasRiskEntityType && hasScanProperty(result, 'risk_entity_type')) {
-            const riskEntityType = result.risk_entity_type as string;
+            const riskEntityType = result.risk_entity_type as string | null;
             
             if (typeof riskEntityType === 'string' && riskEntityType) {
               const validTypes = ['person', 'organization', 'handle', 'location'];

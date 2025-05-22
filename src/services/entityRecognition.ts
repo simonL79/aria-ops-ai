@@ -20,7 +20,5 @@ export {
   getEntityStatistics,
 };
 
-// Explicitly import and re-export the Entity and EntityStatistics types
-// Use 'export type' for types when isolatedModules is enabled
-import type { Entity, EntityStatistics } from '@/types/entity';
-export type { Entity, EntityStatistics };
+// Explicitly re-export the Entity and EntityStatistics types
+export type { Entity, EntityStatistics } from '@/types/entity';

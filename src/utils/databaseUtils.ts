@@ -9,18 +9,21 @@ export async function checkColumnExists(
   columnName: string
 ): Promise<boolean> {
   try {
-    // Call the column_exists RPC function
-    const { data, error } = await supabase.rpc('column_exists', {
-      p_table_name: tableName,
-      p_column_name: columnName
-    });
+    // Call a direct query instead of the RPC function to check if column exists
+    const { data, error } = await supabase
+      .from('information_schema.columns')
+      .select('column_name')
+      .eq('table_schema', 'public')
+      .eq('table_name', tableName)
+      .eq('column_name', columnName)
+      .maybeSingle();
     
     if (error) {
       console.error(`Error checking if column ${columnName} exists:`, error);
       return false;
     }
     
-    return Boolean(data);
+    return data !== null;
   } catch (error) {
     console.error(`Error in checkColumnExists for ${columnName}:`, error);
     return false;

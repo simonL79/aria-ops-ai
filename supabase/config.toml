@@ -1,5 +1,5 @@
 
-# An example Supabase configuration file for managing your project
+# Supabase configuration file for managing your project
 
 project_id = "ssvskbejfacmjemphmry"
 
@@ -8,4 +8,3 @@ verify_jwt = true
 
 [functions."column_exists"]
 verify_jwt = true
-

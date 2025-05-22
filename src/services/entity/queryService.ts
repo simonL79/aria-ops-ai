@@ -4,6 +4,19 @@ import { toast } from 'sonner';
 import { Entity, EntityStatistics } from '@/types/entity';
 import { checkColumnExists, hasScanProperty } from '@/utils/databaseUtils';
 
+// Define type for scan result rows
+type ScanRow = {
+  detected_entities?: any[];
+  risk_entity_name?: string | null;
+  risk_entity_type?: string | null;
+  [key: string]: any;
+};
+
+// Type guard for ScanRow
+function isScanRow(obj: any): obj is ScanRow {
+  return obj && typeof obj === 'object';
+}
+
 /**
  * Get all unique entities from scan results
  */
@@ -45,13 +58,13 @@ export const getAllEntities = async (): Promise<Entity[]> => {
     
     const entityMap = new Map<string, Entity>();
     
-    data.forEach(result => {
+    data.forEach((result: any) => {
       // Skip if not a valid object
-      if (!result || typeof result !== 'object') return;
+      if (!isScanRow(result)) return;
       
       // Safely process detected_entities if it exists and is an array
       if (hasDetectedEntities && hasScanProperty(result, 'detected_entities')) {
-        const detectedEntities = result.detected_entities as string[];
+        const detectedEntities = result.detected_entities;
         if (Array.isArray(detectedEntities)) {
           detectedEntities.forEach((name: string) => {
             if (entityMap.has(name)) {
@@ -64,9 +77,9 @@ export const getAllEntities = async (): Promise<Entity[]> => {
               if (hasRiskEntityName && hasRiskEntityType && 
                   hasScanProperty(result, 'risk_entity_name') &&
                   hasScanProperty(result, 'risk_entity_type') &&
-                  (result.risk_entity_name as string) === name &&
-                  typeof (result.risk_entity_name as string) === 'string' &&
-                  typeof (result.risk_entity_type as string) === 'string') {
+                  result.risk_entity_name === name &&
+                  typeof result.risk_entity_name === 'string' &&
+                  typeof result.risk_entity_type === 'string') {
                   
                 const riskType = result.risk_entity_type as string;
                 if (['person', 'organization', 'handle', 'location'].includes(riskType)) {
@@ -89,13 +102,13 @@ export const getAllEntities = async (): Promise<Entity[]> => {
       
       // Safely process risk_entity_name if it exists and is not already included
       if (hasRiskEntityName && hasScanProperty(result, 'risk_entity_name')) {
-        const riskEntityName = result.risk_entity_name as string;
+        const riskEntityName = result.risk_entity_name as string | null;
         
         if (typeof riskEntityName === 'string' && riskEntityName && !entityMap.has(riskEntityName)) {
           let type: Entity['type'] = 'unknown';
           
           if (hasRiskEntityType && hasScanProperty(result, 'risk_entity_type')) {
-            const riskEntityType = result.risk_entity_type as string;
+            const riskEntityType = result.risk_entity_type as string | null;
             
             if (typeof riskEntityType === 'string' && 
                 ['person', 'organization', 'handle', 'location'].includes(riskEntityType)) {
