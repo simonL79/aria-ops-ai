@@ -41,6 +41,11 @@ function App() {
   useEffect(() => {
     // Initialize the database with required data
     initializeDatabase().catch(console.error);
+
+    // Redirect to RSS feed edge function
+    if (window.location.pathname === "/rss.xml") {
+      window.location.href = "https://ssvskbejfacmjemphmry.supabase.co/functions/v1/generate-rss";
+    }
   }, []);
   
   return (
@@ -61,6 +66,7 @@ function App() {
         <Route path="/how-it-works" element={<HowItWorksPage />} />
         <Route path="/blog" element={<BlogPage />} />
         <Route path="/blog/:slug" element={<BlogPostPage />} />
+        <Route path="/rss.xml" element={<Navigate to="https://ssvskbejfacmjemphmry.supabase.co/functions/v1/generate-rss" />} />
         
         {/* Authentication Route - Redirects to dashboard if already signed in */}
         <Route 

@@ -3,10 +3,19 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import PublicLayout from "@/components/layout/PublicLayout";
 import { blogPosts } from '@/data/blogData';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Rss, Mail } from 'lucide-react';
 import BlogCard from '@/components/blog/BlogCard';
+import { Button } from '@/components/ui/button';
+import { toast } from "sonner";
 
 const BlogPage = () => {
+  const handleSubscribe = (e: React.FormEvent) => {
+    e.preventDefault();
+    toast.success("Thank you for subscribing!");
+    const form = e.target as HTMLFormElement;
+    form.reset();
+  };
+
   return (
     <PublicLayout>
       <div className="bg-black text-white min-h-screen py-16">
@@ -14,6 +23,23 @@ const BlogPage = () => {
           <div className="max-w-4xl mx-auto mb-12">
             <h1 className="text-4xl md:text-5xl font-bold mb-6">Insights from Simon Lindsay</h1>
             <p className="text-gray-400 text-xl">Founder of A.R.I.A™, thought leader in AI-powered digital protection.</p>
+            
+            <div className="flex items-center gap-4 mt-6">
+              <Link to="/rss.xml" className="flex items-center text-blue-500 hover:text-blue-400 transition">
+                <Rss className="h-4 w-4 mr-1" />
+                Subscribe via RSS
+              </Link>
+              
+              <Button variant="outline" className="border-blue-500 text-blue-500 hover:bg-blue-500/10" onClick={() => {
+                const subscribeSection = document.getElementById('email-subscribe');
+                if (subscribeSection) {
+                  subscribeSection.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}>
+                <Mail className="h-4 w-4 mr-1" />
+                Email Updates
+              </Button>
+            </div>
           </div>
           
           {/* Featured post */}
@@ -62,6 +88,24 @@ const BlogPage = () => {
                 slug={post.slug}
               />
             ))}
+          </div>
+          
+          {/* Email subscription section */}
+          <div id="email-subscribe" className="max-w-2xl mx-auto mt-20 p-8 bg-gray-900 rounded-lg text-center">
+            <h3 className="text-2xl font-bold mb-4">Get Expert Insights Delivered</h3>
+            <p className="text-gray-400 mb-6">
+              Subscribe to receive the latest articles on digital protection, reputation management, 
+              and AI-powered monitoring from Simon Lindsay.
+            </p>
+            <form className="flex flex-col sm:flex-row gap-3 justify-center" onSubmit={handleSubscribe}>
+              <input 
+                type="email" 
+                placeholder="Your email address" 
+                className="px-4 py-2 rounded bg-black border border-gray-700 text-white w-full sm:w-auto"
+                required
+              />
+              <Button type="submit">Subscribe</Button>
+            </form>
           </div>
         </div>
       </div>

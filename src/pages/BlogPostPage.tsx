@@ -3,9 +3,11 @@ import React from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import PublicLayout from "@/components/layout/PublicLayout";
 import { blogPosts } from '@/data/blogData';
-import { ArrowLeft, Calendar, User, Tag } from 'lucide-react';
+import { ArrowLeft, Calendar, User, Tag, Share, Facebook, Twitter, Linkedin, Mail, Rss } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import BlogCard from '@/components/blog/BlogCard';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { toast } from "sonner";
 
 const BlogPostPage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -15,6 +17,35 @@ const BlogPostPage = () => {
   const relatedPosts = blogPosts
     .filter(p => p.slug !== slug && p.category === post?.category)
     .slice(0, 3);
+  
+  const handleShare = (platform: string) => {
+    const url = window.location.href;
+    const title = post?.title || "A.R.I.A™ Blog Post";
+    
+    let shareUrl = "";
+    switch (platform) {
+      case "facebook":
+        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+        break;
+      case "twitter":
+        shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`;
+        break;
+      case "linkedin":
+        shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
+        break;
+      case "email":
+        shareUrl = `mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(`Check out this article: ${url}`)}`;
+        break;
+      case "copy":
+        navigator.clipboard.writeText(url);
+        toast.success("Link copied to clipboard");
+        return;
+    }
+    
+    if (shareUrl) {
+      window.open(shareUrl, "_blank");
+    }
+  };
   
   if (!post) {
     return (
@@ -67,16 +98,66 @@ const BlogPostPage = () => {
               Back to all articles
             </Link>
             
+            {/* Social sharing buttons */}
+            <div className="flex items-center gap-2 mb-8">
+              <span className="text-gray-500 text-sm">Share:</span>
+              <Button variant="outline" size="icon" onClick={() => handleShare("facebook")} title="Share on Facebook">
+                <Facebook className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="icon" onClick={() => handleShare("twitter")} title="Share on Twitter">
+                <Twitter className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="icon" onClick={() => handleShare("linkedin")} title="Share on LinkedIn">
+                <Linkedin className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="icon" onClick={() => handleShare("email")} title="Share via Email">
+                <Mail className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="icon" onClick={() => handleShare("copy")} title="Copy link">
+                <Share className="h-4 w-4" />
+              </Button>
+            </div>
+            
             <div className="prose prose-lg max-w-none">
               {post.content}
             </div>
             
-            {/* Author info */}
-            <div className="mt-12 pt-8 border-t border-gray-200">
-              <h3 className="text-xl font-bold mb-2">About the author</h3>
-              <p className="text-gray-600">
-                {post.authorBio || `${post.author} is a reputation management expert at A.R.I.A™.`}
+            {/* Author info with headshot */}
+            <div className="mt-12 pt-8 border-t border-gray-200 flex gap-6">
+              <Avatar className="h-20 w-20">
+                <AvatarImage src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2071&q=80" alt="Simon Lindsay" />
+                <AvatarFallback>SL</AvatarFallback>
+              </Avatar>
+              <div>
+                <h3 className="text-xl font-bold mb-2">About Simon Lindsay</h3>
+                <p className="text-gray-600">
+                  Simon Lindsay is the founder of A.R.I.A™ and a pioneer in applying artificial intelligence to reputation management. 
+                  With over 15 years of experience in digital risk mitigation, Simon has protected the online presence of 
+                  Fortune 500 executives, celebrities, and high-profile entrepreneurs.
+                </p>
+              </div>
+            </div>
+            
+            {/* Email subscription form */}
+            <div className="mt-12 pt-8 border-t border-gray-200 bg-gray-50 p-6 rounded-lg">
+              <h3 className="text-xl font-bold mb-2">Subscribe to Our Newsletter</h3>
+              <p className="text-gray-600 mb-4">
+                Get the latest insights on AI-powered digital protection delivered to your inbox.
               </p>
+              <form className="flex gap-2 flex-col sm:flex-row" onSubmit={(e) => {
+                e.preventDefault();
+                toast.success("Thank you for subscribing!");
+                const form = e.target as HTMLFormElement;
+                form.reset();
+              }}>
+                <input 
+                  type="email" 
+                  placeholder="Enter your email" 
+                  className="border border-gray-300 px-4 py-2 rounded flex-grow"
+                  required
+                />
+                <Button type="submit">Subscribe</Button>
+              </form>
             </div>
           </div>
           
