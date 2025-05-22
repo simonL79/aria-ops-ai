@@ -15,7 +15,7 @@ export interface ScanResult {
   detected_entities?: string[];
   risk_entity_name?: string | null;
   risk_entity_type?: string | null;
-  // Additional properties can be accessed using an index signature
+  // Use an index signature instead of self-reference
   [key: string]: any;
 }
 
