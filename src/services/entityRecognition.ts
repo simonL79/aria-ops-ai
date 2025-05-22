@@ -1,3 +1,4 @@
+
 /**
  * Entity Recognition Utility Functions
  * 
@@ -94,29 +95,22 @@ export const processEntities = async (scanResultId: string, content: string): Pr
   try {
     const entities = extractEntitiesFromText(content);
     
-    // First check if the columns exist to avoid errors
-    let columnExists = true;
-    try {
-      // Check if required columns exist by querying them directly
-      const { data: columnsCheck } = await supabase
-        .from('scan_results')
-        .select('detected_entities, risk_entity_name, risk_entity_type')
-        .limit(1);
-      
-      if (columnsCheck === null) {
-        columnExists = false;
-      }
-    } catch (columnCheckError) {
-      console.error("Error checking scan_results columns:", columnCheckError);
+    // Check if required columns exist by querying them directly
+    const { data: columnsCheck, error: columnsError } = await supabase
+      .from('scan_results')
+      .select('detected_entities, risk_entity_name, risk_entity_type')
+      .limit(1);
+    
+    if (columnsError) {
+      console.error("Error checking scan_results columns:", columnsError);
       toast.error("The entity recognition feature requires database migration");
-      columnExists = false;
       return entities;
     }
     
-    // Only update the database if columns exist
-    if (columnExists && entities.length > 0) {
+    // Only update the database if entities were found
+    if (entities.length > 0) {
       // Store the extracted entities in the scan result
-      const { error } = await supabase
+      const { error: updateError } = await supabase
         .from('scan_results')
         .update({
           detected_entities: entities.map(e => e.name),
@@ -127,8 +121,8 @@ export const processEntities = async (scanResultId: string, content: string): Pr
         })
         .eq('id', scanResultId);
       
-      if (error) {
-        console.error('Error storing entities:', error);
+      if (updateError) {
+        console.error('Error storing entities:', updateError);
       }
     }
     
@@ -144,85 +138,94 @@ export const processEntities = async (scanResultId: string, content: string): Pr
  */
 export const getAllEntities = async (): Promise<Entity[]> => {
   try {
-    // First check if the columns exist to avoid errors
-    let columnsExist = false;
-    try {
-      // Check if columns exist by querying them directly
-      const { data: columnsCheck } = await supabase
-        .from('scan_results')
-        .select('detected_entities, risk_entity_name, risk_entity_type')
-        .limit(1);
-      
-      columnsExist = true;
-    } catch (columnCheckError) {
-      console.error("Error checking scan_results columns:", columnCheckError);
+    // Check if required columns exist by querying them directly
+    const { data: columnsCheck, error: columnsError } = await supabase
+      .from('scan_results')
+      .select('detected_entities, risk_entity_name, risk_entity_type')
+      .limit(1);
+    
+    if (columnsError) {
+      console.error("Error checking scan_results columns:", columnsError);
       toast.error("The entity recognition feature requires database migration");
       return [];
     }
     
-    // If columns exist, proceed with the query
-    if (columnsExist) {
-      const { data, error } = await supabase
-        .from('scan_results')
-        .select('detected_entities, risk_entity_name, risk_entity_type')
-        .not('detected_entities', 'is', null);
-      
-      if (error) {
-        console.error('Error fetching entities:', error);
-        return [];
-      }
-      
-      if (!data || data.length === 0) {
-        return [];
-      }
-      
-      const entityMap = new Map<string, Entity>();
-      
-      data.forEach(result => {
-        // Safely process detected_entities if it exists and is an array
-        if (result && result.detected_entities && Array.isArray(result.detected_entities)) {
-          result.detected_entities.forEach((name: string) => {
-            if (entityMap.has(name)) {
-              const entity = entityMap.get(name)!;
-              entityMap.set(name, { ...entity, mentions: entity.mentions + 1 });
-            } else {
-              // Determine entity type based on available data
-              let type: 'person' | 'organization' | 'handle' | 'location' | 'unknown' = 'unknown';
-              
-              if (result.risk_entity_name && name === result.risk_entity_name && result.risk_entity_type) {
-                // Use a type assertion to handle the string to enum conversion
-                type = result.risk_entity_type as Entity['type'];
-              } else if (name.startsWith('@')) {
-                type = 'handle';
-              }
-              
-              entityMap.set(name, {
-                name,
-                type,
-                confidence: 0.7,
-                mentions: 1
-              });
-            }
-          });
-        }
-        
-        // Safely process risk_entity_name if it exists and is not already included
-        if (result && result.risk_entity_name && typeof result.risk_entity_name === 'string' && 
-            !entityMap.has(result.risk_entity_name)) {
-          entityMap.set(result.risk_entity_name, {
-            name: result.risk_entity_name,
-            type: (result.risk_entity_type as Entity['type']) || 'unknown',
-            confidence: 0.85,
-            mentions: 1
-          });
-        }
-      });
-      
-      return Array.from(entityMap.values())
-        .sort((a, b) => b.mentions - a.mentions);
+    // If columns are accessible, proceed with the query
+    const { data, error } = await supabase
+      .from('scan_results')
+      .select('detected_entities, risk_entity_name, risk_entity_type')
+      .not('detected_entities', 'is', null);
+    
+    if (error) {
+      console.error('Error fetching entities:', error);
+      return [];
     }
     
-    return [];
+    if (!data || data.length === 0) {
+      return [];
+    }
+    
+    const entityMap = new Map<string, Entity>();
+    
+    data.forEach(result => {
+      // Safely process detected_entities if it exists and is an array
+      if (result && result.detected_entities && Array.isArray(result.detected_entities)) {
+        result.detected_entities.forEach((name: string) => {
+          if (entityMap.has(name)) {
+            const entity = entityMap.get(name)!;
+            entityMap.set(name, { ...entity, mentions: entity.mentions + 1 });
+          } else {
+            // Determine entity type based on available data
+            let type: 'person' | 'organization' | 'handle' | 'location' | 'unknown' = 'unknown';
+            
+            if (result.risk_entity_name === name && result.risk_entity_type) {
+              // Use type assertion to handle the string to enum conversion
+              type = (result.risk_entity_type === 'person' || 
+                     result.risk_entity_type === 'organization' || 
+                     result.risk_entity_type === 'handle' || 
+                     result.risk_entity_type === 'location') 
+                     ? result.risk_entity_type as Entity['type'] 
+                     : 'unknown';
+            } else if (name.startsWith('@')) {
+              type = 'handle';
+            }
+            
+            entityMap.set(name, {
+              name,
+              type,
+              confidence: 0.7,
+              mentions: 1
+            });
+          }
+        });
+      }
+      
+      // Safely process risk_entity_name if it exists and is not already included
+      if (result && result.risk_entity_name && typeof result.risk_entity_name === 'string' && 
+          !entityMap.has(result.risk_entity_name)) {
+        
+        // Ensure risk_entity_type is a valid type, defaulting to 'unknown'
+        const type = (result.risk_entity_type === 'person' || 
+                    result.risk_entity_type === 'organization' || 
+                    result.risk_entity_type === 'handle' || 
+                    result.risk_entity_type === 'location') 
+                    ? result.risk_entity_type as Entity['type'] 
+                    : 'unknown';
+        
+        entityMap.set(result.risk_entity_name, {
+          name: result.risk_entity_name,
+          type,
+          confidence: 0.85,
+          mentions: 1
+        });
+      }
+    });
+    
+    // Convert Map to Array and sort by mentions count
+    const entities = Array.from(entityMap.values())
+      .sort((a, b) => b.mentions - a.mentions);
+    
+    return entities;
   } catch (error) {
     console.error('Error getting all entities:', error);
     return [];
@@ -243,24 +246,15 @@ interface ScanResultWithEntities {
  */
 export const batchProcessEntities = async (): Promise<number> => {
   try {
-    // First check if the column exists to avoid errors
-    let columnsExist = false;
-    try {
-      // Check if columns exist by querying them directly
-      const { data: columnsCheck } = await supabase
-        .from('scan_results')
-        .select('is_identified, detected_entities, risk_entity_name, risk_entity_type')
-        .limit(1);
-      
-      columnsExist = true;
-    } catch (columnCheckError) {
-      console.error("Error checking scan_results columns:", columnCheckError);
-      toast.error("The entity recognition feature requires database migration");
-      return 0;
-    }
+    // Check if required columns exist by querying them directly
+    const { data: columnsCheck, error: columnsError } = await supabase
+      .from('scan_results')
+      .select('is_identified, detected_entities, risk_entity_name, risk_entity_type')
+      .limit(1);
     
-    // If columns don't exist, return 0
-    if (!columnsExist) {
+    if (columnsError) {
+      console.error("Error checking scan_results columns:", columnsError);
+      toast.error("The entity recognition feature requires database migration");
       return 0;
     }
     
@@ -306,24 +300,15 @@ export const batchProcessEntities = async (): Promise<number> => {
  */
 export const getScanResultsByEntity = async (entityName: string): Promise<any[]> => {
   try {
-    // First check if the columns exist to avoid errors
-    let columnsExist = false;
-    try {
-      // Check if columns exist by querying them directly
-      const { data: columnsCheck } = await supabase
-        .from('scan_results')
-        .select('detected_entities, risk_entity_name, risk_entity_type')
-        .limit(1);
-      
-      columnsExist = true;
-    } catch (columnCheckError) {
-      console.error("Error checking scan_results columns:", columnCheckError);
-      toast.error("The entity recognition feature requires database migration");
-      return [];
-    }
+    // Check if required columns exist by querying them directly
+    const { data: columnsCheck, error: columnsError } = await supabase
+      .from('scan_results')
+      .select('detected_entities, risk_entity_name, risk_entity_type')
+      .limit(1);
     
-    // If columns don't exist, return empty array
-    if (!columnsExist) {
+    if (columnsError) {
+      console.error("Error checking scan_results columns:", columnsError);
+      toast.error("The entity recognition feature requires database migration");
       return [];
     }
     
