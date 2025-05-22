@@ -7,10 +7,18 @@ const ProblemSection = () => {
     <section className="problem bg-gray-100 py-24 text-center">
       <div className="container mx-auto px-6">
         <h2 className="text-3xl md:text-4xl font-bold mb-8 text-premium-black">One Post Can Wreck Everything</h2>
-        <p className="text-lg md:text-xl max-w-3xl mx-auto mb-16 text-premium-gray">
-          Whether it's a tweet, a review, or a hit piece — your name online shapes your future. Most people discover the damage when it's too late.
-          <span className="block mt-2 font-semibold text-premium-darkGray">A.R.I.A™ changes that.</span>
-        </p>
+        <div className="text-center mx-auto max-w-4xl mb-16">
+          <p className="text-lg md:text-xl mx-auto text-premium-gray">
+            Google never forgets — but now, you don't have to either.
+          </p>
+          <p className="text-lg md:text-xl mx-auto text-premium-gray">
+            Old articles, buried posts, forum rumors — they all still rank. A.R.I.A™ finds what others see.
+          </p>
+          <p className="mt-2 font-semibold text-premium-darkGray">
+            Whether it's a tweet, a review, or a hit piece — your name online shapes your future. Most people discover the damage when it's too late.
+          </p>
+          <p className="block mt-2 font-semibold text-premium-darkGray">A.R.I.A™ changes that.</p>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 max-w-6xl mx-auto">
           <div className="premium-card p-8 rounded-xl transform hover:-translate-y-1">
             <div className="bg-red-50 p-4 rounded-full w-16 h-16 mx-auto mb-6 flex items-center justify-center">
