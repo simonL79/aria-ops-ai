@@ -107,11 +107,16 @@ export async function getAllEntities(): Promise<Entity[]> {
     const entityCounts = new Map<string, number>();
     const entityTypes = new Map<string, string>();
 
+    // TypeScript type guard function to ensure safe property access
+    function isSafeResult(item: any): boolean {
+      return item !== null && typeof item === 'object';
+    }
+
     data.forEach(result => {
-      // Only process if result is a valid object (not null or undefined)
-      if (!result || typeof result !== 'object') return;
+      // Only process if result is a valid object
+      if (!isSafeResult(result)) return;
       
-      // Safely check if detected_entities exists and is an array
+      // Process detected_entities if it exists and is an array
       if (hasDetectedEntities && 
           hasScanProperty(result, 'detected_entities') && 
           result.detected_entities !== null && 

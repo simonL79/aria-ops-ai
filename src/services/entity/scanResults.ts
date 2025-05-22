@@ -17,8 +17,7 @@ export interface ScanResult {
   risk_entity_type?: string | null;
   created_at?: string;
   confidence_score?: number;
-  // Use primitive types for dynamic properties
-  [key: string]: string | string[] | number | null | undefined;
+  [key: string]: string | string[] | number | boolean | null | undefined;
 }
 
 /**
