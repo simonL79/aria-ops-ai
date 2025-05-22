@@ -5,12 +5,13 @@
  */
 
 // Re-export types
-export { 
+export type { 
   ScanResult, 
   RawScanResult, 
   ScanEntity, 
-  isScanResult 
 } from './types/scanTypes';
+
+export { isScanResult } from './types/scanTypes';
 
 // Re-export parser function
 export { parseDetectedEntities } from './utils/entityParser';

@@ -4,7 +4,7 @@
  */
 
 // Define a strict interface for raw scan results from database
-export interface RawScanResult {
+export type RawScanResult = {
   id: string;
   content: string;
   platform: string;
@@ -21,14 +21,14 @@ export interface RawScanResult {
 }
 
 // Define a simple entity structure
-export interface ScanEntity {
+export type ScanEntity = {
   name: string;
   type?: string;
   confidence?: number;
 }
 
 // Define processed scan result type after parsing detected entities
-export interface ScanResult extends Omit<RawScanResult, 'detected_entities'> {
+export type ScanResult = Omit<RawScanResult, 'detected_entities'> & {
   detected_entities?: ScanEntity[]; // Always parsed into ScanEntity[]
 }
 
