@@ -1,3 +1,3 @@
 
-import MentionMonitor from './MentionMonitor';
-export default MentionMonitor;
+import MentionMonitorComponent from './MentionMonitor/index';
+export default MentionMonitorComponent;

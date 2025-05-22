@@ -21,6 +21,7 @@ const MentionsPage = () => {
   const [dialogAction, setDialogAction] = useState<'view' | 'resolve' | 'escalate'>('view');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [classificationResult, setClassificationResult] = useState<ThreatClassificationResult | null>(null);
+  const [activeTab, setActiveTab] = useState('mentions');
   
   useEffect(() => {
     fetchMentions();
@@ -130,6 +131,11 @@ const MentionsPage = () => {
     }
   };
 
+  // Handle tab changes
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+  };
+
   return (
     <DashboardLayout>
       <h1 className="text-2xl font-bold mb-4">Mentions & Threat Monitoring</h1>
@@ -144,7 +150,7 @@ const MentionsPage = () => {
         )}
         
         {/* Tabs for different views */}
-        <Tabs defaultValue="mentions">
+        <Tabs value={activeTab} onValueChange={handleTabChange}>
           <TabsList>
             <TabsTrigger value="mentions">All Mentions</TabsTrigger>
             <TabsTrigger value="threats">Threats</TabsTrigger>
