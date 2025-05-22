@@ -105,7 +105,14 @@ function App() {
         </Route>
         
         {/* Admin-only blog admin route */}
-        <Route path="/blog/admin" element={<BlogAdminPage />} />
+        <Route 
+          path="/blog/admin" 
+          element={
+            <AuthGuard adminOnly={true} redirectTo="/admin-login">
+              <BlogAdminPage />
+            </AuthGuard>
+          } 
+        />
         
         {/* Catch all route - 404 */}
         <Route path="*" element={<NotFound />} />

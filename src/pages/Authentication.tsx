@@ -25,7 +25,7 @@ const Authentication = () => {
     // Small timeout to prevent flash
     const timer = setTimeout(() => {
       setIsReady(true);
-    }, 100);
+    }, 500); // Increased timeout to allow more time for authentication
     
     return () => clearTimeout(timer);
   }, [isLoading, isAuthenticated]);
