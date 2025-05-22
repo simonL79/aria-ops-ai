@@ -107,17 +107,20 @@ export const useEntityRecognition = () => {
     setLoading(true);
     try {
       // First check if the columns exist to avoid errors
-      const { error: columnCheckError } = await supabase
-        .from('scan_results')
-        .select('detected_entities')
-        .limit(1);
-      
-      if (columnCheckError) {
+      try {
+        // Try a simple query first to see if columns exist
+        await supabase
+          .from('scan_results')
+          .select('detected_entities')
+          .limit(1)
+          .throwOnError();
+      } catch (columnCheckError) {
         console.error("Error checking scan_results columns:", columnCheckError);
         toast.error("The entity recognition feature requires database migration");
         return [];
       }
       
+      // If we get here, the columns exist
       const { data, error } = await supabase
         .from('scan_results')
         .select('detected_entities, risk_entity_name, risk_entity_type')

@@ -96,33 +96,34 @@ export const processEntities = async (scanResultId: string, content: string): Pr
     const entities = extractEntitiesFromText(content);
     
     // First check if the columns exist to avoid errors
-    const { error: columnCheckError } = await supabase
-      .from('scan_results')
-      .select('detected_entities')
-      .limit(1);
-    
-    if (columnCheckError) {
+    try {
+      // Try a simple query first to see if columns exist
+      await supabase
+        .from('scan_results')
+        .select('detected_entities')
+        .limit(1)
+        .throwOnError();
+      
+      if (entities.length > 0) {
+        // Store the extracted entities in the scan result
+        const { error } = await supabase
+          .from('scan_results')
+          .update({
+            detected_entities: entities.map(e => e.name),
+            risk_entity_name: entities.find(e => e.type === 'person')?.name,
+            risk_entity_type: entities.find(e => e.type === 'person') ? 'person' : 
+                            entities.find(e => e.type === 'organization') ? 'organization' : 'unknown',
+            is_identified: true
+          })
+          .eq('id', scanResultId);
+        
+        if (error) {
+          console.error('Error storing entities:', error);
+        }
+      }
+    } catch (columnCheckError) {
       console.error("Error checking scan_results columns:", columnCheckError);
       toast.error("The entity recognition feature requires database migration");
-      return entities;
-    }
-    
-    if (entities.length > 0) {
-      // Store the extracted entities in the scan result
-      const { error } = await supabase
-        .from('scan_results')
-        .update({
-          detected_entities: entities.map(e => e.name),
-          risk_entity_name: entities.find(e => e.type === 'person')?.name,
-          risk_entity_type: entities.find(e => e.type === 'person') ? 'person' : 
-                          entities.find(e => e.type === 'organization') ? 'organization' : 'unknown',
-          is_identified: true
-        })
-        .eq('id', scanResultId);
-      
-      if (error) {
-        console.error('Error storing entities:', error);
-      }
     }
     
     return entities;
@@ -138,12 +139,14 @@ export const processEntities = async (scanResultId: string, content: string): Pr
 export const getAllEntities = async (): Promise<Entity[]> => {
   try {
     // First check if the columns exist to avoid errors
-    const { error: columnCheckError } = await supabase
-      .from('scan_results')
-      .select('detected_entities')
-      .limit(1);
-    
-    if (columnCheckError) {
+    try {
+      // Try a simple query first to see if columns exist
+      await supabase
+        .from('scan_results')
+        .select('detected_entities')
+        .limit(1)
+        .throwOnError();
+    } catch (columnCheckError) {
       console.error("Error checking scan_results columns:", columnCheckError);
       toast.error("The entity recognition feature requires database migration");
       return [];
@@ -211,14 +214,14 @@ export const getAllEntities = async (): Promise<Entity[]> => {
   }
 };
 
-// Fix the recursive type issue - simplify the return type
-type ScanResultEntities = {
+// Simplify the return type to avoid recursive type issues
+type ScanResultWithEntities = {
   id: string;
   detected_entities?: string[];
   risk_entity_name?: string;
   risk_entity_type?: string;
   content: string;
-}[];
+};
 
 /**
  * Process all unprocessed scan results
@@ -226,12 +229,14 @@ type ScanResultEntities = {
 export const batchProcessEntities = async (): Promise<number> => {
   try {
     // First check if the column exists to avoid errors
-    const { error: columnCheckError } = await supabase
-      .from('scan_results')
-      .select('is_identified')
-      .limit(1);
-    
-    if (columnCheckError) {
+    try {
+      // Try a simple query first to see if columns exist
+      await supabase
+        .from('scan_results')
+        .select('is_identified')
+        .limit(1)
+        .throwOnError();
+    } catch (columnCheckError) {
       console.error("Error checking scan_results columns:", columnCheckError);
       toast.error("The entity recognition feature requires database migration");
       return 0;
@@ -280,12 +285,14 @@ export const batchProcessEntities = async (): Promise<number> => {
 export const getScanResultsByEntity = async (entityName: string): Promise<any[]> => {
   try {
     // First check if the columns exist to avoid errors
-    const { error: columnCheckError } = await supabase
-      .from('scan_results')
-      .select('risk_entity_name')
-      .limit(1);
-    
-    if (columnCheckError) {
+    try {
+      // Try a simple query first to see if columns exist
+      await supabase
+        .from('scan_results')
+        .select('risk_entity_name')
+        .limit(1)
+        .throwOnError();
+    } catch (columnCheckError) {
       console.error("Error checking scan_results columns:", columnCheckError);
       toast.error("The entity recognition feature requires database migration");
       return [];
