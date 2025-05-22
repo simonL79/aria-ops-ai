@@ -1,8 +1,10 @@
 
 import { useEffect } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import { initializeDatabase } from "@/utils/initializeMonitoring";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import SignedInRedirect from "@/components/auth/SignedInRedirect";
 
 // Import your pages
 import Dashboard from "@/pages/dashboard/DashboardPage";
@@ -18,6 +20,8 @@ import EngagementHubPage from "@/pages/dashboard/EngagementHubPage";
 import Settings from "@/pages/Settings";
 import MentionsPage from "@/pages/dashboard/MentionsPage";
 import NewCoPage from "@/pages/NewCoPage";
+import Authentication from "@/pages/Authentication";
+import SalesFunnelPage from "@/pages/SalesFunnelPage";
 
 function App() {
   useEffect(() => {
@@ -28,19 +32,36 @@ function App() {
   return (
     <>
       <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/monitor" element={<Monitor />} />
-        <Route path="/influencer-radar" element={<InfluencerRadar />} />
-        <Route path="/dashboard/ai-scraping" element={<AiScrapingPage />} />
-        <Route path="/dashboard/intelligence" element={<IntelligencePage />} />
-        <Route path="/dashboard/radar" element={<RadarPage />} />
-        <Route path="/dashboard/command-center" element={<CommandCenterPage />} />
-        <Route path="/dashboard/analytics" element={<AnalyticsPage />} />
-        <Route path="/dashboard/engagement" element={<EngagementHubPage />} />
-        <Route path="/dashboard/mentions" element={<MentionsPage />} />
-        <Route path="/dashboard/new-companies" element={<NewCoPage />} />
-        <Route path="/settings" element={<Settings />} />
+        {/* Public Routes */}
+        <Route path="/" element={<SalesFunnelPage />} />
+        
+        {/* Authentication Route - Redirects to dashboard if already signed in */}
+        <Route 
+          path="/auth" 
+          element={
+            <SignedInRedirect redirectTo="/dashboard">
+              <Authentication />
+            </SignedInRedirect>
+          } 
+        />
+        
+        {/* Protected Dashboard Routes */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/monitor" element={<Monitor />} />
+          <Route path="/influencer-radar" element={<InfluencerRadar />} />
+          <Route path="/dashboard/ai-scraping" element={<AiScrapingPage />} />
+          <Route path="/dashboard/intelligence" element={<IntelligencePage />} />
+          <Route path="/dashboard/radar" element={<RadarPage />} />
+          <Route path="/dashboard/command-center" element={<CommandCenterPage />} />
+          <Route path="/dashboard/analytics" element={<AnalyticsPage />} />
+          <Route path="/dashboard/engagement" element={<EngagementHubPage />} />
+          <Route path="/dashboard/mentions" element={<MentionsPage />} />
+          <Route path="/dashboard/new-companies" element={<NewCoPage />} />
+          <Route path="/settings" element={<Settings />} />
+        </Route>
+        
+        {/* Catch all route - 404 */}
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster />
