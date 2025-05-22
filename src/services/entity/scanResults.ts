@@ -16,8 +16,9 @@ export interface ScanResult {
   risk_entity_name?: string | null;
   risk_entity_type?: string | null;
   created_at?: string;
-  // Use primitive types instead of recursive self-reference
-  [key: string]: string | string[] | null | undefined;
+  confidence_score?: number;
+  // Use primitive types for dynamic properties
+  [key: string]: string | string[] | number | null | undefined;
 }
 
 /**
@@ -45,7 +46,7 @@ export const getScanResultsByEntity = async (entityName: string): Promise<ScanRe
         .eq('risk_entity_name', entityName);
       
       if (!nameError && nameData && nameData.length > 0) {
-        return nameData as ScanResult[];
+        return nameData as unknown as ScanResult[];
       }
     }
     
@@ -57,7 +58,7 @@ export const getScanResultsByEntity = async (entityName: string): Promise<ScanRe
         .contains('detected_entities', [entityName]);
       
       if (!arrayError && arrayData) {
-        results = arrayData as ScanResult[];
+        results = arrayData as unknown as ScanResult[];
       }
     }
     
