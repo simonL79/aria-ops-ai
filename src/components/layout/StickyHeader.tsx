@@ -56,13 +56,13 @@ const StickyHeader = ({ isScrolled }: StickyHeaderProps) => {
             </NavigationMenu>
             
             <Button asChild size="sm" className="ml-4">
-              <Link to="/scan">Scan My Name Now</Link>
+              <Link to="/scan" className="text-white">Scan My Name Now</Link>
             </Button>
             
             <Button 
               variant="outline" 
               size="sm" 
-              className="ml-2"
+              className={`ml-2 ${isScrolled ? 'border-white text-white hover:bg-white hover:text-premium-black' : 'border-premium-black text-premium-black hover:bg-premium-black hover:text-white'}`}
               onClick={() => navigate("/auth")}
             >
               Login

@@ -55,7 +55,7 @@ const MobileMenu = ({ isOpen, setIsOpen, isScrolled }: MobileMenuProps) => {
           </li>
           <li className="pt-4">
             <Button asChild className="w-full" onClick={() => setIsOpen(false)}>
-              <Link to="/scan">Scan My Name Now</Link>
+              <Link to="/scan" className="text-white">Scan My Name Now</Link>
             </Button>
           </li>
         </ul>
