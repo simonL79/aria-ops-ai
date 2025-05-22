@@ -95,7 +95,7 @@ export const processEntities = async (scanResultId: string, content: string): Pr
   try {
     const entities = extractEntitiesFromText(content);
     
-    // First check if the column exists to avoid errors
+    // First check if the columns exist to avoid errors
     const { error: columnCheckError } = await supabase
       .from('scan_results')
       .select('detected_entities')
@@ -115,7 +115,7 @@ export const processEntities = async (scanResultId: string, content: string): Pr
           detected_entities: entities.map(e => e.name),
           risk_entity_name: entities.find(e => e.type === 'person')?.name,
           risk_entity_type: entities.find(e => e.type === 'person') ? 'person' : 
-                            entities.find(e => e.type === 'organization') ? 'organization' : 'unknown',
+                          entities.find(e => e.type === 'organization') ? 'organization' : 'unknown',
           is_identified: true
         })
         .eq('id', scanResultId);
@@ -137,7 +137,7 @@ export const processEntities = async (scanResultId: string, content: string): Pr
  */
 export const getAllEntities = async (): Promise<Entity[]> => {
   try {
-    // First check if the column exists to avoid errors
+    // First check if the columns exist to avoid errors
     const { error: columnCheckError } = await supabase
       .from('scan_results')
       .select('detected_entities')
@@ -166,7 +166,7 @@ export const getAllEntities = async (): Promise<Entity[]> => {
     const entityMap = new Map<string, Entity>();
     
     data.forEach(result => {
-      // Process detected_entities array
+      // Process detected_entities array if it exists
       if (result.detected_entities && Array.isArray(result.detected_entities)) {
         result.detected_entities.forEach((name: string) => {
           if (entityMap.has(name)) {
@@ -176,8 +176,8 @@ export const getAllEntities = async (): Promise<Entity[]> => {
             // Determine entity type based on available data
             let type: 'person' | 'organization' | 'handle' | 'unknown' = 'unknown';
             
-            if (name === result.risk_entity_name) {
-              type = result.risk_entity_type as any || 'unknown';
+            if (result.risk_entity_name && name === result.risk_entity_name) {
+              type = (result.risk_entity_type as any) || 'unknown';
             } else if (name.startsWith('@')) {
               type = 'handle';
             }
@@ -192,7 +192,7 @@ export const getAllEntities = async (): Promise<Entity[]> => {
         });
       }
       
-      // Process risk_entity_name if not included in detected_entities
+      // Process risk_entity_name if not included in detected_entities and if it exists
       if (result.risk_entity_name && !entityMap.has(result.risk_entity_name)) {
         entityMap.set(result.risk_entity_name, {
           name: result.risk_entity_name,
@@ -210,6 +210,15 @@ export const getAllEntities = async (): Promise<Entity[]> => {
     return [];
   }
 };
+
+// Fix the recursive type issue - simplify the return type
+type ScanResultEntities = {
+  id: string;
+  detected_entities?: string[];
+  risk_entity_name?: string;
+  risk_entity_type?: string;
+  content: string;
+}[];
 
 /**
  * Process all unprocessed scan results
@@ -270,6 +279,18 @@ export const batchProcessEntities = async (): Promise<number> => {
  */
 export const getScanResultsByEntity = async (entityName: string): Promise<any[]> => {
   try {
+    // First check if the columns exist to avoid errors
+    const { error: columnCheckError } = await supabase
+      .from('scan_results')
+      .select('risk_entity_name')
+      .limit(1);
+    
+    if (columnCheckError) {
+      console.error("Error checking scan_results columns:", columnCheckError);
+      toast.error("The entity recognition feature requires database migration");
+      return [];
+    }
+    
     // First try with the risk_entity_name field
     const { data: nameData, error: nameError } = await supabase
       .from('scan_results')

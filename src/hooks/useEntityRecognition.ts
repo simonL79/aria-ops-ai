@@ -106,7 +106,7 @@ export const useEntityRecognition = () => {
   const getAllEntities = useCallback(async () => {
     setLoading(true);
     try {
-      // First check if the column exists to avoid errors
+      // First check if the columns exist to avoid errors
       const { error: columnCheckError } = await supabase
         .from('scan_results')
         .select('detected_entities')
@@ -128,12 +128,17 @@ export const useEntityRecognition = () => {
         return [];
       }
 
+      // Handle null/undefined data safely
+      if (!data || data.length === 0) {
+        return [];
+      }
+
       // Combine all entities and count occurrences
       const entityCounts = new Map<string, number>();
       const entityTypes = new Map<string, string>();
 
       data.forEach(result => {
-        if (Array.isArray(result.detected_entities)) {
+        if (result.detected_entities && Array.isArray(result.detected_entities)) {
           result.detected_entities.forEach((entity: string) => {
             entityCounts.set(entity, (entityCounts.get(entity) || 0) + 1);
             
@@ -152,7 +157,7 @@ export const useEntityRecognition = () => {
           });
         }
         
-        // Process risk_entity_name if not included in detected_entities
+        // Process risk_entity_name if not included in detected_entities and if it exists
         if (result.risk_entity_name && !entityCounts.has(result.risk_entity_name)) {
           entityCounts.set(result.risk_entity_name, (entityCounts.get(result.risk_entity_name) || 0) + 1);
           entityTypes.set(result.risk_entity_name, result.risk_entity_type || 'unknown');
