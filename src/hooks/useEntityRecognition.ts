@@ -183,12 +183,25 @@ export const useEntityRecognition = () => {
           }
         });
 
-        const formattedEntities: Entity[] = Array.from(entityCounts.entries()).map(([name, mentions]) => ({
-          name,
-          type: (entityTypes.get(name) as Entity['type']) || 'unknown',
-          confidence: 0.7,
-          mentions
-        }));
+        const formattedEntities: Entity[] = Array.from(entityCounts.entries())
+          .map(([name, mentions]) => {
+            let type: Entity['type'] = 'unknown';
+            const typeName = entityTypes.get(name);
+            
+            if (typeName === 'person' || 
+                typeName === 'organization' || 
+                typeName === 'handle' || 
+                typeName === 'location') {
+              type = typeName as Entity['type'];
+            }
+            
+            return {
+              name,
+              type,
+              confidence: 0.7,
+              mentions
+            };
+          });
 
         return formattedEntities.sort((a, b) => (b.mentions || 0) - (a.mentions || 0));
       }
