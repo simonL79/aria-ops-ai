@@ -1,15 +1,18 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import PublicLayout from "@/components/layout/PublicLayout";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import AdminWalkthrough from "@/components/home/AdminWalkthrough";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const SalesFunnelPage = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formSubmitted, setFormSubmitted] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -19,6 +22,38 @@ const SalesFunnelPage = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    const full_name = e.target.full_name.value;
+    const email = e.target.email.value;
+
+    try {
+      const { error } = await supabase
+        .from('reputation_scan_submissions')
+        .insert([{ full_name, email, keywords: '', status: 'new' }]);
+
+      if (error) {
+        toast.error("There was a problem submitting your request. Please try again.");
+        console.error("Submission error:", error);
+      } else {
+        setFormSubmitted(true);
+        toast.success("Your scan request has been submitted successfully!");
+        
+        // Optional: redirect to a thank you page
+        setTimeout(() => {
+          navigate("/thank-you");
+        }, 1500);
+      }
+    } catch (error) {
+      console.error("Form submission error:", error);
+      toast.error("Something went wrong. Please try again later.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   // If authenticated, show admin dashboard walkthrough
   if (isAuthenticated) {
@@ -132,16 +167,37 @@ const SalesFunnelPage = () => {
       <section id="scan-form" className="bg-blue-600 py-16 px-6 md:px-8 text-center">
         <div className="container mx-auto">
           <h2 className="text-3xl font-bold mb-4 text-white">Request Your Free A.R.I.A™ Scan</h2>
-          <form className="max-w-xl mx-auto space-y-4">
-            <input className="w-full p-3 rounded" type="text" placeholder="Your Full Name" required />
-            <input className="w-full p-3 rounded" type="email" placeholder="Your Email Address" required />
-            <Button 
-              type="submit" 
-              className="w-full bg-black text-white font-semibold py-6 rounded hover:bg-gray-800"
-            >
-              SCAN ME
-            </Button>
-          </form>
+          {formSubmitted ? (
+            <div className="max-w-xl mx-auto p-6 bg-white text-gray-800 rounded-lg shadow-lg">
+              <h3 className="text-2xl font-bold mb-2 text-blue-600">Thank You!</h3>
+              <p className="text-lg mb-4">Your scan request has been submitted successfully.</p>
+              <p>Our team will analyze your online presence and get back to you within 24 hours.</p>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="max-w-xl mx-auto space-y-4">
+              <input 
+                name="full_name"
+                className="w-full p-3 rounded" 
+                type="text" 
+                placeholder="Your Full Name" 
+                required 
+              />
+              <input 
+                name="email"
+                className="w-full p-3 rounded" 
+                type="email" 
+                placeholder="Your Email Address" 
+                required 
+              />
+              <Button 
+                type="submit" 
+                className="w-full bg-black text-white font-semibold py-6 rounded hover:bg-gray-800"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "SUBMITTING..." : "SCAN ME"}
+              </Button>
+            </form>
+          )}
         </div>
       </section>
 

@@ -22,6 +22,8 @@ import MentionsPage from "@/pages/dashboard/MentionsPage";
 import NewCoPage from "@/pages/NewCoPage";
 import Authentication from "@/pages/Authentication";
 import SalesFunnelPage from "@/pages/SalesFunnelPage";
+import ThankYouPage from "@/pages/ThankYouPage";
+import ReputationScanForm from "@/pages/ReputationScanForm";
 
 function App() {
   useEffect(() => {
@@ -34,6 +36,8 @@ function App() {
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<SalesFunnelPage />} />
+        <Route path="/thank-you" element={<ThankYouPage />} />
+        <Route path="/scan" element={<ReputationScanForm />} />
         
         {/* Authentication Route - Redirects to dashboard if already signed in */}
         <Route 
