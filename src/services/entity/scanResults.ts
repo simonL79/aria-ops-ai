@@ -103,10 +103,14 @@ export const getScanResultsByEntity = async (entityName: string): Promise<ScanRe
       .eq('risk_entity_name', entityName);
     
     if (!nameError && nameData && nameData.length > 0) {
-      const processedResults = nameData.map((row: any): ScanResult => ({
-        ...row,
-        detected_entities: parseDetectedEntities(row.detected_entities)
-      }));
+      // Fix: Use an explicit type declaration for the row parameter
+      const processedResults = (nameData as any[]).map((row: any) => {
+        const result: ScanResult = {
+          ...row,
+          detected_entities: parseDetectedEntities(row.detected_entities)
+        };
+        return result;
+      });
       
       return processedResults;
     }
@@ -118,10 +122,14 @@ export const getScanResultsByEntity = async (entityName: string): Promise<ScanRe
       .contains('detected_entities', [entityName]);
     
     if (!arrayError && arrayData) {
-      const processedResults = arrayData.map((row: any): ScanResult => ({
-        ...row,
-        detected_entities: parseDetectedEntities(row.detected_entities)
-      }));
+      // Fix: Use an explicit type declaration here too
+      const processedResults = (arrayData as any[]).map((row: any) => {
+        const result: ScanResult = {
+          ...row,
+          detected_entities: parseDetectedEntities(row.detected_entities)
+        };
+        return result;
+      });
       
       results = processedResults;
     }
@@ -149,11 +157,14 @@ export const getAllScanResults = async (): Promise<ScanResult[]> => {
       return [];
     }
     
-    // Process raw data into typed ScanResults
-    return data.map((row: any): ScanResult => ({
-      ...row,
-      detected_entities: parseDetectedEntities(row.detected_entities)
-    }));
+    // Process raw data into typed ScanResults with explicit typing
+    return (data as any[]).map((row: any) => {
+      const result: ScanResult = {
+        ...row,
+        detected_entities: parseDetectedEntities(row.detected_entities)
+      };
+      return result;
+    });
   } catch (error) {
     console.error("Error fetching scan results:", error);
     return [];
