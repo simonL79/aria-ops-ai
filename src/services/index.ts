@@ -23,6 +23,16 @@ import {
   getMentionsAsAlerts
 } from './monitoring/alerts';
 
+// Re-export entity recognition services
+import {
+  extractEntitiesFromText,
+  processEntities,
+  batchProcessEntities,
+  getAllEntities,
+  getScanResultsByEntity,
+  getEntityStatistics
+} from './entityRecognition';
+
 // Export the stopMonitoring function
 const stopMonitoring = () => {
   console.log("Stopping real-time monitoring services...");
@@ -95,7 +105,15 @@ export {
   
   // Threat classifier services
   classifyThreat,
-  classifyThreatAdvanced
+  classifyThreatAdvanced,
+  
+  // Entity recognition services
+  extractEntitiesFromText,
+  processEntities,
+  batchProcessEntities,
+  getAllEntities,
+  getScanResultsByEntity,
+  getEntityStatistics
 };
 
 // Export types

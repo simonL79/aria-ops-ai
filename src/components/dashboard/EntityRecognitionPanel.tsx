@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -6,7 +7,13 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Loader2, Users, Building, AtSign, RefreshCcw, Eye } from "lucide-react";
-import { getAllEntities, batchProcessEntities, getEntityStatistics, getScanResultsByEntity, Entity } from '@/services/entityRecognition';
+import { 
+  getAllEntities, 
+  batchProcessEntities, 
+  getEntityStatistics, 
+  getScanResultsByEntity 
+} from '@/services/entityRecognition';
+import { Entity } from '@/types/entity';
 import { toast } from "sonner";
 
 // Define local interface to ensure compatibility with both implementations

@@ -9,26 +9,19 @@ export async function checkColumnExists(
   columnName: string
 ): Promise<boolean> {
   try {
-    // Use direct edge function invocation
-    const response = await fetch(`${supabase.supabaseUrl}/functions/v1/column_exists`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${supabase.supabaseKey}`
-      },
-      body: JSON.stringify({
-        table_name: tableName,
-        column_name: columnName
-      })
-    });
+    // Query the Postgres information schema directly
+    const { data, error } = await supabase
+      .from('information_schema.columns')
+      .select('column_name')
+      .eq('table_name', tableName)
+      .eq('column_name', columnName);
     
-    if (!response.ok) {
-      console.error(`Error checking if column ${columnName} exists: HTTP ${response.status}`);
+    if (error) {
+      console.error(`Error checking if column ${columnName} exists:`, error);
       return false;
     }
     
-    const data = await response.json();
-    return !!data?.exists;
+    return Array.isArray(data) && data.length > 0;
   } catch (error) {
     console.error(`Error in checkColumnExists for ${columnName}:`, error);
     return false;
