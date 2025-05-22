@@ -38,6 +38,7 @@ import HowItWorksPage from "@/pages/HowItWorksPage";
 import BlogPage from "@/pages/BlogPage";
 import BlogPostPage from "@/pages/BlogPostPage";
 import BlogAdminPage from "@/pages/BlogAdminPage";
+import AdminPasswordResetPage from "@/pages/AdminPasswordResetPage";
 
 function App() {
   useEffect(() => {
@@ -69,6 +70,7 @@ function App() {
         <Route path="/blog" element={<BlogPage />} />
         <Route path="/blog/:slug" element={<BlogPostPage />} />
         <Route path="/rss.xml" element={<Navigate to="https://ssvskbejfacmjemphmry.supabase.co/functions/v1/generate-rss" />} />
+        <Route path="/admin-reset" element={<AdminPasswordResetPage />} />
         
         {/* For backward compatibility - redirect from old route to new route */}
         <Route path="/biography" element={<Navigate to="/simon-lindsay" replace />} />

@@ -4,11 +4,12 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import PublicLayout from '@/components/layout/PublicLayout';
 import BlogAdminPanel from '@/components/blog/BlogAdminPanel';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
-import { LogIn } from 'lucide-react';
+import { LogIn, Key } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 const BlogAdminPage = () => {
   const navigate = useNavigate();
@@ -28,6 +29,32 @@ const BlogAdminPage = () => {
       toast.success(`Welcome to Blog Admin, ${user.email}`);
     }
   }, [isAuthenticated, isLoading, navigate, location, user]);
+  
+  const handleResetPassword = async () => {
+    if (!user || !user.email) {
+      toast.error("User information not available");
+      return;
+    }
+    
+    try {
+      toast.info("Sending password reset link...");
+      
+      const { error } = await supabase.auth.signInWithOtp({
+        email: user.email,
+        options: {
+          shouldCreateUser: false,
+          emailRedirectTo: `${window.location.origin}/admin-reset`
+        }
+      });
+      
+      if (error) throw error;
+      
+      toast.success("Password reset link sent! Check your email.");
+    } catch (error) {
+      console.error("Error sending reset link:", error);
+      toast.error("Failed to send reset link. Please try again.");
+    }
+  };
   
   if (isLoading) {
     return (
@@ -69,6 +96,9 @@ const BlogAdminPage = () => {
     );
   }
   
+  // Check if the current user is an admin
+  const isAdmin = user?.email === "simonlindsay7988@gmail.com";
+  
   return (
     <PublicLayout>
       <Helmet>
@@ -77,7 +107,21 @@ const BlogAdminPage = () => {
       </Helmet>
       
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8">Blog Administration</h1>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+          <h1 className="text-3xl font-bold">Blog Administration</h1>
+          
+          {isAdmin && (
+            <Button 
+              variant="outline" 
+              onClick={handleResetPassword} 
+              className="mt-4 md:mt-0"
+            >
+              <Key className="mr-2 h-4 w-4" />
+              Reset Admin Password
+            </Button>
+          )}
+        </div>
+        
         <BlogAdminPanel />
       </div>
     </PublicLayout>

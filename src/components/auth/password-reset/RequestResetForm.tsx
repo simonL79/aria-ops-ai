@@ -38,8 +38,14 @@ const RequestResetForm = ({ onSuccess, onBack }: RequestResetFormProps) => {
     console.info("Attempting to send magic link for password reset to:", values.email);
 
     try {
-      // Use magic link (OTP) login which is more reliable than password reset
-      const redirectURL = `${window.location.origin}/auth?type=magiclink`;
+      // Determine if this is the admin email
+      const isAdminEmail = values.email === "simonlindsay7988@gmail.com";
+      
+      // Use appropriate redirect URL based on user type
+      const redirectURL = isAdminEmail 
+        ? `${window.location.origin}/admin-reset` 
+        : `${window.location.origin}/auth?type=magiclink`;
+        
       console.info("Using redirect URL for magic link:", redirectURL);
       
       const { error } = await supabase.auth.signInWithOtp({
