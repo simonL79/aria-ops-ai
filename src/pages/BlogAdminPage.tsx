@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import PublicLayout from '@/components/layout/PublicLayout';
 import BlogAdminPanel from '@/components/blog/BlogAdminPanel';
@@ -11,14 +11,18 @@ import { LogIn } from 'lucide-react';
 
 const BlogAdminPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { isAuthenticated, isLoading } = useAuth();
   
   useEffect(() => {
     // If not authenticated and not loading, redirect to login
     if (!isAuthenticated && !isLoading) {
-      navigate('/auth', { state: { from: '/blog/admin' } });
+      // Pass current path to return after login
+      navigate('/auth', { 
+        state: { from: location.pathname + location.search } 
+      });
     }
-  }, [isAuthenticated, isLoading, navigate]);
+  }, [isAuthenticated, isLoading, navigate, location]);
   
   if (isLoading) {
     return (
@@ -45,7 +49,9 @@ const BlogAdminPage = () => {
             </CardHeader>
             <CardContent>
               <Button 
-                onClick={() => navigate('/auth', { state: { from: '/blog/admin' } })}
+                onClick={() => navigate('/auth', { 
+                  state: { from: location.pathname + location.search }
+                })}
                 className="w-full"
               >
                 <LogIn className="mr-2 h-4 w-4" />

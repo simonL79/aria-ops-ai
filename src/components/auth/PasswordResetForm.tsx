@@ -20,6 +20,7 @@ const PasswordResetForm = ({ onBack }: PasswordResetFormProps) => {
   useEffect(() => {
     // If coming from reset link, go straight to verify step
     if (isResetMode || hasAccessToken) {
+      console.info("Reset mode detected from URL parameters, going to verify step");
       setCurrentStep("verify");
     }
   }, [isResetMode, hasAccessToken]);

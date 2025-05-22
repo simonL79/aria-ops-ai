@@ -50,37 +50,47 @@ const VerifyResetForm = ({ resetEmail, onSuccess, onBack }: VerifyResetFormProps
     console.info("Attempting to update password");
 
     try {
-      // Check if we have access_token and refresh_token from the URL
-      // This happens when the user clicks the reset link in their email
+      // Extract tokens from URL parameters
       const accessToken = searchParams.get("access_token");
       const refreshToken = searchParams.get("refresh_token");
       
-      if (accessToken && refreshToken) {
-        // If we have tokens from the URL, use them to set a new password
-        const { data, error } = await supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken
-        });
+      if (accessToken) {
+        console.info("Found access token, setting session");
         
-        if (error) {
-          throw error;
+        // If we have an access token from the URL, set the session
+        if (refreshToken) {
+          const { error: sessionError } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken
+          });
+          
+          if (sessionError) {
+            console.error("Error setting session:", sessionError);
+            throw sessionError;
+          }
         }
         
-        // Now that we have a session, update the password
+        // Now update the password
         const { error: pwError } = await supabase.auth.updateUser({
           password: values.password,
         });
 
         if (pwError) {
+          console.error("Error updating password after setting session:", pwError);
           throw pwError;
         }
+        
+        console.info("Password updated successfully with token from URL");
       } else {
-        // Try to recover the password using just the email
+        // No tokens in URL, try to use existing session (user must be logged in)
+        console.info("No tokens in URL, attempting to update with existing session");
+        
         const { error } = await supabase.auth.updateUser({
           password: values.password,
         });
 
         if (error) {
+          console.error("Error updating password with existing session:", error);
           throw error;
         }
       }

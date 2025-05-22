@@ -14,10 +14,11 @@ const Authentication = () => {
   const { isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const from = location.state?.from?.pathname || "/dashboard";
+  const from = location.state?.from || "/dashboard";
   
   // Detect if we're in recovery mode from Supabase link
-  const isRecoveryMode = searchParams.get("type") === "recovery";
+  const isRecoveryMode = searchParams.get("type") === "recovery" || 
+                        searchParams.get("access_token") !== null;
   
   useEffect(() => {
     // Small timeout to prevent flash
@@ -40,7 +41,7 @@ const Authentication = () => {
     return <AuthLoadingState />;
   }
   
-  // If already authenticated and not doing a password reset, redirect to the dashboard
+  // If already authenticated and not doing a password reset, redirect to the dashboard or previous page
   if (isAuthenticated && !isRecoveryMode) {
     return <Navigate to={from} replace />;
   }

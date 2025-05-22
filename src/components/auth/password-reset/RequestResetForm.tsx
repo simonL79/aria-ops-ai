@@ -38,7 +38,9 @@ const RequestResetForm = ({ onSuccess, onBack }: RequestResetFormProps) => {
     console.info("Attempting to send password reset to:", values.email);
 
     try {
+      // Use the absolute URL with all necessary parameters
       const redirectURL = `${window.location.origin}/auth?type=recovery`;
+      console.info("Using redirect URL for password reset:", redirectURL);
       
       const { error } = await supabase.auth.resetPasswordForEmail(values.email, {
         redirectTo: redirectURL
