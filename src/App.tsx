@@ -8,6 +8,7 @@ import { initializeDatabase } from "@/utils/initializeMonitoring";
 import Dashboard from "@/pages/dashboard/DashboardPage";
 import Monitor from "@/pages/Monitor";
 import InfluencerRadar from "@/pages/InfluencerRadar";
+import AiScrapingPage from "@/pages/AiScrapingPage";
 
 function App() {
   useEffect(() => {
@@ -21,6 +22,7 @@ function App() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/monitor" element={<Monitor />} />
         <Route path="/influencer-radar" element={<InfluencerRadar />} />
+        <Route path="/dashboard/ai-scraping" element={<AiScrapingPage />} />
       </Routes>
       <Toaster />
     </>

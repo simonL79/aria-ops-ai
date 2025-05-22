@@ -4,75 +4,103 @@ import { supabase } from '@/integrations/supabase/client';
 /**
  * Initialize monitoring status if it doesn't exist
  */
-export const initializeMonitoringStatus = async (): Promise<void> => {
+export const initializeMonitoringStatus = async () => {
   try {
-    // Check if monitoring_status exists
+    // Check if monitoring status exists
     const { data, error } = await supabase
       .from('monitoring_status')
       .select('id')
       .eq('id', '1')
-      .maybeSingle();
+      .single();
     
-    if (error) {
-      console.error("Error checking monitoring status:", error);
+    if (error && error.code !== 'PGRST116') {
+      console.error('Error checking monitoring status:', error);
       return;
     }
     
-    // If no data, create initial monitoring status
+    // If monitoring status doesn't exist, create it
     if (!data) {
+      const now = new Date();
       const { error: insertError } = await supabase
         .from('monitoring_status')
         .insert({
           id: '1',
           is_active: false,
           sources_count: 0,
-          last_run: null,
-          next_run: null
+          created_at: now.toISOString(),
+          updated_at: now.toISOString()
         });
       
       if (insertError) {
-        console.error("Error initializing monitoring status:", insertError);
+        console.error('Error creating monitoring status:', insertError);
       }
     }
   } catch (error) {
-    console.error("Error in initializeMonitoringStatus:", error);
+    console.error('Error in initializeMonitoringStatus:', error);
   }
 };
 
 /**
- * Initialize database with required data
+ * Initialize monitoring sources if none exist
  */
-export const initializeDatabase = async (): Promise<void> => {
-  await initializeMonitoringStatus();
-  await initializeMonitoredPlatforms();
-};
-
-/**
- * Initialize monitored platforms if not exists
- */
-export const initializeMonitoredPlatforms = async (): Promise<void> => {
+export const initializeMonitoringSources = async () => {
   try {
-    // Check if there are any platforms
-    const { data, error } = await supabase
-      .from('monitored_platforms')
-      .select('id')
-      .limit(1);
+    // Check if monitoring sources exist
+    const { count, error } = await supabase
+      .from('monitoring_sources')
+      .select('*', { count: 'exact', head: true });
     
     if (error) {
-      console.error("Error checking monitored platforms:", error);
+      console.error('Error checking monitoring sources:', error);
       return;
     }
     
-    // If no platforms, insert defaults
-    if (!data || data.length === 0) {
+    // If no monitoring sources exist, create default ones
+    if (count === 0) {
+      const defaultSources = [
+        { name: 'Twitter', type: 'social_media' },
+        { name: 'Facebook', type: 'social_media' },
+        { name: 'LinkedIn', type: 'social_media' },
+        { name: 'Google News', type: 'news' },
+        { name: 'Reddit', type: 'forum' }
+      ];
+      
+      const { error: insertError } = await supabase
+        .from('monitoring_sources')
+        .insert(defaultSources);
+      
+      if (insertError) {
+        console.error('Error creating default monitoring sources:', insertError);
+      }
+    }
+  } catch (error) {
+    console.error('Error in initializeMonitoringSources:', error);
+  }
+};
+
+/**
+ * Initialize monitored platforms if none exist
+ */
+export const initializeMonitoredPlatforms = async () => {
+  try {
+    // Check if monitored platforms exist
+    const { count, error } = await supabase
+      .from('monitored_platforms')
+      .select('*', { count: 'exact', head: true });
+    
+    if (error) {
+      console.error('Error checking monitored platforms:', error);
+      return;
+    }
+    
+    // If no monitored platforms exist, create default ones
+    if (count === 0) {
       const defaultPlatforms = [
-        { name: 'Twitter', type: 'social', active: true, positive_ratio: 35, total: 120, sentiment: -15 },
-        { name: 'Facebook', type: 'social', active: true, positive_ratio: 87, total: 230, sentiment: 25 },
-        { name: 'Reddit', type: 'forum', active: true, positive_ratio: 62, total: 85, sentiment: 5 },
-        { name: 'LinkedIn', type: 'business', active: true, positive_ratio: 75, total: 58, sentiment: 15 },
-        { name: 'News Sites', type: 'news', active: true, positive_ratio: 45, total: 42, sentiment: -8 },
-        { name: 'Yelp', type: 'review', active: true, positive_ratio: 78, total: 45, sentiment: 18 },
-        { name: 'Google Reviews', type: 'review', active: true, positive_ratio: 82, total: 90, sentiment: 22 }
+        { name: 'Twitter', type: 'social', status: 'active' },
+        { name: 'Facebook', type: 'social', status: 'active' },
+        { name: 'Reddit', type: 'forum', status: 'active' },
+        { name: 'Google Reviews', type: 'review', status: 'active' },
+        { name: 'Yelp', type: 'review', status: 'active' }
       ];
       
       const { error: insertError } = await supabase
@@ -80,23 +108,45 @@ export const initializeMonitoredPlatforms = async (): Promise<void> => {
         .insert(defaultPlatforms);
       
       if (insertError) {
-        console.error("Error initializing monitored platforms:", insertError);
+        console.error('Error initializing monitored platforms:', insertError);
       }
     }
   } catch (error) {
-    console.error("Error in initializeMonitoredPlatforms:", error);
+    console.error('Error in initializeMonitoredPlatforms:', error);
   }
 };
 
 /**
- * Initialize the entire monitoring system
- * This ensures that both the status and the platforms are properly initialized
+ * Initialize the database with required data
  */
-export const initializeMonitoringSystem = async (): Promise<void> => {
+export const initializeDatabase = async () => {
   try {
-    await initializeDatabase();
-    console.log("Monitoring system initialized successfully");
+    // Initialize monitoring status
+    await initializeMonitoringStatus();
+    
+    // Initialize monitoring sources
+    await initializeMonitoringSources();
+    
+    // Initialize monitored platforms
+    await initializeMonitoredPlatforms();
+    
   } catch (error) {
-    console.error("Error initializing monitoring system:", error);
+    console.error('Error in initializeDatabase:', error);
+  }
+};
+
+/**
+ * Initialize the monitoring system
+ */
+export const initializeMonitoringSystem = async () => {
+  try {
+    // Initialize the database
+    await initializeDatabase();
+    
+    // Log success
+    console.log('Monitoring system initialized successfully');
+    
+  } catch (error) {
+    console.error('Error in initializeMonitoringSystem:', error);
   }
 };
