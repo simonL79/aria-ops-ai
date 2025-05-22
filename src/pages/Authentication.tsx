@@ -16,9 +16,11 @@ const Authentication = () => {
   const [searchParams] = useSearchParams();
   const from = location.state?.from || "/dashboard";
   
-  // Detect if we're in recovery mode from Supabase link
-  const isRecoveryMode = searchParams.get("type") === "recovery" || 
-                        searchParams.get("access_token") !== null;
+  // Detect magic link or recovery mode from Supabase
+  const isMagicLink = searchParams.get("type") === "magiclink";
+  const isRecoveryMode = searchParams.get("type") === "recovery"; 
+  const hasAccessToken = searchParams.get("access_token") !== null;
+  const isAuthFlow = isMagicLink || isRecoveryMode || hasAccessToken;
   
   useEffect(() => {
     // Small timeout to prevent flash
@@ -28,6 +30,18 @@ const Authentication = () => {
     
     return () => clearTimeout(timer);
   }, [isLoading, isAuthenticated]);
+  
+  useEffect(() => {
+    // Log auth flow parameters for debugging
+    if (isAuthFlow) {
+      console.info("Auth flow detected:", {
+        isMagicLink,
+        isRecoveryMode,
+        hasAccessToken,
+        searchParams: Object.fromEntries(searchParams.entries())
+      });
+    }
+  }, [isMagicLink, isRecoveryMode, hasAccessToken, searchParams, isAuthFlow]);
   
   const scrollToAuthCard = () => {
     const authCard = document.getElementById('auth-card');
@@ -41,8 +55,8 @@ const Authentication = () => {
     return <AuthLoadingState />;
   }
   
-  // If already authenticated and not doing a password reset, redirect to the dashboard or previous page
-  if (isAuthenticated && !isRecoveryMode) {
+  // If already authenticated and not in reset flow, redirect to the dashboard or previous page
+  if (isAuthenticated && !isAuthFlow) {
     return <Navigate to={from} replace />;
   }
 
@@ -50,7 +64,7 @@ const Authentication = () => {
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
       <AuthHeader />
       
-      {!isRecoveryMode && (
+      {!isAuthFlow && (
         <div className="w-full max-w-md text-center mb-8">
           <Button 
             size="lg" 
@@ -77,10 +91,10 @@ const Authentication = () => {
       <Card id="auth-card" className="w-full max-w-md border-2 border-primary shadow-lg">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">
-            A.R.I.A. Security {isRecoveryMode ? "Password Reset" : "Login"}
+            A.R.I.A. Security {isAuthFlow ? "Password Reset" : "Login"}
           </CardTitle>
           <CardDescription className="text-center">
-            {isRecoveryMode 
+            {isAuthFlow 
               ? "Set your new password below" 
               : "Sign in to access the A.R.I.A. admin dashboard"
             }

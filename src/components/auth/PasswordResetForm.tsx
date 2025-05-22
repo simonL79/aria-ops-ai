@@ -13,17 +13,17 @@ const PasswordResetForm = ({ onBack }: PasswordResetFormProps) => {
   const [currentStep, setCurrentStep] = useState<"request" | "verify">("request");
   const [searchParams] = useSearchParams();
   
-  // Check if we're coming back from a reset link click
-  const isResetMode = searchParams.get("type") === "recovery";
+  // Check if we're coming back from a magic link click
+  const isAuth = searchParams.get("type") === "magiclink";
   const hasAccessToken = searchParams.get("access_token") !== null;
   
   useEffect(() => {
-    // If coming from reset link, go straight to verify step
-    if (isResetMode || hasAccessToken) {
-      console.info("Reset mode detected from URL parameters, going to verify step");
+    // If coming from magic link or has token, go straight to verify step
+    if (isAuth || hasAccessToken) {
+      console.info("Magic link authentication detected, going to reset password step");
       setCurrentStep("verify");
     }
-  }, [isResetMode, hasAccessToken]);
+  }, [isAuth, hasAccessToken]);
   
   const handleRequestSuccess = (email: string) => {
     setResetEmail(email);

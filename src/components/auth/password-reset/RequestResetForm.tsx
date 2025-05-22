@@ -35,15 +35,19 @@ const RequestResetForm = ({ onSuccess, onBack }: RequestResetFormProps) => {
 
   const handleSendResetLink = async (values: EmailFormValues) => {
     setIsLoading(true);
-    console.info("Attempting to send password reset to:", values.email);
+    console.info("Attempting to send magic link for password reset to:", values.email);
 
     try {
-      // Use the absolute URL with all necessary parameters
-      const redirectURL = `${window.location.origin}/auth?type=recovery`;
-      console.info("Using redirect URL for password reset:", redirectURL);
+      // Use magic link (OTP) login which is more reliable than password reset
+      const redirectURL = `${window.location.origin}/auth?type=magiclink`;
+      console.info("Using redirect URL for magic link:", redirectURL);
       
-      const { error } = await supabase.auth.resetPasswordForEmail(values.email, {
-        redirectTo: redirectURL
+      const { error } = await supabase.auth.signInWithOtp({
+        email: values.email,
+        options: {
+          shouldCreateUser: false,
+          emailRedirectTo: redirectURL
+        }
       });
 
       if (error) {
@@ -51,18 +55,18 @@ const RequestResetForm = ({ onSuccess, onBack }: RequestResetFormProps) => {
       }
 
       setEmailSent(true);
-      toast.success("Password reset link sent successfully!");
+      toast.success("Magic link sent successfully! Check your email to continue.");
       onSuccess(values.email);
     } catch (error) {
-      console.error("Error sending password reset:", error);
-      toast.error("Failed to send password reset link. Please try again.");
+      console.error("Error sending magic link:", error);
+      toast.error("Failed to send magic link. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
   if (isLoading) {
-    return <LoadingSpinner text="Sending password reset email..." />;
+    return <LoadingSpinner text="Sending magic link email..." />;
   }
 
   if (emailSent) {
@@ -70,7 +74,7 @@ const RequestResetForm = ({ onSuccess, onBack }: RequestResetFormProps) => {
       <div className="space-y-6 text-center">
         <div className="bg-green-50 text-green-700 p-4 rounded-lg">
           <h3 className="font-semibold">Email Sent!</h3>
-          <p className="text-sm">Please check your inbox for instructions to reset your password.</p>
+          <p className="text-sm">Please check your inbox for a magic link to log in and reset your password.</p>
         </div>
         
         <Button 
@@ -90,7 +94,7 @@ const RequestResetForm = ({ onSuccess, onBack }: RequestResetFormProps) => {
       <div>
         <h2 className="text-xl font-semibold">Reset Your Password</h2>
         <p className="text-sm text-gray-500">
-          Enter your email address and we'll send you instructions to reset your password.
+          Enter your email address and we'll send you a magic link to log in and reset your password.
         </p>
       </div>
 
@@ -131,7 +135,7 @@ const RequestResetForm = ({ onSuccess, onBack }: RequestResetFormProps) => {
               className="flex items-center gap-2"
             >
               <Send className="h-4 w-4" />
-              Send Reset Link
+              Send Magic Link
             </Button>
           </div>
         </form>

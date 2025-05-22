@@ -8,21 +8,26 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { LogIn } from 'lucide-react';
+import { toast } from 'sonner';
 
 const BlogAdminPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   
   useEffect(() => {
     // If not authenticated and not loading, redirect to login
     if (!isAuthenticated && !isLoading) {
+      console.info('Not authenticated, redirecting to auth page');
       // Pass current path to return after login
       navigate('/auth', { 
         state: { from: location.pathname + location.search } 
       });
+    } else if (isAuthenticated && user) {
+      // User is authenticated, show welcome toast
+      toast.success(`Welcome to Blog Admin, ${user.email}`);
     }
-  }, [isAuthenticated, isLoading, navigate, location]);
+  }, [isAuthenticated, isLoading, navigate, location, user]);
   
   if (isLoading) {
     return (
