@@ -8,7 +8,7 @@ export interface MonitoringStatus {
   lastRun: Date | null;
   nextRun: Date | null;
   sourcesCount: number;
-  sources?: number; // For backward compatibility
+  sources: number; // For backward compatibility
   activeSince?: Date;
 }
 
