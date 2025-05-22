@@ -38,7 +38,8 @@ import HowItWorksPage from "@/pages/HowItWorksPage";
 import BlogPage from "@/pages/BlogPage";
 import BlogPostPage from "@/pages/BlogPostPage";
 import BlogAdminPage from "@/pages/BlogAdminPage";
-import AdminPasswordResetPage from "@/pages/AdminPasswordResetPage";
+import AdminLogin from "@/pages/AdminLogin";
+import AuthGuard from "@/components/auth/AuthGuard";
 
 function App() {
   useEffect(() => {
@@ -70,10 +71,11 @@ function App() {
         <Route path="/blog" element={<BlogPage />} />
         <Route path="/blog/:slug" element={<BlogPostPage />} />
         <Route path="/rss.xml" element={<Navigate to="https://ssvskbejfacmjemphmry.supabase.co/functions/v1/generate-rss" />} />
-        <Route path="/admin-reset" element={<AdminPasswordResetPage />} />
+        <Route path="/admin-login" element={<AdminLogin />} />
         
         {/* For backward compatibility - redirect from old route to new route */}
         <Route path="/biography" element={<Navigate to="/simon-lindsay" replace />} />
+        <Route path="/admin-reset" element={<Navigate to="/admin-login" replace />} />
         
         {/* Authentication Route - Redirects to dashboard if already signed in */}
         <Route 
@@ -100,8 +102,10 @@ function App() {
           <Route path="/dashboard/new-companies" element={<NewCoPage />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/calendar" element={<CalendarPage />} />
-          <Route path="/blog/admin" element={<BlogAdminPage />} />
         </Route>
+        
+        {/* Admin-only blog admin route */}
+        <Route path="/blog/admin" element={<BlogAdminPage />} />
         
         {/* Catch all route - 404 */}
         <Route path="*" element={<NotFound />} />
