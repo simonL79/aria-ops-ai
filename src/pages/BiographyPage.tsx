@@ -44,7 +44,7 @@ const BiographyPage = () => {
                 <div className="flex flex-col md:flex-row gap-6">
                   <div className="md:w-1/3 flex justify-center">
                     <img 
-                      src="/public/lovable-uploads/simon-lindsay.jpg" 
+                      src="/lovable-uploads/simon-lindsay.jpg" 
                       alt="Simon Lindsay" 
                       className="w-48 h-48 rounded-full object-cover border border-premium-silver shadow-md"
                     />
