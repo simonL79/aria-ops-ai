@@ -16,11 +16,10 @@ const Authentication = () => {
   const [searchParams] = useSearchParams();
   const from = location.state?.from || "/dashboard";
   
-  // Detect magic link or recovery mode from Supabase
-  const isMagicLink = searchParams.get("type") === "magiclink";
+  // Detect password reset or recovery mode from Supabase
   const isRecoveryMode = searchParams.get("type") === "recovery"; 
   const hasAccessToken = searchParams.get("access_token") !== null;
-  const isAuthFlow = isMagicLink || isRecoveryMode || hasAccessToken;
+  const isAuthFlow = isRecoveryMode || hasAccessToken;
   
   useEffect(() => {
     // Small timeout to prevent flash
@@ -35,13 +34,12 @@ const Authentication = () => {
     // Log auth flow parameters for debugging
     if (isAuthFlow) {
       console.info("Auth flow detected:", {
-        isMagicLink,
         isRecoveryMode,
         hasAccessToken,
         searchParams: Object.fromEntries(searchParams.entries())
       });
     }
-  }, [isMagicLink, isRecoveryMode, hasAccessToken, searchParams, isAuthFlow]);
+  }, [isRecoveryMode, hasAccessToken, searchParams, isAuthFlow]);
   
   const scrollToAuthCard = () => {
     const authCard = document.getElementById('auth-card');
