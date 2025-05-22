@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Navigate, useLocation } from "react-router-dom";
+import { Navigate, useLocation, useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import AuthHeader from "@/components/auth/AuthHeader";
 import AuthenticationForm from "@/components/auth/AuthenticationForm";
@@ -13,7 +13,9 @@ const Authentication = () => {
   const [isReady, setIsReady] = useState(false);
   const { isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const from = location.state?.from?.pathname || "/dashboard";
+  const isReset = searchParams.get("reset") === "true";
   
   useEffect(() => {
     // Small timeout to prevent flash
@@ -36,8 +38,8 @@ const Authentication = () => {
     return <AuthLoadingState />;
   }
   
-  // If already authenticated, redirect to the dashboard
-  if (isAuthenticated) {
+  // If already authenticated and not doing a password reset, redirect to the dashboard
+  if (isAuthenticated && !isReset) {
     return <Navigate to={from} replace />;
   }
 
@@ -73,7 +75,10 @@ const Authentication = () => {
             A.R.I.A. Security Login
           </CardTitle>
           <CardDescription className="text-center">
-            Sign in to access the A.R.I.A. admin dashboard
+            {isReset 
+              ? "Set your new password below" 
+              : "Sign in to access the A.R.I.A. admin dashboard"
+            }
           </CardDescription>
         </CardHeader>
         <CardContent>

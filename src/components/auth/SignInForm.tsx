@@ -41,7 +41,7 @@ const SignInForm = ({ setShowResetForm }: SignInFormProps) => {
     },
   });
   
-  // Direct email signin implementation
+  // Email signin implementation
   const handleSignInWithEmail = async (values: LoginFormValues) => {
     setIsLoading(true);
     
@@ -50,13 +50,28 @@ const SignInForm = ({ setShowResetForm }: SignInFormProps) => {
       
       if (success) {
         toast.success("Login successful! Redirecting to dashboard...");
+        
+        try {
+          // Log the login activity
+          await logActivity(
+            LogAction.LOGIN, 
+            `User signed in: ${values.email}`, 
+            'user', 
+            values.email
+          );
+        } catch (logError) {
+          console.error("Error logging activity:", logError);
+        }
+        
         setTimeout(() => navigate(from), 500); // Short delay to show the success message
       } else {
         toast.error("Invalid email or password. Please try again.");
       }
     } catch (error: any) {
       console.error("Error signing in:", error);
-      toast.error("Login failed. Please check your credentials.");
+      toast.error("Login failed", {
+        description: error?.message || "Please check your credentials."
+      });
     } finally {
       setIsLoading(false);
     }

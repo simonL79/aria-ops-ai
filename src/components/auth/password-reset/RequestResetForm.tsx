@@ -1,6 +1,5 @@
 
 import { useState } from "react";
-import { useSignIn } from "@clerk/clerk-react";
 import { Mail, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +8,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import LoadingSpinner from "./LoadingSpinner";
 
 // Define schema for the request reset form
@@ -25,7 +25,6 @@ interface RequestResetFormProps {
 
 const RequestResetForm = ({ onSuccess, onBack }: RequestResetFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
-  const { isLoaded: isSignInLoaded, signIn } = useSignIn();
   
   // Set up the reset request form with validation
   const requestForm = useForm<RequestResetFormValues>({
@@ -40,31 +39,25 @@ const RequestResetForm = ({ onSuccess, onBack }: RequestResetFormProps) => {
     console.log("Attempting to send password reset to:", values.email);
     
     try {
-      if (!signIn || !isSignInLoaded) {
-        toast.error("Authentication service not available");
-        console.error("SignIn not available:", { signIn, isSignInLoaded });
-        setIsLoading(false);
-        return;
-      }
-      
-      // Attempt to reset password via email
-      const result = await signIn.create({
-        strategy: "reset_password_email_code",
-        identifier: values.email,
+      // Use Supabase to send password reset email
+      const { error } = await supabase.auth.resetPasswordForEmail(values.email, {
+        redirectTo: `${window.location.origin}/auth?reset=true`,
       });
       
-      console.log("Password reset result:", result);
-      
-      if (result.status === "needs_first_factor") {
-        toast.success("Password reset code sent to your email");
-        onSuccess(values.email);
+      if (error) {
+        console.error("Error sending reset email:", error);
+        toast.error("Failed to send reset email", {
+          description: error.message
+        });
       } else {
-        console.error("Unexpected reset password status:", result);
-        toast.error("Failed to send reset email. Please try again.");
+        toast.success("Password reset email sent successfully");
+        onSuccess(values.email);
       }
     } catch (error: any) {
       console.error("Error sending reset email:", error);
-      toast.error(error?.errors?.[0]?.message || "Failed to send reset email. Please try again.");
+      toast.error("Failed to send reset email", {
+        description: error?.message || "An unexpected error occurred"
+      });
     } finally {
       setIsLoading(false);
     }
@@ -74,7 +67,7 @@ const RequestResetForm = ({ onSuccess, onBack }: RequestResetFormProps) => {
     <div className="space-y-4">
       <h2 className="text-lg font-medium text-center">Reset Your Password</h2>
       <p className="text-sm text-gray-500 text-center">
-        Enter your email address and we'll send you a code to reset your password.
+        Enter your email address and we'll send you a link to reset your password.
       </p>
       
       <Form {...requestForm}>
@@ -107,9 +100,9 @@ const RequestResetForm = ({ onSuccess, onBack }: RequestResetFormProps) => {
             disabled={isLoading}
           >
             {isLoading ? (
-              <LoadingSpinner text="Sending Reset Code..." />
+              <LoadingSpinner text="Sending Reset Email..." />
             ) : (
-              <span>Send Reset Code</span>
+              <span>Send Reset Email</span>
             )}
           </Button>
           
