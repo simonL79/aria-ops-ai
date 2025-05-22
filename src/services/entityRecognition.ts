@@ -7,9 +7,9 @@ import { processEntities } from './entity/processUtils';
 import { batchProcessEntities } from './entity/batchProcessor';
 import { 
   getAllEntities, 
-  getScanResultsByEntity, 
-  getEntityStatistics 
+  getScanResultsByEntity
 } from './entity/queryService';
+import { getEntityStatistics } from './entity/statistics';
 
 export { 
   extractEntitiesFromText,
