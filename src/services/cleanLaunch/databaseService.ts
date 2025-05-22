@@ -1,3 +1,4 @@
+
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -181,5 +182,120 @@ export const saveCompanyToDatabase = async (company: any): Promise<void> => {
   } catch (error) {
     console.error('Error saving company to database:', error);
     toast.error('Failed to save company data');
+  }
+};
+
+/**
+ * Extract and store entities from scan results
+ */
+export const processEntitiesFromScanResult = async (scanResult: any): Promise<void> => {
+  try {
+    // Extract entities using regex for simple cases
+    const entities = extractEntities(scanResult.content);
+    
+    // Update the scan result with the extracted entities
+    const { error } = await supabase
+      .from('scan_results')
+      .update({
+        detected_entities: entities,
+        is_identified: entities.length > 0
+      })
+      .eq('id', scanResult.id);
+    
+    if (error) {
+      console.error('Error updating scan result with entities:', error);
+    }
+  } catch (error) {
+    console.error('Error in processEntitiesFromScanResult:', error);
+  }
+};
+
+/**
+ * Simple entity extraction function using regex
+ * In a production environment, this would be replaced with NLP or API calls
+ */
+const extractEntities = (text: string): string[] => {
+  if (!text) return [];
+  
+  const entities: string[] = [];
+  
+  // Extract mentions (@username)
+  const mentionRegex = /@[\w\d_]{2,}/g;
+  const mentions = text.match(mentionRegex) || [];
+  entities.push(...mentions);
+  
+  // Simple person name extraction (capitalized words in sequence)
+  // This is a simplistic approach and would be replaced with proper NLP
+  const nameRegex = /\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)+\b/g;
+  const names = text.match(nameRegex) || [];
+  entities.push(...names);
+  
+  // Organization names (simplistic approach)
+  const orgIndicators = [
+    'Inc', 'LLC', 'Ltd', 'Limited', 'Corp', 'Corporation', 
+    'Company', 'Co', 'Group', 'Foundation', 'Association'
+  ];
+  
+  orgIndicators.forEach(indicator => {
+    const orgRegex = new RegExp(`\\b[A-Z][\\w\\s]*\\s+${indicator}\\b`, 'g');
+    const orgs = text.match(orgRegex) || [];
+    entities.push(...orgs);
+  });
+  
+  // Remove duplicates and return
+  return [...new Set(entities)];
+};
+
+/**
+ * Process all scan results to extract entities
+ */
+export const processAllScanResults = async (): Promise<void> => {
+  try {
+    // Get scan results that haven't been processed for entities yet
+    const { data: scanResults, error } = await supabase
+      .from('scan_results')
+      .select('*')
+      .is('is_identified', null);
+    
+    if (error) {
+      console.error('Error fetching scan results:', error);
+      return;
+    }
+    
+    if (!scanResults || scanResults.length === 0) {
+      console.log('No unprocessed scan results found');
+      return;
+    }
+    
+    // Process each scan result
+    for (const scanResult of scanResults) {
+      await processEntitiesFromScanResult(scanResult);
+    }
+    
+    toast.success(`Processed ${scanResults.length} scan results for entity extraction`);
+  } catch (error) {
+    console.error('Error in processAllScanResults:', error);
+  }
+};
+
+/**
+ * Get scan results by entity name
+ */
+export const getScanResultsByEntity = async (entityName: string): Promise<any[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('scan_results')
+      .select('*')
+      .filter('detected_entities', 'cs', `["${entityName}"]`);
+    
+    if (error) {
+      console.error('Error fetching scan results by entity:', error);
+      return [];
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error('Error in getScanResultsByEntity:', error);
+    return [];
   }
 };
