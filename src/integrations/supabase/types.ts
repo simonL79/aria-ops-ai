@@ -267,6 +267,36 @@ export type Database = {
           },
         ]
       }
+      lead_magnets: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          lead_magnet: string
+          name: string
+          status: Database["public"]["Enums"]["lead_status"]
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id?: string
+          lead_magnet: string
+          name: string
+          status?: Database["public"]["Enums"]["lead_status"]
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          lead_magnet?: string
+          name?: string
+          status?: Database["public"]["Enums"]["lead_status"]
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       monitored_platforms: {
         Row: {
           active: boolean | null
@@ -572,6 +602,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user" | "security" | "staff" | "analyst"
+      lead_status: "new" | "contacted" | "converted" | "disqualified"
       reputation_scan_status: "new" | "in_review" | "complete" | "archived"
     }
     CompositeTypes: {
@@ -689,6 +720,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user", "security", "staff", "analyst"],
+      lead_status: ["new", "contacted", "converted", "disqualified"],
       reputation_scan_status: ["new", "in_review", "complete", "archived"],
     },
   },

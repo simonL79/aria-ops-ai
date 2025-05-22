@@ -48,15 +48,14 @@ const LeadMagnetForm = ({
     setIsSubmitting(true);
     
     try {
-      // Store lead information in Supabase using reputation_scan_submissions table temporarily
-      // This will be replaced with lead_magnets table after types are updated
+      // Store lead information in our new lead_magnets table
       const { error } = await supabase
-        .from('reputation_scan_submissions')
+        .from('lead_magnets')
         .insert({
-          full_name: data.name,
+          name: data.name,
           email: data.email,
-          keywords: downloadName, // Using keywords field to store the lead magnet name
-          admin_notes: `Lead magnet: ${downloadName}` // Additional info in notes
+          lead_magnet: downloadName,
+          status: 'new'
         });
         
       if (error) throw error;
