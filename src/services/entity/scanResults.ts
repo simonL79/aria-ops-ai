@@ -13,7 +13,7 @@ export interface RawScanResult {
   severity: string;
   status: string;
   threat_type?: string;
-  detected_entities?: unknown; // Accept unknown for detected_entities at fetch time
+  detected_entities?: unknown; // Use unknown type to avoid recursive type issues
   risk_entity_name?: string | null;
   risk_entity_type?: string | null;
   created_at?: string;
