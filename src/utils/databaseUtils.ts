@@ -9,7 +9,7 @@ export async function checkColumnExists(
   columnName: string
 ): Promise<boolean> {
   try {
-    // Instead of using a typed rpc call, use a more generic approach
+    // Use the correct parameter names for the column_exists RPC function
     const { data, error } = await supabase
       .rpc('column_exists', { 
         p_table_name: tableName, 
