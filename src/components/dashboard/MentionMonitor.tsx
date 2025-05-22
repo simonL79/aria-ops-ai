@@ -1,3 +1,3 @@
 
-import MentionMonitor from './mentionMonitor';
+import MentionMonitor from './MentionMonitor';
 export default MentionMonitor;

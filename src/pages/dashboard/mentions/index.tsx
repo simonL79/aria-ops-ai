@@ -109,14 +109,14 @@ const MentionsPage = () => {
       if (dialogAction === 'resolve') {
         // Update mention status
         const updatedMentions = mentions.map(m => 
-          m.id === selectedMention.id ? { ...m, status: 'resolved' } : m
+          m.id === selectedMention.id ? { ...m, status: 'resolved' as const } : m
         );
         setMentions(updatedMentions);
         toast.success('Mention marked as resolved');
       } else if (dialogAction === 'escalate') {
         // Escalate the mention
         const updatedMentions = mentions.map(m => 
-          m.id === selectedMention.id ? { ...m, severity: 'high', status: 'escalated' } : m
+          m.id === selectedMention.id ? { ...m, severity: 'high' as const, status: 'reviewing' as const } : m
         );
         setMentions(updatedMentions);
         toast.success('Mention escalated for urgent review');

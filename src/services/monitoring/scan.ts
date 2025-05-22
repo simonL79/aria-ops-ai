@@ -3,6 +3,11 @@ import { supabase } from '@/integrations/supabase/client';
 import type { ScanResult } from './types';
 import { toast } from 'sonner';
 
+interface ScanOptions {
+  scan_depth?: string;
+  target_entity?: string | null;
+}
+
 /**
  * Run a monitoring scan and return results
  */
@@ -23,10 +28,12 @@ export const runMonitoringScan = async (targetEntity?: string): Promise<ScanResu
 
     // Call the run_scan function via RPC
     // If a target entity is provided, pass it to the scan function
-    const { data, error } = await supabase.rpc('run_scan', { 
+    const scanOptions: ScanOptions = { 
       scan_depth: 'standard',
       target_entity: targetEntity || null
-    });
+    };
+    
+    const { data, error } = await supabase.rpc('run_scan', scanOptions);
     
     if (error) {
       console.error("Error running monitoring scan:", error);
@@ -47,21 +54,23 @@ export const runMonitoringScan = async (targetEntity?: string): Promise<ScanResu
     }
     
     // Convert to the expected format
-    const results = scanResults?.map(item => ({
+    const results: ScanResult[] = scanResults?.map(item => ({
       id: item.id,
       content: item.content,
       platform: item.platform,
       url: item.url || '',
       date: item.created_at,
       sentiment: item.sentiment || 0,
-      severity: item.severity as 'low' | 'medium' | 'high',
-      status: item.status as 'new' | 'read' | 'actioned' | 'resolved',
+      severity: (item.severity as 'low' | 'medium' | 'high') || 'low',
+      status: (item.status as 'new' | 'read' | 'actioned' | 'resolved') || 'new',
       threatType: item.threat_type,
       client_id: item.client_id,
       created_at: item.created_at,
       updated_at: item.updated_at,
-      // Make sure to include detected entities
-      detectedEntities: item.detected_entities || [],
+      // Ensure detected entities is an array
+      detectedEntities: Array.isArray(item.detected_entities) 
+        ? item.detected_entities 
+        : (item.detected_entities ? [item.detected_entities.toString()] : []),
       // Add additional source information
       sourceType: item.source_type,
       // Parse potential reach if available
