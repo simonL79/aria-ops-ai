@@ -1,9 +1,9 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import type { ScanResult, MonitoringStatus } from './monitoring/types';
+import { ScanResult, MonitoringStatus } from './monitoring/types';
 
-export type { ScanResult, MonitoringStatus };
+export { ScanResult, MonitoringStatus };
 
 /**
  * Get the current monitoring status

@@ -8,6 +8,8 @@ import AiScrapingPage from "@/pages/AiScrapingPage";
 // import EngagementHubPage from "@/pages/dashboard/EngagementHubPage";
 // import SettingsPage from "@/pages/SettingsPage";
 
+// This component defines routes that can be used within the main Routes component
+// It should NOT include its own Router/BrowserRouter
 const AppRoutes = () => {
   return (
     <Routes>

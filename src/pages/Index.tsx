@@ -7,6 +7,7 @@ import IntelligencePage from './dashboard/IntelligencePage';
 import RadarPage from './dashboard/RadarPage';
 
 // This is a fallback page that will render the appropriate component based on the current path
+// It does NOT include its own Router/BrowserRouter
 const Index = () => {
   const location = useLocation();
   const path = location.pathname;

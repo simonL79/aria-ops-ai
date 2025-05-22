@@ -1,6 +1,6 @@
 
 import { useEffect } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import { initializeDatabase } from "@/utils/initializeMonitoring";
 
@@ -17,13 +17,11 @@ function App() {
   
   return (
     <>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/monitor" element={<Monitor />} />
-          <Route path="/influencer-radar" element={<InfluencerRadar />} />
-        </Routes>
-      </BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/monitor" element={<Monitor />} />
+        <Route path="/influencer-radar" element={<InfluencerRadar />} />
+      </Routes>
       <Toaster />
     </>
   );

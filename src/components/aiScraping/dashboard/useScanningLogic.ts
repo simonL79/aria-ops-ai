@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { ContentAlert } from '@/types/dashboard';
-import type { 
+import { 
   getMonitoringStatus, 
   startMonitoring,
   stopMonitoring,
