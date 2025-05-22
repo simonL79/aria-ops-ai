@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import Logo from '@/components/ui/logo';
@@ -18,6 +18,7 @@ interface StickyHeaderProps {
 
 const StickyHeader = ({ isScrolled }: StickyHeaderProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
   
   return (
     <header className={`sticky top-0 z-50 w-full transition-all duration-300 ${isScrolled ? 'bg-premium-black/90 shadow-lg backdrop-blur-sm' : 'bg-transparent'}`}>
@@ -56,6 +57,15 @@ const StickyHeader = ({ isScrolled }: StickyHeaderProps) => {
             
             <Button asChild size="sm" className="ml-4">
               <Link to="/scan">Scan My Name Now</Link>
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="ml-2"
+              onClick={() => navigate("/auth")}
+            >
+              Login
             </Button>
           </div>
           
