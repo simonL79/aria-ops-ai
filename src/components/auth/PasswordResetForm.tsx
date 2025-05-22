@@ -1,8 +1,8 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import RequestResetForm from "./password-reset/RequestResetForm";
 import VerifyResetForm from "./password-reset/VerifyResetForm";
-import { useLocation } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 
 interface PasswordResetFormProps {
   onBack: () => void;
@@ -11,16 +11,17 @@ interface PasswordResetFormProps {
 const PasswordResetForm = ({ onBack }: PasswordResetFormProps) => {
   const [resetEmail, setResetEmail] = useState("");
   const [currentStep, setCurrentStep] = useState<"request" | "verify">("request");
-  const location = useLocation();
+  const [searchParams] = useSearchParams();
   
   // Check if we're coming back from a reset link click
-  const searchParams = new URLSearchParams(location.search);
-  const isReset = searchParams.get("reset") === "true";
+  const isResetMode = searchParams.get("type") === "recovery";
   
-  // If coming from reset link, go straight to verify step
-  if (isReset && currentStep === "request") {
-    setCurrentStep("verify");
-  }
+  useEffect(() => {
+    // If coming from reset link, go straight to verify step
+    if (isResetMode) {
+      setCurrentStep("verify");
+    }
+  }, [isResetMode]);
   
   const handleRequestSuccess = (email: string) => {
     setResetEmail(email);

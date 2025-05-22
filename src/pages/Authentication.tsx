@@ -15,7 +15,9 @@ const Authentication = () => {
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const from = location.state?.from?.pathname || "/dashboard";
-  const isReset = searchParams.get("reset") === "true";
+  
+  // Detect if we're in recovery mode from Supabase link
+  const isRecoveryMode = searchParams.get("type") === "recovery";
   
   useEffect(() => {
     // Small timeout to prevent flash
@@ -39,7 +41,7 @@ const Authentication = () => {
   }
   
   // If already authenticated and not doing a password reset, redirect to the dashboard
-  if (isAuthenticated && !isReset) {
+  if (isAuthenticated && !isRecoveryMode) {
     return <Navigate to={from} replace />;
   }
 
@@ -47,35 +49,37 @@ const Authentication = () => {
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
       <AuthHeader />
       
-      <div className="w-full max-w-md text-center mb-8">
-        <Button 
-          size="lg" 
-          className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 transition-colors text-lg font-semibold"
-          onClick={scrollToAuthCard}
-        >
-          <LogIn className="mr-2 h-5 w-5" />
-          <span>Staff Login Only</span>
-        </Button>
-        <p className="mt-2 text-sm text-gray-500">Access your A.R.I.A. security dashboard</p>
-        
-        <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-md">
-          <div className="flex items-center text-amber-700 mb-1">
-            <ShieldAlert className="h-4 w-4 mr-1" />
-            <span className="font-medium">Internal Access Only</span>
+      {!isRecoveryMode && (
+        <div className="w-full max-w-md text-center mb-8">
+          <Button 
+            size="lg" 
+            className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 transition-colors text-lg font-semibold"
+            onClick={scrollToAuthCard}
+          >
+            <LogIn className="mr-2 h-5 w-5" />
+            <span>Staff Login Only</span>
+          </Button>
+          <p className="mt-2 text-sm text-gray-500">Access your A.R.I.A. security dashboard</p>
+          
+          <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-md">
+            <div className="flex items-center text-amber-700 mb-1">
+              <ShieldAlert className="h-4 w-4 mr-1" />
+              <span className="font-medium">Internal Access Only</span>
+            </div>
+            <p className="text-xs text-amber-800">
+              This system is for authorized staff only. Customer reports are delivered externally.
+            </p>
           </div>
-          <p className="text-xs text-amber-800">
-            This system is for authorized staff only. Customer reports are delivered externally.
-          </p>
         </div>
-      </div>
+      )}
 
       <Card id="auth-card" className="w-full max-w-md border-2 border-primary shadow-lg">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">
-            A.R.I.A. Security Login
+            A.R.I.A. Security {isRecoveryMode ? "Password Reset" : "Login"}
           </CardTitle>
           <CardDescription className="text-center">
-            {isReset 
+            {isRecoveryMode 
               ? "Set your new password below" 
               : "Sign in to access the A.R.I.A. admin dashboard"
             }

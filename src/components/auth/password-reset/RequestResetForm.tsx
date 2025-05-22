@@ -41,7 +41,7 @@ const RequestResetForm = ({ onSuccess, onBack }: RequestResetFormProps) => {
     try {
       // Use Supabase to send password reset email
       const { error } = await supabase.auth.resetPasswordForEmail(values.email, {
-        redirectTo: `${window.location.origin}/auth?reset=true`,
+        redirectTo: `${window.location.origin}/auth?type=recovery`,
       });
       
       if (error) {

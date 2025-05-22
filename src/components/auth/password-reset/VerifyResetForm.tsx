@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import LoadingSpinner from "./LoadingSpinner";
 import { supabase } from "@/integrations/supabase/client";
+import { useSearchParams } from "react-router-dom";
 
 // Define schema for the verify reset form
 const completeResetSchema = z.object({
@@ -31,6 +32,7 @@ interface VerifyResetFormProps {
 
 const VerifyResetForm = ({ resetEmail, onSuccess, onBack }: VerifyResetFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [searchParams] = useSearchParams();
   
   // Set up the new password form
   const verifyForm = useForm<CompleteResetFormValues>({
@@ -72,13 +74,16 @@ const VerifyResetForm = ({ resetEmail, onSuccess, onBack }: VerifyResetFormProps
       setIsLoading(false);
     }
   };
+
+  // Get display email - either from form flow or from recovery session
+  const displayEmail = resetEmail || "your account";
   
   return (
     <div className="space-y-4">
       <h2 className="text-lg font-medium text-center">Reset Your Password</h2>
       <Alert variant="default" className="bg-blue-50 text-blue-800 border-blue-300">
         <AlertDescription>
-          Please enter your new password for <span className="font-medium">{resetEmail}</span>.
+          Please enter your new password for <span className="font-medium">{displayEmail}</span>.
         </AlertDescription>
       </Alert>
       
@@ -145,15 +150,17 @@ const VerifyResetForm = ({ resetEmail, onSuccess, onBack }: VerifyResetFormProps
             )}
           </Button>
           
-          <Button 
-            type="button" 
-            variant="outline" 
-            className="w-full"
-            onClick={onBack}
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Email Form
-          </Button>
+          {!searchParams.get("type") && (
+            <Button 
+              type="button" 
+              variant="outline" 
+              className="w-full"
+              onClick={onBack}
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Email Form
+            </Button>
+          )}
         </form>
       </Form>
     </div>
