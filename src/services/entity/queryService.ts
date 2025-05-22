@@ -62,7 +62,7 @@ export const getAllEntities = async (): Promise<Entity[]> => {
               let type: Entity['type'] = 'unknown';
               
               if (hasRiskEntityName && hasRiskEntityType && 
-                  hasScanProperty(result, 'risk_entity_name') &&
+                  result && hasScanProperty(result, 'risk_entity_name') &&
                   hasScanProperty(result, 'risk_entity_type') &&
                   result.risk_entity_name === name) {
                 const riskType = result.risk_entity_type;
@@ -87,7 +87,7 @@ export const getAllEntities = async (): Promise<Entity[]> => {
       
       // Safely process risk_entity_name if it exists and is not already included
       if (hasRiskEntityName && 
-          hasScanProperty(result, 'risk_entity_name') && 
+          result && hasScanProperty(result, 'risk_entity_name') && 
           result.risk_entity_name && 
           typeof result.risk_entity_name === 'string') {
         const riskEntityName = result.risk_entity_name;
@@ -96,7 +96,7 @@ export const getAllEntities = async (): Promise<Entity[]> => {
           let type: Entity['type'] = 'unknown';
           
           if (hasRiskEntityType && 
-              hasScanProperty(result, 'risk_entity_type') && 
+              result && hasScanProperty(result, 'risk_entity_type') && 
               result.risk_entity_type && 
               typeof result.risk_entity_type === 'string') {
             const riskEntityType = result.risk_entity_type;

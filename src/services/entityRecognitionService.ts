@@ -112,7 +112,7 @@ export async function getAllEntities(): Promise<Entity[]> {
       if (!result || typeof result !== 'object') return;
       
       // Safely check if detected_entities exists and is an array
-      if (hasDetectedEntities && hasScanProperty(result, 'detected_entities')) {
+      if (hasDetectedEntities && result && hasScanProperty(result, 'detected_entities')) {
         const detectedEntities = result.detected_entities;
         if (Array.isArray(detectedEntities)) {
           detectedEntities.forEach((entity: string) => {
@@ -136,7 +136,7 @@ export async function getAllEntities(): Promise<Entity[]> {
       
       // Process risk_entity_name if it exists and is not null/undefined
       if (hasRiskEntityName && 
-          hasScanProperty(result, 'risk_entity_name') && 
+          result && hasScanProperty(result, 'risk_entity_name') && 
           result.risk_entity_name && 
           typeof result.risk_entity_name === 'string') {
         
@@ -146,7 +146,7 @@ export async function getAllEntities(): Promise<Entity[]> {
         // Use risk_entity_type if available, otherwise default to unknown
         let entityType = 'unknown';
         if (hasRiskEntityType && 
-            hasScanProperty(result, 'risk_entity_type') && 
+            result && hasScanProperty(result, 'risk_entity_type') && 
             result.risk_entity_type && 
             typeof result.risk_entity_type === 'string') {
           
