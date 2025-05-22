@@ -2,44 +2,33 @@
 import { supabase } from '@/integrations/supabase/client';
 
 /**
- * Helper to check if a column exists in a table
+ * Check if a column exists in a table
  */
-export async function checkColumnExists(
-  tableName: string, 
-  columnName: string
-): Promise<boolean> {
+export async function checkColumnExists(tableName: string, columnName: string): Promise<boolean> {
   try {
-    // Since column_exists is not in the typed list, we need to use the generic query method
-    const { data, error } = await supabase.functions.invoke('column_exists', { 
-      body: JSON.stringify({ 
-        p_table_name: tableName, 
-        p_column_name: columnName 
-      })
+    const { data, error } = await supabase.rpc('column_exists', { 
+      p_table_name: tableName, 
+      p_column_name: columnName 
     });
     
     if (error) {
-      console.error(`Error checking if column ${columnName} exists:`, error);
-      return false;
+      console.error(`Error checking if column ${columnName} exists in table ${tableName}:`, error);
+      // If the RPC function doesn't exist, fall back to assuming column exists
+      // This prevents blocking functionality in case the helper function isn't available
+      return true;
     }
     
     return !!data;
   } catch (error) {
-    console.error(`Error in checkColumnExists for ${columnName}:`, error);
-    return false;
+    console.error(`Error in checkColumnExists for ${columnName} in ${tableName}:`, error);
+    // Assume column exists as fallback
+    return true;
   }
 }
 
 /**
- * Type guard to safely access object properties
+ * Type guard helper to check if a scan result has a specific property
  */
-export function hasScanProperty(obj: any, property: string): boolean {
-  return obj && typeof obj === 'object' && property in obj;
-}
-
-/**
- * Type guard to check if an object has the expected properties
- */
-export function hasRequiredProperties(obj: any, properties: string[]): boolean {
-  if (!obj || typeof obj !== 'object') return false;
-  return properties.every(prop => prop in obj);
+export function hasScanProperty(obj: any, prop: string): boolean {
+  return obj && typeof obj === 'object' && prop in obj;
 }

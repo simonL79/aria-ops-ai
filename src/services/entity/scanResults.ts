@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { checkColumnExists } from '@/utils/databaseUtils';
@@ -63,16 +64,13 @@ export const getScanResultsByEntity = async (entityName: string): Promise<ScanRe
       
       if (!nameError && nameData && nameData.length > 0) {
         // Process raw data into typed ScanResults
-        // Fix: Explicitly cast to RawScanResult before transformation
-        const rawResults = nameData as RawScanResult[];
+        // Cast to RawScanResult explicitly to avoid TS2589
+        const rawResults = nameData as unknown as RawScanResult[];
+        
         return rawResults.map((row): ScanResult => {
-          // Explicitly handle the detected_entities conversion
-          const parsedEntities = parseDetectedEntities(row.detected_entities);
-          
-          // Create a new object with parsed entities
           return {
             ...row,
-            detected_entities: parsedEntities
+            detected_entities: parseDetectedEntities(row.detected_entities)
           };
         });
       }
@@ -87,16 +85,13 @@ export const getScanResultsByEntity = async (entityName: string): Promise<ScanRe
       
       if (!arrayError && arrayData) {
         // Process raw data into typed ScanResults
-        // Fix: Explicitly cast to RawScanResult before transformation
-        const rawResults = arrayData as RawScanResult[];
+        // Cast to RawScanResult explicitly to avoid TS2589
+        const rawResults = arrayData as unknown as RawScanResult[];
+        
         results = rawResults.map((row): ScanResult => {
-          // Explicitly handle the detected_entities conversion
-          const parsedEntities = parseDetectedEntities(row.detected_entities);
-          
-          // Create a new object with parsed entities
           return {
             ...row,
-            detected_entities: parsedEntities
+            detected_entities: parseDetectedEntities(row.detected_entities)
           };
         });
       }

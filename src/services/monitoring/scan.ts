@@ -55,8 +55,9 @@ export const runMonitoringScan = async (targetEntity?: string): Promise<ScanResu
     }
     
     // Convert to the expected format with type safety
-    // We need to type the return value to match the signature in types.ts
-    const results = (scanResults || []).map(item => {
+    // We need to explicitly handle the results to prevent TS2589 errors
+    const results = (scanResults || []).map((item: any): ScanResult => {
+      // Create a safely typed ScanResult object
       const typedResult: ScanResult = {
         id: item.id,
         content: item.content,
