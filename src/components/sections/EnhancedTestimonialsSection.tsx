@@ -9,11 +9,11 @@ const TestimonialCard = ({ quote, author, role, imageUrl }: {
 }) => (
   <div className="premium-card p-8 rounded-xl flex flex-col h-full">
     <div className="mb-6">
-      <svg className="w-10 h-10 text-premium-silver mx-auto" fill="currentColor" viewBox="0 0 24 24">
+      <svg className="w-10 h-10 text-premium-darkGray mx-auto" fill="currentColor" viewBox="0 0 24 24">
         <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
       </svg>
     </div>
-    <p className="mb-6 text-premium-gray italic flex-grow">{quote}</p>
+    <p className="mb-6 text-premium-darkGray italic flex-grow">{quote}</p>
     <div className="flex items-center mt-auto">
       {imageUrl && (
         <div className="mr-3">
@@ -21,8 +21,8 @@ const TestimonialCard = ({ quote, author, role, imageUrl }: {
         </div>
       )}
       <div>
-        <strong className="text-premium-darkGray font-medium block">{author}</strong>
-        {role && <span className="text-sm text-premium-gray">{role}</span>}
+        <strong className="text-premium-black font-medium block">{author}</strong>
+        {role && <span className="text-sm text-premium-darkGray">{role}</span>}
       </div>
     </div>
   </div>
@@ -60,7 +60,7 @@ const EnhancedTestimonialsSection = () => {
     <section className="testimonials py-24 text-center bg-gray-50">
       <div className="container mx-auto px-6">
         <h2 className="text-3xl md:text-4xl font-bold mb-6 text-premium-black">Success Stories</h2>
-        <p className="text-lg md:text-xl mb-6 max-w-xl mx-auto text-premium-gray">
+        <p className="text-lg md:text-xl mb-6 max-w-xl mx-auto text-premium-darkGray">
           Join hundreds of individuals and businesses who've taken control of their online reputation.
         </p>
         
@@ -68,15 +68,15 @@ const EnhancedTestimonialsSection = () => {
           <div className="flex space-x-4">
             <div className="bg-premium-silver/20 px-4 py-2 rounded-full flex items-center">
               <span className="text-green-600 mr-2">✓</span>
-              <span className="text-sm font-medium">500+ Clients Protected</span>
+              <span className="text-sm font-medium text-premium-darkGray">500+ Clients Protected</span>
             </div>
             <div className="bg-premium-silver/20 px-4 py-2 rounded-full flex items-center">
               <span className="text-green-600 mr-2">✓</span>
-              <span className="text-sm font-medium">97% Success Rate</span>
+              <span className="text-sm font-medium text-premium-darkGray">97% Success Rate</span>
             </div>
             <div className="bg-premium-silver/20 px-4 py-2 rounded-full flex items-center">
               <span className="text-green-600 mr-2">✓</span>
-              <span className="text-sm font-medium">4.9/5 Client Rating</span>
+              <span className="text-sm font-medium text-premium-darkGray">4.9/5 Client Rating</span>
             </div>
           </div>
         </div>
@@ -103,7 +103,7 @@ const EnhancedTestimonialsSection = () => {
               ))}
               <span className="ml-2 text-premium-black font-medium">4.9 out of 5</span>
             </div>
-            <p className="text-premium-gray text-center">Based on 127 verified client reviews</p>
+            <p className="text-premium-darkGray text-center">Based on 127 verified client reviews</p>
           </div>
         </div>
       </div>
