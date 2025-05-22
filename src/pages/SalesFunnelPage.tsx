@@ -23,6 +23,21 @@ const SalesFunnelPage = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Track conversion events after successful form submission
+  const trackConversionEvents = () => {
+    // Facebook Pixel conversion tracking
+    if (window.fbq) {
+      window.fbq('track', 'Lead');
+    }
+    
+    // Google Ads conversion tracking
+    if (window.gtag) {
+      window.gtag('event', 'conversion', {
+        'send_to': 'AW-CONVERSION_ID/label' // Replace with your actual conversion ID
+      });
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -31,6 +46,7 @@ const SalesFunnelPage = () => {
     const email = e.target.email.value;
 
     try {
+      // Insert the scan submission
       const { error } = await supabase
         .from('reputation_scan_submissions')
         .insert([{ full_name, email, keywords: '', status: 'new' }]);
@@ -38,15 +54,35 @@ const SalesFunnelPage = () => {
       if (error) {
         toast.error("There was a problem submitting your request. Please try again.");
         console.error("Submission error:", error);
-      } else {
-        setFormSubmitted(true);
-        toast.success("Your scan request has been submitted successfully!");
-        
-        // Optional: redirect to a thank you page
-        setTimeout(() => {
-          navigate("/thank-you");
-        }, 1500);
+        return;
       }
+      
+      // Check if there are any matching influencer alerts
+      const match = await supabase
+        .from('influencer_alerts')
+        .select('*')
+        .eq('influencer_name', full_name)
+        .maybeSingle();
+
+      // Update the influencer alert status if there's a match
+      if (match.data) {
+        await supabase
+          .from('influencer_alerts')
+          .update({ status: 'responded' })
+          .eq('id', match.data.id);
+      }
+
+      // Track conversion events
+      trackConversionEvents();
+      
+      // Show success message
+      setFormSubmitted(true);
+      toast.success("Your scan request has been submitted successfully!");
+      
+      // Redirect to thank you page
+      setTimeout(() => {
+        navigate("/thank-you");
+      }, 1500);
     } catch (error) {
       console.error("Form submission error:", error);
       toast.error("Something went wrong. Please try again later.");
