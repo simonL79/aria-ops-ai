@@ -1,10 +1,12 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { ContentAlert } from '@/types/dashboard';
 import { 
   getMonitoringStatus, 
   startMonitoring,
   stopMonitoring,
-  runMonitoringScan
+  runMonitoringScan,
+  ScanResult
 } from '@/services/monitoring';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -186,10 +188,10 @@ const useScanningLogic = () => {
           sourceType: result.sourceType || result.source_type || mapPlatformToSourceType(result.platform),
           confidenceScore: result.confidenceScore || result.confidence_score || 75,
           sentiment: mapNumericSentimentToString(result.sentiment),
-          detectedEntities: Array.isArray(result.detectedEntities) ? 
-            result.detectedEntities.map(entity => String(entity)) : [],
+          detectedEntities: Array.isArray(result.detectedEntities || result.detected_entities) ? 
+            (result.detectedEntities || result.detected_entities || []).map(entity => String(entity)) : [],
           potentialReach: result.potentialReach || result.potential_reach || 0,
-          category: result.category
+          category: result.category || ''
         }));
         
         // Update results - properly handle the ContentAlert array

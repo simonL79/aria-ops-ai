@@ -1,28 +1,8 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { ScanResult, MonitoringStatus } from './monitoring/types';
 
-export interface MonitoringStatus {
-  isActive: boolean;
-  lastRun: string | null;
-  nextRun: string | null;
-  sources: number;
-}
-
-export interface ScanResult {
-  id: string;
-  content: string;
-  platform: string;
-  url: string;
-  date: string;
-  sentiment: number;
-  severity: 'low' | 'medium' | 'high';
-  status: 'new' | 'read' | 'actioned' | 'resolved';
-  threatType?: string;
-  client_id?: string;
-  created_at?: string;
-  updated_at?: string;
-}
+export { ScanResult, MonitoringStatus };
 
 /**
  * Get the current monitoring status
