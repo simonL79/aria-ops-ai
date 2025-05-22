@@ -142,7 +142,7 @@ const NewCompanyFeed: React.FC<NewCompanyFeedProps> = ({
                 )}
                 
                 {company.cleanLaunchScore && company.status && 
-                  (['scanned', 'contacted', 'onboarded', 'declined'].includes(company.status)) && (
+                  (['scanned', 'contacted', 'onboarded', 'declined'].includes(company.status || '')) && (
                   <Button 
                     onClick={(e) => handleRespond(e, company)}
                     className="flex items-center gap-1"
