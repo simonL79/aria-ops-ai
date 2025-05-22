@@ -48,14 +48,15 @@ const LeadMagnetForm = ({
     setIsSubmitting(true);
     
     try {
-      // Store lead information in Supabase
+      // Store lead information in Supabase using reputation_scan_submissions table temporarily
+      // This will be replaced with lead_magnets table after types are updated
       const { error } = await supabase
-        .from('lead_magnets')
+        .from('reputation_scan_submissions')
         .insert({
-          name: data.name,
+          full_name: data.name,
           email: data.email,
-          lead_magnet: downloadName,
-          status: 'new'
+          keywords: downloadName, // Using keywords field to store the lead magnet name
+          admin_notes: `Lead magnet: ${downloadName}` // Additional info in notes
         });
         
       if (error) throw error;
@@ -69,8 +70,8 @@ const LeadMagnetForm = ({
       
       // Track conversion events if available
       if (typeof window !== 'undefined') {
-        if (window.fbq) window.fbq('track', 'Lead');
-        if (window.gtag) window.gtag('event', 'generate_lead');
+        if ((window as any).fbq) (window as any).fbq('track', 'Lead');
+        if ((window as any).gtag) (window as any).gtag('event', 'generate_lead');
       }
       
     } catch (error: any) {
