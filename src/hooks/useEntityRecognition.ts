@@ -17,10 +17,12 @@ export const useEntityRecognition = () => {
   // Helper to check if a column exists in the scan_results table
   const checkColumnExists = useCallback(async (columnName: string): Promise<boolean> => {
     try {
-      // Use raw SQL query to check if column exists
-      const { data, error } = await supabase.rpc('column_exists', {
-        table_name: 'scan_results',
-        column_name: columnName
+      // Use the edge function directly instead of rpc
+      const { data, error } = await supabase.functions.invoke('column_exists', {
+        body: JSON.stringify({
+          table_name: 'scan_results',
+          column_name: columnName
+        })
       });
       
       if (error) {
@@ -28,7 +30,7 @@ export const useEntityRecognition = () => {
         return false;
       }
       
-      return !!data;
+      return data?.exists || false;
     } catch (error) {
       console.error(`Error in checkColumnExists for ${columnName}:`, error);
       return false;
@@ -52,8 +54,8 @@ export const useEntityRecognition = () => {
         return [];
       }
 
-      setEntities(data.entities || []);
-      return data.entities || [];
+      setEntities(data?.entities || []);
+      return data?.entities || [];
     } catch (error) {
       console.error("Error in processText:", error);
       toast.error("An error occurred during entity recognition");
@@ -168,37 +170,43 @@ export const useEntityRecognition = () => {
       const entityTypes = new Map<string, string>();
 
       data.forEach(result => {
-        // Safely check if detected_entities exists and is an array
-        if (hasDetectedEntities && result && result.detected_entities && Array.isArray(result.detected_entities)) {
-          result.detected_entities.forEach((entity: string) => {
-            entityCounts.set(entity, (entityCounts.get(entity) || 0) + 1);
-            
-            // Try to guess entity type based on patterns
-            if (!entityTypes.has(entity)) {
-              if (entity.startsWith('@')) {
-                entityTypes.set(entity, 'handle');
-              } else if (/Inc|Ltd|LLC|Corp|Company/.test(entity)) {
-                entityTypes.set(entity, 'organization');
-              } else if (/\b[A-Z][a-z]+ [A-Z][a-z]+\b/.test(entity)) {
-                entityTypes.set(entity, 'person');
-              } else {
-                entityTypes.set(entity, 'unknown');
+        // Safe type guard for each property
+        if (result) {
+          // Safely check if detected_entities exists and is an array
+          const detectedEntities = result.detected_entities;
+          if (hasDetectedEntities && detectedEntities && Array.isArray(detectedEntities)) {
+            detectedEntities.forEach((entity: string) => {
+              entityCounts.set(entity, (entityCounts.get(entity) || 0) + 1);
+              
+              // Try to guess entity type based on patterns
+              if (!entityTypes.has(entity)) {
+                if (entity.startsWith('@')) {
+                  entityTypes.set(entity, 'handle');
+                } else if (/Inc|Ltd|LLC|Corp|Company/.test(entity)) {
+                  entityTypes.set(entity, 'organization');
+                } else if (/\b[A-Z][a-z]+ [A-Z][a-z]+\b/.test(entity)) {
+                  entityTypes.set(entity, 'person');
+                } else {
+                  entityTypes.set(entity, 'unknown');
+                }
               }
-            }
-          });
-        }
-        
-        // Process risk_entity_name if it exists and is not null/undefined
-        if (hasRiskEntityName && result && result.risk_entity_name && typeof result.risk_entity_name === 'string') {
-          entityCounts.set(result.risk_entity_name, (entityCounts.get(result.risk_entity_name) || 0) + 1);
+            });
+          }
           
-          // Use risk_entity_type if available, otherwise default to unknown
-          if (hasRiskEntityType && result.risk_entity_type && typeof result.risk_entity_type === 'string') {
-            const validTypes = ['person', 'organization', 'handle', 'location'];
-            const entityType = validTypes.includes(result.risk_entity_type) ? result.risk_entity_type : 'unknown';
-            entityTypes.set(result.risk_entity_name, entityType);
-          } else {
-            entityTypes.set(result.risk_entity_name, 'unknown');
+          // Process risk_entity_name if it exists and is not null/undefined
+          const riskEntityName = result.risk_entity_name;
+          if (hasRiskEntityName && riskEntityName && typeof riskEntityName === 'string') {
+            entityCounts.set(riskEntityName, (entityCounts.get(riskEntityName) || 0) + 1);
+            
+            // Use risk_entity_type if available, otherwise default to unknown
+            const riskEntityType = result.risk_entity_type;
+            if (hasRiskEntityType && riskEntityType && typeof riskEntityType === 'string') {
+              const validTypes = ['person', 'organization', 'handle', 'location'];
+              const entityType = validTypes.includes(riskEntityType) ? riskEntityType : 'unknown';
+              entityTypes.set(riskEntityName, entityType);
+            } else {
+              entityTypes.set(riskEntityName, 'unknown');
+            }
           }
         }
       });

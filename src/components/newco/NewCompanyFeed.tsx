@@ -128,6 +128,7 @@ const NewCompanyFeed: React.FC<NewCompanyFeedProps> = ({
               </div>
               
               <div className="flex gap-2">
+                {/* Fixed the condition by including status type comparison properly */}
                 {(!company.cleanLaunchScore || 
                   company.status === 'new' || 
                   company.status === 'pending') && (
@@ -142,7 +143,7 @@ const NewCompanyFeed: React.FC<NewCompanyFeedProps> = ({
                 )}
                 
                 {company.cleanLaunchScore && company.status && 
-                  (['scanned', 'contacted', 'onboarded', 'declined'].includes(company.status || '')) && (
+                  (['scanned', 'contacted', 'onboarded', 'declined'].includes(company.status)) && (
                   <Button 
                     onClick={(e) => handleRespond(e, company)}
                     className="flex items-center gap-1"

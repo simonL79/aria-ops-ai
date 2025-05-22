@@ -1,4 +1,3 @@
-
 /**
  * Entity Recognition Utility Functions
  * 
@@ -91,10 +90,12 @@ export const extractEntitiesFromText = (text: string): Entity[] => {
 // Helper function to check if a column exists in a table
 const checkColumnExists = async (tableName: string, columnName: string): Promise<boolean> => {
   try {
-    // Use RPC function to check column existence
-    const { data, error } = await supabase.rpc('column_exists', {
-      table_name: tableName,
-      column_name: columnName
+    // Use edge function to check column existence
+    const { data, error } = await supabase.functions.invoke('column_exists', {
+      body: JSON.stringify({
+        table_name: tableName,
+        column_name: columnName
+      })
     });
     
     if (error) {
@@ -102,7 +103,7 @@ const checkColumnExists = async (tableName: string, columnName: string): Promise
       return false;
     }
     
-    return !!data;
+    return !!data?.exists;
   } catch (error) {
     console.error(`Error in checkColumnExists for ${columnName}:`, error);
     return false;
