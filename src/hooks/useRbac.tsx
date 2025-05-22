@@ -17,18 +17,18 @@ const RbacContext = createContext<RbacContextType>({
 });
 
 export const RbacProvider = ({ children, initialRoles = ['user'] }: { children: React.ReactNode, initialRoles?: AppRole[] }) => {
-  const { isAuthenticated, userId } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [roles, setRoles] = useState<AppRole[]>(initialRoles);
   const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
-    if (isAuthenticated && userId) {
-      fetchUserRoles(userId);
+    if (isAuthenticated && user?.id) {
+      fetchUserRoles(user.id);
     } else {
       setRoles(['user']);
       setIsLoading(false);
     }
-  }, [isAuthenticated, userId]);
+  }, [isAuthenticated, user]);
   
   const fetchUserRoles = async (userId: string) => {
     setIsLoading(true);
