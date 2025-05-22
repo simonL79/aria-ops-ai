@@ -35,9 +35,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   
   useEffect(() => {
+    console.log("AuthProvider initializing...");
+    
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, newSession) => {
+      (event, newSession) => {
+        console.log("Auth state change:", event, newSession?.user?.email);
         setSession(newSession);
         setUser(newSession?.user ?? null);
         setIsAuthenticated(!!newSession);
@@ -53,6 +56,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      console.log("Get session result:", currentSession?.user?.email);
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
       setIsAuthenticated(!!currentSession);
@@ -86,12 +90,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
       
       if (error) {
+        console.error("Login error:", error);
         toast.error("Login failed", {
           description: error.message
         });
         return false;
       }
       
+      console.log("Login successful:", data.user?.email);
       return !!data.user;
     } catch (error) {
       console.error("Error signing in:", error);

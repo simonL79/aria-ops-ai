@@ -23,6 +23,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isResetMode, setIsResetMode] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
   const navigate = useNavigate();
   const { signIn } = useAuth();
   
@@ -45,17 +46,22 @@ const LoginForm = () => {
     setIsLoading(true);
     
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      // Log the request to the console for debugging
+      console.log("Sending password reset to:", email);
+      console.log("Redirect URL:", `${window.location.origin}/auth?type=recovery`);
+      
+      const { error, data } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth?type=recovery`,
       });
       
+      console.log("Password reset response:", { error, data });
+      
       if (error) throw error;
       
+      setResetSent(true);
       toast.success("Password reset link sent to your email", {
-        description: "Please check your inbox and follow the instructions",
+        description: "Please check your inbox (and spam folder) and follow the instructions",
       });
-      
-      setIsResetMode(false);
     } catch (error: any) {
       console.error("Password reset error:", error);
       toast.error("Failed to send password reset link", {
@@ -71,6 +77,7 @@ const LoginForm = () => {
     setIsLoading(true);
     
     try {
+      console.log("Attempting sign in with:", values.email);
       const success = await signIn(values.email, values.password);
       
       if (success) {
@@ -92,58 +99,76 @@ const LoginForm = () => {
     return (
       <div className="space-y-4">
         <h3 className="text-lg font-medium">Reset your password</h3>
-        <Form {...form}>
-          <form onSubmit={(e) => {
-            e.preventDefault();
-            handlePasswordReset(form.getValues("email"));
-          }} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-                      <Input 
-                        placeholder="name@example.com" 
-                        className="pl-10"
-                        {...field} 
-                      />
-                    </div>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <div className="flex gap-3">
-              <Button 
-                type="button" 
-                variant="outline"
-                className="flex-1" 
-                onClick={() => setIsResetMode(false)}
-                disabled={isLoading}
-              >
-                Back to Login
-              </Button>
+        
+        {resetSent ? (
+          <div className="p-4 bg-green-50 border border-green-100 rounded-md text-green-800">
+            <p className="mb-2 font-medium">Reset link sent!</p>
+            <p className="text-sm mb-3">Please check your email inbox (and spam folder) for the password reset link.</p>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => {
+                setIsResetMode(false);
+                setResetSent(false);
+              }}
+            >
+              Back to login
+            </Button>
+          </div>
+        ) : (
+          <Form {...form}>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              handlePasswordReset(form.getValues("email"));
+            }} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                        <Input 
+                          placeholder="name@example.com" 
+                          className="pl-10"
+                          {...field} 
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               
-              <Button 
-                type="submit"
-                className="flex-1"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Sending...
-                  </>
-                ) : "Send Reset Link"}
-              </Button>
-            </div>
-          </form>
-        </Form>
+              <div className="flex gap-3">
+                <Button 
+                  type="button" 
+                  variant="outline"
+                  className="flex-1" 
+                  onClick={() => setIsResetMode(false)}
+                  disabled={isLoading}
+                >
+                  Back to Login
+                </Button>
+                
+                <Button 
+                  type="submit"
+                  className="flex-1"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Sending...
+                    </>
+                  ) : "Send Reset Link"}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        )}
       </div>
     );
   }

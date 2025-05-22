@@ -1,8 +1,8 @@
 
 import { useState, useEffect } from "react";
-import { Navigate, useLocation } from "react-router-dom";
+import { Navigate, useLocation, useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Shield } from "lucide-react";
+import { Shield, AlertCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import LoginForm from "@/components/auth/LoginForm";
 
@@ -10,7 +10,9 @@ const Authentication = () => {
   const [isLoading, setIsLoading] = useState(true);
   const { isAuthenticated } = useAuth();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const from = location.state?.from || "/dashboard";
+  const authType = searchParams.get('type');
   
   useEffect(() => {
     // Small timeout to prevent flash
@@ -35,6 +37,27 @@ const Authentication = () => {
     return <Navigate to={from} replace />;
   }
 
+  // Message for password reset workflow
+  const getAuthTypeMessage = () => {
+    if (authType === 'recovery') {
+      return (
+        <div className="mb-6 p-4 bg-blue-50 border border-blue-100 rounded-md">
+          <div className="flex items-start">
+            <AlertCircle className="h-5 w-5 text-blue-500 mr-2 mt-0.5" />
+            <div>
+              <h3 className="font-medium text-blue-800">Password Reset</h3>
+              <p className="text-sm text-blue-600">
+                If you clicked a password reset link in your email, please enter your new password.
+                If no password form appears, the link may have expired. Try requesting a new reset link.
+              </p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
       <div className="mb-8 flex flex-col items-center">
@@ -57,6 +80,7 @@ const Authentication = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {getAuthTypeMessage()}
           <LoginForm />
         </CardContent>
       </Card>
