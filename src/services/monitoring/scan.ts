@@ -70,7 +70,7 @@ export const runMonitoringScan = async (targetEntity?: string): Promise<ScanResu
         client_id: item.client_id,
         created_at: item.created_at,
         updated_at: item.updated_at,
-        // Parse the detected entities using our utility
+        // Parse the detected entities using our utility - extract only names
         detectedEntities: parseDetectedEntities(item.detected_entities).map(entity => entity.name),
         // Add additional source information
         sourceType: item.source_type,

@@ -64,10 +64,16 @@ export const getScanResultsByEntity = async (entityName: string): Promise<ScanRe
       
       if (!nameError && nameData && nameData.length > 0) {
         // Process raw data into typed ScanResults
-        return nameData.map((row: RawScanResult): ScanResult => ({
-          ...row,
-          detected_entities: parseDetectedEntities(row.detected_entities)
-        }));
+        return nameData.map((row: RawScanResult): ScanResult => {
+          // Explicitly handle the detected_entities conversion
+          const parsedEntities = parseDetectedEntities(row.detected_entities);
+          
+          // Create a new object with parsed entities
+          return {
+            ...row,
+            detected_entities: parsedEntities
+          };
+        });
       }
     }
     
@@ -80,10 +86,16 @@ export const getScanResultsByEntity = async (entityName: string): Promise<ScanRe
       
       if (!arrayError && arrayData) {
         // Process raw data into typed ScanResults
-        results = arrayData.map((row: RawScanResult): ScanResult => ({
-          ...row,
-          detected_entities: parseDetectedEntities(row.detected_entities)
-        }));
+        results = arrayData.map((row: RawScanResult): ScanResult => {
+          // Explicitly handle the detected_entities conversion
+          const parsedEntities = parseDetectedEntities(row.detected_entities);
+          
+          // Create a new object with parsed entities
+          return {
+            ...row,
+            detected_entities: parsedEntities
+          };
+        });
       }
     }
     
