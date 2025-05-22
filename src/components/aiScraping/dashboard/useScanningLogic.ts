@@ -1,13 +1,15 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { ContentAlert } from '@/types/dashboard';
+import type { 
+  ScanResult,
+  MonitoringStatus
+} from '@/services/monitoring/types';
 import { 
   getMonitoringStatus, 
   startMonitoring,
   stopMonitoring,
   runMonitoringScan,
-  ScanResult,
-  MonitoringStatus
 } from '@/services/monitoring';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';

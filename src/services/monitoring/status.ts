@@ -1,6 +1,6 @@
 
 import { toast } from "sonner";
-import { MonitoringStatus, ScanResult } from "./types";
+import type { MonitoringStatus, ScanResult } from "./types";
 
 /**
  * Get current monitoring status
@@ -31,6 +31,7 @@ export const getMonitoringStatus = async (): Promise<MonitoringStatus> => {
         lastRun: null,
         nextRun: null,
         sourcesCount: 0,
+        sources: 0,
         activeSince: activeSince
       };
     }
@@ -41,6 +42,7 @@ export const getMonitoringStatus = async (): Promise<MonitoringStatus> => {
       lastRun: data.last_run ? new Date(data.last_run) : null,
       nextRun: data.next_run ? new Date(data.next_run) : null,
       sourcesCount: data.sources_count || 0,
+      sources: data.sources_count || 0, // Include both for backward compatibility
       activeSince: data.created_at ? new Date(data.created_at) : undefined
     };
   } catch (error) {
@@ -55,6 +57,7 @@ export const getMonitoringStatus = async (): Promise<MonitoringStatus> => {
       lastRun: null,
       nextRun: null,
       sourcesCount: 0,
+      sources: 0,
       activeSince: activeSince
     };
   }
