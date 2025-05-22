@@ -106,9 +106,21 @@ export const useEntityRecognition = () => {
   const getAllEntities = useCallback(async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      // First check if the column exists to avoid errors
+      const { error: columnCheckError } = await supabase
         .from('scan_results')
         .select('detected_entities')
+        .limit(1);
+      
+      if (columnCheckError) {
+        console.error("Error checking scan_results columns:", columnCheckError);
+        toast.error("The entity recognition feature requires database migration");
+        return [];
+      }
+      
+      const { data, error } = await supabase
+        .from('scan_results')
+        .select('detected_entities, risk_entity_name, risk_entity_type')
         .not('detected_entities', 'is', null);
 
       if (error) {
@@ -139,11 +151,17 @@ export const useEntityRecognition = () => {
             }
           });
         }
+        
+        // Process risk_entity_name if not included in detected_entities
+        if (result.risk_entity_name && !entityCounts.has(result.risk_entity_name)) {
+          entityCounts.set(result.risk_entity_name, (entityCounts.get(result.risk_entity_name) || 0) + 1);
+          entityTypes.set(result.risk_entity_name, result.risk_entity_type || 'unknown');
+        }
       });
 
       const formattedEntities: Entity[] = Array.from(entityCounts.entries()).map(([name, mentions]) => ({
         name,
-        type: entityTypes.get(name) as any || 'unknown',
+        type: entityTypes.get(name) as Entity['type'] || 'unknown',
         confidence: 0.7,
         mentions
       }));

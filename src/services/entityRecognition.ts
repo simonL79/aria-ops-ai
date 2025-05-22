@@ -95,6 +95,18 @@ export const processEntities = async (scanResultId: string, content: string): Pr
   try {
     const entities = extractEntitiesFromText(content);
     
+    // First check if the column exists to avoid errors
+    const { error: columnCheckError } = await supabase
+      .from('scan_results')
+      .select('detected_entities')
+      .limit(1);
+    
+    if (columnCheckError) {
+      console.error("Error checking scan_results columns:", columnCheckError);
+      toast.error("The entity recognition feature requires database migration");
+      return entities;
+    }
+    
     if (entities.length > 0) {
       // Store the extracted entities in the scan result
       const { error } = await supabase
@@ -125,7 +137,19 @@ export const processEntities = async (scanResultId: string, content: string): Pr
  */
 export const getAllEntities = async (): Promise<Entity[]> => {
   try {
-    const { data: scanResults, error } = await supabase
+    // First check if the column exists to avoid errors
+    const { error: columnCheckError } = await supabase
+      .from('scan_results')
+      .select('detected_entities')
+      .limit(1);
+    
+    if (columnCheckError) {
+      console.error("Error checking scan_results columns:", columnCheckError);
+      toast.error("The entity recognition feature requires database migration");
+      return [];
+    }
+    
+    const { data, error } = await supabase
       .from('scan_results')
       .select('detected_entities, risk_entity_name, risk_entity_type')
       .not('detected_entities', 'is', null);
@@ -135,9 +159,13 @@ export const getAllEntities = async (): Promise<Entity[]> => {
       return [];
     }
     
+    if (!data || data.length === 0) {
+      return [];
+    }
+    
     const entityMap = new Map<string, Entity>();
     
-    scanResults?.forEach(result => {
+    data.forEach(result => {
       // Process detected_entities array
       if (result.detected_entities && Array.isArray(result.detected_entities)) {
         result.detected_entities.forEach((name: string) => {
@@ -188,6 +216,18 @@ export const getAllEntities = async (): Promise<Entity[]> => {
  */
 export const batchProcessEntities = async (): Promise<number> => {
   try {
+    // First check if the column exists to avoid errors
+    const { error: columnCheckError } = await supabase
+      .from('scan_results')
+      .select('is_identified')
+      .limit(1);
+    
+    if (columnCheckError) {
+      console.error("Error checking scan_results columns:", columnCheckError);
+      toast.error("The entity recognition feature requires database migration");
+      return 0;
+    }
+    
     // Get scan results that haven't been processed
     const { data: scanResults, error } = await supabase
       .from('scan_results')
@@ -231,32 +271,32 @@ export const batchProcessEntities = async (): Promise<number> => {
 export const getScanResultsByEntity = async (entityName: string): Promise<any[]> => {
   try {
     // First try with the risk_entity_name field
-    let { data, error } = await supabase
+    const { data: nameData, error: nameError } = await supabase
       .from('scan_results')
       .select('*')
       .eq('risk_entity_name', entityName);
     
-    if (error) {
-      console.error('Error fetching by risk_entity_name:', error);
+    if (nameError) {
+      console.error('Error fetching by risk_entity_name:', nameError);
       return [];
     }
     
-    if (!data || data.length === 0) {
-      // Try using the detected_entities array
-      const { data: arrayData, error: arrayError } = await supabase
-        .from('scan_results')
-        .select('*')
-        .contains('detected_entities', [entityName]);
-      
-      if (arrayError) {
-        console.error('Error fetching by detected_entities:', arrayError);
-        return [];
-      }
-      
-      data = arrayData || [];
+    if (nameData && nameData.length > 0) {
+      return nameData;
     }
     
-    return data;
+    // Try using the detected_entities array
+    const { data: arrayData, error: arrayError } = await supabase
+      .from('scan_results')
+      .select('*')
+      .contains('detected_entities', [entityName]);
+    
+    if (arrayError) {
+      console.error('Error fetching by detected_entities:', arrayError);
+      return [];
+    }
+    
+    return arrayData || [];
   } catch (error) {
     console.error('Error in getScanResultsByEntity:', error);
     return [];

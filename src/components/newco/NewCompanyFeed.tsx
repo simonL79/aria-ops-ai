@@ -128,7 +128,7 @@ const NewCompanyFeed: React.FC<NewCompanyFeedProps> = ({
               </div>
               
               <div className="flex gap-2">
-                {(company.status === 'pending' || company.status === 'new' || !company.cleanLaunchScore) ? (
+                {(company.status === 'new' || !company.cleanLaunchScore) ? (
                   <Button 
                     onClick={(e) => handleAnalyze(e, company)}
                     className="flex items-center gap-1"
