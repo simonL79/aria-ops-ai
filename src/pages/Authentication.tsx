@@ -11,7 +11,7 @@ const Authentication = () => {
   const { isAuthenticated } = useAuth();
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const from = location.state?.from || "/dashboard";
+  const from = location.state?.from?.pathname || "/dashboard";
   const authType = searchParams.get('type');
   
   useEffect(() => {

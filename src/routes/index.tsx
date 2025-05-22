@@ -2,6 +2,7 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import AiScrapingPage from "@/pages/AiScrapingPage";
+import SalesFunnelPage from "@/pages/SalesFunnelPage";
 
 // Import all your other pages/routes
 // import DashboardPage from "@/pages/DashboardPage";
@@ -13,6 +14,7 @@ import AiScrapingPage from "@/pages/AiScrapingPage";
 const AppRoutes = () => {
   return (
     <Routes>
+      <Route path="/" element={<SalesFunnelPage />} />
       <Route path="/dashboard/ai-scraping" element={<AiScrapingPage />} />
       
       {/* Add all your other routes here */}
@@ -21,7 +23,7 @@ const AppRoutes = () => {
       {/* <Route path="/settings" element={<SettingsPage />} /> */}
       
       {/* Default redirect */}
-      <Route path="*" element={<Navigate to="/dashboard/ai-scraping" replace />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 };

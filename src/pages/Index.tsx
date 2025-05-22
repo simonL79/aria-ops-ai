@@ -17,7 +17,7 @@ const Index = () => {
   
   // If not authenticated, redirect to auth page
   if (!isAuthenticated) {
-    return <Navigate to="/auth" state={{ from: location }} replace />;
+    return <Navigate to="/" state={{ from: location }} replace />;
   }
   
   // Check the current path and render the appropriate component
