@@ -18,22 +18,27 @@ export const getScanResultsByEntity = async (entityName: string): Promise<ScanRe
       .eq('risk_entity_name', entityName);
     
     if (!nameError && nameData && nameData.length > 0) {
-      // Explicitly map each field to avoid type recursion
-      return nameData.map((row: any) => ({
-        id: row.id,
-        content: row.content,
-        platform: row.platform,
-        url: row.url,
-        severity: row.severity,
-        status: row.status,
-        threat_type: row.threat_type,
-        risk_entity_name: row.risk_entity_name,
-        risk_entity_type: row.risk_entity_type,
-        created_at: row.created_at,
-        confidence_score: row.confidence_score,
-        is_identified: row.is_identified,
-        detected_entities: parseDetectedEntities(row.detected_entities)
-      }));
+      const processedResults: ScanResult[] = [];
+      
+      for (const row of nameData) {
+        processedResults.push({
+          id: row.id,
+          content: row.content,
+          platform: row.platform,
+          url: row.url,
+          severity: row.severity,
+          status: row.status,
+          threat_type: row.threat_type,
+          risk_entity_name: row.risk_entity_name,
+          risk_entity_type: row.risk_entity_type,
+          created_at: row.created_at,
+          confidence_score: row.confidence_score,
+          is_identified: row.is_identified,
+          detected_entities: parseDetectedEntities(row.detected_entities)
+        });
+      }
+      
+      return processedResults;
     }
     
     // Try with detected_entities field
@@ -43,21 +48,27 @@ export const getScanResultsByEntity = async (entityName: string): Promise<ScanRe
       .contains('detected_entities', [entityName]);
     
     if (!arrayError && arrayData) {
-      results = arrayData.map((row: any) => ({
-        id: row.id,
-        content: row.content,
-        platform: row.platform,
-        url: row.url,
-        severity: row.severity,
-        status: row.status,
-        threat_type: row.threat_type,
-        risk_entity_name: row.risk_entity_name,
-        risk_entity_type: row.risk_entity_type,
-        created_at: row.created_at,
-        confidence_score: row.confidence_score,
-        is_identified: row.is_identified,
-        detected_entities: parseDetectedEntities(row.detected_entities)
-      }));
+      const processedResults: ScanResult[] = [];
+      
+      for (const row of arrayData) {
+        processedResults.push({
+          id: row.id,
+          content: row.content,
+          platform: row.platform,
+          url: row.url,
+          severity: row.severity,
+          status: row.status,
+          threat_type: row.threat_type,
+          risk_entity_name: row.risk_entity_name,
+          risk_entity_type: row.risk_entity_type,
+          created_at: row.created_at,
+          confidence_score: row.confidence_score,
+          is_identified: row.is_identified,
+          detected_entities: parseDetectedEntities(row.detected_entities)
+        });
+      }
+      
+      results = processedResults;
     }
     
     return results;
@@ -83,21 +94,27 @@ export const getAllScanResults = async (): Promise<ScanResult[]> => {
       return [];
     }
     
-    return data.map((row: any) => ({
-      id: row.id,
-      content: row.content,
-      platform: row.platform,
-      url: row.url,
-      severity: row.severity,
-      status: row.status,
-      threat_type: row.threat_type,
-      risk_entity_name: row.risk_entity_name,
-      risk_entity_type: row.risk_entity_type,
-      created_at: row.created_at,
-      confidence_score: row.confidence_score,
-      is_identified: row.is_identified,
-      detected_entities: parseDetectedEntities(row.detected_entities)
-    }));
+    const results: ScanResult[] = [];
+    
+    for (const row of data) {
+      results.push({
+        id: row.id,
+        content: row.content,
+        platform: row.platform,
+        url: row.url,
+        severity: row.severity,
+        status: row.status,
+        threat_type: row.threat_type,
+        risk_entity_name: row.risk_entity_name,
+        risk_entity_type: row.risk_entity_type,
+        created_at: row.created_at,
+        confidence_score: row.confidence_score,
+        is_identified: row.is_identified,
+        detected_entities: parseDetectedEntities(row.detected_entities)
+      });
+    }
+    
+    return results;
   } catch (error) {
     console.error("Error fetching scan results:", error);
     return [];
