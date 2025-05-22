@@ -109,48 +109,53 @@ export async function getAllEntities(): Promise<Entity[]> {
 
     data.forEach(result => {
       // Only process if result is an object (not an error)
-      if (result && typeof result === 'object') {
-        // Safely check if detected_entities exists and is an array
-        if (hasDetectedEntities && hasScanProperty(result, 'detected_entities')) {
-          const detectedEntities = result.detected_entities;
-          if (Array.isArray(detectedEntities)) {
-            detectedEntities.forEach((entity: string) => {
-              entityCounts.set(entity, (entityCounts.get(entity) || 0) + 1);
-              
-              // Try to guess entity type based on patterns
-              if (!entityTypes.has(entity)) {
-                if (entity.startsWith('@')) {
-                  entityTypes.set(entity, 'handle');
-                } else if (/Inc|Ltd|LLC|Corp|Company/.test(entity)) {
-                  entityTypes.set(entity, 'organization');
-                } else if (/\b[A-Z][a-z]+ [A-Z][a-z]+\b/.test(entity)) {
-                  entityTypes.set(entity, 'person');
-                } else {
-                  entityTypes.set(entity, 'unknown');
-                }
-              }
-            });
-          }
-        }
-        
-        // Process risk_entity_name if it exists and is not null/undefined
-        if (hasRiskEntityName && hasScanProperty(result, 'risk_entity_name')) {
-          const riskEntityName = result.risk_entity_name;
-          if (riskEntityName && typeof riskEntityName === 'string') {
-            entityCounts.set(riskEntityName, (entityCounts.get(riskEntityName) || 0) + 1);
+      if (!result || typeof result !== 'object') return;
+      
+      // Safely check if detected_entities exists and is an array
+      if (hasDetectedEntities && hasScanProperty(result, 'detected_entities')) {
+        const detectedEntities = result.detected_entities;
+        if (Array.isArray(detectedEntities)) {
+          detectedEntities.forEach((entity: string) => {
+            entityCounts.set(entity, (entityCounts.get(entity) || 0) + 1);
             
-            // Use risk_entity_type if available, otherwise default to unknown
-            let entityType = 'unknown';
-            if (hasRiskEntityType && hasScanProperty(result, 'risk_entity_type')) {
-              const riskEntityType = result.risk_entity_type;
-              if (riskEntityType && typeof riskEntityType === 'string') {
-                const validTypes = ['person', 'organization', 'handle', 'location'];
-                entityType = validTypes.includes(riskEntityType) ? riskEntityType : 'unknown';
+            // Try to guess entity type based on patterns
+            if (!entityTypes.has(entity)) {
+              if (entity.startsWith('@')) {
+                entityTypes.set(entity, 'handle');
+              } else if (/Inc|Ltd|LLC|Corp|Company/.test(entity)) {
+                entityTypes.set(entity, 'organization');
+              } else if (/\b[A-Z][a-z]+ [A-Z][a-z]+\b/.test(entity)) {
+                entityTypes.set(entity, 'person');
+              } else {
+                entityTypes.set(entity, 'unknown');
               }
             }
-            entityTypes.set(riskEntityName, entityType);
-          }
+          });
         }
+      }
+      
+      // Process risk_entity_name if it exists and is not null/undefined
+      if (hasRiskEntityName && 
+          hasScanProperty(result, 'risk_entity_name') && 
+          result.risk_entity_name && 
+          typeof result.risk_entity_name === 'string') {
+        
+        const riskEntityName = result.risk_entity_name;
+        entityCounts.set(riskEntityName, (entityCounts.get(riskEntityName) || 0) + 1);
+        
+        // Use risk_entity_type if available, otherwise default to unknown
+        let entityType = 'unknown';
+        if (hasRiskEntityType && 
+            hasScanProperty(result, 'risk_entity_type') && 
+            result.risk_entity_type && 
+            typeof result.risk_entity_type === 'string') {
+          
+          const riskEntityType = result.risk_entity_type;
+          const validTypes = ['person', 'organization', 'handle', 'location'];
+          entityType = validTypes.includes(riskEntityType) ? riskEntityType : 'unknown';
+        }
+        
+        entityTypes.set(riskEntityName, entityType);
       }
     });
 

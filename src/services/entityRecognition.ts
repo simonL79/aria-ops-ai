@@ -21,4 +21,5 @@ export {
 };
 
 // Re-export the Entity type from types/entity for backwards compatibility
-export { Entity, EntityStatistics } from '@/types/entity';
+// Use 'export type' for types when isolatedModules is enabled
+export type { Entity, EntityStatistics } from '@/types/entity';

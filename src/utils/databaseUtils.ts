@@ -9,19 +9,19 @@ export async function checkColumnExists(
   columnName: string
 ): Promise<boolean> {
   try {
-    // Query the Postgres information schema directly
-    const { data, error } = await supabase
-      .from('information_schema.columns')
-      .select('column_name')
-      .eq('table_name', tableName)
-      .eq('column_name', columnName);
+    // Use a raw SQL query instead of the typed query builder
+    // because information_schema is not part of our typed schema
+    const { data, error } = await supabase.rpc('column_exists', {
+      p_table_name: tableName,
+      p_column_name: columnName
+    });
     
     if (error) {
       console.error(`Error checking if column ${columnName} exists:`, error);
       return false;
     }
     
-    return Array.isArray(data) && data.length > 0;
+    return Boolean(data);
   } catch (error) {
     console.error(`Error in checkColumnExists for ${columnName}:`, error);
     return false;

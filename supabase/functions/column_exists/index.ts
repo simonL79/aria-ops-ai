@@ -1,56 +1,45 @@
 
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.26.0";
+// Supabase Edge Function to check if a column exists in a table
+// This avoids direct access to information_schema which is restricted in the client
 
-// Initialize Supabase client
-const supabaseUrl = Deno.env.get("SUPABASE_URL") as string;
-const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") as string;
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3'
 
-// CORS headers for browser requests
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+}
 
-serve(async (req) => {
-  // Handle CORS preflight requests
+Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    const { table_name, column_name } = await req.json();
-
-    if (!table_name || !column_name) {
-      return new Response(
-        JSON.stringify({ error: "Missing table_name or column_name parameter" }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Execute SQL to check if column exists
+    const { p_table_name, p_column_name } = await req.json()
+    
+    // Get database connection string from environment variable
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    
+    // Initialize Supabase client with service role key for direct database access
+    const supabase = createClient(supabaseUrl, supabaseServiceKey)
+    
+    // Execute SQL query to check if column exists in table
     const { data, error } = await supabase.rpc('column_exists', {
-      table_name,
-      column_name
-    });
+      p_table_name,
+      p_column_name
+    })
 
-    if (error) {
-      return new Response(
-        JSON.stringify({ error: "Failed to check column existence", details: error }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
+    if (error) throw error
 
-    return new Response(
-      JSON.stringify({ exists: data }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify({ exists: Boolean(data) }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 200,
+    })
   } catch (error) {
-    console.error("Error in column_exists function:", error);
-    return new Response(
-      JSON.stringify({ error: "Internal server error", details: error.message }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify({ error: error.message }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 400,
+    })
   }
-});
+})
