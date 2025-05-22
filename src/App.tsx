@@ -31,6 +31,7 @@ import PrivacyPolicyPage from "@/pages/PrivacyPolicyPage";
 import DisclaimerPage from "@/pages/DisclaimerPage";
 import GDPRCompliancePage from "@/pages/GDPRCompliancePage";
 import RequestDataAccessPage from "@/pages/RequestDataAccessPage";
+import ResourcesPage from "@/pages/ResourcesPage";
 
 function App() {
   useEffect(() => {
@@ -52,6 +53,7 @@ function App() {
         <Route path="/disclaimer" element={<DisclaimerPage />} />
         <Route path="/gdpr-compliance" element={<GDPRCompliancePage />} />
         <Route path="/request-data-access" element={<RequestDataAccessPage />} />
+        <Route path="/resources" element={<ResourcesPage />} />
         
         {/* Authentication Route - Redirects to dashboard if already signed in */}
         <Route 
