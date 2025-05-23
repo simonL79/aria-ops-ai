@@ -8,14 +8,12 @@ import './index.css'
 import { Toaster } from 'sonner'
 
 createRoot(document.getElementById("root")!).render(
-  <>
+  <BrowserRouter>
     <AuthProvider>
       <RbacProvider>
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
+        <App />
+        <Toaster richColors />
       </RbacProvider>
     </AuthProvider>
-    <Toaster richColors />
-  </>
+  </BrowserRouter>
 );
