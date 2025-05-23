@@ -1,33 +1,41 @@
 
+# This file was created and managed by the Lovable AI assistant.
+# Project ID should always stay as the first line
 project_id = "ssvskbejfacmjemphmry"
 
 [api]
 enabled = true
 port = 54321
-schemas = ["public", "graphql_public"]
-extra_search_path = ["public", "extensions"]
-max_rows = 1000
-
-[auth]
-enabled = true
-port = 54320
-site_url = "http://localhost:3000"
-additional_redirect_urls = ["https://lovable.dev"]
-jwt_expiry = 3600
-enable_signup = true
-enable_email_confirmations = false
-enable_phone_confirmations = false
-
-[functions.aria-ingest]
-verify_jwt = false
+schemas = ["public", "storage", "graphql_public"]
 
 [db]
 port = 54322
+shadow_port = 54320
+major_version = 15
+
+[realtime]
+enabled = true
 
 [studio]
 enabled = true
 port = 54323
+api_url = "http://localhost"
 
-[edge_runtime]
+[inbucket]
 enabled = true
 port = 54324
+
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
+
+[storage]
+enabled = true
+
+[functions]
+[functions.aria-ingest]
+verify_jwt = false
+[functions.reddit-scan]
+verify_jwt = false
+# Set up a cron job to run the Reddit scanner every hour
+schedule = "0 * * * *"
