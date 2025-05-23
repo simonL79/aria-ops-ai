@@ -53,47 +53,75 @@ async function scanReddit(): Promise<RedditPost[]> {
   try {
     const matchingPosts: RedditPost[] = [];
     
-    // Prepare authentication for Reddit API
+    // Prepare authentication for Reddit API with proper User-Agent
     const credentials = btoa(`${REDDIT_CLIENT_ID}:${REDDIT_CLIENT_SECRET}`);
     const tokenUrl = 'https://www.reddit.com/api/v1/access_token';
     
-    const formData = new URLSearchParams();
-    formData.append('grant_type', 'password');
-    formData.append('username', REDDIT_USERNAME!);
-    formData.append('password', REDDIT_PASSWORD!);
+    // Create form data for authentication
+    const authBody = new URLSearchParams();
+    authBody.append('grant_type', 'password');
+    authBody.append('username', REDDIT_USERNAME!);
+    authBody.append('password', REDDIT_PASSWORD!);
     
     console.log('[REDDIT-SCAN] Requesting Reddit access token...');
+    console.log('[REDDIT-SCAN] Using username:', REDDIT_USERNAME);
+    console.log('[REDDIT-SCAN] Client ID length:', REDDIT_CLIENT_ID?.length || 0);
+    console.log('[REDDIT-SCAN] Client Secret length:', REDDIT_CLIENT_SECRET?.length || 0);
     
     const tokenResponse = await fetch(tokenUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
         'Authorization': `Basic ${credentials}`,
-        'User-Agent': 'aria-threat-scanner/1.0 by FixExotic9448'
+        'User-Agent': 'ThreatScanner/1.0 by RepWatch (https://repwatch.co)'
       },
-      body: formData.toString()
+      body: authBody.toString()
     });
     
     console.log('[REDDIT-SCAN] Token response status:', tokenResponse.status);
+    console.log('[REDDIT-SCAN] Token response headers:', Object.fromEntries(tokenResponse.headers.entries()));
+    
+    const responseText = await tokenResponse.text();
+    console.log('[REDDIT-SCAN] Raw token response:', responseText);
     
     if (!tokenResponse.ok) {
-      const errorText = await tokenResponse.text();
-      console.error(`[REDDIT-SCAN] Reddit token request failed:`, errorText);
-      throw new Error(`Reddit authentication failed: ${tokenResponse.status} - ${errorText}`);
+      console.error(`[REDDIT-SCAN] Reddit authentication failed with status ${tokenResponse.status}`);
+      throw new Error(`Reddit authentication failed: ${tokenResponse.status} - ${responseText}`);
     }
     
-    const tokenData = await tokenResponse.json();
-    console.log('[REDDIT-SCAN] Token response data:', JSON.stringify(tokenData, null, 2));
+    let tokenData;
+    try {
+      tokenData = JSON.parse(responseText);
+    } catch (parseError) {
+      console.error('[REDDIT-SCAN] Failed to parse token response:', parseError);
+      throw new Error(`Invalid JSON response from Reddit: ${responseText}`);
+    }
+    
+    console.log('[REDDIT-SCAN] Parsed token data:', JSON.stringify(tokenData, null, 2));
+    
+    // Check for error in response
+    if (tokenData.error) {
+      console.error('[REDDIT-SCAN] Reddit API returned error:', tokenData.error);
+      console.error('[REDDIT-SCAN] Error description:', tokenData.error_description);
+      
+      // Provide specific error messages for common issues
+      let errorMessage = `Reddit API error: ${tokenData.error}`;
+      if (tokenData.error === 'invalid_grant') {
+        errorMessage += ' - This usually means the username/password combination is incorrect, or 2FA is enabled on the account.';
+      }
+      
+      throw new Error(errorMessage);
+    }
     
     const accessToken = tokenData?.access_token;
-    console.log('[REDDIT-SCAN] Extracted access token:', accessToken ? 'Found' : 'Missing');
+    console.log('[REDDIT-SCAN] Access token received:', !!accessToken);
     
     if (!accessToken) {
-      console.error('[REDDIT-SCAN] Token data structure:', tokenData);
-      throw new Error('No access token received from Reddit - check credentials');
+      console.error('[REDDIT-SCAN] No access token in response:', tokenData);
+      throw new Error('No access token received from Reddit - authentication failed');
     }
     
-    console.log('[REDDIT-SCAN] Successfully obtained access token');
+    console.log('[REDDIT-SCAN] Successfully obtained Reddit access token');
     
     // Scan each subreddit
     for (const sub of monitoredSubs) {
@@ -103,7 +131,7 @@ async function scanReddit(): Promise<RedditPost[]> {
         const response = await fetch(`https://oauth.reddit.com/r/${sub}/new.json?limit=25`, {
           headers: {
             'Authorization': `Bearer ${accessToken}`,
-            'User-Agent': 'aria-threat-scanner/1.0 by FixExotic9448'
+            'User-Agent': 'ThreatScanner/1.0 by RepWatch (https://repwatch.co)'
           }
         });
         
