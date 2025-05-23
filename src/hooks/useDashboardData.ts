@@ -51,7 +51,6 @@ const useDashboardData = (): DashboardData => {
   const [neutralContent, setNeutralContent] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [filteredAlerts, setFilteredAlerts] = useState<ContentAlert[]>([]);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -66,7 +65,7 @@ const useDashboardData = (): DashboardData => {
       ] = await Promise.all([
         getMetrics(),
         getSources(),
-        getSources(),
+        getRecentActivity(),
         getToneStyles(),
         getRecentActivity(),
         getSeoContent(),
@@ -79,7 +78,6 @@ const useDashboardData = (): DashboardData => {
       setRecentActivity(recentActivityData);
       setSeoContent(seoContentData);
       setAlerts(mockAlerts);
-      setFilteredAlerts(mockAlerts);
 
       // Calculate content metrics
       const negative = mockAlerts.filter(
@@ -130,7 +128,6 @@ const useDashboardData = (): DashboardData => {
     }));
     
     setAlerts(prev => [...newAlerts, ...prev]);
-    setFilteredAlerts(prev => [...newAlerts, ...prev]);
     
     const newNegativeCount = scanResults.filter((r: any) => r.severity === 'high').length;
     setNegativeContent(prev => prev + newNegativeCount);
@@ -155,6 +152,5 @@ const useDashboardData = (): DashboardData => {
   };
 };
 
-// Export as named export for compatibility
 export { useDashboardData };
 export default useDashboardData;

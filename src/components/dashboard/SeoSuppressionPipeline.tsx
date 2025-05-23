@@ -1,129 +1,119 @@
 
-import { useState } from "react";
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Search, TrendingUp, FileText } from "lucide-react";
 import { SeoContent } from "@/types/dashboard";
-import { ArrowRight, RefreshCw } from "lucide-react";
 
 const SeoSuppressionPipeline = () => {
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  
-  const handleRefresh = () => {
-    setIsRefreshing(true);
-    setTimeout(() => {
-      setIsRefreshing(false);
-    }, 1500);
-  };
-  
-  // Sample content items for the pipeline
-  const contentItems: SeoContent[] = [
+  const [seoContent] = useState<SeoContent[]>([
     {
-      id: "seo1",
-      title: "Negative Review about Product Quality",
-      keywords: ["product failure", "poor quality", "defective"],
-      status: "suppressed",
-      dateCreated: "2024-01-15",
-      publishDate: "2024-01-22",
-      url: "https://example.com/review-1",
-      score: 85,
-      type: "review",
-      date: "2024-01-22"
+      id: '1',
+      title: 'Positive Brand Story - Company Innovation',
+      content: 'Comprehensive article highlighting company achievements and innovation milestones.',
+      keywords: ['innovation', 'company success', 'technology leadership'],
+      priority: 'high',
+      status: 'published',
+      type: 'article',
+      score: 95,
+      publishDate: '2024-01-15'
     },
     {
-      id: "seo2",
-      title: "Client Complaint Article",
-      keywords: ["complaint", "customer service", "issue"],
-      status: "in-progress",
-      dateCreated: "2024-02-03",
-      score: 62,
-      url: "https://example.com/article-2",
-      type: "article",
-      date: "2024-02-03"
+      id: '2', 
+      title: 'Executive Interview - Industry Leadership',
+      content: 'In-depth interview with CEO discussing industry trends and company vision.',
+      keywords: ['CEO interview', 'industry leadership', 'company vision'],
+      priority: 'high',
+      status: 'pending',
+      type: 'interview',
+      score: 88,
+      publishDate: '2024-01-20'
     },
     {
-      id: "seo3",
-      title: "Negative Social Media Post",
-      keywords: ["disappointed", "won't recommend", "poor experience"],
-      status: "queue",
-      dateCreated: "2024-02-10",
-      url: "https://example.com/post-3",
-      type: "social",
-      date: "2024-02-10"
+      id: '3',
+      title: 'Corporate Social Responsibility Report',
+      content: 'Annual CSR report showcasing community impact and sustainability initiatives.',
+      keywords: ['CSR', 'sustainability', 'community impact'],
+      priority: 'medium',
+      status: 'draft',
+      type: 'report',
+      score: 82,
+      publishDate: '2024-01-25'
     }
-  ];
+  ]);
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'high': return 'bg-red-100 text-red-800';
+      case 'medium': return 'bg-yellow-100 text-yellow-800';
+      case 'low': return 'bg-green-100 text-green-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'published': return 'bg-green-100 text-green-800';
+      case 'pending': return 'bg-yellow-100 text-yellow-800';
+      case 'draft': return 'bg-gray-100 text-gray-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-lg font-medium">SEO Suppression Pipeline</CardTitle>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={handleRefresh} 
-          disabled={isRefreshing}
-        >
-          <RefreshCw className={`h-4 w-4 mr-1 ${isRefreshing ? "animate-spin" : ""}`} />
-          Refresh
-        </Button>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Search className="h-5 w-5" />
+          SEO Suppression Pipeline
+        </CardTitle>
       </CardHeader>
-      <CardContent className="p-0">
-        <div className="grid grid-cols-3 border-b">
-          {/* Pipeline Headers */}
-          <div className="p-2 font-medium text-center text-muted-foreground">In Queue</div>
-          <div className="p-2 font-medium text-center border-x text-muted-foreground">In Progress</div>
-          <div className="p-2 font-medium text-center text-muted-foreground">Suppressed</div>
-        </div>
-        
-        <div className="grid grid-cols-3 p-4 gap-4 min-h-[200px]">
-          {/* Queue Column */}
-          <div className="space-y-2">
-            {contentItems
-              .filter(item => item.status === "queue")
-              .map(item => (
-                <div key={item.id} className="p-2 border rounded-md bg-background shadow-sm">
-                  <div className="font-medium truncate">{item.title}</div>
-                  <div className="flex items-center justify-between mt-1">
-                    <Badge variant="outline" className="text-xs">{item.type}</Badge>
-                    <ArrowRight className="h-3 w-3 text-muted-foreground" />
-                  </div>
+      <CardContent>
+        <div className="space-y-4">
+          {seoContent.map((content) => (
+            <div key={content.id} className="p-4 border rounded-lg">
+              <div className="flex justify-between items-start mb-3">
+                <h3 className="font-medium text-sm">{content.title}</h3>
+                <div className="flex gap-2">
+                  <Badge className={getPriorityColor(content.priority)}>
+                    {content.priority}
+                  </Badge>
+                  <Badge className={getStatusColor(content.status || 'draft')}>
+                    {content.status || 'draft'}
+                  </Badge>
                 </div>
-              ))}
-          </div>
-          
-          {/* In Progress Column */}
-          <div className="space-y-2">
-            {contentItems
-              .filter(item => item.status === "in-progress")
-              .map(item => (
-                <div key={item.id} className="p-2 border rounded-md bg-background shadow-sm">
-                  <div className="font-medium truncate">{item.title}</div>
-                  <div className="flex items-center justify-between mt-1">
-                    <Badge className="text-xs bg-blue-100 text-blue-800 hover:bg-blue-100">
-                      {item.score}%
-                    </Badge>
-                    <ArrowRight className="h-3 w-3 text-muted-foreground" />
-                  </div>
-                </div>
-              ))}
-          </div>
-          
-          {/* Suppressed Column */}
-          <div className="space-y-2">
-            {contentItems
-              .filter(item => item.status === "suppressed")
-              .map(item => (
-                <div key={item.id} className="p-2 border rounded-md bg-background shadow-sm">
-                  <div className="font-medium truncate">{item.title}</div>
-                  <div className="flex items-center justify-between mt-1">
-                    <Badge className="text-xs bg-green-100 text-green-800 hover:bg-green-100">
-                      {item.score}%
-                    </Badge>
-                    <span className="text-xs text-muted-foreground">{item.publishDate}</span>
-                  </div>
-                </div>
-              ))}
-          </div>
+              </div>
+              
+              <p className="text-xs text-muted-foreground mb-3">{content.content}</p>
+              
+              <div className="flex items-center gap-4 text-xs text-muted-foreground mb-3">
+                <span className="flex items-center gap-1">
+                  <TrendingUp className="h-3 w-3" />
+                  Score: {content.score || 0}
+                </span>
+                <span className="flex items-center gap-1">
+                  <FileText className="h-3 w-3" />
+                  {content.type || 'article'}
+                </span>
+                {content.publishDate && (
+                  <span>Publish: {content.publishDate}</span>
+                )}
+              </div>
+              
+              <div className="flex flex-wrap gap-1 mb-3">
+                {content.keywords.map((keyword, index) => (
+                  <Badge key={index} variant="outline" className="text-xs">
+                    {keyword}
+                  </Badge>
+                ))}
+              </div>
+              
+              <Button size="sm" variant="outline">
+                Edit Content
+              </Button>
+            </div>
+          ))}
         </div>
       </CardContent>
     </Card>
