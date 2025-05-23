@@ -60,9 +60,6 @@ serve(async (req) => {
     console.log(`[ARIA-INGEST] Expected auth: "${expectedAuth}"`);
     console.log(`[ARIA-INGEST] Match: ${authHeader === expectedAuth}`);
     
-    // TEMPORARILY SKIP AUTH FOR TESTING
-    // Uncomment this block once we confirm the endpoint works
-    /*
     if (!authHeader || authHeader !== expectedAuth) {
       console.log(`[ARIA-INGEST] Auth failed. Expected: "${expectedAuth}", Got: "${authHeader}"`);
       return new Response(JSON.stringify({ 
@@ -73,7 +70,6 @@ serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
-    */
     
     // Process the request
     return await handleRequest(requestData, supabase);
