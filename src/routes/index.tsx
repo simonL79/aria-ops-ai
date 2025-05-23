@@ -28,7 +28,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-// This component defines routes that can be used within the main Routes component
 const AppRoutes = () => {
   return (
     <Routes>
@@ -82,7 +81,7 @@ const AppRoutes = () => {
         </ProtectedRoute>
       } />
       
-      {/* Default redirect */}
+      {/* Catch all route */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

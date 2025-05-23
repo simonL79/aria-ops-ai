@@ -3,8 +3,6 @@ import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { initializeDatabase } from "@/utils/initializeMonitoring";
 import { HelmetProvider } from "react-helmet-async";
-
-// Import your root routes component
 import AppRoutes from "./routes/index";
 
 function App() {
