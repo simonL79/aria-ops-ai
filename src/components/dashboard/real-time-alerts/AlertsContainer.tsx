@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { ContentAlert } from "@/types/dashboard";
 import AlertHeader from "./AlertHeader";
 import FilterButtons from "./FilterButtons";
-import AlertsList from "./AlertsList";
+import EngagementHubAlertList from "./EngagementHubAlertList";
 import EmptyAlertState from "./EmptyAlertState";
 
 interface AlertsContainerProps {
@@ -27,7 +27,7 @@ const AlertsContainer = ({ alerts, onViewDetail, onMarkAsRead, onDismiss }: Aler
       <AlertHeader alertCount={filteredAlerts.length} />
       <FilterButtons currentFilter={filter} onFilterChange={setFilter} />
       {filteredAlerts.length > 0 ? (
-        <AlertsList 
+        <EngagementHubAlertList 
           alerts={filteredAlerts}
           onViewDetail={onViewDetail}
           onMarkAsRead={onMarkAsRead}
