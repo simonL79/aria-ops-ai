@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from "react";
-import DashboardSidebar from "@/components/layout/DashboardSidebar";
-import StickyHeader from "@/components/layout/StickyHeader";
+import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MentionsTab from "./MentionsTab";
 import ClassifyTab from "./ClassifyTab";
@@ -10,9 +9,9 @@ import { ContentAlert } from "@/types/dashboard";
 import { getMentionsAsAlerts, updateScanResultStatus } from "@/services/monitoring";
 import { toast } from "sonner";
 import { useSearchParams } from "react-router-dom";
+import DashboardHeader from "@/components/dashboard/DashboardHeader";
 
 const MentionsPage = () => {
-  const [isScrolled, setIsScrolled] = useState(false);
   const [activeTab, setActiveTab] = useState("mentions");
   const [mentions, setMentions] = useState<ContentAlert[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -96,53 +95,44 @@ const MentionsPage = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      <DashboardSidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <StickyHeader isScrolled={isScrolled} />
-        <div
-          className="flex-1 overflow-y-auto p-4 md:p-6 bg-gray-50"
-          onScroll={(e) => setIsScrolled(e.currentTarget.scrollTop > 0)}
+    <DashboardLayout>
+      <div className="container mx-auto">
+        <DashboardHeader title="Reputation Intelligence" />
+        
+        <Tabs 
+          defaultValue="mentions" 
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="w-full"
         >
-          <div className="container mx-auto py-4">
-            <h1 className="text-2xl font-bold mb-6">Reputation Intelligence</h1>
-
-            <Tabs 
-              defaultValue="mentions" 
-              value={activeTab}
-              onValueChange={setActiveTab}
-              className="w-full"
-            >
-              <TabsList className="mb-4">
-                <TabsTrigger value="mentions">
-                  Mentions ({mentions.length})
-                </TabsTrigger>
-                <TabsTrigger value="classify">Classify</TabsTrigger>
-                <TabsTrigger value="leads">Lead Prioritization</TabsTrigger>
-              </TabsList>
-              <TabsContent value="mentions">
-                <MentionsTab 
-                  mentions={mentions}
-                  setMentions={setMentions}
-                  onViewDetail={handleViewDetail}
-                  onMarkResolved={handleMarkResolved}
-                  onEscalate={handleEscalate}
-                />
-              </TabsContent>
-              <TabsContent value="classify">
-                <ClassifyTab 
-                  setMentions={setMentions}
-                  setActiveTab={setActiveTab}
-                />
-              </TabsContent>
-              <TabsContent value="leads">
-                <LeadPrioritizationTable />
-              </TabsContent>
-            </Tabs>
-          </div>
-        </div>
+          <TabsList className="mb-4">
+            <TabsTrigger value="mentions">
+              Mentions ({mentions.length})
+            </TabsTrigger>
+            <TabsTrigger value="classify">Classify</TabsTrigger>
+            <TabsTrigger value="leads">Lead Prioritization</TabsTrigger>
+          </TabsList>
+          <TabsContent value="mentions">
+            <MentionsTab 
+              mentions={mentions}
+              setMentions={setMentions}
+              onViewDetail={handleViewDetail}
+              onMarkResolved={handleMarkResolved}
+              onEscalate={handleEscalate}
+            />
+          </TabsContent>
+          <TabsContent value="classify">
+            <ClassifyTab 
+              setMentions={setMentions}
+              setActiveTab={setActiveTab}
+            />
+          </TabsContent>
+          <TabsContent value="leads">
+            <LeadPrioritizationTable />
+          </TabsContent>
+        </Tabs>
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 

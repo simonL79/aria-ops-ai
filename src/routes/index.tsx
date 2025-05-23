@@ -14,7 +14,7 @@ import PricingPage from "@/pages/PricingPage";
 import CalendarPage from "@/pages/CalendarPage";
 import Settings from "@/pages/Settings";
 import DashboardPage from "@/pages/dashboard/DashboardPage";
-import MentionsPage from "@/pages/dashboard/MentionsPage";
+import MentionsPage from "@/pages/dashboard/mentions"; // Fixed import path
 import AnalyticsPage from "@/pages/dashboard/AnalyticsPage";
 import EngagementHubPage from "@/pages/dashboard/EngagementHubPage";
 import RadarPage from "@/pages/dashboard/RadarPage";
