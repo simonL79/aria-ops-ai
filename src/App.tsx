@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   BrowserRouter,
@@ -6,42 +7,34 @@ import {
 } from "react-router-dom";
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { Toaster } from "@/components/ui/toaster"
-import { Sonner } from 'sonner';
+import { Toaster as Sonner } from 'sonner';
 import {
   QueryClient,
-  QueryClientProvider as QueryClientProviderInner,
+  QueryClientProvider,
 } from "@tanstack/react-query";
 
-import Index from "@/pages/Index"
-import Dashboard from "@/pages/Dashboard"
+import Index from "@/pages/HomePage"
+import Dashboard from "@/pages/dashboard/DashboardPage"
 import Features from "@/pages/Features"
-import Pricing from "@/pages/Pricing"
+import Pricing from "@/pages/PricingPage"
 import Contact from "@/pages/Contact"
-import Privacy from "@/pages/Privacy"
+import Privacy from "@/pages/PrivacyPolicyPage"
 import Terms from "@/pages/Terms"
-import ReputationScan from "@/pages/ReputationScan"
+import ReputationScan from "@/pages/ReputationScanForm"
 import CleanLaunch from "@/pages/CleanLaunch"
 import FreeScanResults from "@/pages/FreeScanResults"
 import AdminDashboard from "@/pages/AdminDashboard";
-import AiScrapingDashboard from "@/pages/AiScrapingDashboard";
+import AiScrapingDashboard from "@/pages/AiScrapingPage";
 import MentionsPage from "@/pages/dashboard/MentionsPage";
 import EngagementHubPage from "@/pages/dashboard/EngagementHubPage";
 import AriaIngestPage from "@/pages/dashboard/AriaIngestPage";
 
 const queryClient = new QueryClient();
 
-function QueryClientProvider({ children }: { children: React.ReactNode }) {
-  return (
-    <QueryClientProviderInner client={queryClient}>
-      {children}
-    </QueryClientProviderInner>
-  );
-}
-
 function App() {
   return (
     <BrowserRouter>
-      <QueryClient client={queryClient}>
+      <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Toaster />
           <Sonner />
@@ -63,7 +56,7 @@ function App() {
             <Route path="/ai-scraping" element={<AiScrapingDashboard />} />
           </Routes>
         </TooltipProvider>
-      </QueryClient>
+      </QueryClientProvider>
     </BrowserRouter>
   );
 }
