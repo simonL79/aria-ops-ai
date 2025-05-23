@@ -1,6 +1,4 @@
 
-# Supabase configuration file for managing your project
-
 project_id = "ssvskbejfacmjemphmry"
 
 [functions."entity-recognition"]
@@ -10,4 +8,7 @@ verify_jwt = true
 verify_jwt = false
 
 [functions."aria-ingest"]
+verify_jwt = false
+
+[functions."radar-news-scan"]
 verify_jwt = false
