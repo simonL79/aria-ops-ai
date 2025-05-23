@@ -11,19 +11,19 @@ const AriaIngestPage = () => {
     <DashboardLayout>
       <div className="container mx-auto">
         <DashboardHeader 
-          title="ARIA Content Ingest" 
-          description="Submit content for AI-powered entity extraction and threat analysis"
+          title="ARIA Intelligence Suite" 
+          description="Comprehensive threat intelligence, content processing, and real-time monitoring"
         />
         
-        <div className="space-y-8 max-w-6xl">
+        <div className="space-y-8 max-w-full">
+          <AriaIngestPanel />
+          
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <AriaIngestPanel />
             <RedditScannerPanel />
+            <MonitoringSourcesManager />
           </div>
           
           <ThreatAnalysisHub />
-          
-          <MonitoringSourcesManager />
         </div>
       </div>
     </DashboardLayout>
