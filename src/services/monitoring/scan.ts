@@ -15,6 +15,8 @@ interface ScanOptions {
  */
 export const runMonitoringScan = async (targetEntity?: string): Promise<ScanResult[]> => {
   try {
+    console.log('Starting monitoring scan...');
+    
     // First, update the monitoring status
     const { error: statusError } = await supabase
       .from('monitoring_status')
@@ -34,6 +36,7 @@ export const runMonitoringScan = async (targetEntity?: string): Promise<ScanResu
       target_entity: targetEntity || null
     };
     
+    console.log('Calling database run_scan function with options:', scanOptions);
     const { data, error } = await supabase.rpc('run_scan', scanOptions);
     
     if (error) {
@@ -43,6 +46,7 @@ export const runMonitoringScan = async (targetEntity?: string): Promise<ScanResu
     }
     
     // Get the latest scan results
+    console.log('Fetching latest scan results...');
     const { data: scanResults, error: fetchError } = await supabase
       .from('scan_results')
       .select('*')
@@ -54,23 +58,47 @@ export const runMonitoringScan = async (targetEntity?: string): Promise<ScanResu
       return [];
     }
     
+    console.log(`Fetched ${scanResults?.length || 0} scan results`);
+    
     // Process entity extraction for new results
     if (scanResults && scanResults.length > 0) {
       console.log('Processing entity extraction for new scan results...');
       
+      const processingPromises = [];
+      
       // Process entity extraction in the background for each new result
       for (const result of scanResults) {
         if (result.content && (!result.detected_entities || (Array.isArray(result.detected_entities) && result.detected_entities.length === 0))) {
-          // Process entity extraction asynchronously
-          processScanWithEntityExtraction(result.id, result.content).catch(error => {
-            console.error(`Error processing entities for scan ${result.id}:`, error);
+          // Add to processing queue
+          processingPromises.push(
+            processScanWithEntityExtraction(result.id, result.content)
+              .catch(error => {
+                console.error(`Error processing entities for scan ${result.id}:`, error);
+              })
+          );
+        }
+      }
+      
+      // Process entity extraction concurrently
+      if (processingPromises.length > 0) {
+        console.log(`Processing entity extraction for ${processingPromises.length} items...`);
+        try {
+          // Run all entity extraction in the background
+          Promise.all(processingPromises).catch(err => {
+            console.error('Error in bulk entity extraction:', err);
           });
+        } catch (err) {
+          console.error('Error starting entity extraction:', err);
         }
       }
     }
     
     // Convert to the expected format with type safety
     const results = (scanResults || []).map((item: any): ScanResult => {
+      // Parse detected entities if they exist
+      const detectedEntities = item.detected_entities ? 
+        parseDetectedEntities(item.detected_entities) : [];
+      
       const typedResult: ScanResult = {
         id: item.id,
         content: item.content,
@@ -84,17 +112,19 @@ export const runMonitoringScan = async (targetEntity?: string): Promise<ScanResu
         client_id: item.client_id,
         created_at: item.created_at,
         updated_at: item.updated_at,
-        detectedEntities: parseDetectedEntities(item.detected_entities).map(entity => entity.name),
-        sourceType: item.source_type,
-        potentialReach: item.potential_reach,
-        confidenceScore: item.confidence_score
+        detectedEntities: detectedEntities.map(entity => entity.name),
+        sourceType: item.source_type || 'scan',
+        potentialReach: item.potential_reach || 0,
+        confidenceScore: item.confidence_score || 75
       };
       return typedResult;
     });
     
     if (results.length > 0) {
+      console.log(`Scan completed: ${results.length} mentions found`);
       toast.success(`Scan completed: ${results.length} mentions found`);
     } else {
+      console.log('Scan completed: No new mentions found');
       toast.info("Scan completed: No new mentions found");
     }
     
