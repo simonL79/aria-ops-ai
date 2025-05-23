@@ -10,6 +10,10 @@ export interface ScanResult {
   risk_entity_name: string | null;
   risk_entity_type: string | null;
   is_identified: boolean;
+  source_credibility_score?: number;
+  media_is_ai_generated?: boolean;
+  ai_detection_confidence?: number;
+  incident_playbook?: string;
 }
 
 export async function processScanWithEntityExtraction(scanResultId: string, text: string): Promise<Partial<ScanResult>> {

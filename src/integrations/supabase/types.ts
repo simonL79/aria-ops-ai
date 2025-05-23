@@ -437,6 +437,7 @@ export type Database = {
       }
       scan_results: {
         Row: {
+          ai_detection_confidence: number | null
           assigned_to: string | null
           client_id: string | null
           confidence_score: number | null
@@ -446,7 +447,9 @@ export type Database = {
           created_at: string | null
           detected_entities: Json | null
           id: string
+          incident_playbook: string | null
           is_identified: boolean | null
+          media_is_ai_generated: boolean | null
           platform: string
           potential_reach: number | null
           resolved_at: string | null
@@ -457,6 +460,7 @@ export type Database = {
           risk_entity_type: string | null
           sentiment: number | null
           severity: string | null
+          source_credibility_score: number | null
           source_type: string | null
           status: string | null
           threat_severity: string | null
@@ -466,6 +470,7 @@ export type Database = {
           url: string
         }
         Insert: {
+          ai_detection_confidence?: number | null
           assigned_to?: string | null
           client_id?: string | null
           confidence_score?: number | null
@@ -475,7 +480,9 @@ export type Database = {
           created_at?: string | null
           detected_entities?: Json | null
           id?: string
+          incident_playbook?: string | null
           is_identified?: boolean | null
+          media_is_ai_generated?: boolean | null
           platform: string
           potential_reach?: number | null
           resolved_at?: string | null
@@ -486,6 +493,7 @@ export type Database = {
           risk_entity_type?: string | null
           sentiment?: number | null
           severity?: string | null
+          source_credibility_score?: number | null
           source_type?: string | null
           status?: string | null
           threat_severity?: string | null
@@ -495,6 +503,7 @@ export type Database = {
           url?: string
         }
         Update: {
+          ai_detection_confidence?: number | null
           assigned_to?: string | null
           client_id?: string | null
           confidence_score?: number | null
@@ -504,7 +513,9 @@ export type Database = {
           created_at?: string | null
           detected_entities?: Json | null
           id?: string
+          incident_playbook?: string | null
           is_identified?: boolean | null
+          media_is_ai_generated?: boolean | null
           platform?: string
           potential_reach?: number | null
           resolved_at?: string | null
@@ -515,6 +526,7 @@ export type Database = {
           risk_entity_type?: string | null
           sentiment?: number | null
           severity?: string | null
+          source_credibility_score?: number | null
           source_type?: string | null
           status?: string | null
           threat_severity?: string | null
@@ -716,6 +728,7 @@ export type Database = {
       run_scan: {
         Args: { scan_depth?: string }
         Returns: {
+          ai_detection_confidence: number | null
           assigned_to: string | null
           client_id: string | null
           confidence_score: number | null
@@ -725,7 +738,9 @@ export type Database = {
           created_at: string | null
           detected_entities: Json | null
           id: string
+          incident_playbook: string | null
           is_identified: boolean | null
+          media_is_ai_generated: boolean | null
           platform: string
           potential_reach: number | null
           resolved_at: string | null
@@ -736,6 +751,7 @@ export type Database = {
           risk_entity_type: string | null
           sentiment: number | null
           severity: string | null
+          source_credibility_score: number | null
           source_type: string | null
           status: string | null
           threat_severity: string | null

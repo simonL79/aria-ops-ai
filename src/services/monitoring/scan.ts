@@ -115,7 +115,11 @@ export const runMonitoringScan = async (targetEntity?: string): Promise<ScanResu
         detectedEntities: detectedEntities.map(entity => entity.name),
         sourceType: item.source_type || 'scan',
         potentialReach: item.potential_reach || 0,
-        confidenceScore: item.confidence_score || 75
+        confidenceScore: item.confidence_score || 75,
+        source_credibility_score: item.source_credibility_score,
+        media_is_ai_generated: item.media_is_ai_generated || false,
+        ai_detection_confidence: item.ai_detection_confidence,
+        incident_playbook: item.incident_playbook
       };
       return typedResult;
     });

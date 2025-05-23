@@ -1,4 +1,3 @@
-
 /**
  * Type definitions for monitoring service
  */
@@ -32,26 +31,28 @@ export interface Mention {
 
 export interface ScanResult {
   id: string;
-  platform: string;
   content: string;
-  date: string;
-  severity: 'high' | 'medium' | 'low';
-  status: 'new' | 'read' | 'actioned' | 'resolved' | 'reviewing';
+  platform: string;
   url: string;
+  date: string;
+  sentiment?: number;
+  severity: 'low' | 'medium' | 'high';
+  status: 'new' | 'read' | 'actioned' | 'resolved';
   threatType?: string;
+  client_id?: string;
+  created_at: string;
+  updated_at: string;
+  detectedEntities?: string[];
   sourceType?: string;
   source_type?: string;
+  potentialReach?: number;
   confidenceScore?: number;
   confidence_score?: number;
-  sentiment?: number;
-  detectedEntities?: string[];
-  detected_entities?: string[];
-  potentialReach?: number;
-  potential_reach?: number;
   category?: string;
-  client_id?: string;
-  created_at?: string;
-  updated_at?: string;
+  source_credibility_score?: number;
+  media_is_ai_generated?: boolean;
+  ai_detection_confidence?: number;
+  incident_playbook?: string;
 }
 
 export interface MonitoringConfig {

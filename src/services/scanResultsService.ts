@@ -18,6 +18,10 @@ export interface ScanResult {
   confidence_score?: number;
   potential_reach?: number;
   detected_entities?: any;
+  source_credibility_score?: number;
+  media_is_ai_generated?: boolean;
+  ai_detection_confidence?: number;
+  incident_playbook?: string;
 }
 
 /**

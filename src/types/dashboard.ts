@@ -1,49 +1,37 @@
-// Define client change interface
-export interface ClientChange {
-  id: string;
-  clientId: string;
-  clientName: string;
-  type: 'update' | 'incident' | 'request';
-  description: string;
-  timestamp: Date;
-  severity?: number;
-  read: boolean;
-}
-
-// Define content alert interface
 export interface ContentAlert {
   id: string;
   platform: string;
   content: string;
   date: string;
-  severity: 'low' | 'medium' | 'high';
-  status: 'new' | 'read' | 'actioned' | 'reviewing' | 'resolved';
-  sourceType?: string;
+  severity: 'high' | 'medium' | 'low';
+  status: 'new' | 'read' | 'reviewing' | 'actioned';
+  url: string;
   threatType?: string;
-  confidenceScore?: number;
-  sentiment?: 'positive' | 'neutral' | 'negative' | 'threatening';
-  detectedEntities?: string[];
+  sourceType: string;
+  confidenceScore: number;
+  sentiment: 'positive' | 'negative' | 'neutral' | 'threatening';
+  detectedEntities: string[];
   potentialReach?: number;
   category?: string;
   recommendation?: string;
-  ai_reasoning?: string;
-  url?: string;
+  source_credibility_score?: number;
+  media_is_ai_generated?: boolean;
+  ai_detection_confidence?: number;
+  incident_playbook?: string;
 }
 
-// Define content source interface
 export interface ContentSource {
   id: string;
   name: string;
+  status: "critical" | "good" | "warning";
+  positiveRatio: number;
+  total: number;
   active: boolean;
   lastUpdated: string;
   mentionCount: number;
   sentiment: number;
-  status: "critical" | "good" | "warning";
-  positiveRatio: number;
-  total: number;
 }
 
-// Define content action interface
 export interface ContentAction {
   id: string;
   type: string;
@@ -51,46 +39,14 @@ export interface ContentAction {
   timestamp: string;
   status: string;
   user: string;
-  platform?: string;
-  date?: string;
-  action?: string;
-}
-
-// Define response tone style enum
-export type ResponseToneStyle = 
-  'professional' | 
-  'casual' | 
-  'friendly' | 
-  'formal' | 
-  'technical' | 
-  'educational' | 
-  'empathetic' |
-  'humorous' |
-  'apologetic';
-
-// Define SEO content type
-export interface SeoContent {
-  id: string;
-  title: string;
-  url: string;
-  type: string;
-  status: string;
+  platform: string;
+  action: string;
   date: string;
-  keywords?: string[];
-  dateCreated?: string;
-  publishDate?: string;
-  score?: number;
 }
 
-// Define SourceData for DashboardMainContent component
-export interface SourceData {
-  id: string;
+export interface MetricValue {
   name: string;
-  active: boolean;
-  lastUpdated: string;
-  mentionCount: number;
-  sentiment: number;
-  status: "critical" | "good" | "warning";
-  positiveRatio: number;
-  total: number;
+  value: number;
+  delta: number;
+  deltaType: "increase" | "decrease";
 }

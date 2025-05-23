@@ -18,6 +18,10 @@ export type RawScanResult = {
   created_at?: string;
   confidence_score?: number | null;
   is_identified?: boolean;
+  source_credibility_score?: number | null;
+  media_is_ai_generated?: boolean;
+  ai_detection_confidence?: number | null;
+  incident_playbook?: string | null;
 }
 
 // Define a simple entity structure
