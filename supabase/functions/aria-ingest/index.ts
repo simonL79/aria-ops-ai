@@ -78,7 +78,12 @@ function sanitizeContent(text: string): string {
 serve(async (req) => {
   // Log incoming auth header for debug
   console.log("Auth header received:", req.headers.get('authorization'));
-
+  
+  // More detailed authorization logging
+  const authHeader = req.headers.get('authorization') || 'No auth header';
+  console.log("Full auth header:", authHeader);
+  console.log("Expected auth:", `Bearer ${AUTH_KEY}`);
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -92,11 +97,33 @@ serve(async (req) => {
       });
     }
 
-    // Validate authentication
+    // Validate authentication - more verbose for debugging
     const auth = req.headers.get('authorization');
-    if (!auth || auth !== `Bearer ${AUTH_KEY}`) {
-      console.error('Unauthorized access attempt');
-      return new Response('Unauthorized', { 
+    if (!auth) {
+      console.error('No authorization header provided');
+      return new Response('Unauthorized: No auth header', { 
+        status: 401,
+        headers: corsHeaders 
+      });
+    }
+    
+    // Check if auth header format is correct
+    if (!auth.startsWith('Bearer ')) {
+      console.error('Authorization header not in Bearer format');
+      return new Response('Unauthorized: Invalid auth format', { 
+        status: 401,
+        headers: corsHeaders 
+      });
+    }
+    
+    // Extract token and compare
+    const token = auth.substring(7); // Remove 'Bearer ' prefix
+    console.log("Extracted token:", token);
+    console.log("AUTH_KEY:", AUTH_KEY);
+    
+    if (token !== AUTH_KEY) {
+      console.error('Invalid token provided');
+      return new Response('Unauthorized: Invalid token', { 
         status: 401,
         headers: corsHeaders 
       });
