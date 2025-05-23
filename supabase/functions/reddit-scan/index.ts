@@ -22,13 +22,12 @@ console.log('[REDDIT-SCAN] REDDIT_CLIENT_ID exists:', !!REDDIT_CLIENT_ID);
 console.log('[REDDIT-SCAN] REDDIT_CLIENT_SECRET exists:', !!REDDIT_CLIENT_SECRET);
 console.log('[REDDIT-SCAN] REDDIT_USERNAME exists:', !!REDDIT_USERNAME);
 console.log('[REDDIT-SCAN] REDDIT_PASSWORD exists:', !!REDDIT_PASSWORD);
-console.log('[REDDIT-SCAN] REDDIT_USERNAME value:', REDDIT_USERNAME);
 
 // Initialize Supabase client
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 // Reddit scanner configuration
-const monitoredSubs = ['technology', 'news', 'business']; // customize
+const monitoredSubs = ['technology', 'news', 'business'];
 const keywords = ['lawsuit', 'fraud', 'scandal', 'CEO', 'leak', 'exposed'];
 
 // Reddit post interface
@@ -54,74 +53,91 @@ async function scanReddit(): Promise<RedditPost[]> {
   try {
     const matchingPosts: RedditPost[] = [];
     
-    // Fetch access token for Reddit API
+    // Prepare authentication for Reddit API
+    const credentials = btoa(`${REDDIT_CLIENT_ID}:${REDDIT_CLIENT_SECRET}`);
     const tokenUrl = 'https://www.reddit.com/api/v1/access_token';
-    const authString = btoa(`${REDDIT_CLIENT_ID}:${REDDIT_CLIENT_SECRET}`);
-    const body = `grant_type=password&username=${REDDIT_USERNAME}&password=${REDDIT_PASSWORD}`;
     
-    console.log('[REDDIT-SCAN] Requesting Reddit token...');
-    console.log('[REDDIT-SCAN] Auth string length:', authString.length);
-    console.log('[REDDIT-SCAN] Body:', body.replace(REDDIT_PASSWORD || '', '***'));
+    const formData = new URLSearchParams();
+    formData.append('grant_type', 'password');
+    formData.append('username', REDDIT_USERNAME!);
+    formData.append('password', REDDIT_PASSWORD!);
+    
+    console.log('[REDDIT-SCAN] Requesting Reddit access token...');
     
     const tokenResponse = await fetch(tokenUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': `Basic ${authString}`,
+        'Authorization': `Basic ${credentials}`,
         'User-Agent': 'aria-threat-scanner/1.0 by FixExotic9448'
       },
-      body: body
+      body: formData.toString()
     });
     
     console.log('[REDDIT-SCAN] Token response status:', tokenResponse.status);
     
     if (!tokenResponse.ok) {
-      const error = await tokenResponse.text();
-      console.error(`[REDDIT-SCAN] Failed to get Reddit token: ${error}`);
-      throw new Error(`Failed to authenticate with Reddit: ${tokenResponse.status} - ${error}`);
+      const errorText = await tokenResponse.text();
+      console.error(`[REDDIT-SCAN] Reddit token request failed:`, errorText);
+      throw new Error(`Reddit authentication failed: ${tokenResponse.status} - ${errorText}`);
     }
     
     const tokenData = await tokenResponse.json();
-    console.log('[REDDIT-SCAN] Token received, type:', tokenData.token_type);
+    console.log('[REDDIT-SCAN] Successfully obtained access token');
     const accessToken = tokenData.access_token;
+    
+    if (!accessToken) {
+      throw new Error('No access token received from Reddit');
+    }
     
     // Scan each subreddit
     for (const sub of monitoredSubs) {
       console.log(`[REDDIT-SCAN] Scanning r/${sub}...`);
       
-      const response = await fetch(`https://oauth.reddit.com/r/${sub}/new.json?limit=25`, {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'User-Agent': 'aria-threat-scanner/1.0 by FixExotic9448'
-        }
-      });
-      
-      if (!response.ok) {
-        console.error(`[REDDIT-SCAN] Failed to fetch from r/${sub}: ${response.status}`);
-        const errorText = await response.text();
-        console.error(`[REDDIT-SCAN] Error details:`, errorText);
-        continue;
-      }
-      
-      const data = await response.json();
-      console.log(`[REDDIT-SCAN] Retrieved ${data.data.children.length} posts from r/${sub}`);
-      const posts = data.data.children.map((child: any) => child.data);
-      
-      for (const post of posts) {
-        const text = `${post.title}\n${post.selftext || ''}`;
+      try {
+        const response = await fetch(`https://oauth.reddit.com/r/${sub}/new.json?limit=25`, {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'User-Agent': 'aria-threat-scanner/1.0 by FixExotic9448'
+          }
+        });
         
-        if (keywords.some(k => text.toLowerCase().includes(k.toLowerCase()))) {
-          console.log(`[REDDIT-SCAN] Found matching post in r/${sub}: ${post.title}`);
-          matchingPosts.push(post);
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error(`[REDDIT-SCAN] Failed to fetch from r/${sub}: ${response.status} - ${errorText}`);
+          continue;
         }
+        
+        const data = await response.json();
+        console.log(`[REDDIT-SCAN] Retrieved ${data?.data?.children?.length || 0} posts from r/${sub}`);
+        
+        if (!data?.data?.children) {
+          console.log(`[REDDIT-SCAN] No posts data found for r/${sub}`);
+          continue;
+        }
+        
+        const posts = data.data.children.map((child: any) => child.data);
+        
+        for (const post of posts) {
+          const text = `${post.title || ''}\n${post.selftext || ''}`;
+          
+          if (keywords.some(k => text.toLowerCase().includes(k.toLowerCase()))) {
+            console.log(`[REDDIT-SCAN] Found matching post in r/${sub}: ${post.title}`);
+            matchingPosts.push(post);
+          }
+        }
+        
+      } catch (subError) {
+        console.error(`[REDDIT-SCAN] Error scanning r/${sub}:`, subError);
+        continue;
       }
     }
     
-    console.log(`[REDDIT-SCAN] Found ${matchingPosts.length} matching posts`);
+    console.log(`[REDDIT-SCAN] Found ${matchingPosts.length} matching posts total`);
     return matchingPosts;
     
   } catch (error) {
-    console.error('[REDDIT-SCAN] Error scanning Reddit:', error);
+    console.error('[REDDIT-SCAN] Error in scanReddit:', error);
     throw error;
   }
 }
@@ -134,7 +150,7 @@ async function sendToAriaIngest(post: RedditPost) {
     const text = `${post.title}\n${post.selftext || ''}`;
     const url = `https://reddit.com${post.permalink}`;
     
-    console.log(`[REDDIT-SCAN] Sending to ARIA ingest: ${post.title}`);
+    console.log(`[REDDIT-SCAN] Sending to ARIA ingest: ${post.title.substring(0, 50)}...`);
     
     const payload = {
       content: text,
@@ -142,7 +158,7 @@ async function sendToAriaIngest(post: RedditPost) {
       url: url,
       source_type: 'reddit_scan',
       confidence_score: 80,
-      potential_reach: post.ups + (post.num_comments * 5), // Rough estimate based on upvotes + comments
+      potential_reach: post.ups + (post.num_comments * 5),
     };
     
     const response = await fetch(`${SUPABASE_URL}/functions/v1/aria-ingest`, {
@@ -160,7 +176,7 @@ async function sendToAriaIngest(post: RedditPost) {
     }
     
     const result = await response.json();
-    console.log(`[REDDIT-SCAN] Successfully sent to ARIA ingest, result:`, result.success);
+    console.log(`[REDDIT-SCAN] Successfully sent to ARIA ingest`);
     return result;
     
   } catch (error) {
@@ -209,6 +225,7 @@ serve(async (req) => {
     }
     
     // Scan Reddit for matching posts
+    console.log('[REDDIT-SCAN] Starting scan process...');
     const matchingPosts = await scanReddit();
     
     // Process each matching post
@@ -228,11 +245,12 @@ serve(async (req) => {
           title: post.title,
           url: `https://reddit.com${post.permalink}`,
           success: false,
-          error: error.message
+          error: error instanceof Error ? error.message : 'Unknown error'
         });
       }
     }
     
+    console.log(`[REDDIT-SCAN] Scan completed successfully`);
     return new Response(JSON.stringify({ 
       status: 'success',
       scanned: monitoredSubs,
@@ -248,8 +266,8 @@ serve(async (req) => {
     console.error('[REDDIT-SCAN] Function error:', error);
     return new Response(JSON.stringify({ 
       error: 'Internal Server Error', 
-      details: error.message,
-      stack: error.stack
+      details: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
     }), { 
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
