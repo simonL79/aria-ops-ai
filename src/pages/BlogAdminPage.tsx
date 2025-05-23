@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import PublicLayout from '@/components/layout/PublicLayout';
 import BlogAdminPanel from '@/components/blog/BlogAdminPanel';
@@ -12,7 +13,27 @@ import { useAuth } from '@/hooks/useAuth';
 
 const BlogAdminPage = () => {
   const [isSending, setIsSending] = React.useState(false);
-  const { user } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
+  
+  // Show loading state while checking auth
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-2">Verifying admin access...</span>
+      </div>
+    );
+  }
+  
+  // Redirect if not authenticated
+  if (!isAuthenticated) {
+    return <Navigate to="/auth" replace />;
+  }
+  
+  // Check if user is admin (based on email)
+  if (user?.email !== 'simonlindsay7988@gmail.com') {
+    return <Navigate to="/dashboard" replace />;
+  }
   
   const handleSendMagicLink = async () => {
     if (!user || !user.email) {

@@ -62,24 +62,81 @@ function App() {
           <Route path="/simon-lindsay" element={<BiographyPage />} />
           <Route path="/scan" element={<ScanPage />} />
           
-          {/* Dashboard routes */}
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/dashboard/mentions" element={<MentionsPage />} />
-          <Route path="/dashboard/engagement" element={<EngagementHubPage />} />
-          <Route path="/dashboard/aria-ingest" element={<AriaIngestPage />} />
-          <Route path="/dashboard/analytics" element={<AnalyticsPage />} />
-          <Route path="/dashboard/radar" element={<RadarPage />} />
-          <Route path="/dashboard/ai-scraping" element={<AiScrapingDashboard />} />
+          {/* Protected dashboard routes */}
+          <Route path="/dashboard" element={
+            <AuthGuard>
+              <Dashboard />
+            </AuthGuard>
+          } />
+          <Route path="/dashboard/mentions" element={
+            <AuthGuard>
+              <MentionsPage />
+            </AuthGuard>
+          } />
+          <Route path="/dashboard/engagement" element={
+            <AuthGuard>
+              <EngagementHubPage />
+            </AuthGuard>
+          } />
+          <Route path="/dashboard/aria-ingest" element={
+            <AuthGuard>
+              <AriaIngestPage />
+            </AuthGuard>
+          } />
+          <Route path="/dashboard/analytics" element={
+            <AuthGuard>
+              <AnalyticsPage />
+            </AuthGuard>
+          } />
+          <Route path="/dashboard/radar" element={
+            <AuthGuard>
+              <RadarPage />
+            </AuthGuard>
+          } />
+          <Route path="/dashboard/ai-scraping" element={
+            <AuthGuard>
+              <AiScrapingDashboard />
+            </AuthGuard>
+          } />
           
-          {/* Admin routes */}
-          <Route path="/admin" element={<AdminDashboard />} />
+          {/* Admin-only routes */}
+          <Route path="/admin" element={
+            <AdminGuard>
+              <AdminDashboard />
+            </AdminGuard>
+          } />
+          <Route path="/blog/admin" element={
+            <AdminGuard>
+              <BlogAdminPage />
+            </AdminGuard>
+          } />
           
           {/* Other protected routes */}
-          <Route path="/clients" element={<Clients />} />
-          <Route path="/calendar" element={<CalendarPage />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/monitor" element={<Monitor />} />
-          <Route path="/new-companies" element={<NewCoPage />} />
+          <Route path="/clients" element={
+            <AuthGuard>
+              <Clients />
+            </AuthGuard>
+          } />
+          <Route path="/calendar" element={
+            <AuthGuard>
+              <CalendarPage />
+            </AuthGuard>
+          } />
+          <Route path="/settings" element={
+            <AuthGuard>
+              <Settings />
+            </AuthGuard>
+          } />
+          <Route path="/monitor" element={
+            <AuthGuard>
+              <Monitor />
+            </AuthGuard>
+          } />
+          <Route path="/new-companies" element={
+            <AuthGuard>
+              <NewCoPage />
+            </AuthGuard>
+          } />
           
           {/* Catch all - redirect to home */}
           <Route path="*" element={<Index />} />
