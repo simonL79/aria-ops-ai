@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 export interface BlogPost {
@@ -16,6 +15,28 @@ export interface BlogPost {
 
 export const blogPosts: BlogPost[] = [
   {
+    title: "Why I Built A.R.I.A™",
+    slug: "why-i-built-aria",
+    description: "The personal story behind creating A.R.I.A™ and the vision for transforming online reputation management.",
+    author: "Simon Lindsay",
+    date: "May 25, 2025",
+    image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=2034&auto=format&fit=crop",
+    category: "Company Updates",
+    status: "published",
+    content: `
+# Why I Built A.R.I.A™
+
+*Also published on [Medium](https://medium.com/@simonlindsay7988/why-i-built-a-r-i-a-c9f3ab23d266)*
+
+[Content from the Medium article would go here - please update with the actual content from the Medium post]
+
+---
+
+**Simon Lindsay**  
+*Founder, A.R.I.A™*
+    `
+  },
+  {
     title: "Building A.R.I.A™ — A Smarter Way to Understand Online Reputation",
     slug: "building-aria-smarter-online-reputation",
     description: "In today's world, reputation moves at the speed of a headline. Discover how we're building A.R.I.A™ to help individuals and organizations understand their online presence.",
@@ -28,6 +49,8 @@ export const blogPosts: BlogPost[] = [
 # Building A.R.I.A™ — A Smarter Way to Understand Online Reputation
 
 *Also published on [Medium](https://medium.com/@simonlindsay7988/building-a-r-i-a-a-smarter-way-to-understand-online-reputation-733ea9c6a683)*
+
+*Related: [Why I Built A.R.I.A™](/blog/why-i-built-aria)*
 
 In today's world, reputation moves at the speed of a headline. What people say about you — online, in reviews, on social media — can have a lasting impact. That's why we're building A.R.I.A™.
 
