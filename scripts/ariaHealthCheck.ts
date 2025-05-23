@@ -157,6 +157,107 @@ async function runHealthCheck(): Promise<void> {
       console.log(`  ❌ ${errors.length} platform(s) with errors`);
     }
   }
+
+  // Send alerts if needed
+  await sendAlertsIfNeeded(results);
+}
+
+async function sendAlertsIfNeeded(results: HealthCheckResult[]): Promise<void> {
+  const SLACK_WEBHOOK_URL = process.env.SLACK_WEBHOOK_URL;
+  
+  if (!SLACK_WEBHOOK_URL) {
+    console.log('ℹ️  No Slack webhook configured - skipping alerts');
+    return;
+  }
+
+  const errors = results.filter(r => r.status === 'error');
+  const warnings = results.filter(r => r.status === 'warning');
+  const highThreats = results.filter(r => r.count24h > 0 && r.message.includes('threats'))
+    .reduce((sum, r) => {
+      const match = r.message.match(/(\d+) potential threats/);
+      return sum + (match ? parseInt(match[1]) : 0);
+    }, 0);
+
+  // Determine if we should alert
+  const shouldAlert = errors.length > 0 || warnings.length >= 3 || highThreats > 3;
+
+  if (!shouldAlert) {
+    console.log('✅ No alerts needed - all systems operational');
+    return;
+  }
+
+  // Build Slack message
+  const message = {
+    blocks: [
+      {
+        type: "header",
+        text: {
+          type: "plain_text",
+          text: "🚨 ARIA Health Check Alert",
+          emoji: true
+        }
+      },
+      {
+        type: "section",
+        fields: [
+          {
+            type: "mrkdwn",
+            text: `*Errors:* ${errors.length}`
+          },
+          {
+            type: "mrkdwn",
+            text: `*Warnings:* ${warnings.length}`
+          },
+          {
+            type: "mrkdwn",
+            text: `*High Threats (24h):* ${highThreats}`
+          },
+          {
+            type: "mrkdwn",
+            text: `*Time:* ${new Date().toLocaleString()}`
+          }
+        ]
+      }
+    ]
+  };
+
+  // Add error details
+  if (errors.length > 0) {
+    message.blocks.push({
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: `*❌ Errors:*\n${errors.map(e => `• ${e.platform}: ${e.message}`).join('\n')}`
+      }
+    } as any);
+  }
+
+  // Add warning details
+  if (warnings.length > 0) {
+    message.blocks.push({
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: `*⚠️ Warnings:*\n${warnings.map(w => `• ${w.platform}: ${w.message}`).join('\n')}`
+      }
+    } as any);
+  }
+
+  try {
+    const response = await fetch(SLACK_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(message)
+    });
+
+    if (response.ok) {
+      console.log('📢 Alert sent to Slack successfully');
+    } else {
+      console.error('❌ Failed to send Slack alert:', response.statusText);
+    }
+  } catch (error) {
+    console.error('❌ Error sending Slack alert:', error);
+  }
 }
 
 // Run if called directly
