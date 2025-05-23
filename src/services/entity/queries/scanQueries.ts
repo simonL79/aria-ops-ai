@@ -29,11 +29,11 @@ export const getScanResultsByEntity = async (entityName: string): Promise<ScanRe
           severity: row.severity,
           status: row.status,
           threat_type: row.threat_type,
-          risk_entity_name: row.risk_entity_name,
-          risk_entity_type: row.risk_entity_type,
+          risk_entity_name: row.risk_entity_name || null,
+          risk_entity_type: row.risk_entity_type || null,
           created_at: row.created_at,
-          confidence_score: row.confidence_score,
-          is_identified: row.is_identified,
+          confidence_score: row.confidence_score || null,
+          is_identified: Boolean(row.is_identified),
           detected_entities: parseDetectedEntities(row.detected_entities)
         });
       }
@@ -59,11 +59,11 @@ export const getScanResultsByEntity = async (entityName: string): Promise<ScanRe
           severity: row.severity,
           status: row.status,
           threat_type: row.threat_type,
-          risk_entity_name: row.risk_entity_name,
-          risk_entity_type: row.risk_entity_type,
+          risk_entity_name: row.risk_entity_name || null,
+          risk_entity_type: row.risk_entity_type || null,
           created_at: row.created_at,
-          confidence_score: row.confidence_score,
-          is_identified: row.is_identified,
+          confidence_score: row.confidence_score || null,
+          is_identified: Boolean(row.is_identified),
           detected_entities: parseDetectedEntities(row.detected_entities)
         });
       }
@@ -105,11 +105,11 @@ export const getAllScanResults = async (): Promise<ScanResult[]> => {
         severity: row.severity,
         status: row.status,
         threat_type: row.threat_type,
-        risk_entity_name: row.risk_entity_name,
-        risk_entity_type: row.risk_entity_type,
+        risk_entity_name: row.risk_entity_name || null,
+        risk_entity_type: row.risk_entity_type || null,
         created_at: row.created_at,
-        confidence_score: row.confidence_score,
-        is_identified: row.is_identified,
+        confidence_score: row.confidence_score || null,
+        is_identified: Boolean(row.is_identified),
         detected_entities: parseDetectedEntities(row.detected_entities)
       });
     }
