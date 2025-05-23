@@ -28,8 +28,8 @@ const BatchProcessingPanel: React.FC = () => {
       const urlItems = urls.split('\n').filter(url => url.trim());
       
       const allItems = [
-        ...contentItems.map(content => ({ content, type: 'content' })),
-        ...urlItems.map(url => ({ content: `Content from: ${url}`, url, type: 'url' }))
+        ...contentItems.map(content => ({ content, type: 'content' as const })),
+        ...urlItems.map(url => ({ content: `Content from: ${url}`, type: 'url' as const, url }))
       ];
 
       let processed = 0;
@@ -37,7 +37,7 @@ const BatchProcessingPanel: React.FC = () => {
         await submitToAriaIngest({
           content: item.content,
           platform: batchPlatform,
-          url: item.url || '',
+          url: item.type === 'url' ? item.url : '',
           severity: 'medium'
         });
         processed++;

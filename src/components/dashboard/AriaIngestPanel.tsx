@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,7 +9,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Loader, Send, TestTube, CheckCircle, User, Building, AlertTriangle } from "lucide-react";
 import { AriaIngestRequest, AriaIngestResponse, submitToAriaIngest, testAriaIngest } from "@/services/ariaIngestService";
-import { NotificationSystem, BatchProcessingPanel, ThreatTrendsChart, SearchAndFilterPanel, ResponseManagementPanel, EntityRelationshipMap } from "@/components";
+import { ContentAlert } from "@/types/dashboard";
+import NotificationSystem from "@/components/dashboard/real-time-alerts/NotificationSystem";
+import BatchProcessingPanel from "@/components/dashboard/processing/BatchProcessingPanel";
+import ThreatTrendsChart from "@/components/dashboard/analytics/ThreatTrendsChart";
+import SearchAndFilterPanel from "@/components/dashboard/search/SearchAndFilterPanel";
+import ResponseManagementPanel from "@/components/dashboard/response/ResponseManagementPanel";
+import EntityRelationshipMap from "@/components/dashboard/analytics/EntityRelationshipMap";
 
 const AriaIngestPanel = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -399,6 +406,81 @@ const AriaIngestPanel = () => {
       )}
     </div>
   );
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!formData.content.trim()) return;
+
+    setIsSubmitting(true);
+    
+    (async () => {
+      try {
+        // Provide a fallback URL if empty
+        const requestData = {
+          ...formData,
+          url: formData.url.trim() || `https://manual-entry-${formData.platform}.com/${Date.now()}`
+        };
+        
+        console.log('Submitting request:', requestData);
+        const response = await submitToAriaIngest(requestData);
+        console.log('Received response:', response);
+        
+        if (response) {
+          setLastResponse(response);
+          // Clear form on successful submission (but not test)
+          if (!formData.test) {
+            setFormData({
+              content: "",
+              platform: "twitter", 
+              url: "",
+              severity: "low",
+              test: false
+            });
+          }
+        }
+      } finally {
+        setIsSubmitting(false);
+      }
+    })();
+  }
+
+  async function handleTest() {
+    setIsTesting(true);
+    try {
+      console.log('Running test...');
+      const response = await testAriaIngest();
+      console.log('Test response:', response);
+      if (response) {
+        setLastResponse(response);
+      }
+    } finally {
+      setIsTesting(false);
+    }
+  }
+
+  function getEntityIcon(type: string) {
+    switch (type) {
+      case 'PERSON':
+        return <User className="h-3 w-3" />;
+      case 'ORG':
+        return <Building className="h-3 w-3" />;
+      default:
+        return <span className="h-3 w-3 bg-gray-400 rounded-full" />;
+    }
+  }
+
+  function getThreatSeverityColor(severity: string) {
+    switch (severity) {
+      case 'HIGH':
+        return 'destructive';
+      case 'MEDIUM':
+        return 'default';
+      case 'LOW':
+        return 'secondary';
+      default:
+        return 'outline';
+    }
+  }
 };
 
 export default AriaIngestPanel;
