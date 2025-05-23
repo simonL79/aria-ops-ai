@@ -19,6 +19,13 @@ interface StickyHeaderProps {
 const StickyHeader = ({ isScrolled }: StickyHeaderProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
+
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
   
   return (
     <header className={`sticky top-0 z-50 w-full transition-all duration-300 ${isScrolled ? 'bg-premium-black/90 shadow-lg backdrop-blur-sm' : 'bg-transparent'}`}>
@@ -43,9 +50,12 @@ const StickyHeader = ({ isScrolled }: StickyHeaderProps) => {
                   </Link>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
-                  <Link to="/how-it-works" className={`${navigationMenuTriggerStyle()} font-medium transition-colors duration-300 ${isScrolled ? 'text-white hover:text-premium-silver' : 'text-premium-black hover:text-premium-darkGray'}`}>
+                  <button 
+                    onClick={() => scrollToSection('how-it-works')}
+                    className={`${navigationMenuTriggerStyle()} font-medium transition-colors duration-300 ${isScrolled ? 'text-white hover:text-premium-silver' : 'text-premium-black hover:text-premium-darkGray'}`}
+                  >
                     How It Works
-                  </Link>
+                  </button>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
                   <Link to="/simon-lindsay" className={`${navigationMenuTriggerStyle()} font-medium transition-colors duration-300 ${isScrolled ? 'text-white hover:text-premium-silver' : 'text-premium-black hover:text-premium-darkGray'}`}>

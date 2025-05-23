@@ -11,6 +11,14 @@ interface MobileMenuProps {
 }
 
 const MobileMenu = ({ isOpen, setIsOpen, isScrolled }: MobileMenuProps) => {
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+    setIsOpen(false);
+  };
+
   if (!isOpen) return null;
   
   return (
@@ -36,13 +44,12 @@ const MobileMenu = ({ isOpen, setIsOpen, isScrolled }: MobileMenuProps) => {
             </Link>
           </li>
           <li>
-            <Link 
-              to="/how-it-works" 
-              className="block text-white hover:text-premium-silver transition-colors"
-              onClick={() => setIsOpen(false)}
+            <button
+              onClick={() => scrollToSection('how-it-works')}
+              className="block text-white hover:text-premium-silver transition-colors text-left w-full"
             >
               How It Works
-            </Link>
+            </button>
           </li>
           <li>
             <Link 

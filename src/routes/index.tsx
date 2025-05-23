@@ -3,6 +3,7 @@ import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import SalesFunnelPage from "@/pages/SalesFunnelPage";
+import ScanPage from "@/pages/ScanPage";
 import Authentication from "@/pages/Authentication";
 import AiScrapingPage from "@/pages/AiScrapingPage";
 import BlogPage from "@/pages/BlogPage";
@@ -34,6 +35,7 @@ const AppRoutes = () => {
     <Routes>
       {/* Public routes */}
       <Route path="/" element={<SalesFunnelPage />} />
+      <Route path="/scan" element={<ScanPage />} />
       <Route path="/auth" element={<Authentication />} />
       <Route path="/blog" element={<BlogPage />} />
       <Route path="/blog/:slug" element={<BlogPostPage />} />
