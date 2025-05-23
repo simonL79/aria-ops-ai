@@ -37,11 +37,11 @@ export async function handleRequest(requestData: any, supabase: any) {
     potential_reach = 0
   } = requestData;
 
-  // Validate required fields
-  if (!content || !platform || !url) {
+  // Validate required fields - URL can be empty, we'll provide a fallback
+  if (!content || !platform) {
     console.error('[ARIA-INGEST] Missing required fields');
     return new Response(JSON.stringify({ 
-      error: 'Missing required fields',
+      error: 'Missing required fields: content and platform are required',
       received: { content: !!content, platform: !!platform, url: !!url }
     }), { 
       status: 400,
@@ -49,7 +49,10 @@ export async function handleRequest(requestData: any, supabase: any) {
     });
   }
 
-  console.log(`[ARIA-INGEST] Processing content from ${platform}: ${url.substring(0, 50)}...`);
+  // Provide fallback URL if empty
+  const finalUrl = url && url.trim() ? url : `https://manual-entry-${platform}.com/${Date.now()}`;
+
+  console.log(`[ARIA-INGEST] Processing content from ${platform}: ${finalUrl.substring(0, 50)}...`);
 
   // Clean and process content
   const cleanedContent = sanitizeContent(content);
@@ -65,7 +68,7 @@ export async function handleRequest(requestData: any, supabase: any) {
   const payload = {
     content: cleanedContent,
     platform,
-    url,
+    url: finalUrl,
     detected_entities,
     risk_entity_name: topEntity.name,
     risk_entity_type: topEntity.type,

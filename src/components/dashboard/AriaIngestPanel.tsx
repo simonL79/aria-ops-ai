@@ -28,7 +28,13 @@ const AriaIngestPanel = () => {
 
     setIsSubmitting(true);
     try {
-      const response = await submitToAriaIngest(formData);
+      // Provide a fallback URL if empty
+      const requestData = {
+        ...formData,
+        url: formData.url.trim() || `https://manual-entry-${formData.platform}.com/${Date.now()}`
+      };
+      
+      const response = await submitToAriaIngest(requestData);
       if (response) {
         setLastResponse(response);
         // Clear form on successful submission (but not test)
@@ -120,7 +126,7 @@ const AriaIngestPanel = () => {
                 id="url"
                 value={formData.url}
                 onChange={(e) => setFormData(prev => ({ ...prev, url: e.target.value }))}
-                placeholder="https://example.com/post"
+                placeholder="https://example.com/post (leave empty for manual entries)"
               />
             </div>
 
