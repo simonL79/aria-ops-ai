@@ -79,7 +79,7 @@ export const useMonitoringSources = () => {
         platform: 'TikTok',
         enabled: false,
         status: 'inactive',
-        icon: <Users className="h-4 w-4" />,
+        icon: <Camera className="h-4 w-4" />,
         description: 'Track viral TikTok content involving UK celebrities and sports personalities (External scraper required)',
         requiresSetup: true
       },
@@ -121,9 +121,6 @@ export const useMonitoringSources = () => {
         case 'rss-news':
           functionName = 'rss-scraper';
           break;
-        case 'social-media-scraper':
-          functionName = 'social-media-scraper';
-          break;
         case 'aria-scraper':
           functionName = 'aria-scraper';
           break;
@@ -155,8 +152,6 @@ export const useMonitoringSources = () => {
       
       if (sourceId === 'rss-news') {
         contentType = 'celebrity/sports threats';
-      } else if (sourceId === 'social-media-scraper') {
-        contentType = 'social media threats';
       } else if (sourceId === 'aria-scraper') {
         contentType = 'YouTube threats';
       }
