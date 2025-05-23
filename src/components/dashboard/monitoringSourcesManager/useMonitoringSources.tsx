@@ -3,7 +3,6 @@ import {
   MessageSquare, 
   Camera, 
   Globe, 
-  Users, 
   Trophy, 
   Briefcase 
 } from "lucide-react";
@@ -50,16 +49,6 @@ export const useMonitoringSources = () => {
         icon: <Trophy className="h-4 w-4" />,
         description: 'Daily scan of YouTube RSS feeds for UK celebrity and sports channel content threats',
         lastScan: 'Daily at 8 AM UTC'
-      },
-      {
-        id: 'social-media-scraper',
-        name: 'Legacy Social Media Bundle',
-        type: 'social',
-        platform: 'YouTube, Instagram, TikTok',
-        enabled: false,
-        status: 'inactive',
-        icon: <Users className="h-4 w-4" />,
-        description: 'Legacy automated scraping (replaced by focused scanners)'
       },
       {
         id: 'twitter',
