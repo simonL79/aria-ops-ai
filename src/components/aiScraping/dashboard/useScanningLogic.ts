@@ -192,7 +192,7 @@ const useScanningLogic = () => {
           sentiment: mapNumericSentimentToString(result.sentiment),
           detectedEntities: Array.isArray(result.detectedEntities) ? 
             result.detectedEntities.map(entity => String(entity)) : [],
-          potentialReach: result.potentialReach || result.potential_reach || 0,
+          potentialReach: result.potentialReach || 0,
           category: result.category || '',
           source_credibility_score: result.source_credibility_score,
           media_is_ai_generated: result.media_is_ai_generated,

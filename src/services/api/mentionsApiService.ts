@@ -19,7 +19,6 @@ interface MentionStoreRequest {
  */
 export const storeMention = async (mentionRequest: MentionStoreRequest): Promise<ContentAlert> => {
   // Store the mention using the monitoring service
-  // Using the correct number of arguments for saveMention
   saveMention(
     mentionRequest.platform,
     mentionRequest.content,
@@ -39,8 +38,10 @@ export const storeMention = async (mentionRequest: MentionStoreRequest): Promise
     sourceType: mentionRequest.sourceType,
     category: mentionRequest.category,
     recommendation: mentionRequest.recommendation,
-    ai_reasoning: mentionRequest.ai_reasoning,
-    url: mentionRequest.sourceType === 'manual' ? '' : 'https://example.com'
+    url: mentionRequest.sourceType === 'manual' ? '' : 'https://example.com',
+    confidenceScore: 75,
+    sentiment: 'neutral',
+    detectedEntities: []
   };
   
   return newAlert;

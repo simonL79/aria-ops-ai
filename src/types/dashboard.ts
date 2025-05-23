@@ -1,4 +1,3 @@
-
 export interface ContentAlert {
   id: string;
   platform: string;
@@ -61,4 +60,8 @@ export interface SeoContent {
   content: string;
   keywords: string[];
   priority: 'high' | 'medium' | 'low';
+  status?: string;
+  type?: string;
+  score?: number;
+  publishDate?: string;
 }

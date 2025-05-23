@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from "react";
 import {
   getMetrics,
@@ -154,4 +155,6 @@ const useDashboardData = (): DashboardData => {
   };
 };
 
+// Export as named export for compatibility
+export { useDashboardData };
 export default useDashboardData;

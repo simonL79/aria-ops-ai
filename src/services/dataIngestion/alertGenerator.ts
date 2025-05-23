@@ -23,7 +23,12 @@ export const generateSimulatedAlert = (platform: string): ContentAlert => {
     content,
     date: '10 minutes ago',
     severity: severity as 'low' | 'medium' | 'high',
-    status: 'new'
+    status: 'new',
+    url: '',
+    sourceType: 'simulation',
+    confidenceScore: 75,
+    sentiment: 'neutral',
+    detectedEntities: []
   };
 };
 
