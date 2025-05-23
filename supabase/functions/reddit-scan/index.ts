@@ -83,12 +83,17 @@ async function scanReddit(): Promise<RedditPost[]> {
     }
     
     const tokenData = await tokenResponse.json();
-    console.log('[REDDIT-SCAN] Successfully obtained access token');
-    const accessToken = tokenData.access_token;
+    console.log('[REDDIT-SCAN] Token response data:', JSON.stringify(tokenData, null, 2));
+    
+    const accessToken = tokenData?.access_token;
+    console.log('[REDDIT-SCAN] Extracted access token:', accessToken ? 'Found' : 'Missing');
     
     if (!accessToken) {
-      throw new Error('No access token received from Reddit');
+      console.error('[REDDIT-SCAN] Token data structure:', tokenData);
+      throw new Error('No access token received from Reddit - check credentials');
     }
+    
+    console.log('[REDDIT-SCAN] Successfully obtained access token');
     
     // Scan each subreddit
     for (const sub of monitoredSubs) {
