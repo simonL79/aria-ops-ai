@@ -3,57 +3,39 @@ import { Button } from "@/components/ui/button";
 import { BellRing, AlertTriangle, AlertCircle, AlertOctagon, MessageSquare } from "lucide-react";
 
 interface FilterButtonsProps {
-  filter: 'all' | 'high' | 'medium' | 'low' | 'customer';
-  setFilter: (filter: 'all' | 'high' | 'medium' | 'low' | 'customer') => void;
+  currentFilter: 'all' | 'high' | 'new';
+  onFilterChange: (filter: 'all' | 'high' | 'new') => void;
 }
 
-const FilterButtons = ({ filter, setFilter }: FilterButtonsProps) => {
+const FilterButtons = ({ currentFilter, onFilterChange }: FilterButtonsProps) => {
   return (
     <div className="flex items-center space-x-1">
       <Button
-        variant={filter === "all" ? "secondary" : "ghost"}
+        variant={currentFilter === "all" ? "secondary" : "ghost"}
         size="sm"
         className="h-7 text-xs"
-        onClick={() => setFilter("all")}
+        onClick={() => onFilterChange("all")}
       >
         <BellRing className="h-3.5 w-3.5 mr-1" />
         All
       </Button>
       <Button
-        variant={filter === "high" ? "secondary" : "ghost"}
+        variant={currentFilter === "high" ? "secondary" : "ghost"}
         size="sm"
         className="h-7 text-xs"
-        onClick={() => setFilter("high")}
+        onClick={() => onFilterChange("high")}
       >
         <AlertOctagon className="h-3.5 w-3.5 mr-1 text-red-500" />
         High
       </Button>
       <Button
-        variant={filter === "medium" ? "secondary" : "ghost"}
+        variant={currentFilter === "new" ? "secondary" : "ghost"}
         size="sm"
         className="h-7 text-xs"
-        onClick={() => setFilter("medium")}
+        onClick={() => onFilterChange("new")}
       >
-        <AlertTriangle className="h-3.5 w-3.5 mr-1 text-amber-500" />
-        Medium
-      </Button>
-      <Button
-        variant={filter === "low" ? "secondary" : "ghost"}
-        size="sm"
-        className="h-7 text-xs"
-        onClick={() => setFilter("low")}
-      >
-        <AlertCircle className="h-3.5 w-3.5 mr-1 text-green-500" />
-        Low
-      </Button>
-      <Button
-        variant={filter === "customer" ? "secondary" : "ghost"}
-        size="sm"
-        className="h-7 text-xs"
-        onClick={() => setFilter("customer")}
-      >
-        <MessageSquare className="h-3.5 w-3.5 mr-1 text-blue-500" />
-        Customer
+        <AlertCircle className="h-3.5 w-3.5 mr-1 text-blue-500" />
+        New
       </Button>
     </div>
   );
