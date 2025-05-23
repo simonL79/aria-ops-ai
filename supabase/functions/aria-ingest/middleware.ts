@@ -17,6 +17,10 @@ export function validateRequest(req: Request) {
   return null;
 }
 
+// Import the sanitizeContent function from utils
+import { sanitizeContent } from './utils.ts';
+import { extractEntities } from './entityExtraction.ts';
+
 // Process the request data
 export async function handleRequest(requestData: any, supabase: any) {
   console.log(`[ARIA-INGEST] Processing request data`);
