@@ -7,6 +7,8 @@ export interface MetricValue {
   icon: string;
   color: string;
   name?: string; // Added for compatibility with dashboardApiService
+  delta?: number; // Added for dashboardApiService compatibility
+  deltaType?: 'increase' | 'decrease'; // Added for dashboardApiService compatibility
 }
 
 export interface ContentSource {
@@ -127,6 +129,13 @@ export interface SeoContent {
   url: string;
   rank: number;
   impression: number;
+  content?: string;
+  keywords?: string[];
+  priority?: 'high' | 'medium' | 'low';
+  status?: string;
+  type?: string;
+  score?: number;
+  publishDate?: string;
 }
 
 export interface DashboardHeaderProps {

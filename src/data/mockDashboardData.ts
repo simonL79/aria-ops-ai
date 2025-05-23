@@ -1,3 +1,4 @@
+
 import { ContentAlert, ContentSource, ContentAction, MetricValue } from "@/types/dashboard";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -52,7 +53,15 @@ export const fetchRealSources = async (): Promise<ContentSource[]> => {
     return data.map(item => ({
       id: item.id,
       name: item.name,
+      type: item.type || 'platform',
       status: item.status as "critical" | "good" | "warning",
+      lastUpdate: new Date(item.last_updated).toLocaleDateString(),
+      metrics: {
+        total: item.total || 0,
+        positive: Math.floor((item.positive_ratio || 0) * (item.total || 0) / 100),
+        negative: Math.floor((100 - (item.positive_ratio || 0)) * (item.total || 0) / 100),
+        neutral: 0
+      },
       positiveRatio: item.positive_ratio,
       total: item.total,
       active: item.active,
@@ -86,7 +95,6 @@ export const fetchRealActions = async (): Promise<ContentAction[]> => {
       description: item.description,
       timestamp: new Date(item.created_at).toLocaleDateString(),
       status: item.status,
-      user: 'system', // Default value since we don't have user names
       platform: item.platform,
       action: item.action,
       date: new Date(item.created_at).toLocaleDateString()
@@ -135,7 +143,7 @@ export const mockAlerts: ContentAlert[] = [
     content: "Local business receives positive review for community involvement",
     date: "2024-01-13T09:15:00",
     severity: "low",
-    status: "reviewing",
+    status: "dismissed",
     threatType: "positive_mention",
     url: "https://localnews.com/article/789",
     sourceType: "news",
@@ -183,7 +191,15 @@ export const mockSources: ContentSource[] = [
   { 
     id: '1',
     name: 'Twitter', 
+    type: 'social',
     status: 'critical', 
+    lastUpdate: '2 hours ago',
+    metrics: {
+      total: 120,
+      positive: 42,
+      negative: 78,
+      neutral: 0
+    },
     positiveRatio: 35, 
     total: 120, 
     active: true,
@@ -194,7 +210,15 @@ export const mockSources: ContentSource[] = [
   { 
     id: '2',
     name: 'Facebook', 
+    type: 'social',
     status: 'good', 
+    lastUpdate: '5 hours ago',
+    metrics: {
+      total: 230,
+      positive: 200,
+      negative: 30,
+      neutral: 0
+    },
     positiveRatio: 87, 
     total: 230, 
     active: true,
@@ -211,7 +235,6 @@ export const mockActions: ContentAction[] = [
     description: 'Requested removal of negative review targeting Emma Smith at DataTech Corp',
     timestamp: '3 hours ago', 
     status: 'completed',
-    user: 'admin',
     platform: 'Twitter', 
     action: 'removal_requested', 
     date: '3 hours ago'
