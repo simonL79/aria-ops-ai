@@ -446,10 +446,13 @@ export type Database = {
           created_at: string | null
           detected_entities: Json | null
           id: string
+          is_identified: boolean | null
           platform: string
           potential_reach: number | null
           resolved_at: string | null
           responded_at: string | null
+          risk_entity_name: string | null
+          risk_entity_type: string | null
           sentiment: number | null
           severity: string | null
           source_type: string | null
@@ -468,10 +471,13 @@ export type Database = {
           created_at?: string | null
           detected_entities?: Json | null
           id?: string
+          is_identified?: boolean | null
           platform: string
           potential_reach?: number | null
           resolved_at?: string | null
           responded_at?: string | null
+          risk_entity_name?: string | null
+          risk_entity_type?: string | null
           sentiment?: number | null
           severity?: string | null
           source_type?: string | null
@@ -490,10 +496,13 @@ export type Database = {
           created_at?: string | null
           detected_entities?: Json | null
           id?: string
+          is_identified?: boolean | null
           platform?: string
           potential_reach?: number | null
           resolved_at?: string | null
           responded_at?: string | null
+          risk_entity_name?: string | null
+          risk_entity_type?: string | null
           sentiment?: number | null
           severity?: string | null
           source_type?: string | null
@@ -603,10 +612,13 @@ export type Database = {
           created_at: string | null
           detected_entities: Json | null
           id: string
+          is_identified: boolean | null
           platform: string
           potential_reach: number | null
           resolved_at: string | null
           responded_at: string | null
+          risk_entity_name: string | null
+          risk_entity_type: string | null
           sentiment: number | null
           severity: string | null
           source_type: string | null

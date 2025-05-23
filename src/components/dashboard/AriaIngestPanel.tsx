@@ -184,7 +184,7 @@ const AriaIngestPanel = () => {
         </CardContent>
       </Card>
 
-      {lastResponse && (
+      {lastResponse && lastResponse.payload && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -196,24 +196,24 @@ const AriaIngestPanel = () => {
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <Label className="text-muted-foreground">Platform</Label>
-                <p className="font-medium">{lastResponse.payload.platform}</p>
+                <p className="font-medium">{lastResponse.payload.platform || 'N/A'}</p>
               </div>
               <div>
                 <Label className="text-muted-foreground">Severity</Label>
                 <Badge variant={lastResponse.payload.severity === 'high' ? 'destructive' : 'secondary'}>
-                  {lastResponse.payload.severity}
+                  {lastResponse.payload.severity || 'N/A'}
                 </Badge>
               </div>
             </div>
 
             <div>
               <Label className="text-muted-foreground">Content</Label>
-              <p className="text-sm bg-muted p-2 rounded">{lastResponse.payload.content}</p>
+              <p className="text-sm bg-muted p-2 rounded">{lastResponse.payload.content || 'N/A'}</p>
             </div>
 
             <div>
               <Label className="text-muted-foreground">Detected Entities</Label>
-              {lastResponse.payload.detected_entities.length > 0 ? (
+              {lastResponse.payload.detected_entities && lastResponse.payload.detected_entities.length > 0 ? (
                 <div className="flex flex-wrap gap-2 mt-1">
                   {lastResponse.payload.detected_entities.map((entity, idx) => (
                     <Badge key={idx} variant="outline" className="flex items-center gap-1">
@@ -243,15 +243,15 @@ const AriaIngestPanel = () => {
             <div className="grid grid-cols-3 gap-4 text-sm">
               <div>
                 <Label className="text-muted-foreground">Confidence</Label>
-                <p className="font-medium">{lastResponse.payload.confidence_score}%</p>
+                <p className="font-medium">{lastResponse.payload.confidence_score || 0}%</p>
               </div>
               <div>
                 <Label className="text-muted-foreground">Status</Label>
-                <p className="font-medium">{lastResponse.payload.status}</p>
+                <p className="font-medium">{lastResponse.payload.status || 'N/A'}</p>
               </div>
               <div>
                 <Label className="text-muted-foreground">Source Type</Label>
-                <p className="font-medium">{lastResponse.payload.source_type}</p>
+                <p className="font-medium">{lastResponse.payload.source_type || 'N/A'}</p>
               </div>
             </div>
           </CardContent>
