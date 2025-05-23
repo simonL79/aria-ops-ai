@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { Loader2, Plus } from "lucide-react";
 
 interface ClassifyTabProps {
-  setMentions: (mentions: ContentAlert[]) => void;
+  setMentions: React.Dispatch<React.SetStateAction<ContentAlert[]>>;
   setActiveTab: (tab: string) => void;
 }
 
@@ -46,7 +46,8 @@ const ClassifyTab = ({ setMentions, setActiveTab }: ClassifyTabProps) => {
         sourceType: 'manual'
       });
 
-      setMentions(prev => [newAlert, ...prev]);
+      // Fixed: Pass a function that properly returns ContentAlert[]
+      setMentions((prev: ContentAlert[]) => [newAlert, ...prev]);
       toast.success("Mention classified and added successfully");
       
       // Reset form
