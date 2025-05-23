@@ -51,20 +51,12 @@ serve(async (req) => {
       });
     }
 
-    // Extract the auth key - handle multiple formats
+    // Extract the auth key from the header - accepting a simple key without Bearer prefix
     const authHeader = req.headers.get('authorization') || '';
     console.log(`[ARIA-INGEST] Raw auth header: "${authHeader}"`);
     
-    let receivedKey = '';
-    
-    // Handle different authorization formats
-    if (authHeader.startsWith('Bearer ')) {
-      receivedKey = authHeader.substring(7).trim();
-      console.log(`[ARIA-INGEST] Extracted Bearer token: "${receivedKey}"`);
-    } else if (authHeader.length > 0) {
-      receivedKey = authHeader.trim();
-      console.log(`[ARIA-INGEST] Using raw header as key: "${receivedKey}"`);
-    }
+    // The key should be sent directly as is - no Bearer prefix expected
+    const receivedKey = authHeader.trim();
     
     console.log(`[ARIA-INGEST] Expected key: "${AUTH_KEY}" (${AUTH_KEY.length} chars)`);
     console.log(`[ARIA-INGEST] Received key: "${receivedKey}" (${receivedKey.length} chars)`);
@@ -78,8 +70,7 @@ serve(async (req) => {
         debug: { 
           receivedKeyLength: receivedKey.length,
           expectedKeyLength: AUTH_KEY.length,
-          hasAuth: !!authHeader,
-          authFormat: authHeader.startsWith('Bearer ') ? 'Bearer' : 'Raw'
+          hasAuth: !!authHeader
         }
       }), {
         status: 401, 

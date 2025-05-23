@@ -19,7 +19,7 @@ def test_aria_ingest():
         "test": True  # This will return the payload without inserting
     }
     
-    # Headers - note: send the AUTH_KEY directly without "Bearer " prefix
+    # Headers - send the AUTH_KEY directly without "Bearer " prefix
     headers = {
         "Content-Type": "application/json",
         "Authorization": AUTH_KEY  # This matches the expected format in the edge function
@@ -57,4 +57,4 @@ def test_aria_ingest():
         print(f'❌ Error testing ARIA ingest: {str(e)}')
 
 if __name__ == "__main__":
-    test_aria_ingest()
+    test_aria_ingest();

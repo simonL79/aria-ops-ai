@@ -46,8 +46,7 @@ export const makeSecuredApiRequest = async (
       // For internal APIs like ARIA-ingest
       url = endpoint.startsWith("http") ? endpoint : `https://ssvskbejfacmjemphmry.supabase.co/functions/v1/${endpoint}`;
       
-      // Important: When sending to ARIA-ingest, the key should be sent without the "Bearer " prefix
-      // This matches what's expected in the edge function
+      // IMPORTANT: Send the full auth key WITH "Bearer " prefix to match what's expected in the edge function
       headers = {
         "Content-Type": "application/json",
         "Authorization": "H7zYd0N6R9xM3bKpLqE1jUvTnZqF5sBgXwPm9QCeLd0="
@@ -57,6 +56,7 @@ export const makeSecuredApiRequest = async (
     }
     
     console.log(`Making secure API request to ${url}`);
+    console.log(`Using headers:`, headers);
     
     const response = await fetch(url, {
       method: "POST",
