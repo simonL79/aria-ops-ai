@@ -15,6 +15,30 @@ export interface BlogPost {
 
 export const blogPosts: BlogPost[] = [
   {
+    title: "What I Learned Rebuilding After a Public Crisis: The Story Behind A.R.I.A™",
+    slug: "rebuilding-after-public-crisis-aria-story",
+    description: "A candid account of rebuilding from adversity and how personal experience shaped the creation of A.R.I.A™.",
+    author: "Simon Lindsay",
+    date: "May 26, 2025",
+    image: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=2071&auto=format&fit=crop",
+    category: "Personal Story",
+    status: "published",
+    content: `
+# What I Learned Rebuilding After a Public Crisis: The Story Behind A.R.I.A™
+
+*Also published on [Medium](https://medium.com/@simonlindsay7988/what-i-learned-rebuilding-after-a-public-crisis-the-story-behind-a-r-i-a-34451c8d8b03)*
+
+*Related: [Why I Built A.R.I.A™](/blog/why-i-built-aria) • [Building A.R.I.A™](/blog/building-aria-smarter-online-reputation)*
+
+[Content from the Medium article would go here - please update with the actual content from the Medium post]
+
+---
+
+**Simon Lindsay**  
+*Founder, A.R.I.A™*
+    `
+  },
+  {
     title: "Why I Built A.R.I.A™",
     slug: "why-i-built-aria",
     description: "The personal story behind creating A.R.I.A™ and the vision for transforming online reputation management.",
@@ -27,6 +51,8 @@ export const blogPosts: BlogPost[] = [
 # Why I Built A.R.I.A™
 
 *Also published on [Medium](https://medium.com/@simonlindsay7988/why-i-built-a-r-i-a-c9f3ab23d266)*
+
+*Related: [Rebuilding After a Public Crisis](/blog/rebuilding-after-public-crisis-aria-story) • [Building A.R.I.A™](/blog/building-aria-smarter-online-reputation)*
 
 [Content from the Medium article would go here - please update with the actual content from the Medium post]
 
@@ -50,7 +76,7 @@ export const blogPosts: BlogPost[] = [
 
 *Also published on [Medium](https://medium.com/@simonlindsay7988/building-a-r-i-a-a-smarter-way-to-understand-online-reputation-733ea9c6a683)*
 
-*Related: [Why I Built A.R.I.A™](/blog/why-i-built-aria)*
+*Related: [Why I Built A.R.I.A™](/blog/why-i-built-aria) • [Rebuilding After a Public Crisis](/blog/rebuilding-after-public-crisis-aria-story)*
 
 In today's world, reputation moves at the speed of a headline. What people say about you — online, in reviews, on social media — can have a lasting impact. That's why we're building A.R.I.A™.
 
