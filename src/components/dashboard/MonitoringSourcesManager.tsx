@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,7 +18,10 @@ import {
   MessageSquare,
   Briefcase,
   Settings,
-  Plus
+  Plus,
+  Users,
+  Trophy,
+  Camera
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -51,7 +53,7 @@ const MonitoringSourcesManager = () => {
   const [scanResults, setScanResults] = useState<Record<string, ScanResult>>({});
   const [customRSSUrl, setCustomRSSUrl] = useState('');
 
-  // Initialize default sources
+  // Initialize default sources focused on public figures
   useEffect(() => {
     const defaultSources: MonitoringSource[] = [
       {
@@ -62,18 +64,18 @@ const MonitoringSourcesManager = () => {
         enabled: true,
         status: 'active',
         icon: <MessageSquare className="h-4 w-4" />,
-        description: 'Monitors subreddits for threat-related discussions',
+        description: 'Monitors subreddits for threat-related discussions about public figures',
         lastScan: 'Active (hourly scans)'
       },
       {
         id: 'rss-news',
-        name: 'News RSS Feeds',
+        name: 'Celebrity & Sports News',
         type: 'news',
-        platform: 'Various News Sites',
+        platform: 'Entertainment & Sports Media',
         enabled: true,
         status: 'active',
-        icon: <Rss className="h-4 w-4" />,
-        description: 'Aggregates news from Reuters, BBC, CNN, Fortune, TechCrunch'
+        icon: <Camera className="h-4 w-4" />,
+        description: 'Monitors TMZ, Page Six, ESPN, Sports Illustrated and other celebrity/sports outlets'
       },
       {
         id: 'twitter',
@@ -83,29 +85,40 @@ const MonitoringSourcesManager = () => {
         enabled: false,
         status: 'inactive',
         icon: <Globe className="h-4 w-4" />,
-        description: 'Real-time Twitter monitoring for mentions and keywords',
+        description: 'Real-time Twitter monitoring for celebrity mentions and trending topics',
         requiresSetup: true
       },
       {
-        id: 'google-reviews',
-        name: 'Google Reviews',
-        type: 'review',
-        platform: 'Google',
+        id: 'instagram-monitoring',
+        name: 'Instagram Monitoring',
+        type: 'social',
+        platform: 'Instagram',
         enabled: false,
         status: 'inactive',
-        icon: <Star className="h-4 w-4" />,
-        description: 'Monitor Google Business reviews and ratings',
+        icon: <Camera className="h-4 w-4" />,
+        description: 'Monitor Instagram posts and stories for public figure content',
         requiresSetup: true
       },
       {
-        id: 'yelp',
-        name: 'Yelp Reviews',
-        type: 'review',
-        platform: 'Yelp',
+        id: 'tiktok-monitoring',
+        name: 'TikTok Monitoring',
+        type: 'social',
+        platform: 'TikTok',
         enabled: false,
         status: 'inactive',
-        icon: <Star className="h-4 w-4" />,
-        description: 'Track Yelp business reviews and customer feedback',
+        icon: <Users className="h-4 w-4" />,
+        description: 'Track viral TikTok content and trends involving public figures',
+        requiresSetup: true
+      },
+      {
+        id: 'youtube-monitoring',
+        name: 'YouTube Monitoring',
+        type: 'social',
+        platform: 'YouTube',
+        enabled: false,
+        status: 'inactive',
+        icon: <Trophy className="h-4 w-4" />,
+        description: 'Monitor YouTube videos and comments for celebrity/sports content',
         requiresSetup: true
       },
       {
@@ -116,7 +129,7 @@ const MonitoringSourcesManager = () => {
         enabled: false,
         status: 'inactive',
         icon: <Briefcase className="h-4 w-4" />,
-        description: 'Monitor company pages and professional discussions',
+        description: 'Monitor professional athlete and celebrity business activities',
         requiresSetup: true
       }
     ];
@@ -158,8 +171,11 @@ const MonitoringSourcesManager = () => {
           : source
       ));
       
-      toast.success(`${sources.find(s => s.id === sourceId)?.name} scan completed`, {
-        description: `Found ${data.matches_found || 0} potential threats`
+      const sourceName = sources.find(s => s.id === sourceId)?.name;
+      const contentType = sourceId === 'rss-news' ? 'celebrity/sports threats' : 'potential threats';
+      
+      toast.success(`${sourceName} scan completed`, {
+        description: `Found ${data.matches_found || 0} ${contentType}`
       });
     } catch (error) {
       console.error('Error triggering scan:', error);
@@ -197,7 +213,7 @@ const MonitoringSourcesManager = () => {
     
     const newSource: MonitoringSource = {
       id: `custom-rss-${Date.now()}`,
-      name: `Custom RSS Feed`,
+      name: `Custom Celebrity/Sports Feed`,
       type: 'news',
       platform: 'Custom',
       enabled: true,
@@ -208,7 +224,7 @@ const MonitoringSourcesManager = () => {
     
     setSources(prev => [...prev, newSource]);
     setCustomRSSUrl('');
-    toast.success('Custom RSS feed added');
+    toast.success('Custom celebrity/sports RSS feed added');
   };
 
   const getStatusBadge = (status: string) => {
@@ -231,7 +247,7 @@ const MonitoringSourcesManager = () => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Settings className="h-5 w-5" />
-          Monitoring Sources
+          Celebrity & Sports Monitoring Sources
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -239,7 +255,7 @@ const MonitoringSourcesManager = () => {
           <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="all">All Sources</TabsTrigger>
             <TabsTrigger value="social">Social Media</TabsTrigger>
-            <TabsTrigger value="news">News & Blogs</TabsTrigger>
+            <TabsTrigger value="news">News & Entertainment</TabsTrigger>
             <TabsTrigger value="review">Reviews</TabsTrigger>
             <TabsTrigger value="custom">Custom</TabsTrigger>
           </TabsList>
@@ -305,11 +321,11 @@ const MonitoringSourcesManager = () => {
               <CardContent className="pt-6">
                 <div className="space-y-4">
                   <div>
-                    <Label htmlFor="rss-url">Add Custom RSS Feed</Label>
+                    <Label htmlFor="rss-url">Add Custom Celebrity/Sports RSS Feed</Label>
                     <div className="flex gap-2 mt-2">
                       <Input
                         id="rss-url"
-                        placeholder="https://example.com/rss.xml"
+                        placeholder="https://celebrity-news-site.com/rss.xml"
                         value={customRSSUrl}
                         onChange={(e) => setCustomRSSUrl(e.target.value)}
                       />

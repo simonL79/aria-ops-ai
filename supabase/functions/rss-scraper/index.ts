@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -20,20 +19,50 @@ console.log('[RSS-SCRAPER] ARIA_INGEST_KEY exists:', !!ARIA_INGEST_KEY);
 // Initialize Supabase client
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-// RSS feeds to monitor
+// RSS feeds focused on influencers, sports personalities, and public figures
 const RSS_FEEDS = [
-  { url: 'https://feeds.reuters.com/reuters/businessNews', name: 'Reuters Business' },
-  { url: 'https://feeds.bbci.co.uk/news/business/rss.xml', name: 'BBC Business' },
-  { url: 'https://rss.cnn.com/rss/money_latest.rss', name: 'CNN Business' },
-  { url: 'https://feeds.fortune.com/fortune/headlines', name: 'Fortune' },
-  { url: 'https://techcrunch.com/feed/', name: 'TechCrunch' },
+  { url: 'https://www.tmz.com/rss.xml', name: 'TMZ Celebrity News' },
+  { url: 'https://pagesix.nypost.com/feed/', name: 'Page Six' },
+  { url: 'https://www.etonline.com/rss', name: 'Entertainment Tonight' },
+  { url: 'https://www.espn.com/espn/rss/news', name: 'ESPN Sports News' },
+  { url: 'https://www.si.com/rss/si_topstories.rss', name: 'Sports Illustrated' },
+  { url: 'https://www.usatoday.com/sports/', name: 'USA Today Sports' },
+  { url: 'https://www.hollywoodreporter.com/feed/', name: 'Hollywood Reporter' },
+  { url: 'https://variety.com/feed/', name: 'Variety Entertainment' },
+  { url: 'https://www.people.com/feed/', name: 'People Magazine' },
+  { url: 'https://www.eonline.com/news.rss', name: 'E! News' },
+  { url: 'https://www.complex.com/rss/', name: 'Complex Culture' },
+  { url: 'https://www.billboard.com/feed/', name: 'Billboard Music' },
+  { url: 'https://bleacherreport.com/articles/feed', name: 'Bleacher Report' },
+  { url: 'https://www.nfl.com/feeds/rss/news', name: 'NFL News' },
+  { url: 'https://www.nba.com/news/rss.xml', name: 'NBA News' }
 ];
 
-// Keywords to search for in articles
+// Keywords focused on public figure threats and reputation risks
 const THREAT_KEYWORDS = [
-  'lawsuit', 'fraud', 'scandal', 'data breach', 'security incident',
-  'CEO resignation', 'regulatory action', 'investigation', 'fine',
-  'hack', 'leak', 'exposed', 'vulnerability', 'crisis', 'controversy'
+  // Legal issues
+  'lawsuit', 'sued', 'charges', 'arrested', 'investigation', 'fraud', 'scandal',
+  'court', 'trial', 'guilty', 'conviction', 'settlement', 'legal action',
+  
+  // Behavioral issues
+  'controversy', 'backlash', 'criticism', 'outrage', 'offensive', 'inappropriate',
+  'misconduct', 'behavior', 'allegations', 'accused', 'denied', 'apology',
+  
+  // Career/reputation damage
+  'fired', 'suspended', 'dropped', 'cancelled', 'boycott', 'loses endorsement',
+  'contract terminated', 'banned', 'excluded', 'resignation', 'stepped down',
+  
+  // Social media/public relations
+  'viral', 'trending', 'social media storm', 'twitter controversy', 'instagram drama',
+  'leaked', 'exposed', 'caught', 'video surfaces', 'photos leaked',
+  
+  // Health/personal issues
+  'rehab', 'addiction', 'mental health', 'hospitalized', 'injury concerns',
+  'personal struggles', 'family issues', 'divorce', 'custody battle',
+  
+  // Performance/career issues
+  'poor performance', 'booed', 'criticized', 'disappointing', 'failure',
+  'retirement', 'benched', 'traded', 'cut from team', 'career ending'
 ];
 
 interface RSSItem {
@@ -99,11 +128,12 @@ async function sendToAriaIngest(item: RSSItem) {
       platform: 'news',
       url: item.link,
       source_type: 'rss_feed',
-      confidence_score: 70,
-      potential_reach: 10000, // Estimated reach for news articles
+      confidence_score: 75,
+      potential_reach: 50000, // Higher reach estimate for celebrity/sports news
       metadata: {
         source: item.source,
-        published_date: item.pubDate
+        published_date: item.pubDate,
+        content_type: 'celebrity_sports_news'
       }
     };
     
@@ -135,7 +165,7 @@ async function sendToAriaIngest(item: RSSItem) {
  * Scan RSS feeds for threat-related content
  */
 async function scanRSSFeeds(): Promise<RSSItem[]> {
-  console.log('[RSS-SCRAPER] Starting RSS feed scan...');
+  console.log('[RSS-SCRAPER] Starting RSS feed scan for celebrity/sports content...');
   
   const matchingItems: RSSItem[] = [];
   
@@ -145,7 +175,7 @@ async function scanRSSFeeds(): Promise<RSSItem[]> {
     try {
       const response = await fetch(feed.url, {
         headers: {
-          'User-Agent': 'ThreatScanner/1.0 by RepWatch (https://repwatch.co)'
+          'User-Agent': 'RepWatch Celebrity Scanner/1.0 (https://repwatch.co)'
         }
       });
       
@@ -163,7 +193,7 @@ async function scanRSSFeeds(): Promise<RSSItem[]> {
       const threatItems = items.filter(containsThreatKeywords);
       
       if (threatItems.length > 0) {
-        console.log(`[RSS-SCRAPER] Found ${threatItems.length} threat-related items in ${feed.name}`);
+        console.log(`[RSS-SCRAPER] Found ${threatItems.length} potential reputation threats in ${feed.name}`);
         matchingItems.push(...threatItems);
       }
       
@@ -173,7 +203,7 @@ async function scanRSSFeeds(): Promise<RSSItem[]> {
     }
   }
   
-  console.log(`[RSS-SCRAPER] Found ${matchingItems.length} matching items total`);
+  console.log(`[RSS-SCRAPER] Found ${matchingItems.length} celebrity/sports threat items total`);
   return matchingItems;
 }
 
@@ -199,7 +229,7 @@ serve(async (req) => {
   
   try {
     // Scan RSS feeds for matching content
-    console.log('[RSS-SCRAPER] Starting scan process...');
+    console.log('[RSS-SCRAPER] Starting celebrity/sports news scan...');
     const matchingItems = await scanRSSFeeds();
     
     // Process each matching item
@@ -226,9 +256,10 @@ serve(async (req) => {
       }
     }
     
-    console.log(`[RSS-SCRAPER] Scan completed successfully`);
+    console.log(`[RSS-SCRAPER] Celebrity/sports scan completed successfully`);
     return new Response(JSON.stringify({ 
       status: 'success',
+      scan_type: 'celebrity_sports_news',
       feeds_scanned: RSS_FEEDS.map(f => f.name),
       matches_found: matchingItems.length,
       processed: results.length,
