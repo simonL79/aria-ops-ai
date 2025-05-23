@@ -51,37 +51,35 @@ serve(async (req) => {
       });
     }
 
-    // Extract the auth key regardless of format (supporting multiple formats)
+    // Extract the auth key - handle multiple formats
     const authHeader = req.headers.get('authorization') || '';
     console.log(`[ARIA-INGEST] Raw auth header: "${authHeader}"`);
     
     let receivedKey = '';
     
-    // Extract the actual key part regardless of format
+    // Handle different authorization formats
     if (authHeader.startsWith('Bearer ')) {
       receivedKey = authHeader.substring(7).trim();
-    } else if (authHeader.includes(' ')) {
-      // Try to extract key if it's in another format with a space
-      receivedKey = authHeader.split(' ')[1]?.trim() || '';
-    } else {
-      // Maybe it's just the raw key
+      console.log(`[ARIA-INGEST] Extracted Bearer token: "${receivedKey}"`);
+    } else if (authHeader.length > 0) {
       receivedKey = authHeader.trim();
+      console.log(`[ARIA-INGEST] Using raw header as key: "${receivedKey}"`);
     }
     
-    console.log(`[ARIA-INGEST] Extracted key: "${receivedKey}" (${receivedKey.length} chars)`);
     console.log(`[ARIA-INGEST] Expected key: "${AUTH_KEY}" (${AUTH_KEY.length} chars)`);
+    console.log(`[ARIA-INGEST] Received key: "${receivedKey}" (${receivedKey.length} chars)`);
     console.log(`[ARIA-INGEST] Keys match: ${receivedKey === AUTH_KEY}`);
     
-    // More flexible auth check - just compare the actual key parts
+    // Validate the key
     if (!receivedKey || receivedKey !== AUTH_KEY) {
-      console.log(`[ARIA-INGEST] Auth failed - keys don't match`);
-      
+      console.log(`[ARIA-INGEST] Auth failed - invalid or missing key`);
       return new Response(JSON.stringify({ 
-        error: 'Authorization failed',
+        error: 'Invalid or missing authorization key',
         debug: { 
           receivedKeyLength: receivedKey.length,
           expectedKeyLength: AUTH_KEY.length,
-          hint: "Make sure the exact key is being sent, without any encoding issues"
+          hasAuth: !!authHeader,
+          authFormat: authHeader.startsWith('Bearer ') ? 'Bearer' : 'Raw'
         }
       }), {
         status: 401, 

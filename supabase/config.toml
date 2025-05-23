@@ -1,14 +1,33 @@
 
 project_id = "ssvskbejfacmjemphmry"
 
-[functions."entity-recognition"]
-verify_jwt = true
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
 
-[functions."column_exists"]
+[auth]
+enabled = true
+port = 54320
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["https://lovable.dev"]
+jwt_expiry = 3600
+enable_signup = true
+enable_email_confirmations = false
+enable_phone_confirmations = false
+
+[functions.aria-ingest]
 verify_jwt = false
 
-[functions."aria-ingest"]
-verify_jwt = false
+[db]
+port = 54322
 
-[functions."radar-news-scan"]
-verify_jwt = false
+[studio]
+enabled = true
+port = 54323
+
+[edge_runtime]
+enabled = true
+port = 54324
