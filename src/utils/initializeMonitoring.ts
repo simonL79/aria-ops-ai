@@ -1,152 +1,203 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 /**
- * Initialize monitoring status if it doesn't exist
+ * Initialize default monitoring sources in the database
  */
-export const initializeMonitoringStatus = async () => {
+export const initializeMonitoringSources = async (): Promise<void> => {
   try {
-    // Check if monitoring status exists
-    const { data, error } = await supabase
-      .from('monitoring_status')
-      .select('id')
-      .eq('id', '1')
-      .single();
+    console.log('Initializing monitoring sources...');
     
-    if (error && error.code !== 'PGRST116') {
-      console.error('Error checking monitoring status:', error);
+    // Check if we have an authenticated user first
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      console.log('No authenticated user, skipping monitoring sources initialization');
       return;
     }
-    
-    // If monitoring status doesn't exist, create it
-    if (!data) {
-      const now = new Date();
-      const { error: insertError } = await supabase
-        .from('monitoring_status')
-        .insert({
-          id: '1',
-          is_active: false,
-          sources_count: 0,
-          created_at: now.toISOString(),
-          updated_at: now.toISOString()
-        });
-      
-      if (insertError) {
-        console.error('Error creating monitoring status:', insertError);
-      }
-    }
-  } catch (error) {
-    console.error('Error in initializeMonitoringStatus:', error);
-  }
-};
 
-/**
- * Initialize monitoring sources if none exist
- */
-export const initializeMonitoringSources = async () => {
-  try {
-    // Check if monitoring sources exist
-    const { count, error } = await supabase
+    // Check if monitoring sources already exist
+    const { data: existingSources, error: checkError } = await supabase
       .from('monitoring_sources')
-      .select('*', { count: 'exact', head: true });
-    
-    if (error) {
-      console.error('Error checking monitoring sources:', error);
+      .select('id')
+      .limit(1);
+
+    if (checkError) {
+      console.error('Error checking existing monitoring sources:', checkError);
       return;
     }
-    
-    // If no monitoring sources exist, create default ones
-    if (count === 0) {
-      const defaultSources = [
-        { name: 'Twitter', type: 'social_media' },
-        { name: 'Facebook', type: 'social_media' },
-        { name: 'LinkedIn', type: 'social_media' },
-        { name: 'Google News', type: 'news' },
-        { name: 'Reddit', type: 'forum' }
-      ];
-      
-      const { error: insertError } = await supabase
-        .from('monitoring_sources')
-        .insert(defaultSources);
-      
-      if (insertError) {
-        console.error('Error creating default monitoring sources:', insertError);
-      }
+
+    // If sources already exist, don't create duplicates
+    if (existingSources && existingSources.length > 0) {
+      console.log('Monitoring sources already exist, skipping initialization');
+      return;
     }
+
+    // Create default monitoring sources
+    const defaultSources = [
+      { name: 'Twitter', type: 'social_media', is_active: true },
+      { name: 'Facebook', type: 'social_media', is_active: true },
+      { name: 'LinkedIn', type: 'social_media', is_active: true },
+      { name: 'Reddit', type: 'forum', is_active: true },
+      { name: 'News Sites', type: 'news', is_active: true },
+      { name: 'Google Search', type: 'search', is_active: true }
+    ];
+
+    const { error: insertError } = await supabase
+      .from('monitoring_sources')
+      .insert(defaultSources);
+
+    if (insertError) {
+      console.error('Error creating default monitoring sources:', insertError);
+      return;
+    }
+
+    console.log('Default monitoring sources created successfully');
   } catch (error) {
     console.error('Error in initializeMonitoringSources:', error);
   }
 };
 
 /**
- * Initialize monitored platforms if none exist
+ * Initialize monitored platforms in the database
  */
-export const initializeMonitoredPlatforms = async () => {
+export const initializeMonitoredPlatforms = async (): Promise<void> => {
   try {
-    // Check if monitored platforms exist
-    const { count, error } = await supabase
-      .from('monitored_platforms')
-      .select('*', { count: 'exact', head: true });
+    console.log('Initializing monitored platforms...');
     
-    if (error) {
-      console.error('Error checking monitored platforms:', error);
+    // Check if we have an authenticated user first
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      console.log('No authenticated user, skipping monitored platforms initialization');
       return;
     }
-    
-    // If no monitored platforms exist, create default ones
-    if (count === 0) {
-      const defaultPlatforms = [
-        { name: 'Twitter', type: 'social', status: 'active' },
-        { name: 'Facebook', type: 'social', status: 'active' },
-        { name: 'Reddit', type: 'forum', status: 'active' },
-        { name: 'Google Reviews', type: 'review', status: 'active' },
-        { name: 'Yelp', type: 'review', status: 'active' }
-      ];
-      
-      const { error: insertError } = await supabase
-        .from('monitored_platforms')
-        .insert(defaultPlatforms);
-      
-      if (insertError) {
-        console.error('Error initializing monitored platforms:', insertError);
-      }
+
+    // Check if platforms already exist
+    const { data: existingPlatforms, error: checkError } = await supabase
+      .from('monitored_platforms')
+      .select('id')
+      .limit(1);
+
+    if (checkError) {
+      console.error('Error checking existing monitored platforms:', checkError);
+      return;
     }
+
+    // If platforms already exist, don't create duplicates
+    if (existingPlatforms && existingPlatforms.length > 0) {
+      console.log('Monitored platforms already exist, skipping initialization');
+      return;
+    }
+
+    // Create default monitored platforms
+    const defaultPlatforms = [
+      {
+        name: 'Twitter',
+        type: 'social_media',
+        status: 'active',
+        active: true,
+        positive_ratio: 50,
+        total: 0,
+        mention_count: 0,
+        sentiment: 0
+      },
+      {
+        name: 'Facebook',
+        type: 'social_media', 
+        status: 'active',
+        active: true,
+        positive_ratio: 60,
+        total: 0,
+        mention_count: 0,
+        sentiment: 0
+      },
+      {
+        name: 'LinkedIn',
+        type: 'social_media',
+        status: 'active', 
+        active: true,
+        positive_ratio: 75,
+        total: 0,
+        mention_count: 0,
+        sentiment: 0
+      }
+    ];
+
+    const { error: insertError } = await supabase
+      .from('monitored_platforms')
+      .insert(defaultPlatforms);
+
+    if (insertError) {
+      console.error('Error initializing monitored platforms:', insertError);
+      return;
+    }
+
+    console.log('Monitored platforms initialized successfully');
   } catch (error) {
     console.error('Error in initializeMonitoredPlatforms:', error);
   }
 };
 
 /**
- * Initialize the database with required data
+ * Initialize the monitoring status
  */
-export const initializeDatabase = async () => {
+export const initializeMonitoringStatus = async (): Promise<void> => {
   try {
-    // Initialize monitoring status
-    await initializeMonitoringStatus();
-    
-    // Initialize monitoring sources
-    await initializeMonitoringSources();
-    
-    // Initialize monitored platforms
-    await initializeMonitoredPlatforms();
-    
+    console.log('Initializing monitoring status...');
+
+    // Check if monitoring status already exists
+    const { data: existingStatus, error: checkError } = await supabase
+      .from('monitoring_status')
+      .select('id')
+      .eq('id', '1')
+      .single();
+
+    if (checkError && checkError.code !== 'PGRST116') {
+      console.error('Error checking monitoring status:', checkError);
+      return;
+    }
+
+    // If status already exists, don't create duplicate
+    if (existingStatus) {
+      console.log('Monitoring status already exists, skipping initialization');
+      return;
+    }
+
+    // Create default monitoring status
+    const { error: insertError } = await supabase
+      .from('monitoring_status')
+      .insert({
+        id: '1',
+        is_active: false,
+        sources_count: 0,
+        last_run: null,
+        next_run: null
+      });
+
+    if (insertError) {
+      console.error('Error creating monitoring status:', insertError);
+      return;
+    }
+
+    console.log('Monitoring status initialized successfully');
   } catch (error) {
-    console.error('Error in initializeDatabase:', error);
+    console.error('Error in initializeMonitoringStatus:', error);
   }
 };
 
 /**
- * Initialize the monitoring system
+ * Initialize all database components
  */
-export const initializeMonitoringSystem = async () => {
+export const initializeDatabase = async (): Promise<void> => {
   try {
-    // Initialize the database
-    await initializeDatabase();
+    console.log('Starting database initialization...');
     
-    // Log success
-    console.log('Monitoring system initialized successfully');
+    await initializeMonitoringStatus();
+    await initializeMonitoringSources();
+    await initializeMonitoredPlatforms();
     
+    console.log('Database initialization completed');
   } catch (error) {
-    console.error('Error in initializeMonitoringSystem:', error);
+    console.error('Error during database initialization:', error);
   }
 };
