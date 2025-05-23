@@ -457,6 +457,8 @@ export type Database = {
           severity: string | null
           source_type: string | null
           status: string | null
+          threat_severity: string | null
+          threat_summary: string | null
           threat_type: string | null
           updated_at: string | null
           url: string
@@ -482,6 +484,8 @@ export type Database = {
           severity?: string | null
           source_type?: string | null
           status?: string | null
+          threat_severity?: string | null
+          threat_summary?: string | null
           threat_type?: string | null
           updated_at?: string | null
           url?: string
@@ -507,6 +511,8 @@ export type Database = {
           severity?: string | null
           source_type?: string | null
           status?: string | null
+          threat_severity?: string | null
+          threat_summary?: string | null
           threat_type?: string | null
           updated_at?: string | null
           url?: string
@@ -623,6 +629,8 @@ export type Database = {
           severity: string | null
           source_type: string | null
           status: string | null
+          threat_severity: string | null
+          threat_summary: string | null
           threat_type: string | null
           updated_at: string | null
           url: string

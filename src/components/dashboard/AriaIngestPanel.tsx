@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Loader, Send, TestTube, CheckCircle, User, Building } from "lucide-react";
+import { Loader, Send, TestTube, CheckCircle, User, Building, AlertTriangle } from "lucide-react";
 import { AriaIngestRequest, AriaIngestResponse, submitToAriaIngest, testAriaIngest } from "@/services/ariaIngestService";
 
 const AriaIngestPanel = () => {
@@ -81,8 +81,18 @@ const AriaIngestPanel = () => {
     }
   };
 
-  // Debug: Log the response structure
-  console.log('Current lastResponse:', lastResponse);
+  const getThreatSeverityColor = (severity: string) => {
+    switch (severity) {
+      case 'HIGH':
+        return 'destructive';
+      case 'MEDIUM':
+        return 'default';
+      case 'LOW':
+        return 'secondary';
+      default:
+        return 'outline';
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -192,19 +202,7 @@ const AriaIngestPanel = () => {
         </CardContent>
       </Card>
 
-      {/* Debug card to show raw response */}
-      {lastResponse && (
-        <Card className="border-blue-200 bg-blue-50">
-          <CardHeader>
-            <CardTitle className="text-sm text-blue-700">Debug: Raw Response</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <pre className="text-xs overflow-auto">{JSON.stringify(lastResponse, null, 2)}</pre>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Enhanced results display with better error handling */}
+      {/* Enhanced results display with threat analysis */}
       {lastResponse && (
         <Card>
           <CardHeader>
@@ -214,7 +212,6 @@ const AriaIngestPanel = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Check if we have payload or if it's in a different structure */}
             {lastResponse.payload ? (
               <>
                 <div className="grid grid-cols-2 gap-4 text-sm">
@@ -234,6 +231,26 @@ const AriaIngestPanel = () => {
                   <Label className="text-muted-foreground">Content</Label>
                   <p className="text-sm bg-muted p-2 rounded">{lastResponse.payload.content || 'N/A'}</p>
                 </div>
+
+                {/* Threat Analysis Section */}
+                {(lastResponse.payload.threat_summary || lastResponse.payload.threat_severity) && (
+                  <div className="p-3 bg-amber-50 border border-amber-200 rounded-md">
+                    <div className="flex items-center gap-2 mb-2">
+                      <AlertTriangle className="h-4 w-4 text-amber-600" />
+                      <span className="font-medium text-amber-800">Threat Analysis</span>
+                      {lastResponse.payload.threat_severity && (
+                        <Badge variant={getThreatSeverityColor(lastResponse.payload.threat_severity) as any}>
+                          {lastResponse.payload.threat_severity}
+                        </Badge>
+                      )}
+                    </div>
+                    {lastResponse.payload.threat_summary && (
+                      <p className="text-amber-700 text-sm">
+                        {lastResponse.payload.threat_summary}
+                      </p>
+                    )}
+                  </div>
+                )}
 
                 <div>
                   <Label className="text-muted-foreground">Detected Entities</Label>
@@ -332,7 +349,6 @@ const AriaIngestPanel = () => {
             ) : (
               <div className="text-center py-4">
                 <p className="text-muted-foreground">Response received but no data to display</p>
-                <p className="text-xs text-muted-foreground mt-2">Check the debug section above for raw response data</p>
               </div>
             )}
 

@@ -34,6 +34,8 @@ export interface AriaIngestResponse {
     confidence_score: number;
     sentiment: number;
     potential_reach: number;
+    threat_summary: string | null;
+    threat_severity: 'LOW' | 'MEDIUM' | 'HIGH' | null;
   };
   inserted?: any;
   message?: string;
@@ -50,12 +52,12 @@ export const submitToAriaIngest = async (request: AriaIngestRequest): Promise<Ar
     
     if (response.success || response.test) {
       if (response.test) {
-        toast.success('Test successful! Entity extraction working', {
-          description: `Detected ${response.payload.detected_entities.length} entities`
+        toast.success('Test successful! Enhanced analysis working', {
+          description: `Detected ${response.payload.detected_entities.length} entities. Threat: ${response.payload.threat_severity || 'None'}`
         });
       } else {
         toast.success('Content processed successfully', {
-          description: response.message || 'Content added to monitoring pipeline'
+          description: response.message || 'Content analyzed and added to monitoring pipeline'
         });
       }
       
@@ -80,7 +82,7 @@ export const submitToAriaIngest = async (request: AriaIngestRequest): Promise<Ar
  */
 export const testAriaIngest = async (): Promise<AriaIngestResponse | null> => {
   const testRequest: AriaIngestRequest = {
-    content: "TechCorp CEO John Doe partners with Acme Inc. for new product launch",
+    content: "TechCorp CEO John Doe accused of financial fraud in new investigation. Serious allegations could damage company reputation significantly.",
     platform: "twitter",
     url: "https://example.com/test",
     test: true
