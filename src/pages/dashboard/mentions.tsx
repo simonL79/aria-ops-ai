@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -21,11 +20,11 @@ const MentionsPage = () => {
   const [isRunningManualScan, setIsRunningManualScan] = useState<boolean>(false);
   const [mentions, setMentions] = useState<ContentAlert[]>([]);
   const [filter, setFilter] = useState({
-    severity: '',
-    platform: '',
+    severity: 'all',
+    platform: 'all',
     search: '',
     sortBy: 'date',
-    entityType: ''
+    entityType: 'all'
   });
   
   useEffect(() => {
@@ -68,17 +67,17 @@ const MentionsPage = () => {
   
   const filteredMentions = mentions.filter(mention => {
     // Apply severity filter
-    if (filter.severity && mention.severity !== filter.severity) {
+    if (filter.severity !== 'all' && mention.severity !== filter.severity) {
       return false;
     }
     
     // Apply platform filter
-    if (filter.platform && mention.platform !== filter.platform) {
+    if (filter.platform !== 'all' && mention.platform !== filter.platform) {
       return false;
     }
     
     // Apply entity type filter if available
-    if (filter.entityType && mention.sourceType !== filter.entityType) {
+    if (filter.entityType !== 'all' && mention.sourceType !== filter.entityType) {
       return false;
     }
     
@@ -175,7 +174,7 @@ const MentionsPage = () => {
                   <SelectValue placeholder="Severity" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Severities</SelectItem>
+                  <SelectItem value="all">All Severities</SelectItem>
                   <SelectItem value="high">High</SelectItem>
                   <SelectItem value="medium">Medium</SelectItem>
                   <SelectItem value="low">Low</SelectItem>
@@ -191,7 +190,7 @@ const MentionsPage = () => {
                   <SelectValue placeholder="Platform" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Platforms</SelectItem>
+                  <SelectItem value="all">All Platforms</SelectItem>
                   {platforms.map((platform) => (
                     <SelectItem key={platform} value={platform}>{platform}</SelectItem>
                   ))}
@@ -210,7 +209,7 @@ const MentionsPage = () => {
                   <SelectValue placeholder="Source Type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Sources</SelectItem>
+                  <SelectItem value="all">All Sources</SelectItem>
                   {sourceTypes.map((type) => (
                     <SelectItem key={type} value={type}>{type.charAt(0).toUpperCase() + type.slice(1)}</SelectItem>
                   ))}
@@ -244,7 +243,7 @@ const MentionsPage = () => {
               <AlertTriangle className="mx-auto h-12 w-12 text-gray-400 mb-4" />
               <h3 className="text-lg font-medium mb-1">No mentions found</h3>
               <p className="text-gray-500">
-                {filter.search || filter.severity || filter.platform || filter.entityType ? 
+                {filter.search || filter.severity !== 'all' || filter.platform !== 'all' || filter.entityType !== 'all' ? 
                   'Try adjusting your filters' : 
                   'No mentions have been detected yet'}
               </p>
