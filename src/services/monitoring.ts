@@ -11,7 +11,7 @@ export {
   startMonitoring, 
   stopMonitoring, 
   runMonitoringScan 
-} from './monitoring';
+} from './monitoring/monitoringService';
 
 /**
  * Get all available monitoring sources
