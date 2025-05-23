@@ -53,7 +53,7 @@ const MonitoringSourcesManager = () => {
   const [scanResults, setScanResults] = useState<Record<string, ScanResult>>({});
   const [customRSSUrl, setCustomRSSUrl] = useState('');
 
-  // Initialize default sources focused on public figures
+  // Initialize default sources focused on UK public figures
   useEffect(() => {
     const defaultSources: MonitoringSource[] = [
       {
@@ -64,18 +64,18 @@ const MonitoringSourcesManager = () => {
         enabled: true,
         status: 'active',
         icon: <MessageSquare className="h-4 w-4" />,
-        description: 'Monitors subreddits for threat-related discussions about public figures',
+        description: 'Monitors UK-focused subreddits for reputation threats about public figures',
         lastScan: 'Active (hourly scans)'
       },
       {
         id: 'rss-news',
-        name: 'Celebrity & Sports News',
+        name: 'UK Celebrity & Sports News',
         type: 'news',
-        platform: 'Entertainment & Sports Media',
+        platform: 'UK Media',
         enabled: true,
         status: 'active',
         icon: <Camera className="h-4 w-4" />,
-        description: 'Monitors TMZ, Page Six, ESPN, Sports Illustrated and other celebrity/sports outlets'
+        description: 'Monitors BBC, The Sun, Daily Mail, Guardian, Sky Sports and other UK outlets for celebrity and sports threats'
       },
       {
         id: 'twitter',
@@ -85,7 +85,7 @@ const MonitoringSourcesManager = () => {
         enabled: false,
         status: 'inactive',
         icon: <Globe className="h-4 w-4" />,
-        description: 'Real-time Twitter monitoring for celebrity mentions and trending topics',
+        description: 'Real-time Twitter monitoring for UK celebrity mentions and trending topics',
         requiresSetup: true
       },
       {
@@ -96,7 +96,7 @@ const MonitoringSourcesManager = () => {
         enabled: false,
         status: 'inactive',
         icon: <Camera className="h-4 w-4" />,
-        description: 'Monitor Instagram posts and stories for public figure content',
+        description: 'Monitor Instagram posts and stories for UK public figure content',
         requiresSetup: true
       },
       {
@@ -107,7 +107,7 @@ const MonitoringSourcesManager = () => {
         enabled: false,
         status: 'inactive',
         icon: <Users className="h-4 w-4" />,
-        description: 'Track viral TikTok content and trends involving public figures',
+        description: 'Track viral TikTok content involving UK celebrities and sports personalities',
         requiresSetup: true
       },
       {
@@ -118,7 +118,7 @@ const MonitoringSourcesManager = () => {
         enabled: false,
         status: 'inactive',
         icon: <Trophy className="h-4 w-4" />,
-        description: 'Monitor YouTube videos and comments for celebrity/sports content',
+        description: 'Monitor UK YouTube channels and comments for celebrity/sports content',
         requiresSetup: true
       },
       {
@@ -129,7 +129,7 @@ const MonitoringSourcesManager = () => {
         enabled: false,
         status: 'inactive',
         icon: <Briefcase className="h-4 w-4" />,
-        description: 'Monitor professional athlete and celebrity business activities',
+        description: 'Monitor UK business figures and professional athlete activities',
         requiresSetup: true
       }
     ];
@@ -213,7 +213,7 @@ const MonitoringSourcesManager = () => {
     
     const newSource: MonitoringSource = {
       id: `custom-rss-${Date.now()}`,
-      name: `Custom Celebrity/Sports Feed`,
+      name: `Custom UK Celebrity/Sports Feed`,
       type: 'news',
       platform: 'Custom',
       enabled: true,
@@ -224,7 +224,7 @@ const MonitoringSourcesManager = () => {
     
     setSources(prev => [...prev, newSource]);
     setCustomRSSUrl('');
-    toast.success('Custom celebrity/sports RSS feed added');
+    toast.success('Custom UK celebrity/sports RSS feed added');
   };
 
   const getStatusBadge = (status: string) => {
@@ -247,7 +247,7 @@ const MonitoringSourcesManager = () => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Settings className="h-5 w-5" />
-          Celebrity & Sports Monitoring Sources
+          UK Celebrity & Sports Monitoring Sources
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -255,7 +255,7 @@ const MonitoringSourcesManager = () => {
           <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="all">All Sources</TabsTrigger>
             <TabsTrigger value="social">Social Media</TabsTrigger>
-            <TabsTrigger value="news">News & Entertainment</TabsTrigger>
+            <TabsTrigger value="news">UK News & Entertainment</TabsTrigger>
             <TabsTrigger value="review">Reviews</TabsTrigger>
             <TabsTrigger value="custom">Custom</TabsTrigger>
           </TabsList>
@@ -321,11 +321,11 @@ const MonitoringSourcesManager = () => {
               <CardContent className="pt-6">
                 <div className="space-y-4">
                   <div>
-                    <Label htmlFor="rss-url">Add Custom Celebrity/Sports RSS Feed</Label>
+                    <Label htmlFor="rss-url">Add Custom UK Celebrity/Sports RSS Feed</Label>
                     <div className="flex gap-2 mt-2">
                       <Input
                         id="rss-url"
-                        placeholder="https://celebrity-news-site.com/rss.xml"
+                        placeholder="https://uk-celebrity-news-site.com/rss.xml"
                         value={customRSSUrl}
                         onChange={(e) => setCustomRSSUrl(e.target.value)}
                       />

@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -19,50 +20,77 @@ console.log('[RSS-SCRAPER] ARIA_INGEST_KEY exists:', !!ARIA_INGEST_KEY);
 // Initialize Supabase client
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-// RSS feeds focused on influencers, sports personalities, and public figures
+// UK-focused RSS feeds for celebrities, sports personalities, and general news
 const RSS_FEEDS = [
-  { url: 'https://www.tmz.com/rss.xml', name: 'TMZ Celebrity News' },
-  { url: 'https://pagesix.nypost.com/feed/', name: 'Page Six' },
-  { url: 'https://www.etonline.com/rss', name: 'Entertainment Tonight' },
-  { url: 'https://www.espn.com/espn/rss/news', name: 'ESPN Sports News' },
-  { url: 'https://www.si.com/rss/si_topstories.rss', name: 'Sports Illustrated' },
-  { url: 'https://www.usatoday.com/sports/', name: 'USA Today Sports' },
-  { url: 'https://www.hollywoodreporter.com/feed/', name: 'Hollywood Reporter' },
-  { url: 'https://variety.com/feed/', name: 'Variety Entertainment' },
-  { url: 'https://www.people.com/feed/', name: 'People Magazine' },
-  { url: 'https://www.eonline.com/news.rss', name: 'E! News' },
-  { url: 'https://www.complex.com/rss/', name: 'Complex Culture' },
-  { url: 'https://www.billboard.com/feed/', name: 'Billboard Music' },
-  { url: 'https://bleacherreport.com/articles/feed', name: 'Bleacher Report' },
-  { url: 'https://www.nfl.com/feeds/rss/news', name: 'NFL News' },
-  { url: 'https://www.nba.com/news/rss.xml', name: 'NBA News' }
+  // UK Celebrity & Entertainment News
+  { url: 'https://www.thesun.co.uk/tvandshowbiz/feed/', name: 'The Sun - TV & Showbiz' },
+  { url: 'https://www.dailymail.co.uk/tvshowbiz/index.rss', name: 'Daily Mail - TV & Showbiz' },
+  { url: 'https://www.mirror.co.uk/3am/feed/', name: 'The Mirror - 3AM Celebrity News' },
+  { url: 'https://www.ok.co.uk/celebrity-news/rss.xml', name: 'OK! Magazine Celebrity News' },
+  { url: 'https://www.hellomagazine.com/rss/celebrities/', name: 'Hello! Magazine - Celebrities' },
+  { url: 'https://www.digitalspy.com/rss/showbiz.xml', name: 'Digital Spy - Showbiz' },
+  
+  // UK Sports News
+  { url: 'https://www.bbc.co.uk/sport/rss.xml', name: 'BBC Sport' },
+  { url: 'https://www.theguardian.com/uk/sport/rss', name: 'The Guardian - UK Sport' },
+  { url: 'https://www.skysports.com/rss/12040', name: 'Sky Sports News' },
+  { url: 'https://www.independent.co.uk/sport/rss', name: 'The Independent - Sport' },
+  { url: 'https://talksport.com/feed/', name: 'talkSPORT' },
+  { url: 'https://www.telegraph.co.uk/sport/rss.xml', name: 'The Telegraph - Sport' },
+  
+  // UK Football (Premier League focus)
+  { url: 'https://www.bbc.co.uk/sport/football/rss.xml', name: 'BBC Sport - Football' },
+  { url: 'https://www.theguardian.com/football/rss', name: 'The Guardian - Football' },
+  { url: 'https://www.skysports.com/rss/12691', name: 'Sky Sports - Premier League' },
+  
+  // UK General News (for public figures)
+  { url: 'https://www.bbc.co.uk/news/rss.xml', name: 'BBC News' },
+  { url: 'https://www.theguardian.com/uk/rss', name: 'The Guardian - UK News' },
+  { url: 'https://www.independent.co.uk/news/uk/rss', name: 'The Independent - UK News' },
+  { url: 'https://www.telegraph.co.uk/news/rss.xml', name: 'The Telegraph - News' },
+  
+  // UK Business & Politics (public figures)
+  { url: 'https://www.bbc.co.uk/news/business/rss.xml', name: 'BBC Business' },
+  { url: 'https://www.bbc.co.uk/news/politics/rss.xml', name: 'BBC Politics' },
+  { url: 'https://www.theguardian.com/politics/rss', name: 'The Guardian - Politics' },
+  { url: 'https://www.ft.com/rss/home/uk', name: 'Financial Times - UK' }
 ];
 
-// Keywords focused on public figure threats and reputation risks
+// UK-focused keywords for public figure threats and reputation risks
 const THREAT_KEYWORDS = [
   // Legal issues
   'lawsuit', 'sued', 'charges', 'arrested', 'investigation', 'fraud', 'scandal',
-  'court', 'trial', 'guilty', 'conviction', 'settlement', 'legal action',
+  'court', 'trial', 'guilty', 'conviction', 'settlement', 'legal action', 'charged',
+  
+  // UK-specific legal terms
+  'magistrates court', 'crown court', 'tribunal', 'police investigation', 'CPS',
+  'serious fraud office', 'ofcom investigation', 'parliamentary inquiry',
   
   // Behavioral issues
   'controversy', 'backlash', 'criticism', 'outrage', 'offensive', 'inappropriate',
-  'misconduct', 'behavior', 'allegations', 'accused', 'denied', 'apology',
+  'misconduct', 'behaviour', 'allegations', 'accused', 'denied', 'apology',
+  'racism', 'sexism', 'harassment', 'discrimination',
   
   // Career/reputation damage
-  'fired', 'suspended', 'dropped', 'cancelled', 'boycott', 'loses endorsement',
+  'fired', 'suspended', 'dropped', 'cancelled', 'boycott', 'loses sponsorship',
   'contract terminated', 'banned', 'excluded', 'resignation', 'stepped down',
+  'sacked', 'dismissed', 'stripped of title', 'loses endorsement',
+  
+  // UK Sports specific
+  'transfer saga', 'doping', 'performance enhancing', 'match fixing', 'betting scandal',
+  'relegated', 'points deduction', 'FA investigation', 'premier league',
+  
+  // UK Celebrity specific
+  'divorce battle', 'custody dispute', 'rehab', 'mental health crisis',
+  'tax avoidance', 'offshore accounts', 'bankruptcy', 'financial troubles',
   
   // Social media/public relations
-  'viral', 'trending', 'social media storm', 'twitter controversy', 'instagram drama',
-  'leaked', 'exposed', 'caught', 'video surfaces', 'photos leaked',
+  'viral', 'trending', 'social media storm', 'twitter row', 'instagram drama',
+  'leaked', 'exposed', 'caught', 'video surfaces', 'photos leaked', 'paparazzi',
   
-  // Health/personal issues
-  'rehab', 'addiction', 'mental health', 'hospitalized', 'injury concerns',
-  'personal struggles', 'family issues', 'divorce', 'custody battle',
-  
-  // Performance/career issues
-  'poor performance', 'booed', 'criticized', 'disappointing', 'failure',
-  'retirement', 'benched', 'traded', 'cut from team', 'career ending'
+  // UK Media specific
+  'tabloid exclusive', 'kiss and tell', 'phone hacking', 'privacy breach',
+  'injunction', 'super injunction', 'gagging order'
 ];
 
 interface RSSItem {
@@ -125,15 +153,16 @@ async function sendToAriaIngest(item: RSSItem) {
     
     const payload = {
       content: content,
-      platform: 'news',
+      platform: 'uk_news',
       url: item.link,
-      source_type: 'rss_feed',
-      confidence_score: 75,
-      potential_reach: 50000, // Higher reach estimate for celebrity/sports news
+      source_type: 'uk_rss_feed',
+      confidence_score: 80,
+      potential_reach: 100000, // Higher reach estimate for UK news
       metadata: {
         source: item.source,
         published_date: item.pubDate,
-        content_type: 'celebrity_sports_news'
+        content_type: 'uk_celebrity_sports_news',
+        region: 'UK'
       }
     };
     
@@ -165,7 +194,7 @@ async function sendToAriaIngest(item: RSSItem) {
  * Scan RSS feeds for threat-related content
  */
 async function scanRSSFeeds(): Promise<RSSItem[]> {
-  console.log('[RSS-SCRAPER] Starting RSS feed scan for celebrity/sports content...');
+  console.log('[RSS-SCRAPER] Starting UK celebrity/sports/news scan...');
   
   const matchingItems: RSSItem[] = [];
   
@@ -175,7 +204,7 @@ async function scanRSSFeeds(): Promise<RSSItem[]> {
     try {
       const response = await fetch(feed.url, {
         headers: {
-          'User-Agent': 'RepWatch Celebrity Scanner/1.0 (https://repwatch.co)'
+          'User-Agent': 'RepWatch UK Scanner/1.0 (https://repwatch.co)'
         }
       });
       
@@ -193,7 +222,7 @@ async function scanRSSFeeds(): Promise<RSSItem[]> {
       const threatItems = items.filter(containsThreatKeywords);
       
       if (threatItems.length > 0) {
-        console.log(`[RSS-SCRAPER] Found ${threatItems.length} potential reputation threats in ${feed.name}`);
+        console.log(`[RSS-SCRAPER] Found ${threatItems.length} potential UK reputation threats in ${feed.name}`);
         matchingItems.push(...threatItems);
       }
       
@@ -203,7 +232,7 @@ async function scanRSSFeeds(): Promise<RSSItem[]> {
     }
   }
   
-  console.log(`[RSS-SCRAPER] Found ${matchingItems.length} celebrity/sports threat items total`);
+  console.log(`[RSS-SCRAPER] Found ${matchingItems.length} UK celebrity/sports/news threat items total`);
   return matchingItems;
 }
 
@@ -229,7 +258,7 @@ serve(async (req) => {
   
   try {
     // Scan RSS feeds for matching content
-    console.log('[RSS-SCRAPER] Starting celebrity/sports news scan...');
+    console.log('[RSS-SCRAPER] Starting UK celebrity/sports/news scan...');
     const matchingItems = await scanRSSFeeds();
     
     // Process each matching item
@@ -256,10 +285,11 @@ serve(async (req) => {
       }
     }
     
-    console.log(`[RSS-SCRAPER] Celebrity/sports scan completed successfully`);
+    console.log(`[RSS-SCRAPER] UK celebrity/sports/news scan completed successfully`);
     return new Response(JSON.stringify({ 
       status: 'success',
-      scan_type: 'celebrity_sports_news',
+      scan_type: 'uk_celebrity_sports_news',
+      region: 'UK',
       feeds_scanned: RSS_FEEDS.map(f => f.name),
       matches_found: matchingItems.length,
       processed: results.length,

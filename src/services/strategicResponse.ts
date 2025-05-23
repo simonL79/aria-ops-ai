@@ -47,7 +47,25 @@ export const getHighPriorityThreats = async (): Promise<ThreatResponse[]> => {
       return [];
     }
 
-    return data || [];
+    // Type the data properly to ensure severity is correctly mapped
+    const typedData: ThreatResponse[] = (data || []).map((item: any) => ({
+      id: item.id,
+      content: item.content,
+      platform: item.platform,
+      url: item.url || '',
+      severity: (item.severity === 'high' || item.severity === 'medium' || item.severity === 'low') 
+        ? item.severity as 'low' | 'medium' | 'high'
+        : 'low',
+      threat_type: item.threat_type,
+      risk_entity_name: item.risk_entity_name,
+      response_status: item.response_status || 'unaddressed',
+      response_notes: item.response_notes,
+      assigned_to: item.assigned_to,
+      created_at: item.created_at,
+      priority_level: item.priority_level
+    }));
+
+    return typedData;
   } catch (error) {
     console.error('Error in getHighPriorityThreats:', error);
     return [];
