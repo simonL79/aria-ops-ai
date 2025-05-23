@@ -17,6 +17,13 @@ const REDDIT_USERNAME = Deno.env.get('REDDIT_USERNAME');
 const REDDIT_PASSWORD = Deno.env.get('REDDIT_PASSWORD');
 const ARIA_INGEST_KEY = Deno.env.get('ARIA_INGEST_KEY');
 
+console.log('[REDDIT-SCAN] Environment check:');
+console.log('[REDDIT-SCAN] REDDIT_CLIENT_ID exists:', !!REDDIT_CLIENT_ID);
+console.log('[REDDIT-SCAN] REDDIT_CLIENT_SECRET exists:', !!REDDIT_CLIENT_SECRET);
+console.log('[REDDIT-SCAN] REDDIT_USERNAME exists:', !!REDDIT_USERNAME);
+console.log('[REDDIT-SCAN] REDDIT_PASSWORD exists:', !!REDDIT_PASSWORD);
+console.log('[REDDIT-SCAN] REDDIT_USERNAME value:', REDDIT_USERNAME);
+
 // Initialize Supabase client
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
@@ -48,22 +55,34 @@ async function scanReddit(): Promise<RedditPost[]> {
     const matchingPosts: RedditPost[] = [];
     
     // Fetch access token for Reddit API
-    const tokenResponse = await fetch('https://www.reddit.com/api/v1/access_token', {
+    const tokenUrl = 'https://www.reddit.com/api/v1/access_token';
+    const authString = btoa(`${REDDIT_CLIENT_ID}:${REDDIT_CLIENT_SECRET}`);
+    const body = `grant_type=password&username=${REDDIT_USERNAME}&password=${REDDIT_PASSWORD}`;
+    
+    console.log('[REDDIT-SCAN] Requesting Reddit token...');
+    console.log('[REDDIT-SCAN] Auth string length:', authString.length);
+    console.log('[REDDIT-SCAN] Body:', body.replace(REDDIT_PASSWORD || '', '***'));
+    
+    const tokenResponse = await fetch(tokenUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': `Basic ${btoa(`${REDDIT_CLIENT_ID}:${REDDIT_CLIENT_SECRET}`)}`
+        'Authorization': `Basic ${authString}`,
+        'User-Agent': 'aria-threat-scanner/1.0 by FixExotic9448'
       },
-      body: `grant_type=password&username=${REDDIT_USERNAME}&password=${REDDIT_PASSWORD}`
+      body: body
     });
+    
+    console.log('[REDDIT-SCAN] Token response status:', tokenResponse.status);
     
     if (!tokenResponse.ok) {
       const error = await tokenResponse.text();
       console.error(`[REDDIT-SCAN] Failed to get Reddit token: ${error}`);
-      throw new Error(`Failed to authenticate with Reddit: ${tokenResponse.status}`);
+      throw new Error(`Failed to authenticate with Reddit: ${tokenResponse.status} - ${error}`);
     }
     
     const tokenData = await tokenResponse.json();
+    console.log('[REDDIT-SCAN] Token received, type:', tokenData.token_type);
     const accessToken = tokenData.access_token;
     
     // Scan each subreddit
@@ -73,16 +92,19 @@ async function scanReddit(): Promise<RedditPost[]> {
       const response = await fetch(`https://oauth.reddit.com/r/${sub}/new.json?limit=25`, {
         headers: {
           'Authorization': `Bearer ${accessToken}`,
-          'User-Agent': 'aria-threat-scanner/1.0'
+          'User-Agent': 'aria-threat-scanner/1.0 by FixExotic9448'
         }
       });
       
       if (!response.ok) {
         console.error(`[REDDIT-SCAN] Failed to fetch from r/${sub}: ${response.status}`);
+        const errorText = await response.text();
+        console.error(`[REDDIT-SCAN] Error details:`, errorText);
         continue;
       }
       
       const data = await response.json();
+      console.log(`[REDDIT-SCAN] Retrieved ${data.data.children.length} posts from r/${sub}`);
       const posts = data.data.children.map((child: any) => child.data);
       
       for (const post of posts) {
@@ -111,7 +133,6 @@ async function sendToAriaIngest(post: RedditPost) {
   try {
     const text = `${post.title}\n${post.selftext || ''}`;
     const url = `https://reddit.com${post.permalink}`;
-    const subreddit = post.subreddit_name_prefixed;
     
     console.log(`[REDDIT-SCAN] Sending to ARIA ingest: ${post.title}`);
     
@@ -171,9 +192,16 @@ serve(async (req) => {
   try {
     // Check if Reddit API credentials are configured
     if (!REDDIT_CLIENT_ID || !REDDIT_CLIENT_SECRET || !REDDIT_USERNAME || !REDDIT_PASSWORD) {
+      console.error('[REDDIT-SCAN] Missing Reddit credentials');
       return new Response(JSON.stringify({ 
         error: 'Reddit API credentials not configured',
-        requiredEnvVars: ['REDDIT_CLIENT_ID', 'REDDIT_CLIENT_SECRET', 'REDDIT_USERNAME', 'REDDIT_PASSWORD']
+        requiredEnvVars: ['REDDIT_CLIENT_ID', 'REDDIT_CLIENT_SECRET', 'REDDIT_USERNAME', 'REDDIT_PASSWORD'],
+        debug: {
+          hasClientId: !!REDDIT_CLIENT_ID,
+          hasClientSecret: !!REDDIT_CLIENT_SECRET,
+          hasUsername: !!REDDIT_USERNAME,
+          hasPassword: !!REDDIT_PASSWORD
+        }
       }), { 
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
