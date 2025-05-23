@@ -39,3 +39,7 @@ verify_jwt = false
 verify_jwt = false
 # Set up a cron job to run the Reddit scanner every hour
 schedule = "0 * * * *"
+[functions.rss-scraper]
+verify_jwt = false
+# Set up a cron job to run the RSS scraper every 2 hours
+schedule = "0 */2 * * *"

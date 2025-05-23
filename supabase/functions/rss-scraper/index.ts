@@ -1,158 +1,252 @@
 
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { parse } from "https://deno.land/x/xml@2.1.3/mod.ts";
+import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+// CORS headers for browser requests
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+};
 
-// Define the structure of an RSS request
-interface RssFeedRequest {
-  url: string;
-  maxItems?: number;
-  filterKeywords?: string[];
-  includeContent?: boolean;
-}
+// Environment variables
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const ARIA_INGEST_KEY = Deno.env.get('ARIA_INGEST_KEY');
 
-// Define the structure for an RSS item
-interface RssItem {
+console.log('[RSS-SCRAPER] Environment check:');
+console.log('[RSS-SCRAPER] SUPABASE_URL exists:', !!SUPABASE_URL);
+console.log('[RSS-SCRAPER] ARIA_INGEST_KEY exists:', !!ARIA_INGEST_KEY);
+
+// Initialize Supabase client
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+
+// RSS feeds to monitor
+const RSS_FEEDS = [
+  { url: 'https://feeds.reuters.com/reuters/businessNews', name: 'Reuters Business' },
+  { url: 'https://feeds.bbci.co.uk/news/business/rss.xml', name: 'BBC Business' },
+  { url: 'https://rss.cnn.com/rss/money_latest.rss', name: 'CNN Business' },
+  { url: 'https://feeds.fortune.com/fortune/headlines', name: 'Fortune' },
+  { url: 'https://techcrunch.com/feed/', name: 'TechCrunch' },
+];
+
+// Keywords to search for in articles
+const THREAT_KEYWORDS = [
+  'lawsuit', 'fraud', 'scandal', 'data breach', 'security incident',
+  'CEO resignation', 'regulatory action', 'investigation', 'fine',
+  'hack', 'leak', 'exposed', 'vulnerability', 'crisis', 'controversy'
+];
+
+interface RSSItem {
   title: string;
+  description: string;
   link: string;
-  pubDate?: string;
-  description?: string;
-  content?: string;
-  author?: string;
-  categories?: string[];
+  pubDate: string;
+  source: string;
 }
 
-serve(async (req) => {
-  // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
-  }
-
+/**
+ * Parse RSS feed XML and extract items
+ */
+function parseRSSFeed(xmlText: string, sourceName: string): RSSItem[] {
   try {
-    // Parse request body
-    const requestData: RssFeedRequest = await req.json()
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(xmlText, 'text/xml');
     
-    if (!requestData.url) {
-      throw new Error('Feed URL is required')
-    }
+    const items = doc.querySelectorAll('item');
+    const parsedItems: RSSItem[] = [];
     
-    console.log(`Fetching RSS feed from: ${requestData.url}`)
+    items.forEach(item => {
+      const title = item.querySelector('title')?.textContent || '';
+      const description = item.querySelector('description')?.textContent || '';
+      const link = item.querySelector('link')?.textContent || '';
+      const pubDate = item.querySelector('pubDate')?.textContent || '';
+      
+      parsedItems.push({
+        title,
+        description,
+        link,
+        pubDate,
+        source: sourceName
+      });
+    });
     
-    // Fetch the RSS feed
-    const response = await fetch(requestData.url)
+    return parsedItems;
+  } catch (error) {
+    console.error(`[RSS-SCRAPER] Error parsing RSS feed for ${sourceName}:`, error);
+    return [];
+  }
+}
+
+/**
+ * Check if an RSS item contains threat keywords
+ */
+function containsThreatKeywords(item: RSSItem): boolean {
+  const content = `${item.title} ${item.description}`.toLowerCase();
+  return THREAT_KEYWORDS.some(keyword => content.includes(keyword.toLowerCase()));
+}
+
+/**
+ * Send RSS item to ARIA ingest pipeline
+ */
+async function sendToAriaIngest(item: RSSItem) {
+  try {
+    const content = `${item.title}\n${item.description}`;
+    
+    console.log(`[RSS-SCRAPER] Sending to ARIA ingest: ${item.title.substring(0, 50)}...`);
+    
+    const payload = {
+      content: content,
+      platform: 'news',
+      url: item.link,
+      source_type: 'rss_feed',
+      confidence_score: 70,
+      potential_reach: 10000, // Estimated reach for news articles
+      metadata: {
+        source: item.source,
+        published_date: item.pubDate
+      }
+    };
+    
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/aria-ingest`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': ARIA_INGEST_KEY || 'H7zYd0N6R9xM3bKpLqE1jUvTnZqF5sBgXwPm9QCeLd0=',
+      },
+      body: JSON.stringify(payload)
+    });
     
     if (!response.ok) {
-      throw new Error(`Failed to fetch RSS feed: ${response.status} ${response.statusText}`)
+      const error = await response.text();
+      throw new Error(`ARIA ingest failed: ${error}`);
     }
     
-    const xmlText = await response.text()
-    
-    // Parse the XML
-    let feedData;
-    try {
-      feedData = parse(xmlText);
-    } catch (parseError) {
-      throw new Error(`Failed to parse XML: ${parseError.message}`);
-    }
-    
-    // Extract the RSS items
-    const channel = feedData.rss?.channel;
-    
-    if (!channel) {
-      throw new Error('Invalid RSS format');
-    }
-    
-    // Extract feed information
-    const feedInfo = {
-      title: channel.title?._text || '',
-      description: channel.description?._text || '',
-      link: channel.link?._text || '',
-      language: channel.language?._text || '',
-      lastBuildDate: channel.lastBuildDate?._text || '',
-      items: []
-    };
-    
-    // Extract items
-    const items: RssItem[] = [];
-    
-    // Handle both single item and item array cases
-    const itemsArray = Array.isArray(channel.item) ? channel.item : [channel.item].filter(Boolean);
-    
-    for (const item of itemsArray) {
-      if (!item) continue;
-      
-      const rssItem: RssItem = {
-        title: item.title?._text || '',
-        link: item.link?._text || '',
-        pubDate: item.pubDate?._text || '',
-        description: item.description?._text || '',
-        content: item['content:encoded']?._text || item.content?._text || '',
-        author: item.author?._text || item['dc:creator']?._text || '',
-        categories: Array.isArray(item.category) 
-          ? item.category.map((cat: any) => cat._text || '') 
-          : (item.category?._text ? [item.category._text] : [])
-      };
-      
-      // Filter by keywords if specified
-      if (requestData.filterKeywords && requestData.filterKeywords.length > 0) {
-        const text = `${rssItem.title} ${rssItem.description} ${rssItem.content}`.toLowerCase();
-        const matchesKeyword = requestData.filterKeywords.some(keyword => 
-          text.includes(keyword.toLowerCase())
-        );
-        
-        if (!matchesKeyword) continue;
-      }
-      
-      // Remove content if not requested (to reduce payload size)
-      if (!requestData.includeContent) {
-        delete rssItem.content;
-      }
-      
-      items.push(rssItem);
-    }
-    
-    // Limit the number of items if specified
-    const limitedItems = requestData.maxItems 
-      ? items.slice(0, requestData.maxItems) 
-      : items;
-    
-    // Build the response
-    const result = {
-      feed: feedInfo,
-      items: limitedItems,
-      count: limitedItems.length,
-      metadata: {
-        requestUrl: requestData.url,
-        timestamp: new Date().toISOString(),
-      }
-    };
-    
-    console.log(`Successfully fetched RSS feed: ${result.feed.title}. Found ${result.items.length} items.`);
-    
-    // Return the result
-    return new Response(
-      JSON.stringify(result),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    )
+    const result = await response.json();
+    console.log(`[RSS-SCRAPER] Successfully sent to ARIA ingest`);
+    return result;
     
   } catch (error) {
-    console.error('Error in rss-scraper function:', error)
-    
-    return new Response(
-      JSON.stringify({ 
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
-        metadata: {
-          timestamp: new Date().toISOString()
-        } 
-      }),
-      { 
-        status: 500, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
-    )
+    console.error(`[RSS-SCRAPER] Error sending to ARIA ingest:`, error);
+    throw error;
   }
-})
+}
+
+/**
+ * Scan RSS feeds for threat-related content
+ */
+async function scanRSSFeeds(): Promise<RSSItem[]> {
+  console.log('[RSS-SCRAPER] Starting RSS feed scan...');
+  
+  const matchingItems: RSSItem[] = [];
+  
+  for (const feed of RSS_FEEDS) {
+    console.log(`[RSS-SCRAPER] Scanning ${feed.name}: ${feed.url}`);
+    
+    try {
+      const response = await fetch(feed.url, {
+        headers: {
+          'User-Agent': 'ThreatScanner/1.0 by RepWatch (https://repwatch.co)'
+        }
+      });
+      
+      if (!response.ok) {
+        console.error(`[RSS-SCRAPER] Failed to fetch ${feed.name}: ${response.status}`);
+        continue;
+      }
+      
+      const xmlText = await response.text();
+      const items = parseRSSFeed(xmlText, feed.name);
+      
+      console.log(`[RSS-SCRAPER] Retrieved ${items.length} items from ${feed.name}`);
+      
+      // Filter items that contain threat keywords
+      const threatItems = items.filter(containsThreatKeywords);
+      
+      if (threatItems.length > 0) {
+        console.log(`[RSS-SCRAPER] Found ${threatItems.length} threat-related items in ${feed.name}`);
+        matchingItems.push(...threatItems);
+      }
+      
+    } catch (error) {
+      console.error(`[RSS-SCRAPER] Error scanning ${feed.name}:`, error);
+      continue;
+    }
+  }
+  
+  console.log(`[RSS-SCRAPER] Found ${matchingItems.length} matching items total`);
+  return matchingItems;
+}
+
+/**
+ * Main handler for the RSS scraper function
+ */
+serve(async (req) => {
+  console.log(`[RSS-SCRAPER] === NEW REQUEST ===`);
+  console.log(`[RSS-SCRAPER] Method: ${req.method}`);
+  
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+  
+  // Only allow POST or GET requests
+  if (req.method !== 'POST' && req.method !== 'GET') {
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), { 
+      status: 405,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+  }
+  
+  try {
+    // Scan RSS feeds for matching content
+    console.log('[RSS-SCRAPER] Starting scan process...');
+    const matchingItems = await scanRSSFeeds();
+    
+    // Process each matching item
+    const results = [];
+    for (const item of matchingItems) {
+      try {
+        const result = await sendToAriaIngest(item);
+        results.push({
+          title: item.title,
+          source: item.source,
+          url: item.link,
+          success: true,
+          ariaResult: result
+        });
+      } catch (error) {
+        console.error('[RSS-SCRAPER] Error processing item:', error);
+        results.push({
+          title: item.title,
+          source: item.source,
+          url: item.link,
+          success: false,
+          error: error instanceof Error ? error.message : 'Unknown error'
+        });
+      }
+    }
+    
+    console.log(`[RSS-SCRAPER] Scan completed successfully`);
+    return new Response(JSON.stringify({ 
+      status: 'success',
+      feeds_scanned: RSS_FEEDS.map(f => f.name),
+      matches_found: matchingItems.length,
+      processed: results.length,
+      results
+    }), {
+      status: 200,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+    
+  } catch (error) {
+    console.error('[RSS-SCRAPER] Function error:', error);
+    return new Response(JSON.stringify({ 
+      error: 'Internal Server Error', 
+      details: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    }), { 
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+  }
+});
