@@ -76,7 +76,20 @@ function sanitizeContent(text: string): string {
 }
 
 serve(async (req) => {
-  console.log(`[ARIA-INGEST] Received ${req.method} request to aria-ingest function`);
+  console.log(`[ARIA-INGEST] === NEW REQUEST ===`);
+  console.log(`[ARIA-INGEST] Method: ${req.method}`);
+  console.log(`[ARIA-INGEST] URL: ${req.url}`);
+  
+  // Log all headers for debugging
+  console.log(`[ARIA-INGEST] Headers:`);
+  for (const [key, value] of req.headers.entries()) {
+    if (key.toLowerCase() === 'authorization') {
+      console.log(`[ARIA-INGEST]   ${key}: ${value ? 'PROVIDED' : 'MISSING'}`);
+      console.log(`[ARIA-INGEST]   Authorization value: "${value}"`);
+    } else {
+      console.log(`[ARIA-INGEST]   ${key}: ${value}`);
+    }
+  }
   
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -94,33 +107,61 @@ serve(async (req) => {
     }
 
     // Check for authorization header
-    const auth = req.headers.get('authorization');
-    console.log(`[ARIA-INGEST] Authorization header received: ${auth ? 'YES' : 'NO'}`);
+    const authHeader = req.headers.get('authorization');
+    console.log(`[ARIA-INGEST] Auth header exists: ${authHeader ? 'YES' : 'NO'}`);
     
-    if (!auth) {
-      console.log("[ARIA-INGEST] Authentication failed: No authorization header provided");
-      return new Response(JSON.stringify({ error: 'Authorization header required' }), { 
+    if (!authHeader) {
+      console.log("[ARIA-INGEST] FAILED: No authorization header");
+      return new Response(JSON.stringify({ 
+        error: 'Authorization header required',
+        debug: 'No Authorization header found in request'
+      }), { 
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
+    
+    // Log exact values for comparison
+    const expectedAuth = `Bearer ${AUTH_KEY}`;
+    console.log(`[ARIA-INGEST] Expected auth: "${expectedAuth}"`);
+    console.log(`[ARIA-INGEST] Received auth: "${authHeader}"`);
+    console.log(`[ARIA-INGEST] Auth match: ${authHeader === expectedAuth}`);
     
     // Check if the token matches our expected token
-    const expectedAuth = `Bearer ${AUTH_KEY}`;
-    console.log(`[ARIA-INGEST] Expected: "${expectedAuth}"`);
-    console.log(`[ARIA-INGEST] Received: "${auth}"`);
-    
-    if (auth !== expectedAuth) {
-      console.log("[ARIA-INGEST] Authentication failed: Invalid token");
-      return new Response(JSON.stringify({ error: 'Invalid authorization token' }), { 
+    if (authHeader !== expectedAuth) {
+      console.log("[ARIA-INGEST] FAILED: Invalid authorization token");
+      console.log(`[ARIA-INGEST] Expected: "${expectedAuth}"`);
+      console.log(`[ARIA-INGEST] Got: "${authHeader}"`);
+      return new Response(JSON.stringify({ 
+        error: 'Invalid authorization token',
+        debug: {
+          expected: expectedAuth,
+          received: authHeader,
+          match: authHeader === expectedAuth
+        }
+      }), { 
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
     
-    console.log("[ARIA-INGEST] Authentication successful!");
+    console.log("[ARIA-INGEST] ✅ Authentication successful!");
     
     // Parse request body
+    const body = await req.text();
+    console.log(`[ARIA-INGEST] Request body: ${body}`);
+    
+    let requestData;
+    try {
+      requestData = JSON.parse(body);
+    } catch (e) {
+      console.error('[ARIA-INGEST] Failed to parse JSON:', e);
+      return new Response(JSON.stringify({ error: 'Invalid JSON in request body' }), { 
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
     const { 
       content, 
       platform, 
@@ -131,7 +172,7 @@ serve(async (req) => {
       source_type = 'fallback_ai',
       confidence_score = 90,
       potential_reach = 0
-    } = await req.json();
+    } = requestData;
 
     // Validate required fields
     if (!content || !platform || !url) {
