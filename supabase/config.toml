@@ -43,3 +43,7 @@ schedule = "0 * * * *"
 verify_jwt = false
 # Set up a cron job to run the RSS scraper every 2 hours
 schedule = "0 */2 * * *"
+[functions.social-media-scraper]
+verify_jwt = false
+# Set up a cron job to run the social media scraper every 4 hours
+schedule = "0 */4 * * *"

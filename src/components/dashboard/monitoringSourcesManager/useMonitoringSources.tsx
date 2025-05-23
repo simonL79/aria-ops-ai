@@ -42,6 +42,16 @@ export const useMonitoringSources = () => {
         description: 'Monitors BBC, The Sun, Daily Mail, Guardian, Sky Sports and other UK outlets for celebrity and sports threats'
       },
       {
+        id: 'social-media-scraper',
+        name: 'Social Media Bundle',
+        type: 'social',
+        platform: 'YouTube, Instagram, TikTok',
+        enabled: true,
+        status: 'active',
+        icon: <Users className="h-4 w-4" />,
+        description: 'Automated scraping of YouTube, Instagram, and TikTok for UK celebrity and sports content threats'
+      },
+      {
         id: 'twitter',
         name: 'Twitter/X Monitor',
         type: 'social',
@@ -112,6 +122,9 @@ export const useMonitoringSources = () => {
         case 'rss-news':
           functionName = 'rss-scraper';
           break;
+        case 'social-media-scraper':
+          functionName = 'social-media-scraper';
+          break;
         default:
           toast.error('Scanner not yet implemented for this source');
           return;
@@ -136,10 +149,16 @@ export const useMonitoringSources = () => {
       ));
       
       const sourceName = sources.find(s => s.id === sourceId)?.name;
-      const contentType = sourceId === 'rss-news' ? 'celebrity/sports threats' : 'potential threats';
+      let contentType = 'potential threats';
+      
+      if (sourceId === 'rss-news') {
+        contentType = 'celebrity/sports threats';
+      } else if (sourceId === 'social-media-scraper') {
+        contentType = 'social media threats';
+      }
       
       toast.success(`${sourceName} scan completed`, {
-        description: `Found ${data.matches_found || 0} ${contentType}`
+        description: `Found ${data.results?.total || data.matches_found || 0} ${contentType}`
       });
     } catch (error) {
       console.error('Error triggering scan:', error);
