@@ -18,6 +18,9 @@ import MentionsPage from "@/pages/dashboard/MentionsPage";
 import AnalyticsPage from "@/pages/dashboard/AnalyticsPage";
 import EngagementHubPage from "@/pages/dashboard/EngagementHubPage";
 import RadarPage from "@/pages/dashboard/RadarPage";
+import Clients from "@/pages/Clients";
+import Monitor from "@/pages/Monitor";
+import NewCoPage from "@/pages/NewCoPage";
 
 // Protected Route wrapper
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -49,6 +52,11 @@ const AppRoutes = () => {
           <DashboardPage />
         </ProtectedRoute>
       } />
+      <Route path="/dashboard/intelligence" element={
+        <ProtectedRoute>
+          <DashboardPage />
+        </ProtectedRoute>
+      } />
       <Route path="/dashboard/mentions" element={
         <ProtectedRoute>
           <MentionsPage />
@@ -72,6 +80,21 @@ const AppRoutes = () => {
       <Route path="/dashboard/ai-scraping" element={
         <ProtectedRoute>
           <AiScrapingPage />
+        </ProtectedRoute>
+      } />
+      <Route path="/dashboard/monitor" element={
+        <ProtectedRoute>
+          <Monitor />
+        </ProtectedRoute>
+      } />
+      <Route path="/dashboard/new-companies" element={
+        <ProtectedRoute>
+          <NewCoPage />
+        </ProtectedRoute>
+      } />
+      <Route path="/clients" element={
+        <ProtectedRoute>
+          <Clients />
         </ProtectedRoute>
       } />
       <Route path="/calendar" element={

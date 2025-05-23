@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Home, Settings, Users, AlertTriangle, Shield, Search, BarChart3, Mail, MessageSquare, FileText, Radar, Building, FileBarChart } from "lucide-react";
+import { Home, Settings, Users, AlertTriangle, Shield, Search, BarChart3, Mail, MessageSquare, FileText, Radar, Building, FileBarChart, Brain, Activity, Bell } from "lucide-react";
 
 interface SidebarProps {
   className?: string;
@@ -41,13 +41,35 @@ const DashboardSidebar = () => {
               </div>
             </Link>
             <Link
+              to="/dashboard/intelligence"
+              className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
+                location.pathname.includes('/dashboard/intelligence') ? 'bg-accent text-accent-foreground' : ''
+              }`}
+            >
+              <div className="flex items-center">
+                <Brain className="mr-2 h-4 w-4" />
+                <span>Intelligence</span>
+              </div>
+            </Link>
+            <Link
+              to="/dashboard/mentions"
+              className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
+                location.pathname.includes('/dashboard/mentions') ? 'bg-accent text-accent-foreground' : ''
+              }`}
+            >
+              <div className="flex items-center">
+                <Bell className="mr-2 h-4 w-4" />
+                <span>Mentions</span>
+              </div>
+            </Link>
+            <Link
               to="/dashboard/monitor"
               className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
                 location.pathname.includes('/dashboard/monitor') ? 'bg-accent text-accent-foreground' : ''
               }`}
             >
               <div className="flex items-center">
-                <Search className="mr-2 h-4 w-4" />
+                <Activity className="mr-2 h-4 w-4" />
                 <span>Content Monitor</span>
               </div>
             </Link>
@@ -85,14 +107,14 @@ const DashboardSidebar = () => {
               </div>
             </Link>
             <Link
-              to="/reports"
+              to="/dashboard/new-companies"
               className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
-                location.pathname.includes('/reports') ? 'bg-accent text-accent-foreground' : ''
+                location.pathname.includes('/dashboard/new-companies') ? 'bg-accent text-accent-foreground' : ''
               }`}
             >
               <div className="flex items-center">
-                <FileBarChart className="mr-2 h-4 w-4" />
-                <span>Entity Reports</span>
+                <Building className="mr-2 h-4 w-4" />
+                <span>New Companies</span>
               </div>
             </Link>
             <Link
@@ -115,7 +137,7 @@ const DashboardSidebar = () => {
           </h2>
           <div className="space-y-1">
             <Link
-              to="/dashboard"
+              to="/dashboard/intelligence"
               className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
                 location.pathname.includes('/dashboard/intelligence') ? 'bg-accent text-accent-foreground' : ''
               }`}
@@ -127,7 +149,7 @@ const DashboardSidebar = () => {
             </Link>
             
             <Link
-              to="/dashboard"
+              to="/dashboard/radar"
               className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
                 location.pathname.includes('/dashboard/radar') ? 'bg-accent text-accent-foreground' : ''
               }`}
@@ -145,17 +167,6 @@ const DashboardSidebar = () => {
             Administration
           </h2>
           <div className="space-y-1">
-            <Link
-              to="/dashboard/new-companies"
-              className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
-                location.pathname.includes('/dashboard/new-companies') ? 'bg-accent text-accent-foreground' : ''
-              }`}
-            >
-              <div className="flex items-center">
-                <Building className="mr-2 h-4 w-4" />
-                <span>New Companies</span>
-              </div>
-            </Link>
             <Link
               to="/settings"
               className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
