@@ -6,7 +6,7 @@ import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, Users, Share2, Bell, Mail } from "lucide-react";
+import { MessageSquare, Users, Share2, Bell, Mail, AlertTriangle, Target } from "lucide-react";
 import RealTimeAlerts from "@/components/dashboard/real-time-alerts";
 import ThreatFeed from "@/components/dashboard/ThreatFeed";
 import ThreatAnalysisHub from "@/components/dashboard/ThreatAnalysisHub";
@@ -15,6 +15,7 @@ import { registerAlertListener, unregisterAlertListener } from "@/services/aiScr
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { EmailDigestSettings } from "@/types/aiScraping";
 import { scheduleEmailDigest } from "@/services/notifications/emailNotificationService";
@@ -224,31 +225,114 @@ const EngagementHubPage = () => {
               </div>
               
               <Card className="mb-4">
-                <CardHeader className="pb-2">
+                <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
-                    <CardTitle>{selectedAlert.platform} Alert</CardTitle>
-                    <div className={`px-2 py-1 text-xs rounded-full ${
-                      selectedAlert.severity === 'high' 
-                        ? 'bg-red-100 text-red-800' 
-                        : selectedAlert.severity === 'medium' 
-                        ? 'bg-yellow-100 text-yellow-800' 
-                        : 'bg-green-100 text-green-800'
-                    }`}>
+                    <CardTitle className="flex items-center gap-2">
+                      <AlertTriangle className="h-5 w-5" />
+                      {selectedAlert.platform} Alert
+                    </CardTitle>
+                    <Badge variant={
+                      selectedAlert.severity === 'high' ? 'destructive' : 
+                      selectedAlert.severity === 'medium' ? 'default' : 
+                      'secondary'
+                    }>
                       {selectedAlert.severity} Priority
-                    </div>
+                    </Badge>
                   </div>
-                  <CardDescription>{selectedAlert.date}</CardDescription>
+                  <CardDescription className="flex items-center gap-2">
+                    <span>{selectedAlert.date}</span>
+                    {selectedAlert.url && (
+                      <a 
+                        href={selectedAlert.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline"
+                      >
+                        View Source
+                      </a>
+                    )}
+                  </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <p className="mb-3">{selectedAlert.content}</p>
-                  {selectedAlert.category === 'customer_enquiry' && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-md p-3 text-blue-800 text-sm mb-3">
-                      This is a customer enquiry and requires a response.
+                <CardContent className="space-y-4">
+                  <div>
+                    <Label className="text-sm font-medium">Content</Label>
+                    <p className="mt-1 p-3 bg-muted rounded-md">{selectedAlert.content}</p>
+                  </div>
+
+                  {/* Threat Information */}
+                  {selectedAlert.threatType && (
+                    <div className="p-3 bg-amber-50 border border-amber-200 rounded-md">
+                      <div className="flex items-center gap-2 mb-2">
+                        <AlertTriangle className="h-4 w-4 text-amber-600" />
+                        <span className="font-medium text-amber-800">Threat Detected</span>
+                      </div>
+                      <p className="text-amber-700">
+                        <strong>Type:</strong> {selectedAlert.threatType.replace('_', ' ').charAt(0).toUpperCase() + selectedAlert.threatType.replace('_', ' ').slice(1)}
+                      </p>
                     </div>
                   )}
-                  {selectedAlert.threatType && (
-                    <div className="bg-amber-50 border border-amber-200 rounded-md p-3 text-amber-800 text-sm mb-3">
-                      Threat type detected: <strong>{selectedAlert.threatType.replace('_', ' ')}</strong>
+
+                  {/* Detected Entities */}
+                  {selectedAlert.detectedEntities && selectedAlert.detectedEntities.length > 0 && (
+                    <div>
+                      <Label className="text-sm font-medium flex items-center gap-2">
+                        <Target className="h-4 w-4" />
+                        Detected Entities
+                      </Label>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {selectedAlert.detectedEntities.map((entity, idx) => (
+                          <Badge key={idx} variant="outline">
+                            {entity}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Additional Information */}
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    {selectedAlert.sourceType && (
+                      <div>
+                        <Label className="text-muted-foreground">Source Type</Label>
+                        <p className="font-medium">{selectedAlert.sourceType}</p>
+                      </div>
+                    )}
+                    {selectedAlert.confidenceScore && (
+                      <div>
+                        <Label className="text-muted-foreground">Confidence</Label>
+                        <p className="font-medium">{selectedAlert.confidenceScore}%</p>
+                      </div>
+                    )}
+                    {selectedAlert.potentialReach && (
+                      <div>
+                        <Label className="text-muted-foreground">Potential Reach</Label>
+                        <p className="font-medium">{selectedAlert.potentialReach.toLocaleString()}</p>
+                      </div>
+                    )}
+                    {selectedAlert.sentiment && (
+                      <div>
+                        <Label className="text-muted-foreground">Sentiment</Label>
+                        <p className="font-medium capitalize">{selectedAlert.sentiment}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Category Information */}
+                  {selectedAlert.category === 'customer_enquiry' && (
+                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
+                      <p className="text-blue-800">
+                        <strong>Customer Enquiry:</strong> This appears to be a customer enquiry that requires a response.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Recommendation */}
+                  {selectedAlert.recommendation && (
+                    <div>
+                      <Label className="text-sm font-medium">Recommended Action</Label>
+                      <p className="mt-1 p-3 bg-green-50 border border-green-200 rounded-md text-green-800">
+                        {selectedAlert.recommendation}
+                      </p>
                     </div>
                   )}
                 </CardContent>

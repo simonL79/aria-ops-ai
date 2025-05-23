@@ -1,46 +1,37 @@
 
-import React from "react";
-import { ContentAlert } from "@/types/dashboard";
-import AlertItem from "./AlertItem";
-import { Separator } from "@/components/ui/separator";
+import React from 'react';
+import { ContentAlert } from '@/types/dashboard';
+import AlertItem from './AlertItem';
+import EmptyAlertState from './EmptyAlertState';
 
 interface AlertsContainerProps {
-  filteredAlerts: ContentAlert[];
-  onDismiss?: (id: string) => void;
-  onMarkAsRead?: (id: string) => void;
-  onViewDetail?: (alert: ContentAlert) => void;
-  onRespond?: (alertId: string) => void;
+  alerts: ContentAlert[];
+  onViewDetail: (alert: ContentAlert) => void;
+  onMarkAsRead: (id: string) => void;
+  onDismiss: (id: string) => void;
 }
 
 const AlertsContainer: React.FC<AlertsContainerProps> = ({
-  filteredAlerts,
-  onDismiss,
-  onMarkAsRead,
+  alerts,
   onViewDetail,
-  onRespond,
+  onMarkAsRead,
+  onDismiss,
 }) => {
-  if (filteredAlerts.length === 0) {
-    return (
-      <div className="p-4 text-center text-muted-foreground">
-        No alerts match your current filter
-      </div>
-    );
+  if (alerts.length === 0) {
+    return <EmptyAlertState />;
   }
 
   return (
-    <div>
-      {filteredAlerts.map((alert, index) => (
-        <React.Fragment key={alert.id}>
-          <AlertItem 
-            alert={alert} 
-            isLast={index === filteredAlerts.length - 1} 
-            onDismiss={onDismiss}
-            onMarkAsRead={onMarkAsRead}
+    <div className="space-y-2">
+      {alerts.map((alert) => (
+        <div key={alert.id}>
+          <AlertItem
+            alert={alert}
             onViewDetail={onViewDetail}
-            onRespond={onRespond}
+            onMarkAsRead={onMarkAsRead}
+            onDismiss={onDismiss}
           />
-          {index < filteredAlerts.length - 1 && <Separator />}
-        </React.Fragment>
+        </div>
       ))}
     </div>
   );
