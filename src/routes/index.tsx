@@ -8,6 +8,7 @@ import AiScrapingPage from "@/pages/AiScrapingPage";
 import BlogPage from "@/pages/BlogPage";
 import BlogPostPage from "@/pages/BlogPostPage";
 import AboutPage from "@/pages/AboutPage";
+import BiographyPage from "@/pages/BiographyPage";
 import PricingPage from "@/pages/PricingPage";
 import CalendarPage from "@/pages/CalendarPage";
 import Settings from "@/pages/Settings";
@@ -37,6 +38,7 @@ const AppRoutes = () => {
       <Route path="/blog" element={<BlogPage />} />
       <Route path="/blog/:slug" element={<BlogPostPage />} />
       <Route path="/about" element={<AboutPage />} />
+      <Route path="/simon-lindsay" element={<BiographyPage />} />
       <Route path="/pricing" element={<PricingPage />} />
       
       {/* Protected routes */}
