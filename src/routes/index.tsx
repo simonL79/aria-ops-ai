@@ -1,9 +1,32 @@
 
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import AiScrapingPage from "@/pages/AiScrapingPage";
+import { useAuth } from "@/hooks/useAuth";
 import SalesFunnelPage from "@/pages/SalesFunnelPage";
 import Authentication from "@/pages/Authentication";
+import AiScrapingPage from "@/pages/AiScrapingPage";
+import BlogPage from "@/pages/BlogPage";
+import BlogPostPage from "@/pages/BlogPostPage";
+import AboutPage from "@/pages/AboutPage";
+import PricingPage from "@/pages/PricingPage";
+import CalendarPage from "@/pages/CalendarPage";
+import Settings from "@/pages/Settings";
+import DashboardPage from "@/pages/dashboard/DashboardPage";
+import MentionsPage from "@/pages/dashboard/MentionsPage";
+import AnalyticsPage from "@/pages/dashboard/AnalyticsPage";
+import EngagementHubPage from "@/pages/dashboard/EngagementHubPage";
+import RadarPage from "@/pages/dashboard/RadarPage";
+
+// Protected Route wrapper
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated } = useAuth();
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/auth" replace />;
+  }
+  
+  return <>{children}</>;
+};
 
 // This component defines routes that can be used within the main Routes component
 const AppRoutes = () => {
@@ -12,9 +35,52 @@ const AppRoutes = () => {
       {/* Public routes */}
       <Route path="/" element={<SalesFunnelPage />} />
       <Route path="/auth" element={<Authentication />} />
+      <Route path="/blog" element={<BlogPage />} />
+      <Route path="/blog/:slug" element={<BlogPostPage />} />
+      <Route path="/about" element={<AboutPage />} />
+      <Route path="/pricing" element={<PricingPage />} />
       
       {/* Protected routes */}
-      <Route path="/dashboard/ai-scraping" element={<AiScrapingPage />} />
+      <Route path="/dashboard" element={
+        <ProtectedRoute>
+          <DashboardPage />
+        </ProtectedRoute>
+      } />
+      <Route path="/dashboard/mentions" element={
+        <ProtectedRoute>
+          <MentionsPage />
+        </ProtectedRoute>
+      } />
+      <Route path="/dashboard/engagement" element={
+        <ProtectedRoute>
+          <EngagementHubPage />
+        </ProtectedRoute>
+      } />
+      <Route path="/dashboard/analytics" element={
+        <ProtectedRoute>
+          <AnalyticsPage />
+        </ProtectedRoute>
+      } />
+      <Route path="/dashboard/radar" element={
+        <ProtectedRoute>
+          <RadarPage />
+        </ProtectedRoute>
+      } />
+      <Route path="/dashboard/ai-scraping" element={
+        <ProtectedRoute>
+          <AiScrapingPage />
+        </ProtectedRoute>
+      } />
+      <Route path="/calendar" element={
+        <ProtectedRoute>
+          <CalendarPage />
+        </ProtectedRoute>
+      } />
+      <Route path="/settings" element={
+        <ProtectedRoute>
+          <Settings />
+        </ProtectedRoute>
+      } />
       
       {/* Default redirect */}
       <Route path="*" element={<Navigate to="/" replace />} />
