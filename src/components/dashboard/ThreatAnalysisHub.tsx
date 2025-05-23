@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import ThreatClassifier from "@/components/dashboard/ThreatClassifier";
 import StrategicResponseEngine from "@/components/dashboard/responseEngine";
 import AdvancedIntelligencePanel from "@/components/dashboard/AdvancedIntelligencePanel";
+import ThreatResponsePanel from "@/components/dashboard/ThreatResponsePanel";
 
 interface ThreatAnalysisHubProps {
   initialContent?: string;
@@ -21,9 +22,10 @@ const ThreatAnalysisHub = ({
   return (
     <Card className="w-full">
       <Tabs defaultValue="classify" className="w-full">
-        <TabsList className="grid grid-cols-3 mb-2 w-full">
+        <TabsList className="grid grid-cols-4 mb-2 w-full">
           <TabsTrigger value="classify" className="px-2 py-1.5 text-sm">Threat Classification</TabsTrigger>
           <TabsTrigger value="respond" className="px-2 py-1.5 text-sm">Response Generation</TabsTrigger>
+          <TabsTrigger value="strategic" className="px-2 py-1.5 text-sm">Strategic Response</TabsTrigger>
           <TabsTrigger value="advanced" className="px-2 py-1.5 text-sm">Advanced Intelligence</TabsTrigger>
         </TabsList>
         
@@ -38,6 +40,10 @@ const ThreatAnalysisHub = ({
             severity={severity}
             platform={platform}
           />
+        </TabsContent>
+        
+        <TabsContent value="strategic" className="mt-0 p-3">
+          <ThreatResponsePanel />
         </TabsContent>
         
         <TabsContent value="advanced" className="mt-0 p-3">

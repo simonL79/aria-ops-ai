@@ -4,6 +4,7 @@ import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import AriaIngestPanel from "@/components/dashboard/AriaIngestPanel";
 import RedditScannerPanel from "@/components/dashboard/RedditScannerPanel";
 import MonitoringSourcesManager from "@/components/dashboard/MonitoringSourcesManager";
+import ThreatAnalysisHub from "@/components/dashboard/ThreatAnalysisHub";
 
 const AriaIngestPage = () => {
   return (
@@ -19,6 +20,8 @@ const AriaIngestPage = () => {
             <AriaIngestPanel />
             <RedditScannerPanel />
           </div>
+          
+          <ThreatAnalysisHub />
           
           <MonitoringSourcesManager />
         </div>

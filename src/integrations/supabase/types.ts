@@ -451,6 +451,8 @@ export type Database = {
           potential_reach: number | null
           resolved_at: string | null
           responded_at: string | null
+          response_notes: string | null
+          response_status: string | null
           risk_entity_name: string | null
           risk_entity_type: string | null
           sentiment: number | null
@@ -478,6 +480,8 @@ export type Database = {
           potential_reach?: number | null
           resolved_at?: string | null
           responded_at?: string | null
+          response_notes?: string | null
+          response_status?: string | null
           risk_entity_name?: string | null
           risk_entity_type?: string | null
           sentiment?: number | null
@@ -505,6 +509,8 @@ export type Database = {
           potential_reach?: number | null
           resolved_at?: string | null
           responded_at?: string | null
+          response_notes?: string | null
+          response_status?: string | null
           risk_entity_name?: string | null
           risk_entity_type?: string | null
           sentiment?: number | null
@@ -589,6 +595,107 @@ export type Database = {
         }
         Relationships: []
       }
+      high_priority_threats: {
+        Row: {
+          assigned_to: string | null
+          client_id: string | null
+          confidence_score: number | null
+          contact_status: string | null
+          contact_status_updated_by: string | null
+          content: string | null
+          created_at: string | null
+          detected_entities: Json | null
+          id: string | null
+          is_identified: boolean | null
+          platform: string | null
+          potential_reach: number | null
+          priority_level: string | null
+          resolved_at: string | null
+          responded_at: string | null
+          response_notes: string | null
+          response_status: string | null
+          risk_entity_name: string | null
+          risk_entity_type: string | null
+          sentiment: number | null
+          severity: string | null
+          source_type: string | null
+          status: string | null
+          threat_severity: string | null
+          threat_summary: string | null
+          threat_type: string | null
+          updated_at: string | null
+          url: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          client_id?: string | null
+          confidence_score?: number | null
+          contact_status?: string | null
+          contact_status_updated_by?: string | null
+          content?: string | null
+          created_at?: string | null
+          detected_entities?: Json | null
+          id?: string | null
+          is_identified?: boolean | null
+          platform?: string | null
+          potential_reach?: number | null
+          priority_level?: never
+          resolved_at?: string | null
+          responded_at?: string | null
+          response_notes?: string | null
+          response_status?: string | null
+          risk_entity_name?: string | null
+          risk_entity_type?: string | null
+          sentiment?: number | null
+          severity?: string | null
+          source_type?: string | null
+          status?: string | null
+          threat_severity?: string | null
+          threat_summary?: string | null
+          threat_type?: string | null
+          updated_at?: string | null
+          url?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          client_id?: string | null
+          confidence_score?: number | null
+          contact_status?: string | null
+          contact_status_updated_by?: string | null
+          content?: string | null
+          created_at?: string | null
+          detected_entities?: Json | null
+          id?: string | null
+          is_identified?: boolean | null
+          platform?: string | null
+          potential_reach?: number | null
+          priority_level?: never
+          resolved_at?: string | null
+          responded_at?: string | null
+          response_notes?: string | null
+          response_status?: string | null
+          risk_entity_name?: string | null
+          risk_entity_type?: string | null
+          sentiment?: number | null
+          severity?: string | null
+          source_type?: string | null
+          status?: string | null
+          threat_severity?: string | null
+          threat_summary?: string | null
+          threat_type?: string | null
+          updated_at?: string | null
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scan_results_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       assign_staff_role: {
@@ -623,6 +730,8 @@ export type Database = {
           potential_reach: number | null
           resolved_at: string | null
           responded_at: string | null
+          response_notes: string | null
+          response_status: string | null
           risk_entity_name: string | null
           risk_entity_type: string | null
           sentiment: number | null
