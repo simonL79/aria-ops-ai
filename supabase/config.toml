@@ -11,4 +11,3 @@ verify_jwt = false
 
 [functions."aria-ingest"]
 verify_jwt = false
-
