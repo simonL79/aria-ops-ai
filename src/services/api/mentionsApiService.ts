@@ -1,4 +1,3 @@
-
 import { ContentAlert } from '@/types/dashboard';
 import { saveMention } from '@/services/monitoring/mentions';
 import { toast } from 'sonner';
@@ -45,4 +44,40 @@ export const storeMention = async (mentionRequest: MentionStoreRequest): Promise
   };
   
   return newAlert;
+};
+
+export const saveMentionAnalysis = async (
+  mentionId: string,
+  analysis: {
+    threatLevel: string;
+    category: string;
+    recommendedAction: string;
+    confidence: number;
+  }
+): Promise<boolean> => {
+  try {
+    const newAlert: ContentAlert = {
+      id: mentionId,
+      platform: 'Analysis',
+      content: `Threat Level: ${analysis.threatLevel}, Category: ${analysis.category}`,
+      date: new Date().toISOString(),
+      severity: analysis.threatLevel as 'high' | 'medium' | 'low',
+      status: 'new',
+      url: '',
+      sourceType: 'analysis',
+      confidenceScore: analysis.confidence,
+      sentiment: 'neutral',
+      detectedEntities: [analysis.category],
+      threatType: analysis.category,
+      recommendation: analysis.recommendedAction
+    };
+
+    // Here you would typically save to your backend
+    console.log('Saving mention analysis:', newAlert);
+    
+    return true;
+  } catch (error) {
+    console.error('Error saving mention analysis:', error);
+    return false;
+  }
 };

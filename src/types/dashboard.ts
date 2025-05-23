@@ -1,10 +1,11 @@
+
 export interface ContentAlert {
   id: string;
   platform: string;
   content: string;
   date: string;
   severity: 'high' | 'medium' | 'low';
-  status: 'new' | 'read' | 'reviewing' | 'actioned';
+  status: 'new' | 'read' | 'reviewing' | 'actioned' | 'resolved';
   url: string;
   threatType?: string;
   sourceType: string;
@@ -49,4 +50,15 @@ export interface MetricValue {
   value: number;
   delta: number;
   deltaType: "increase" | "decrease";
+}
+
+// Add missing types that were referenced in other files
+export type ResponseToneStyle = 'professional' | 'casual' | 'empathetic' | 'assertive';
+
+export interface SeoContent {
+  id: string;
+  title: string;
+  content: string;
+  keywords: string[];
+  priority: 'high' | 'medium' | 'low';
 }

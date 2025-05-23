@@ -1,5 +1,4 @@
-
-import { ContentAlert, ContentSource, ContentAction } from "@/types/dashboard";
+import { ContentAlert, ContentSource, ContentAction, MetricValue } from "@/types/dashboard";
 import { supabase } from "@/integrations/supabase/client";
 
 // Function to fetch real alerts from database
@@ -101,32 +100,82 @@ export const fetchRealActions = async (): Promise<ContentAction[]> => {
 // Fallback mock data (kept for development/testing)
 export const mockAlerts: ContentAlert[] = [
   {
-    id: '1',
-    platform: 'Twitter',
-    content: '@JohnDoe at TechCorp Inc is spreading false information about our services. This company has terrible customer service. #scam #terrible',
-    date: '2 hours ago',
-    severity: 'high',
-    status: 'new',
-    threatType: 'viralThreat',
-    confidenceScore: 89,
-    sourceType: 'social',
-    sentiment: 'negative',
-    potentialReach: 6500,
-    detectedEntities: ['JohnDoe', 'TechCorp Inc', 'Customer Service']
+    id: "1",
+    platform: "Twitter",
+    content: "This company is terrible! Worst customer service ever!",
+    date: "2024-01-15T10:30:00",
+    severity: "high",
+    status: "new",
+    threatType: "customer_complaint",
+    url: "https://twitter.com/user/status/123",
+    sourceType: "social",
+    confidenceScore: 85,
+    sentiment: "negative",
+    detectedEntities: ["customer service"],
+    potentialReach: 1500
   },
   {
-    id: '2',
-    platform: 'Reddit',
-    content: 'Sarah Johnson from Global Solutions LLC posted evidence that @AcmeSupport is using fake reviews. Look at these screenshots #FakeReviews #Scam',
-    date: '5 hours ago',
-    severity: 'high',
-    status: 'new',
-    threatType: 'misinformation',
-    confidenceScore: 73,
-    sourceType: 'forum',
-    sentiment: 'threatening',
-    potentialReach: 12400,
-    detectedEntities: ['Sarah Johnson', 'Global Solutions LLC', 'AcmeSupport']
+    id: "2",
+    platform: "Reddit",
+    content: "Has anyone had issues with this company? They seem shady...",
+    date: "2024-01-14T15:45:00",
+    severity: "medium",
+    status: "read",
+    threatType: "reputation_inquiry",
+    url: "https://reddit.com/r/reviews/post/456",
+    sourceType: "forum",
+    confidenceScore: 70,
+    sentiment: "negative",
+    detectedEntities: ["company reputation"],
+    potentialReach: 800
+  },
+  {
+    id: "3",
+    platform: "News Site",
+    content: "Local business receives positive review for community involvement",
+    date: "2024-01-13T09:15:00",
+    severity: "low",
+    status: "reviewing",
+    threatType: "positive_mention",
+    url: "https://localnews.com/article/789",
+    sourceType: "news",
+    confidenceScore: 95,
+    sentiment: "positive",
+    detectedEntities: ["community involvement"],
+    potentialReach: 5000
+  }
+];
+
+export const mockClassifiedAlerts: ContentAlert[] = [
+  {
+    id: "classified-1",
+    platform: "Twitter",
+    content: "I'm considering legal action against this company for their negligence",
+    date: "2024-01-16T08:00:00",
+    severity: "high",
+    status: "new",
+    threatType: "legal_threat",
+    confidenceScore: 92,
+    sourceType: "social",
+    sentiment: "threatening",
+    potentialReach: 2500,
+    detectedEntities: ["legal action", "negligence"],
+    url: "https://twitter.com/user/status/legal123"
+  },
+  {
+    id: "classified-2",
+    platform: "Facebook",
+    content: "Warning everyone about this business - they're scammers!",
+    date: "2024-01-15T14:30:00",
+    severity: "high",
+    status: "new",
+    threatType: "defamation",
+    confidenceScore: 88,
+    sourceType: "social",
+    sentiment: "threatening",
+    potentialReach: 1200,
+    detectedEntities: ["scam", "warning"],
+    url: "https://facebook.com/post/scam456"
   }
 ];
 

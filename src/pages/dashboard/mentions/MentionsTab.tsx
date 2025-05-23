@@ -43,7 +43,10 @@ const MentionsTab = ({
         status: alert.status as ContentAlert['status'],
         url: alert.url || '',
         threatType: alert.threatType,
-        detectedEntities: alert.detectedEntities || []
+        detectedEntities: alert.detectedEntities || [],
+        sourceType: 'scan',
+        confidenceScore: 75,
+        sentiment: 'neutral'
       }));
       setMentions(formattedMentions);
     } catch (error) {

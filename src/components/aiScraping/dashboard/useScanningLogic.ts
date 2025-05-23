@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { ContentAlert } from '@/types/dashboard';
 import type { 
@@ -185,16 +184,20 @@ const useScanningLogic = () => {
           content: result.content,
           date: new Date(result.date).toLocaleString(),
           severity: result.severity,
-          status: result.status === 'resolved' ? 'reviewing' : result.status as ContentAlert['status'],
+          status: result.status === 'resolved' ? 'resolved' : result.status as ContentAlert['status'],
           url: result.url,
           threatType: result.threatType,
           sourceType: result.sourceType || result.source_type || mapPlatformToSourceType(result.platform),
           confidenceScore: result.confidenceScore || result.confidence_score || 75,
           sentiment: mapNumericSentimentToString(result.sentiment),
-          detectedEntities: Array.isArray(result.detectedEntities || result.detected_entities) ? 
-            (result.detectedEntities || result.detected_entities || []).map(entity => String(entity)) : [],
+          detectedEntities: Array.isArray(result.detectedEntities) ? 
+            result.detectedEntities.map(entity => String(entity)) : [],
           potentialReach: result.potentialReach || result.potential_reach || 0,
-          category: result.category || ''
+          category: result.category || '',
+          source_credibility_score: result.source_credibility_score,
+          media_is_ai_generated: result.media_is_ai_generated,
+          ai_detection_confidence: result.ai_detection_confidence,
+          incident_playbook: result.incident_playbook
         }));
         
         // Update results - properly handle the ContentAlert array

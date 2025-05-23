@@ -1,172 +1,157 @@
+import { useState, useEffect, useCallback } from "react";
+import {
+  getMetrics,
+  getSources,
+  getRecentActivity,
+  getSeoContent,
+  getToneStyles,
+} from "@/services/api/dashboardApiService";
+import {
+  ContentAlert,
+  ContentSource,
+  ContentAction,
+  MetricValue,
+  ResponseToneStyle,
+  SeoContent as SeoContentType,
+} from "@/types/dashboard";
+import { mockAlerts, mockClassifiedAlerts } from "@/data/mockDashboardData";
 
-import { useState, useEffect } from "react";
-import { ContentAlert, ContentSource, ContentAction } from "@/types/dashboard";
-import { supabase } from '@/integrations/supabase/client';
-import { getContentAlerts, getContentActions, getMonitoredPlatforms } from "@/services/scanResultsService";
+interface DashboardData {
+  metrics: MetricValue[];
+  alerts: ContentAlert[];
+  classifiedAlerts: ContentAlert[];
+  sources: ContentSource[];
+  actions: ContentAction[];
+  toneStyles: ResponseToneStyle[];
+  recentActivity: ContentAction[];
+  seoContent: SeoContentType[];
+  negativeContent: number;
+  positiveContent: number;
+  neutralContent: number;
+  loading: boolean;
+  error: string | null;
+  fetchData: () => Promise<void>;
+  simulateNewData: (scanResults: any[]) => void;
+}
 
-export const useDashboardData = () => {
-  const [filteredAlerts, setFilteredAlerts] = useState<ContentAlert[]>([]);
-  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
-  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
-  
-  // State for metrics
-  const [reputationScore, setReputationScore] = useState(0);
-  const [previousScore, setPreviousScore] = useState(0);
-  const [sources, setSources] = useState<ContentSource[]>([]);
+const useDashboardData = (): DashboardData => {
+  const [metrics, setMetrics] = useState<MetricValue[]>([]);
   const [alerts, setAlerts] = useState<ContentAlert[]>([]);
+  const [classifiedAlerts, setClassifiedAlerts] = useState<ContentAlert[]>(
+    mockClassifiedAlerts
+  );
+  const [sources, setSources] = useState<ContentSource[]>([]);
   const [actions, setActions] = useState<ContentAction[]>([]);
-  const [monitoredSources, setMonitoredSources] = useState(0);
-  const [negativeContent, setNegativeContent] = useState(0);
-  const [removedContent, setRemovedContent] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
+  const [toneStyles, setToneStyles] = useState<ResponseToneStyle[]>([]);
+  const [recentActivity, setRecentActivity] = useState<ContentAction[]>([]);
+  const [seoContent, setSeoContent] = useState<SeoContentType[]>([]);
+  const [negativeContent, setNegativeContent] = useState<number>(0);
+  const [positiveContent, setPositiveContent] = useState<number>(0);
+  const [neutralContent, setNeutralContent] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [filteredAlerts, setFilteredAlerts] = useState<ContentAlert[]>([]);
 
-  // Load initial data
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [
+        metricsData,
+        sourcesData,
+        actionsData,
+        toneStylesData,
+        recentActivityData,
+        seoContentData,
+      ] = await Promise.all([
+        getMetrics(),
+        getSources(),
+        getSources(),
+        getToneStyles(),
+        getRecentActivity(),
+        getSeoContent(),
+      ]);
+
+      setMetrics(metricsData);
+      setSources(sourcesData);
+      setActions(actionsData);
+      setToneStyles(toneStylesData);
+      setRecentActivity(recentActivityData);
+      setSeoContent(seoContentData);
+      setAlerts(mockAlerts);
+      setFilteredAlerts(mockAlerts);
+
+      // Calculate content metrics
+      const negative = mockAlerts.filter(
+        (alert) => alert.sentiment === "negative"
+      ).length;
+      const positive = mockAlerts.filter(
+        (alert) => alert.sentiment === "positive"
+      ).length;
+      const neutral = mockAlerts.filter(
+        (alert) => alert.sentiment === "neutral"
+      ).length;
+
+      setNegativeContent(negative);
+      setPositiveContent(positive);
+      setNeutralContent(neutral);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
-    const fetchInitialData = async () => {
-      setIsLoading(true);
-      
-      try {
-        // Get alerts
-        const alertsData = await getContentAlerts(20, 0);
-        const formattedAlerts = alertsData.map(alert => ({
-          id: alert.id,
-          platform: alert.platform,
-          content: alert.content,
-          date: new Date(alert.created_at).toLocaleString(),
-          severity: alert.severity,
-          status: alert.status,
-          threatType: alert.threat_type,
-          confidenceScore: alert.confidence_score,
-          sourceType: alert.source_type,
-          sentiment: alert.sentiment,
-          potentialReach: alert.potential_reach,
-          detectedEntities: alert.detected_entities
-        }));
-        
-        setAlerts(formattedAlerts);
-        setFilteredAlerts(formattedAlerts);
-        
-        // Count negative content
-        const negativeCount = alertsData.filter(alert => 
-          alert.severity === 'high' || alert.severity === 'medium'
-        ).length;
-        setNegativeContent(negativeCount);
-        
-        // Get actions
-        const actionsData = await getContentActions(10, 0);
-        const formattedActions = actionsData.map(action => ({
-          id: action.id,
-          type: action.type,
-          description: action.description,
-          timestamp: new Date(action.created_at).toLocaleString(),
-          status: action.status,
-          user: action.user_id,
-          platform: action.platform,
-          action: action.action,
-          date: new Date(action.created_at).toLocaleString()
-        }));
-        
-        setActions(formattedActions);
-        
-        // Count removed content
-        const removedCount = actionsData.filter(action => 
-          action.type === 'removal' && action.status === 'completed'
-        ).length;
-        setRemovedContent(removedCount);
-        
-        // Get monitored platforms
-        const platformsData = await getMonitoredPlatforms();
-        const formattedSources: ContentSource[] = platformsData.map(platform => ({
-          id: platform.id,
-          name: platform.name,
-          status: getSentimentStatus(platform.sentiment || 0),
-          positiveRatio: platform.positive_ratio || 0,
-          total: platform.total || 0,
-          active: platform.active,
-          lastUpdated: platform.last_updated ? new Date(platform.last_updated).toLocaleString() : 'Never',
-          mentionCount: platform.mention_count || 0,
-          sentiment: platform.sentiment || 0
-        }));
-        
-        setSources(formattedSources);
-        setMonitoredSources(platformsData.length);
-        
-        // Calculate reputation score based on alerts and actions
-        const highSeverityCount = alertsData.filter(a => a.severity === 'high').length;
-        const mediumSeverityCount = alertsData.filter(a => a.severity === 'medium').length;
-        const resolvedCount = actionsData.filter(a => a.status === 'completed' || a.status === 'resolved').length;
-        
-        // Simple formula: start at 70, subtract for issues, add for resolutions
-        const calculatedScore = Math.max(0, Math.min(100, 
-          70 - (highSeverityCount * 5) - (mediumSeverityCount * 2) + (resolvedCount * 3)
-        ));
-        
-        setReputationScore(calculatedScore);
-        setPreviousScore(Math.max(0, calculatedScore - 5)); // Simulate previous score
-        
-      } catch (error) {
-        console.error("Error loading dashboard data:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    fetchData();
+  }, [fetchData]);
+
+  const simulateNewData = useCallback((scanResults: any[]) => {
+    if (!scanResults || scanResults.length === 0) return;
     
-    // Helper function to determine status based on sentiment
-    const getSentimentStatus = (sentiment: number): "critical" | "good" | "warning" => {
-      if (sentiment < -10) return "critical";
-      if (sentiment > 10) return "good";
-      return "warning";
-    };
+    const newAlerts = scanResults.map((result: any) => ({
+      id: result.id,
+      platform: result.platform,
+      content: result.content,
+      date: new Date(result.date || result.created_at).toLocaleString(),
+      severity: result.severity,
+      status: result.status,
+      threatType: result.threatType || result.threat_type,
+      confidenceScore: result.confidenceScore || result.confidence_score || 75,
+      sourceType: result.sourceType || result.source_type || 'scan',
+      sentiment: result.sentiment || 'neutral',
+      potentialReach: result.potentialReach || result.potential_reach || 0,
+      detectedEntities: result.detectedEntities || result.detected_entities || [],
+      url: result.url || '',
+      source_credibility_score: result.source_credibility_score,
+      media_is_ai_generated: result.media_is_ai_generated,
+      ai_detection_confidence: result.ai_detection_confidence,
+      incident_playbook: result.incident_playbook
+    }));
     
-    fetchInitialData();
+    setAlerts(prev => [...newAlerts, ...prev]);
+    setFilteredAlerts(prev => [...newAlerts, ...prev]);
     
-    // Set up real-time listening for changes
-    const channel = supabase
-      .channel('db-changes')
-      .on('postgres_changes', 
-        { event: 'INSERT', schema: 'public', table: 'scan_results' }, 
-        (payload) => {
-          // Update alerts when new scan results arrive
-          fetchInitialData();
-        }
-      )
-      .on('postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'content_actions' },
-        (payload) => {
-          // Update actions when new actions are added
-          fetchInitialData();
-        }
-      )
-      .subscribe();
-    
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    const newNegativeCount = scanResults.filter((r: any) => r.severity === 'high').length;
+    setNegativeContent(prev => prev + newNegativeCount);
   }, []);
 
   return {
-    filteredAlerts, 
-    setFilteredAlerts,
-    startDate,
-    setStartDate,
-    endDate, 
-    setEndDate,
-    reputationScore, 
-    setReputationScore,
-    previousScore, 
-    setPreviousScore,
-    sources, 
-    setSources,
-    alerts, 
-    setAlerts,
-    actions, 
-    setActions,
-    monitoredSources, 
-    setMonitoredSources,
-    negativeContent, 
-    setNegativeContent,
-    removedContent, 
-    setRemovedContent,
-    isLoading
+    metrics,
+    alerts,
+    classifiedAlerts,
+    sources,
+    actions,
+    toneStyles,
+    recentActivity,
+    seoContent,
+    negativeContent,
+    positiveContent,
+    neutralContent,
+    loading,
+    error,
+    fetchData,
+    simulateNewData,
   };
 };
+
+export default useDashboardData;

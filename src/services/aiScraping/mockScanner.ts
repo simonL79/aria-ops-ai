@@ -1,4 +1,3 @@
-
 import { ContentAlert } from "@/types/dashboard";
 
 // Export the ScanParameters interface
@@ -166,4 +165,74 @@ export const startContinuousMonitoring = (callback: (alerts: ContentAlert[]) => 
   
   // Return cleanup function
   return () => clearInterval(intervalId);
+};
+
+const createMockAlert = (override: Partial<ContentAlert> = {}): ContentAlert => {
+  const platforms = ['Twitter', 'Facebook', 'Reddit', 'LinkedIn', 'News Site'];
+  const severities: ('high' | 'medium' | 'low')[] = ['high', 'medium', 'low'];
+  const threatTypes = ['spam', 'harassment', 'misinformation', 'hate_speech', 'scam'];
+  const sentiments: ('positive' | 'negative' | 'neutral' | 'threatening')[] = ['positive', 'negative', 'neutral', 'threatening'];
+  
+  return {
+    id: `mock-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+    platform: platforms[Math.floor(Math.random() * platforms.length)],
+    content: `Mock content detected at ${new Date().toLocaleTimeString()}`,
+    date: new Date().toISOString(),
+    severity: severities[Math.floor(Math.random() * severities.length)],
+    status: 'new',
+    url: `https://example.com/post/${Math.random().toString(36).substring(2, 9)}`,
+    threatType: threatTypes[Math.floor(Math.random() * threatTypes.length)],
+    sourceType: 'social',
+    confidenceScore: Math.floor(Math.random() * 40) + 60, // 60-100
+    sentiment: sentiments[Math.floor(Math.random() * sentiments.length)],
+    detectedEntities: ['entity1', 'entity2'],
+    potentialReach: Math.floor(Math.random() * 10000) + 100,
+    ...override
+  };
+};
+
+export const simulateAIScan = async (
+  keywords: string[],
+  platforms: string[],
+  onNewAlert?: (alert: ContentAlert) => void
+): Promise<ContentAlert[]> => {
+  console.log("Simulating AI scan with parameters:", keywords, platforms);
+  
+  // Simulate network delay
+  await new Promise(resolve => setTimeout(resolve, 2000));
+  
+  const resultCount = Math.floor(Math.random() * 5) + 1;
+  
+  const results: ContentAlert[] = [];
+  
+  for (let i = 0; i < resultCount; i++) {
+    const alert = createMockAlert({
+      content: `Alert containing "${keywords[0]}" found via AI scan`,
+      platform: platforms[Math.floor(Math.random() * platforms.length)]
+    });
+    
+    results.push(alert);
+    
+    if (onNewAlert) {
+      onNewAlert(alert);
+    }
+    
+    await new Promise(resolve => setTimeout(resolve, 500));
+  }
+  
+  return results;
+};
+
+export const simulateRealTimeScan = (
+  onNewAlert: (alert: ContentAlert) => void,
+  intervalMs: number = 15000
+): (() => void) => {
+  const interval = setInterval(() => {
+    if (Math.random() > 0.7) {
+      const alert = createMockAlert();
+      onNewAlert(alert);
+    }
+  }, intervalMs);
+  
+  return () => clearInterval(interval);
 };

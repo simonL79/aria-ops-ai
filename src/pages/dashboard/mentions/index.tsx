@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -66,7 +65,7 @@ const MentionsPage = () => {
       if (success) {
         setMentions(prev => 
           prev.map(mention => 
-            mention.id === id ? { ...mention, status: "resolved" } : mention
+            mention.id === id ? { ...mention, status: "resolved" as ContentAlert['status'] } : mention
           )
         );
         toast.success("Mention marked as resolved");
