@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 export interface BlogPost {
@@ -25,6 +26,8 @@ export const blogPosts: BlogPost[] = [
     status: "published",
     content: `
 # Building A.R.I.A™ — A Smarter Way to Understand Online Reputation
+
+*Also published on [Medium](https://medium.com/@simonlindsay7988/building-a-r-i-a-a-smarter-way-to-understand-online-reputation-733ea9c6a683)*
 
 In today's world, reputation moves at the speed of a headline. What people say about you — online, in reviews, on social media — can have a lasting impact. That's why we're building A.R.I.A™.
 
