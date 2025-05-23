@@ -1,6 +1,21 @@
 
 import { ContentAlert } from '@/types/dashboard';
 
+export interface ScanParameters {
+  platforms?: string[];
+  keywordFilters?: string[];
+  maxResults: number;
+  prioritizeSeverity?: 'high' | 'medium' | 'low';
+  includeCustomerEnquiries: boolean;
+}
+
+export const defaultScanParameters: ScanParameters = {
+  platforms: ['Twitter', 'Reddit', 'News Article'],
+  keywordFilters: [],
+  maxResults: 5,
+  includeCustomerEnquiries: false
+};
+
 export const mockScanResults: ContentAlert[] = [
   {
     id: '1',
@@ -109,4 +124,24 @@ export const simulateQuickScan = async (): Promise<ContentAlert[]> => {
   }
   
   return results;
+};
+
+export const getMonitoringStatus = async () => {
+  return {
+    isActive: true,
+    sources: 8,
+    platforms: 5,
+    lastRun: new Date().toISOString()
+  };
+};
+
+export const registerAlertListener = (callback: (alert: ContentAlert) => void) => {
+  // Mock implementation
+  console.log('Alert listener registered');
+  return () => console.log('Alert listener unregistered');
+};
+
+export const unregisterAlertListener = (listenerId: string) => {
+  // Mock implementation
+  console.log('Alert listener unregistered:', listenerId);
 };

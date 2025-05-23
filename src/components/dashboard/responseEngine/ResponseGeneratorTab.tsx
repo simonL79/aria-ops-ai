@@ -139,7 +139,7 @@ const ResponseGeneratorTab = ({
             </SelectTrigger>
             <SelectContent>
               {responseTemplates.map((template) => (
-                <SelectItem key={template.type} value={template.type}>
+                <SelectItem key={template.id} value={template.type}>
                   {template.type.charAt(0).toUpperCase() + template.type.slice(1)}
                 </SelectItem>
               ))}

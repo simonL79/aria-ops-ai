@@ -1,117 +1,19 @@
 
-// Add or ensure these types are defined
 export interface ScanParameters {
   platforms?: string[];
-  keywords?: string[];
-  timeframe?: "day" | "week" | "month";
-  intensity?: "low" | "medium" | "high";
-  threatTypes?: string[];
   keywordFilters?: string[];
-  maxResults?: number;
-  includeCustomerEnquiries?: boolean;
-  prioritizeSeverity?: "low" | "medium" | "high"; // String, not boolean
-}
-
-// ScrapingQuery definition
-export interface ScrapingQuery {
-  query: string;
-  entityTypes: ('person' | 'organization' | 'location')[];
   maxResults: number;
+  prioritizeSeverity?: 'high' | 'medium' | 'low';
+  includeCustomerEnquiries: boolean;
 }
 
-// ScrapingResult definition
-export interface ScrapingResult {
+export interface AiScrapingResult {
   id: string;
-  sourceId: string;
-  sourceName: string;
-  sourceType: string;
-  entityName: string;
-  entityType: string;
   content: string;
-  url?: string;
-  timestamp: string;
-  sentiment: number;
-  riskScore?: number;
-  category?: string;
-  aiAnalysis?: {
-    summary?: string;
-    recommendation?: string;
-    threatClassification?: string;
-  };
-  processed: boolean;
-  notified: boolean;
+  platform: string;
+  date: string;
+  severity: 'high' | 'medium' | 'low';
+  confidence: number;
+  sentiment: 'positive' | 'negative' | 'neutral';
+  entities: string[];
 }
-
-// ScrapingSource definition
-export interface ScrapingSource {
-  id: string;
-  name: string;
-  type: 'google' | 'news' | 'crawler' | 'manual' | 'zapier';
-  enabled: boolean;
-  config?: {
-    maxResults?: number;
-    url?: string;
-  };
-  lastScan?: string;
-}
-
-// EntityWatchlist definition
-export interface EntityWatchlist {
-  id: string;
-  name: string;
-  type: 'person' | 'organization' | 'location';
-  keywords: string[];
-  sources: string[];
-  alertThreshold: number;
-  scanFrequency: 'daily' | 'weekly' | 'monthly';
-  autoRespond: boolean;
-  lastScan?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-// ScanResultStats definition
-export interface ScanResultStats {
-  totalScanned: number;
-  risksIdentified: number;
-  averageRiskScore: number;
-  scanDuration: number;
-  sourcesDistribution: Record<string, number>;
-}
-
-// Extended ModelConfig definition to match what's being used in ModelSettings.tsx
-export interface ModelConfig {
-  id: string;
-  name: string;
-  type: 'openai' | 'huggingface' | 'custom';
-  usage: 'sentiment' | 'classification' | 'response' | 'summary';
-  config: {
-    model: string;
-    temperature: number;
-    maxTokens?: number;
-    apiKey?: string;
-    endpoint?: string;
-    useLocal?: boolean;
-  };
-  isDefault: boolean;
-  parameters: {
-    temperature: number;
-    maxTokens?: number;
-    topP?: number;
-    frequencyPenalty?: number;
-    presencePenalty?: number;
-  };
-  costPerToken?: number;
-  active?: boolean;
-}
-
-// EmailDigestSettings definition
-export interface EmailDigestSettings {
-  enabled: boolean;
-  frequency: 'daily' | 'weekly' | 'immediate';
-  minRiskScore: number;
-  recipients: string[];
-  lastSent?: string;
-}
-
-// Add any other AI scraping related types here

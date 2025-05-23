@@ -39,7 +39,7 @@ const AutoResponseSettingsTab = () => {
         <Label>Response Threshold</Label>
         <Select 
           value={autoResponseSettings.threshold}
-          onValueChange={(val: any) => 
+          onValueChange={(val: 'high' | 'medium' | 'all' | 'none') => 
             setAutoResponseSettings({...autoResponseSettings, threshold: val})
           }
         >
