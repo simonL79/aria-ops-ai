@@ -6,7 +6,9 @@ import { ContentAlert } from "@/types/dashboard";
 import { Target } from "lucide-react";
 
 interface ResultItemProps {
-  result: ContentAlert;
+  result: ContentAlert & {
+    onViewDetail?: () => void;
+  };
 }
 
 const ResultItem: React.FC<ResultItemProps> = ({ result }) => {
@@ -90,9 +92,7 @@ const ResultItem: React.FC<ResultItemProps> = ({ result }) => {
           variant="ghost" 
           size="sm" 
           className="ml-2"
-          onClick={() => {
-            window.location.href = `/dashboard/engagement?alert=${result.id}`;
-          }}
+          onClick={result.onViewDetail}
         >
           View & Respond
         </Button>

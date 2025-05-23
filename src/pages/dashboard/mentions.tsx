@@ -14,8 +14,10 @@ import { getMentionsAsAlerts } from "@/services/monitoring/alerts";
 import { toast } from "sonner";
 import ResultItem from "@/components/aiScraping/dashboard/ResultItem";
 import { runMonitoringScan } from '@/services/monitoring/scan';
+import { useNavigate } from 'react-router-dom';
 
 const MentionsPage = () => {
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isRunningManualScan, setIsRunningManualScan] = useState<boolean>(false);
   const [mentions, setMentions] = useState<ContentAlert[]>([]);
@@ -62,6 +64,16 @@ const MentionsPage = () => {
       toast.error("Failed to run scan");
     } finally {
       setIsRunningManualScan(false);
+    }
+  };
+  
+  const handleViewAndRespond = (mentionId: string) => {
+    // Store the selected alert in sessionStorage for retrieval on the engagement page
+    const selectedAlert = mentions.find(mention => mention.id === mentionId);
+    if (selectedAlert) {
+      sessionStorage.setItem('selectedAlert', JSON.stringify(selectedAlert));
+      // Navigate to engagement page with alert ID as a URL parameter
+      navigate(`/dashboard/engagement?alert=${mentionId}`);
     }
   };
   
@@ -334,9 +346,7 @@ const MentionsPage = () => {
                               <Button 
                                 variant="default" 
                                 size="sm" 
-                                onClick={() => {
-                                  window.location.href = `/dashboard/engagement?alert=${mention.id}`;
-                                }}
+                                onClick={() => handleViewAndRespond(mention.id)}
                               >
                                 View & Respond
                               </Button>
@@ -350,10 +360,13 @@ const MentionsPage = () => {
                 
                 <TabsContent value="detail">
                   <div className="space-y-4">
-                    {sortedMentions.map((mention, index) => (
+                    {sortedMentions.map((mention) => (
                       <ResultItem 
                         key={mention.id} 
-                        result={mention}
+                        result={{
+                          ...mention,
+                          onViewDetail: () => handleViewAndRespond(mention.id)
+                        }}
                       />
                     ))}
                   </div>
