@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import PublicLayout from "@/components/layout/PublicLayout";
-import { blogPosts } from '@/data/blogData';
+import { blogPosts } from '@/data/blog';
 import { ArrowRight, Rss, Mail, Edit, Lock } from 'lucide-react';
 import BlogCard from '@/components/blog/BlogCard';
 import { Button } from '@/components/ui/button';
