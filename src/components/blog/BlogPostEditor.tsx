@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -10,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { Save, ArrowLeft, Image } from 'lucide-react';
-import { blogPosts } from '@/data/blogData'; // Import for now, will be replaced with API
+import { blogPosts } from '@/data/blog'; // Updated import path
 
 const postSchema = z.object({
   title: z.string().min(5, { message: "Title must be at least 5 characters" }),

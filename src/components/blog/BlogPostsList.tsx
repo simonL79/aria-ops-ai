@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { blogPosts } from '@/data/blogData';
+import { blogPosts } from '@/data/blog';
 import { Button } from '@/components/ui/button';
 import { Edit, Trash2, Eye, ArrowUpDown } from 'lucide-react';
 import { toast } from 'sonner';
