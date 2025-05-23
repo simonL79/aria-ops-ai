@@ -47,3 +47,7 @@ schedule = "0 */2 * * *"
 verify_jwt = false
 # Set up a cron job to run the social media scraper every 4 hours
 schedule = "0 */4 * * *"
+[functions.aria-scraper]
+verify_jwt = false
+# Set up a cron job to run the comprehensive ARIA scraper daily at 8 AM UTC
+schedule = "0 8 * * *"

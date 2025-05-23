@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { 
   MessageSquare, 
@@ -42,14 +41,25 @@ export const useMonitoringSources = () => {
         description: 'Monitors BBC, The Sun, Daily Mail, Guardian, Sky Sports and other UK outlets for celebrity and sports threats'
       },
       {
-        id: 'social-media-scraper',
-        name: 'Social Media Bundle',
+        id: 'aria-scraper',
+        name: 'Comprehensive Social Media Scanner',
         type: 'social',
         platform: 'YouTube, Instagram, TikTok',
         enabled: true,
         status: 'active',
         icon: <Users className="h-4 w-4" />,
-        description: 'Automated scraping of YouTube, Instagram, and TikTok for UK celebrity and sports content threats'
+        description: 'Daily comprehensive scan of YouTube RSS, Instagram profiles, and TikTok content for UK celebrity and sports threats',
+        lastScan: 'Daily at 8 AM UTC'
+      },
+      {
+        id: 'social-media-scraper',
+        name: 'Legacy Social Media Bundle',
+        type: 'social',
+        platform: 'YouTube, Instagram, TikTok',
+        enabled: false,
+        status: 'inactive',
+        icon: <Users className="h-4 w-4" />,
+        description: 'Legacy automated scraping (replaced by comprehensive scanner)'
       },
       {
         id: 'twitter',
@@ -125,6 +135,9 @@ export const useMonitoringSources = () => {
         case 'social-media-scraper':
           functionName = 'social-media-scraper';
           break;
+        case 'aria-scraper':
+          functionName = 'aria-scraper';
+          break;
         default:
           toast.error('Scanner not yet implemented for this source');
           return;
@@ -155,10 +168,12 @@ export const useMonitoringSources = () => {
         contentType = 'celebrity/sports threats';
       } else if (sourceId === 'social-media-scraper') {
         contentType = 'social media threats';
+      } else if (sourceId === 'aria-scraper') {
+        contentType = 'comprehensive threats';
       }
       
       toast.success(`${sourceName} scan completed`, {
-        description: `Found ${data.results?.total || data.matches_found || 0} ${contentType}`
+        description: `Found ${data.results?.total || data.total || data.matches_found || 0} ${contentType}`
       });
     } catch (error) {
       console.error('Error triggering scan:', error);
