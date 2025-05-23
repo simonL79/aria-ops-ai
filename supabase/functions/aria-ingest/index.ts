@@ -5,7 +5,6 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 // Load environment
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const AUTH_KEY = "H7zYd0N6R9xM3bKpLqE1jUvTnZqF5sBgXwPm9QCeLd0=";
 const openaiKey = Deno.env.get('OPENAI_API_KEY')!;
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
@@ -76,13 +75,7 @@ function sanitizeContent(text: string): string {
 }
 
 serve(async (req) => {
-  // Log incoming auth header for debug
-  console.log("Auth header received:", req.headers.get('authorization'));
-  
-  // More detailed authorization logging
-  const authHeader = req.headers.get('authorization') || 'No auth header';
-  console.log("Full auth header:", authHeader);
-  console.log("Expected auth:", `Bearer ${AUTH_KEY}`);
+  console.log(`Received ${req.method} request to aria-ingest function`);
   
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -93,38 +86,6 @@ serve(async (req) => {
     if (req.method !== 'POST') {
       return new Response('Method Not Allowed', { 
         status: 405,
-        headers: corsHeaders 
-      });
-    }
-
-    // Validate authentication - more verbose for debugging
-    const auth = req.headers.get('authorization');
-    if (!auth) {
-      console.error('No authorization header provided');
-      return new Response('Unauthorized: No auth header', { 
-        status: 401,
-        headers: corsHeaders 
-      });
-    }
-    
-    // Check if auth header format is correct
-    if (!auth.startsWith('Bearer ')) {
-      console.error('Authorization header not in Bearer format');
-      return new Response('Unauthorized: Invalid auth format', { 
-        status: 401,
-        headers: corsHeaders 
-      });
-    }
-    
-    // Extract token and compare
-    const token = auth.substring(7); // Remove 'Bearer ' prefix
-    console.log("Extracted token:", token);
-    console.log("AUTH_KEY:", AUTH_KEY);
-    
-    if (token !== AUTH_KEY) {
-      console.error('Invalid token provided');
-      return new Response('Unauthorized: Invalid token', { 
-        status: 401,
         headers: corsHeaders 
       });
     }
