@@ -4,7 +4,7 @@ export async function extractEntities(text: string, apiKey: string) {
   const prompt = `
 Extract all people, organizations, and social handles from the following text.
 
-Return in JSON format like:
+Return ONLY a JSON array with no additional formatting or markdown. Use this exact format:
 [
   { "name": "Jane Doe", "type": "PERSON" },
   { "name": "ACME Corp", "type": "ORG" },
@@ -25,10 +25,10 @@ Text:
       body: JSON.stringify({
         model: 'gpt-4o-mini', // Using the more efficient mini model
         messages: [
-          { role: 'system', content: 'You are an entity extraction assistant.' },
+          { role: 'system', content: 'You are an entity extraction assistant. Return only valid JSON arrays with no markdown formatting.' },
           { role: 'user', content: prompt }
         ],
-        temperature: 0.2
+        temperature: 0.1
       })
     });
 
@@ -40,10 +40,25 @@ Text:
 
     const data = await res.json();
     const content = data.choices?.[0]?.message?.content ?? '[]';
+    
+    // Clean the response - remove markdown code blocks if present
+    let cleanedContent = content.trim();
+    if (cleanedContent.startsWith('```json')) {
+      cleanedContent = cleanedContent.replace(/^```json\s*/, '');
+    }
+    if (cleanedContent.startsWith('```')) {
+      cleanedContent = cleanedContent.replace(/^```\s*/, '');
+    }
+    if (cleanedContent.endsWith('```')) {
+      cleanedContent = cleanedContent.replace(/\s*```$/, '');
+    }
+    
     try {
-      return JSON.parse(content);
+      const entities = JSON.parse(cleanedContent);
+      console.log('Successfully parsed entities:', entities);
+      return Array.isArray(entities) ? entities : [];
     } catch (e) {
-      console.error('Error parsing OpenAI response:', e, 'Response was:', content);
+      console.error('Error parsing cleaned OpenAI response:', e, 'Cleaned content was:', cleanedContent);
       return [];
     }
   } catch (error) {
