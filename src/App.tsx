@@ -1,7 +1,6 @@
 
 import React from 'react';
 import {
-  BrowserRouter,
   Routes,
   Route,
 } from "react-router-dom";
@@ -33,31 +32,29 @@ const queryClient = new QueryClient();
 
 function App() {
   return (
-    <BrowserRouter>
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/dashboard/mentions" element={<MentionsPage />} />
-            <Route path="/dashboard/engagement" element={<EngagementHubPage />} />
-            <Route path="/dashboard/aria-ingest" element={<AriaIngestPage />} />
-            <Route path="/features" element={<Features />} />
-            <Route path="/pricing" element={<Pricing />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/legal/privacy" element={<Privacy />} />
-            <Route path="/legal/terms" element={<Terms />} />
-            <Route path="/reputation-scan" element={<ReputationScan />} />
-            <Route path="/clean-launch" element={<CleanLaunch />} />
-            <Route path="/free-scan-results/:id" element={<FreeScanResults />} />
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/ai-scraping" element={<AiScrapingDashboard />} />
-          </Routes>
-        </TooltipProvider>
-      </QueryClientProvider>
-    </BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/dashboard/mentions" element={<MentionsPage />} />
+          <Route path="/dashboard/engagement" element={<EngagementHubPage />} />
+          <Route path="/dashboard/aria-ingest" element={<AriaIngestPage />} />
+          <Route path="/features" element={<Features />} />
+          <Route path="/pricing" element={<Pricing />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/legal/privacy" element={<Privacy />} />
+          <Route path="/legal/terms" element={<Terms />} />
+          <Route path="/reputation-scan" element={<ReputationScan />} />
+          <Route path="/clean-launch" element={<CleanLaunch />} />
+          <Route path="/free-scan-results/:id" element={<FreeScanResults />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/ai-scraping" element={<AiScrapingDashboard />} />
+        </Routes>
+      </TooltipProvider>
+    </QueryClientProvider>
   );
 }
 
