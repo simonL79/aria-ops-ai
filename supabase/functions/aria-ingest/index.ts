@@ -76,6 +76,9 @@ function sanitizeContent(text: string): string {
 }
 
 serve(async (req) => {
+  // Log incoming auth header for debug
+  console.log("Auth header received:", req.headers.get('authorization'));
+
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
