@@ -31,27 +31,39 @@ Text:
 """${text}"""
 `;
 
-  const res = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: 'You are an entity extraction assistant.' },
-        { role: 'user', content: prompt }
-      ],
-      temperature: 0.2
-    })
-  });
-
-  const data = await res.json();
-  const content = data.choices?.[0]?.message?.content ?? '[]';
   try {
-    return JSON.parse(content);
-  } catch {
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini', // Using the more efficient mini model
+        messages: [
+          { role: 'system', content: 'You are an entity extraction assistant.' },
+          { role: 'user', content: prompt }
+        ],
+        temperature: 0.2
+      })
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      console.error('OpenAI API error:', errorData);
+      return [];
+    }
+
+    const data = await res.json();
+    const content = data.choices?.[0]?.message?.content ?? '[]';
+    try {
+      return JSON.parse(content);
+    } catch (e) {
+      console.error('Error parsing OpenAI response:', e, 'Response was:', content);
+      return [];
+    }
+  } catch (error) {
+    console.error('Error in entity extraction:', error);
     return [];
   }
 }
@@ -77,25 +89,41 @@ serve(async (req) => {
       });
     }
 
+    // Validate authentication
     const auth = req.headers.get('authorization');
     if (!auth || auth !== `Bearer ${AUTH_KEY}`) {
+      console.error('Unauthorized access attempt');
       return new Response('Unauthorized', { 
         status: 401,
         headers: corsHeaders 
       });
     }
 
-    const { content, platform, url, test = false, severity = 'low', threat_type = null } = await req.json();
+    // Parse request body
+    const { 
+      content, 
+      platform, 
+      url, 
+      test = false, 
+      severity = 'low', 
+      threat_type = null,
+      source_type = 'fallback_ai',
+      confidence_score = 90,
+      potential_reach = 0
+    } = await req.json();
 
+    // Validate required fields
     if (!content || !platform || !url) {
+      console.error('Missing required fields');
       return new Response(JSON.stringify({ error: 'Missing required fields' }), { 
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
 
-    console.log('Processing content:', { platform, url: url.substring(0, 50) + '...' });
+    console.log(`Processing content from ${platform}: ${url.substring(0, 50)}...`);
 
+    // Clean and process content
     const cleanedContent = sanitizeContent(content);
     console.log('Extracting entities with OpenAI...');
     
@@ -104,6 +132,7 @@ serve(async (req) => {
 
     console.log('Extracted entities:', detected_entities);
 
+    // Prepare payload for database
     const payload = {
       content: cleanedContent,
       platform,
@@ -113,13 +142,14 @@ serve(async (req) => {
       risk_entity_type: topEntity.type,
       severity,
       threat_type,
-      source_type: 'fallback_ai',
+      source_type,
       status: 'new',
-      confidence_score: 90,
+      confidence_score,
       sentiment: 0,
-      potential_reach: 0
+      potential_reach
     };
 
+    // Handle test mode
     if (test) {
       console.log('Test mode - returning preview without inserting');
       return new Response(JSON.stringify({ test: true, payload }, null, 2), {
@@ -127,6 +157,7 @@ serve(async (req) => {
       });
     }
 
+    // Insert into database
     console.log('Inserting into scan_results...');
     const { data: insertedData, error } = await supabase.from('scan_results').insert([payload]).select().single();
 
