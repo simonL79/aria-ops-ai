@@ -42,13 +42,13 @@ export const useMonitoringSources = () => {
       },
       {
         id: 'aria-scraper',
-        name: 'Comprehensive Social Media Scanner',
+        name: 'YouTube RSS Scanner',
         type: 'social',
-        platform: 'YouTube, Instagram, TikTok',
+        platform: 'YouTube',
         enabled: true,
         status: 'active',
-        icon: <Users className="h-4 w-4" />,
-        description: 'Daily comprehensive scan of YouTube RSS, Instagram profiles, and TikTok content for UK celebrity and sports threats',
+        icon: <Trophy className="h-4 w-4" />,
+        description: 'Daily scan of YouTube RSS feeds for UK celebrity and sports channel content threats',
         lastScan: 'Daily at 8 AM UTC'
       },
       {
@@ -59,7 +59,7 @@ export const useMonitoringSources = () => {
         enabled: false,
         status: 'inactive',
         icon: <Users className="h-4 w-4" />,
-        description: 'Legacy automated scraping (replaced by comprehensive scanner)'
+        description: 'Legacy automated scraping (replaced by focused scanners)'
       },
       {
         id: 'twitter',
@@ -80,7 +80,7 @@ export const useMonitoringSources = () => {
         enabled: false,
         status: 'inactive',
         icon: <Camera className="h-4 w-4" />,
-        description: 'Monitor Instagram posts and stories for UK public figure content',
+        description: 'Monitor Instagram posts and stories for UK public figure content (External scraper required)',
         requiresSetup: true
       },
       {
@@ -91,7 +91,7 @@ export const useMonitoringSources = () => {
         enabled: false,
         status: 'inactive',
         icon: <Users className="h-4 w-4" />,
-        description: 'Track viral TikTok content involving UK celebrities and sports personalities',
+        description: 'Track viral TikTok content involving UK celebrities and sports personalities (External scraper required)',
         requiresSetup: true
       },
       {
@@ -169,7 +169,7 @@ export const useMonitoringSources = () => {
       } else if (sourceId === 'social-media-scraper') {
         contentType = 'social media threats';
       } else if (sourceId === 'aria-scraper') {
-        contentType = 'comprehensive threats';
+        contentType = 'YouTube threats';
       }
       
       toast.success(`${sourceName} scan completed`, {

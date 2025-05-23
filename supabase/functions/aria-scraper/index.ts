@@ -1,8 +1,6 @@
 
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
 import { scanYouTube } from './youtube.ts';
-import { scanInstagram } from './instagram.ts';
-import { scanTikTok } from './tiktok.ts';
 
 // CORS headers
 const corsHeaders = {
@@ -20,51 +18,33 @@ serve(async (req) => {
   }
 
   try {
-    console.log('[ARIA-SCRAPER] Starting comprehensive social media scan...');
+    console.log('[ARIA-SCRAPER] Starting YouTube RSS scan...');
     
     const results = {
       youtube: 0,
-      instagram: 0,
-      tiktok: 0,
       total: 0,
       timestamp: new Date().toISOString(),
       errors: []
     };
     
-    // Run all scrapers concurrently for better performance
-    const scanPromises = [
-      scanYouTube().catch(error => {
-        console.error('[ARIA-SCRAPER] YouTube scan failed:', error);
-        results.errors.push(`YouTube: ${error.message}`);
-        return 0;
-      }),
-      scanInstagram().catch(error => {
-        console.error('[ARIA-SCRAPER] Instagram scan failed:', error);
-        results.errors.push(`Instagram: ${error.message}`);
-        return 0;
-      }),
-      scanTikTok().catch(error => {
-        console.error('[ARIA-SCRAPER] TikTok scan failed:', error);
-        results.errors.push(`TikTok: ${error.message}`);
-        return 0;
-      })
-    ];
-    
-    const [youtubeResults, instagramResults, tiktokResults] = await Promise.all(scanPromises);
+    // Run YouTube scanner
+    const youtubeResults = await scanYouTube().catch(error => {
+      console.error('[ARIA-SCRAPER] YouTube scan failed:', error);
+      results.errors.push(`YouTube: ${error.message}`);
+      return 0;
+    });
     
     results.youtube = youtubeResults;
-    results.instagram = instagramResults;
-    results.tiktok = tiktokResults;
-    results.total = results.youtube + results.instagram + results.tiktok;
+    results.total = results.youtube;
     
-    console.log('[ARIA-SCRAPER] All scans completed successfully');
+    console.log('[ARIA-SCRAPER] YouTube scan completed successfully');
     console.log(`[ARIA-SCRAPER] Total threats found: ${results.total}`);
     
     return new Response(JSON.stringify({
       success: true,
-      message: 'ARIA comprehensive scraper completed',
+      message: 'ARIA YouTube RSS scanner completed',
       results: results,
-      platforms_scanned: ['YouTube', 'Instagram', 'TikTok'],
+      platforms_scanned: ['YouTube'],
       scan_time: new Date().toISOString()
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
