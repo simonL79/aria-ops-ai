@@ -9,7 +9,9 @@ interface AuthContextType {
   session: Session | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  isAdmin: boolean;
   signOut: () => Promise<void>;
+  signIn: (email: string, password: string) => Promise<{ error?: any }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -18,6 +20,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     console.log('AuthProvider initializing...');
@@ -46,8 +49,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setSession(initialSession);
           setUser(initialSession?.user ?? null);
           
-          // Initialize database if we have a session
+          // Check admin status
           if (initialSession?.user) {
+            checkAdminStatus(initialSession.user.id);
             initializeDatabase().catch(error => {
               console.error('Error initializing database:', error);
             });
@@ -76,13 +80,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setIsLoading(false);
         clearTimeout(authTimeout);
 
-        // Initialize database when user signs in
+        // Check admin status and initialize database when user signs in
         if (event === 'SIGNED_IN' && currentSession?.user) {
           try {
+            checkAdminStatus(currentSession.user.id);
             await initializeDatabase();
           } catch (error) {
             console.error('Error initializing database after sign in:', error);
           }
+        }
+
+        if (event === 'SIGNED_OUT') {
+          setIsAdmin(false);
         }
       }
     );
@@ -93,9 +102,39 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
   }, []);
 
+  const checkAdminStatus = async (userId: string) => {
+    try {
+      const { data } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .eq('role', 'admin')
+        .single();
+      
+      setIsAdmin(!!data);
+    } catch (error) {
+      console.error('Error checking admin status:', error);
+      setIsAdmin(false);
+    }
+  };
+
+  const signIn = async (email: string, password: string) => {
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      return { error };
+    } catch (error) {
+      console.error('Error signing in:', error);
+      return { error };
+    }
+  };
+
   const signOut = async () => {
     try {
       await supabase.auth.signOut();
+      setIsAdmin(false);
     } catch (error) {
       console.error('Error signing out:', error);
     }
@@ -106,7 +145,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     session,
     isAuthenticated: !!user,
     isLoading,
+    isAdmin,
     signOut,
+    signIn,
   };
 
   return (

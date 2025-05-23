@@ -5,6 +5,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.26.0";
 // Initialize Supabase client
 const supabaseUrl = Deno.env.get("SUPABASE_URL") as string;
 const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") as string;
+const openaiApiKey = Deno.env.get("OPENAI_API_KEY") as string;
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 // CORS headers for browser requests
@@ -19,6 +20,28 @@ interface Entity {
   confidence: number;
   mentions?: number;
 }
+
+const ENTITY_EXTRACTION_PROMPT = (text: string) => `
+Extract all identifiable entities from the text below.
+
+Return ONLY a JSON array of objects with this exact format:
+[
+  { "name": "Jane Doe", "type": "PERSON" },
+  { "name": "ACME Corp", "type": "ORG" },
+  { "name": "@johndoe", "type": "SOCIAL" }
+]
+
+Types to identify:
+- PERSON: People's names (first/last names)
+- ORG: Company names, organizations, brands
+- SOCIAL: Social media handles (@username, usernames)
+- LOCATION: Cities, countries, places
+
+Text:
+"""${text}"""
+
+Return only the JSON array, no other text.
+`;
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -55,21 +78,14 @@ serve(async (req) => {
       textToAnalyze = data.content;
     }
 
-    // Extract entities using regex for simple mode
     let entities: Entity[] = [];
     
-    if (mode === 'simple' || !mode) {
+    if (mode === 'advanced' && openaiApiKey) {
+      // Use OpenAI for advanced entity extraction
+      entities = await extractEntitiesWithOpenAI(textToAnalyze);
+    } else {
+      // Fallback to simple regex extraction
       entities = extractEntitiesSimple(textToAnalyze);
-    } else if (mode === 'advanced') {
-      // In a real implementation, this would call an NLP API or ML model
-      // For now, we'll just use the simple extraction as a placeholder
-      entities = extractEntitiesSimple(textToAnalyze);
-      
-      // Simulate better results from advanced processing
-      entities = entities.map(entity => ({
-        ...entity,
-        confidence: Math.min(entity.confidence + 0.2, 0.95) // Boost confidence but cap at 0.95
-      }));
     }
 
     // If contentId is provided, update the database with the extracted entities
@@ -78,7 +94,8 @@ serve(async (req) => {
         .from('scan_results')
         .update({
           detected_entities: entities.map(e => e.name),
-          risk_entity_name: entities.find(e => e.type === 'person')?.name,
+          risk_entity_name: entities.find(e => e.type === 'person')?.name ||
+                          entities.find(e => e.type === 'organization')?.name,
           risk_entity_type: entities.find(e => e.type === 'person') ? 'person' : 
                           entities.find(e => e.type === 'organization') ? 'organization' : 'unknown',
           is_identified: true
@@ -106,6 +123,89 @@ serve(async (req) => {
     );
   }
 });
+
+async function extractEntitiesWithOpenAI(text: string): Promise<Entity[]> {
+  try {
+    console.log('Calling OpenAI for entity extraction...');
+    
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openaiApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          { role: 'system', content: 'You are a helpful assistant that extracts structured entities from text. Always return valid JSON.' },
+          { role: 'user', content: ENTITY_EXTRACTION_PROMPT(text) },
+        ],
+        temperature: 0.2,
+        max_tokens: 1000,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error('OpenAI API error:', response.status, response.statusText);
+      return extractEntitiesSimple(text);
+    }
+
+    const data = await response.json();
+    const content = data.choices[0]?.message?.content?.trim();
+    
+    if (!content) {
+      console.error('No content from OpenAI response');
+      return extractEntitiesSimple(text);
+    }
+
+    console.log('OpenAI response:', content);
+    
+    // Parse the JSON response
+    let parsedEntities;
+    try {
+      parsedEntities = JSON.parse(content);
+    } catch (parseError) {
+      console.error('Failed to parse OpenAI JSON response:', parseError);
+      return extractEntitiesSimple(text);
+    }
+
+    if (!Array.isArray(parsedEntities)) {
+      console.error('OpenAI response is not an array');
+      return extractEntitiesSimple(text);
+    }
+
+    // Convert to our format
+    const entities: Entity[] = parsedEntities.map((entity: any) => ({
+      name: entity.name,
+      type: mapOpenAIEntityType(entity.type),
+      confidence: 0.9,
+      mentions: 1
+    }));
+
+    console.log('Extracted entities with OpenAI:', entities);
+    return entities;
+  } catch (error) {
+    console.error('OpenAI entity extraction failed:', error);
+    return extractEntitiesSimple(text);
+  }
+}
+
+function mapOpenAIEntityType(type: string): Entity['type'] {
+  switch (type?.toUpperCase()) {
+    case 'PERSON':
+      return 'person';
+    case 'ORG':
+    case 'ORGANIZATION':
+      return 'organization';
+    case 'SOCIAL':
+    case 'HANDLE':
+      return 'handle';
+    case 'LOCATION':
+      return 'location';
+    default:
+      return 'unknown';
+  }
+}
 
 /**
  * Simple entity extraction using regex

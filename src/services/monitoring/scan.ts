@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import type { ScanResult } from './types';
 import { toast } from 'sonner';
 import { parseDetectedEntities } from '@/utils/parseDetectedEntities';
+import { processScanWithEntityExtraction } from '@/services/entityExtraction/scanProcessor';
 
 interface ScanOptions {
   scan_depth?: string;
@@ -28,7 +29,6 @@ export const runMonitoringScan = async (targetEntity?: string): Promise<ScanResu
     }
 
     // Call the run_scan function via RPC
-    // If a target entity is provided, pass it to the scan function
     const scanOptions: ScanOptions = { 
       scan_depth: 'standard',
       target_entity: targetEntity || null
@@ -54,10 +54,23 @@ export const runMonitoringScan = async (targetEntity?: string): Promise<ScanResu
       return [];
     }
     
+    // Process entity extraction for new results
+    if (scanResults && scanResults.length > 0) {
+      console.log('Processing entity extraction for new scan results...');
+      
+      // Process entity extraction in the background for each new result
+      for (const result of scanResults) {
+        if (result.content && (!result.is_identified || result.detected_entities?.length === 0)) {
+          // Process entity extraction asynchronously
+          processScanWithEntityExtraction(result.id, result.content).catch(error => {
+            console.error(`Error processing entities for scan ${result.id}:`, error);
+          });
+        }
+      }
+    }
+    
     // Convert to the expected format with type safety
-    // We need to explicitly handle the results to prevent TS2589 errors
     const results = (scanResults || []).map((item: any): ScanResult => {
-      // Create a safely typed ScanResult object
       const typedResult: ScanResult = {
         id: item.id,
         content: item.content,
@@ -71,13 +84,9 @@ export const runMonitoringScan = async (targetEntity?: string): Promise<ScanResu
         client_id: item.client_id,
         created_at: item.created_at,
         updated_at: item.updated_at,
-        // Parse the detected entities using our utility - avoid deep type inference
         detectedEntities: parseDetectedEntities(item.detected_entities).map(entity => entity.name),
-        // Add additional source information
         sourceType: item.source_type,
-        // Parse potential reach if available
         potentialReach: item.potential_reach,
-        // Parse confidence score if available  
         confidenceScore: item.confidence_score
       };
       return typedResult;
