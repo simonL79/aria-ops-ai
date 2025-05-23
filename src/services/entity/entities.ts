@@ -4,9 +4,9 @@ import { toast } from 'sonner';
 import { Entity } from '@/types/entity';
 import { hasScanProperty } from '@/utils/databaseUtils';
 
-// Define type for scan result rows
+// Define type for scan result rows from Supabase
 type ScanRow = {
-  detected_entities?: any[];
+  detected_entities?: any; // Changed from any[] to any to handle Json type
   risk_entity_name?: string | null;
   risk_entity_type?: string | null;
   [key: string]: any;
@@ -31,41 +31,72 @@ function processEntityData(data: ScanRow[] | null): Map<string, Entity> {
     // Skip if not a valid object
     if (!isScanRow(result)) return;
     
-    // Process detected_entities array if it exists
+    // Process detected_entities array if it exists and is an array
     if (hasScanProperty(result, 'detected_entities')) {
       const detectedEntities = result.detected_entities;
+      
+      // Handle different formats of detected_entities
+      let entitiesArray: any[] = [];
+      
       if (Array.isArray(detectedEntities)) {
-        detectedEntities.forEach((name: string) => {
-          if (entityMap.has(name)) {
-            const entity = entityMap.get(name)!;
-            entityMap.set(name, { ...entity, mentions: (entity.mentions || 0) + 1 });
-          } else {
-            // Determine entity type based on available data
-            let type: Entity['type'] = 'unknown';
-            
+        entitiesArray = detectedEntities;
+      } else if (detectedEntities && typeof detectedEntities === 'object' && !Array.isArray(detectedEntities)) {
+        // If it's an object, try to extract entities from it
+        entitiesArray = Object.values(detectedEntities).filter(item => 
+          typeof item === 'string' || (typeof item === 'object' && item?.name)
+        );
+      }
+      
+      entitiesArray.forEach((entity: any) => {
+        let entityName: string;
+        let entityType: Entity['type'] = 'unknown';
+        
+        // Handle different entity formats
+        if (typeof entity === 'string') {
+          entityName = entity;
+        } else if (typeof entity === 'object' && entity?.name) {
+          entityName = entity.name;
+          if (entity.type) {
+            const type = entity.type.toLowerCase();
+            if (['person', 'organization', 'handle', 'location'].includes(type)) {
+              entityType = type as Entity['type'];
+            } else if (type === 'org') {
+              entityType = 'organization';
+            }
+          }
+        } else {
+          return; // Skip invalid entity format
+        }
+        
+        if (entityMap.has(entityName)) {
+          const existingEntity = entityMap.get(entityName)!;
+          entityMap.set(entityName, { ...existingEntity, mentions: (existingEntity.mentions || 0) + 1 });
+        } else {
+          // Determine entity type based on available data if not already set
+          if (entityType === 'unknown') {
             if (hasScanProperty(result, 'risk_entity_name') &&
                 hasScanProperty(result, 'risk_entity_type') &&
-                result.risk_entity_name === name &&
+                result.risk_entity_name === entityName &&
                 typeof result.risk_entity_name === 'string' &&
                 typeof result.risk_entity_type === 'string') {
                 
               const riskType = result.risk_entity_type as string;
               if (['person', 'organization', 'handle', 'location'].includes(riskType)) {
-                type = riskType as Entity['type'];
+                entityType = riskType as Entity['type'];
               }
-            } else if (name.startsWith('@')) {
-              type = 'handle';
+            } else if (entityName.startsWith('@')) {
+              entityType = 'handle';
             }
-            
-            entityMap.set(name, {
-              name,
-              type,
-              confidence: 0.7,
-              mentions: 1
-            });
           }
-        });
-      }
+          
+          entityMap.set(entityName, {
+            name: entityName,
+            type: entityType,
+            confidence: 0.7,
+            mentions: 1
+          });
+        }
+      });
     }
     
     // Process risk_entity_name if it exists
