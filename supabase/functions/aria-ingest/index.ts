@@ -1,3 +1,4 @@
+
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
@@ -75,25 +76,29 @@ function sanitizeContent(text: string): string {
 }
 
 serve(async (req) => {
-  console.log(`Received ${req.method} request to aria-ingest function`);
+  console.log(`[ARIA-INGEST] Received ${req.method} request to aria-ingest function`);
   
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
+    console.log('[ARIA-INGEST] Handling CORS preflight request');
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
     if (req.method !== 'POST') {
+      console.log(`[ARIA-INGEST] Method not allowed: ${req.method}`);
       return new Response('Method Not Allowed', { 
         status: 405,
         headers: corsHeaders 
       });
     }
 
-    // Validate the API key - IMPORTANT: Now actually enforcing auth
+    // Check for authorization header
     const auth = req.headers.get('authorization');
+    console.log(`[ARIA-INGEST] Authorization header received: ${auth ? 'YES' : 'NO'}`);
+    
     if (!auth) {
-      console.log("Authentication failed: No authorization header provided");
+      console.log("[ARIA-INGEST] Authentication failed: No authorization header provided");
       return new Response(JSON.stringify({ error: 'Authorization header required' }), { 
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -102,15 +107,18 @@ serve(async (req) => {
     
     // Check if the token matches our expected token
     const expectedAuth = `Bearer ${AUTH_KEY}`;
+    console.log(`[ARIA-INGEST] Expected: "${expectedAuth}"`);
+    console.log(`[ARIA-INGEST] Received: "${auth}"`);
+    
     if (auth !== expectedAuth) {
-      console.log("Authentication failed: Invalid token");
+      console.log("[ARIA-INGEST] Authentication failed: Invalid token");
       return new Response(JSON.stringify({ error: 'Invalid authorization token' }), { 
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
     
-    console.log("Authentication successful");
+    console.log("[ARIA-INGEST] Authentication successful!");
     
     // Parse request body
     const { 
@@ -127,23 +135,23 @@ serve(async (req) => {
 
     // Validate required fields
     if (!content || !platform || !url) {
-      console.error('Missing required fields');
+      console.error('[ARIA-INGEST] Missing required fields');
       return new Response(JSON.stringify({ error: 'Missing required fields' }), { 
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
 
-    console.log(`Processing content from ${platform}: ${url.substring(0, 50)}...`);
+    console.log(`[ARIA-INGEST] Processing content from ${platform}: ${url.substring(0, 50)}...`);
 
     // Clean and process content
     const cleanedContent = sanitizeContent(content);
-    console.log('Extracting entities with OpenAI...');
+    console.log('[ARIA-INGEST] Extracting entities with OpenAI...');
     
     const detected_entities = await extractEntities(cleanedContent, openaiKey);
     const topEntity = detected_entities[0] ?? { name: null, type: null };
 
-    console.log('Extracted entities:', detected_entities);
+    console.log('[ARIA-INGEST] Extracted entities:', detected_entities);
 
     // Prepare payload for database
     const payload = {
@@ -164,25 +172,25 @@ serve(async (req) => {
 
     // Handle test mode
     if (test) {
-      console.log('Test mode - returning preview without inserting');
+      console.log('[ARIA-INGEST] Test mode - returning preview without inserting');
       return new Response(JSON.stringify({ test: true, payload }, null, 2), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
 
     // Insert into database
-    console.log('Inserting into scan_results...');
+    console.log('[ARIA-INGEST] Inserting into scan_results...');
     const { data: insertedData, error } = await supabase.from('scan_results').insert([payload]).select().single();
 
     if (error) {
-      console.error('Database insertion error:', error);
+      console.error('[ARIA-INGEST] Database insertion error:', error);
       return new Response(JSON.stringify({ error: error.message }), { 
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
 
-    console.log('Successfully inserted scan result:', insertedData.id);
+    console.log('[ARIA-INGEST] Successfully inserted scan result:', insertedData.id);
 
     // Log activity
     const { error: logError } = await supabase
@@ -195,7 +203,7 @@ serve(async (req) => {
       });
 
     if (logError) {
-      console.error('Activity log error:', logError);
+      console.error('[ARIA-INGEST] Activity log error:', logError);
     }
 
     return new Response(JSON.stringify({ 
@@ -207,7 +215,7 @@ serve(async (req) => {
     });
 
   } catch (err) {
-    console.error('Function error:', err);
+    console.error('[ARIA-INGEST] Function error:', err);
     return new Response(JSON.stringify({ error: 'Internal Server Error', details: err.message }), { 
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
