@@ -6,5 +6,8 @@ project_id = "ssvskbejfacmjemphmry"
 [functions."entity-recognition"]
 verify_jwt = true
 
-[functions.column_exists]
+[functions."column_exists"]
+verify_jwt = false
+
+[functions."aria-ingest"]
 verify_jwt = false
