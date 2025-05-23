@@ -1,9 +1,14 @@
+
 import React from 'react';
 import { Routes, Route } from "react-router-dom";
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { Toaster } from "@/components/ui/toaster"
 import { Toaster as Sonner } from 'sonner';
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+// Import auth guards
+import AuthGuard from "@/components/auth/AuthGuard"
+import AdminGuard from "@/components/auth/AdminGuard"
 
 // Import all pages
 import Index from "@/pages/HomePage"
@@ -35,6 +40,7 @@ import RadarPage from "@/pages/dashboard/RadarPage"
 import Clients from "@/pages/Clients"
 import Monitor from "@/pages/Monitor"
 import NewCoPage from "@/pages/NewCoPage"
+import BlogAdminPage from "@/pages/BlogAdminPage"
 
 const queryClient = new QueryClient();
 
