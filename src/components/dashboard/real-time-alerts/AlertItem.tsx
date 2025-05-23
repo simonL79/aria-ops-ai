@@ -1,211 +1,78 @@
-import React from 'react';
+
+import React from "react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Clock, X, CheckCircle2, MessageSquare, Eye, Target } from "lucide-react";
+import { Eye, Check, X } from "lucide-react";
 import { ContentAlert } from "@/types/dashboard";
-import { dismissAlert, markAlertAsRead, requestContentRemoval } from '@/services/contentActionService';
 
 interface AlertItemProps {
   alert: ContentAlert;
-  isLast: boolean;
-  onDismiss?: (id: string) => void;
-  onMarkAsRead?: (id: string) => void;
-  onViewDetail?: (alert: ContentAlert) => void;
-  onRespond?: (alertId: string) => void;
+  onViewDetail: (alert: ContentAlert) => void;
+  onMarkAsRead: (id: string) => void;
+  onDismiss: (id: string) => void;
 }
 
-const AlertItem: React.FC<AlertItemProps> = ({ 
-  alert, 
-  isLast, 
-  onDismiss, 
-  onMarkAsRead,
-  onViewDetail,
-  onRespond
-}) => {
+const AlertItem = ({ alert, onViewDetail, onMarkAsRead, onDismiss }: AlertItemProps) => {
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case 'high': return 'bg-red-500 text-white';
-      case 'medium': return 'bg-yellow-500 text-white';
-      case 'low': return 'bg-green-500 text-white';
-      default: return 'bg-gray-500 text-white';
-    }
-  };
-  
-  const isHighSeverity = alert.severity === 'high';
-  const isCustomerEnquiry = alert.category === 'customer_enquiry';
-  
-  // Extract targets if they're in the alert
-  const getTargets = () => {
-    if (alert.detectedEntities && alert.detectedEntities.length > 0) {
-      return alert.detectedEntities;
-    }
-    
-    if (alert.content) {
-      // Try to extract proper nouns from the content as potential targets
-      const properNouns = alert.content.match(/\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b/g);
-      return properNouns ? [...new Set(properNouns)].slice(0, 2) : null;
-    }
-    
-    return null;
-  };
-  
-  const targets = alert.detectedEntities || getTargets();
-  
-  const handleViewDetail = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (onViewDetail) {
-      // Store alert in session storage to ensure it can be accessed across pages
-      sessionStorage.setItem('selectedAlert', JSON.stringify(alert));
-      onViewDetail(alert);
-    }
-  };
-
-  const handleRespond = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (onRespond) {
-      // Store alert in session storage to ensure it can be accessed across pages
-      sessionStorage.setItem('selectedAlert', JSON.stringify(alert));
-      onRespond(alert.id);
-    }
-  };
-
-  const handleDismiss = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    // Track the dismissal action in the database
-    const success = await dismissAlert(alert);
-    
-    if (success && onDismiss) {
-      onDismiss(alert.id);
-    }
-  };
-
-  const handleMarkAsRead = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    // Track the read action in the database
-    const success = await markAlertAsRead(alert);
-    
-    if (success && onMarkAsRead) {
-      onMarkAsRead(alert.id);
+      case 'high': return 'bg-red-100 text-red-800 border-red-200';
+      case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'low': return 'bg-green-100 text-green-800 border-green-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
   };
 
   return (
-    <div 
-      className={`p-4 
-        ${alert.status === 'new' ? isCustomerEnquiry ? 'bg-blue-50' : 'bg-blue-50' : ''} 
-        ${isHighSeverity && alert.status === 'new' ? 'border-l-4 border-red-500' : ''}
-        ${isCustomerEnquiry && alert.status === 'new' ? 'border-l-4 border-blue-500' : ''}
-        ${!isLast ? 'border-b' : ''}`}
-    >
-      <div className="flex justify-between items-start">
-        <div>
+    <Card className={`transition-all hover:shadow-md ${alert.status === 'new' ? 'border-l-4 border-l-blue-500' : ''}`}>
+      <CardContent className="p-4">
+        <div className="flex justify-between items-start mb-2">
           <div className="flex items-center gap-2">
-            {isCustomerEnquiry ? (
-              <Badge className="bg-blue-500 text-white">
-                CUSTOMER
-              </Badge>
-            ) : (
-              <Badge className={getSeverityColor(alert.severity)}>
-                {alert.severity.toUpperCase()}
-                {isHighSeverity && alert.status === 'new' && " ⚠️"}
-              </Badge>
-            )}
-            <span className="font-medium">{alert.platform}</span>
-            {alert.status === 'new' && (
-              <Badge variant="outline" className={
-                isCustomerEnquiry ? 
-                "bg-blue-100 border-blue-200 text-blue-800 animate-pulse" : 
-                isHighSeverity ? 
-                "bg-red-100 border-red-200 text-red-800 animate-pulse" : 
-                "bg-blue-100 border-blue-200 text-blue-800"
-              }>
-                New
-              </Badge>
-            )}
+            <Badge className={getSeverityColor(alert.severity)}>
+              {alert.severity.toUpperCase()}
+            </Badge>
+            <span className="text-sm font-medium">{alert.platform}</span>
           </div>
-          <p className={`mt-2 ${(isHighSeverity || isCustomerEnquiry) && alert.status === 'new' ? 'font-medium' : ''}`}>
-            {alert.content}
-          </p>
-          
-          {targets && targets.length > 0 && (
-            <div className="flex items-center gap-1 mt-1 mb-1 text-xs">
-              <Target className="h-3 w-3 text-gray-500" />
-              <span className="text-muted-foreground">Targets:</span>
-              <div className="flex gap-1">
-                {targets.map((target, idx) => (
-                  <Badge key={idx} variant="outline" className="text-xs py-0 px-1">
-                    {target}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
-          
-          {alert.recommendation && (
-            <div className="text-xs text-muted-foreground mt-1">
-              <strong>Recommended:</strong> {alert.recommendation.length > 80 
-                ? `${alert.recommendation.substring(0, 80)}...` 
-                : alert.recommendation}
-            </div>
-          )}
-          
-          <div className="flex items-center gap-1 text-xs text-muted-foreground mt-2">
-            <Clock className="h-3 w-3" />
-            <span>{alert.date}</span>
-          </div>
+          <span className="text-xs text-muted-foreground">{alert.date}</span>
         </div>
-        <div className="flex flex-col gap-1">
+        
+        <p className="text-sm text-gray-700 mb-3 line-clamp-2">{alert.content}</p>
+        
+        <div className="flex gap-2">
           <Button 
             size="sm" 
-            variant="ghost" 
-            onClick={handleDismiss}
-            className="h-7 w-7 p-0"
+            variant="outline" 
+            onClick={() => onViewDetail(alert)}
+            className="flex items-center gap-1"
           >
-            <X className="h-4 w-4" />
+            <Eye className="h-3 w-3" />
+            View
           </Button>
+          
+          {alert.status === 'new' && (
+            <Button 
+              size="sm" 
+              variant="outline" 
+              onClick={() => onMarkAsRead(alert.id)}
+              className="flex items-center gap-1"
+            >
+              <Check className="h-3 w-3" />
+              Mark Read
+            </Button>
+          )}
+          
           <Button 
             size="sm" 
-            variant="ghost" 
-            onClick={handleMarkAsRead}
-            className="h-7 w-7 p-0"
+            variant="outline" 
+            onClick={() => onDismiss(alert.id)}
+            className="flex items-center gap-1 text-red-600 hover:text-red-700"
           >
-            <CheckCircle2 className="h-4 w-4" />
+            <X className="h-3 w-3" />
+            Dismiss
           </Button>
         </div>
-      </div>
-      <div className="mt-2 flex justify-end">
-        <Button 
-          size="sm" 
-          variant={
-            isCustomerEnquiry && alert.status === 'new' ? "default" : 
-            isHighSeverity && alert.status === 'new' ? "destructive" : 
-            "outline"
-          }
-          className={`text-xs h-7 ${(isHighSeverity || isCustomerEnquiry) && alert.status === 'new' ? 'animate-pulse' : ''}`}
-          onClick={isCustomerEnquiry ? handleRespond : handleViewDetail}
-        >
-          {isCustomerEnquiry && alert.status === 'new' ? (
-            <>
-              <MessageSquare className="h-3 w-3 mr-1" /> Respond Now
-            </>
-          ) : isHighSeverity && alert.status === 'new' ? (
-            <>
-              <Eye className="h-3 w-3 mr-1" /> View Now
-            </>
-          ) : (
-            <>
-              <Eye className="h-3 w-3 mr-1" /> Analyze & Respond
-            </>
-          )}
-        </Button>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 

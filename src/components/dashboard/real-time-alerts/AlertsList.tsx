@@ -1,47 +1,28 @@
 
-import React from 'react';
+import React from "react";
 import { ContentAlert } from "@/types/dashboard";
-import AlertItem from "../alerts/AlertItem";
-import { Info } from 'lucide-react';
+import AlertItem from "./AlertItem";
 
 interface AlertsListProps {
-  filteredAlerts: ContentAlert[];
-  handleDismiss: (id: string) => void;
-  handleMarkAsRead: (id: string) => void;
-  onViewDetail?: (alert: ContentAlert) => void;
-  onRespond?: (alertId: string) => void;
+  alerts: ContentAlert[];
+  onViewDetail: (alert: ContentAlert) => void;
+  onMarkAsRead: (id: string) => void;
+  onDismiss: (id: string) => void;
 }
 
-const AlertsList = ({ 
-  filteredAlerts, 
-  handleDismiss, 
-  handleMarkAsRead,
-  onViewDetail,
-  onRespond
-}: AlertsListProps) => {
-  
-  if (filteredAlerts.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center p-8 text-center">
-        <Info className="h-12 w-12 text-muted-foreground" />
-        <p className="mt-2 text-muted-foreground">No active alerts at this time</p>
-        <p className="text-xs text-muted-foreground mt-1">
-          New alerts will appear here as they are detected
-        </p>
-      </div>
-    );
-  }
-  
+const AlertsList = ({ alerts, onViewDetail, onMarkAsRead, onDismiss }: AlertsListProps) => {
   return (
-    <>
-      {filteredAlerts.map((alert, index) => (
-        <AlertItem
-          key={alert.id}
-          alert={alert}
-          isLast={index === filteredAlerts.length - 1}
+    <div className="space-y-2">
+      {alerts.map((alert) => (
+        <AlertItem 
+          key={alert.id} 
+          alert={alert} 
+          onViewDetail={onViewDetail}
+          onMarkAsRead={onMarkAsRead}
+          onDismiss={onDismiss}
         />
       ))}
-    </>
+    </div>
   );
 };
 

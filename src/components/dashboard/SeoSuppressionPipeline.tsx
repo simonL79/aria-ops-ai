@@ -11,6 +11,9 @@ const SeoSuppressionPipeline = () => {
     {
       id: '1',
       title: 'Positive Brand Story - Company Innovation',
+      url: 'https://example.com/positive-innovation',
+      rank: 2,
+      impression: 3500,
       content: 'Comprehensive article highlighting company achievements and innovation milestones.',
       keywords: ['innovation', 'company success', 'technology leadership'],
       priority: 'high',
@@ -22,6 +25,9 @@ const SeoSuppressionPipeline = () => {
     {
       id: '2', 
       title: 'Executive Interview - Industry Leadership',
+      url: 'https://example.com/ceo-interview',
+      rank: 1,
+      impression: 4200,
       content: 'In-depth interview with CEO discussing industry trends and company vision.',
       keywords: ['CEO interview', 'industry leadership', 'company vision'],
       priority: 'high',
@@ -33,6 +39,9 @@ const SeoSuppressionPipeline = () => {
     {
       id: '3',
       title: 'Corporate Social Responsibility Report',
+      url: 'https://example.com/csr-report',
+      rank: 3,
+      impression: 2800,
       content: 'Annual CSR report showcasing community impact and sustainability initiatives.',
       keywords: ['CSR', 'sustainability', 'community impact'],
       priority: 'medium',
@@ -99,10 +108,12 @@ const SeoSuppressionPipeline = () => {
                 {content.publishDate && (
                   <span>Publish: {content.publishDate}</span>
                 )}
+                <span>Rank: #{content.rank}</span>
+                <span>Impressions: {content.impression.toLocaleString()}</span>
               </div>
               
               <div className="flex flex-wrap gap-1 mb-3">
-                {content.keywords.map((keyword, index) => (
+                {content.keywords?.map((keyword, index) => (
                   <Badge key={index} variant="outline" className="text-xs">
                     {keyword}
                   </Badge>
