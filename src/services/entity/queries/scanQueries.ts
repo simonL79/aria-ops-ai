@@ -11,47 +11,18 @@ export const getScanResultsByEntity = async (entityName: string): Promise<ScanRe
   try {
     let results: ScanResult[] = [];
     
-    // Try with risk_entity_name field
-    const { data: nameData, error: nameError } = await supabase
-      .from('scan_results')
-      .select('*')
-      .eq('risk_entity_name', entityName);
-    
-    if (!nameError && nameData && nameData.length > 0) {
-      const processedResults: ScanResult[] = [];
-      
-      for (const row of nameData) {
-        processedResults.push({
-          id: row.id,
-          content: row.content,
-          platform: row.platform,
-          url: row.url,
-          severity: row.severity,
-          status: row.status,
-          threat_type: row.threat_type,
-          risk_entity_name: row.risk_entity_name || null,
-          risk_entity_type: row.risk_entity_type || null,
-          created_at: row.created_at,
-          confidence_score: row.confidence_score || null,
-          is_identified: Boolean(row.is_identified),
-          detected_entities: parseDetectedEntities(row.detected_entities)
-        });
-      }
-      
-      return processedResults;
-    }
-    
-    // Try with detected_entities field
+    // Try with detected_entities field using contains operator
     const { data: arrayData, error: arrayError } = await supabase
       .from('scan_results')
       .select('*')
       .contains('detected_entities', [entityName]);
     
     if (!arrayError && arrayData) {
-      const processedResults: ScanResult[] = [];
+      // Cast to any to break type inference chain
+      const rows: any[] = arrayData;
       
-      for (const row of arrayData) {
-        processedResults.push({
+      for (const row of rows) {
+        results.push({
           id: row.id,
           content: row.content,
           platform: row.platform,
@@ -59,16 +30,14 @@ export const getScanResultsByEntity = async (entityName: string): Promise<ScanRe
           severity: row.severity,
           status: row.status,
           threat_type: row.threat_type,
-          risk_entity_name: row.risk_entity_name || null,
-          risk_entity_type: row.risk_entity_type || null,
+          risk_entity_name: null, // These fields don't exist in DB
+          risk_entity_type: null, // These fields don't exist in DB
           created_at: row.created_at,
           confidence_score: row.confidence_score || null,
-          is_identified: Boolean(row.is_identified),
+          is_identified: false, // This field doesn't exist in DB
           detected_entities: parseDetectedEntities(row.detected_entities)
         });
       }
-      
-      results = processedResults;
     }
     
     return results;
@@ -94,9 +63,11 @@ export const getAllScanResults = async (): Promise<ScanResult[]> => {
       return [];
     }
     
+    // Cast to any to break type inference chain
+    const rows: any[] = data;
     const results: ScanResult[] = [];
     
-    for (const row of data) {
+    for (const row of rows) {
       results.push({
         id: row.id,
         content: row.content,
@@ -105,11 +76,11 @@ export const getAllScanResults = async (): Promise<ScanResult[]> => {
         severity: row.severity,
         status: row.status,
         threat_type: row.threat_type,
-        risk_entity_name: row.risk_entity_name || null,
-        risk_entity_type: row.risk_entity_type || null,
+        risk_entity_name: null, // These fields don't exist in DB
+        risk_entity_type: null, // These fields don't exist in DB
         created_at: row.created_at,
         confidence_score: row.confidence_score || null,
-        is_identified: Boolean(row.is_identified),
+        is_identified: false, // This field doesn't exist in DB
         detected_entities: parseDetectedEntities(row.detected_entities)
       });
     }
