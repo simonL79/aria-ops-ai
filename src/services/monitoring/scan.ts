@@ -60,7 +60,7 @@ export const runMonitoringScan = async (targetEntity?: string): Promise<ScanResu
       
       // Process entity extraction in the background for each new result
       for (const result of scanResults) {
-        if (result.content && (!result.is_identified || result.detected_entities?.length === 0)) {
+        if (result.content && (!result.detected_entities || (Array.isArray(result.detected_entities) && result.detected_entities.length === 0))) {
           // Process entity extraction asynchronously
           processScanWithEntityExtraction(result.id, result.content).catch(error => {
             console.error(`Error processing entities for scan ${result.id}:`, error);

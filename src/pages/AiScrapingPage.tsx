@@ -1,5 +1,5 @@
 
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import DashboardLayout from "@/components/layout/DashboardLayout";
 import { AiScrapingDashboard } from "@/components/aiScraping";
 import { useEffect } from "react";
 import { initializeMonitoringStatus } from "@/utils/initializeMonitoring";
