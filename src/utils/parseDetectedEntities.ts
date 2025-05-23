@@ -1,67 +1,69 @@
 
-/**
- * Utility for safely parsing detected entities from various formats
- */
-
-export interface ScanEntity {
-  name: string;  // Using name instead of label to match existing code
-  type?: string;
-  confidence?: number;
-}
+import { ScanEntity } from '@/services/entityExtraction/openaiEntityExtraction';
 
 /**
- * Safely parse detected entities from unknown input
- * This prevents TypeScript TS2589 errors by avoiding deep type inference
+ * Parse detected entities from various formats
  */
-export function parseDetectedEntities(input: unknown): ScanEntity[] {
-  if (!input) return [];
+export const parseDetectedEntities = (entities: any): ScanEntity[] => {
+  if (!entities) return [];
   
-  // Handle array input
-  if (Array.isArray(input)) {
-    return input.map(item => {
-      // Handle string items
-      if (typeof item === 'string') {
-        return { name: item };
+  try {
+    // Handle case where entities is already an array of objects
+    if (Array.isArray(entities) && entities.length > 0 && typeof entities[0] === 'object') {
+      return entities.map(entity => ({
+        name: entity.name || String(entity),
+        type: entity.type || 'PERSON'
+      }));
+    }
+    
+    // Handle case where entities is an array of strings
+    if (Array.isArray(entities) && entities.length > 0 && typeof entities[0] === 'string') {
+      return entities.map(entity => ({
+        name: entity,
+        type: 'PERSON'
+      }));
+    }
+    
+    // Handle case where entities is a JSON string
+    if (typeof entities === 'string') {
+      try {
+        const parsed = JSON.parse(entities);
+        if (Array.isArray(parsed)) {
+          return parsed.map(entity => {
+            if (typeof entity === 'string') {
+              return { name: entity, type: 'PERSON' };
+            }
+            return {
+              name: entity.name || String(entity),
+              type: entity.type || 'PERSON'
+            };
+          });
+        }
+      } catch (e) {
+        // If not valid JSON, treat as single entity
+        return [{ name: entities, type: 'PERSON' }];
       }
-      
-      // Handle object items with name property
-      if (item && typeof item === 'object') {
-        if ('name' in item && typeof (item as any).name === 'string') {
+    }
+    
+    // Handle case where entities is an object
+    if (typeof entities === 'object' && !Array.isArray(entities)) {
+      return Object.values(entities).map(entity => {
+        if (typeof entity === 'string') {
+          return { name: entity, type: 'PERSON' };
+        }
+        if (typeof entity === 'object' && entity !== null) {
           return {
-            name: String((item as any).name),
-            type: typeof (item as any).type === 'string' ? (item as any).type : undefined,
-            confidence: typeof (item as any).confidence === 'number' ? (item as any).confidence : undefined
-          };
-        } else if ('label' in item && typeof (item as any).label === 'string') {
-          // Support label property as an alternative to name
-          return {
-            name: String((item as any).label),
-            type: typeof (item as any).type === 'string' ? (item as any).type : undefined,
-            confidence: typeof (item as any).confidence === 'number' ? (item as any).confidence : undefined
+            name: (entity as any).name || String(entity),
+            type: (entity as any).type || 'PERSON'
           };
         }
-      }
-      
-      // Default fallback for unknown formats
-      return { name: String(item) };
-    });
-  }
-  
-  // Handle string input (e.g., JSON string)
-  if (typeof input === 'string') {
-    try {
-      const parsed = JSON.parse(input);
-      if (Array.isArray(parsed)) {
-        return parseDetectedEntities(parsed); // Recursive call with parsed array
-      }
-      // Single entity as string
-      return [{ name: input }];
-    } catch {
-      // If parsing fails, treat as a single entity
-      return [{ name: input }];
+        return { name: String(entity), type: 'PERSON' };
+      });
     }
+    
+    return [];
+  } catch (error) {
+    console.error('Error parsing detected entities:', error);
+    return [];
   }
-  
-  // Default: return empty array for unsupported inputs
-  return [];
-}
+};

@@ -1,13 +1,18 @@
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from "sonner";
 import MonitoringControls from './dashboard/MonitoringControls';
 import MonitoringMetrics from './dashboard/MonitoringMetrics';
 import MonitoringResults from './dashboard/MonitoringResults';
 import useScanningLogic from './dashboard/useScanningLogic';
 import { playNotificationSound } from '@/utils/notificationSound';
+import { ContentAlert } from '@/types/dashboard';
+import { getMentionsAsAlerts } from '@/services/monitoring';
 
 const AiScrapingDashboard = () => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [initialDataLoaded, setInitialDataLoaded] = useState(false);
+
   const {
     isScanning,
     scanResults,
@@ -18,13 +23,44 @@ const AiScrapingDashboard = () => {
     handleManualScan
   } = useScanningLogic();
 
+  // Load initial mentions data
+  useEffect(() => {
+    const loadInitialData = async () => {
+      setIsLoading(true);
+      try {
+        console.log('AiScrapingDashboard: Loading initial mentions data...');
+        const initialMentions = await getMentionsAsAlerts();
+        
+        if (initialMentions && initialMentions.length > 0) {
+          console.log(`AiScrapingDashboard: Loaded ${initialMentions.length} initial mentions`);
+          // Your useScanningLogic hook should handle this state update
+        } else {
+          console.log('AiScrapingDashboard: No initial mentions found');
+        }
+        setInitialDataLoaded(true);
+      } catch (error) {
+        console.error('AiScrapingDashboard: Error loading initial mentions:', error);
+        toast.error("Failed to load monitoring data");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadInitialData();
+  }, []);
+
   // Notify on high priority alerts
   useEffect(() => {
-    const highPriorityAlerts = scanResults.filter(result => result.severity === 'high' && result.status === 'new');
+    if (!scanResults.length) return;
+    
+    const highPriorityAlerts = scanResults.filter(result => 
+      result.severity === 'high' && result.status === 'new'
+    );
+    
     if (highPriorityAlerts.length > 0) {
       playNotificationSound('warning');
       toast.error(`🚨 HIGH RISK ALERT: ${highPriorityAlerts[0].platform}`, {
-        description: "New mention on LinkedIn about your brand.",
+        description: highPriorityAlerts[0].content.substring(0, 60) + "...",
         duration: 5000,
       });
     }
@@ -44,7 +80,7 @@ const AiScrapingDashboard = () => {
       <MonitoringResults 
         scanResults={scanResults}
         isActive={isActive}
-        isScanning={isScanning}
+        isScanning={isScanning || (isLoading && !initialDataLoaded)}
         onActivate={() => setIsActive(true)}
       />
     </div>
