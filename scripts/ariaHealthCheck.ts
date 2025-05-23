@@ -1,6 +1,7 @@
-
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
+import { HealthCheckResult, AlertChannels } from '../src/services/notifications/types';
+import { SlackAlerter } from '../src/services/notifications/alerts/slackAlerter';
 
 dotenv.config();
 
@@ -16,14 +17,6 @@ if (!SUPABASE_KEY) {
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const PLATFORMS = ['YouTube', 'Reddit', 'uk_news', 'Instagram', 'TikTok', 'Twitter'];
-
-interface HealthCheckResult {
-  platform: string;
-  status: 'healthy' | 'warning' | 'error';
-  lastEntry?: string;
-  count24h: number;
-  message: string;
-}
 
 async function runHealthCheck(): Promise<void> {
   const now = new Date();
@@ -130,7 +123,7 @@ async function runHealthCheck(): Promise<void> {
   // Show detailed results
   for (const result of results) {
     const icon = result.status === 'healthy' ? '✅' : 
-                 result.status === 'warning' ? '⚠️ ' : '❌';
+                result.status === 'warning' ? '⚠️ ' : '❌';
     
     console.log(`${icon} ${result.platform.padEnd(12)} | ${result.message}`);
   }
@@ -186,78 +179,14 @@ async function sendAlertsIfNeeded(results: HealthCheckResult[]): Promise<void> {
     return;
   }
 
-  // Build Slack message
-  const message = {
-    blocks: [
-      {
-        type: "header",
-        text: {
-          type: "plain_text",
-          text: "🚨 ARIA Health Check Alert",
-          emoji: true
-        }
-      },
-      {
-        type: "section",
-        fields: [
-          {
-            type: "mrkdwn",
-            text: `*Errors:* ${errors.length}`
-          },
-          {
-            type: "mrkdwn",
-            text: `*Warnings:* ${warnings.length}`
-          },
-          {
-            type: "mrkdwn",
-            text: `*High Threats (24h):* ${highThreats}`
-          },
-          {
-            type: "mrkdwn",
-            text: `*Time:* ${new Date().toLocaleString()}`
-          }
-        ]
-      }
-    ]
-  };
+  // Use our new alerter system
+  const slackAlerter = new SlackAlerter({
+    webhookUrl: SLACK_WEBHOOK_URL,
+    enabled: true
+  });
 
-  // Add error details
-  if (errors.length > 0) {
-    message.blocks.push({
-      type: "section",
-      text: {
-        type: "mrkdwn",
-        text: `*❌ Errors:*\n${errors.map(e => `• ${e.platform}: ${e.message}`).join('\n')}`
-      }
-    } as any);
-  }
-
-  // Add warning details
-  if (warnings.length > 0) {
-    message.blocks.push({
-      type: "section",
-      text: {
-        type: "mrkdwn",
-        text: `*⚠️ Warnings:*\n${warnings.map(w => `• ${w.platform}: ${w.message}`).join('\n')}`
-      }
-    } as any);
-  }
-
-  try {
-    const response = await fetch(SLACK_WEBHOOK_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(message)
-    });
-
-    if (response.ok) {
-      console.log('📢 Alert sent to Slack successfully');
-    } else {
-      console.error('❌ Failed to send Slack alert:', response.statusText);
-    }
-  } catch (error) {
-    console.error('❌ Error sending Slack alert:', error);
-  }
+  await slackAlerter.send(results, errors, warnings, highThreats);
+  console.log('📢 Alert check completed');
 }
 
 // Run if called directly
