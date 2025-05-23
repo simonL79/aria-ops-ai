@@ -15,6 +15,52 @@ export interface BlogPost {
 
 export const blogPosts: BlogPost[] = [
   {
+    title: "Building A.R.I.A™ — A Smarter Way to Understand Online Reputation",
+    slug: "building-aria-smarter-online-reputation",
+    description: "In today's world, reputation moves at the speed of a headline. Discover how we're building A.R.I.A™ to help individuals and organizations understand their online presence.",
+    author: "Simon Lindsay",
+    date: "May 23, 2025",
+    image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=2034&auto=format&fit=crop",
+    category: "Company Updates",
+    status: "published",
+    content: `
+# Building A.R.I.A™ — A Smarter Way to Understand Online Reputation
+
+In today's world, reputation moves at the speed of a headline. What people say about you — online, in reviews, on social media — can have a lasting impact. That's why we're building A.R.I.A™.
+
+A.R.I.A™ (Automated Reputation Intelligence & Analysis) is a platform designed to help individuals and organizations see the bigger picture of how they're being talked about online — and take action before a small issue becomes a serious one.
+
+## What We're Working On
+
+Over the past few months, we've been heads-down, designing and building a tool that helps our users:
+
+- **Spot risks early** — before they escalate
+- **Recognize opportunities** — hidden in public feedback  
+- **Understand trends** — and how reputation changes over time
+
+Our focus has been on making A.R.I.A™ simple, clear, and genuinely helpful — not another dashboard with too much data and too little meaning.
+
+## Why It Matters
+
+The internet is vast, fast, and often unforgiving. A single post can go viral. A review can sway perception. A name can be misrepresented.
+
+A.R.I.A™ is about giving people clarity — helping them focus on what matters, not just what's loud. It's about awareness, accountability, and action.
+
+## What's Next
+
+We're now moving into testing with early users and partners. The feedback so far has been incredibly encouraging, and we're excited to keep improving.
+
+We're not trying to build a tool for everyone. We're building the right tool for those who care deeply about trust, reputation, and the truth of what's being said.
+
+If that sounds like you — we'd love to connect.
+
+---
+
+**Simon Lindsay**  
+*Founder, A.R.I.A™*
+    `
+  },
+  {
     title: "How AI Is Transforming Reputation Management",
     slug: "ai-transforming-reputation-management",
     description: "Discover how AI-powered tools are revolutionizing the way individuals and businesses protect their digital reputations.",
