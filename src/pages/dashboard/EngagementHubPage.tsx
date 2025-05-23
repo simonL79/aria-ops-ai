@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom"; 
 import DashboardLayout from "@/components/layout/DashboardLayout";
@@ -98,7 +99,7 @@ const EngagementHubPage = () => {
     const cleanupFunction = registerAlertListener(handleNewAlert);
     
     return () => {
-      cleanupFunction();
+      unregisterAlertListener(cleanupFunction);
     };
   }, []);
 
@@ -123,7 +124,7 @@ const EngagementHubPage = () => {
 
   const handleMarkAsRead = (id: string) => {
     setAlerts(prev => prev.map(alert => 
-      alert.id === id ? { ...alert, status: 'read' } : alert
+      alert.id === id ? { ...alert, status: 'read' as ContentAlert['status'] } : alert
     ));
   };
 

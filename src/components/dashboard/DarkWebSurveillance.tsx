@@ -22,8 +22,7 @@ const DarkWebSurveillance = () => {
       url: 'https://darkweb-forum.onion/leaked-data',
       sourceType: 'forum',
       confidenceScore: 95,
-      sentiment: 'threatening',
-      detectedEntities: ['credentials', 'corporate data']
+      sentiment: 'negative'
     },
     {
       id: '2',
@@ -36,8 +35,7 @@ const DarkWebSurveillance = () => {
       url: 'https://tor-site.onion/attack-plans',
       sourceType: 'forum',
       confidenceScore: 88,
-      sentiment: 'threatening',
-      detectedEntities: ['attack planning', 'infrastructure']
+      sentiment: 'negative'
     },
     {
       id: '3',
@@ -50,8 +48,7 @@ const DarkWebSurveillance = () => {
       url: 'https://underground-market.onion/bots',
       sourceType: 'marketplace',
       confidenceScore: 75,
-      sentiment: 'negative',
-      detectedEntities: ['bot network', 'social media']
+      sentiment: 'negative'
     },
     {
       id: '4',
@@ -64,8 +61,7 @@ const DarkWebSurveillance = () => {
       url: 'https://identity-theft.onion/executive-info',
       sourceType: 'marketplace',
       confidenceScore: 92,
-      sentiment: 'threatening',
-      detectedEntities: ['executive info', 'personal data']
+      sentiment: 'negative'
     }
   ];
 

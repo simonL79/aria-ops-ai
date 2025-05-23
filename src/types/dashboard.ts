@@ -1,3 +1,4 @@
+
 export interface MetricValue {
   id: string;
   title: string;
@@ -5,6 +6,7 @@ export interface MetricValue {
   change: number;
   icon: string;
   color: string;
+  name?: string; // Added for compatibility with dashboardApiService
 }
 
 export interface ContentSource {
@@ -19,6 +21,13 @@ export interface ContentSource {
     negative: number;
     neutral: number;
   };
+  // Additional properties used in some parts of the code
+  positiveRatio?: number;
+  total?: number;
+  active?: boolean;
+  lastUpdated?: string;
+  mentionCount?: number;
+  sentiment?: number;
 }
 
 export interface ContentAction {
@@ -28,6 +37,10 @@ export interface ContentAction {
   platform: string;
   status: string;
   timestamp: string;
+  // Additional properties used in some parts of the code
+  action?: string;
+  date?: string;
+  user?: string;
 }
 
 export interface DashboardData {
@@ -51,12 +64,12 @@ export interface ContentAlert {
   severity: 'high' | 'medium' | 'low';
   date: string;
   url?: string;
-  status: 'new' | 'read' | 'dismissed';
+  status: 'new' | 'read' | 'dismissed' | 'actioned' | 'reviewing' | 'resolved';
   threatType?: string;
   detectedEntities?: string[];
   confidenceScore?: number;
   potentialReach?: number;
-  sentiment?: 'positive' | 'negative' | 'neutral';
+  sentiment?: 'positive' | 'negative' | 'neutral' | 'threatening';
   category?: string;
   recommendation?: string;
   sourceType?: string;
@@ -75,4 +88,70 @@ export interface ActivityItem {
   type: string;
   description: string;
   timestamp: string;
+}
+
+export interface AutoResponseSettings {
+  enabled: boolean;
+  tone: ResponseToneStyle;
+  language: string;
+  responseDelay: number;
+  keywords: string[];
+  platforms: string[];
+  threshold?: number;
+  reviewRequired?: boolean;
+  defaultTone?: ResponseToneStyle;
+}
+
+export interface ResponseTemplate {
+  id: string;
+  name: string;
+  content: string;
+  tone: ResponseToneStyle;
+  type?: string;
+  icon?: string;
+  description?: string;
+  template?: string;
+}
+
+export interface SourceData {
+  id: string;
+  name: string;
+  status: string;
+  positiveRatio: number;
+  total: number;
+}
+
+export interface SeoContent {
+  id: string;
+  title: string;
+  url: string;
+  rank: number;
+  impression: number;
+}
+
+export interface DashboardHeaderProps {
+  title?: string;
+  description?: string;
+  onRefresh?: () => Promise<void>;
+  totalAlerts?: number;
+  highSeverityAlerts?: number;
+}
+
+export interface DashboardMainContentProps {
+  metrics?: MetricValue[];
+  alerts?: ContentAlert[];
+  classifiedAlerts?: ContentAlert[];
+  sources?: ContentSource[];
+  actions?: ContentAction[];
+  toneStyles?: any;
+  recentActivity?: any;
+  seoContent?: any;
+  negativeContent?: number;
+  positiveContent?: number;
+  neutralContent?: number;
+  onSimulateNewData?: (scanResults: any[]) => void;
+  reputationScore?: number;
+  previousScore?: number;
+  filteredAlerts?: ContentAlert[];
+  onFilterChange?: (filters: { platforms: string[]; severities: string[]; statuses: string[] }) => void;
 }

@@ -70,7 +70,7 @@ export const updateWatchlistEntity = async (entity: EntityWatchlist): Promise<En
     // Create new entity
     watchlistEntitiesStorage.push({
       ...entity,
-      createdAt: new Date().toISOString(),
+      createdAt: entity.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString()
     });
   }

@@ -27,12 +27,14 @@ const EntityWatchlist = () => {
   const [isAddingEntity, setIsAddingEntity] = useState(false);
   const [newEntity, setNewEntity] = useState<Partial<EntityWatchlistType>>({
     name: '',
-    type: 'organization',
+    entityType: 'organization',
+    priority: 'medium',
     keywords: [],
     sources: [],
     alertThreshold: 5,
     scanFrequency: 'daily',
-    autoRespond: false
+    autoRespond: false,
+    autoAlert: false
   });
   const [keyword, setKeyword] = useState('');
   const [availableSources, setAvailableSources] = useState<string[]>([
@@ -107,12 +109,15 @@ const EntityWatchlist = () => {
       const entity: EntityWatchlistType = {
         id: `entity-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         name: newEntity.name,
-        type: newEntity.type as 'person' | 'organization' | 'location',
+        entityType: newEntity.entityType as 'person' | 'organization' | 'location' | 'keyword',
+        type: newEntity.entityType as 'person' | 'organization' | 'location',
+        priority: newEntity.priority as 'high' | 'medium' | 'low',
         keywords: newEntity.keywords || [],
         sources: newEntity.sources || [],
         alertThreshold: newEntity.alertThreshold || 5,
         scanFrequency: newEntity.scanFrequency as 'daily' | 'weekly' | 'monthly',
         autoRespond: newEntity.autoRespond || false,
+        autoAlert: newEntity.autoAlert || false,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
@@ -122,12 +127,14 @@ const EntityWatchlist = () => {
       setIsAddingEntity(false);
       setNewEntity({
         name: '',
-        type: 'organization',
+        entityType: 'organization',
+        priority: 'medium',
         keywords: [],
         sources: [],
         alertThreshold: 5,
         scanFrequency: 'daily',
-        autoRespond: false
+        autoRespond: false,
+        autoAlert: false
       });
 
       toast.success("Entity added to watchlist", {
@@ -212,10 +219,10 @@ const EntityWatchlist = () => {
                 <div className="space-y-2">
                   <Label htmlFor="type">Entity Type</Label>
                   <Select 
-                    value={newEntity.type} 
+                    value={newEntity.entityType} 
                     onValueChange={(value) => setNewEntity({
                       ...newEntity, 
-                      type: value as 'person' | 'organization' | 'location'
+                      entityType: value as 'person' | 'organization' | 'location'
                     })}
                   >
                     <SelectTrigger>
@@ -228,6 +235,26 @@ const EntityWatchlist = () => {
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Priority</Label>
+                <Select 
+                  value={newEntity.priority} 
+                  onValueChange={(value) => setNewEntity({
+                    ...newEntity, 
+                    priority: value as 'high' | 'medium' | 'low'
+                  })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select priority" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="low">Low</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">
@@ -322,6 +349,15 @@ const EntityWatchlist = () => {
                 />
                 <Label htmlFor="autoRespond">Generate responses automatically</Label>
               </div>
+
+              <div className="flex items-center space-x-2">
+                <Switch 
+                  id="autoAlert" 
+                  checked={newEntity.autoAlert} 
+                  onCheckedChange={(checked) => setNewEntity({...newEntity, autoAlert: checked})}
+                />
+                <Label htmlFor="autoAlert">Send alerts automatically</Label>
+              </div>
             </div>
             <div className="flex justify-end space-x-2">
               <Button variant="outline" onClick={() => setIsAddingEntity(false)}>
@@ -358,14 +394,14 @@ const EntityWatchlist = () => {
                     <div className="flex items-center space-x-2">
                       <h3 className="font-medium">{entity.name}</h3>
                       <Badge variant="outline">
-                        {entity.type.charAt(0).toUpperCase() + entity.type.slice(1)}
+                        {entity.entityType.charAt(0).toUpperCase() + entity.entityType.slice(1)}
                       </Badge>
                       {entity.autoRespond && (
                         <Badge variant="secondary">Auto-Response</Badge>
                       )}
                     </div>
                     <p className="text-sm text-muted-foreground mt-1">
-                      {entity.keywords.join(', ')}
+                      {entity.keywords ? entity.keywords.join(', ') : ''}
                     </p>
                     <div className="flex items-center mt-2 text-xs text-muted-foreground">
                       <AlertCircle className="h-3 w-3 mr-1" />

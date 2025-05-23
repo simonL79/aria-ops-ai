@@ -3,30 +3,7 @@ import React from 'react';
 import { useDashboardData } from "@/hooks/useDashboardData";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import DashboardMainContent from "@/components/dashboard/DashboardMainContent";
-import { MetricValue, ContentAlert, ContentSource, ContentAction } from "@/types/dashboard";
-
-interface DashboardHeaderProps {
-  title?: string;
-  description?: string;
-  onRefresh?: () => Promise<void>;
-  totalAlerts?: number;
-  highSeverityAlerts?: number;
-}
-
-interface DashboardMainContentProps {
-  metrics?: MetricValue[];
-  alerts?: ContentAlert[];
-  classifiedAlerts?: ContentAlert[];
-  sources?: ContentSource[];
-  actions?: ContentAction[];
-  toneStyles?: any;
-  recentActivity?: any;
-  seoContent?: any;
-  negativeContent?: number;
-  positiveContent?: number;
-  neutralContent?: number;
-  onSimulateNewData?: (scanResults: any[]) => void;
-}
+import { DashboardHeaderProps, DashboardMainContentProps } from "@/types/dashboard";
 
 const DashboardPage = () => {
   const {
@@ -60,6 +37,7 @@ const DashboardPage = () => {
       <DashboardHeader 
         title="Dashboard"
         description="Overview of your reputation monitoring"
+        onRefresh={fetchData}
         totalAlerts={alerts.length}
         highSeverityAlerts={alerts.filter(alert => alert.severity === 'high').length}
       />

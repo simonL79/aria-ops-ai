@@ -11,24 +11,25 @@ import SeoSuppressionPipeline from "@/components/dashboard/SeoSuppressionPipelin
 import IntelligenceCollection from "@/components/dashboard/IntelligenceCollection";
 import ContentFilter from "@/components/dashboard/ContentFilter";
 import InfoTooltip from "@/components/dashboard/InfoTooltip";
-import { ContentAlert, ContentSource, ContentAction } from "@/types/dashboard";
-
-interface DashboardMainContentProps {
-  reputationScore: number;
-  previousScore: number;
-  sources: ContentSource[];
-  filteredAlerts: ContentAlert[];
-  actions: ContentAction[];
-  onFilterChange: (filters: { platforms: string[]; severities: string[]; statuses: string[] }) => void;
-}
+import { ContentAlert, ContentSource, ContentAction, DashboardMainContentProps } from "@/types/dashboard";
 
 const DashboardMainContent = ({
-  reputationScore,
-  previousScore,
-  sources,
-  filteredAlerts,
-  actions,
-  onFilterChange
+  reputationScore = 70,
+  previousScore = 65,
+  sources = [],
+  filteredAlerts = [],
+  actions = [],
+  onFilterChange = () => {},
+  metrics = [],
+  alerts = [],
+  classifiedAlerts = [],
+  toneStyles = [],
+  recentActivity = [],
+  seoContent = '',
+  negativeContent = 0,
+  positiveContent = 0,
+  neutralContent = 0,
+  onSimulateNewData = () => {}
 }: DashboardMainContentProps) => {
   return (
     <>
@@ -61,7 +62,7 @@ const DashboardMainContent = ({
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         <div className="lg:col-span-1">
-          <SourceOverview sources={sources} />
+          <SourceOverview sources={sources as any} />
         </div>
         <div className="lg:col-span-1">
           <RecentActions actions={actions} />

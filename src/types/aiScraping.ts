@@ -14,7 +14,7 @@ export interface AiScrapingResult {
   date: string;
   severity: 'high' | 'medium' | 'low';
   confidence: number;
-  sentiment: 'positive' | 'negative' | 'neutral';
+  sentiment: 'positive' | 'negative' | 'neutral' | 'threatening';
   entities: string[];
 }
 
@@ -60,7 +60,7 @@ export interface ScrapingQuery {
   sources?: string[];
   filters?: {
     minRiskScore?: number;
-    sentiment?: 'positive' | 'negative' | 'neutral';
+    sentiment?: 'positive' | 'negative' | 'neutral' | 'threatening';
   };
 }
 

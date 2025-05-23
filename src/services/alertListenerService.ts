@@ -12,4 +12,5 @@ export const registerAlertListener = (callback: (alert: ContentAlert) => void) =
 export const unregisterAlertListener = (listenerId: string) => {
   // In a real implementation, this would unregister a listener with a backend service
   console.log('Alert listener unregistered:', listenerId);
+  return () => {}; // Return a cleanup function
 };

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -65,7 +66,9 @@ const MentionsPage = () => {
       if (success) {
         setMentions(prev => 
           prev.map(mention => 
-            mention.id === id ? { ...mention, status: "resolved" as ContentAlert['status'] } : mention
+            mention.id === id ? 
+              { ...mention, status: 'resolved' as ContentAlert['status'] } : 
+              mention
           )
         );
         toast.success("Mention marked as resolved");
@@ -82,7 +85,9 @@ const MentionsPage = () => {
       if (success) {
         setMentions(prev => 
           prev.map(mention => 
-            mention.id === id ? { ...mention, severity: "high", status: "actioned" } : mention
+            mention.id === id ? 
+              { ...mention, severity: 'high', status: 'actioned' as ContentAlert['status'] } : 
+              mention
           )
         );
         toast.warning("Mention escalated");
