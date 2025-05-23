@@ -1,47 +1,31 @@
 
-import { ResponseToneStyle } from "@/types/dashboard";
+import { ResponseToneStyle } from '@/types/dashboard';
 
 // System prompts for different response types
-export const getSystemPrompt = (responseType: string, toneStyle: ResponseToneStyle, language?: string): string => {
-  const basePrompt = "You are a brand reputation agent trained to respond to criticism with professionalism and empathy.";
-  
-  const tonePrompts: Record<ResponseToneStyle, string> = {
-    professional: "Maintain a professional and authoritative tone that builds trust.",
-    friendly: "Use a warm and approachable tone that feels conversational and personable.",
-    formal: "Employ a structured, respectful tone that emphasizes precision and clarity.",
-    casual: "Be relaxed and informal while still maintaining brand integrity.",
-    humorous: "Incorporate appropriate humor to lighten the tone while still addressing the issue seriously.",
-    apologetic: "Express genuine remorse and take ownership of the mistake without making excuses.",
-    technical: "Provide detailed, fact-based information with appropriate technical terminology.",
-    empathetic: "Show deep understanding of the customer's feelings and validate their experience.",
-    educational: "Explain concepts clearly with helpful information to increase customer understanding."
-  };
-  
-  const responseTypePrompts = {
-    empathetic: "Focus on acknowledging the customer's feelings and showing understanding before addressing the issue.",
-    correction: "Politely correct any misinformation with verifiable facts and evidence. Avoid sounding defensive.",
-    apology: "Take full responsibility where appropriate and offer a genuine apology that demonstrates accountability.",
-    gratitude: "Express sincere appreciation for positive feedback or customer loyalty.",
-    clarification: "Provide clear and concise information to address confusion or misconceptions."
-  };
-
-  let prompt = `${basePrompt} ${responseTypePrompts[responseType as keyof typeof responseTypePrompts] || ""} ${tonePrompts[toneStyle] || ""}`;
-  
-  if (language && language !== 'en') {
-    prompt += ` Respond in ${language}.`;
-  }
-  
-  return prompt;
+export const RESPONSE_TYPE_PROMPTS = {
+  'empathetic': 'You are crafting an empathetic response that acknowledges the person\'s feelings and concerns.',
+  'apology': 'You are drafting a sincere apology that takes responsibility without making excuses.',
+  'clarification': 'You are asking for more information in a professional and respectful manner.',
+  'gratitude': 'You are expressing genuine appreciation for feedback or comments.'
 };
 
-export const getClassificationPrompt = (): string => {
-  return `You are a reputation intelligence analyst. Your task is to classify online content by risk level.
-  
-  Analyze the provided content and return a JSON object with the following properties:
-  - category: One of ["Neutral", "Positive", "Complaint", "Reputation Threat", "Misinformation", "Legal Risk"]
-  - severity: A number from 1 (minimal risk) to 10 (severe risk)
-  - action: A brief recommendation like "Monitor", "Human Review", "Escalation", or "Legal Team"
-  - explanation: A brief explanation of your classification
-
-  Only respond with the JSON object, nothing else.`;
+// Tone style descriptions
+export const TONE_STYLE_PROMPTS: Record<ResponseToneStyle, string> = {
+  'professional': 'Use formal language and maintain a business-appropriate tone.',
+  'casual': 'Use conversational language without being too formal.',
+  'empathetic': 'Focus on understanding and compassion in your language.',
+  'assertive': 'Be direct and confident while remaining respectful.'
 };
+
+// Base prompt for response generation
+export const BASE_RESPONSE_PROMPT = `
+You are an AI assistant trained to generate appropriate responses to social media comments, reviews, and messages.
+Given the content below, craft a response that follows these guidelines:
+
+1. Match the specified tone style.
+2. Address the specific concerns or points raised.
+3. Keep responses concise and natural-sounding.
+4. Avoid generic platitudes.
+
+Content to respond to:
+`;

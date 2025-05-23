@@ -1,8 +1,26 @@
-
 import React from 'react';
 import { useDashboardData } from "@/hooks/useDashboardData";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import DashboardMainContent from "@/components/dashboard/DashboardMainContent";
+
+// Update or add the necessary interface definitions for DashboardHeaderProps
+interface DashboardHeaderProps {
+  onRefresh?: () => Promise<void>;
+  totalAlerts: number;
+  highSeverityAlerts: number;
+  // Add any other required props
+}
+
+// Update or add the necessary interface definitions for DashboardMainContentProps
+interface DashboardMainContentProps {
+  metrics: MetricValue[];
+  alerts: ContentAlert[];
+  classifiedAlerts: ContentAlert[];
+  sources: ContentSource[];
+  actions: ContentAction[];
+  // Add any other required props
+  onSimulateNewData?: (scanResults: any[]) => void;
+}
 
 const DashboardPage = () => {
   const {

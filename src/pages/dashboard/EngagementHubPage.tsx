@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom"; 
 import DashboardLayout from "@/components/layout/DashboardLayout";
@@ -11,7 +10,7 @@ import RealTimeAlerts from "@/components/dashboard/real-time-alerts";
 import ThreatFeed from "@/components/dashboard/ThreatFeed";
 import ThreatAnalysisHub from "@/components/dashboard/ThreatAnalysisHub";
 import { ContentAlert } from "@/types/dashboard";
-import { registerAlertListener, unregisterAlertListener } from "@/services/aiScraping/mockScanner";
+import { registerAlertListener, unregisterAlertListener } from '@/services/alertListenerService';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -19,6 +18,13 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { EmailDigestSettings } from "@/types/aiScraping";
 import { scheduleEmailDigest } from "@/services/notifications/emailNotificationService";
+
+interface AlertListProps {
+  alerts: ContentAlert[];
+  onViewDetail: (alert: ContentAlert) => void;
+  onMarkAsRead: (id: string) => void;
+  onDismiss: (id: string) => void;
+}
 
 const EngagementHubPage = () => {
   const location = useLocation();
