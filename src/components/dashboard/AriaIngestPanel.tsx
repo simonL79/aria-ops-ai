@@ -34,7 +34,10 @@ const AriaIngestPanel = () => {
         url: formData.url.trim() || `https://manual-entry-${formData.platform}.com/${Date.now()}`
       };
       
+      console.log('Submitting request:', requestData);
       const response = await submitToAriaIngest(requestData);
+      console.log('Received response:', response);
+      
       if (response) {
         setLastResponse(response);
         // Clear form on successful submission (but not test)
@@ -56,7 +59,9 @@ const AriaIngestPanel = () => {
   const handleTest = async () => {
     setIsTesting(true);
     try {
+      console.log('Running test...');
       const response = await testAriaIngest();
+      console.log('Test response:', response);
       if (response) {
         setLastResponse(response);
       }
@@ -75,6 +80,9 @@ const AriaIngestPanel = () => {
         return <span className="h-3 w-3 bg-gray-400 rounded-full" />;
     }
   };
+
+  // Debug: Log the response structure
+  console.log('Current lastResponse:', lastResponse);
 
   return (
     <div className="space-y-4">
@@ -184,7 +192,20 @@ const AriaIngestPanel = () => {
         </CardContent>
       </Card>
 
-      {lastResponse && lastResponse.payload && (
+      {/* Debug card to show raw response */}
+      {lastResponse && (
+        <Card className="border-blue-200 bg-blue-50">
+          <CardHeader>
+            <CardTitle className="text-sm text-blue-700">Debug: Raw Response</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <pre className="text-xs overflow-auto">{JSON.stringify(lastResponse, null, 2)}</pre>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Enhanced results display with better error handling */}
+      {lastResponse && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -193,67 +214,133 @@ const AriaIngestPanel = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <Label className="text-muted-foreground">Platform</Label>
-                <p className="font-medium">{lastResponse.payload.platform || 'N/A'}</p>
-              </div>
-              <div>
-                <Label className="text-muted-foreground">Severity</Label>
-                <Badge variant={lastResponse.payload.severity === 'high' ? 'destructive' : 'secondary'}>
-                  {lastResponse.payload.severity || 'N/A'}
-                </Badge>
-              </div>
-            </div>
-
-            <div>
-              <Label className="text-muted-foreground">Content</Label>
-              <p className="text-sm bg-muted p-2 rounded">{lastResponse.payload.content || 'N/A'}</p>
-            </div>
-
-            <div>
-              <Label className="text-muted-foreground">Detected Entities</Label>
-              {lastResponse.payload.detected_entities && lastResponse.payload.detected_entities.length > 0 ? (
-                <div className="flex flex-wrap gap-2 mt-1">
-                  {lastResponse.payload.detected_entities.map((entity, idx) => (
-                    <Badge key={idx} variant="outline" className="flex items-center gap-1">
-                      {getEntityIcon(entity.type)}
-                      {entity.name}
-                      <span className="text-xs text-muted-foreground">({entity.type})</span>
+            {/* Check if we have payload or if it's in a different structure */}
+            {lastResponse.payload ? (
+              <>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <Label className="text-muted-foreground">Platform</Label>
+                    <p className="font-medium">{lastResponse.payload.platform || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground">Severity</Label>
+                    <Badge variant={lastResponse.payload.severity === 'high' ? 'destructive' : 'secondary'}>
+                      {lastResponse.payload.severity || 'N/A'}
                     </Badge>
-                  ))}
+                  </div>
                 </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">No entities detected</p>
-              )}
-            </div>
 
-            {lastResponse.payload.risk_entity_name && (
-              <div>
-                <Label className="text-muted-foreground">Primary Risk Entity</Label>
-                <div className="flex items-center gap-2 mt-1">
-                  <Badge variant="destructive" className="flex items-center gap-1">
-                    {getEntityIcon(lastResponse.payload.risk_entity_type || '')}
-                    {lastResponse.payload.risk_entity_name}
-                  </Badge>
+                <div>
+                  <Label className="text-muted-foreground">Content</Label>
+                  <p className="text-sm bg-muted p-2 rounded">{lastResponse.payload.content || 'N/A'}</p>
                 </div>
+
+                <div>
+                  <Label className="text-muted-foreground">Detected Entities</Label>
+                  {lastResponse.payload.detected_entities && lastResponse.payload.detected_entities.length > 0 ? (
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      {lastResponse.payload.detected_entities.map((entity, idx) => (
+                        <Badge key={idx} variant="outline" className="flex items-center gap-1">
+                          {getEntityIcon(entity.type)}
+                          {entity.name}
+                          <span className="text-xs text-muted-foreground">({entity.type})</span>
+                        </Badge>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No entities detected</p>
+                  )}
+                </div>
+
+                {lastResponse.payload.risk_entity_name && (
+                  <div>
+                    <Label className="text-muted-foreground">Primary Risk Entity</Label>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Badge variant="destructive" className="flex items-center gap-1">
+                        {getEntityIcon(lastResponse.payload.risk_entity_type || '')}
+                        {lastResponse.payload.risk_entity_name}
+                      </Badge>
+                    </div>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-3 gap-4 text-sm">
+                  <div>
+                    <Label className="text-muted-foreground">Confidence</Label>
+                    <p className="font-medium">{lastResponse.payload.confidence_score || 0}%</p>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground">Status</Label>
+                    <p className="font-medium">{lastResponse.payload.status || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground">Source Type</Label>
+                    <p className="font-medium">{lastResponse.payload.source_type || 'N/A'}</p>
+                  </div>
+                </div>
+              </>
+            ) : lastResponse.inserted ? (
+              // Handle case where response has 'inserted' data instead of 'payload'
+              <>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <Label className="text-muted-foreground">Platform</Label>
+                    <p className="font-medium">{lastResponse.inserted.platform || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <Label className="text-muted-foreground">Severity</Label>
+                    <Badge variant={lastResponse.inserted.severity === 'high' ? 'destructive' : 'secondary'}>
+                      {lastResponse.inserted.severity || 'N/A'}
+                    </Badge>
+                  </div>
+                </div>
+
+                <div>
+                  <Label className="text-muted-foreground">Content</Label>
+                  <p className="text-sm bg-muted p-2 rounded">{lastResponse.inserted.content || 'N/A'}</p>
+                </div>
+
+                <div>
+                  <Label className="text-muted-foreground">Detected Entities</Label>
+                  {lastResponse.inserted.detected_entities && lastResponse.inserted.detected_entities.length > 0 ? (
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      {lastResponse.inserted.detected_entities.map((entity: any, idx: number) => (
+                        <Badge key={idx} variant="outline" className="flex items-center gap-1">
+                          {getEntityIcon(entity.type || 'UNKNOWN')}
+                          {entity.name || entity}
+                          <span className="text-xs text-muted-foreground">({entity.type || 'UNKNOWN'})</span>
+                        </Badge>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No entities detected</p>
+                  )}
+                </div>
+
+                {lastResponse.inserted.risk_entity_name && (
+                  <div>
+                    <Label className="text-muted-foreground">Primary Risk Entity</Label>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Badge variant="destructive" className="flex items-center gap-1">
+                        {getEntityIcon(lastResponse.inserted.risk_entity_type || '')}
+                        {lastResponse.inserted.risk_entity_name}
+                      </Badge>
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="text-center py-4">
+                <p className="text-muted-foreground">Response received but no data to display</p>
+                <p className="text-xs text-muted-foreground mt-2">Check the debug section above for raw response data</p>
               </div>
             )}
 
-            <div className="grid grid-cols-3 gap-4 text-sm">
-              <div>
-                <Label className="text-muted-foreground">Confidence</Label>
-                <p className="font-medium">{lastResponse.payload.confidence_score || 0}%</p>
+            {lastResponse.message && (
+              <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded">
+                <p className="text-sm text-green-700">{lastResponse.message}</p>
               </div>
-              <div>
-                <Label className="text-muted-foreground">Status</Label>
-                <p className="font-medium">{lastResponse.payload.status || 'N/A'}</p>
-              </div>
-              <div>
-                <Label className="text-muted-foreground">Source Type</Label>
-                <p className="font-medium">{lastResponse.payload.source_type || 'N/A'}</p>
-              </div>
-            </div>
+            )}
           </CardContent>
         </Card>
       )}
