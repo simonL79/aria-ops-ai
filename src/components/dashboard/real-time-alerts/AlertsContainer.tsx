@@ -5,31 +5,35 @@ import AlertItem from './AlertItem';
 import EmptyAlertState from './EmptyAlertState';
 
 interface AlertsContainerProps {
-  alerts: ContentAlert[];
-  onViewDetail: (alert: ContentAlert) => void;
-  onMarkAsRead: (id: string) => void;
-  onDismiss: (id: string) => void;
+  filteredAlerts: ContentAlert[];
+  onViewDetail?: (alert: ContentAlert) => void;
+  onMarkAsRead?: (id: string) => void;
+  onDismiss?: (id: string) => void;
+  onRespond?: (alertId: string) => void;
 }
 
 const AlertsContainer: React.FC<AlertsContainerProps> = ({
-  alerts,
+  filteredAlerts,
   onViewDetail,
   onMarkAsRead,
   onDismiss,
+  onRespond,
 }) => {
-  if (alerts.length === 0) {
+  if (filteredAlerts.length === 0) {
     return <EmptyAlertState />;
   }
 
   return (
     <div className="space-y-2">
-      {alerts.map((alert) => (
+      {filteredAlerts.map((alert, index) => (
         <div key={alert.id}>
           <AlertItem
             alert={alert}
+            isLast={index === filteredAlerts.length - 1}
             onViewDetail={onViewDetail}
             onMarkAsRead={onMarkAsRead}
             onDismiss={onDismiss}
+            onRespond={onRespond}
           />
         </div>
       ))}
