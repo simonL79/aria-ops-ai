@@ -43,7 +43,7 @@ function processEntityData(data: ScanRow[] | null): Map<string, Entity> {
       } else if (detectedEntities && typeof detectedEntities === 'object' && !Array.isArray(detectedEntities)) {
         // If it's an object, try to extract entities from it
         entitiesArray = Object.values(detectedEntities).filter(item => 
-          typeof item === 'string' || (typeof item === 'object' && item?.name)
+          typeof item === 'string' || (typeof item === 'object' && item !== null && 'name' in item)
         );
       }
       
@@ -54,9 +54,9 @@ function processEntityData(data: ScanRow[] | null): Map<string, Entity> {
         // Handle different entity formats
         if (typeof entity === 'string') {
           entityName = entity;
-        } else if (typeof entity === 'object' && entity?.name) {
+        } else if (typeof entity === 'object' && entity !== null && 'name' in entity && typeof entity.name === 'string') {
           entityName = entity.name;
-          if (entity.type) {
+          if ('type' in entity && typeof entity.type === 'string') {
             const type = entity.type.toLowerCase();
             if (['person', 'organization', 'handle', 'location'].includes(type)) {
               entityType = type as Entity['type'];
