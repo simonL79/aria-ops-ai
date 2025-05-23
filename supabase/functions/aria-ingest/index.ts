@@ -91,20 +91,27 @@ serve(async (req) => {
       });
     }
 
-    // Validate the API key
+    // Validate the API key - IMPORTANT: Now actually enforcing auth
     const auth = req.headers.get('authorization');
-    if (auth) {
-      // If auth header is provided, validate it
-      const expectedAuth = `Bearer ${AUTH_KEY}`;
-      if (auth !== expectedAuth) {
-        console.log("Authentication failed: Invalid token");
-        // Still allow the request to proceed for now, but log the validation failure
-      } else {
-        console.log("Authentication successful");
-      }
-    } else {
-      console.log("No authorization header provided - proceeding anyway since JWT verification is disabled");
+    if (!auth) {
+      console.log("Authentication failed: No authorization header provided");
+      return new Response(JSON.stringify({ error: 'Authorization header required' }), { 
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
+    
+    // Check if the token matches our expected token
+    const expectedAuth = `Bearer ${AUTH_KEY}`;
+    if (auth !== expectedAuth) {
+      console.log("Authentication failed: Invalid token");
+      return new Response(JSON.stringify({ error: 'Invalid authorization token' }), { 
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+    
+    console.log("Authentication successful");
     
     // Parse request body
     const { 
