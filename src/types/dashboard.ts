@@ -1,67 +1,78 @@
-export interface ContentAlert {
+export interface MetricValue {
   id: string;
-  platform: string;
-  content: string;
-  date: string;
-  severity: 'high' | 'medium' | 'low';
-  status: 'new' | 'read' | 'reviewing' | 'actioned' | 'resolved';
-  url: string;
-  threatType?: string;
-  sourceType: string;
-  confidenceScore: number;
-  sentiment: 'positive' | 'negative' | 'neutral' | 'threatening';
-  detectedEntities: string[];
-  potentialReach?: number;
-  category?: string;
-  recommendation?: string;
-  source_credibility_score?: number;
-  media_is_ai_generated?: boolean;
-  ai_detection_confidence?: number;
-  incident_playbook?: string;
+  title: string;
+  value: number;
+  change: number;
+  icon: string;
+  color: string;
 }
 
 export interface ContentSource {
   id: string;
   name: string;
-  status: "critical" | "good" | "warning";
-  positiveRatio: number;
-  total: number;
-  active: boolean;
-  lastUpdated: string;
-  mentionCount: number;
-  sentiment: number;
+  type: string;
+  status: string;
+  lastUpdate: string;
+  metrics: {
+    total: number;
+    positive: number;
+    negative: number;
+    neutral: number;
+  };
 }
 
 export interface ContentAction {
   id: string;
   type: string;
   description: string;
-  timestamp: string;
-  status: string;
-  user: string;
   platform: string;
-  action: string;
+  status: string;
+  timestamp: string;
+}
+
+export interface DashboardData {
+  metrics: MetricValue[];
+  alerts: ContentAlert[];
+  classifiedAlerts: ContentAlert[];
+  sources: ContentSource[];
+  actions: ContentAction[];
+  toneStyles: ToneStyle[];
+  recentActivity: ActivityItem[];
+  seoContent: string;
+  negativeContent: number;
+  positiveContent: number;
+  neutralContent: number;
+}
+
+export interface ContentAlert {
+  id: string;
+  platform: string;
+  content: string;
+  severity: 'high' | 'medium' | 'low';
   date: string;
+  url?: string;
+  status: 'new' | 'read' | 'dismissed';
+  threatType?: string;
+  detectedEntities?: string[];
+  confidenceScore?: number;
+  potentialReach?: number;
+  sentiment?: 'positive' | 'negative' | 'neutral';
+  category?: string;
+  recommendation?: string;
+  sourceType?: string;
 }
 
-export interface MetricValue {
+export interface ToneStyle {
+  id: string;
   name: string;
-  value: number;
-  delta: number;
-  deltaType: "increase" | "decrease";
+  description: string;
 }
 
-// Add missing types that were referenced in other files
 export type ResponseToneStyle = 'professional' | 'casual' | 'empathetic' | 'assertive';
 
-export interface SeoContent {
+export interface ActivityItem {
   id: string;
-  title: string;
-  content: string;
-  keywords: string[];
-  priority: 'high' | 'medium' | 'low';
-  status?: string;
-  type?: string;
-  score?: number;
-  publishDate?: string;
+  type: string;
+  description: string;
+  timestamp: string;
 }

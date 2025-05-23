@@ -29,3 +29,16 @@ Given the content below, craft a response that follows these guidelines:
 
 Content to respond to:
 `;
+
+// Export functions needed by messageBuilder
+export const getSystemPrompt = (responseType: string, toneStyle: ResponseToneStyle, language?: string) => {
+  const basePrompt = RESPONSE_TYPE_PROMPTS[responseType as keyof typeof RESPONSE_TYPE_PROMPTS] || 'You are generating a professional response.';
+  const tonePrompt = TONE_STYLE_PROMPTS[toneStyle];
+  const languagePrompt = language ? `Respond in ${language}.` : '';
+  
+  return `${basePrompt} ${tonePrompt} ${languagePrompt}`;
+};
+
+export const getClassificationPrompt = () => {
+  return `You are an AI trained to classify content for threat analysis. Analyze the given content and provide a classification with severity, category, and explanation.`;
+};

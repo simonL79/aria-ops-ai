@@ -18,8 +18,6 @@ export interface AiScrapingResult {
   entities: string[];
 }
 
-// Additional interfaces needed for other components
-
 export interface ScrapingSource {
   id: string;
   name: string;
@@ -113,10 +111,17 @@ export interface EntityWatchlist {
   id: string;
   name: string;
   entityType: 'person' | 'organization' | 'location' | 'keyword';
+  type?: 'person' | 'organization' | 'location';
   priority: 'high' | 'medium' | 'low';
   description?: string;
   keywords?: string[];
+  sources?: string[];
+  alertThreshold?: number;
+  scanFrequency?: 'daily' | 'weekly' | 'monthly';
+  autoRespond?: boolean;
   autoAlert: boolean;
   createdAt: string;
+  updatedAt?: string;
+  lastScan?: string;
   lastAlertAt?: string;
 }

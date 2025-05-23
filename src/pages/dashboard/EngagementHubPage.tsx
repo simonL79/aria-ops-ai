@@ -19,13 +19,6 @@ import { toast } from "sonner";
 import { EmailDigestSettings } from "@/types/aiScraping";
 import { scheduleEmailDigest } from "@/services/notifications/emailNotificationService";
 
-interface AlertListProps {
-  alerts: ContentAlert[];
-  onViewDetail: (alert: ContentAlert) => void;
-  onMarkAsRead: (id: string) => void;
-  onDismiss: (id: string) => void;
-}
-
 const EngagementHubPage = () => {
   const location = useLocation();
   const [selectedAlert, setSelectedAlert] = useState<ContentAlert | null>(null);

@@ -1,24 +1,30 @@
+
 import React from 'react';
 import { useDashboardData } from "@/hooks/useDashboardData";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import DashboardMainContent from "@/components/dashboard/DashboardMainContent";
+import { MetricValue, ContentAlert, ContentSource, ContentAction } from "@/types/dashboard";
 
-// Update or add the necessary interface definitions for DashboardHeaderProps
 interface DashboardHeaderProps {
+  title?: string;
+  description?: string;
   onRefresh?: () => Promise<void>;
-  totalAlerts: number;
-  highSeverityAlerts: number;
-  // Add any other required props
+  totalAlerts?: number;
+  highSeverityAlerts?: number;
 }
 
-// Update or add the necessary interface definitions for DashboardMainContentProps
 interface DashboardMainContentProps {
-  metrics: MetricValue[];
-  alerts: ContentAlert[];
-  classifiedAlerts: ContentAlert[];
-  sources: ContentSource[];
-  actions: ContentAction[];
-  // Add any other required props
+  metrics?: MetricValue[];
+  alerts?: ContentAlert[];
+  classifiedAlerts?: ContentAlert[];
+  sources?: ContentSource[];
+  actions?: ContentAction[];
+  toneStyles?: any;
+  recentActivity?: any;
+  seoContent?: any;
+  negativeContent?: number;
+  positiveContent?: number;
+  neutralContent?: number;
   onSimulateNewData?: (scanResults: any[]) => void;
 }
 
@@ -52,7 +58,8 @@ const DashboardPage = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <DashboardHeader 
-        onRefresh={fetchData}
+        title="Dashboard"
+        description="Overview of your reputation monitoring"
         totalAlerts={alerts.length}
         highSeverityAlerts={alerts.filter(alert => alert.severity === 'high').length}
       />

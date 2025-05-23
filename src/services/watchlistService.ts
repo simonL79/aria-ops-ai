@@ -7,12 +7,15 @@ let watchlistEntitiesStorage: EntityWatchlist[] = [
   {
     id: 'entity-001',
     name: 'Acme Corporation',
+    entityType: 'organization',
     type: 'organization',
+    priority: 'high',
     keywords: ['Acme Corp', 'Acme Corporation', 'Acme Inc'],
     sources: ['google', 'news', 'crawler'],
     alertThreshold: 6,
     scanFrequency: 'daily',
     autoRespond: true,
+    autoAlert: true,
     lastScan: new Date(Date.now() - 86400000).toISOString(), // yesterday
     createdAt: new Date(Date.now() - 604800000).toISOString(), // a week ago
     updatedAt: new Date(Date.now() - 86400000).toISOString() // yesterday
@@ -20,12 +23,15 @@ let watchlistEntitiesStorage: EntityWatchlist[] = [
   {
     id: 'entity-002',
     name: 'Jane Smith',
+    entityType: 'person',
     type: 'person',
+    priority: 'medium',
     keywords: ['Jane Smith', 'J. Smith', 'CEO Jane Smith'],
     sources: ['twitter', 'google', 'news'],
     alertThreshold: 5,
     scanFrequency: 'weekly',
     autoRespond: false,
+    autoAlert: true,
     lastScan: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
     createdAt: new Date(Date.now() - 1209600000).toISOString(), // 2 weeks ago
     updatedAt: new Date(Date.now() - 172800000).toISOString() // 2 days ago
@@ -98,7 +104,7 @@ export const runWatchlistScan = async (entityId: string): Promise<ScrapingResult
   const results: ScrapingResult[] = Array(Math.floor(Math.random() * 5) + 1)
     .fill(0)
     .map((_, i) => {
-      const sourceType = entity.sources[Math.floor(Math.random() * entity.sources.length)];
+      const sourceType = entity.sources![Math.floor(Math.random() * entity.sources!.length)];
       const sentiment = Math.random() * 2 - 1; // -1 to 1
       const riskScore = Math.abs(sentiment) * 10; // 0 to 10
       
@@ -108,7 +114,7 @@ export const runWatchlistScan = async (entityId: string): Promise<ScrapingResult
         sourceName: sourceType.charAt(0).toUpperCase() + sourceType.slice(1),
         sourceType,
         entityName: entity.name,
-        entityType: entity.type,
+        entityType: entity.entityType,
         content: `Mock mention of ${entity.name} with ${sentiment < 0 ? 'negative' : 'positive'} sentiment.`,
         url: 'https://example.com/mock-result',
         timestamp: new Date().toISOString(),
@@ -132,7 +138,7 @@ export const runWatchlistScan = async (entityId: string): Promise<ScrapingResult
   });
   
   // Show a success toast if we found risks above threshold
-  const risksFound = results.filter(r => (r.riskScore || 0) >= entity.alertThreshold).length;
+  const risksFound = results.filter(r => (r.riskScore || 0) >= (entity.alertThreshold || 5)).length;
   
   if (risksFound > 0) {
     toast.warning(`Found ${risksFound} potential risk${risksFound > 1 ? 's' : ''} for ${entity.name}`, {
