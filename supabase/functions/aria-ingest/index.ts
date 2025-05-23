@@ -53,23 +53,38 @@ serve(async (req) => {
 
     // Verify authentication
     const authHeader = req.headers.get('authorization');
-    console.log(`[ARIA-INGEST] Auth header: "${authHeader}"`);
+    console.log(`[ARIA-INGEST] Auth header received: "${authHeader}"`);
     
-    // Compare with expected
+    // Compare with expected - trim whitespace and normalize
     const expectedAuth = `Bearer ${AUTH_KEY}`;
-    console.log(`[ARIA-INGEST] Expected auth: "${expectedAuth}"`);
-    console.log(`[ARIA-INGEST] Match: ${authHeader === expectedAuth}`);
+    const normalizedAuthHeader = authHeader?.trim();
+    const normalizedExpectedAuth = expectedAuth.trim();
     
-    if (!authHeader || authHeader !== expectedAuth) {
-      console.log(`[ARIA-INGEST] Auth failed. Expected: "${expectedAuth}", Got: "${authHeader}"`);
+    console.log(`[ARIA-INGEST] Expected auth: "${normalizedExpectedAuth}"`);
+    console.log(`[ARIA-INGEST] Received length: ${normalizedAuthHeader?.length || 0}`);
+    console.log(`[ARIA-INGEST] Expected length: ${normalizedExpectedAuth.length}`);
+    console.log(`[ARIA-INGEST] Match: ${normalizedAuthHeader === normalizedExpectedAuth}`);
+    
+    if (!authHeader || normalizedAuthHeader !== normalizedExpectedAuth) {
+      console.log(`[ARIA-INGEST] Auth failed.`);
+      console.log(`[ARIA-INGEST] Expected: "${normalizedExpectedAuth}"`);
+      console.log(`[ARIA-INGEST] Got: "${normalizedAuthHeader}"`);
+      
       return new Response(JSON.stringify({ 
         error: 'Authorization failed',
-        debug: { received: authHeader, expected: expectedAuth }
+        debug: { 
+          received: normalizedAuthHeader, 
+          expected: normalizedExpectedAuth,
+          receivedLength: normalizedAuthHeader?.length || 0,
+          expectedLength: normalizedExpectedAuth.length
+        }
       }), {
         status: 401, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
+    
+    console.log(`[ARIA-INGEST] Auth successful - proceeding with request`);
     
     // Process the request
     return await handleRequest(requestData, supabase);
