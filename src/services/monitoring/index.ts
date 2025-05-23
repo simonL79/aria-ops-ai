@@ -90,6 +90,25 @@ export const stopMonitoring = async () => {
 };
 
 /**
+ * Helper function to safely extract entity name from unknown structure
+ */
+const extractEntityName = (entity: unknown): string => {
+  if (typeof entity === 'string') return entity;
+  
+  if (
+    entity &&
+    typeof entity === 'object' &&
+    !Array.isArray(entity) &&
+    'name' in entity &&
+    typeof (entity as any).name === 'string'
+  ) {
+    return (entity as any).name;
+  }
+  
+  return String(entity);
+};
+
+/**
  * Get mentions as formatted ContentAlerts
  */
 export const getMentionsAsAlerts = async (): Promise<ContentAlert[]> => {
@@ -113,14 +132,10 @@ export const getMentionsAsAlerts = async (): Promise<ContentAlert[]> => {
     return (scanResults || []).map((item): ContentAlert => {
       let detectedEntities: string[] = [];
       
-      // Handle detected_entities in various formats
+      // Handle detected_entities in various formats with proper type checking
       if (item.detected_entities) {
         if (Array.isArray(item.detected_entities)) {
-          detectedEntities = item.detected_entities.map(entity => {
-            if (typeof entity === 'string') return entity;
-            if (typeof entity === 'object' && entity.name) return entity.name;
-            return String(entity);
-          });
+          detectedEntities = item.detected_entities.map(extractEntityName);
         } else if (typeof item.detected_entities === 'object') {
           detectedEntities = Object.values(item.detected_entities)
             .filter(Boolean)
