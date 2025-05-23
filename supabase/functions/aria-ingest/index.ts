@@ -51,32 +51,37 @@ serve(async (req) => {
       });
     }
 
-    // Verify authentication
-    const authHeader = req.headers.get('authorization');
-    console.log(`[ARIA-INGEST] Auth header received: "${authHeader}"`);
+    // Extract the auth key regardless of format (supporting multiple formats)
+    const authHeader = req.headers.get('authorization') || '';
+    console.log(`[ARIA-INGEST] Raw auth header: "${authHeader}"`);
     
-    // Compare with expected - trim whitespace and normalize
-    const expectedAuth = `Bearer ${AUTH_KEY}`;
-    const normalizedAuthHeader = authHeader?.trim();
-    const normalizedExpectedAuth = expectedAuth.trim();
+    let receivedKey = '';
     
-    console.log(`[ARIA-INGEST] Expected auth: "${normalizedExpectedAuth}"`);
-    console.log(`[ARIA-INGEST] Received length: ${normalizedAuthHeader?.length || 0}`);
-    console.log(`[ARIA-INGEST] Expected length: ${normalizedExpectedAuth.length}`);
-    console.log(`[ARIA-INGEST] Match: ${normalizedAuthHeader === normalizedExpectedAuth}`);
+    // Extract the actual key part regardless of format
+    if (authHeader.startsWith('Bearer ')) {
+      receivedKey = authHeader.substring(7).trim();
+    } else if (authHeader.includes(' ')) {
+      // Try to extract key if it's in another format with a space
+      receivedKey = authHeader.split(' ')[1]?.trim() || '';
+    } else {
+      // Maybe it's just the raw key
+      receivedKey = authHeader.trim();
+    }
     
-    if (!authHeader || normalizedAuthHeader !== normalizedExpectedAuth) {
-      console.log(`[ARIA-INGEST] Auth failed.`);
-      console.log(`[ARIA-INGEST] Expected: "${normalizedExpectedAuth}"`);
-      console.log(`[ARIA-INGEST] Got: "${normalizedAuthHeader}"`);
+    console.log(`[ARIA-INGEST] Extracted key: "${receivedKey}" (${receivedKey.length} chars)`);
+    console.log(`[ARIA-INGEST] Expected key: "${AUTH_KEY}" (${AUTH_KEY.length} chars)`);
+    console.log(`[ARIA-INGEST] Keys match: ${receivedKey === AUTH_KEY}`);
+    
+    // More flexible auth check - just compare the actual key parts
+    if (!receivedKey || receivedKey !== AUTH_KEY) {
+      console.log(`[ARIA-INGEST] Auth failed - keys don't match`);
       
       return new Response(JSON.stringify({ 
         error: 'Authorization failed',
         debug: { 
-          received: normalizedAuthHeader, 
-          expected: normalizedExpectedAuth,
-          receivedLength: normalizedAuthHeader?.length || 0,
-          expectedLength: normalizedExpectedAuth.length
+          receivedKeyLength: receivedKey.length,
+          expectedKeyLength: AUTH_KEY.length,
+          hint: "Make sure the exact key is being sent, without any encoding issues"
         }
       }), {
         status: 401, 
