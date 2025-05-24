@@ -3,6 +3,30 @@ import { BlogPost } from '@/types/blog';
 
 export const ariaPosts: BlogPost[] = [
   {
+    title: "From Chaos to Control: How ARIA Turns Digital Threats into Strategic Insight",
+    slug: "from-chaos-to-control-aria-digital-threats-strategic-insight",
+    description: "Discover how A.R.I.A™ transforms the overwhelming noise of digital threats into actionable strategic intelligence for modern businesses.",
+    author: "Simon Lindsay",
+    date: "May 27, 2025",
+    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop",
+    category: "Strategic Intelligence",
+    status: "published",
+    content: `
+# From Chaos to Control: How ARIA Turns Digital Threats into Strategic Insight
+
+*Also published on [Medium](https://medium.com/@simonlindsay7988/from-chaos-to-control-how-aria-turns-digital-threats-into-strategic-insight-17f3ccf5015b)*
+
+*Related: [Why I Built A.R.I.A™](/blog/why-i-built-aria) • [Building A.R.I.A™](/blog/building-aria-smarter-online-reputation)*
+
+[Content from the Medium article would go here - please update with the actual content from the Medium post]
+
+---
+
+**Simon Lindsay**  
+*Founder, A.R.I.A™*
+    `
+  },
+  {
     title: "What I Learned Rebuilding After a Public Crisis: The Story Behind A.R.I.A™",
     slug: "rebuilding-after-public-crisis-aria-story",
     description: "A candid account of rebuilding from adversity and how personal experience shaped the creation of A.R.I.A™.",
