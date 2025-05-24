@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Navigate, useLocation, useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Shield, AlertCircle } from "lucide-react";
+import { Shield, AlertCircle, CheckCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import LoginForm from "@/components/auth/LoginForm";
 
@@ -13,15 +13,22 @@ const Authentication = () => {
   const [searchParams] = useSearchParams();
   const from = location.state?.from?.pathname || "/dashboard";
   const authType = searchParams.get('type');
+  const error = searchParams.get('error');
+  const errorDescription = searchParams.get('error_description');
   
   useEffect(() => {
+    // Handle auth errors from URL params
+    if (error) {
+      console.error('Auth error from URL:', error, errorDescription);
+    }
+    
     // Small timeout to prevent flash
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 300);
     
     return () => clearTimeout(timer);
-  }, []);
+  }, [error, errorDescription]);
   
   // If still loading, show a simple loading state
   if (isLoading) {
@@ -37,7 +44,7 @@ const Authentication = () => {
     return <Navigate to={from} replace />;
   }
 
-  // Message for password reset workflow
+  // Message for different auth types
   const getAuthTypeMessage = () => {
     if (authType === 'recovery') {
       return (
@@ -55,6 +62,40 @@ const Authentication = () => {
         </div>
       );
     }
+
+    if (authType === 'magiclink') {
+      return (
+        <div className="mb-6 p-4 bg-green-50 border border-green-100 rounded-md">
+          <div className="flex items-start">
+            <CheckCircle className="h-5 w-5 text-green-500 mr-2 mt-0.5" />
+            <div>
+              <h3 className="font-medium text-green-800">Magic Link Authentication</h3>
+              <p className="text-sm text-green-600">
+                You've clicked a magic link. You should be signed in automatically. 
+                If not, please try signing in again.
+              </p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (error) {
+      return (
+        <div className="mb-6 p-4 bg-red-50 border border-red-100 rounded-md">
+          <div className="flex items-start">
+            <AlertCircle className="h-5 w-5 text-red-500 mr-2 mt-0.5" />
+            <div>
+              <h3 className="font-medium text-red-800">Authentication Error</h3>
+              <p className="text-sm text-red-600">
+                {errorDescription || error || "An authentication error occurred. Please try again."}
+              </p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     return null;
   };
 

@@ -25,7 +25,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     console.log('AuthProvider initializing...');
     
-    // Set a reasonable timeout for auth loading
     const authTimeout = setTimeout(() => {
       if (isLoading) {
         console.warn('Auth loading timed out - forcing completion');
@@ -33,7 +32,46 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     }, 5000);
 
-    // Get initial session
+    // Set up auth state change listener first
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, currentSession) => {
+        console.log('Auth state change:', event, { 
+          hasSession: !!currentSession,
+          userId: currentSession?.user?.id 
+        });
+        
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
+        setIsLoading(false);
+        clearTimeout(authTimeout);
+
+        // Handle different auth events
+        if (event === 'SIGNED_IN' && currentSession?.user) {
+          try {
+            await checkAdminStatus(currentSession.user.id);
+            await initializeDatabase();
+            console.log('User signed in successfully:', currentSession.user.email);
+          } catch (error) {
+            console.error('Error during sign in initialization:', error);
+          }
+        }
+
+        if (event === 'SIGNED_OUT') {
+          setIsAdmin(false);
+          console.log('User signed out');
+        }
+
+        if (event === 'TOKEN_REFRESHED') {
+          console.log('Token refreshed successfully');
+        }
+
+        if (event === 'PASSWORD_RECOVERY') {
+          console.log('Password recovery initiated');
+        }
+      }
+    );
+
+    // Then get initial session
     const getInitialSession = async () => {
       try {
         const { data: { session: initialSession }, error } = await supabase.auth.getSession();
@@ -41,18 +79,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (error) {
           console.error('Error getting initial session:', error);
         } else {
-          console.log('Get session result:', { 
-            _type: typeof initialSession, 
-            value: initialSession ? 'session_exists' : 'undefined'
+          console.log('Initial session check:', { 
+            hasSession: !!initialSession,
+            userId: initialSession?.user?.id 
           });
           
           setSession(initialSession);
           setUser(initialSession?.user ?? null);
           
-          // Check admin status
           if (initialSession?.user) {
-            checkAdminStatus(initialSession.user.id);
-            initializeDatabase().catch(error => {
+            await checkAdminStatus(initialSession.user.id);
+            await initializeDatabase().catch(error => {
               console.error('Error initializing database:', error);
             });
           }
@@ -66,35 +103,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     getInitialSession();
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, currentSession) => {
-        console.log('Auth state change:', event, { 
-          _type: typeof currentSession, 
-          value: currentSession ? 'session_exists' : 'undefined'
-        });
-        
-        setSession(currentSession);
-        setUser(currentSession?.user ?? null);
-        setIsLoading(false);
-        clearTimeout(authTimeout);
-
-        // Check admin status and initialize database when user signs in
-        if (event === 'SIGNED_IN' && currentSession?.user) {
-          try {
-            checkAdminStatus(currentSession.user.id);
-            await initializeDatabase();
-          } catch (error) {
-            console.error('Error initializing database after sign in:', error);
-          }
-        }
-
-        if (event === 'SIGNED_OUT') {
-          setIsAdmin(false);
-        }
-      }
-    );
 
     return () => {
       clearTimeout(authTimeout);
@@ -112,6 +120,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         .single();
       
       setIsAdmin(!!data);
+      console.log('Admin status checked:', !!data);
     } catch (error) {
       console.error('Error checking admin status:', error);
       setIsAdmin(false);

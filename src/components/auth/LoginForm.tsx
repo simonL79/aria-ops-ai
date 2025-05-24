@@ -12,7 +12,6 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
-// Define a schema for login form validation
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
   password: z.string().min(1, "Password is required"),
@@ -23,11 +22,12 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isResetMode, setIsResetMode] = useState(false);
+  const [isMagicLinkMode, setIsMagicLinkMode] = useState(false);
   const [resetSent, setResetSent] = useState(false);
+  const [magicLinkSent, setMagicLinkSent] = useState(false);
   const navigate = useNavigate();
   const { signIn } = useAuth();
   
-  // Set up the login form with validation
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -36,7 +36,6 @@ const LoginForm = () => {
     },
   });
   
-  // Handle password reset request
   const handlePasswordReset = async (email: string) => {
     if (!email) {
       toast.error("Please enter your email address to reset your password");
@@ -46,7 +45,6 @@ const LoginForm = () => {
     setIsLoading(true);
     
     try {
-      // Log the request to the console for debugging
       console.log("Sending password reset to:", email);
       console.log("Redirect URL:", `${window.location.origin}/auth?type=recovery`);
       
@@ -71,16 +69,56 @@ const LoginForm = () => {
       setIsLoading(false);
     }
   };
+
+  const handleMagicLink = async (email: string) => {
+    if (!email) {
+      toast.error("Please enter your email address to send magic link");
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    try {
+      console.log("Sending magic link to:", email);
+      console.log("Redirect URL:", `${window.location.origin}/dashboard`);
+      
+      const { error, data } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/dashboard`,
+        },
+      });
+      
+      console.log("Magic link response:", { error, data });
+      
+      if (error) throw error;
+      
+      setMagicLinkSent(true);
+      toast.success("Magic link sent to your email", {
+        description: "Please check your inbox (and spam folder) to sign in",
+      });
+    } catch (error: any) {
+      console.error("Magic link error:", error);
+      toast.error("Failed to send magic link", {
+        description: error.message || "Please try again later",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
   
-  // Email signin implementation
   const handleSignIn = async (values: LoginFormValues) => {
     setIsLoading(true);
     
     try {
       console.log("Attempting sign in with:", values.email);
-      const success = await signIn(values.email, values.password);
+      const { error } = await signIn(values.email, values.password);
       
-      if (success) {
+      if (error) {
+        toast.error("Login failed", {
+          description: error.message || "Please check your credentials",
+        });
+      } else {
         toast.success("Login successful!");
         setTimeout(() => navigate("/dashboard"), 500);
       }
@@ -94,8 +132,85 @@ const LoginForm = () => {
     }
   };
 
+  if (isMagicLinkMode) {
+    return (
+      <div className="space-y-4">
+        <h3 className="text-lg font-medium">Sign in with Magic Link</h3>
+        
+        {magicLinkSent ? (
+          <div className="p-4 bg-green-50 border border-green-100 rounded-md text-green-800">
+            <p className="mb-2 font-medium">Magic link sent!</p>
+            <p className="text-sm mb-3">Please check your email inbox (and spam folder) for the magic link to sign in.</p>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => {
+                setIsMagicLinkMode(false);
+                setMagicLinkSent(false);
+              }}
+            >
+              Back to login
+            </Button>
+          </div>
+        ) : (
+          <Form {...form}>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              handleMagicLink(form.getValues("email"));
+            }} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                        <Input 
+                          placeholder="name@example.com" 
+                          className="pl-10"
+                          {...field} 
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <div className="flex gap-3">
+                <Button 
+                  type="button" 
+                  variant="outline"
+                  className="flex-1" 
+                  onClick={() => setIsMagicLinkMode(false)}
+                  disabled={isLoading}
+                >
+                  Back to Login
+                </Button>
+                
+                <Button 
+                  type="submit"
+                  className="flex-1"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Sending...
+                    </>
+                  ) : "Send Magic Link"}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        )}
+      </div>
+    );
+  }
+
   if (isResetMode) {
-    // Show password reset form
     return (
       <div className="space-y-4">
         <h3 className="text-lg font-medium">Reset your password</h3>
@@ -173,7 +288,6 @@ const LoginForm = () => {
     );
   }
 
-  // Regular login form
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSignIn)} className="space-y-4">
@@ -222,7 +336,7 @@ const LoginForm = () => {
           )}
         />
         
-        <div className="text-right">
+        <div className="flex justify-between text-sm">
           <Button 
             type="button" 
             variant="link" 
@@ -231,6 +345,15 @@ const LoginForm = () => {
             onClick={() => setIsResetMode(true)}
           >
             Forgot your password?
+          </Button>
+          <Button 
+            type="button" 
+            variant="link" 
+            size="sm" 
+            className="px-0" 
+            onClick={() => setIsMagicLinkMode(true)}
+          >
+            Use Magic Link
           </Button>
         </div>
         
@@ -251,6 +374,17 @@ const LoginForm = () => {
               Sign In
             </span>
           )}
+        </Button>
+
+        <Button 
+          type="button" 
+          variant="outline"
+          className="w-full"
+          onClick={() => setIsMagicLinkMode(true)}
+          disabled={isLoading}
+        >
+          <Mail className="mr-2 h-4 w-4" />
+          Sign In with Magic Link
         </Button>
       </form>
     </Form>
