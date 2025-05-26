@@ -1,14 +1,10 @@
-
 import React from 'react';
 import { Routes, Route } from "react-router-dom";
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { Toaster } from "@/components/ui/toaster"
 import { Toaster as Sonner } from 'sonner';
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-
-// Import auth guards
-import AuthGuard from "@/components/auth/AuthGuard"
-import AdminGuard from "@/components/auth/AdminGuard"
+import RouteProtection from "@/components/auth/RouteProtection";
 
 // Import all pages
 import Index from "@/pages/HomePage"
@@ -70,78 +66,78 @@ function App() {
           
           {/* Protected dashboard routes */}
           <Route path="/dashboard" element={
-            <AuthGuard>
+            <RouteProtection requireAuth={true}>
               <Dashboard />
-            </AuthGuard>
+            </RouteProtection>
           } />
           <Route path="/dashboard/mentions" element={
-            <AuthGuard>
+            <RouteProtection requireAuth={true}>
               <MentionsPage />
-            </AuthGuard>
+            </RouteProtection>
           } />
           <Route path="/dashboard/engagement" element={
-            <AuthGuard>
+            <RouteProtection requireAuth={true}>
               <EngagementHubPage />
-            </AuthGuard>
+            </RouteProtection>
           } />
           <Route path="/dashboard/aria-ingest" element={
-            <AuthGuard>
+            <RouteProtection requireAuth={true}>
               <AriaIngestPage />
-            </AuthGuard>
+            </RouteProtection>
           } />
           <Route path="/dashboard/analytics" element={
-            <AuthGuard>
+            <RouteProtection requireAuth={true}>
               <AnalyticsPage />
-            </AuthGuard>
+            </RouteProtection>
           } />
           <Route path="/dashboard/radar" element={
-            <AuthGuard>
+            <RouteProtection requireAuth={true}>
               <RadarPage />
-            </AuthGuard>
+            </RouteProtection>
           } />
           <Route path="/dashboard/ai-scraping" element={
-            <AuthGuard>
+            <RouteProtection requireAuth={true}>
               <AiScrapingDashboard />
-            </AuthGuard>
+            </RouteProtection>
           } />
           
           {/* Admin-only routes */}
           <Route path="/admin" element={
-            <AdminGuard>
+            <RouteProtection requireAuth={true} requireAdmin={true}>
               <AdminDashboard />
-            </AdminGuard>
+            </RouteProtection>
           } />
           <Route path="/blog/admin" element={
-            <AdminGuard>
+            <RouteProtection requireAuth={true} requireAdmin={true}>
               <BlogAdminPage />
-            </AdminGuard>
+            </RouteProtection>
           } />
           
           {/* Other protected routes */}
           <Route path="/clients" element={
-            <AuthGuard>
+            <RouteProtection requireAuth={true}>
               <Clients />
-            </AuthGuard>
+            </RouteProtection>
           } />
           <Route path="/calendar" element={
-            <AuthGuard>
+            <RouteProtection requireAuth={true}>
               <CalendarPage />
-            </AuthGuard>
+            </RouteProtection>
           } />
           <Route path="/settings" element={
-            <AuthGuard>
+            <RouteProtection requireAuth={true}>
               <Settings />
-            </AuthGuard>
+            </RouteProtection>
           } />
           <Route path="/monitor" element={
-            <AuthGuard>
+            <RouteProtection requireAuth={true}>
               <Monitor />
-            </AuthGuard>
+            </RouteProtection>
           } />
           <Route path="/new-companies" element={
-            <AuthGuard>
+            <RouteProtection requireAuth={true}>
               <NewCoPage />
-            </AuthGuard>
+            </RouteProtection>
           } />
           
           {/* Catch all - redirect to home */}
