@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -35,6 +34,20 @@ interface IngestStats {
   averageProcessingTime: number;
   isRunning: boolean;
 }
+
+// Add status normalization function
+const normalizeThreatStatus = (status: string): 'new' | 'in_review' | 'complete' | 'archived' => {
+  switch (status) {
+    case 'completed':
+      return 'complete';
+    case 'processing':
+      return 'in_review';
+    case 'failed':
+      return 'archived';
+    default:
+      return status as 'new' | 'in_review' | 'complete' | 'archived';
+  }
+};
 
 const ThreatIngestWorker = () => {
   const [jobs, setJobs] = useState<IngestJob[]>([]);
@@ -78,17 +91,15 @@ const ThreatIngestWorker = () => {
 
       if (error) throw error;
 
-      // Convert submissions to ingest jobs format
+      // Convert submissions to ingest jobs format with normalized status
       const ingestJobs: IngestJob[] = (submissions || []).map(sub => ({
         id: `job_${sub.id}`,
         submissionId: sub.id,
-        status: sub.status === 'complete' ? 'complete' : 
-                sub.status === 'archived' ? 'archived' : 
-                sub.status === 'in_review' ? 'in_review' : 'new',
-        progress: sub.status === 'complete' ? 100 : 
-                 sub.status === 'in_review' ? 50 : 0,
+        status: normalizeThreatStatus(sub.status),
+        progress: normalizeThreatStatus(sub.status) === 'complete' ? 100 : 
+                 normalizeThreatStatus(sub.status) === 'in_review' ? 50 : 0,
         startedAt: sub.created_at ? new Date(sub.created_at) : undefined,
-        completedAt: sub.updated_at && sub.status === 'complete' ? new Date(sub.updated_at) : undefined
+        completedAt: sub.updated_at && normalizeThreatStatus(sub.status) === 'complete' ? new Date(sub.updated_at) : undefined
       }));
 
       setJobs(ingestJobs);

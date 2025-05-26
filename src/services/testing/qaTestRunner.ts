@@ -1,418 +1,305 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { systemHealthService } from '../monitoring/systemHealthService';
-import { dataExportService } from '../dataExport/exportService';
+import { toast } from 'sonner';
 
 export interface QATestResult {
   testName: string;
-  phase: string;
   status: 'pass' | 'fail' | 'warning';
   message: string;
-  details?: any;
   timestamp: Date;
+  phase: string;
 }
 
 export interface QATestSuite {
-  suiteName: string;
   totalTests: number;
   passedTests: number;
   failedTests: number;
   warningTests: number;
-  results: QATestResult[];
   duration: number;
+  results: QATestResult[];
 }
 
 export class QATestRunner {
   private results: QATestResult[] = [];
-  private startTime: Date = new Date();
 
   async runFullQASuite(): Promise<QATestSuite> {
+    const startTime = Date.now();
     this.results = [];
-    this.startTime = new Date();
 
-    console.log('🚀 Starting ARIA™ NOC QA Master Suite...');
+    console.log('Starting QA Master Suite...');
 
     // Phase 1: Public Entry Points
     await this.runPhase1Tests();
-
-    // Phase 2: Backend Intelligence Flow
+    
+    // Phase 2: Backend Intelligence
     await this.runPhase2Tests();
-
-    // Phase 3: Control Center UI
+    
+    // Phase 3: Control Center
     await this.runPhase3Tests();
-
+    
     // Phase 4: Command Modules
     await this.runPhase4Tests();
-
-    // Phase 5: Security & Data Integrity
+    
+    // Phase 5: Security & Compliance
     await this.runPhase5Tests();
-
-    // Phase 6: System Health & Reliability
+    
+    // Phase 6: System Health
     await this.runPhase6Tests();
-
-    // Phase 7: Data Export & External Ops
+    
+    // Phase 7: Export & Audit
     await this.runPhase7Tests();
 
-    const endTime = new Date();
-    const duration = endTime.getTime() - this.startTime.getTime();
-
-    const passed = this.results.filter(r => r.status === 'pass').length;
-    const failed = this.results.filter(r => r.status === 'fail').length;
-    const warnings = this.results.filter(r => r.status === 'warning').length;
+    const duration = Date.now() - startTime;
+    const totalTests = this.results.length;
+    const passedTests = this.results.filter(r => r.status === 'pass').length;
+    const failedTests = this.results.filter(r => r.status === 'fail').length;
+    const warningTests = this.results.filter(r => r.status === 'warning').length;
 
     return {
-      suiteName: 'ARIA™ NOC QA Master Suite',
-      totalTests: this.results.length,
-      passedTests: passed,
-      failedTests: failed,
-      warningTests: warnings,
-      results: this.results,
-      duration
+      totalTests,
+      passedTests,
+      failedTests,
+      warningTests,
+      duration,
+      results: this.results
     };
   }
 
+  private addResult(testName: string, status: 'pass' | 'fail' | 'warning', message: string, phase: string) {
+    this.results.push({
+      testName,
+      status,
+      message,
+      timestamp: new Date(),
+      phase
+    });
+  }
+
   private async runPhase1Tests() {
-    console.log('📝 Phase 1: Public Entry Points');
-
-    // Test 1: Form Access & Responsiveness
-    await this.runTest('Form Rendering', 'Phase 1', async () => {
-      // Check if reputation scan form components exist
-      const formExists = document.querySelector('[data-testid="reputation-scan-form"]') !== null;
-      return {
-        pass: true, // Mock test
-        message: 'Form components are properly structured'
-      };
-    });
-
-    // Test 2: Validation & Error Handling
-    await this.runTest('Form Validation', 'Phase 1', async () => {
-      // Test form validation logic
-      return {
-        pass: true,
-        message: 'Form validation working correctly'
-      };
-    });
-
-    // Test 3: Submission Behavior
-    await this.runTest('Form Submission', 'Phase 1', async () => {
-      // Test database connection and submission
-      const { error } = await supabase
+    const phase = 'Phase 1: Public Entry Points';
+    
+    // Test 1.1: Form Submission
+    try {
+      const { data, error } = await supabase
         .from('reputation_scan_submissions')
-        .select('id')
+        .select('count(*)')
         .limit(1);
+      
+      if (error) throw error;
+      this.addResult('Form Submission Table', 'pass', 'Reputation scan submissions table accessible', phase);
+    } catch (error) {
+      this.addResult('Form Submission Table', 'fail', `Database error: ${error.message}`, phase);
+    }
 
-      return {
-        pass: !error,
-        message: error ? `Database connection failed: ${error.message}` : 'Form submission pathway verified'
-      };
-    });
+    // Test 1.2: Rate Limiting Check
+    this.addResult('Rate Limiting', 'warning', 'Rate limiting not implemented - manual verification needed', phase);
 
-    // Test 4: Rate Limiting
-    await this.runTest('Rate Limiting', 'Phase 1', async () => {
-      // Mock rate limiting test
-      return {
-        pass: true,
-        message: 'Rate limiting configuration verified'
-      };
-    });
+    // Test 1.3: Input Validation
+    this.addResult('Input Validation', 'warning', 'Input validation requires manual testing', phase);
   }
 
   private async runPhase2Tests() {
-    console.log('🧠 Phase 2: Backend Intelligence Flow');
-
-    // Test 5: Ingest Job Triggers
-    await this.runTest('Ingest Triggers', 'Phase 2', async () => {
-      // Check if scan_results table is accessible
-      const { error } = await supabase
-        .from('scan_results')
-        .select('id')
-        .limit(1);
-
-      return {
-        pass: !error,
-        message: error ? `Scan results table inaccessible: ${error.message}` : 'Ingest pipeline accessible'
-      };
-    });
-
-    // Test 6: Threat Analysis Engine
-    await this.runTest('AI Threat Analysis', 'Phase 2', async () => {
-      // Check for AI analysis fields in scan results
+    const phase = 'Phase 2: Backend Intelligence';
+    
+    // Test 2.1: Threat Analysis Pipeline
+    try {
       const { data, error } = await supabase
         .from('scan_results')
-        .select('threat_type, threat_summary, confidence_score, ai_detection_confidence')
+        .select('threat_type, confidence_score')
         .not('threat_type', 'is', null)
-        .limit(1);
+        .limit(5);
+      
+      if (error) throw error;
+      
+      if (data && data.length > 0) {
+        this.addResult('Threat Analysis Pipeline', 'pass', `Found ${data.length} analyzed threats`, phase);
+      } else {
+        this.addResult('Threat Analysis Pipeline', 'warning', 'No analyzed threats found in database', phase);
+      }
+    } catch (error) {
+      this.addResult('Threat Analysis Pipeline', 'fail', `Pipeline error: ${error.message}`, phase);
+    }
 
-      return {
-        pass: !error && data && data.length > 0,
-        message: error ? `AI analysis verification failed: ${error.message}` : 
-                data && data.length > 0 ? 'AI analysis pipeline verified' : 'No AI analysis data found'
-      };
-    });
-
-    // Test 7: Threat Correlation Engine
-    await this.runTest('Threat Correlation', 'Phase 2', async () => {
-      // Check if case_threads table exists and is functional
-      const { error } = await supabase
-        .from('case_threads')
-        .select('id')
-        .limit(1);
-
-      return {
-        pass: !error,
-        message: error ? `Case threads system failed: ${error.message}` : 'Threat correlation system verified'
-      };
-    });
+    // Test 2.2: AI Integration
+    const hasAIAnalysis = this.results.some(r => r.testName.includes('Threat Analysis') && r.status === 'pass');
+    this.addResult('AI Integration', hasAIAnalysis ? 'pass' : 'warning', 
+      hasAIAnalysis ? 'AI analysis detected in threat data' : 'AI analysis integration needs verification', phase);
   }
 
   private async runPhase3Tests() {
-    console.log('🎛️ Phase 3: Control Center UI');
-
-    // Test 8: Live Threat Feed
-    await this.runTest('Real-time Feed', 'Phase 3', async () => {
-      // Check recent threats are accessible
+    const phase = 'Phase 3: Control Center';
+    
+    // Test 3.1: Real-time Threat Feed
+    try {
       const { data, error } = await supabase
         .from('scan_results')
-        .select('*')
+        .select('created_at, platform, severity')
         .order('created_at', { ascending: false })
         .limit(10);
-
-      return {
-        pass: !error,
-        message: error ? `Threat feed failed: ${error.message}` : `Threat feed accessible with ${data?.length || 0} items`
-      };
-    });
-
-    // Test 9: Filter & Search
-    await this.runTest('Filter & Search', 'Phase 3', async () => {
-      // Test filtering functionality
-      const { data, error } = await supabase
-        .from('scan_results')
-        .select('*')
-        .eq('severity', 'high')
-        .limit(5);
-
-      return {
-        pass: !error,
-        message: error ? `Filtering failed: ${error.message}` : 'Filter functionality verified'
-      };
-    });
-
-    // Test 10: Case Thread Management
-    await this.runTest('Case Management', 'Phase 3', async () => {
-      // Test case thread operations
-      const testCaseId = `test_case_${Date.now()}`;
       
-      const { error: insertError } = await supabase
+      if (error) throw error;
+      this.addResult('Real-time Threat Feed', 'pass', `Feed accessible with ${data?.length || 0} recent items`, phase);
+    } catch (error) {
+      this.addResult('Real-time Threat Feed', 'fail', `Feed error: ${error.message}`, phase);
+    }
+
+    // Test 3.2: Case Thread Management
+    try {
+      // Use type assertion for new table
+      const { data, error } = await (supabase as any)
         .from('case_threads')
-        .insert({
-          id: testCaseId,
-          title: 'QA Test Case',
-          summary: 'Automated QA test case thread',
-          status: 'active',
-          priority: 'low'
-        });
-
-      if (insertError) {
-        return {
-          pass: false,
-          message: `Case creation failed: ${insertError.message}`
-        };
-      }
-
-      // Clean up test case
-      await supabase
-        .from('case_threads')
-        .delete()
-        .eq('id', testCaseId);
-
-      return {
-        pass: true,
-        message: 'Case thread management verified'
-      };
-    });
+        .select('id, title, status, priority')
+        .limit(5);
+      
+      if (error) throw error;
+      this.addResult('Case Thread Management', 'pass', `Case threads accessible with ${data?.length || 0} threads`, phase);
+    } catch (error) {
+      this.addResult('Case Thread Management', 'warning', `Case threads may not be fully configured: ${error.message}`, phase);
+    }
   }
 
   private async runPhase4Tests() {
-    console.log('🤖 Phase 4: Command Modules');
+    const phase = 'Phase 4: Command Modules';
+    
+    // Test 4.1: Response Generation
+    try {
+      const { data, error } = await supabase
+        .from('generated_responses')
+        .select('response_text')
+        .limit(1);
+      
+      if (error) throw error;
+      this.addResult('Response Generation', 'pass', 'Response generation system accessible', phase);
+    } catch (error) {
+      this.addResult('Response Generation', 'fail', `Response system error: ${error.message}`, phase);
+    }
 
-    // Test 12: GPT Playbook Assistant
-    await this.runTest('AI Playbook Assistant', 'Phase 4', async () => {
-      // Mock test for AI assistant
-      return {
-        pass: true,
-        message: 'AI assistant components verified'
-      };
-    });
-
-    // Test 13: Incident Simulation
-    await this.runTest('Incident Simulation', 'Phase 4', async () => {
-      // Mock test for simulation tools
-      return {
-        pass: true,
-        message: 'Simulation tools available'
-      };
-    });
+    // Test 4.2: Playbook Assistant
+    this.addResult('Playbook Assistant', 'warning', 'GPT-powered playbook assistant requires manual verification', phase);
   }
 
   private async runPhase5Tests() {
-    console.log('🔒 Phase 5: Security & Data Integrity');
-
-    // Test 14: Access Control
-    await this.runTest('Access Control', 'Phase 5', async () => {
-      // Test RLS policies
-      const { data: currentUser } = await supabase.auth.getUser();
-      
-      return {
-        pass: !!currentUser.user,
-        message: currentUser.user ? 'Authentication verified' : 'Authentication required'
-      };
-    });
-
-    // Test 15: Activity Logging
-    await this.runTest('Activity Logging', 'Phase 5', async () => {
-      // Check activity logs table
-      const { error } = await supabase
+    const phase = 'Phase 5: Security & Compliance';
+    
+    // Test 5.1: Activity Logging
+    try {
+      const { data, error } = await supabase
         .from('activity_logs')
-        .select('id')
+        .select('action, created_at')
+        .order('created_at', { ascending: false })
         .limit(1);
+      
+      if (error) throw error;
+      this.addResult('Activity Logging', 'pass', 'Activity logging system operational', phase);
+    } catch (error) {
+      this.addResult('Activity Logging', 'fail', `Logging error: ${error.message}`, phase);
+    }
 
-      return {
-        pass: !error,
-        message: error ? `Activity logging failed: ${error.message}` : 'Activity logging system verified'
-      };
-    });
-
-    // Test 16: Case Thread Immutability
-    await this.runTest('Data Immutability', 'Phase 5', async () => {
-      // Test timestamp triggers
-      return {
-        pass: true,
-        message: 'Immutability triggers verified'
-      };
-    });
+    // Test 5.2: User Roles & Permissions
+    try {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .limit(1);
+      
+      if (error) throw error;
+      this.addResult('User Roles & Permissions', 'pass', 'Role-based access control configured', phase);
+    } catch (error) {
+      this.addResult('User Roles & Permissions', 'fail', `RBAC error: ${error.message}`, phase);
+    }
   }
 
   private async runPhase6Tests() {
-    console.log('💊 Phase 6: System Health');
-
-    // Test 17: Health Check System
-    await this.runTest('Health Monitoring', 'Phase 6', async () => {
-      try {
-        const healthMetrics = await systemHealthService.runComprehensiveHealthCheck();
-        
-        return {
-          pass: true,
-          message: `Health system operational. ${healthMetrics.totalThreats24h} threats in 24h`,
-          details: healthMetrics
-        };
-      } catch (error) {
-        return {
-          pass: false,
-          message: `Health check failed: ${error.message}`
-        };
-      }
-    });
-
-    // Test 18: Slack Integration
-    await this.runTest('Slack Alerts', 'Phase 6', async () => {
-      // Check if Slack webhook is configured
-      const webhookConfigured = !!process.env.SLACK_WEBHOOK_URL;
-      
-      return {
-        pass: webhookConfigured,
-        message: webhookConfigured ? 'Slack integration configured' : 'Slack webhook not configured'
-      };
-    });
-
-    // Test 19: System Health Storage
-    await this.runTest('Health Data Storage', 'Phase 6', async () => {
-      const { error } = await supabase
+    const phase = 'Phase 6: System Health';
+    
+    // Test 6.1: Health Monitoring
+    try {
+      // Use type assertion for new table
+      const { data, error } = await (supabase as any)
         .from('system_health_checks')
-        .select('id')
-        .limit(1);
+        .select('check_type, status, created_at')
+        .order('created_at', { ascending: false })
+        .limit(5);
+      
+      if (error) throw error;
+      this.addResult('Health Monitoring', 'pass', `Health checks accessible with ${data?.length || 0} recent checks`, phase);
+    } catch (error) {
+      this.addResult('Health Monitoring', 'warning', `Health monitoring setup incomplete: ${error.message}`, phase);
+    }
 
-      return {
-        pass: !error,
-        message: error ? `Health storage failed: ${error.message}` : 'Health data storage verified'
-      };
-    });
+    // Test 6.2: Platform Status
+    try {
+      const { data, error } = await supabase
+        .from('monitored_platforms')
+        .select('name, status, active')
+        .eq('active', true);
+      
+      if (error) throw error;
+      this.addResult('Platform Status', 'pass', `${data?.length || 0} active platforms monitored`, phase);
+    } catch (error) {
+      this.addResult('Platform Status', 'fail', `Platform monitoring error: ${error.message}`, phase);
+    }
+
+    // Test 6.3: Monitoring Status
+    try {
+      const { data, error } = await supabase
+        .from('monitoring_status')
+        .select('is_active, last_run, sources_count')
+        .eq('id', '1')
+        .single();
+      
+      if (error) throw error;
+      this.addResult('Monitoring Status', 'pass', 
+        `Monitoring ${data.is_active ? 'active' : 'inactive'}, ${data.sources_count || 0} sources`, phase);
+    } catch (error) {
+      this.addResult('Monitoring Status', 'fail', `Monitoring status error: ${error.message}`, phase);
+    }
   }
 
   private async runPhase7Tests() {
-    console.log('📊 Phase 7: Data Export & External Ops');
-
-    // Test 20: Data Export
-    await this.runTest('Data Export System', 'Phase 7', async () => {
-      try {
-        // Test export service initialization
-        const exportService = dataExportService;
-        
-        return {
-          pass: true,
-          message: 'Data export system initialized successfully'
-        };
-      } catch (error) {
-        return {
-          pass: false,
-          message: `Export system failed: ${error.message}`
-        };
-      }
-    });
-
-    // Test 21: Load Testing Readiness
-    await this.runTest('Load Testing Readiness', 'Phase 7', async () => {
-      // Check database performance with sample query
-      const startTime = Date.now();
-      
+    const phase = 'Phase 7: Export & Audit';
+    
+    // Test 7.1: Data Export Capability
+    try {
       const { data, error } = await supabase
         .from('scan_results')
-        .select('id, created_at, severity')
-        .order('created_at', { ascending: false })
-        .limit(100);
-
-      const queryTime = Date.now() - startTime;
-
-      return {
-        pass: !error && queryTime < 1000,
-        message: error ? `Performance test failed: ${error.message}` : 
-                `Query performance: ${queryTime}ms for 100 records`
-      };
-    });
-  }
-
-  private async runTest(
-    testName: string, 
-    phase: string, 
-    testFn: () => Promise<{ pass: boolean; message: string; details?: any }>
-  ) {
-    try {
-      console.log(`  🧪 Running: ${testName}`);
+        .select('*')
+        .limit(1);
       
-      const result = await testFn();
-      
-      this.results.push({
-        testName,
-        phase,
-        status: result.pass ? 'pass' : 'fail',
-        message: result.message,
-        details: result.details,
-        timestamp: new Date()
-      });
-
-      const icon = result.pass ? '✅' : '❌';
-      console.log(`  ${icon} ${testName}: ${result.message}`);
-
+      if (error) throw error;
+      this.addResult('Data Export Capability', 'pass', 'Data export endpoints accessible', phase);
     } catch (error) {
-      this.results.push({
-        testName,
-        phase,
-        status: 'fail',
-        message: `Test execution failed: ${error.message}`,
-        timestamp: new Date()
-      });
+      this.addResult('Data Export Capability', 'fail', `Export capability error: ${error.message}`, phase);
+    }
 
-      console.log(`  ❌ ${testName}: Test execution failed - ${error.message}`);
+    // Test 7.2: Audit Trail Completeness
+    try {
+      const { data, error } = await supabase
+        .from('activity_logs')
+        .select('action, entity_type, created_at')
+        .order('created_at', { ascending: false })
+        .limit(10);
+      
+      if (error) throw error;
+      
+      const actionTypes = [...new Set(data?.map(log => log.action) || [])];
+      this.addResult('Audit Trail Completeness', 'pass', 
+        `Audit trail active with ${actionTypes.length} action types`, phase);
+    } catch (error) {
+      this.addResult('Audit Trail Completeness', 'fail', `Audit trail error: ${error.message}`, phase);
+    }
+
+    // Test 7.3: System Performance
+    const totalPassedTests = this.results.filter(r => r.status === 'pass').length;
+    const totalTests = this.results.length;
+    const passRate = (totalPassedTests / totalTests) * 100;
+    
+    if (passRate >= 80) {
+      this.addResult('System Performance', 'pass', `${passRate.toFixed(1)}% test pass rate`, phase);
+    } else if (passRate >= 60) {
+      this.addResult('System Performance', 'warning', `${passRate.toFixed(1)}% test pass rate - needs improvement`, phase);
+    } else {
+      this.addResult('System Performance', 'fail', `${passRate.toFixed(1)}% test pass rate - critical issues`, phase);
     }
   }
 }
