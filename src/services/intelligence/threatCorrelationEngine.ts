@@ -165,8 +165,28 @@ export class ThreatCorrelationEngine {
       summary: `Case thread with ${allThreats.length} threats and ${correlations.length} correlations`
     };
     
-    // Store in database
-    await supabase.from('case_threads').insert(caseThread);
+    // Store in database using the correct table structure
+    const { data, error } = await supabase
+      .from('case_threads')
+      .insert({
+        id: caseThread.id,
+        title: caseThread.title,
+        status: caseThread.status,
+        threats: caseThread.threats,
+        correlations: caseThread.correlations,
+        priority: caseThread.priority,
+        created: caseThread.created.toISOString(),
+        last_activity: caseThread.lastActivity.toISOString(),
+        tags: caseThread.tags,
+        summary: caseThread.summary
+      })
+      .select()
+      .single();
+    
+    if (error) {
+      console.error('Error creating case thread:', error);
+      throw error;
+    }
     
     return caseThread;
   }

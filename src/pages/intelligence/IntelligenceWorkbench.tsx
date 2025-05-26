@@ -167,7 +167,7 @@ const IntelligenceWorkbench = () => {
                   <div className="flex items-center gap-4 mb-4 p-3 bg-muted rounded-lg">
                     <Checkbox
                       checked={selectedThreats.length === filteredThreats.length && filteredThreats.length > 0}
-                      onCheckedChange={handleSelectAll}
+                      onCheckedChange={(checked) => handleSelectAll(Boolean(checked))}
                     />
                     <span className="text-sm font-medium">
                       Select All ({filteredThreats.length})
@@ -197,7 +197,7 @@ const IntelligenceWorkbench = () => {
                       >
                         <Checkbox
                           checked={selectedThreats.includes(threat.id)}
-                          onCheckedChange={(checked) => handleThreatSelection(threat.id, checked)}
+                          onCheckedChange={(checked) => handleThreatSelection(threat.id, Boolean(checked))}
                         />
                         
                         <div className={`w-2 h-8 rounded-full ${getSeverityColor(threat.severity)}`} />

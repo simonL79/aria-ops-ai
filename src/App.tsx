@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Routes, Route } from "react-router-dom";
 import { TooltipProvider } from "@/components/ui/tooltip"
@@ -37,7 +38,7 @@ import Clients from "@/pages/Clients"
 import Monitor from "@/pages/Monitor"
 import NewCoPage from "@/pages/NewCoPage"
 import BlogAdminPage from "@/pages/BlogAdminPage"
-import IntelligenceWorkbench from "@/pages/IntelligenceWorkbench"
+import IntelligenceWorkbench from "@/pages/intelligence/IntelligenceWorkbench"
 
 const queryClient = new QueryClient();
 
