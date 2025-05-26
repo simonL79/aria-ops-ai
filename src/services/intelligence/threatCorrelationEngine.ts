@@ -165,8 +165,8 @@ export class ThreatCorrelationEngine {
       summary: `Case thread with ${allThreats.length} threats and ${correlations.length} correlations`
     };
     
-    // Store in database using the correct table structure
-    const { data, error } = await supabase
+    // Store in database using type assertion to work around missing table types
+    const { data, error } = await (supabase as any)
       .from('case_threads')
       .insert({
         id: caseThread.id,
