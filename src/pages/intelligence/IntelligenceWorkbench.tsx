@@ -10,6 +10,7 @@ import { Eye, Brain, Shield, Zap, FileText, Users } from 'lucide-react';
 import ThreatCorrelationPanel from '@/components/intelligence/ThreatCorrelationPanel';
 import IntelDossier from '@/components/intelligence/IntelDossier';
 import AnalystMacros from '@/components/intelligence/AnalystMacros';
+import { ThreatIntelligencePanel } from '@/components/intelligence/ThreatIntelligencePanel';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
@@ -83,6 +84,13 @@ const IntelligenceWorkbench = () => {
     }
   };
 
+  // Generate summary for AI analysis
+  const threatSummary = selectedThreats.length > 0 
+    ? threats.filter(t => selectedThreats.includes(t.id))
+        .map(t => t.content)
+        .join(' | ')
+    : threats.slice(0, 5).map(t => t.content).join(' | ');
+
   if (loading) {
     return (
       <DashboardLayout>
@@ -126,6 +134,7 @@ const IntelligenceWorkbench = () => {
           <Tabs defaultValue="threats" className="space-y-4">
             <TabsList>
               <TabsTrigger value="threats">Threat Matrix</TabsTrigger>
+              <TabsTrigger value="intelligence">AI Intelligence</TabsTrigger>
               <TabsTrigger value="correlation">Correlation Engine</TabsTrigger>
               <TabsTrigger value="macros">Analyst Macros</TabsTrigger>
             </TabsList>
@@ -247,6 +256,13 @@ const IntelligenceWorkbench = () => {
                   )}
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            <TabsContent value="intelligence">
+              <ThreatIntelligencePanel 
+                summary={threatSummary}
+                threats={threats}
+              />
             </TabsContent>
 
             <TabsContent value="correlation">
