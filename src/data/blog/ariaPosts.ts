@@ -1,7 +1,34 @@
-
 import { BlogPost } from '@/types/blog';
 
 export const ariaPosts: BlogPost[] = [
+  {
+    title: "ARIA™ Was Born in a Firestorm — Here's Why That Matters",
+    slug: "aria-born-in-firestorm-why-that-matters",
+    description: "A candid account of how personal crisis became the catalyst for building A.R.I.A™ — and why adversity often breeds the most innovative solutions.",
+    author: "Simon Lindsay",
+    date: "May 27, 2025",
+    image: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=2071&auto=format&fit=crop",
+    category: "Personal Story",
+    status: "published",
+    content: `
+# ARIA™ Was Born in a Firestorm — Here's Why That Matters
+
+*Originally published on [Substack](https://open.substack.com/pub/simonaria/p/rebuilding-in-public-what-crisis?r=qkgbu&utm_campaign=post&utm_medium=web&showWelcomeOnShare=true)*
+
+*Related: [Why I Built A.R.I.A™](/blog/why-i-built-aria) • [Building A.R.I.A™](/blog/building-aria-smarter-online-reputation)*
+
+Sometimes the best solutions are born from the worst circumstances. A.R.I.A™ wasn't conceived in a boardroom or during a strategic planning session — it emerged from necessity, forged in the heat of a personal crisis that could have destroyed everything I'd worked for.
+
+[Please update with the full content from the Substack article]
+
+---
+
+**Read the full story on Substack:** [Rebuilding in Public: What Crisis Taught Me About Building A.R.I.A™](https://open.substack.com/pub/simonaria/p/rebuilding-in-public-what-crisis?r=qkgbu&utm_campaign=post&utm_medium=web&showWelcomeOnShare=true)
+
+**Simon Lindsay**  
+*Founder, A.R.I.A™*
+    `
+  },
   {
     title: "From Chaos to Control: How ARIA Turns Digital Threats into Strategic Insight",
     slug: "from-chaos-to-control-aria-digital-threats-strategic-insight",
