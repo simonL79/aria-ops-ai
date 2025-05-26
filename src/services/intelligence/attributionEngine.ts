@@ -1,3 +1,4 @@
+
 import { AttributionAssessment } from '@/types/intelligence/fusion';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -141,7 +142,7 @@ export class AttributionEngine {
       const urlDomain = this.extractDomain(threatData.url);
       const expectedDomains = this.getExpectedDomains(threatData.platform);
       
-      if (urlDomain && !expectedDomains.includes(expectedDomains)) {
+      if (urlDomain && !expectedDomains.includes(urlDomain)) {
         indicators.push('URL domain inconsistent with claimed platform');
         score += 0.4;
       }
