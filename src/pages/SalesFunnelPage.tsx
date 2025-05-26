@@ -5,11 +5,13 @@ import { useAuth } from "@/hooks/useAuth";
 import StickyHeader from "@/components/layout/StickyHeader";
 import Footer from "@/components/layout/Footer";
 import HeroSection from "@/components/sections/HeroSection";
+import NOCFeaturesSection from "@/components/sections/NOCFeaturesSection";
 import ProblemSection from "@/components/sections/ProblemSection";
 import HowItWorksSection from "@/components/sections/HowItWorksSection";
 import EnhancedTestimonialsSection from "@/components/sections/EnhancedTestimonialsSection";
 import EnhancedCTASection from "@/components/sections/EnhancedCTASection";
 import PlatformsSection from "@/components/sections/PlatformsSection";
+import ReputationOpsCenterSection from "@/components/sections/ReputationOpsCenterSection";
 import AdminDashboardWelcome from "@/components/salesFunnel/AdminDashboardWelcome";
 import ScanRequestForm from "@/components/salesFunnel/ScanRequestForm";
 import LeadMagnetForm from "@/components/lead-magnet/LeadMagnetForm";
@@ -48,6 +50,9 @@ const SalesFunnelPage = () => {
       {/* Hero Section */}
       <HeroSection />
 
+      {/* NOC Features Section */}
+      <NOCFeaturesSection />
+
       {/* Problem Section */}
       <ProblemSection />
 
@@ -59,6 +64,9 @@ const SalesFunnelPage = () => {
       {/* Platforms We Monitor */}
       <PlatformsSection />
 
+      {/* Reputation Ops Center Section */}
+      <ReputationOpsCenterSection />
+
       {/* Enhanced Testimonials */}
       <EnhancedTestimonialsSection />
 
@@ -68,23 +76,23 @@ const SalesFunnelPage = () => {
           <div className="grid md:grid-cols-2 gap-12 max-w-5xl mx-auto">
             <div className="flex flex-col justify-center">
               <h2 className="text-3xl font-bold mb-6 text-premium-black">
-                Get Your FREE AI Risk Assessment
+                Get Your FREE Threat Intelligence Briefing
               </h2>
               <p className="text-premium-darkGray mb-6">
-                Discover how AI can be used against you and what you can do to protect yourself with our comprehensive guide:
+                Discover how threat actors target your reputation and learn command center strategies to defend against them:
               </p>
               <ul className="space-y-3 mb-6">
                 <li className="flex items-start gap-2">
                   <Check className="h-5 w-5 text-green-500 mt-1" />
-                  <span className="text-premium-darkGray">Identify AI-generated threats to your reputation</span>
+                  <span className="text-premium-darkGray">Build your personal threat intelligence NOC</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <Check className="h-5 w-5 text-green-500 mt-1" />
-                  <span className="text-premium-darkGray">Learn how deepfakes and synthetic media can impact you</span>
+                  <span className="text-premium-darkGray">Learn case threading and triage methodologies</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <Check className="h-5 w-5 text-green-500 mt-1" />
-                  <span className="text-premium-darkGray">Get a 7-step action plan to protect your digital identity</span>
+                  <span className="text-premium-darkGray">Get operator-level response playbooks</span>
                 </li>
               </ul>
               
@@ -103,10 +111,10 @@ const SalesFunnelPage = () => {
             </div>
             <div>
               <LeadMagnetForm
-                title="Download Your Free AI Risk Assessment"
-                description="Protect yourself from AI-powered reputation threats"
-                downloadName="ai-risk-assessment-guide"
-                ctaText="Get My Free Guide"
+                title="Download Your Free Threat Intelligence Briefing"
+                description="Command center strategies for reputation defense"
+                downloadName="threat-intelligence-briefing"
+                ctaText="Get My Briefing"
                 variant="default"
               />
             </div>
