@@ -1,3 +1,4 @@
+
 import { BlogPost } from '@/types/blog';
 
 export const ariaPosts: BlogPost[] = [
@@ -41,13 +42,15 @@ Sometimes the best solutions are born from the worst circumstances. A.R.I.A™ w
     content: `
 # From Chaos to Control: How ARIA Turns Digital Threats into Strategic Insight
 
-*Also published on [Medium](https://medium.com/@simonlindsay7988/from-chaos-to-control-how-aria-turns-digital-threats-into-strategic-insight-17f3ccf5015b)*
+*Originally published on [Medium](https://medium.com/@simonlindsay7988/from-chaos-to-control-how-aria-turns-digital-threats-into-strategic-insight-17f3ccf5015b)*
 
 *Related: [Why I Built A.R.I.A™](/blog/why-i-built-aria) • [Building A.R.I.A™](/blog/building-aria-smarter-online-reputation)*
 
 [Content from the Medium article would go here - please update with the actual content from the Medium post]
 
 ---
+
+**Read the full article on Medium:** [From Chaos to Control: How ARIA Turns Digital Threats into Strategic Insight](https://medium.com/@simonlindsay7988/from-chaos-to-control-how-aria-turns-digital-threats-into-strategic-insight-17f3ccf5015b)
 
 **Simon Lindsay**  
 *Founder, A.R.I.A™*
@@ -65,13 +68,15 @@ Sometimes the best solutions are born from the worst circumstances. A.R.I.A™ w
     content: `
 # What I Learned Rebuilding After a Public Crisis: The Story Behind A.R.I.A™
 
-*Also published on [Medium](https://medium.com/@simonlindsay7988/what-i-learned-rebuilding-after-a-public-crisis-the-story-behind-a-r-i-a-34451c8d8b03)*
+*Originally published on [Medium](https://medium.com/@simonlindsay7988/what-i-learned-rebuilding-after-a-public-crisis-the-story-behind-a-r-i-a-34451c8d8b03)*
 
 *Related: [Why I Built A.R.I.A™](/blog/why-i-built-aria) • [Building A.R.I.A™](/blog/building-aria-smarter-online-reputation)*
 
 [Content from the Medium article would go here - please update with the actual content from the Medium post]
 
 ---
+
+**Read the full article on Medium:** [What I Learned Rebuilding After a Public Crisis: The Story Behind A.R.I.A™](https://medium.com/@simonlindsay7988/what-i-learned-rebuilding-after-a-public-crisis-the-story-behind-a-r-i-a-34451c8d8b03)
 
 **Simon Lindsay**  
 *Founder, A.R.I.A™*
@@ -89,13 +94,15 @@ Sometimes the best solutions are born from the worst circumstances. A.R.I.A™ w
     content: `
 # Why I Built A.R.I.A™
 
-*Also published on [Medium](https://medium.com/@simonlindsay7988/why-i-built-a-r-i-a-c9f3ab23d266)*
+*Originally published on [Medium](https://medium.com/@simonlindsay7988/why-i-built-a-r-i-a-c9f3ab23d266)*
 
 *Related: [Rebuilding After a Public Crisis](/blog/rebuilding-after-public-crisis-aria-story) • [Building A.R.I.A™](/blog/building-aria-smarter-online-reputation)*
 
 [Content from the Medium article would go here - please update with the actual content from the Medium post]
 
 ---
+
+**Read the full article on Medium:** [Why I Built A.R.I.A™](https://medium.com/@simonlindsay7988/why-i-built-a-r-i-a-c9f3ab23d266)
 
 **Simon Lindsay**  
 *Founder, A.R.I.A™*
@@ -113,7 +120,7 @@ Sometimes the best solutions are born from the worst circumstances. A.R.I.A™ w
     content: `
 # Building A.R.I.A™ — A Smarter Way to Understand Online Reputation
 
-*Also published on [Medium](https://medium.com/@simonlindsay7988/building-a-r-i-a-a-smarter-way-to-understand-online-reputation-733ea9c6a683)*
+*Originally published on [Medium](https://medium.com/@simonlindsay7988/building-a-r-i-a-a-smarter-way-to-understand-online-reputation-733ea9c6a683)*
 
 *Related: [Why I Built A.R.I.A™](/blog/why-i-built-aria) • [Rebuilding After a Public Crisis](/blog/rebuilding-after-public-crisis-aria-story)*
 
@@ -146,6 +153,8 @@ We're not trying to build a tool for everyone. We're building the right tool for
 If that sounds like you — we'd love to connect.
 
 ---
+
+**Read the full article on Medium:** [Building A.R.I.A™ — A Smarter Way to Understand Online Reputation](https://medium.com/@simonlindsay7988/building-a-r-i-a-a-smarter-way-to-understand-online-reputation-733ea9c6a683)
 
 **Simon Lindsay**  
 *Founder, A.R.I.A™*
