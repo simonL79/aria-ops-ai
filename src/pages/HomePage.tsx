@@ -1,10 +1,26 @@
 
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import HeroSection from '@/components/sections/HeroSection';
+import HowItWorksSection from '@/components/sections/HowItWorksSection';
+import ProblemSection from '@/components/sections/ProblemSection';
+import PlatformsSection from '@/components/sections/PlatformsSection';
+import EnhancedTestimonialsSection from '@/components/sections/EnhancedTestimonialsSection';
+import CTASection from '@/components/sections/CTASection';
+import EnhancedCTASection from '@/components/sections/EnhancedCTASection';
+import PublicLayout from '@/components/layout/PublicLayout';
 
-// We'll just redirect to the root path when HomePage is visited
 const HomePage = () => {
-  return <Navigate to="/" replace />;
+  return (
+    <PublicLayout>
+      <HeroSection />
+      <ProblemSection />
+      <HowItWorksSection />
+      <PlatformsSection />
+      <EnhancedTestimonialsSection />
+      <CTASection />
+      <EnhancedCTASection />
+    </PublicLayout>
+  );
 };
 
 export default HomePage;
