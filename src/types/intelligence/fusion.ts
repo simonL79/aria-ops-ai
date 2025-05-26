@@ -1,17 +1,19 @@
 
 export interface ThreatCorrelation {
   id: string;
-  threats: string[]; // threat IDs
-  correlationType: 'language_similarity' | 'username_pattern' | 'geolocation' | 'timing_pattern';
-  confidence: number; // 0-1
+  threats: string[];
+  correlationType: 'language_similarity' | 'username_pattern' | 'timing_pattern' | 'behavioral_pattern';
+  confidence: number;
   similarityScore: number;
   metadata: {
     sharedTokens?: string[];
     usernames?: string[];
-    locations?: string[];
-    timeWindow?: { start: Date; end: Date };
+    timeWindow?: {
+      start: Date;
+      end: Date;
+    };
+    [key: string]: any;
   };
-  caseThreadId?: string;
 }
 
 export interface CaseThread {
@@ -21,35 +23,19 @@ export interface CaseThread {
   threats: string[];
   correlations: string[];
   priority: 'low' | 'medium' | 'high' | 'critical';
-  assignedAnalyst?: string;
   created: Date;
   lastActivity: Date;
   tags: string[];
   summary: string;
+  assignedAnalyst?: string;
 }
 
-export interface OSINTEnrichment {
-  domain?: {
-    whois: any;
-    dnsHistory: any[];
-    reputation: number;
+export interface FusionIntelligence {
+  correlations: ThreatCorrelation[];
+  caseThreads: CaseThread[];
+  riskAssessment: {
+    overallThreatLevel: number;
+    criticalVectors: string[];
+    emergingPatterns: string[];
   };
-  archive?: {
-    snapshots: any[];
-    changes: any[];
-  };
-  threatFeeds?: {
-    knownActor: boolean;
-    ttps: string[];
-    confidence: number;
-  };
-}
-
-export interface AttributionAssessment {
-  suspectedOrigin: 'individual' | 'botnet' | 'campaign' | 'unknown';
-  intentProfile: 'harassment' | 'disinformation' | 'reputation_damage' | 'competitive' | 'personal';
-  coordinationScore: number; // 0-1
-  confidence: number; // 0-1
-  indicators: string[];
-  reasoning: string;
 }

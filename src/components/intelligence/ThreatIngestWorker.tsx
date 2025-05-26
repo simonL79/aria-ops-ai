@@ -21,7 +21,7 @@ import { toast } from 'sonner';
 interface IngestJob {
   id: string;
   submissionId: string;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
+  status: 'new' | 'in_review' | 'complete' | 'archived';
   progress: number;
   startedAt?: Date;
   completedAt?: Date;
@@ -82,22 +82,22 @@ const ThreatIngestWorker = () => {
       const ingestJobs: IngestJob[] = (submissions || []).map(sub => ({
         id: `job_${sub.id}`,
         submissionId: sub.id,
-        status: sub.status === 'completed' ? 'completed' : 
-                sub.status === 'failed' ? 'failed' : 
-                sub.status === 'processing' ? 'processing' : 'pending',
-        progress: sub.status === 'completed' ? 100 : 
-                 sub.status === 'processing' ? 50 : 0,
+        status: sub.status === 'complete' ? 'complete' : 
+                sub.status === 'archived' ? 'archived' : 
+                sub.status === 'in_review' ? 'in_review' : 'new',
+        progress: sub.status === 'complete' ? 100 : 
+                 sub.status === 'in_review' ? 50 : 0,
         startedAt: sub.created_at ? new Date(sub.created_at) : undefined,
-        completedAt: sub.updated_at && sub.status === 'completed' ? new Date(sub.updated_at) : undefined
+        completedAt: sub.updated_at && sub.status === 'complete' ? new Date(sub.updated_at) : undefined
       }));
 
       setJobs(ingestJobs);
 
       // Calculate stats
       const totalJobs = ingestJobs.length;
-      const completedJobs = ingestJobs.filter(job => job.status === 'completed').length;
-      const failedJobs = ingestJobs.filter(job => job.status === 'failed').length;
-      const runningJobs = ingestJobs.filter(job => job.status === 'processing').length;
+      const completedJobs = ingestJobs.filter(job => job.status === 'complete').length;
+      const failedJobs = ingestJobs.filter(job => job.status === 'archived').length;
+      const runningJobs = ingestJobs.filter(job => job.status === 'in_review').length;
 
       setStats({
         totalJobs,
@@ -127,10 +127,10 @@ const ThreatIngestWorker = () => {
 
   const processSubmission = async (submission: any) => {
     try {
-      // Update submission status to processing
+      // Update submission status to in_review
       await supabase
         .from('reputation_scan_submissions')
-        .update({ status: 'processing' })
+        .update({ status: 'in_review' })
         .eq('id', submission.id);
 
       // Create a new scan result entry
@@ -170,11 +170,11 @@ const ThreatIngestWorker = () => {
         })
         .eq('id', scanResult.id);
 
-      // Update submission status to completed
+      // Update submission status to complete
       await supabase
         .from('reputation_scan_submissions')
         .update({ 
-          status: 'completed',
+          status: 'complete',
           admin_notes: `Processed successfully. Threat level: ${threatAnalysis.threat_type}`
         })
         .eq('id', submission.id);
@@ -184,11 +184,11 @@ const ThreatIngestWorker = () => {
     } catch (error) {
       console.error('Processing failed:', error);
       
-      // Update submission status to failed
+      // Update submission status to archived (failed)
       await supabase
         .from('reputation_scan_submissions')
         .update({ 
-          status: 'failed',
+          status: 'archived',
           admin_notes: `Processing failed: ${error.message}`
         })
         .eq('id', submission.id);
@@ -223,11 +223,11 @@ const ThreatIngestWorker = () => {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'completed':
+      case 'complete':
         return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case 'failed':
+      case 'archived':
         return <AlertTriangle className="h-4 w-4 text-red-500" />;
-      case 'processing':
+      case 'in_review':
         return <RefreshCw className="h-4 w-4 text-blue-500 animate-spin" />;
       default:
         return <Clock className="h-4 w-4 text-gray-500" />;
@@ -236,11 +236,11 @@ const ThreatIngestWorker = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed':
+      case 'complete':
         return 'bg-green-100 text-green-800';
-      case 'failed':
+      case 'archived':
         return 'bg-red-100 text-red-800';
-      case 'processing':
+      case 'in_review':
         return 'bg-blue-100 text-blue-800';
       default:
         return 'bg-gray-100 text-gray-800';
@@ -389,7 +389,7 @@ const ThreatIngestWorker = () => {
                   </div>
                   
                   <div className="flex items-center gap-3">
-                    {job.status === 'processing' && (
+                    {job.status === 'in_review' && (
                       <Progress value={job.progress} className="w-20" />
                     )}
                     <Badge className={getStatusColor(job.status)}>

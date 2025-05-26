@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { saveAs } from 'file-saver';
 
@@ -112,7 +111,8 @@ export class DataExportService {
   }
 
   private async gatherCaseThreadData(options: ExportOptions): Promise<any[]> {
-    let query = supabase.from('case_threads').select('*');
+    // Use type assertion to work around missing table types
+    let query = (supabase as any).from('case_threads').select('*');
 
     if (options.dateRange) {
       query = query
@@ -131,7 +131,8 @@ export class DataExportService {
   }
 
   private async gatherHealthData(options: ExportOptions): Promise<any[]> {
-    let query = supabase.from('system_health_checks').select('*');
+    // Use type assertion to work around missing table types
+    let query = (supabase as any).from('system_health_checks').select('*');
 
     if (options.dateRange) {
       query = query

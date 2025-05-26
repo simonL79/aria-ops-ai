@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export interface HealthCheckResult {
@@ -186,7 +185,7 @@ export class SystemHealthService {
     ];
 
     for (const check of healthChecks) {
-      await supabase
+      await (supabase as any)
         .from('system_health_checks')
         .insert(check);
     }
@@ -227,7 +226,7 @@ export class SystemHealthService {
   }
 
   async getLatestHealthStatus(): Promise<SystemHealthMetrics | null> {
-    const { data } = await supabase
+    const { data } = await (supabase as any)
       .from('system_health_checks')
       .select('*')
       .eq('check_type', 'system_overview')
