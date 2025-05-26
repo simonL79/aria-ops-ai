@@ -1,4 +1,3 @@
-
 import { AttributionAssessment } from '@/types/intelligence/fusion';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -47,6 +46,36 @@ export class AttributionEngine {
       indicators,
       reasoning: this.generateReasoning(suspectedOrigin, intentProfile, indicators)
     };
+  }
+  
+  private determineIntentProfile(content: string, threatType?: string): AttributionAssessment['intentProfile'] {
+    const contentLower = content.toLowerCase();
+    
+    if (threatType === 'disinformation' || contentLower.includes('fake') || contentLower.includes('false')) {
+      return 'disinformation';
+    }
+    
+    if (contentLower.includes('competitor') || contentLower.includes('business')) {
+      return 'competitive';
+    }
+    
+    if (contentLower.includes('reputation') || contentLower.includes('damage')) {
+      return 'reputation_damage';
+    }
+    
+    if (contentLower.includes('personal') || contentLower.includes('private')) {
+      return 'personal';
+    }
+    
+    return 'harassment';
+  }
+  
+  private generateReasoning(
+    origin: AttributionAssessment['suspectedOrigin'],
+    intent: AttributionAssessment['intentProfile'],
+    indicators: string[]
+  ): string {
+    return `Assessment indicates ${origin} origin based on ${indicators.length} indicators including: ${indicators.slice(0, 3).join(', ')}. Primary intent appears to be ${intent.replace('_', ' ')}.`;
   }
   
   private analyzeLinguisticPatterns(content: string): { indicators: string[], score: number } {
@@ -112,7 +141,7 @@ export class AttributionEngine {
       const urlDomain = this.extractDomain(threatData.url);
       const expectedDomains = this.getExpectedDomains(threatData.platform);
       
-      if (urlDomain && !expectedDomains.includes(urlDomain)) {
+      if (urlDomain && !expectedDomains.includes(expectedDomains)) {
         indicators.push('URL domain inconsistent with claimed platform');
         score += 0.4;
       }
@@ -149,35 +178,5 @@ export class AttributionEngine {
     };
     
     return platformDomains[platform.toLowerCase()] || [];
-  }
-  
-  private determineIntentProfile(content: string, threatType?: string): AttributionAssessment['intentProfile'] {
-    const contentLower = content.toLowerCase();
-    
-    if (threatType === 'disinformation' || contentLower.includes('fake') || contentLower.includes('false')) {
-      return 'disinformation';
-    }
-    
-    if (contentLower.includes('competitor') || contentLower.includes('business')) {
-      return 'competitive';
-    }
-    
-    if (contentLower.includes('reputation') || contentLower.includes('damage')) {
-      return 'reputation_damage';
-    }
-    
-    if (contentLower.includes('personal') || contentLower.includes('private')) {
-      return 'personal';
-    }
-    
-    return 'harassment';
-  }
-  
-  private generateReasoning(
-    origin: AttributionAssessment['suspectedOrigin'],
-    intent: AttributionAssessment['intentProfile'],
-    indicators: string[]
-  ): string {
-    return `Assessment indicates ${origin} origin based on ${indicators.length} indicators including: ${indicators.slice(0, 3).join(', ')}. Primary intent appears to be ${intent.replace('_', ' ')}.`;
   }
 }

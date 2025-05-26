@@ -1,11 +1,17 @@
-
 import { OSINTEnrichment } from '@/types/intelligence/fusion';
 import { supabase } from '@/integrations/supabase/client';
 
 export class OSINTEnrichmentService {
   
   async enrichThreat(threatId: string, url?: string): Promise<OSINTEnrichment> {
-    const enrichment: OSINTEnrichment = {};
+    const enrichment: OSINTEnrichment = {
+      id: threatId,
+      sourceType: 'social_media',
+      credibilityScore: 0.8,
+      lastUpdated: new Date(),
+      metadata: {},
+      enrichedData: {}
+    };
     
     if (url) {
       const domain = this.extractDomain(url);

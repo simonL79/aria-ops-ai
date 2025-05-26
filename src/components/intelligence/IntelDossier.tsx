@@ -62,6 +62,19 @@ const IntelDossier = ({ threatId, threatData, onClose }: IntelDossierProps) => {
     }
   };
 
+  const getIndicatorsArray = (indicators: AttributionAssessment['indicators']): string[] => {
+    if (Array.isArray(indicators)) {
+      return indicators;
+    }
+    
+    // Extract indicators from the structured format
+    const result: string[] = [];
+    if (indicators.linguistic?.patterns) result.push(...indicators.linguistic.patterns);
+    if (indicators.technical?.ipGeolocation) result.push(...indicators.technical.ipGeolocation);
+    if (indicators.behavioral?.activityPatterns) result.push(...indicators.behavioral.activityPatterns);
+    return result;
+  };
+
   if (isLoading) {
     return (
       <Card>
@@ -199,9 +212,9 @@ const IntelDossier = ({ threatId, threatData, onClose }: IntelDossierProps) => {
                 </div>
                 
                 <div>
-                  <h4 className="font-medium mb-2">Indicators ({attribution.indicators.length}):</h4>
+                  <h4 className="font-medium mb-2">Indicators ({getIndicatorsArray(attribution.indicators).length}):</h4>
                   <div className="space-y-2">
-                    {attribution.indicators.map((indicator, index) => (
+                    {getIndicatorsArray(attribution.indicators).map((indicator, index) => (
                       <div key={index} className="flex items-start gap-2">
                         <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0" />
                         <span className="text-sm">{indicator}</span>

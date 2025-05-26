@@ -41,17 +41,17 @@ export interface FusionIntelligence {
 }
 
 export interface OSINTEnrichment {
-  id: string;
-  sourceType: 'social_media' | 'news' | 'forum' | 'blog' | 'government' | 'academic';
-  credibilityScore: number;
-  lastUpdated: Date;
-  metadata: {
+  id?: string;
+  sourceType?: 'social_media' | 'news' | 'forum' | 'blog' | 'government' | 'academic';
+  credibilityScore?: number;
+  lastUpdated?: Date;
+  metadata?: {
     author?: string;
     domain?: string;
     verificationStatus?: 'verified' | 'unverified' | 'disputed';
     crossReferences?: string[];
   };
-  enrichedData: {
+  enrichedData?: {
     geolocation?: {
       country: string;
       region?: string;
@@ -67,13 +67,17 @@ export interface OSINTEnrichment {
       locations: string[];
     };
   };
+  // Additional properties used in the implementation
+  domain?: any;
+  archive?: any;
+  threatFeeds?: any;
 }
 
 export interface AttributionAssessment {
-  id: string;
+  id?: string;
   confidence: number;
-  attributionType: 'individual' | 'group' | 'organization' | 'state_actor' | 'unknown';
-  indicators: {
+  attributionType?: 'individual' | 'group' | 'organization' | 'state_actor' | 'unknown';
+  indicators: string[] | {
     linguistic: {
       patterns: string[];
       language: string;
@@ -92,7 +96,12 @@ export interface AttributionAssessment {
       };
     };
   };
-  relatedThreats: string[];
-  assessedBy: string;
-  assessmentDate: Date;
+  relatedThreats?: string[];
+  assessedBy?: string;
+  assessmentDate?: Date;
+  // Properties used in the implementation
+  suspectedOrigin: 'unknown' | 'individual' | 'botnet' | 'campaign';
+  intentProfile: 'harassment' | 'disinformation' | 'competitive' | 'reputation_damage' | 'personal';
+  coordinationScore: number;
+  reasoning: string;
 }
