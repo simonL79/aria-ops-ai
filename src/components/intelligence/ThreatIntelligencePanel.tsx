@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,7 +8,11 @@ import { callOpenAI } from '@/services/api/openaiClient';
 import { toast } from 'sonner';
 
 // Dynamic import for Cytoscape to avoid SSR issues
-const CytoscapeComponent = React.lazy(() => import('react-cytoscapejs'));
+const CytoscapeComponent = React.lazy(() => 
+  import('react-cytoscapejs').catch(() => ({
+    default: () => <div className="flex items-center justify-center h-full text-muted-foreground">Network visualization unavailable</div>
+  }))
+);
 
 // ======================================
 // GPT Utility
