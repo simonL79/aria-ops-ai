@@ -37,6 +37,7 @@ import Clients from "@/pages/Clients"
 import Monitor from "@/pages/Monitor"
 import NewCoPage from "@/pages/NewCoPage"
 import BlogAdminPage from "@/pages/BlogAdminPage"
+import IntelligenceWorkbench from "@/pages/IntelligenceWorkbench"
 
 const queryClient = new QueryClient();
 
@@ -63,6 +64,13 @@ function App() {
           <Route path="/about" element={<AboutPage />} />
           <Route path="/simon-lindsay" element={<BiographyPage />} />
           <Route path="/scan" element={<ScanPage />} />
+          
+          {/* Intelligence Workbench - Protected route */}
+          <Route path="/intelligence" element={
+            <RouteProtection requireAuth={true}>
+              <IntelligenceWorkbench />
+            </RouteProtection>
+          } />
           
           {/* Protected dashboard routes */}
           <Route path="/dashboard" element={
