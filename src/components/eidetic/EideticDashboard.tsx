@@ -1,10 +1,10 @@
-
 import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Brain, Search, TrendingDown, Archive } from "lucide-react";
+import { supabase } from '@/integrations/supabase/client';
 import { scanMemoryFootprints, calculateDecayScores, triggerMemoryRecalibration } from '@/services/eidetic/eideticService';
 import MemoryFootprintsList from './MemoryFootprintsList';
 import DecayProfilesPanel from './DecayProfilesPanel';
@@ -34,7 +34,7 @@ const EideticDashboard = () => {
       const { data, error } = await supabase
         .from('memory_footprints')
         .select('*')
-        .order('last_updated', { ascending: false });
+        .order('updated_at', { ascending: false });
 
       if (error) throw error;
 
@@ -48,9 +48,9 @@ const EideticDashboard = () => {
   const calculateStats = (footprints) => {
     setStats({
       totalFootprints: footprints.length,
-      activeFootprints: footprints.filter(f => f.status === 'active').length,
-      decayingFootprints: footprints.filter(f => f.status === 'decaying').length,
-      archivedFootprints: footprints.filter(f => f.status === 'archived').length
+      activeFootprints: footprints.filter(f => f.is_active === true).length,
+      decayingFootprints: footprints.filter(f => f.decay_score > 0.5).length,
+      archivedFootprints: footprints.filter(f => f.is_active === false).length
     });
   };
 
@@ -76,7 +76,7 @@ const EideticDashboard = () => {
   const handleRecalculateDecay = async () => {
     try {
       const activeFootprintIds = memoryFootprints
-        .filter(f => f.status === 'active')
+        .filter(f => f.is_active === true)
         .map(f => f.id);
       
       if (activeFootprintIds.length > 0) {
@@ -198,8 +198,7 @@ const EideticDashboard = () => {
 
         <TabsContent value="footprints">
           <MemoryFootprintsList 
-            footprints={memoryFootprints}
-            onFootprintUpdated={loadMemoryFootprints}
+            onFootprintAdded={loadMemoryFootprints}
           />
         </TabsContent>
 

@@ -69,7 +69,20 @@ export const getRSIActivationLogs = async (clientId?: string): Promise<RSIActiva
       return [];
     }
 
-    return data || [];
+    // Map and validate the activation status to ensure type safety
+    const validatedLogs: RSIActivationLog[] = (data || []).map(log => ({
+      id: log.id,
+      client_id: log.client_id,
+      threat_simulation_id: log.threat_simulation_id,
+      trigger_type: log.trigger_type,
+      matched_threat: log.matched_threat,
+      activation_status: ['initiated', 'active', 'completed', 'failed'].includes(log.activation_status) 
+        ? log.activation_status as 'initiated' | 'active' | 'completed' | 'failed'
+        : 'initiated',
+      triggered_at: log.triggered_at
+    }));
+
+    return validatedLogs;
   } catch (error) {
     console.error('Error in getRSIActivationLogs:', error);
     return [];
