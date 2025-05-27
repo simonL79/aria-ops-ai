@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Search, AlertTriangle, Eye, ExternalLink } from "lucide-react";
+import { Search, AlertTriangle, Eye, ExternalLink, Target, Shield } from "lucide-react";
 import { DiscoveredThreat } from '@/hooks/useDiscoveryScanning';
 
 interface DiscoveryScanPanelProps {
@@ -19,15 +19,22 @@ const DiscoveryScanPanel = ({ isScanning, discoveredThreats, onStartScan }: Disc
   const [searchFilters, setSearchFilters] = useState({
     entityName: '',
     platform: '',
-    threatLevel: ''
+    threatLevel: '',
+    clientLinked: 'all' // all, linked, unlinked
   });
 
   const filteredThreats = discoveredThreats.filter(threat => {
-    return (
-      (!searchFilters.entityName || threat.entityName.toLowerCase().includes(searchFilters.entityName.toLowerCase())) &&
-      (!searchFilters.platform || threat.platform.toLowerCase().includes(searchFilters.platform.toLowerCase())) &&
-      (!searchFilters.threatLevel || threat.threatLevel >= parseInt(searchFilters.threatLevel))
-    );
+    const matchesEntity = !searchFilters.entityName || 
+      threat.entityName.toLowerCase().includes(searchFilters.entityName.toLowerCase());
+    const matchesPlatform = !searchFilters.platform || 
+      threat.platform.toLowerCase().includes(searchFilters.platform.toLowerCase());
+    const matchesThreatLevel = !searchFilters.threatLevel || 
+      threat.threatLevel >= parseInt(searchFilters.threatLevel);
+    const matchesClientFilter = searchFilters.clientLinked === 'all' ||
+      (searchFilters.clientLinked === 'linked' && threat.clientLinked) ||
+      (searchFilters.clientLinked === 'unlinked' && !threat.clientLinked);
+
+    return matchesEntity && matchesPlatform && matchesThreatLevel && matchesClientFilter;
   });
 
   const getThreatLevelColor = (level: number) => {
@@ -44,6 +51,18 @@ const DiscoveryScanPanel = ({ isScanning, discoveredThreats, onStartScan }: Disc
     return 'Low';
   };
 
+  const getMatchTypeColor = (matchType?: string) => {
+    switch (matchType) {
+      case 'exact': return 'bg-green-100 text-green-800';
+      case 'alias_exact': return 'bg-blue-100 text-blue-800';
+      case 'partial': return 'bg-yellow-100 text-yellow-800';
+      case 'fuzzy': return 'bg-orange-100 text-orange-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const clientLinkedThreats = discoveredThreats.filter(t => t.clientLinked);
+
   return (
     <div className="space-y-6">
       {/* Zero-Input Discovery Section */}
@@ -54,7 +73,7 @@ const DiscoveryScanPanel = ({ isScanning, discoveredThreats, onStartScan }: Disc
             Zero-Input Discovery Engine
           </CardTitle>
           <CardDescription>
-            Autonomous scanning across Reddit, Google News, TrustPilot, Twitter, Forums, and more
+            Autonomous scanning across Reddit, Google News, TrustPilot, Twitter, Forums, and more with intelligent client-entity mapping
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -72,6 +91,19 @@ const DiscoveryScanPanel = ({ isScanning, discoveredThreats, onStartScan }: Disc
                 <div>• News Article Comments</div>
               </div>
             </div>
+
+            {clientLinkedThreats.length > 0 && (
+              <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                <h4 className="font-medium mb-2 flex items-center gap-2">
+                  <Target className="h-4 w-4 text-purple-600" />
+                  Client Entity Intelligence Active
+                </h4>
+                <p className="text-sm text-purple-700">
+                  {clientLinkedThreats.length} threats currently linked to your monitored client entities. 
+                  Prioritized alerts will appear when client-related threats are detected.
+                </p>
+              </div>
+            )}
             
             <Button 
               onClick={onStartScan}
@@ -97,7 +129,7 @@ const DiscoveryScanPanel = ({ isScanning, discoveredThreats, onStartScan }: Disc
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <Label htmlFor="entityName">Entity Name</Label>
               <Input
@@ -128,6 +160,19 @@ const DiscoveryScanPanel = ({ isScanning, discoveredThreats, onStartScan }: Disc
                 onChange={(e) => setSearchFilters(prev => ({ ...prev, threatLevel: e.target.value }))}
               />
             </div>
+            <div>
+              <Label htmlFor="clientLinked">Client Filter</Label>
+              <select
+                id="clientLinked"
+                value={searchFilters.clientLinked}
+                onChange={(e) => setSearchFilters(prev => ({ ...prev, clientLinked: e.target.value }))}
+                className="w-full px-3 py-2 border rounded-md"
+              >
+                <option value="all">All Threats</option>
+                <option value="linked">Client Linked Only</option>
+                <option value="unlinked">Non-Client Only</option>
+              </select>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -135,9 +180,16 @@ const DiscoveryScanPanel = ({ isScanning, discoveredThreats, onStartScan }: Disc
       {/* Discovered Threats */}
       <Card>
         <CardHeader>
-          <CardTitle>Discovered Threats ({filteredThreats.length})</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            Discovered Threats ({filteredThreats.length})
+            {clientLinkedThreats.length > 0 && (
+              <Badge variant="secondary" className="ml-2">
+                {clientLinkedThreats.length} client-linked
+              </Badge>
+            )}
+          </CardTitle>
           <CardDescription>
-            Real-time threats detected across all monitored platforms
+            Real-time threats detected across all monitored platforms with client-entity intelligence
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -151,16 +203,31 @@ const DiscoveryScanPanel = ({ isScanning, discoveredThreats, onStartScan }: Disc
               </div>
             ) : (
               filteredThreats.map((threat) => (
-                <div key={threat.id} className="border rounded-lg p-4 space-y-3">
+                <div key={threat.id} className={`border rounded-lg p-4 space-y-3 ${
+                  threat.clientLinked ? 'border-purple-200 bg-purple-50' : ''
+                }`}>
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
+                        {threat.clientLinked && (
+                          <Shield className="h-4 w-4 text-purple-600" />
+                        )}
                         <h4 className="font-medium">{threat.entityName}</h4>
                         <Badge variant="outline">{threat.entityType}</Badge>
                         <Badge className={getThreatLevelColor(threat.threatLevel)}>
                           {getThreatLevelText(threat.threatLevel)} ({threat.threatLevel}/10)
                         </Badge>
                         <Badge variant="secondary">{threat.platform}</Badge>
+                        {threat.clientLinked && (
+                          <Badge className="bg-purple-100 text-purple-800">
+                            Client: {threat.linkedClientName}
+                          </Badge>
+                        )}
+                        {threat.matchType && (
+                          <Badge className={getMatchTypeColor(threat.matchType)}>
+                            {threat.matchType.replace('_', ' ')} {threat.matchConfidence && `(${threat.matchConfidence}%)`}
+                          </Badge>
+                        )}
                       </div>
                       
                       <p className="text-sm text-muted-foreground mb-2">

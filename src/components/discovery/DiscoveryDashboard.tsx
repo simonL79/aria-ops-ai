@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
-import { Search, Users, FileText, Mail, TrendingUp, AlertTriangle } from "lucide-react";
+import { Search, Users, FileText, Mail, TrendingUp, AlertTriangle, Target, Shield } from "lucide-react";
 import { toast } from "sonner";
 import DiscoveryScanPanel from './DiscoveryScanPanel';
 import ThreatIntelligencePanel from './ThreatIntelligencePanel';
@@ -22,7 +22,8 @@ const DiscoveryDashboard = () => {
     discoveredThreats,
     scanStats,
     startDiscoveryScan,
-    stopDiscoveryScan
+    stopDiscoveryScan,
+    processClientEntityMatching
   } = useDiscoveryScanning();
 
   const [activeTab, setActiveTab] = useState('scan');
@@ -37,6 +38,9 @@ const DiscoveryDashboard = () => {
     await stopDiscoveryScan();
   };
 
+  const clientLinkedThreats = discoveredThreats.filter(t => t.clientLinked);
+  const highPriorityClientThreats = clientLinkedThreats.filter(t => t.threatLevel >= 8);
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -44,7 +48,7 @@ const DiscoveryDashboard = () => {
         <div>
           <h1 className="text-3xl font-bold">ARIA™ Discovery Intelligence</h1>
           <p className="text-muted-foreground">
-            Autonomous threat discovery & direct outreach system
+            Autonomous threat discovery & direct outreach system with client-entity mapping
           </p>
         </div>
         <div className="flex gap-2">
@@ -79,7 +83,7 @@ const DiscoveryDashboard = () => {
           <CardContent>
             <div className="space-y-4">
               <Progress value={scanProgress} className="w-full" />
-              <div className="grid grid-cols-4 gap-4 text-sm">
+              <div className="grid grid-cols-5 gap-4 text-sm">
                 <div>
                   <span className="font-medium">Platforms Scanned:</span>
                   <div>{scanStats.platformsScanned}/8</div>
@@ -96,14 +100,40 @@ const DiscoveryDashboard = () => {
                   <span className="font-medium">High Priority:</span>
                   <div>{scanStats.highPriorityThreats}</div>
                 </div>
+                <div>
+                  <span className="font-medium">Client Linked:</span>
+                  <div className="text-purple-600 font-semibold">{scanStats.clientLinkedThreats}</div>
+                </div>
               </div>
             </div>
           </CardContent>
         </Card>
       )}
 
+      {/* Client Priority Alerts */}
+      {highPriorityClientThreats.length > 0 && (
+        <Alert className="border-purple-200 bg-purple-50">
+          <Target className="h-4 w-4" />
+          <AlertDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <strong>Client Entity Threats Detected:</strong> {highPriorityClientThreats.length} high-priority threats 
+                affecting your monitored entities require immediate attention.
+              </div>
+              <Button 
+                size="sm" 
+                className="bg-purple-600 hover:bg-purple-700"
+                onClick={() => setActiveTab('intelligence')}
+              >
+                View Client Threats
+              </Button>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -112,6 +142,18 @@ const DiscoveryDashboard = () => {
                 <p className="text-2xl font-bold text-red-600">{discoveredThreats.filter(t => t.status === 'active').length}</p>
               </div>
               <AlertTriangle className="h-8 w-8 text-red-600" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="border-purple-200">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground">Client Linked</p>
+                <p className="text-2xl font-bold text-purple-600">{scanStats.clientLinkedThreats}</p>
+              </div>
+              <Target className="h-8 w-8 text-purple-600" />
             </div>
           </CardContent>
         </Card>
@@ -159,15 +201,59 @@ const DiscoveryDashboard = () => {
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
             <strong>High Priority Threats Detected:</strong> {discoveredThreats.filter(t => t.threatLevel >= 8).length} critical threats require immediate attention.
+            {highPriorityClientThreats.length > 0 && (
+              <span className="ml-2 text-purple-700 font-semibold">
+                ({highPriorityClientThreats.length} affect your clients)
+              </span>
+            )}
           </AlertDescription>
         </Alert>
       )}
+
+      {/* Client Entity Matching Controls */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Shield className="h-5 w-5" />
+            Client-Entity Intelligence
+          </CardTitle>
+          <CardDescription>
+            Advanced threat prioritization based on your client entity mappings
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-4">
+            <Button
+              onClick={processClientEntityMatching}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <Target className="h-4 w-4" />
+              Run Client Matching
+            </Button>
+            <div className="text-sm text-muted-foreground">
+              {clientLinkedThreats.length > 0 && (
+                <span>
+                  {clientLinkedThreats.length} threats currently linked to client entities
+                </span>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Main Interface */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid grid-cols-5 w-full">
           <TabsTrigger value="scan">Discovery Scan</TabsTrigger>
-          <TabsTrigger value="intelligence">Threat Intelligence</TabsTrigger>
+          <TabsTrigger value="intelligence" className="relative">
+            Threat Intelligence
+            {clientLinkedThreats.length > 0 && (
+              <Badge variant="secondary" className="ml-1 h-4 w-4 p-0 text-xs">
+                {clientLinkedThreats.length}
+              </Badge>
+            )}
+          </TabsTrigger>
           <TabsTrigger value="reports">Evidence Reports</TabsTrigger>
           <TabsTrigger value="contacts">Contact Discovery</TabsTrigger>
           <TabsTrigger value="outreach">Direct Outreach</TabsTrigger>

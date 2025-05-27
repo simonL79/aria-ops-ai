@@ -204,8 +204,50 @@ export type Database = {
         }
         Relationships: []
       }
+      client_entities: {
+        Row: {
+          alias: string | null
+          client_id: string
+          created_at: string | null
+          entity_name: string
+          entity_type: string
+          id: string
+          notes: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          alias?: string | null
+          client_id: string
+          created_at?: string | null
+          entity_name: string
+          entity_type: string
+          id?: string
+          notes?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          alias?: string | null
+          client_id?: string
+          created_at?: string | null
+          entity_name?: string
+          entity_type?: string
+          id?: string
+          notes?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_entities_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clients: {
         Row: {
+          client_type: string | null
           contactemail: string
           contactname: string
           created_at: string
@@ -218,6 +260,7 @@ export type Database = {
           website: string | null
         }
         Insert: {
+          client_type?: string | null
           contactemail: string
           contactname: string
           created_at?: string
@@ -230,6 +273,7 @@ export type Database = {
           website?: string | null
         }
         Update: {
+          client_type?: string | null
           contactemail?: string
           contactname?: string
           created_at?: string
@@ -953,6 +997,7 @@ export type Database = {
           ai_detection_confidence: number | null
           assigned_to: string | null
           client_id: string | null
+          client_linked: boolean | null
           confidence_score: number | null
           contact_status: string | null
           contact_status_updated_by: string | null
@@ -962,6 +1007,8 @@ export type Database = {
           id: string
           incident_playbook: string | null
           is_identified: boolean | null
+          linked_client_id: string | null
+          linked_entity_id: string | null
           media_is_ai_generated: boolean | null
           platform: string
           potential_reach: number | null
@@ -986,6 +1033,7 @@ export type Database = {
           ai_detection_confidence?: number | null
           assigned_to?: string | null
           client_id?: string | null
+          client_linked?: boolean | null
           confidence_score?: number | null
           contact_status?: string | null
           contact_status_updated_by?: string | null
@@ -995,6 +1043,8 @@ export type Database = {
           id?: string
           incident_playbook?: string | null
           is_identified?: boolean | null
+          linked_client_id?: string | null
+          linked_entity_id?: string | null
           media_is_ai_generated?: boolean | null
           platform: string
           potential_reach?: number | null
@@ -1019,6 +1069,7 @@ export type Database = {
           ai_detection_confidence?: number | null
           assigned_to?: string | null
           client_id?: string | null
+          client_linked?: boolean | null
           confidence_score?: number | null
           contact_status?: string | null
           contact_status_updated_by?: string | null
@@ -1028,6 +1079,8 @@ export type Database = {
           id?: string
           incident_playbook?: string | null
           is_identified?: boolean | null
+          linked_client_id?: string | null
+          linked_entity_id?: string | null
           media_is_ai_generated?: boolean | null
           platform?: string
           potential_reach?: number | null
@@ -1054,6 +1107,20 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scan_results_linked_client_id_fkey"
+            columns: ["linked_client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scan_results_linked_entity_id_fkey"
+            columns: ["linked_entity_id"]
+            isOneToOne: false
+            referencedRelation: "client_entities"
             referencedColumns: ["id"]
           },
         ]
@@ -1309,6 +1376,16 @@ export type Database = {
         Args: { user_email: string }
         Returns: undefined
       }
+      check_entity_client_match: {
+        Args: { entity_name_input: string }
+        Returns: {
+          client_id: string
+          client_name: string
+          entity_id: string
+          entity_name: string
+          match_type: string
+        }[]
+      }
       column_exists: {
         Args: { p_table_name: string; p_column_name: string }
         Returns: boolean
@@ -1316,6 +1393,26 @@ export type Database = {
       get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      gtrgm_compress: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gtrgm_decompress: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gtrgm_in: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gtrgm_options: {
+        Args: { "": unknown }
+        Returns: undefined
+      }
+      gtrgm_out: {
+        Args: { "": unknown }
+        Returns: unknown
       }
       has_role: {
         Args: {
@@ -1342,6 +1439,7 @@ export type Database = {
           ai_detection_confidence: number | null
           assigned_to: string | null
           client_id: string | null
+          client_linked: boolean | null
           confidence_score: number | null
           contact_status: string | null
           contact_status_updated_by: string | null
@@ -1351,6 +1449,8 @@ export type Database = {
           id: string
           incident_playbook: string | null
           is_identified: boolean | null
+          linked_client_id: string | null
+          linked_entity_id: string | null
           media_is_ai_generated: boolean | null
           platform: string
           potential_reach: number | null
@@ -1372,12 +1472,24 @@ export type Database = {
           url: string
         }[]
       }
+      set_limit: {
+        Args: { "": number }
+        Returns: number
+      }
       set_role: {
         Args: {
           _user_id: string
           _role: Database["public"]["Enums"]["app_role"]
         }
         Returns: undefined
+      }
+      show_limit: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      show_trgm: {
+        Args: { "": string }
+        Returns: string[]
       }
     }
     Enums: {

@@ -19,6 +19,12 @@ export interface DiscoveredThreat {
   timestamp: string;
   status: 'active' | 'investigating' | 'resolved';
   screenshotUrl?: string;
+  // New client-entity mapping fields
+  clientLinked?: boolean;
+  linkedClientId?: string;
+  linkedClientName?: string;
+  matchType?: string;
+  matchConfidence?: number;
 }
 
 export interface ScanStats {
@@ -26,6 +32,7 @@ export interface ScanStats {
   entitiesFound: number;
   threatsDetected: number;
   highPriorityThreats: number;
+  clientLinkedThreats: number;
   reportsGenerated?: number;
   contactsFound?: number;
 }
@@ -38,18 +45,20 @@ export const useDiscoveryScanning = () => {
     platformsScanned: 0,
     entitiesFound: 0,
     threatsDetected: 0,
-    highPriorityThreats: 0
+    highPriorityThreats: 0,
+    clientLinkedThreats: 0
   });
 
-  // Load existing threats from database
+  // Load existing threats with client-entity enrichment
   useEffect(() => {
     loadExistingThreats();
   }, []);
 
   const loadExistingThreats = async () => {
     try {
+      // Use the enriched view that includes client information
       const { data, error } = await supabase
-        .from('scan_results')
+        .from('scan_results_with_client')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(50);
@@ -58,7 +67,7 @@ export const useDiscoveryScanning = () => {
 
       const threats: DiscoveredThreat[] = (data || []).map(item => ({
         id: item.id,
-        entityName: item.risk_entity_name || 'Unknown Entity',
+        entityName: item.risk_entity_name || item.matched_entity_name || 'Unknown Entity',
         entityType: item.risk_entity_type === 'person' ? 'person' : 'brand',
         platform: item.platform,
         content: item.content,
@@ -70,17 +79,24 @@ export const useDiscoveryScanning = () => {
         mentionCount: 1,
         spreadVelocity: Math.floor(Math.random() * 10) + 1,
         timestamp: item.created_at,
-        status: item.status === 'resolved' ? 'resolved' : 'active'
+        status: item.status === 'resolved' ? 'resolved' : 'active',
+        // Client-entity mapping enrichment
+        clientLinked: item.client_linked || false,
+        linkedClientId: item.linked_client_id,
+        linkedClientName: item.client_name,
+        matchType: item.entity_match_type,
+        matchConfidence: item.entity_similarity_score ? Math.round(item.entity_similarity_score * 100) : undefined
       }));
 
       setDiscoveredThreats(threats);
       
-      // Update stats
+      // Update stats with client-linked information
       setScanStats({
         platformsScanned: new Set(threats.map(t => t.platform)).size,
         entitiesFound: new Set(threats.map(t => t.entityName)).size,
         threatsDetected: threats.length,
-        highPriorityThreats: threats.filter(t => t.threatLevel >= 8).length
+        highPriorityThreats: threats.filter(t => t.threatLevel >= 8).length,
+        clientLinkedThreats: threats.filter(t => t.clientLinked).length
       });
 
     } catch (error) {
@@ -112,6 +128,9 @@ export const useDiscoveryScanning = () => {
         // Simulate scanning delay
         await new Promise(resolve => setTimeout(resolve, 2000));
       }
+      
+      // After scanning, run client-entity matching on new results
+      await processClientEntityMatching();
       
       toast.success("Discovery scan completed successfully!");
       
@@ -158,7 +177,9 @@ export const useDiscoveryScanning = () => {
           mentionCount: threat.mention_count || 1,
           spreadVelocity: threat.spread_velocity || 1,
           timestamp: new Date().toISOString(),
-          status: 'active' as const
+          status: 'active' as const,
+          clientLinked: false, // Will be updated by client-entity matching
+          matchConfidence: 0
         }));
 
         setDiscoveredThreats(prev => [...newThreats, ...prev]);
@@ -183,6 +204,28 @@ export const useDiscoveryScanning = () => {
     }
   };
 
+  const processClientEntityMatching = async () => {
+    try {
+      // Call the enhanced client matching function
+      const { data, error } = await supabase
+        .rpc('process_scan_results_client_matching_enhanced', { batch_size: 100 });
+
+      if (error) {
+        console.error('Error in client-entity matching:', error);
+        return;
+      }
+
+      if (data && data > 0) {
+        toast.success(`🎯 Linked ${data} threats to client entities`);
+        
+        // Reload threats to get updated client linkages
+        await loadExistingThreats();
+      }
+    } catch (error) {
+      console.error('Error processing client-entity matching:', error);
+    }
+  };
+
   const stopDiscoveryScan = async () => {
     setIsScanning(false);
     toast.info("Discovery scan stopped");
@@ -195,6 +238,7 @@ export const useDiscoveryScanning = () => {
     scanStats,
     startDiscoveryScan,
     stopDiscoveryScan,
-    loadExistingThreats
+    loadExistingThreats,
+    processClientEntityMatching
   };
 };
