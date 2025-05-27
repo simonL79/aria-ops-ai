@@ -15,6 +15,7 @@ import {
   CheckCircle
 } from "lucide-react";
 import ARIASecurityPanel from './ARIASecurityPanel';
+import CerebraPanel from './CerebraPanel';
 import { logModuleUsage } from '@/services/aria/securityService';
 import { toast } from 'sonner';
 
@@ -48,6 +49,20 @@ const ARIAAdvancedModules = () => {
         'Digital footprint management',
         'Persistence scoring',
         'Automated memory routing'
+      ]
+    },
+    {
+      id: 'cerebra',
+      name: 'CEREBRA™ AI Memory Controller',
+      description: 'AI model bias tracking and memory override system',
+      icon: Brain,
+      status: 'active',
+      classification: 'restricted',
+      features: [
+        'AI model bias detection',
+        'Memory override injection',
+        'Influence echo mapping',
+        'Automated bias alerts'
       ]
     },
     {
@@ -119,8 +134,9 @@ const ARIAAdvancedModules = () => {
       </div>
 
       <Tabs defaultValue="modules" className="w-full">
-        <TabsList className="grid grid-cols-2 w-full">
+        <TabsList className="grid grid-cols-3 w-full">
           <TabsTrigger value="modules">Protected Modules</TabsTrigger>
+          <TabsTrigger value="cerebra">CEREBRA™ Control</TabsTrigger>
           <TabsTrigger value="security">Security Control</TabsTrigger>
         </TabsList>
 
@@ -210,6 +226,10 @@ const ARIAAdvancedModules = () => {
               </CardContent>
             </Card>
           )}
+        </TabsContent>
+
+        <TabsContent value="cerebra">
+          <CerebraPanel />
         </TabsContent>
 
         <TabsContent value="security">

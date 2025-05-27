@@ -117,6 +117,42 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_influence_map: {
+        Row: {
+          ai_model_origin: string | null
+          captured_at: string | null
+          echo_type: string | null
+          entity_name: string | null
+          id: string
+          matched_content: string | null
+          source_platform: string | null
+          verified: boolean | null
+          visibility_score: number | null
+        }
+        Insert: {
+          ai_model_origin?: string | null
+          captured_at?: string | null
+          echo_type?: string | null
+          entity_name?: string | null
+          id?: string
+          matched_content?: string | null
+          source_platform?: string | null
+          verified?: boolean | null
+          visibility_score?: number | null
+        }
+        Update: {
+          ai_model_origin?: string | null
+          captured_at?: string | null
+          echo_type?: string | null
+          entity_name?: string | null
+          id?: string
+          matched_content?: string | null
+          source_platform?: string | null
+          verified?: boolean | null
+          visibility_score?: number | null
+        }
+        Relationships: []
+      }
       aria_access_audit: {
         Row: {
           attempted_action: string | null
@@ -295,6 +331,86 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      cerebra_correction_history: {
+        Row: {
+          after_response: string | null
+          before_response: string | null
+          corrected_at: string | null
+          correction_type: string | null
+          entity_name: string | null
+          id: string
+          override_packet_id: string | null
+          success: boolean | null
+          target_model: string | null
+        }
+        Insert: {
+          after_response?: string | null
+          before_response?: string | null
+          corrected_at?: string | null
+          correction_type?: string | null
+          entity_name?: string | null
+          id?: string
+          override_packet_id?: string | null
+          success?: boolean | null
+          target_model?: string | null
+        }
+        Update: {
+          after_response?: string | null
+          before_response?: string | null
+          corrected_at?: string | null
+          correction_type?: string | null
+          entity_name?: string | null
+          id?: string
+          override_packet_id?: string | null
+          success?: boolean | null
+          target_model?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cerebra_correction_history_override_packet_id_fkey"
+            columns: ["override_packet_id"]
+            isOneToOne: false
+            referencedRelation: "cerebra_override_packets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cerebra_override_packets: {
+        Row: {
+          context_type: string | null
+          created_at: string | null
+          deployed_at: string | null
+          effectiveness_score: number | null
+          entity_name: string | null
+          id: string
+          override_prompt: string | null
+          status: string | null
+          target_model: string | null
+        }
+        Insert: {
+          context_type?: string | null
+          created_at?: string | null
+          deployed_at?: string | null
+          effectiveness_score?: number | null
+          entity_name?: string | null
+          id?: string
+          override_prompt?: string | null
+          status?: string | null
+          target_model?: string | null
+        }
+        Update: {
+          context_type?: string | null
+          created_at?: string | null
+          deployed_at?: string | null
+          effectiveness_score?: number | null
+          entity_name?: string | null
+          id?: string
+          override_prompt?: string | null
+          status?: string | null
+          target_model?: string | null
+        }
+        Relationships: []
       }
       clean_launch_targets: {
         Row: {
@@ -2237,6 +2353,45 @@ export type Database = {
           },
         ]
       }
+      model_bias_profile: {
+        Row: {
+          bias_level: number | null
+          created_at: string | null
+          entity_name: string
+          factual_accuracy_score: number | null
+          id: string
+          last_verified: string | null
+          memory_extracted: boolean | null
+          model: string | null
+          notes: string | null
+          tone: string | null
+        }
+        Insert: {
+          bias_level?: number | null
+          created_at?: string | null
+          entity_name: string
+          factual_accuracy_score?: number | null
+          id?: string
+          last_verified?: string | null
+          memory_extracted?: boolean | null
+          model?: string | null
+          notes?: string | null
+          tone?: string | null
+        }
+        Update: {
+          bias_level?: number | null
+          created_at?: string | null
+          entity_name?: string
+          factual_accuracy_score?: number | null
+          id?: string
+          last_verified?: string | null
+          memory_extracted?: boolean | null
+          model?: string | null
+          notes?: string | null
+          tone?: string | null
+        }
+        Relationships: []
+      }
       monitored_platforms: {
         Row: {
           active: boolean | null
@@ -3672,6 +3827,47 @@ export type Database = {
         }
         Relationships: []
       }
+      cerebra_bias_dashboard: {
+        Row: {
+          avg_accuracy: number | null
+          avg_bias: number | null
+          critical_mentions: number | null
+          entity_name: string | null
+          first_detected: string | null
+          inaccuracies: number | null
+          last_checked: string | null
+          model: string | null
+          total_profiles: number | null
+        }
+        Relationships: []
+      }
+      cerebra_influence_summary: {
+        Row: {
+          ai_summaries: number | null
+          direct_quotes: number | null
+          entity_name: string | null
+          hallucinated_mentions: number | null
+          latest_detection: string | null
+          model_sources: number | null
+          peak_visibility: number | null
+          spread_channels: number | null
+          total_echoes: number | null
+        }
+        Relationships: []
+      }
+      cerebra_override_effectiveness: {
+        Row: {
+          avg_effectiveness: number | null
+          context_type: string | null
+          deployed_count: number | null
+          entity_name: string | null
+          highly_effective: number | null
+          latest_deployment: string | null
+          target_model: string | null
+          total_overrides: number | null
+        }
+        Relationships: []
+      }
       clean_launch_dashboard: {
         Row: {
           company_name: string | null
@@ -4041,6 +4237,10 @@ export type Database = {
         Returns: string
       }
       refresh_active_case_dashboard: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      refresh_cerebra_views: {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
