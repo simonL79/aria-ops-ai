@@ -1521,6 +1521,44 @@ export type Database = {
           },
         ]
       }
+      gsc_rank_tracking: {
+        Row: {
+          clicks: number | null
+          ctr: number | null
+          id: string
+          impressions: number | null
+          position: number | null
+          recorded_at: string | null
+          suppression_asset_id: string | null
+        }
+        Insert: {
+          clicks?: number | null
+          ctr?: number | null
+          id?: string
+          impressions?: number | null
+          position?: number | null
+          recorded_at?: string | null
+          suppression_asset_id?: string | null
+        }
+        Update: {
+          clicks?: number | null
+          ctr?: number | null
+          id?: string
+          impressions?: number | null
+          position?: number | null
+          recorded_at?: string | null
+          suppression_asset_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gsc_rank_tracking_suppression_asset_id_fkey"
+            columns: ["suppression_asset_id"]
+            isOneToOne: false
+            referencedRelation: "suppression_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       indexing_footprint: {
         Row: {
           asset_title: string | null
@@ -1651,6 +1689,71 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      legacy_reputation_posts: {
+        Row: {
+          backlink_count: number | null
+          client_id: string | null
+          created_at: string | null
+          excerpt: string | null
+          first_seen: string | null
+          id: string
+          is_active: boolean | null
+          last_seen: string | null
+          rank_score: number | null
+          resurfacing_score: number | null
+          source_domain: string | null
+          suppression_status: string | null
+          times_mentioned: number | null
+          title: string | null
+          updated_at: string | null
+          url: string
+        }
+        Insert: {
+          backlink_count?: number | null
+          client_id?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          first_seen?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_seen?: string | null
+          rank_score?: number | null
+          resurfacing_score?: number | null
+          source_domain?: string | null
+          suppression_status?: string | null
+          times_mentioned?: number | null
+          title?: string | null
+          updated_at?: string | null
+          url: string
+        }
+        Update: {
+          backlink_count?: number | null
+          client_id?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          first_seen?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_seen?: string | null
+          rank_score?: number | null
+          resurfacing_score?: number | null
+          source_domain?: string | null
+          suppression_status?: string | null
+          times_mentioned?: number | null
+          title?: string | null
+          updated_at?: string | null
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legacy_reputation_posts_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       lia_records: {
         Row: {
@@ -2650,6 +2753,112 @@ export type Database = {
         }
         Relationships: []
       }
+      suppression_actions: {
+        Row: {
+          action_status: string | null
+          action_type: string
+          created_at: string | null
+          description: string | null
+          executed_at: string | null
+          id: string
+          initiated_by: string | null
+          legacy_post_id: string | null
+        }
+        Insert: {
+          action_status?: string | null
+          action_type: string
+          created_at?: string | null
+          description?: string | null
+          executed_at?: string | null
+          id?: string
+          initiated_by?: string | null
+          legacy_post_id?: string | null
+        }
+        Update: {
+          action_status?: string | null
+          action_type?: string
+          created_at?: string | null
+          description?: string | null
+          executed_at?: string | null
+          id?: string
+          initiated_by?: string | null
+          legacy_post_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suppression_actions_legacy_post_id_fkey"
+            columns: ["legacy_post_id"]
+            isOneToOne: false
+            referencedRelation: "legacy_reputation_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      suppression_assets: {
+        Row: {
+          asset_title: string | null
+          asset_type: string | null
+          asset_url: string
+          created_at: string | null
+          engagement_score: number | null
+          gsc_clicks: number | null
+          gsc_ctr: number | null
+          gsc_impressions: number | null
+          gsc_last_checked: string | null
+          gsc_position: number | null
+          id: string
+          legacy_post_id: string | null
+          published_at: string | null
+          publishing_channel: string | null
+          rank_goal: number | null
+          visibility_score: number | null
+        }
+        Insert: {
+          asset_title?: string | null
+          asset_type?: string | null
+          asset_url: string
+          created_at?: string | null
+          engagement_score?: number | null
+          gsc_clicks?: number | null
+          gsc_ctr?: number | null
+          gsc_impressions?: number | null
+          gsc_last_checked?: string | null
+          gsc_position?: number | null
+          id?: string
+          legacy_post_id?: string | null
+          published_at?: string | null
+          publishing_channel?: string | null
+          rank_goal?: number | null
+          visibility_score?: number | null
+        }
+        Update: {
+          asset_title?: string | null
+          asset_type?: string | null
+          asset_url?: string
+          created_at?: string | null
+          engagement_score?: number | null
+          gsc_clicks?: number | null
+          gsc_ctr?: number | null
+          gsc_impressions?: number | null
+          gsc_last_checked?: string | null
+          gsc_position?: number | null
+          id?: string
+          legacy_post_id?: string | null
+          published_at?: string | null
+          publishing_channel?: string | null
+          rank_goal?: number | null
+          visibility_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suppression_assets_legacy_post_id_fkey"
+            columns: ["legacy_post_id"]
+            isOneToOne: false
+            referencedRelation: "legacy_reputation_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       system_config: {
         Row: {
           config_key: string
@@ -2832,6 +3041,34 @@ export type Database = {
         }
         Relationships: []
       }
+      graveyard_summary: {
+        Row: {
+          actions_taken: number | null
+          assets_deployed: number | null
+          avg_position: number | null
+          avg_rank_goal: number | null
+          client_id: string | null
+          client_name: string | null
+          last_asset_published: string | null
+          rank_score: number | null
+          resurfacing_score: number | null
+          suppression_status: string | null
+          times_mentioned: number | null
+          title: string | null
+          total_clicks: number | null
+          total_impressions: number | null
+          url: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legacy_reputation_posts_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       high_priority_threats: {
         Row: {
           assigned_to: string | null
@@ -2964,6 +3201,10 @@ export type Database = {
       assign_staff_role: {
         Args: { user_email: string }
         Returns: undefined
+      }
+      calculate_decay_score: {
+        Args: { rank_score: number; resurfacing_score: number }
+        Returns: number
       }
       calculate_threat_urgency: {
         Args: { threat_level: number; likelihood_score: number }
