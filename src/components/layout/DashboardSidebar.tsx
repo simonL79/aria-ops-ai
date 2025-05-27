@@ -41,58 +41,47 @@ const DashboardSidebar = () => {
               </div>
             </Link>
             <Link
-              to="/dashboard/intelligence"
+              to="/discovery"
               className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
-                location.pathname.includes('/dashboard/intelligence') ? 'bg-accent text-accent-foreground' : ''
+                location.pathname.includes('/discovery') ? 'bg-accent text-accent-foreground' : ''
               }`}
             >
               <div className="flex items-center">
                 <Brain className="mr-2 h-4 w-4" />
-                <span>Intelligence</span>
+                <span>Discovery</span>
               </div>
             </Link>
             <Link
-              to="/dashboard/mentions"
+              to="/eidetic"
               className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
-                location.pathname.includes('/dashboard/mentions') ? 'bg-accent text-accent-foreground' : ''
+                location.pathname.includes('/eidetic') ? 'bg-accent text-accent-foreground' : ''
               }`}
             >
               <div className="flex items-center">
-                <Bell className="mr-2 h-4 w-4" />
-                <span>Mentions</span>
+                <Brain className="mr-2 h-4 w-4" />
+                <span>EIDETIC™</span>
               </div>
             </Link>
             <Link
-              to="/dashboard/monitor"
+              to="/rsi"
               className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
-                location.pathname.includes('/dashboard/monitor') ? 'bg-accent text-accent-foreground' : ''
+                location.pathname.includes('/rsi') ? 'bg-accent text-accent-foreground' : ''
+              }`}
+            >
+              <div className="flex items-center">
+                <Shield className="mr-2 h-4 w-4" />
+                <span>RSI™</span>
+              </div>
+            </Link>
+            <Link
+              to="/graveyard"
+              className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
+                location.pathname.includes('/graveyard') ? 'bg-accent text-accent-foreground' : ''
               }`}
             >
               <div className="flex items-center">
                 <Activity className="mr-2 h-4 w-4" />
-                <span>Content Monitor</span>
-              </div>
-            </Link>
-            <Link
-              to="/dashboard/engagement"
-              className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
-                location.pathname.includes('/dashboard/engagement') ? 'bg-accent text-accent-foreground' : ''
-              }`}
-            >
-              <div className="flex items-center">
-                <MessageSquare className="mr-2 h-4 w-4" />
-                <span>Engagement Hub</span>
-              </div>
-            </Link>
-            <Link
-              to="/dashboard/ai-scraping"
-              className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
-                location.pathname.includes('/dashboard/ai-scraping') ? 'bg-accent text-accent-foreground' : ''
-              }`}
-            >
-              <div className="flex items-center">
-                <Search className="mr-2 h-4 w-4" />
-                <span>AI Scraping</span>
+                <span>Graveyard</span>
               </div>
             </Link>
             <Link
@@ -107,75 +96,25 @@ const DashboardSidebar = () => {
               </div>
             </Link>
             <Link
-              to="/dashboard/new-companies"
+              to="/employee-risk"
               className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
-                location.pathname.includes('/dashboard/new-companies') ? 'bg-accent text-accent-foreground' : ''
-              }`}
-            >
-              <div className="flex items-center">
-                <Building className="mr-2 h-4 w-4" />
-                <span>New Companies</span>
-              </div>
-            </Link>
-            <Link
-              to="/dashboard"
-              className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
-                location.pathname.includes('/dashboard/seo-center') ? 'bg-accent text-accent-foreground' : ''
-              }`}
-            >
-              <div className="flex items-center">
-                <BarChart3 className="mr-2 h-4 w-4" />
-                <span>SEO Center</span>
-              </div>
-            </Link>
-          </div>
-        </div>
-        
-        <div className="px-3 py-2">
-          <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">
-            Intelligence
-          </h2>
-          <div className="space-y-1">
-            <Link
-              to="/dashboard/intelligence"
-              className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
-                location.pathname.includes('/dashboard/intelligence') ? 'bg-accent text-accent-foreground' : ''
+                location.pathname.includes('/employee-risk') ? 'bg-accent text-accent-foreground' : ''
               }`}
             >
               <div className="flex items-center">
                 <AlertTriangle className="mr-2 h-4 w-4" />
-                <span>Threat Intelligence</span>
+                <span>Employee Risk</span>
               </div>
             </Link>
-            
             <Link
-              to="/dashboard/radar"
+              to="/compliance"
               className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
-                location.pathname.includes('/dashboard/radar') ? 'bg-accent text-accent-foreground' : ''
+                location.pathname.includes('/compliance') ? 'bg-accent text-accent-foreground' : ''
               }`}
             >
               <div className="flex items-center">
-                <Radar className="mr-2 h-4 w-4" />
-                <span>Reputation Radar</span>
-              </div>
-            </Link>
-          </div>
-        </div>
-        
-        <div className="px-3 py-2">
-          <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">
-            Administration
-          </h2>
-          <div className="space-y-1">
-            <Link
-              to="/settings"
-              className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
-                location.pathname.includes('/settings') ? 'bg-accent text-accent-foreground' : ''
-              }`}
-            >
-              <div className="flex items-center">
-                <Settings className="mr-2 h-4 w-4" />
-                <span>Settings</span>
+                <FileText className="mr-2 h-4 w-4" />
+                <span>Compliance</span>
               </div>
             </Link>
           </div>

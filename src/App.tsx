@@ -90,7 +90,7 @@ const App = () => {
                   </SecureRouteGuard>
                 } />
                 
-                {/* Add more protected routes here */}
+                {/* Dashboard route pointing to discovery */}
                 <Route path="/dashboard" element={
                   <SecureRouteGuard requireAdmin={true}>
                     <Discovery />
