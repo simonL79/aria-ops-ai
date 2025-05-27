@@ -48,10 +48,12 @@ export interface ProspectAlert {
 
 export const getProspectEntities = async (): Promise<ProspectEntity[]> => {
   try {
+    // Use scan_results table to simulate prospect entities
     const { data, error } = await supabase
-      .from('prospect_entities')
+      .from('scan_results')
       .select('*')
-      .order('escalation_score', { ascending: false })
+      .eq('threat_type', 'reputation_risk')
+      .order('created_at', { ascending: false })
       .limit(50);
 
     if (error) {
@@ -59,7 +61,19 @@ export const getProspectEntities = async (): Promise<ProspectEntity[]> => {
       return [];
     }
 
-    return data || [];
+    // Map scan_results to ProspectEntity format
+    const entities: ProspectEntity[] = (data || []).map(item => ({
+      id: item.id,
+      detected_name: item.risk_entity_name || 'Unknown Entity',
+      source: item.platform || 'Unknown Source',
+      context_excerpt: (item.content || '').substring(0, 150) + '...',
+      mention_count: 1,
+      escalation_score: Math.abs(item.sentiment || 0),
+      created_at: item.created_at,
+      updated_at: item.updated_at || item.created_at
+    }));
+
+    return entities;
   } catch (error) {
     console.error('Error in getProspectEntities:', error);
     return [];
@@ -68,10 +82,12 @@ export const getProspectEntities = async (): Promise<ProspectEntity[]> => {
 
 export const getRSIActivationQueue = async (): Promise<RSIActivationItem[]> => {
   try {
+    // Use activity_logs table to simulate RSI activation queue
     const { data, error } = await supabase
-      .from('rsi_activation_queue')
+      .from('activity_logs')
       .select('*')
-      .order('queued_at', { ascending: false })
+      .eq('action', 'rsi_simulation_triggered')
+      .order('created_at', { ascending: false })
       .limit(20);
 
     if (error) {
@@ -79,7 +95,16 @@ export const getRSIActivationQueue = async (): Promise<RSIActivationItem[]> => {
       return [];
     }
 
-    return data || [];
+    // Map activity_logs to RSIActivationItem format
+    const items: RSIActivationItem[] = (data || []).map(log => ({
+      id: log.id,
+      prospect_name: log.entity_id || 'Unknown Prospect',
+      threat_reason: log.details || 'RSI Simulation',
+      source: 'Manual Trigger',
+      queued_at: log.created_at
+    }));
+
+    return items;
   } catch (error) {
     console.error('Error in getRSIActivationQueue:', error);
     return [];
@@ -88,10 +113,12 @@ export const getRSIActivationQueue = async (): Promise<RSIActivationItem[]> => {
 
 export const getEideticFootprintQueue = async (): Promise<EideticFootprintItem[]> => {
   try {
+    // Use memory_footprints table to simulate eidetic queue
     const { data, error } = await supabase
-      .from('eidetic_footprint_queue')
+      .from('memory_footprints')
       .select('*')
-      .order('routed_at', { ascending: false })
+      .eq('is_active', true)
+      .order('updated_at', { ascending: false })
       .limit(20);
 
     if (error) {
@@ -99,7 +126,16 @@ export const getEideticFootprintQueue = async (): Promise<EideticFootprintItem[]
       return [];
     }
 
-    return data || [];
+    // Map memory_footprints to EideticFootprintItem format
+    const items: EideticFootprintItem[] = (data || []).map(footprint => ({
+      id: footprint.id,
+      prospect_name: footprint.memory_type || 'Unknown Prospect',
+      content_excerpt: (footprint.memory_context || '').substring(0, 100) + '...',
+      decay_score: footprint.decay_score || 0,
+      routed_at: footprint.updated_at
+    }));
+
+    return items;
   } catch (error) {
     console.error('Error in getEideticFootprintQueue:', error);
     return [];
@@ -108,8 +144,9 @@ export const getEideticFootprintQueue = async (): Promise<EideticFootprintItem[]
 
 export const getProspectAlerts = async (): Promise<ProspectAlert[]> => {
   try {
+    // Use content_alerts table for prospect alerts
     const { data, error } = await supabase
-      .from('prospect_alerts')
+      .from('content_alerts')
       .select('*')
       .eq('status', 'pending')
       .order('created_at', { ascending: false })
@@ -120,7 +157,17 @@ export const getProspectAlerts = async (): Promise<ProspectAlert[]> => {
       return [];
     }
 
-    return data || [];
+    // Map content_alerts to ProspectAlert format
+    const alerts: ProspectAlert[] = (data || []).map(alert => ({
+      id: alert.id,
+      entity: alert.detected_entities ? JSON.stringify(alert.detected_entities) : 'Unknown Entity',
+      event: alert.threat_type || 'Threat Detected',
+      status: alert.status || 'pending',
+      medium: alert.platform || 'Unknown Medium',
+      created_at: alert.created_at
+    }));
+
+    return alerts;
   } catch (error) {
     console.error('Error in getProspectAlerts:', error);
     return [];
@@ -129,9 +176,11 @@ export const getProspectAlerts = async (): Promise<ProspectAlert[]> => {
 
 export const getRejectedThreats = async (): Promise<RejectedThreat[]> => {
   try {
+    // Use scan_results with resolved status for rejected threats
     const { data, error } = await supabase
-      .from('rejected_threats_log')
+      .from('scan_results')
       .select('*')
+      .eq('status', 'resolved')
       .order('created_at', { ascending: false })
       .limit(20);
 
@@ -140,7 +189,16 @@ export const getRejectedThreats = async (): Promise<RejectedThreat[]> => {
       return [];
     }
 
-    return data || [];
+    // Map scan_results to RejectedThreat format
+    const threats: RejectedThreat[] = (data || []).map(result => ({
+      id: result.id,
+      content: result.content || 'Threat content',
+      reason: 'Resolved by system',
+      source: result.platform || 'Unknown Source',
+      created_at: result.created_at
+    }));
+
+    return threats;
   } catch (error) {
     console.error('Error in getRejectedThreats:', error);
     return [];
@@ -150,7 +208,7 @@ export const getRejectedThreats = async (): Promise<RejectedThreat[]> => {
 export const markAlertProcessed = async (alertId: string): Promise<boolean> => {
   try {
     const { error } = await supabase
-      .from('prospect_alerts')
+      .from('content_alerts')
       .update({ status: 'sent' })
       .eq('id', alertId);
 

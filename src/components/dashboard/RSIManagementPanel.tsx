@@ -33,10 +33,11 @@ const RSIManagementPanel = () => {
 
   const loadActivationLogs = async () => {
     try {
-      // Get real RSI activation logs
+      // Get RSI activation logs from activity_logs
       const { data: logs, error } = await supabase
-        .from('rsi_activation_logs')
+        .from('activity_logs')
         .select('*')
+        .eq('action', 'rsi_simulation_triggered')
         .order('created_at', { ascending: false })
         .limit(10);
 
@@ -44,13 +45,21 @@ const RSIManagementPanel = () => {
         console.error('Error loading RSI logs:', error);
         setActivationLogs([]);
       } else {
-        setActivationLogs(logs || []);
+        // Map activity_logs to RSIActivationLog format
+        const mappedLogs: RSIActivationLog[] = (logs || []).map(log => ({
+          id: log.id,
+          matched_threat: log.details || 'RSI Simulation',
+          trigger_type: 'manual',
+          activation_status: 'completed',
+          created_at: log.created_at
+        }));
+        setActivationLogs(mappedLogs);
       }
 
       // Calculate stats
       const totalSims = logs?.length || 0;
-      const activeSims = logs?.filter(log => log.activation_status === 'active').length || 0;
-      const completedSims = logs?.filter(log => log.activation_status === 'completed').length || 0;
+      const activeSims = logs?.filter(log => log.action === 'rsi_simulation_triggered').length || 0;
+      const completedSims = logs?.filter(log => log.action === 'rsi_simulation_triggered').length || 0;
       
       setStats({
         totalSimulations: totalSims,

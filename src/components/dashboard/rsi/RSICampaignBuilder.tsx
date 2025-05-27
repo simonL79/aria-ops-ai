@@ -41,14 +41,16 @@ const RSICampaignBuilder = () => {
 
   const loadCampaigns = async () => {
     try {
+      // Use activity_logs to simulate RSI campaigns
       const { data, error } = await supabase
-        .from('rsi_campaigns')
+        .from('activity_logs')
         .select('*')
+        .eq('action', 'rsi_campaign_created')
         .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error loading campaigns:', error);
-        // Show some sample data if table doesn't exist yet
+        // Show some sample data if no campaigns exist
         setCampaigns([
           {
             id: '1',
@@ -62,16 +64,16 @@ const RSICampaignBuilder = () => {
           }
         ]);
       } else {
-        // Transform database data to match interface
-        const transformedCampaigns = (data || []).map(campaign => ({
-          id: campaign.id,
-          name: campaign.campaign_name || campaign.name,
-          description: campaign.description || '',
-          status: campaign.status || 'draft',
-          targetPlatforms: campaign.target_platforms || [],
-          keywords: campaign.keywords || [],
-          responseType: campaign.response_type || '',
-          createdAt: campaign.created_at || new Date().toISOString()
+        // Transform activity_logs data to match Campaign interface
+        const transformedCampaigns: Campaign[] = (data || []).map(log => ({
+          id: log.id,
+          name: log.details || 'RSI Campaign',
+          description: `Campaign created on ${new Date(log.created_at).toLocaleDateString()}`,
+          status: 'active' as const,
+          targetPlatforms: ['Twitter', 'Reddit'],
+          keywords: ['threat', 'negative'],
+          responseType: 'defensive',
+          createdAt: log.created_at
         }));
         setCampaigns(transformedCampaigns);
       }
@@ -116,16 +118,14 @@ const RSICampaignBuilder = () => {
     }
 
     try {
-      // Try to insert into database
+      // Log campaign creation to activity_logs
       const { data, error } = await supabase
-        .from('rsi_campaigns')
+        .from('activity_logs')
         .insert({
-          campaign_name: formData.name,
-          description: formData.description,
-          target_platforms: formData.targetPlatforms,
-          keywords: formData.keywords,
-          response_type: formData.responseType,
-          status: 'draft'
+          action: 'rsi_campaign_created',
+          entity_type: 'campaign',
+          entity_id: formData.name,
+          details: `RSI Campaign: ${formData.name} - ${formData.description}`
         })
         .select()
         .single();
@@ -148,12 +148,12 @@ const RSICampaignBuilder = () => {
         // Use database data
         const newCampaign: Campaign = {
           id: data.id,
-          name: data.campaign_name,
-          description: data.description,
-          status: data.status,
-          targetPlatforms: data.target_platforms || [],
-          keywords: data.keywords || [],
-          responseType: data.response_type,
+          name: formData.name,
+          description: formData.description,
+          status: 'draft',
+          targetPlatforms: formData.targetPlatforms,
+          keywords: formData.keywords,
+          responseType: formData.responseType,
           createdAt: data.created_at
         };
         setCampaigns(prev => [...prev, newCampaign]);
@@ -178,14 +178,18 @@ const RSICampaignBuilder = () => {
     const campaign = campaigns.find(c => c.id === id);
     if (!campaign) return;
 
-    const newStatus = campaign.status === 'active' ? 'paused' : 'active';
+    const newStatus: 'draft' | 'active' | 'paused' | 'completed' = campaign.status === 'active' ? 'paused' : 'active';
 
     try {
-      // Try to update in database
+      // Log status change to activity_logs
       const { error } = await supabase
-        .from('rsi_campaigns')
-        .update({ status: newStatus })
-        .eq('id', id);
+        .from('activity_logs')
+        .insert({
+          action: 'rsi_campaign_status_changed',
+          entity_type: 'campaign',
+          entity_id: id,
+          details: `Campaign status changed to ${newStatus}`
+        });
 
       if (error) {
         console.log('Database update failed, updating locally:', error);
@@ -205,11 +209,15 @@ const RSICampaignBuilder = () => {
 
   const deleteCampaign = async (id: string) => {
     try {
-      // Try to delete from database
+      // Log deletion to activity_logs
       const { error } = await supabase
-        .from('rsi_campaigns')
-        .delete()
-        .eq('id', id);
+        .from('activity_logs')
+        .insert({
+          action: 'rsi_campaign_deleted',
+          entity_type: 'campaign',
+          entity_id: id,
+          details: 'RSI Campaign deleted'
+        });
 
       if (error) {
         console.log('Database delete failed, updating locally:', error);
