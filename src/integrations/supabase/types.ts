@@ -425,6 +425,129 @@ export type Database = {
           },
         ]
       }
+      compliance_audit_logs: {
+        Row: {
+          activity_description: string
+          activity_type: string
+          consent_status: string | null
+          created_at: string | null
+          data_processed: Json | null
+          data_sources: string[] | null
+          data_subject_notified: boolean | null
+          id: string
+          ip_address: unknown | null
+          legal_basis: string | null
+          pseudonymization_applied: boolean | null
+          retention_period: unknown | null
+          user_agent: string | null
+          user_email: string | null
+          user_id: string | null
+        }
+        Insert: {
+          activity_description: string
+          activity_type: string
+          consent_status?: string | null
+          created_at?: string | null
+          data_processed?: Json | null
+          data_sources?: string[] | null
+          data_subject_notified?: boolean | null
+          id?: string
+          ip_address?: unknown | null
+          legal_basis?: string | null
+          pseudonymization_applied?: boolean | null
+          retention_period?: unknown | null
+          user_agent?: string | null
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          activity_description?: string
+          activity_type?: string
+          consent_status?: string | null
+          created_at?: string | null
+          data_processed?: Json | null
+          data_sources?: string[] | null
+          data_subject_notified?: boolean | null
+          id?: string
+          ip_address?: unknown | null
+          legal_basis?: string | null
+          pseudonymization_applied?: boolean | null
+          retention_period?: unknown | null
+          user_agent?: string | null
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      consent_records: {
+        Row: {
+          consent_date: string | null
+          consent_evidence: Json | null
+          consent_given: boolean
+          consent_method: string
+          consent_type: string
+          created_at: string | null
+          data_categories: string[]
+          data_subject_identifier: string
+          granular_choices: Json | null
+          id: string
+          ip_address: unknown | null
+          marketing_consent: boolean | null
+          processing_purpose: string
+          profiling_consent: boolean | null
+          retention_period: unknown | null
+          third_party_sharing_consent: boolean | null
+          updated_at: string | null
+          user_agent: string | null
+          withdrawal_date: string | null
+          withdrawal_method: string | null
+        }
+        Insert: {
+          consent_date?: string | null
+          consent_evidence?: Json | null
+          consent_given: boolean
+          consent_method: string
+          consent_type: string
+          created_at?: string | null
+          data_categories: string[]
+          data_subject_identifier: string
+          granular_choices?: Json | null
+          id?: string
+          ip_address?: unknown | null
+          marketing_consent?: boolean | null
+          processing_purpose: string
+          profiling_consent?: boolean | null
+          retention_period?: unknown | null
+          third_party_sharing_consent?: boolean | null
+          updated_at?: string | null
+          user_agent?: string | null
+          withdrawal_date?: string | null
+          withdrawal_method?: string | null
+        }
+        Update: {
+          consent_date?: string | null
+          consent_evidence?: Json | null
+          consent_given?: boolean
+          consent_method?: string
+          consent_type?: string
+          created_at?: string | null
+          data_categories?: string[]
+          data_subject_identifier?: string
+          granular_choices?: Json | null
+          id?: string
+          ip_address?: unknown | null
+          marketing_consent?: boolean | null
+          processing_purpose?: string
+          profiling_consent?: boolean | null
+          retention_period?: unknown | null
+          third_party_sharing_consent?: boolean | null
+          updated_at?: string | null
+          user_agent?: string | null
+          withdrawal_date?: string | null
+          withdrawal_method?: string | null
+        }
+        Relationships: []
+      }
       content_actions: {
         Row: {
           action: string
@@ -591,6 +714,246 @@ export type Database = {
           },
         ]
       }
+      data_breach_incidents: {
+        Row: {
+          breach_type: string
+          cause_of_breach: string
+          containment_measures: string | null
+          created_at: string | null
+          data_categories_affected: string[]
+          data_subjects_notified: boolean | null
+          discovery_date: string
+          ico_notification_date: string | null
+          ico_notification_required: boolean | null
+          ico_reference: string | null
+          id: string
+          immediate_actions_taken: string | null
+          incident_date: string | null
+          incident_description: string
+          incident_reference: string
+          incident_status: string | null
+          investigated_by: string | null
+          lessons_learned: string | null
+          likelihood_of_harm: string
+          notification_date: string | null
+          notification_method: string | null
+          number_of_data_subjects_affected: number | null
+          number_of_records_affected: number | null
+          preventive_measures: string | null
+          regulatory_action: string | null
+          reported_by: string | null
+          risk_assessment: string
+          severity_of_harm: string
+          systems_affected: string[] | null
+          updated_at: string | null
+        }
+        Insert: {
+          breach_type: string
+          cause_of_breach: string
+          containment_measures?: string | null
+          created_at?: string | null
+          data_categories_affected: string[]
+          data_subjects_notified?: boolean | null
+          discovery_date: string
+          ico_notification_date?: string | null
+          ico_notification_required?: boolean | null
+          ico_reference?: string | null
+          id?: string
+          immediate_actions_taken?: string | null
+          incident_date?: string | null
+          incident_description: string
+          incident_reference: string
+          incident_status?: string | null
+          investigated_by?: string | null
+          lessons_learned?: string | null
+          likelihood_of_harm: string
+          notification_date?: string | null
+          notification_method?: string | null
+          number_of_data_subjects_affected?: number | null
+          number_of_records_affected?: number | null
+          preventive_measures?: string | null
+          regulatory_action?: string | null
+          reported_by?: string | null
+          risk_assessment: string
+          severity_of_harm: string
+          systems_affected?: string[] | null
+          updated_at?: string | null
+        }
+        Update: {
+          breach_type?: string
+          cause_of_breach?: string
+          containment_measures?: string | null
+          created_at?: string | null
+          data_categories_affected?: string[]
+          data_subjects_notified?: boolean | null
+          discovery_date?: string
+          ico_notification_date?: string | null
+          ico_notification_required?: boolean | null
+          ico_reference?: string | null
+          id?: string
+          immediate_actions_taken?: string | null
+          incident_date?: string | null
+          incident_description?: string
+          incident_reference?: string
+          incident_status?: string | null
+          investigated_by?: string | null
+          lessons_learned?: string | null
+          likelihood_of_harm?: string
+          notification_date?: string | null
+          notification_method?: string | null
+          number_of_data_subjects_affected?: number | null
+          number_of_records_affected?: number | null
+          preventive_measures?: string | null
+          regulatory_action?: string | null
+          reported_by?: string | null
+          risk_assessment?: string
+          severity_of_harm?: string
+          systems_affected?: string[] | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      data_retention_schedule: {
+        Row: {
+          automated_deletion: boolean | null
+          created_at: string | null
+          cross_border_considerations: string | null
+          data_category: string
+          deletion_job_name: string | null
+          deletion_method: string
+          id: string
+          last_review_date: string | null
+          legal_basis: string
+          next_review_date: string | null
+          responsible_role: string
+          retention_justification: string
+          retention_period: unknown
+          review_frequency: unknown | null
+          special_category_data: boolean | null
+          table_name: string
+          updated_at: string | null
+        }
+        Insert: {
+          automated_deletion?: boolean | null
+          created_at?: string | null
+          cross_border_considerations?: string | null
+          data_category: string
+          deletion_job_name?: string | null
+          deletion_method: string
+          id?: string
+          last_review_date?: string | null
+          legal_basis: string
+          next_review_date?: string | null
+          responsible_role: string
+          retention_justification: string
+          retention_period: unknown
+          review_frequency?: unknown | null
+          special_category_data?: boolean | null
+          table_name: string
+          updated_at?: string | null
+        }
+        Update: {
+          automated_deletion?: boolean | null
+          created_at?: string | null
+          cross_border_considerations?: string | null
+          data_category?: string
+          deletion_job_name?: string | null
+          deletion_method?: string
+          id?: string
+          last_review_date?: string | null
+          legal_basis?: string
+          next_review_date?: string | null
+          responsible_role?: string
+          retention_justification?: string
+          retention_period?: unknown
+          review_frequency?: unknown | null
+          special_category_data?: boolean | null
+          table_name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      data_subject_requests: {
+        Row: {
+          acknowledgment_sent_date: string | null
+          created_at: string | null
+          data_categories: string[] | null
+          data_corrected: boolean | null
+          data_deleted: boolean | null
+          data_provided: boolean | null
+          data_subject_email: string
+          data_subject_name: string
+          handled_by: string | null
+          id: string
+          legal_basis_for_refusal: string | null
+          notes: string | null
+          outcome: string | null
+          processing_restricted: boolean | null
+          processing_systems: string[] | null
+          request_date: string | null
+          request_details: string | null
+          request_type: string
+          response_due_date: string | null
+          response_method: string | null
+          response_sent_date: string | null
+          status: string | null
+          updated_at: string | null
+          verification_status: string | null
+        }
+        Insert: {
+          acknowledgment_sent_date?: string | null
+          created_at?: string | null
+          data_categories?: string[] | null
+          data_corrected?: boolean | null
+          data_deleted?: boolean | null
+          data_provided?: boolean | null
+          data_subject_email: string
+          data_subject_name: string
+          handled_by?: string | null
+          id?: string
+          legal_basis_for_refusal?: string | null
+          notes?: string | null
+          outcome?: string | null
+          processing_restricted?: boolean | null
+          processing_systems?: string[] | null
+          request_date?: string | null
+          request_details?: string | null
+          request_type: string
+          response_due_date?: string | null
+          response_method?: string | null
+          response_sent_date?: string | null
+          status?: string | null
+          updated_at?: string | null
+          verification_status?: string | null
+        }
+        Update: {
+          acknowledgment_sent_date?: string | null
+          created_at?: string | null
+          data_categories?: string[] | null
+          data_corrected?: boolean | null
+          data_deleted?: boolean | null
+          data_provided?: boolean | null
+          data_subject_email?: string
+          data_subject_name?: string
+          handled_by?: string | null
+          id?: string
+          legal_basis_for_refusal?: string | null
+          notes?: string | null
+          outcome?: string | null
+          processing_restricted?: boolean | null
+          processing_systems?: string[] | null
+          request_date?: string | null
+          request_details?: string | null
+          request_type?: string
+          response_due_date?: string | null
+          response_method?: string | null
+          response_sent_date?: string | null
+          status?: string | null
+          updated_at?: string | null
+          verification_status?: string | null
+        }
+        Relationships: []
+      }
       diversion_campaigns: {
         Row: {
           content_title: string
@@ -644,6 +1007,90 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      dpia_records: {
+        Row: {
+          approval_date: string | null
+          approved_by: string | null
+          assessment_date: string
+          assessment_title: string
+          assessor_name: string
+          assessor_role: string
+          automated_decision_making: boolean | null
+          created_at: string | null
+          cross_border_transfers: string | null
+          data_minimization_measures: string | null
+          data_retention_period: unknown | null
+          data_types: string[]
+          id: string
+          identified_risks: Json | null
+          legal_basis: string
+          mitigation_measures: Json | null
+          necessity_justification: string
+          processing_purpose: string
+          profiling_activities: boolean | null
+          proportionality_assessment: string
+          review_date: string | null
+          security_measures: string | null
+          status: string | null
+          third_party_sharing: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          approval_date?: string | null
+          approved_by?: string | null
+          assessment_date: string
+          assessment_title: string
+          assessor_name: string
+          assessor_role: string
+          automated_decision_making?: boolean | null
+          created_at?: string | null
+          cross_border_transfers?: string | null
+          data_minimization_measures?: string | null
+          data_retention_period?: unknown | null
+          data_types: string[]
+          id?: string
+          identified_risks?: Json | null
+          legal_basis: string
+          mitigation_measures?: Json | null
+          necessity_justification: string
+          processing_purpose: string
+          profiling_activities?: boolean | null
+          proportionality_assessment: string
+          review_date?: string | null
+          security_measures?: string | null
+          status?: string | null
+          third_party_sharing?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          approval_date?: string | null
+          approved_by?: string | null
+          assessment_date?: string
+          assessment_title?: string
+          assessor_name?: string
+          assessor_role?: string
+          automated_decision_making?: boolean | null
+          created_at?: string | null
+          cross_border_transfers?: string | null
+          data_minimization_measures?: string | null
+          data_retention_period?: unknown | null
+          data_types?: string[]
+          id?: string
+          identified_risks?: Json | null
+          legal_basis?: string
+          mitigation_measures?: Json | null
+          necessity_justification?: string
+          processing_purpose?: string
+          profiling_activities?: boolean | null
+          proportionality_assessment?: string
+          review_date?: string | null
+          security_measures?: string | null
+          status?: string | null
+          third_party_sharing?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       employee_batch_scans: {
         Row: {
@@ -1085,6 +1532,72 @@ export type Database = {
         }
         Relationships: []
       }
+      lia_records: {
+        Row: {
+          assessment_date: string
+          assessment_outcome: string
+          assessor_name: string
+          balancing_test: string
+          created_at: string | null
+          data_sources: string[]
+          data_subject_impact: string
+          data_types: string[]
+          id: string
+          legitimate_interest: string
+          mitigation_measures: string
+          necessity_test: string
+          opt_out_mechanism: string
+          processing_methods: string
+          purpose_description: string
+          retention_justification: string
+          review_date: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          assessment_date: string
+          assessment_outcome: string
+          assessor_name: string
+          balancing_test: string
+          created_at?: string | null
+          data_sources: string[]
+          data_subject_impact: string
+          data_types: string[]
+          id?: string
+          legitimate_interest: string
+          mitigation_measures: string
+          necessity_test: string
+          opt_out_mechanism: string
+          processing_methods: string
+          purpose_description: string
+          retention_justification: string
+          review_date?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          assessment_date?: string
+          assessment_outcome?: string
+          assessor_name?: string
+          balancing_test?: string
+          created_at?: string | null
+          data_sources?: string[]
+          data_subject_impact?: string
+          data_types?: string[]
+          id?: string
+          legitimate_interest?: string
+          mitigation_measures?: string
+          necessity_test?: string
+          opt_out_mechanism?: string
+          processing_methods?: string
+          purpose_description?: string
+          retention_justification?: string
+          review_date?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       monitored_platforms: {
         Row: {
           active: boolean | null
@@ -1223,6 +1736,162 @@ export type Database = {
           original_narrative?: string
           platform?: string
           trend_direction?: string | null
+        }
+        Relationships: []
+      }
+      privacy_notices: {
+        Row: {
+          approved_by: string | null
+          contact_details: Json | null
+          content: string
+          created_at: string | null
+          created_by: string | null
+          data_controller_details: Json | null
+          dpo_contact: Json | null
+          effective_date: string
+          expiry_date: string | null
+          id: string
+          is_active: boolean | null
+          jurisdiction: string | null
+          language: string | null
+          notice_type: string
+          target_audience: string
+          title: string
+          updated_at: string | null
+          version: string
+        }
+        Insert: {
+          approved_by?: string | null
+          contact_details?: Json | null
+          content: string
+          created_at?: string | null
+          created_by?: string | null
+          data_controller_details?: Json | null
+          dpo_contact?: Json | null
+          effective_date: string
+          expiry_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          jurisdiction?: string | null
+          language?: string | null
+          notice_type: string
+          target_audience: string
+          title: string
+          updated_at?: string | null
+          version: string
+        }
+        Update: {
+          approved_by?: string | null
+          contact_details?: Json | null
+          content?: string
+          created_at?: string | null
+          created_by?: string | null
+          data_controller_details?: Json | null
+          dpo_contact?: Json | null
+          effective_date?: string
+          expiry_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          jurisdiction?: string | null
+          language?: string | null
+          notice_type?: string
+          target_audience?: string
+          title?: string
+          updated_at?: string | null
+          version?: string
+        }
+        Relationships: []
+      }
+      processing_activities: {
+        Row: {
+          accuracy_measures: string | null
+          activity_name: string
+          automated_decision_making: boolean | null
+          consent_mechanisms: string | null
+          controller_contact: Json
+          controller_name: string
+          created_at: string | null
+          criminal_conviction_data: boolean | null
+          data_minimization_measures: string | null
+          data_sources: string[]
+          data_subject_categories: string[]
+          dpo_contact: Json | null
+          id: string
+          joint_controllers: Json | null
+          last_updated: string | null
+          legal_basis: string[]
+          next_review_date: string | null
+          personal_data_categories: string[]
+          processing_purposes: string[]
+          profiling_details: string | null
+          recipients: string[] | null
+          regular_review_date: string | null
+          retention_periods: Json
+          security_measures: string
+          special_category_data: string[] | null
+          status: string | null
+          third_country_transfers: string[] | null
+          transfer_safeguards: string | null
+        }
+        Insert: {
+          accuracy_measures?: string | null
+          activity_name: string
+          automated_decision_making?: boolean | null
+          consent_mechanisms?: string | null
+          controller_contact: Json
+          controller_name: string
+          created_at?: string | null
+          criminal_conviction_data?: boolean | null
+          data_minimization_measures?: string | null
+          data_sources: string[]
+          data_subject_categories: string[]
+          dpo_contact?: Json | null
+          id?: string
+          joint_controllers?: Json | null
+          last_updated?: string | null
+          legal_basis: string[]
+          next_review_date?: string | null
+          personal_data_categories: string[]
+          processing_purposes: string[]
+          profiling_details?: string | null
+          recipients?: string[] | null
+          regular_review_date?: string | null
+          retention_periods: Json
+          security_measures: string
+          special_category_data?: string[] | null
+          status?: string | null
+          third_country_transfers?: string[] | null
+          transfer_safeguards?: string | null
+        }
+        Update: {
+          accuracy_measures?: string | null
+          activity_name?: string
+          automated_decision_making?: boolean | null
+          consent_mechanisms?: string | null
+          controller_contact?: Json
+          controller_name?: string
+          created_at?: string | null
+          criminal_conviction_data?: boolean | null
+          data_minimization_measures?: string | null
+          data_sources?: string[]
+          data_subject_categories?: string[]
+          dpo_contact?: Json | null
+          id?: string
+          joint_controllers?: Json | null
+          last_updated?: string | null
+          legal_basis?: string[]
+          next_review_date?: string | null
+          personal_data_categories?: string[]
+          processing_purposes?: string[]
+          profiling_details?: string | null
+          recipients?: string[] | null
+          regular_review_date?: string | null
+          retention_periods?: Json
+          security_measures?: string
+          special_category_data?: string[] | null
+          status?: string | null
+          third_country_transfers?: string[] | null
+          transfer_safeguards?: string | null
         }
         Relationships: []
       }
@@ -1866,6 +2535,16 @@ export type Database = {
       is_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
+      }
+      log_compliance_activity: {
+        Args: {
+          p_activity_type: string
+          p_description: string
+          p_data_processed?: Json
+          p_legal_basis?: string
+          p_data_sources?: string[]
+        }
+        Returns: string
       }
       refresh_active_case_dashboard: {
         Args: Record<PropertyKey, never>

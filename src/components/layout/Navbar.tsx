@@ -1,144 +1,143 @@
 
-import React from 'react';
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/useAuth';
 import { 
   Shield, 
   Search, 
-  Activity, 
-  Brain, 
+  Users, 
+  LogOut, 
+  Menu, 
+  X,
   FileText,
-  Users,
-  Settings,
-  Zap
-} from "lucide-react";
+  BarChart3
+} from 'lucide-react';
 
 const Navbar = () => {
+  const { signOut, isAdmin } = useAuth();
   const location = useLocation();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const navItems = [
-    { 
-      name: 'Intelligence', 
-      path: '/', 
-      icon: Shield,
-      description: 'Main dashboard and threat overview'
-    },
-    { 
-      name: 'Discovery', 
-      path: '/discovery', 
-      icon: Search,
-      description: 'AI-powered threat discovery engine'
-    },
-    { 
-      name: 'AI Scraping', 
-      path: '/ai-scraping', 
-      icon: Activity,
-      description: 'Real-time monitoring and scanning'
-    },
-    { 
-      name: 'Engagement Hub', 
-      path: '/engagement-hub', 
-      icon: Users,
-      description: 'Response management and communications'
-    },
-    { 
-      name: 'Executive Reports', 
-      path: '/executive-reports', 
-      icon: FileText,
-      description: 'Strategic intelligence briefings'
-    },
-    { 
-      name: 'Threat Intelligence', 
-      path: '/threat-intelligence', 
-      icon: Brain,
-      description: 'Advanced analysis and prediction'
-    }
+  const navigation = [
+    { name: 'Discovery', href: '/discovery', icon: Search },
+    { name: 'Employee Risk', href: '/employee-risk', icon: Users },
+    { name: 'Compliance', href: '/compliance', icon: Shield },
   ];
 
   const isActivePath = (path: string) => {
-    if (path === '/') {
-      return location.pathname === '/';
-    }
-    return location.pathname.startsWith(path);
+    return location.pathname === path;
   };
 
-  return (
-    <nav className="bg-white border-b border-gray-200 px-6 py-3">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-8">
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <div className="bg-blue-600 p-2 rounded-lg">
-              <Shield className="h-6 w-6 text-white" />
-            </div>
-            <span className="text-xl font-bold text-gray-900">
-              ARIA™ Intelligence
-            </span>
-          </Link>
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
 
-          {/* Main Navigation */}
-          <div className="hidden md:flex items-center space-x-1">
-            {navItems.map((item) => {
+  if (!isAdmin) {
+    return null;
+  }
+
+  return (
+    <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-16">
+          <div className="flex">
+            <div className="flex-shrink-0 flex items-center">
+              <Link to="/discovery" className="flex items-center gap-2">
+                <Shield className="h-8 w-8 text-blue-600" />
+                <span className="font-bold text-xl text-gray-900">A.R.I.A™</span>
+              </Link>
+            </div>
+            <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
+              {navigation.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors ${
+                      isActivePath(item.href)
+                        ? 'border-blue-500 text-gray-900'
+                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                    }`}
+                  >
+                    <Icon className="h-4 w-4 mr-2" />
+                    {item.name}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="hidden sm:ml-6 sm:flex sm:items-center">
+            <Button
+              variant="ghost"
+              onClick={handleSignOut}
+              className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Sign Out
+            </Button>
+          </div>
+
+          {/* Mobile menu button */}
+          <div className="sm:hidden flex items-center">
+            <Button
+              variant="ghost"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
+            >
+              {mobileMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile menu */}
+      {mobileMenuOpen && (
+        <div className="sm:hidden">
+          <div className="pt-2 pb-3 space-y-1">
+            {navigation.map((item) => {
               const Icon = item.icon;
-              const isActive = isActivePath(item.path);
-              
               return (
                 <Link
-                  key={item.path}
-                  to={item.path}
-                  className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    isActive
-                      ? 'bg-blue-100 text-blue-700'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  key={item.name}
+                  to={item.href}
+                  className={`flex items-center pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-colors ${
+                    isActivePath(item.href)
+                      ? 'bg-blue-50 border-blue-500 text-blue-700'
+                      : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800'
                   }`}
-                  title={item.description}
+                  onClick={() => setMobileMenuOpen(false)}
                 >
-                  <Icon className="h-4 w-4" />
-                  <span>{item.name}</span>
+                  <Icon className="h-4 w-4 mr-3" />
+                  {item.name}
                 </Link>
               );
             })}
           </div>
-        </div>
-
-        {/* Right side actions */}
-        <div className="flex items-center space-x-4">
-          <Button variant="outline" size="sm">
-            <Settings className="h-4 w-4 mr-2" />
-            Settings
-          </Button>
-          
-          <div className="flex items-center space-x-2 bg-green-50 px-3 py-1 rounded-full">
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-            <span className="text-sm font-medium text-green-700">Live Monitoring</span>
+          <div className="pt-4 pb-3 border-t border-gray-200">
+            <div className="flex items-center px-4">
+              <Button
+                variant="ghost"
+                onClick={handleSignOut}
+                className="flex items-center w-full justify-start text-gray-700 hover:text-gray-900"
+              >
+                <LogOut className="h-4 w-4 mr-3" />
+                Sign Out
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
-
-      {/* Mobile Navigation */}
-      <div className="md:hidden mt-4">
-        <div className="grid grid-cols-2 gap-2">
-          {navItems.slice(0, 6).map((item) => {
-            const Icon = item.icon;
-            const isActive = isActivePath(item.path);
-            
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`flex items-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  isActive
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                }`}
-              >
-                <Icon className="h-4 w-4" />
-                <span>{item.name}</span>
-              </Link>
-            );
-          })}
-        </div>
-      </div>
+      )}
     </nav>
   );
 };
