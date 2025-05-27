@@ -266,12 +266,15 @@ export const markAlertProcessed = async (alertId: string): Promise<boolean> => {
 
 export const getARIAStats = async () => {
   try {
-    const [entities, rsiQueue, eideticQueue, alerts, riskDashboard] = await Promise.all([
+    const [entities, rsiQueue, eideticQueue, alerts, riskDashboard, reports, notifications] = await Promise.all([
       getProspectEntities(),
       getRSIActivationQueue(),
       getEideticFootprintQueue(),
       getProspectAlerts(),
-      getEntityRiskDashboard()
+      getEntityRiskDashboard(),
+      // Add new report and notification counts
+      supabase.from('aria_reports').select('id', { count: 'exact', head: true }),
+      supabase.from('aria_notifications').select('id', { count: 'exact', head: true }).eq('seen', false)
     ]);
 
     const highScoreProspects = riskDashboard.filter(e => e.risk_score >= 0.8).length;
@@ -283,7 +286,9 @@ export const getARIAStats = async () => {
       totalMentions,
       rsiActivations: rsiQueue.length,
       eideticFootprints: eideticQueue.length,
-      pendingAlerts: alerts.length
+      pendingAlerts: alerts.length,
+      autoReports: reports.count || 0,
+      unseenNotifications: notifications.count || 0
     };
   } catch (error) {
     console.error('Error getting ARIA stats:', error);
@@ -293,7 +298,9 @@ export const getARIAStats = async () => {
       totalMentions: 0,
       rsiActivations: 0,
       eideticFootprints: 0,
-      pendingAlerts: 0
+      pendingAlerts: 0,
+      autoReports: 0,
+      unseenNotifications: 0
     };
   }
 };

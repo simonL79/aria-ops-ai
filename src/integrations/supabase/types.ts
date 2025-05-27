@@ -117,6 +117,69 @@ export type Database = {
         }
         Relationships: []
       }
+      aria_notifications: {
+        Row: {
+          created_at: string | null
+          entity_name: string | null
+          event_type: string | null
+          id: string
+          priority: string | null
+          seen: boolean | null
+          summary: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          entity_name?: string | null
+          event_type?: string | null
+          id?: string
+          priority?: string | null
+          seen?: boolean | null
+          summary?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          entity_name?: string | null
+          event_type?: string | null
+          id?: string
+          priority?: string | null
+          seen?: boolean | null
+          summary?: string | null
+        }
+        Relationships: []
+      }
+      aria_reports: {
+        Row: {
+          content: string | null
+          created_at: string | null
+          entity_name: string | null
+          id: string
+          report_title: string
+          risk_rating: string | null
+          summary: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string | null
+          entity_name?: string | null
+          id?: string
+          report_title: string
+          risk_rating?: string | null
+          summary?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          content?: string | null
+          created_at?: string | null
+          entity_name?: string | null
+          id?: string
+          report_title?: string
+          risk_rating?: string | null
+          summary?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       case_threads: {
         Row: {
           assigned_to: string | null
@@ -2606,6 +2669,50 @@ export type Database = {
         }
         Relationships: []
       }
+      report_exports: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          export_type: string | null
+          id: string
+          recipient: string | null
+          report_id: string | null
+          scheduled_at: string | null
+          sent_at: string | null
+          status: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          export_type?: string | null
+          id?: string
+          recipient?: string | null
+          report_id?: string | null
+          scheduled_at?: string | null
+          sent_at?: string | null
+          status?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          export_type?: string | null
+          id?: string
+          recipient?: string | null
+          report_id?: string | null
+          scheduled_at?: string | null
+          sent_at?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "report_exports_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "aria_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reputation_counters: {
         Row: {
           content_type: string | null
@@ -3489,6 +3596,19 @@ export type Database = {
       }
     }
     Views: {
+      aria_notifications_dashboard: {
+        Row: {
+          created_at: string | null
+          entity_name: string | null
+          event_type: string | null
+          id: string | null
+          priority: string | null
+          priority_order: number | null
+          seen: boolean | null
+          summary: string | null
+        }
+        Relationships: []
+      }
       clean_launch_dashboard: {
         Row: {
           company_name: string | null
@@ -3824,6 +3944,18 @@ export type Database = {
           p_data_processed?: Json
           p_legal_basis?: string
           p_data_sources?: string[]
+        }
+        Returns: string
+      }
+      mark_notification_seen: {
+        Args: { notification_id: string }
+        Returns: undefined
+      }
+      queue_report_export: {
+        Args: {
+          p_report_id: string
+          p_export_type: string
+          p_recipient: string
         }
         Returns: string
       }

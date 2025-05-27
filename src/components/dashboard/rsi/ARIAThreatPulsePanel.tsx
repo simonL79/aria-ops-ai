@@ -12,7 +12,9 @@ import {
   Eye, 
   Shield,
   Activity,
-  Target
+  Target,
+  Bell,
+  FileText
 } from "lucide-react";
 import { 
   getProspectEntities, 
@@ -44,7 +46,9 @@ const ARIAThreatPulsePanel = () => {
     totalMentions: 0,
     rsiActivations: 0,
     eideticFootprints: 0,
-    pendingAlerts: 0
+    pendingAlerts: 0,
+    autoReports: 0,
+    unseenNotifications: 0
   });
 
   useEffect(() => {
@@ -123,7 +127,7 @@ const ARIAThreatPulsePanel = () => {
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-8 gap-4">
         <Card>
           <CardContent className="p-3">
             <div className="text-center">
@@ -169,6 +173,22 @@ const ARIAThreatPulsePanel = () => {
             <div className="text-center">
               <p className="text-xs text-muted-foreground">Alerts</p>
               <p className="text-lg font-bold text-blue-600">{stats.pendingAlerts}</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-3">
+            <div className="text-center">
+              <p className="text-xs text-muted-foreground">Auto Reports</p>
+              <p className="text-lg font-bold text-green-600">{stats.autoReports}</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-3">
+            <div className="text-center">
+              <p className="text-xs text-muted-foreground">Notifications</p>
+              <p className="text-lg font-bold text-yellow-600">{stats.unseenNotifications}</p>
             </div>
           </CardContent>
         </Card>
