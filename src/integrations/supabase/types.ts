@@ -189,13 +189,6 @@ export type Database = {
             foreignKeyName: "case_timelines_case_id_fkey"
             columns: ["case_id"]
             isOneToOne: false
-            referencedRelation: "active_case_dashboard"
-            referencedColumns: ["case_id"]
-          },
-          {
-            foreignKeyName: "case_timelines_case_id_fkey"
-            columns: ["case_id"]
-            isOneToOne: false
             referencedRelation: "case_threads"
             referencedColumns: ["id"]
           },
@@ -2312,19 +2305,6 @@ export type Database = {
       }
     }
     Views: {
-      active_case_dashboard: {
-        Row: {
-          assigned_to: string | null
-          case_id: string | null
-          last_activity: string | null
-          last_case_update: string | null
-          log_count: number | null
-          priority: string | null
-          status: string | null
-          title: string | null
-        }
-        Relationships: []
-      }
       clean_launch_dashboard: {
         Row: {
           company_name: string | null
@@ -2492,38 +2472,25 @@ export type Database = {
         Returns: {
           client_id: string
           client_name: string
+          client_contact: string
           entity_id: string
           entity_name: string
+          entity_type: string
           match_type: string
+          confidence_score: number
         }[]
       }
       column_exists: {
         Args: { p_table_name: string; p_column_name: string }
         Returns: boolean
       }
+      get_active_case_dashboard: {
+        Args: Record<PropertyKey, never>
+        Returns: unknown[]
+      }
       get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: string
-      }
-      gtrgm_compress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gtrgm_decompress: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gtrgm_in: {
-        Args: { "": unknown }
-        Returns: unknown
-      }
-      gtrgm_options: {
-        Args: { "": unknown }
-        Returns: undefined
-      }
-      gtrgm_out: {
-        Args: { "": unknown }
-        Returns: unknown
       }
       has_role: {
         Args: {
@@ -2551,7 +2518,7 @@ export type Database = {
         Returns: undefined
       }
       run_global_scan: {
-        Args: Record<PropertyKey, never>
+        Args: Record<PropertyKey, never> | { scan_depth?: string }
         Returns: undefined
       }
       run_scan: {
@@ -2593,24 +2560,12 @@ export type Database = {
           url: string
         }[]
       }
-      set_limit: {
-        Args: { "": number }
-        Returns: number
-      }
       set_role: {
         Args: {
           _user_id: string
           _role: Database["public"]["Enums"]["app_role"]
         }
         Returns: undefined
-      }
-      show_limit: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
-      show_trgm: {
-        Args: { "": string }
-        Returns: string[]
       }
     }
     Enums: {

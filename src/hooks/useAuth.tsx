@@ -43,6 +43,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const hasAdminRole = !!data;
       console.log('Admin status result:', hasAdminRole);
       setIsAdmin(hasAdminRole);
+      
+      // If this is immediately after login and user should be admin, force refresh
+      if (!hasAdminRole && userId) {
+        console.log('Admin role not found, checking again in 1 second...');
+        setTimeout(async () => {
+          const { data: retryData } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', userId)
+            .eq('role', 'admin')
+            .maybeSingle();
+          
+          const retryHasAdmin = !!retryData;
+          console.log('Retry admin status result:', retryHasAdmin);
+          setIsAdmin(retryHasAdmin);
+        }, 1000);
+      }
     } catch (error) {
       console.error('Error in checkAdminStatus:', error);
       setIsAdmin(false);
