@@ -149,9 +149,14 @@ const EmployeeManagement = () => {
 
   const queueScan = async (employeeId: string) => {
     try {
-      const { error } = await supabase.rpc('queue_employee_scan', {
-        p_employee_id: employeeId
-      });
+      // Insert directly into the scan queue table
+      const { error } = await supabase
+        .from('employee_scan_queue')
+        .insert({
+          employee_id: employeeId,
+          priority: 5,
+          status: 'queued'
+        });
       
       if (error) throw error;
       toast.success('Employee queued for scanning');
