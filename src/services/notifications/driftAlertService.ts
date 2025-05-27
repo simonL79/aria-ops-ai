@@ -148,7 +148,7 @@ class DriftAlertService {
   }
 
   private buildSlackMessage(driftAlerts: DriftAlert[], sentimentAlerts: SentimentAlert[]): any {
-    const blocks = [
+    const blocks: any[] = [
       {
         type: "header",
         text: {
