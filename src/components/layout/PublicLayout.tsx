@@ -21,7 +21,7 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
     if (isAuthenticated) {
       await signOut();
     } else {
-      navigate('/auth');
+      navigate('/admin/login');
     }
   };
 
@@ -61,7 +61,7 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
                 className="ml-4 text-sm font-medium"
               >
                 <LogIn className="mr-2 h-4 w-4" />
-                Sign In
+                Admin Login
               </Button>
             )}
           </div>

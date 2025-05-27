@@ -6,7 +6,7 @@ import { Routes, Route } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
 import SecureRouteGuard from "@/components/auth/SecureRouteGuard";
 import AdminSessionManager from "@/components/auth/AdminSessionManager";
-import Index from "./pages/Index";
+import SalesFunnelPage from "./pages/SalesFunnelPage";
 import Discovery from "./pages/Discovery";
 import AdminLogin from "./pages/AdminLogin";
 import AboutPage from "./pages/AboutPage";
@@ -34,7 +34,7 @@ const App = () => {
           <main>
             <Routes>
               {/* Public Routes */}
-              <Route path="/" element={<Index />} />
+              <Route path="/" element={<SalesFunnelPage />} />
               <Route path="/about" element={<AboutPage />} />
               <Route path="/blog" element={<BlogPage />} />
               
