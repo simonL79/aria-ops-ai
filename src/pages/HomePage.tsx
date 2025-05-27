@@ -1,5 +1,7 @@
 
 import React from 'react';
+import PageLayout from '@/components/layout/PageLayout';
+import PublicLayout from '@/components/layout/PublicLayout';
 import HeroSection from '@/components/sections/HeroSection';
 import NOCFeaturesSection from '@/components/sections/NOCFeaturesSection';
 import HowItWorksSection from '@/components/sections/HowItWorksSection';
@@ -9,21 +11,22 @@ import ReputationOpsCenterSection from '@/components/sections/ReputationOpsCente
 import EnhancedTestimonialsSection from '@/components/sections/EnhancedTestimonialsSection';
 import CTASection from '@/components/sections/CTASection';
 import EnhancedCTASection from '@/components/sections/EnhancedCTASection';
-import PublicLayout from '@/components/layout/PublicLayout';
 
 const HomePage = () => {
   return (
-    <PublicLayout>
-      <HeroSection />
-      <NOCFeaturesSection />
-      <ProblemSection />
-      <HowItWorksSection />
-      <PlatformsSection />
-      <ReputationOpsCenterSection />
-      <EnhancedTestimonialsSection />
-      <CTASection />
-      <EnhancedCTASection />
-    </PublicLayout>
+    <PageLayout title="A.R.I.A™ - AI Reputation Intelligence Agent">
+      <PublicLayout>
+        <HeroSection />
+        <NOCFeaturesSection />
+        <ProblemSection />
+        <HowItWorksSection />
+        <PlatformsSection />
+        <ReputationOpsCenterSection />
+        <EnhancedTestimonialsSection />
+        <CTASection />
+        <EnhancedCTASection />
+      </PublicLayout>
+    </PageLayout>
   );
 };
 
