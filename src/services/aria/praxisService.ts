@@ -104,7 +104,15 @@ export const getInternalBehaviorSignals = async (): Promise<InternalBehaviorSign
       return [];
     }
 
-    return data || [];
+    // Transform the data to ensure proper typing
+    const transformedData = (data || []).map(item => ({
+      ...item,
+      metadata: typeof item.metadata === 'string' 
+        ? JSON.parse(item.metadata) 
+        : (item.metadata as Record<string, any>) || {}
+    }));
+
+    return transformedData;
   } catch (error) {
     console.error('Error in getInternalBehaviorSignals:', error);
     return [];
