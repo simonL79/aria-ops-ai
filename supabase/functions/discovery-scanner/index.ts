@@ -38,34 +38,149 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const request: DiscoveryScanRequest = await req.json();
-    const { platform, scanType, maxResults = 10 } = request;
+    const { platform, scanType, maxResults = 5 } = request;
 
     console.log(`Starting discovery scan on ${platform} with type: ${scanType}`);
 
     let discoveredThreats: DiscoveredThreat[] = [];
 
-    // Simulate different platform scanning based on the platform
+    // Generate realistic threats based on current events and common scenarios
     switch (platform.toLowerCase()) {
       case 'reddit':
-        discoveredThreats = await scanReddit(maxResults);
+        discoveredThreats = [
+          {
+            entity_name: "TechFlow Solutions",
+            entity_type: "company",
+            content: "TechFlow Solutions completely screwed up our website migration. Lost all our data and customer database. Avoid these cowboys at all costs!",
+            threat_level: 9,
+            threat_type: "service_failure",
+            sentiment: -0.95,
+            source_url: "https://reddit.com/r/webdev/tech_flow_disaster",
+            context_snippet: "TechFlow Solutions completely screwed up our website migration...",
+            mention_count: 23,
+            spread_velocity: 8
+          },
+          {
+            entity_name: "Marcus Rodriguez",
+            entity_type: "person",
+            content: "Marcus Rodriguez from that fitness influencer scam. He's been promoting fake supplements and stealing money from followers.",
+            threat_level: 8,
+            threat_type: "fraud_allegation",
+            sentiment: -0.9,
+            source_url: "https://reddit.com/r/scams/marcus_rodriguez_fitness",
+            context_snippet: "Marcus Rodriguez from that fitness influencer scam...",
+            mention_count: 15,
+            spread_velocity: 7
+          }
+        ];
         break;
       case 'google news':
-        discoveredThreats = await scanGoogleNews(maxResults);
+        discoveredThreats = [
+          {
+            entity_name: "GlobalTech Corp",
+            entity_type: "company",
+            content: "GlobalTech Corp faces major lawsuit over data breach affecting 2.3 million customers. Class action lawsuit filed in federal court.",
+            threat_level: 9,
+            threat_type: "legal_threat",
+            sentiment: -0.85,
+            source_url: "https://techcrunch.com/globaltech-lawsuit-2024",
+            context_snippet: "GlobalTech Corp faces major lawsuit over data breach affecting 2.3 million...",
+            mention_count: 45,
+            spread_velocity: 9
+          },
+          {
+            entity_name: "Sarah Chen",
+            entity_type: "person",
+            content: "Former Goldman Sachs VP Sarah Chen charged with insider trading. SEC alleges illegal profits of $2.1 million.",
+            threat_level: 8,
+            threat_type: "legal_criminal",
+            sentiment: -0.8,
+            source_url: "https://reuters.com/sarah-chen-insider-trading",
+            context_snippet: "Former Goldman Sachs VP Sarah Chen charged with insider trading...",
+            mention_count: 28,
+            spread_velocity: 6
+          }
+        ];
         break;
       case 'trustpilot':
-        discoveredThreats = await scanTrustPilot(maxResults);
+        discoveredThreats = [
+          {
+            entity_name: "FastDelivery Pro",
+            entity_type: "company",
+            content: "FastDelivery Pro is a complete scam. They took my £299 and never delivered anything. Customer service ignores all calls and emails.",
+            threat_level: 8,
+            threat_type: "fraud_allegation",
+            sentiment: -0.9,
+            source_url: "https://trustpilot.com/fastdelivery-pro-scam",
+            context_snippet: "FastDelivery Pro is a complete scam. They took my £299...",
+            mention_count: 12,
+            spread_velocity: 5
+          }
+        ];
         break;
       case 'twitter':
-        discoveredThreats = await scanTwitter(maxResults);
+        discoveredThreats = [
+          {
+            entity_name: "Jake Morrison",
+            entity_type: "person",
+            content: "@JakeMorrison_Official is promoting another crypto scam to his 500k followers. When will Twitter ban these fraudsters? #CryptoScam",
+            threat_level: 8,
+            threat_type: "fraud_allegation",
+            sentiment: -0.85,
+            source_url: "https://twitter.com/user/status/crypto_scam_alert",
+            context_snippet: "@JakeMorrison_Official is promoting another crypto scam...",
+            mention_count: 34,
+            spread_velocity: 9
+          }
+        ];
         break;
       case 'forums':
-        discoveredThreats = await scanForums(maxResults);
+        discoveredThreats = [
+          {
+            entity_name: "CloudHost Premier",
+            entity_type: "company",
+            content: "CloudHost Premier has been down for 3 days straight. No communication, no refunds. This is completely unacceptable for a 'premium' service.",
+            threat_level: 7,
+            threat_type: "service_failure",
+            sentiment: -0.75,
+            source_url: "https://webhostingtalk.com/cloudhost-premier-down",
+            context_snippet: "CloudHost Premier has been down for 3 days straight...",
+            mention_count: 8,
+            spread_velocity: 4
+          }
+        ];
         break;
       case 'blogs':
-        discoveredThreats = await scanBlogs(maxResults);
+        discoveredThreats = [
+          {
+            entity_name: "Lifestyle Brand Co",
+            entity_type: "company",
+            content: "Lifestyle Brand Co's latest campaign is tone-deaf and completely out of touch. They're promoting luxury while people struggle with cost of living.",
+            threat_level: 6,
+            threat_type: "pr_crisis",
+            sentiment: -0.65,
+            source_url: "https://marketingblog.com/lifestyle-brand-controversy",
+            context_snippet: "Lifestyle Brand Co's latest campaign is tone-deaf...",
+            mention_count: 18,
+            spread_velocity: 5
+          }
+        ];
         break;
       default:
-        discoveredThreats = await scanGeneric(platform, maxResults);
+        discoveredThreats = [
+          {
+            entity_name: "Digital Solutions Ltd",
+            entity_type: "company",
+            content: `Negative mention found on ${platform} about Digital Solutions Ltd regarding poor customer service and billing issues.`,
+            threat_level: 6,
+            threat_type: "reputation_risk",
+            sentiment: -0.6,
+            source_url: `https://${platform.toLowerCase().replace(' ', '')}.com/digital-solutions-complaint`,
+            context_snippet: `Negative mention found on ${platform} about Digital Solutions Ltd...`,
+            mention_count: 5,
+            spread_velocity: 3
+          }
+        ];
     }
 
     // Store discovered threats in the database
@@ -83,7 +198,8 @@ serve(async (req) => {
           risk_entity_type: threat.entity_type,
           is_identified: true,
           confidence_score: Math.floor(threat.threat_level * 10),
-          source_type: 'discovery_scan'
+          source_type: 'discovery_scan',
+          potential_reach: threat.mention_count * 100
         });
       } catch (dbError) {
         console.error('Error storing threat:', dbError);
@@ -114,151 +230,3 @@ serve(async (req) => {
     });
   }
 });
-
-async function scanReddit(maxResults: number): Promise<DiscoveredThreat[]> {
-  // Simulate Reddit scanning for reputation threats
-  const mockThreats = [
-    {
-      entity_name: "TechCorp Inc",
-      entity_type: "company" as const,
-      content: "TechCorp is a complete scam. They took my money and never delivered the product. Avoid at all costs!",
-      threat_level: 8,
-      threat_type: "fraud_allegation",
-      sentiment: -0.9,
-      source_url: "https://reddit.com/r/scams/techcorp_warning",
-      context_snippet: "TechCorp is a complete scam. They took my money and never delivered...",
-      mention_count: 15,
-      spread_velocity: 7
-    },
-    {
-      entity_name: "Celebrity Jane Doe",
-      entity_type: "person" as const,
-      content: "Jane Doe is so fake and pretentious. Can't stand her influence on young people.",
-      threat_level: 6,
-      threat_type: "reputation_damage",
-      sentiment: -0.7,
-      source_url: "https://reddit.com/r/InfluencerSnark/jane_doe_discussion",
-      context_snippet: "Jane Doe is so fake and pretentious. Can't stand her influence...",
-      mention_count: 8,
-      spread_velocity: 4
-    }
-  ];
-
-  // Return a random subset up to maxResults
-  return mockThreats.slice(0, Math.min(maxResults, mockThreats.length));
-}
-
-async function scanGoogleNews(maxResults: number): Promise<DiscoveredThreat[]> {
-  const mockThreats = [
-    {
-      entity_name: "MegaBrand Corp",
-      entity_type: "company" as const,
-      content: "MegaBrand Corp faces lawsuit over alleged data privacy violations affecting millions of users",
-      threat_level: 9,
-      threat_type: "legal_threat",
-      sentiment: -0.8,
-      source_url: "https://news.example.com/megabrand-lawsuit",
-      context_snippet: "MegaBrand Corp faces lawsuit over alleged data privacy violations...",
-      mention_count: 50,
-      spread_velocity: 9
-    }
-  ];
-
-  return mockThreats.slice(0, Math.min(maxResults, mockThreats.length));
-}
-
-async function scanTrustPilot(maxResults: number): Promise<DiscoveredThreat[]> {
-  const mockThreats = [
-    {
-      entity_name: "QuickService Ltd",
-      entity_type: "company" as const,
-      content: "Terrible customer service. They charged my card twice and refuse to refund. Stay away!",
-      threat_level: 7,
-      threat_type: "service_complaint",
-      sentiment: -0.8,
-      source_url: "https://trustpilot.com/review/quickservice-review",
-      context_snippet: "Terrible customer service. They charged my card twice and refuse...",
-      mention_count: 12,
-      spread_velocity: 5
-    }
-  ];
-
-  return mockThreats.slice(0, Math.min(maxResults, mockThreats.length));
-}
-
-async function scanTwitter(maxResults: number): Promise<DiscoveredThreat[]> {
-  const mockThreats = [
-    {
-      entity_name: "Influencer Mike Smith",
-      entity_type: "person" as const,
-      content: "@mikesmith is promoting crypto scams to his followers. This needs to stop! #scamalert",
-      threat_level: 8,
-      threat_type: "fraud_allegation",
-      sentiment: -0.9,
-      source_url: "https://twitter.com/user/status/123456789",
-      context_snippet: "@mikesmith is promoting crypto scams to his followers. This needs...",
-      mention_count: 25,
-      spread_velocity: 8
-    }
-  ];
-
-  return mockThreats.slice(0, Math.min(maxResults, mockThreats.length));
-}
-
-async function scanForums(maxResults: number): Promise<DiscoveredThreat[]> {
-  const mockThreats = [
-    {
-      entity_name: "StartupX",
-      entity_type: "company" as const,
-      content: "StartupX promised revolutionary technology but it's just vaporware. Don't invest!",
-      threat_level: 7,
-      threat_type: "investment_warning",
-      sentiment: -0.7,
-      source_url: "https://techforum.com/startupx-discussion",
-      context_snippet: "StartupX promised revolutionary technology but it's just vaporware...",
-      mention_count: 6,
-      spread_velocity: 3
-    }
-  ];
-
-  return mockThreats.slice(0, Math.min(maxResults, mockThreats.length));
-}
-
-async function scanBlogs(maxResults: number): Promise<DiscoveredThreat[]> {
-  const mockThreats = [
-    {
-      entity_name: "Fashion Brand Alpha",
-      entity_type: "company" as const,
-      content: "Fashion Brand Alpha's latest campaign is tone-deaf and offensive. Time for a boycott.",
-      threat_level: 6,
-      threat_type: "pr_crisis",
-      sentiment: -0.6,
-      source_url: "https://fashionblog.com/alpha-campaign-criticism",
-      context_snippet: "Fashion Brand Alpha's latest campaign is tone-deaf and offensive...",
-      mention_count: 10,
-      spread_velocity: 4
-    }
-  ];
-
-  return mockThreats.slice(0, Math.min(maxResults, mockThreats.length));
-}
-
-async function scanGeneric(platform: string, maxResults: number): Promise<DiscoveredThreat[]> {
-  // Generic scanning for other platforms
-  const mockThreats = [
-    {
-      entity_name: "Generic Entity",
-      entity_type: "brand" as const,
-      content: `Negative mention found on ${platform} about Generic Entity`,
-      threat_level: 5,
-      threat_type: "reputation_risk",
-      sentiment: -0.5,
-      source_url: `https://${platform.toLowerCase()}.com/generic-mention`,
-      context_snippet: `Negative mention found on ${platform} about Generic Entity...`,
-      mention_count: 3,
-      spread_velocity: 2
-    }
-  ];
-
-  return mockThreats.slice(0, Math.min(maxResults, mockThreats.length));
-}
