@@ -66,8 +66,8 @@ const SalesFunnelPage = () => {
             </p>
           </div>
           
-          <div className="bg-red-600 border-l-4 border-red-400 p-6 mb-8 rounded-lg">
-            <h3 className="text-xl font-bold mb-2 flex items-center">
+          <div className="bg-blue-800 border-l-4 border-blue-400 p-6 mb-8 rounded-lg">
+            <h3 className="text-xl font-bold mb-2 flex items-center justify-center">
               🚨 Protect What Matters — Before It Breaks
             </h3>
             <p className="text-lg">
@@ -372,18 +372,6 @@ const SalesFunnelPage = () => {
               <a href="#scan-form" onClick={scrollToForm}>
                 🔍 Request Your Private Scan
               </a>
-            </Button>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-4 max-w-2xl mx-auto">
-            <Button asChild variant="outline" className="border-white text-white hover:bg-white hover:text-blue-900">
-              <a href="/calendar">👉 Schedule a Demo</a>
-            </Button>
-            <Button asChild variant="outline" className="border-white text-white hover:bg-white hover:text-blue-900">
-              <a href="/reports">👉 Sample Report PDF</a>
-            </Button>
-            <Button asChild variant="outline" className="border-white text-white hover:bg-white hover:text-blue-900">
-              <a href="/pricing">👉 Compare Plans</a>
             </Button>
           </div>
         </div>
