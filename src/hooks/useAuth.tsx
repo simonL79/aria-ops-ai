@@ -36,16 +36,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (error) {
         console.error('Error checking admin status:', error);
         setIsAdmin(false);
-        return;
+        return false;
       }
 
       const hasAdminRole = data && data.length > 0;
       console.log('Admin status check result:', { hasAdminRole, data });
       setIsAdmin(hasAdminRole);
+      return hasAdminRole;
       
     } catch (error) {
       console.error('Error in checkAdminStatus:', error);
       setIsAdmin(false);
+      return false;
     }
   };
 
@@ -80,6 +82,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           }
         }
         
+        // Always set loading to false after processing
         setIsLoading(false);
       } catch (error) {
         console.error('Error in getInitialSession:', error);
