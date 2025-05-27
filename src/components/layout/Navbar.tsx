@@ -11,7 +11,9 @@ import {
   Menu, 
   X,
   FileText,
-  BarChart3
+  BarChart3,
+  Brain,
+  Skull
 } from 'lucide-react';
 import Logo from '@/components/ui/logo';
 
@@ -24,7 +26,9 @@ const Navbar = () => {
     { name: 'Discovery', href: '/discovery', icon: Search },
     { name: 'Employee Risk', href: '/employee-risk', icon: Users },
     { name: 'Compliance', href: '/compliance', icon: Shield },
-    { name: 'EIDETIC', href: '/eidetic', icon: FileText },
+    { name: 'EIDETIC', href: '/eidetic', icon: Brain },
+    { name: 'RSI™', href: '/rsi', icon: BarChart3 },
+    { name: 'GRAVEYARD™', href: '/graveyard', icon: Skull },
   ];
 
   const isActivePath = (path: string) => {

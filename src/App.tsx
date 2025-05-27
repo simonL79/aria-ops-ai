@@ -15,6 +15,8 @@ import BlogPage from "./pages/BlogPage";
 import EideticPage from "./pages/EideticPage";
 import EmployeeBrandRiskPage from "./pages/EmployeeBrandRiskPage";
 import ComplianceDashboard from "./components/compliance/ComplianceDashboard";
+import RSI from "./pages/RSI";
+import GraveyardPage from "./pages/GraveyardPage";
 import { useAuth } from "@/hooks/useAuth";
 
 const queryClient = new QueryClient();
@@ -66,6 +68,18 @@ const App = () => {
                 <Route path="/eidetic" element={
                   <SecureRouteGuard requireAdmin={true}>
                     <EideticPage />
+                  </SecureRouteGuard>
+                } />
+
+                <Route path="/rsi" element={
+                  <SecureRouteGuard requireAdmin={true}>
+                    <RSI />
+                  </SecureRouteGuard>
+                } />
+
+                <Route path="/graveyard" element={
+                  <SecureRouteGuard requireAdmin={true}>
+                    <GraveyardPage />
                   </SecureRouteGuard>
                 } />
                 

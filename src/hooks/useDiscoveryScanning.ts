@@ -219,12 +219,19 @@ export const useDiscoveryScanning = () => {
     }
   };
 
+  const stopDiscoveryScan = () => {
+    setIsScanning(false);
+    setScanProgress(0);
+    toast.info('Discovery scan stopped');
+  };
+
   return {
     isScanning,
     scanProgress,
     discoveredThreats,
     scanStats,
     startDiscoveryScan,
+    stopDiscoveryScan,
     loadExistingThreats
   };
 };
