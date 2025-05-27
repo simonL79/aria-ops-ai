@@ -11,6 +11,7 @@ import Discovery from "./pages/Discovery";
 import AdminLogin from "./pages/AdminLogin";
 import AboutPage from "./pages/AboutPage";
 import BlogPage from "./pages/BlogPage";
+import EideticPage from "./pages/EideticPage";
 import EmployeeBrandRiskPage from "./pages/EmployeeBrandRiskPage";
 import ComplianceDashboard from "./components/compliance/ComplianceDashboard";
 import { useAuth } from "@/hooks/useAuth";
@@ -57,6 +58,12 @@ const App = () => {
               <Route path="/compliance" element={
                 <SecureRouteGuard requireAdmin={true}>
                   <ComplianceDashboard />
+                </SecureRouteGuard>
+              } />
+
+              <Route path="/eidetic" element={
+                <SecureRouteGuard requireAdmin={true}>
+                  <EideticPage />
                 </SecureRouteGuard>
               } />
               

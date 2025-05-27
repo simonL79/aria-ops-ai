@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -40,26 +41,35 @@ const EideticDashboard = () => {
     try {
       setLoading(true);
       
-      // Get memory footprints stats
+      // Get memory footprints stats with error handling
       const { data: footprints, error: footprintsError } = await supabase
         .from('memory_footprints')
         .select('decay_score, is_active');
 
-      if (footprintsError) throw footprintsError;
+      if (footprintsError) {
+        console.error('Error loading footprints:', footprintsError);
+        // Continue with empty data instead of throwing
+      }
 
-      // Get decay profiles stats
+      // Get decay profiles stats with error handling
       const { data: profiles, error: profilesError } = await supabase
         .from('memory_decay_profiles')
         .select('action_status');
 
-      if (profilesError) throw profilesError;
+      if (profilesError) {
+        console.error('Error loading profiles:', profilesError);
+        // Continue with empty data instead of throwing
+      }
 
-      // Get recalibrators stats
+      // Get recalibrators stats with error handling
       const { data: recalibrators, error: recalibratorsError } = await supabase
         .from('memory_recalibrators')
         .select('is_deployed, effectiveness_score');
 
-      if (recalibratorsError) throw recalibratorsError;
+      if (recalibratorsError) {
+        console.error('Error loading recalibrators:', recalibratorsError);
+        // Continue with empty data instead of throwing
+      }
 
       const totalFootprints = footprints?.length || 0;
       const activeFootprints = footprints?.filter(f => f.is_active).length || 0;
@@ -91,7 +101,7 @@ const EideticDashboard = () => {
   const refreshData = async () => {
     try {
       toast.success('EIDETIC™ data refreshed');
-      loadStats();
+      await loadStats();
     } catch (error) {
       console.error('Error refreshing EIDETIC data:', error);
       toast.error('Failed to refresh data');
