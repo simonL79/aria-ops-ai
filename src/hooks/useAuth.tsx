@@ -26,59 +26,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       console.log('Checking admin status for user:', userId);
       
-      // First try: Check with count
-      const { count, error } = await supabase
+      const { data, error } = await supabase
         .from('user_roles')
-        .select('*', { count: 'exact', head: true })
+        .select('role')
         .eq('user_id', userId)
-        .eq('role', 'admin');
+        .eq('role', 'admin')
+        .limit(1);
       
       if (error) {
         console.error('Error checking admin status:', error);
-        
-        // Fallback: Try direct select if count fails
-        console.log('Count query failed, trying direct select...');
-        const { data: directData, error: directError } = await supabase
-          .from('user_roles')
-          .select('id, role')
-          .eq('user_id', userId)
-          .eq('role', 'admin')
-          .limit(1);
-        
-        if (directError) {
-          console.error('Direct select also failed:', directError);
-          setIsAdmin(false);
-          return;
-        }
-        
-        const hasAdminRole = directData && directData.length > 0;
-        console.log('Direct select result:', directData, 'hasAdminRole:', hasAdminRole);
-        setIsAdmin(hasAdminRole);
+        setIsAdmin(false);
         return;
       }
 
-      const hasAdminRole = count !== null && count > 0;
-      console.log('Admin status check - count:', count, 'hasAdminRole:', hasAdminRole);
+      const hasAdminRole = data && data.length > 0;
+      console.log('Admin status check result:', { hasAdminRole, data });
       setIsAdmin(hasAdminRole);
       
-      // If count is 0, double-check with direct select
-      if (!hasAdminRole) {
-        console.log('Count returned 0, double-checking with direct select...');
-        const { data: directData, error: directError } = await supabase
-          .from('user_roles')
-          .select('id, role')
-          .eq('user_id', userId)
-          .eq('role', 'admin')
-          .limit(1);
-        
-        if (!directError && directData && directData.length > 0) {
-          console.log('Direct select found admin role (count was wrong):', directData);
-          setIsAdmin(true);
-        } else {
-          console.log('Confirmed: No admin role found for user');
-          setIsAdmin(false);
-        }
-      }
     } catch (error) {
       console.error('Error in checkAdminStatus:', error);
       setIsAdmin(false);
@@ -88,6 +52,41 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     console.log('AuthProvider initializing...');
     
+    // Get initial session first
+    const getInitialSession = async () => {
+      try {
+        const { data: { session: initialSession }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Error getting initial session:', error);
+          setIsLoading(false);
+          return;
+        }
+        
+        console.log('Initial session check:', { 
+          hasSession: !!initialSession,
+          userId: initialSession?.user?.id 
+        });
+        
+        setSession(initialSession);
+        setUser(initialSession?.user ?? null);
+        
+        if (initialSession?.user) {
+          await checkAdminStatus(initialSession.user.id);
+          try {
+            await initializeDatabase();
+          } catch (dbError) {
+            console.error('Error initializing database:', dbError);
+          }
+        }
+        
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error in getInitialSession:', error);
+        setIsLoading(false);
+      }
+    };
+
     // Set up auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
@@ -99,11 +98,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
 
-        // Handle admin status checking
         if (event === 'SIGNED_IN' && currentSession?.user) {
-          // Check admin status immediately
           await checkAdminStatus(currentSession.user.id);
-          
           try {
             await initializeDatabase();
             console.log('User signed in successfully:', currentSession.user.email);
@@ -122,40 +118,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           await checkAdminStatus(currentSession.user.id);
         }
 
+        // Always set loading to false after handling auth state changes
         setIsLoading(false);
       }
     );
 
-    // Get initial session
-    const getInitialSession = async () => {
-      try {
-        const { data: { session: initialSession }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error('Error getting initial session:', error);
-        } else {
-          console.log('Initial session check:', { 
-            hasSession: !!initialSession,
-            userId: initialSession?.user?.id 
-          });
-          
-          setSession(initialSession);
-          setUser(initialSession?.user ?? null);
-          
-          if (initialSession?.user) {
-            await checkAdminStatus(initialSession.user.id);
-            await initializeDatabase().catch(error => {
-              console.error('Error initializing database:', error);
-            });
-          }
-        }
-      } catch (error) {
-        console.error('Error in getInitialSession:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
+    // Initialize session
     getInitialSession();
 
     return () => {
@@ -179,17 +147,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signOut = async () => {
     try {
       console.log('Signing out user...');
-      // Clear local state immediately
       setIsAdmin(false);
       setUser(null);
       setSession(null);
       
-      // Then sign out from Supabase
       await supabase.auth.signOut();
       console.log('Sign out successful');
     } catch (error) {
       console.error('Error signing out:', error);
-      // Even if signOut fails, clear local state
       setIsAdmin(false);
       setUser(null);
       setSession(null);
