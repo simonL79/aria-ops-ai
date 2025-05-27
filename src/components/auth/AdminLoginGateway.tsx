@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -24,30 +25,34 @@ const AdminLoginGateway = () => {
   const MAX_ATTEMPTS = 5;
   const LOCKOUT_DURATION = 15 * 60 * 1000; // 15 minutes
 
-  // Handle force reset
+  // Handle force reset with immediate feedback
   const handleForceReset = async () => {
-    toast.info('Resetting authentication state...');
+    toast.info('Resetting authentication...', { duration: 1000 });
     await forceReset();
     setEmail('');
     setPassword('');
     setLoginAttempts(0);
     setIsLocked(false);
     setLockoutTime(null);
-    toast.success('Authentication reset complete');
+    toast.success('Authentication reset complete', { duration: 2000 });
   };
 
   // Check for existing lockout
   useEffect(() => {
     const lockout = localStorage.getItem('admin_lockout');
     if (lockout) {
-      const lockoutData = JSON.parse(lockout);
-      const lockoutExpiry = new Date(lockoutData.expiry);
-      
-      if (new Date() < lockoutExpiry) {
-        setIsLocked(true);
-        setLockoutTime(lockoutExpiry);
-        setLoginAttempts(lockoutData.attempts);
-      } else {
+      try {
+        const lockoutData = JSON.parse(lockout);
+        const lockoutExpiry = new Date(lockoutData.expiry);
+        
+        if (new Date() < lockoutExpiry) {
+          setIsLocked(true);
+          setLockoutTime(lockoutExpiry);
+          setLoginAttempts(lockoutData.attempts);
+        } else {
+          localStorage.removeItem('admin_lockout');
+        }
+      } catch (error) {
         localStorage.removeItem('admin_lockout');
       }
     }
@@ -69,67 +74,67 @@ const AdminLoginGateway = () => {
     }
   }, [isLocked, lockoutTime]);
 
-  // Handle successful authentication redirect
+  // Handle authentication redirect - simplified logic
   useEffect(() => {
-    console.log('Auth state in AdminLoginGateway:', { isAuthenticated, isAdmin, authLoading });
+    console.log('🔍 AdminLoginGateway auth state:', { 
+      isAuthenticated, 
+      isAdmin, 
+      authLoading 
+    });
     
+    // Only redirect if we're sure about the auth state
     if (!authLoading && isAuthenticated && isAdmin) {
       const from = location.state?.from?.pathname || '/discovery';
-      console.log('Admin authenticated, redirecting to:', from);
+      console.log('✅ Admin authenticated, redirecting to:', from);
+      toast.success('Welcome back, admin!');
       navigate(from, { replace: true });
     }
   }, [isAuthenticated, isAdmin, authLoading, navigate, location.state]);
 
-  // Show loading while authentication is being processed
+  // Show simple loading state while auth is initializing
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
-        <div className="text-center space-y-4">
-          <div className="animate-spin h-12 w-12 border-4 border-blue-400 border-t-transparent rounded-full mx-auto"></div>
-          <div className="text-white">
-            <div className="font-semibold">Verifying Access</div>
-            <div className="text-sm text-gray-400">Checking authentication...</div>
+        <div className="text-center space-y-6">
+          <div className="animate-spin h-16 w-16 border-4 border-blue-400 border-t-transparent rounded-full mx-auto"></div>
+          <div className="text-white space-y-2">
+            <div className="text-xl font-semibold">Initializing A.R.I.A™</div>
+            <div className="text-gray-400">Loading authentication system...</div>
           </div>
           <Button
             onClick={handleForceReset}
             variant="outline"
-            className="mt-4 text-gray-300 border-gray-600 hover:bg-gray-700"
+            className="text-gray-300 border-gray-600 hover:bg-gray-700"
           >
             <RotateCcw className="mr-2 h-4 w-4" />
-            Reset Auth State
+            Force Reset
           </Button>
         </div>
       </div>
     );
   }
 
-  // Redirect if already authenticated and admin
-  if (!authLoading && isAuthenticated && isAdmin) {
-    const from = location.state?.from?.pathname || '/discovery';
-    return <Navigate to={from} replace />;
-  }
-
-  // If authenticated but not admin, show error
-  if (!authLoading && isAuthenticated && !isAdmin) {
+  // If authenticated but not admin, show clear error
+  if (isAuthenticated && !isAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
-        <div className="text-center space-y-4">
-          <div className="text-red-400 text-xl font-semibold">Access Denied</div>
-          <div className="text-gray-300">Admin privileges required</div>
-          <div className="space-x-2">
-            <button 
+        <div className="text-center space-y-6">
+          <div className="text-red-400 text-2xl font-semibold">❌ Access Denied</div>
+          <div className="text-gray-300 text-lg">Admin privileges required for this area</div>
+          <div className="space-x-4">
+            <Button 
               onClick={() => signOut()}
-              className="px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600"
+              className="bg-gray-700 text-white hover:bg-gray-600"
             >
               Sign Out
-            </button>
+            </Button>
             <Button
               onClick={handleForceReset}
               variant="outline"
               className="text-gray-300 border-gray-600 hover:bg-gray-700"
             >
               <RotateCcw className="mr-2 h-4 w-4" />
-              Reset
+              Reset Auth
             </Button>
           </div>
         </div>
@@ -144,7 +149,7 @@ const AdminLoginGateway = () => {
         action,
         success,
         details,
-        ip_address: 'client-side', // In production, get from server
+        ip_address: 'client-side',
         user_agent: navigator.userAgent,
         email_attempted: email
       });
@@ -186,7 +191,7 @@ const AdminLoginGateway = () => {
             expiry: lockoutExpiry.toISOString()
           }));
 
-          toast.error(`Account locked for ${LOCKOUT_DURATION / 60000} minutes due to multiple failed attempts`);
+          toast.error(`Account locked for ${LOCKOUT_DURATION / 60000} minutes`);
         } else {
           toast.error(`Login failed. ${MAX_ATTEMPTS - newAttempts} attempts remaining.`);
         }
@@ -194,7 +199,7 @@ const AdminLoginGateway = () => {
         setLoginAttempts(0);
         localStorage.removeItem('admin_lockout');
         await logAdminAction('admin_login_success', true, 'Successful admin login');
-        toast.success('Admin access granted - redirecting...');
+        toast.success('Login successful! Checking admin status...');
       }
     } catch (error: any) {
       console.error('Login error:', error);
@@ -225,16 +230,17 @@ const AdminLoginGateway = () => {
           <p className="text-gray-300">Secure Admin Access Gateway</p>
         </div>
 
-        {/* Reset Button */}
+        {/* Emergency Reset Button */}
         <div className="text-center">
           <Button
             onClick={handleForceReset}
             variant="outline"
-            className="text-gray-300 border-gray-600 hover:bg-gray-700"
+            className="text-gray-300 border-gray-600 hover:bg-gray-700 bg-red-900/20 border-red-600"
           >
             <RotateCcw className="mr-2 h-4 w-4" />
-            Reset Authentication
+            Emergency Reset
           </Button>
+          <p className="text-xs text-gray-500 mt-2">Click if stuck on verification</p>
         </div>
 
         {/* Security Notice */}
