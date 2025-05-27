@@ -27,7 +27,8 @@ export const apiCall = async <T>(
   errorMessage = 'Operation failed'
 ): Promise<T> => {
   try {
-    const { data, error } = await operation();
+    const result = await operation();
+    const { data, error } = result;
     
     if (error) {
       throw handleApiError(error, errorMessage);
@@ -48,9 +49,12 @@ export const submitScanRequest = async (formData: {
   email: string;
 }) => {
   return apiCall(
-    () => supabase
-      .from('reputation_scan_submissions')
-      .insert([{ ...formData, keywords: '', status: 'new' }]),
+    async () => {
+      const result = await supabase
+        .from('reputation_scan_submissions')
+        .insert([{ ...formData, keywords: '', status: 'new' }]);
+      return result;
+    },
     'Failed to submit scan request'
   );
 };
@@ -61,9 +65,12 @@ export const submitLeadMagnet = async (formData: {
   lead_magnet: string;
 }) => {
   return apiCall(
-    () => supabase
-      .from('lead_magnets')
-      .insert([{ ...formData, status: 'new' }]),
+    async () => {
+      const result = await supabase
+        .from('lead_magnets')
+        .insert([{ ...formData, status: 'new' }]);
+      return result;
+    },
     'Failed to submit lead magnet'
   );
 };
