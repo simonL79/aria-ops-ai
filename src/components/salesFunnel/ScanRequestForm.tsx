@@ -90,13 +90,15 @@ const ScanRequestForm = () => {
               placeholder="Your Email Address" 
               required 
             />
-            <Button 
-              type="submit" 
-              className="w-full bg-blue-800 text-white font-semibold py-6 rounded hover:bg-blue-900 transition-colors"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? "SUBMITTING..." : "SCAN ME"}
-            </Button>
+            <div className="flex justify-center">
+              <Button 
+                type="submit" 
+                className="w-full max-w-md bg-blue-800 text-white font-semibold py-6 rounded hover:bg-blue-900 transition-colors mx-auto"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "SUBMITTING..." : "SCAN ME"}
+              </Button>
+            </div>
           </form>
         )}
       </div>
