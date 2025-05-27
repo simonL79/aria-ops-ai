@@ -25,12 +25,13 @@ const ScanRequestForm = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    const full_name = e.target.full_name.value;
-    const email = e.target.email.value;
+    const formData = new FormData(e.currentTarget);
+    const full_name = formData.get('full_name') as string;
+    const email = formData.get('email') as string;
 
     try {
       // Insert the scan submission

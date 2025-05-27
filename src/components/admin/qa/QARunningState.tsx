@@ -1,16 +1,41 @@
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { Loader } from 'lucide-react';
 
-const QARunningState = () => {
+interface QARunningStateProps {
+  progress: number;
+  currentPhase?: string;
+  estimatedTime?: number;
+}
+
+const QARunningState = ({ progress, currentPhase, estimatedTime }: QARunningStateProps) => {
   return (
-    <Card className="text-center py-12">
-      <CardContent>
-        <div className="animate-spin h-16 w-16 border-b-2 border-primary mx-auto mb-4"></div>
-        <h3 className="text-lg font-medium mb-2">Running ARIA™ NOC QA Suite...</h3>
-        <p className="text-muted-foreground">
-          Testing all system components with live data validation and GDPR compliance checks.
-        </p>
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Loader className="h-5 w-5 animate-spin" />
+          Running QA Test Suite
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <Progress value={progress} className="w-full" />
+        <div className="text-center space-y-2">
+          <p className="text-sm text-muted-foreground">
+            Progress: {Math.round(progress)}%
+          </p>
+          {currentPhase && (
+            <p className="font-medium">
+              Current Phase: {currentPhase}
+            </p>
+          )}
+          {estimatedTime && (
+            <p className="text-xs text-muted-foreground">
+              Estimated time remaining: {estimatedTime}s
+            </p>
+          )}
+        </div>
       </CardContent>
     </Card>
   );

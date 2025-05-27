@@ -24,6 +24,16 @@ const SourceCard: React.FC<SourceCardProps> = ({
   scanResult,
   getStatusBadge
 }) => {
+  const handleScanClick = () => {
+    console.log(`Triggering scan for source: ${source.id}`);
+    onScan(source.id);
+  };
+
+  const handleToggleChange = (checked: boolean) => {
+    console.log(`Toggling source ${source.id} to ${checked ? 'enabled' : 'disabled'}`);
+    onToggle(source.id, checked);
+  };
+
   return (
     <div className="border rounded-lg p-4">
       <div className="flex justify-between items-start">
@@ -47,7 +57,7 @@ const SourceCard: React.FC<SourceCardProps> = ({
             {scanResult && (
               <div className="mt-2 text-xs">
                 <span className="text-green-600">
-                  Found {scanResult.matches_found} threats, processed {scanResult.processed}
+                  Found {scanResult.matches_found || 0} threats, processed {scanResult.processed || 0}
                 </span>
               </div>
             )}
@@ -63,7 +73,7 @@ const SourceCard: React.FC<SourceCardProps> = ({
             <Button 
               size="sm" 
               variant="outline"
-              onClick={() => onScan(source.id)}
+              onClick={handleScanClick}
               disabled={isLoading}
             >
               {isLoading ? (
@@ -71,12 +81,13 @@ const SourceCard: React.FC<SourceCardProps> = ({
               ) : (
                 <RefreshCw className="h-4 w-4" />
               )}
+              <span className="ml-1 hidden sm:inline">Scan</span>
             </Button>
           )}
           
           <Switch 
             checked={source.enabled}
-            onCheckedChange={(checked) => onToggle(source.id, checked)}
+            onCheckedChange={handleToggleChange}
             disabled={source.requiresSetup}
           />
         </div>
