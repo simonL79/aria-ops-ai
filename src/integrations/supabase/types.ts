@@ -1888,6 +1888,90 @@ export type Database = {
         }
         Relationships: []
       }
+      prospect_entities: {
+        Row: {
+          average_sentiment: number | null
+          competitive_threats: string[] | null
+          contact_channels: string[] | null
+          contact_potential: string | null
+          context_summary: string | null
+          created_at: string | null
+          crisis_indicators: string[] | null
+          decision_maker_mentions: string[] | null
+          entity_name: string
+          entity_type: string
+          estimated_company_size: string | null
+          estimated_revenue: string | null
+          first_mention_source: string
+          growth_indicators: string[] | null
+          id: string
+          industry_category: string | null
+          last_updated: string | null
+          media_visibility_trend: string | null
+          potential_ad_spend: string | null
+          potential_reach: number | null
+          reputation_risk_level: string | null
+          sales_opportunity_score: number | null
+          total_mentions: number
+          urgency_score: number | null
+          visibility_score: number | null
+        }
+        Insert: {
+          average_sentiment?: number | null
+          competitive_threats?: string[] | null
+          contact_channels?: string[] | null
+          contact_potential?: string | null
+          context_summary?: string | null
+          created_at?: string | null
+          crisis_indicators?: string[] | null
+          decision_maker_mentions?: string[] | null
+          entity_name: string
+          entity_type: string
+          estimated_company_size?: string | null
+          estimated_revenue?: string | null
+          first_mention_source: string
+          growth_indicators?: string[] | null
+          id?: string
+          industry_category?: string | null
+          last_updated?: string | null
+          media_visibility_trend?: string | null
+          potential_ad_spend?: string | null
+          potential_reach?: number | null
+          reputation_risk_level?: string | null
+          sales_opportunity_score?: number | null
+          total_mentions?: number
+          urgency_score?: number | null
+          visibility_score?: number | null
+        }
+        Update: {
+          average_sentiment?: number | null
+          competitive_threats?: string[] | null
+          contact_channels?: string[] | null
+          contact_potential?: string | null
+          context_summary?: string | null
+          created_at?: string | null
+          crisis_indicators?: string[] | null
+          decision_maker_mentions?: string[] | null
+          entity_name?: string
+          entity_type?: string
+          estimated_company_size?: string | null
+          estimated_revenue?: string | null
+          first_mention_source?: string
+          growth_indicators?: string[] | null
+          id?: string
+          industry_category?: string | null
+          last_updated?: string | null
+          media_visibility_trend?: string | null
+          potential_ad_spend?: string | null
+          potential_reach?: number | null
+          reputation_risk_level?: string | null
+          sales_opportunity_score?: number | null
+          total_mentions?: number
+          urgency_score?: number | null
+          visibility_score?: number | null
+        }
+        Relationships: []
+      }
       reputation_scan_submissions: {
         Row: {
           admin_notes: string | null

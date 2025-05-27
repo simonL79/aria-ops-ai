@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -106,22 +107,28 @@ const UKNewsScanPanel = () => {
 
   const loadProspectIntelligence = async () => {
     try {
+      // Use a raw query to access the prospect_entities table since TypeScript types haven't been updated yet
       const { data, error } = await supabase
-        .from('prospect_entities')
+        .from('prospect_entities' as any)
         .select('*')
         .order('sales_opportunity_score', { ascending: false })
         .limit(20);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error loading prospect intelligence:', error);
+        return;
+      }
 
-      if (data) {
-        setProspectIntel(data);
+      if (data && Array.isArray(data)) {
+        // Type cast the data to match our interface
+        const typedData = data as ProspectIntelligence[];
+        setProspectIntel(typedData);
         
         // Calculate enhanced stats
-        const highValueProspects = data.filter(p => p.sales_opportunity_score >= 8).length;
+        const highValueProspects = typedData.filter(p => p.sales_opportunity_score >= 8).length;
         
         // Estimate total ad spend potential
-        const totalAdSpend = data.reduce((total, prospect) => {
+        const totalAdSpend = typedData.reduce((total, prospect) => {
           const adSpend = prospect.potential_ad_spend || '£0';
           const match = adSpend.match(/£([\d.]+)([KM]?)/);
           if (match) {
