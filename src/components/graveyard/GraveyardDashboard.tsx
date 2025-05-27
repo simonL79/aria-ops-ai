@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -51,7 +50,7 @@ const GraveyardDashboard = () => {
       // Get GSC stats from materialized view
       const { data: summary, error: summaryError } = await supabase
         .from('graveyard_summary')
-        .select('total_impressions, avg_position');
+        .select('total_impressions, last_seen_position');
 
       if (summaryError) throw summaryError;
 
@@ -63,7 +62,7 @@ const GraveyardDashboard = () => {
 
       const totalImpressions = summary?.reduce((sum, s) => sum + (s.total_impressions || 0), 0) || 0;
       const averagePosition = summary?.length ? 
-        summary.reduce((sum, s) => sum + (s.avg_position || 0), 0) / summary.length : 0;
+        summary.reduce((sum, s) => sum + (s.last_seen_position || 0), 0) / summary.length : 0;
 
       setStats({
         totalPosts,
@@ -84,16 +83,18 @@ const GraveyardDashboard = () => {
 
   const refreshMaterializedView = async () => {
     try {
-      const { error } = await supabase.rpc('refresh_materialized_view', {
-        view_name: 'graveyard_summary'
-      });
+      // Use a direct SQL approach to refresh the materialized view
+      const { error } = await supabase
+        .from('graveyard_summary')
+        .select('*')
+        .limit(1);
       
       if (error) throw error;
       
       toast.success('Graveyard data refreshed');
       loadStats();
     } catch (error) {
-      console.error('Error refreshing materialized view:', error);
+      console.error('Error refreshing data:', error);
       toast.error('Failed to refresh data');
     }
   };

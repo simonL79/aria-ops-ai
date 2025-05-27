@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,8 +20,8 @@ interface SuppressionAsset {
   gsc_impressions: number;
   gsc_clicks: number;
   gsc_ctr: number;
-  gsc_position: number;
-  gsc_last_checked: string;
+  gsc_last_position: number;
+  updated_at: string;
   legacy_post_id: string;
 }
 
@@ -54,13 +53,13 @@ const SuppressionAssets = () => {
 
   const updateGSCData = async (assetId: string) => {
     try {
-      // Simulate GSC data update
+      // Simulate GSC data update with the new schema
       const mockGSCData = {
         gsc_impressions: Math.floor(Math.random() * 10000) + 500,
         gsc_clicks: Math.floor(Math.random() * 500) + 10,
         gsc_ctr: Math.random() * 0.1,
-        gsc_position: Math.random() * 50 + 1,
-        gsc_last_checked: new Date().toISOString()
+        gsc_last_position: Math.random() * 50 + 1,
+        updated_at: new Date().toISOString()
       };
 
       const { error } = await supabase
@@ -187,29 +186,29 @@ const SuppressionAssets = () => {
                     <div className="flex items-center justify-center gap-1 mb-1">
                       <span className="text-sm font-medium">Position</span>
                     </div>
-                    <p className={`text-lg font-bold ${getPerformanceColor(asset.gsc_position || 100, asset.rank_goal)}`}>
-                      {asset.gsc_position ? Math.round(asset.gsc_position) : 'N/A'}
+                    <p className={`text-lg font-bold ${getPerformanceColor(asset.gsc_last_position || 100, asset.rank_goal)}`}>
+                      {asset.gsc_last_position ? Math.round(asset.gsc_last_position) : 'N/A'}
                     </p>
                   </div>
                 </div>
 
                 {/* Rank Goal Progress */}
-                {asset.rank_goal && asset.gsc_position && (
+                {asset.rank_goal && asset.gsc_last_position && (
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Rank Goal Progress</span>
                       <span>Goal: Position {asset.rank_goal}</span>
                     </div>
                     <Progress 
-                      value={Math.max(0, Math.min(100, ((100 - asset.gsc_position) / (100 - asset.rank_goal)) * 100))}
+                      value={Math.max(0, Math.min(100, ((100 - asset.gsc_last_position) / (100 - asset.rank_goal)) * 100))}
                       className="h-2"
                     />
                   </div>
                 )}
 
-                {asset.gsc_last_checked && (
+                {asset.updated_at && (
                   <p className="text-xs text-muted-foreground mt-2">
-                    Last updated: {new Date(asset.gsc_last_checked).toLocaleString()}
+                    Last updated: {new Date(asset.updated_at).toLocaleString()}
                   </p>
                 )}
               </div>
