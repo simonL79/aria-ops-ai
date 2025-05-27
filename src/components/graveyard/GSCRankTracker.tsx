@@ -10,11 +10,11 @@ import { toast } from "sonner";
 
 interface GSCTrackingData {
   id: string;
-  log_date: string;
-  gsc_impressions: number;
-  gsc_clicks: number;
-  gsc_ctr: number;
-  gsc_position: number;
+  recorded_at: string;
+  impressions: number;
+  clicks: number;
+  ctr: number;
+  position: number;
   asset_title?: string;
 }
 
@@ -30,21 +30,24 @@ const GSCRankTracker = () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from('suppression_rank_history')
+        .from('gsc_rank_tracking')
         .select(`
           *,
           suppression_assets!inner(asset_title)
         `)
-        .order('log_date', { ascending: true })
+        .order('recorded_at', { ascending: true })
         .limit(100);
 
       if (error) throw error;
       
       const formattedData = data?.map(item => ({
-        ...item,
-        asset_title: item.suppression_assets?.asset_title,
-        log_date: new Date(item.log_date).toLocaleDateString(),
-        gsc_ctr: item.gsc_ctr * 100 // Convert to percentage
+        id: item.id,
+        recorded_at: new Date(item.recorded_at).toLocaleDateString(),
+        impressions: item.impressions || 0,
+        clicks: item.clicks || 0,
+        ctr: (item.ctr || 0) * 100, // Convert to percentage
+        position: item.position || 0,
+        asset_title: (item.suppression_assets as any)?.asset_title
       })) || [];
 
       setTrackingData(formattedData);
@@ -81,18 +84,18 @@ const GSCRankTracker = () => {
           date.setDate(date.getDate() - i);
           
           sampleData.push({
-            asset_id: asset.id,
-            log_date: date.toISOString().split('T')[0], // Date only
-            gsc_impressions: Math.floor(Math.random() * 1000) + 100,
-            gsc_clicks: Math.floor(Math.random() * 50) + 5,
-            gsc_ctr: Math.random() * 0.1,
-            gsc_position: Math.random() * 30 + 10
+            suppression_asset_id: asset.id,
+            recorded_at: date.toISOString(),
+            impressions: Math.floor(Math.random() * 1000) + 100,
+            clicks: Math.floor(Math.random() * 50) + 5,
+            ctr: Math.random() * 0.1,
+            position: Math.random() * 30 + 10
           });
         }
       }
 
       const { error } = await supabase
-        .from('suppression_rank_history')
+        .from('gsc_rank_tracking')
         .insert(sampleData);
 
       if (error) throw error;
@@ -146,7 +149,7 @@ const GSCRankTracker = () => {
                     <span className="font-medium">Total Impressions</span>
                   </div>
                   <p className="text-2xl font-bold">
-                    {trackingData.reduce((sum, item) => sum + item.gsc_impressions, 0).toLocaleString()}
+                    {trackingData.reduce((sum, item) => sum + item.impressions, 0).toLocaleString()}
                   </p>
                 </div>
                 
@@ -156,7 +159,7 @@ const GSCRankTracker = () => {
                     <span className="font-medium">Total Clicks</span>
                   </div>
                   <p className="text-2xl font-bold">
-                    {trackingData.reduce((sum, item) => sum + item.gsc_clicks, 0).toLocaleString()}
+                    {trackingData.reduce((sum, item) => sum + item.clicks, 0).toLocaleString()}
                   </p>
                 </div>
                 
@@ -166,7 +169,7 @@ const GSCRankTracker = () => {
                     <span className="font-medium">Avg CTR</span>
                   </div>
                   <p className="text-2xl font-bold">
-                    {(trackingData.reduce((sum, item) => sum + item.gsc_ctr, 0) / trackingData.length).toFixed(2)}%
+                    {(trackingData.reduce((sum, item) => sum + item.ctr, 0) / trackingData.length).toFixed(2)}%
                   </p>
                 </div>
                 
@@ -176,7 +179,7 @@ const GSCRankTracker = () => {
                     <span className="font-medium">Avg Position</span>
                   </div>
                   <p className="text-2xl font-bold">
-                    {(trackingData.reduce((sum, item) => sum + item.gsc_position, 0) / trackingData.length).toFixed(1)}
+                    {(trackingData.reduce((sum, item) => sum + item.position, 0) / trackingData.length).toFixed(1)}
                   </p>
                 </div>
               </div>
@@ -190,7 +193,7 @@ const GSCRankTracker = () => {
                   <ResponsiveContainer width="100%" height={300}>
                     <LineChart data={trackingData}>
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="log_date" />
+                      <XAxis dataKey="recorded_at" />
                       <YAxis domain={['dataMin - 5', 'dataMax + 5']} reversed />
                       <Tooltip 
                         formatter={(value: number) => [value.toFixed(1), 'Position']}
@@ -198,7 +201,7 @@ const GSCRankTracker = () => {
                       />
                       <Line 
                         type="monotone" 
-                        dataKey="gsc_position" 
+                        dataKey="position" 
                         stroke="#8884d8" 
                         strokeWidth={2}
                         dot={{ r: 4 }}
@@ -217,12 +220,12 @@ const GSCRankTracker = () => {
                   <ResponsiveContainer width="100%" height={300}>
                     <AreaChart data={trackingData}>
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="log_date" />
+                      <XAxis dataKey="recorded_at" />
                       <YAxis />
                       <Tooltip />
                       <Area 
                         type="monotone" 
-                        dataKey="gsc_impressions" 
+                        dataKey="impressions" 
                         stackId="1"
                         stroke="#8884d8" 
                         fill="#8884d8" 
@@ -230,7 +233,7 @@ const GSCRankTracker = () => {
                       />
                       <Area 
                         type="monotone" 
-                        dataKey="gsc_clicks" 
+                        dataKey="clicks" 
                         stackId="2"
                         stroke="#82ca9d" 
                         fill="#82ca9d" 

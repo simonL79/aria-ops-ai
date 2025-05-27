@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -47,12 +48,12 @@ const GraveyardDashboard = () => {
 
       if (postsError) throw postsError;
 
-      // Get GSC stats from materialized view
-      const { data: summary, error: summaryError } = await supabase
-        .from('graveyard_summary')
-        .select('total_impressions, last_seen_position');
+      // Get GSC stats from suppression assets
+      const { data: assets, error: assetsError } = await supabase
+        .from('suppression_assets')
+        .select('gsc_impressions, gsc_last_position');
 
-      if (summaryError) throw summaryError;
+      if (assetsError) throw assetsError;
 
       const totalPosts = posts?.length || 0;
       const activePosts = posts?.filter(p => p.is_active).length || 0;
@@ -60,9 +61,9 @@ const GraveyardDashboard = () => {
       const averageRankScore = posts?.length ? 
         posts.reduce((sum, p) => sum + (p.rank_score || 0), 0) / posts.length : 0;
 
-      const totalImpressions = summary?.reduce((sum, s) => sum + (s.total_impressions || 0), 0) || 0;
-      const averagePosition = summary?.length ? 
-        summary.reduce((sum, s) => sum + (s.last_seen_position || 0), 0) / summary.length : 0;
+      const totalImpressions = assets?.reduce((sum, a) => sum + (a.gsc_impressions || 0), 0) || 0;
+      const averagePosition = assets?.length ? 
+        assets.reduce((sum, a) => sum + (a.gsc_last_position || 0), 0) / assets.length : 0;
 
       setStats({
         totalPosts,
@@ -81,16 +82,8 @@ const GraveyardDashboard = () => {
     }
   };
 
-  const refreshMaterializedView = async () => {
+  const refreshData = async () => {
     try {
-      // Use a direct SQL approach to refresh the materialized view
-      const { error } = await supabase
-        .from('graveyard_summary')
-        .select('*')
-        .limit(1);
-      
-      if (error) throw error;
-      
       toast.success('Graveyard data refreshed');
       loadStats();
     } catch (error) {
@@ -127,7 +120,7 @@ const GraveyardDashboard = () => {
         </div>
         
         <div className="flex items-center gap-2">
-          <Button onClick={refreshMaterializedView} variant="outline" size="sm">
+          <Button onClick={refreshData} variant="outline" size="sm">
             <BarChart3 className="h-4 w-4 mr-2" />
             Refresh Data
           </Button>
