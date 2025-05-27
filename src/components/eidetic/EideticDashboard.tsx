@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -91,13 +90,6 @@ const EideticDashboard = () => {
 
   const refreshData = async () => {
     try {
-      // Refresh materialized view
-      const { error } = await supabase.rpc('refresh_materialized_view', {
-        view_name: 'eidetic_summary'
-      });
-      
-      if (error) console.warn('Could not refresh materialized view:', error);
-      
       toast.success('EIDETIC™ data refreshed');
       loadStats();
     } catch (error) {

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import DashboardLayout from "@/components/layout/DashboardLayout";
-import EideticDashboard from "@/components/graveyard/GraveyardDashboard";
+import EideticDashboard from "@/components/eidetic/EideticDashboard";
 
 const EideticPage = () => {
   return (
