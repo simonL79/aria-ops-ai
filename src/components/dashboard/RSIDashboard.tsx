@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield, Brain, Target, Activity } from "lucide-react";
 import RSIManagementPanel from './RSIManagementPanel';
 import RSIThreatSimulator from './RSIThreatSimulator';
+import RSICampaignBuilder from './rsi/RSICampaignBuilder';
+import RSIAnalytics from './rsi/RSIAnalytics';
 
 const RSIDashboard = () => {
   const [activeTab, setActiveTab] = useState('management');
@@ -69,33 +71,11 @@ const RSIDashboard = () => {
         </TabsContent>
 
         <TabsContent value="campaigns">
-          <Card>
-            <CardHeader>
-              <CardTitle>RSI Campaign Builder</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-12 text-gray-500">
-                <Target className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>Campaign Builder Coming Soon</p>
-                <p className="text-sm">Advanced campaign creation and management tools</p>
-              </div>
-            </CardContent>
-          </Card>
+          <RSICampaignBuilder />
         </TabsContent>
 
         <TabsContent value="analytics">
-          <Card>
-            <CardHeader>
-              <CardTitle>Deep Analytics & Intelligence</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-12 text-gray-500">
-                <Shield className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>Advanced Analytics Coming Soon</p>
-                <p className="text-sm">Comprehensive threat intelligence and performance analytics</p>
-              </div>
-            </CardContent>
-          </Card>
+          <RSIAnalytics />
         </TabsContent>
       </Tabs>
     </div>
