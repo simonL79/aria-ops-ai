@@ -9,8 +9,7 @@ export const getDefaultSources = (): MonitoringSource[] => [
     enabled: true,
     status: 'active',
     description: 'Scans major UK news outlets including BBC, Guardian, Telegraph, Sky News',
-    lastScan: null,
-    totalMentions: 0
+    lastScan: null
   },
   {
     id: 'reddit',
@@ -19,8 +18,7 @@ export const getDefaultSources = (): MonitoringSource[] => [
     enabled: true,
     status: 'active',
     description: 'Monitors UK-focused subreddits for reputation threats',
-    lastScan: null,
-    totalMentions: 0
+    lastScan: null
   },
   {
     id: 'rss-news',
@@ -29,17 +27,15 @@ export const getDefaultSources = (): MonitoringSource[] => [
     enabled: true,
     status: 'active',
     description: 'Real-time RSS feed monitoring for breaking news',
-    lastScan: null,
-    totalMentions: 0
+    lastScan: null
   },
   {
     id: 'aria-scraper',
     name: 'A.R.I.A Video Intelligence',
-    type: 'media',
+    type: 'social',
     enabled: true,
     status: 'active',
     description: 'Advanced video content analysis and monitoring',
-    lastScan: null,
-    totalMentions: 0
+    lastScan: null
   }
 ];
