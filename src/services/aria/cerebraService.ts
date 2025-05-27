@@ -94,7 +94,9 @@ export const getModelBiasProfiles = async (): Promise<ModelBiasProfile[]> => {
   }
 };
 
-export const createModelBiasProfile = async (profile: Partial<ModelBiasProfile>): Promise<boolean> => {
+export const createModelBiasProfile = async (
+  profile: Omit<Partial<ModelBiasProfile>, 'id' | 'created_at' | 'last_verified'> & { entity_name: string }
+): Promise<boolean> => {
   try {
     const { error } = await supabase
       .from('model_bias_profile')
@@ -134,7 +136,9 @@ export const getCerebraOverridePackets = async (): Promise<CerebraOverridePacket
   }
 };
 
-export const createOverridePacket = async (packet: Partial<CerebraOverridePacket>): Promise<boolean> => {
+export const createOverridePacket = async (
+  packet: Omit<Partial<CerebraOverridePacket>, 'id' | 'created_at'> & { entity_name: string }
+): Promise<boolean> => {
   try {
     const { error } = await supabase
       .from('cerebra_override_packets')
