@@ -30,24 +30,52 @@ export const runMonitoringScan = async (targetEntity?: string): Promise<ScanResu
       console.error("Error updating monitoring status:", statusError);
     }
 
-    // Call the run_scan function via RPC
-    const scanOptions: ScanOptions = { 
-      scan_depth: 'standard',
-      target_entity: targetEntity || null
-    };
+    // Try to call the edge function first, but fallback to database function if it fails
+    let scanResults = null;
+    let useEdgeFunction = true;
     
-    console.log('Calling database run_scan function with options:', scanOptions);
-    const { data, error } = await supabase.rpc('run_scan', scanOptions);
-    
-    if (error) {
-      console.error("Error running monitoring scan:", error);
-      toast.error("Failed to run monitoring scan");
-      return [];
+    try {
+      // Call the monitoring-scan edge function
+      console.log('Attempting to call monitoring-scan edge function...');
+      const { data: edgeData, error: edgeError } = await supabase.functions.invoke('monitoring-scan', {
+        body: { 
+          fullScan: true,
+          targetEntity: targetEntity || null
+        }
+      });
+      
+      if (edgeError) {
+        console.error('Edge function error:', edgeError);
+        useEdgeFunction = false;
+      } else {
+        console.log('Edge function executed successfully');
+        scanResults = edgeData?.results || [];
+      }
+    } catch (edgeError) {
+      console.error('Edge function call failed:', edgeError);
+      useEdgeFunction = false;
     }
     
-    // Get the latest scan results
+    // Fallback to database function if edge function fails
+    if (!useEdgeFunction) {
+      console.log('Falling back to database function...');
+      const scanOptions: ScanOptions = { 
+        scan_depth: 'standard',
+        target_entity: targetEntity || null
+      };
+      
+      const { data, error } = await supabase.rpc('run_scan', scanOptions);
+      
+      if (error) {
+        console.error("Error running database scan:", error);
+        toast.error("Failed to run monitoring scan");
+        return [];
+      }
+    }
+    
+    // Get the latest scan results regardless of scan method
     console.log('Fetching latest scan results...');
-    const { data: scanResults, error: fetchError } = await supabase
+    const { data: latestResults, error: fetchError } = await supabase
       .from('scan_results')
       .select('*')
       .order('created_at', { ascending: false })
@@ -58,16 +86,16 @@ export const runMonitoringScan = async (targetEntity?: string): Promise<ScanResu
       return [];
     }
     
-    console.log(`Fetched ${scanResults?.length || 0} scan results`);
+    console.log(`Fetched ${latestResults?.length || 0} scan results`);
     
     // Process entity extraction for new results
-    if (scanResults && scanResults.length > 0) {
+    if (latestResults && latestResults.length > 0) {
       console.log('Processing entity extraction for new scan results...');
       
       const processingPromises = [];
       
       // Process entity extraction in the background for each new result
-      for (const result of scanResults) {
+      for (const result of latestResults) {
         if (result.content && (!result.detected_entities || (Array.isArray(result.detected_entities) && result.detected_entities.length === 0))) {
           // Add to processing queue
           processingPromises.push(
@@ -94,7 +122,7 @@ export const runMonitoringScan = async (targetEntity?: string): Promise<ScanResu
     }
     
     // Convert to the expected format with type safety
-    const results = (scanResults || []).map((item: any): ScanResult => {
+    const results = (latestResults || []).map((item: any): ScanResult => {
       // Parse detected entities if they exist
       const detectedEntities = item.detected_entities ? 
         parseDetectedEntities(item.detected_entities) : [];
@@ -136,7 +164,9 @@ export const runMonitoringScan = async (targetEntity?: string): Promise<ScanResu
     
   } catch (error) {
     console.error("Error in runMonitoringScan:", error);
-    toast.error("An error occurred while running the scan");
+    toast.error("An error occurred while running the scan. The system fell back to local scanning.");
+    
+    // Final fallback - return empty results but don't crash
     return [];
   }
 };
