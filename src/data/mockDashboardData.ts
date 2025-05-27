@@ -2,7 +2,7 @@
 import { ContentAlert, ContentSource, ContentAction, MetricValue } from "@/types/dashboard";
 import { supabase } from "@/integrations/supabase/client";
 
-// Function to fetch real alerts from database
+// Function to fetch real alerts from database only - no mock data
 export const fetchRealAlerts = async (): Promise<ContentAlert[]> => {
   try {
     const { data, error } = await supabase
@@ -13,6 +13,11 @@ export const fetchRealAlerts = async (): Promise<ContentAlert[]> => {
     
     if (error) {
       console.error('Error fetching alerts:', error);
+      return [];
+    }
+    
+    // Return empty array if no data - never return mock data
+    if (!data || data.length === 0) {
       return [];
     }
     
@@ -37,7 +42,7 @@ export const fetchRealAlerts = async (): Promise<ContentAlert[]> => {
   }
 };
 
-// Function to fetch real sources from database
+// Function to fetch real sources from database only - no mock data
 export const fetchRealSources = async (): Promise<ContentSource[]> => {
   try {
     const { data, error } = await supabase
@@ -47,6 +52,11 @@ export const fetchRealSources = async (): Promise<ContentSource[]> => {
     
     if (error) {
       console.error('Error fetching sources:', error);
+      return [];
+    }
+    
+    // Return empty array if no data - never return mock data
+    if (!data || data.length === 0) {
       return [];
     }
     
@@ -75,7 +85,7 @@ export const fetchRealSources = async (): Promise<ContentSource[]> => {
   }
 };
 
-// Function to fetch real actions from database
+// Function to fetch real actions from database only - no mock data
 export const fetchRealActions = async (): Promise<ContentAction[]> => {
   try {
     const { data, error } = await supabase
@@ -86,6 +96,11 @@ export const fetchRealActions = async (): Promise<ContentAction[]> => {
     
     if (error) {
       console.error('Error fetching actions:', error);
+      return [];
+    }
+    
+    // Return empty array if no data - never return mock data
+    if (!data || data.length === 0) {
       return [];
     }
     
@@ -105,7 +120,7 @@ export const fetchRealActions = async (): Promise<ContentAction[]> => {
   }
 };
 
-// Function to calculate real metrics from database
+// Function to calculate real metrics from database only - no mock data
 export const fetchRealMetrics = async (): Promise<MetricValue[]> => {
   try {
     const [alertsData, sourcesData] = await Promise.all([
@@ -116,7 +131,7 @@ export const fetchRealMetrics = async (): Promise<MetricValue[]> => {
     const totalMentions = alertsData.data?.length || 0;
     const negativeSentiment = alertsData.data?.filter(item => item.sentiment < 0).length || 0;
     const activeSources = sourcesData.data?.filter(item => item.active).length || 0;
-    const threatLevel = Math.round((negativeSentiment / totalMentions) * 100) || 0;
+    const threatLevel = totalMentions > 0 ? Math.round((negativeSentiment / totalMentions) * 100) : 0;
 
     return [
       { 
@@ -162,10 +177,16 @@ export const fetchRealMetrics = async (): Promise<MetricValue[]> => {
     ];
   } catch (error) {
     console.error('Error fetching metrics:', error);
-    return [];
+    // Return zeros instead of mock data
+    return [
+      { id: "1", title: "Total Mentions", value: 0, change: 0, icon: "trending-up", color: "blue", delta: 0, deltaType: "increase" },
+      { id: "2", title: "Negative Sentiment", value: 0, change: 0, icon: "trending-down", color: "red", delta: 0, deltaType: "increase" },
+      { id: "3", title: "Active Sources", value: 0, change: 0, icon: "trending-up", color: "green", delta: 0, deltaType: "increase" },
+      { id: "4", title: "Threat Level", value: 0, change: 0, icon: "trending-down", color: "yellow", delta: 0, deltaType: "increase" }
+    ];
   }
 };
 
-// Remove all mock data exports
+// Remove all mock data exports - only empty arrays
 export const mockAlerts: ContentAlert[] = [];
 export const mockClassifiedAlerts: ContentAlert[] = [];

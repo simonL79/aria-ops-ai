@@ -19,7 +19,7 @@ export const defaultScanParameters: ScanParameters = {
 
 export const performRealScan = async (query: string, platforms: string[]): Promise<ContentAlert[]> => {
   try {
-    // Fetch real scan results from database
+    // Fetch real scan results from database only - no mock data
     const { data, error } = await supabase
       .from('scan_results')
       .select('*')
@@ -30,6 +30,11 @@ export const performRealScan = async (query: string, platforms: string[]): Promi
 
     if (error) {
       console.error('Error fetching scan results:', error);
+      return [];
+    }
+
+    // Return empty array if no data - never return mock data
+    if (!data || data.length === 0) {
       return [];
     }
 
@@ -98,14 +103,18 @@ export const unregisterAlertListener = (listenerId: string) => {
   console.log('Alert listener unregistered:', listenerId);
 };
 
-// Remove all mock data generation functions
+// All mock data exports removed - only empty arrays to prevent errors
 export const mockScanResults: ContentAlert[] = [];
+
+// Throw errors for any mock functions to ensure they're not used
 export const generateMockAlert = (): ContentAlert => {
   throw new Error('Mock alerts disabled - use real data only');
 };
+
 export const simulateIntensiveScan = async (): Promise<ContentAlert[]> => {
   throw new Error('Mock scanning disabled - use real scan functions only');
 };
+
 export const simulateQuickScan = async (): Promise<ContentAlert[]> => {
   throw new Error('Mock scanning disabled - use real scan functions only');
 };

@@ -69,10 +69,10 @@ const UKNewsScanPanel = () => {
         setResults(data.results || []);
         setLastScanTime(data.scan_timestamp);
         
-        // Load enhanced prospect intelligence
+        // Load prospect intelligence from real data only
         await loadProspectIntelligence();
         
-        // Calculate enhanced statistics
+        // Calculate statistics from real scan data
         const uniqueEntities = new Set<string>();
         let clientMatches = 0;
         let totalProspects = 0;
@@ -107,41 +107,32 @@ const UKNewsScanPanel = () => {
 
   const loadProspectIntelligence = async () => {
     try {
-      // Use a direct query to the prospect_entities table
+      // Direct query to prospect_entities table - no fallback to mock data
       const { data, error } = await supabase
-        .rpc('get_prospect_entities_data')
+        .from('prospect_entities')
+        .select('*')
+        .order('sales_opportunity_score', { ascending: false })
         .limit(20);
 
       if (error) {
         console.error('Error loading prospect intelligence:', error);
-        // Fallback: try direct table access
-        const { data: fallbackData, error: fallbackError } = await supabase
-          .from('prospect_entities')
-          .select('*')
-          .order('sales_opportunity_score', { ascending: false })
-          .limit(20);
-
-        if (fallbackError) {
-          console.error('Fallback query also failed:', fallbackError);
-          return;
-        }
-
-        if (fallbackData && Array.isArray(fallbackData)) {
-          processProspectData(fallbackData);
-        }
+        toast.info("No prospect intelligence data available yet. Run scans to populate data.");
         return;
       }
 
-      if (data && Array.isArray(data)) {
+      if (data && Array.isArray(data) && data.length > 0) {
         processProspectData(data);
+      } else {
+        toast.info("No prospect data found. Run discovery scans to populate intelligence.");
       }
     } catch (error) {
       console.error('Error loading prospect intelligence:', error);
+      toast.info("No prospect intelligence data available yet.");
     }
   };
 
   const processProspectData = (data: any[]) => {
-    // Type-safe processing of prospect data
+    // Process only real data from database
     const typedData = data.map(item => ({
       entity_name: item.entity_name || 'Unknown',
       estimated_company_size: item.estimated_company_size || 'Unknown',
@@ -159,10 +150,10 @@ const UKNewsScanPanel = () => {
 
     setProspectIntel(typedData);
     
-    // Calculate enhanced stats
+    // Calculate enhanced stats from real data only
     const highValueProspects = typedData.filter(p => p.sales_opportunity_score >= 8).length;
     
-    // Estimate total ad spend potential
+    // Calculate total ad spend potential from real data
     const totalAdSpend = typedData.reduce((total, prospect) => {
       const adSpend = prospect.potential_ad_spend || '£0';
       const match = adSpend.match(/£([\d.]+)([KM]?)/);
@@ -186,6 +177,49 @@ const UKNewsScanPanel = () => {
       highValueProspects,
       totalAdSpendPotential: formatAdSpend(totalAdSpend)
     }));
+  };
+
+  const clearAllScanData = async () => {
+    try {
+      // Clear scan results
+      const { error: scanError } = await supabase
+        .from('scan_results')
+        .delete()
+        .gte('id', '0');
+
+      if (scanError) {
+        console.error('Error clearing scan results:', scanError);
+      }
+
+      // Clear prospect entities
+      const { error: prospectError } = await supabase
+        .from('prospect_entities')
+        .delete()
+        .gte('id', '0');
+
+      if (prospectError) {
+        console.error('Error clearing prospect entities:', prospectError);
+      }
+
+      // Reset local state
+      setResults([]);
+      setProspectIntel([]);
+      setLastScanTime(null);
+      setScanStats({
+        scannedDomains: 0,
+        articlesFound: 0,
+        entitiesDetected: 0,
+        clientsMatched: 0,
+        prospectsIdentified: 0,
+        highValueProspects: 0,
+        totalAdSpendPotential: '£0'
+      });
+
+      toast.success("All scan data cleared. Ready for fresh scans.");
+    } catch (error) {
+      console.error('Error clearing scan data:', error);
+      toast.error("Failed to clear scan data");
+    }
   };
 
   const getUrgencyColor = (score: number) => {
@@ -234,6 +268,14 @@ const UKNewsScanPanel = () => {
             )}
           </Button>
           
+          <Button 
+            onClick={clearAllScanData} 
+            variant="outline"
+            className="text-red-600 border-red-200 hover:bg-red-50"
+          >
+            Clear All Scan Data
+          </Button>
+          
           {lastScanTime && (
             <div className="text-sm text-gray-500 flex items-center">
               Last scan: {new Date(lastScanTime).toLocaleString()}
@@ -274,7 +316,7 @@ const UKNewsScanPanel = () => {
           </div>
         )}
 
-        {/* Prospect Intelligence Dashboard */}
+        {/* Prospect Intelligence Dashboard - Only show if we have real data */}
         {prospectIntel.length > 0 && (
           <div className="space-y-4">
             <div className="flex items-center gap-2">
@@ -390,6 +432,7 @@ const UKNewsScanPanel = () => {
           </div>
         )}
 
+        {/* Scan Results - Only show if we have real data */}
         {results.length > 0 ? (
           <div className="space-y-4">
             <h3 className="text-lg font-medium">Latest Scan Results</h3>

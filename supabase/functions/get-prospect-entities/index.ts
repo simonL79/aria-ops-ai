@@ -17,6 +17,9 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    console.log('Fetching prospect entities from database...');
+
+    // Only return real data from the database - no mock data
     const { data, error } = await supabase
       .from('prospect_entities')
       .select('*')
@@ -24,10 +27,22 @@ serve(async (req) => {
       .limit(20);
 
     if (error) {
-      throw error;
+      console.error('Database error:', error);
+      return new Response(JSON.stringify({
+        error: 'Failed to fetch prospect entities',
+        details: error.message
+      }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
 
-    return new Response(JSON.stringify(data || []), {
+    // Return empty array if no data - never return mock data
+    const prospectData = data || [];
+    
+    console.log(`Returning ${prospectData.length} real prospect entities`);
+
+    return new Response(JSON.stringify(prospectData), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
 
