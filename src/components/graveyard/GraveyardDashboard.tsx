@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -51,7 +50,7 @@ const GraveyardDashboard = () => {
       // Get GSC stats from suppression assets
       const { data: assets, error: assetsError } = await supabase
         .from('suppression_assets')
-        .select('gsc_impressions, gsc_last_position');
+        .select('gsc_impressions, rank_goal');
 
       if (assetsError) throw assetsError;
 
@@ -63,7 +62,7 @@ const GraveyardDashboard = () => {
 
       const totalImpressions = assets?.reduce((sum, a) => sum + (a.gsc_impressions || 0), 0) || 0;
       const averagePosition = assets?.length ? 
-        assets.reduce((sum, a) => sum + (a.gsc_last_position || 0), 0) / assets.length : 0;
+        assets.reduce((sum, a) => sum + (a.rank_goal || 0), 0) / assets.length : 0;
 
       setStats({
         totalPosts,
@@ -196,7 +195,7 @@ const GraveyardDashboard = () => {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Avg Position</p>
+                <p className="text-sm text-muted-foreground">Avg Goal</p>
                 <p className="text-2xl font-bold">{stats.averagePosition}</p>
               </div>
               <TrendingDown className="h-8 w-8 text-orange-500" />

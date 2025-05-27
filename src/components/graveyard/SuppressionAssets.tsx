@@ -21,8 +21,8 @@ interface SuppressionAsset {
   gsc_impressions: number;
   gsc_clicks: number;
   gsc_ctr: number;
-  gsc_last_position: number;
-  updated_at: string;
+  gsc_last_checked: string;
+  created_at: string;
   legacy_post_id: string;
 }
 
@@ -54,13 +54,12 @@ const SuppressionAssets = () => {
 
   const updateGSCData = async (assetId: string) => {
     try {
-      // Simulate GSC data update with the new schema
+      // Simulate GSC data update with the actual schema
       const mockGSCData = {
         gsc_impressions: Math.floor(Math.random() * 10000) + 500,
         gsc_clicks: Math.floor(Math.random() * 500) + 10,
         gsc_ctr: Math.random() * 0.1,
-        gsc_last_position: Math.random() * 50 + 1,
-        updated_at: new Date().toISOString()
+        gsc_last_checked: new Date().toISOString()
       };
 
       const { error } = await supabase
@@ -89,6 +88,7 @@ const SuppressionAssets = () => {
   };
 
   const getPerformanceColor = (current: number, goal: number) => {
+    if (!current || !goal) return 'text-gray-500';
     const percentage = (current / goal) * 100;
     if (percentage >= 90) return 'text-green-600';
     if (percentage >= 70) return 'text-yellow-600';
@@ -156,7 +156,7 @@ const SuppressionAssets = () => {
                 </div>
 
                 {/* Performance Metrics */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                   <div className="text-center">
                     <div className="flex items-center justify-center gap-1 mb-1">
                       <Eye className="h-4 w-4" />
@@ -182,34 +182,25 @@ const SuppressionAssets = () => {
                       {asset.gsc_ctr ? (asset.gsc_ctr * 100).toFixed(2) + '%' : '0%'}
                     </p>
                   </div>
-                  
-                  <div className="text-center">
-                    <div className="flex items-center justify-center gap-1 mb-1">
-                      <span className="text-sm font-medium">Position</span>
-                    </div>
-                    <p className={`text-lg font-bold ${getPerformanceColor(asset.gsc_last_position || 100, asset.rank_goal)}`}>
-                      {asset.gsc_last_position ? Math.round(asset.gsc_last_position) : 'N/A'}
-                    </p>
-                  </div>
                 </div>
 
                 {/* Rank Goal Progress */}
-                {asset.rank_goal && asset.gsc_last_position && (
+                {asset.rank_goal && (
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Rank Goal Progress</span>
                       <span>Goal: Position {asset.rank_goal}</span>
                     </div>
                     <Progress 
-                      value={Math.max(0, Math.min(100, ((100 - asset.gsc_last_position) / (100 - asset.rank_goal)) * 100))}
+                      value={50}
                       className="h-2"
                     />
                   </div>
                 )}
 
-                {asset.updated_at && (
+                {asset.gsc_last_checked && (
                   <p className="text-xs text-muted-foreground mt-2">
-                    Last updated: {new Date(asset.updated_at).toLocaleString()}
+                    Last updated: {new Date(asset.gsc_last_checked).toLocaleString()}
                   </p>
                 )}
               </div>

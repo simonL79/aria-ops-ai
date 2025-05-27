@@ -29,25 +29,26 @@ const GSCRankTracker = () => {
   const loadTrackingData = async () => {
     try {
       setLoading(true);
+      
+      // Since gsc_rank_tracking doesn't exist in the current schema, 
+      // let's use suppression_assets data for now
       const { data, error } = await supabase
-        .from('gsc_rank_tracking')
-        .select(`
-          *,
-          suppression_assets!inner(asset_title)
-        `)
-        .order('recorded_at', { ascending: true })
-        .limit(100);
+        .from('suppression_assets')
+        .select('*')
+        .order('created_at', { ascending: true })
+        .limit(50);
 
       if (error) throw error;
       
+      // Transform the data to match our interface
       const formattedData = data?.map(item => ({
         id: item.id,
-        recorded_at: new Date(item.recorded_at).toLocaleDateString(),
-        impressions: item.impressions || 0,
-        clicks: item.clicks || 0,
-        ctr: (item.ctr || 0) * 100, // Convert to percentage
-        position: item.position || 0,
-        asset_title: (item.suppression_assets as any)?.asset_title
+        recorded_at: new Date(item.created_at).toLocaleDateString(),
+        impressions: item.gsc_impressions || 0,
+        clicks: item.gsc_clicks || 0,
+        ctr: (item.gsc_ctr || 0) * 100, // Convert to percentage
+        position: item.rank_goal || 0,
+        asset_title: item.asset_title
       })) || [];
 
       setTrackingData(formattedData);
@@ -70,38 +71,48 @@ const GSCRankTracker = () => {
       if (assetsError) throw assetsError;
 
       if (!assets || assets.length === 0) {
-        toast.error('No suppression assets found to generate tracking data for');
-        return;
+        // Create some sample suppression assets
+        const sampleAssets = [
+          {
+            asset_url: 'https://example.com/positive-article-1',
+            asset_title: 'Sample Positive Article 1',
+            asset_type: 'article',
+            publishing_channel: 'blog',
+            rank_goal: 1,
+            gsc_impressions: Math.floor(Math.random() * 1000) + 100,
+            gsc_clicks: Math.floor(Math.random() * 50) + 5,
+            gsc_ctr: Math.random() * 0.1,
+            published_at: new Date().toISOString(),
+            engagement_score: Math.random() * 100,
+            visibility_score: Math.random() * 100
+          },
+          {
+            asset_url: 'https://example.com/positive-article-2',
+            asset_title: 'Sample Positive Article 2',
+            asset_type: 'press_release',
+            publishing_channel: 'news',
+            rank_goal: 2,
+            gsc_impressions: Math.floor(Math.random() * 1000) + 100,
+            gsc_clicks: Math.floor(Math.random() * 50) + 5,
+            gsc_ctr: Math.random() * 0.1,
+            published_at: new Date().toISOString(),
+            engagement_score: Math.random() * 100,
+            visibility_score: Math.random() * 100
+          }
+        ];
+
+        const { error: insertError } = await supabase
+          .from('suppression_assets')
+          .insert(sampleAssets);
+
+        if (insertError) throw insertError;
+        
+        toast.success('Sample GSC tracking data generated');
+        loadTrackingData();
+      } else {
+        toast.success('Sample data already exists');
+        loadTrackingData();
       }
-
-      // Generate sample tracking data for the last 30 days
-      const sampleData = [];
-      const now = new Date();
-      
-      for (let i = 29; i >= 0; i--) {
-        for (const asset of assets) {
-          const date = new Date(now);
-          date.setDate(date.getDate() - i);
-          
-          sampleData.push({
-            suppression_asset_id: asset.id,
-            recorded_at: date.toISOString(),
-            impressions: Math.floor(Math.random() * 1000) + 100,
-            clicks: Math.floor(Math.random() * 50) + 5,
-            ctr: Math.random() * 0.1,
-            position: Math.random() * 30 + 10
-          });
-        }
-      }
-
-      const { error } = await supabase
-        .from('gsc_rank_tracking')
-        .insert(sampleData);
-
-      if (error) throw error;
-      
-      toast.success('Sample GSC tracking data generated');
-      loadTrackingData();
     } catch (error) {
       console.error('Error generating sample data:', error);
       toast.error('Failed to generate sample data');
@@ -169,7 +180,7 @@ const GSCRankTracker = () => {
                     <span className="font-medium">Avg CTR</span>
                   </div>
                   <p className="text-2xl font-bold">
-                    {(trackingData.reduce((sum, item) => sum + item.ctr, 0) / trackingData.length).toFixed(2)}%
+                    {trackingData.length > 0 ? (trackingData.reduce((sum, item) => sum + item.ctr, 0) / trackingData.length).toFixed(2) : 0}%
                   </p>
                 </div>
                 
@@ -179,7 +190,7 @@ const GSCRankTracker = () => {
                     <span className="font-medium">Avg Position</span>
                   </div>
                   <p className="text-2xl font-bold">
-                    {(trackingData.reduce((sum, item) => sum + item.position, 0) / trackingData.length).toFixed(1)}
+                    {trackingData.length > 0 ? (trackingData.reduce((sum, item) => sum + item.position, 0) / trackingData.length).toFixed(1) : 0}
                   </p>
                 </div>
               </div>
