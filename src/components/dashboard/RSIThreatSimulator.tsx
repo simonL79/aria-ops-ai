@@ -4,11 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, Brain, Zap } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { triggerRSISimulation } from '@/services/rsi/rsiService';
 import { toast } from "sonner";
 
 interface ThreatSimulationForm {
@@ -79,49 +78,28 @@ const RSIThreatSimulator = () => {
 
     setLoading(true);
     try {
-      // Get a client ID (for demo purposes, we'll use the first available client)
-      const { data: clients } = await supabase.from('clients').select('id').limit(1);
+      const simulation = await triggerRSISimulation(form.threat_topic);
       
-      if (!clients || clients.length === 0) {
-        toast.error('No clients found. Please create a client first.');
-        return;
-      }
-
-      const { error } = await supabase.from('threat_simulations').insert({
-        client_id: clients[0].id,
-        threat_topic: form.threat_topic,
-        predicted_keywords: form.predicted_keywords,
-        threat_level: form.threat_level,
-        likelihood_score: form.likelihood_score,
-        threat_source: form.threat_source || null,
-        geographical_scope: form.geographical_scope.length > 0 ? form.geographical_scope : null
-      });
-
-      if (error) {
-        console.error('Error creating threat simulation:', error);
-        toast.error('Failed to create threat simulation');
-        return;
-      }
-
-      toast.success('Threat simulation created successfully');
-      
-      // Reset form
-      setForm({
-        threat_topic: '',
-        predicted_keywords: [],
-        threat_level: 1,
-        likelihood_score: 0.5,
-        threat_source: '',
-        geographical_scope: []
-      });
-
-      // Show activation message if threshold met
-      if (form.threat_level >= 4 && form.likelihood_score >= 0.75) {
-        toast.success('🚨 High-priority threat detected! RSI auto-activation triggered.', {
-          duration: 5000
+      if (simulation) {
+        toast.success('Threat simulation created successfully');
+        
+        // Reset form
+        setForm({
+          threat_topic: '',
+          predicted_keywords: [],
+          threat_level: 1,
+          likelihood_score: 0.5,
+          threat_source: '',
+          geographical_scope: []
         });
-      }
 
+        // Show activation message if threshold met
+        if (form.threat_level >= 4 && form.likelihood_score >= 0.75) {
+          toast.success('🚨 High-priority threat detected! RSI auto-activation triggered.', {
+            duration: 5000
+          });
+        }
+      }
     } catch (error) {
       console.error('Error:', error);
       toast.error('An unexpected error occurred');

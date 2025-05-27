@@ -41,8 +41,13 @@ export const triggerRSISimulation = async (threatTopic: string, clientId?: strin
       return null;
     }
 
-    toast.success('RSI threat simulation initiated');
-    return data?.simulation || null;
+    if (data?.success) {
+      toast.success('RSI threat simulation initiated successfully');
+      return data.simulation;
+    } else {
+      toast.error('RSI simulation failed');
+      return null;
+    }
 
   } catch (error) {
     console.error('Error triggering RSI simulation:', error);
