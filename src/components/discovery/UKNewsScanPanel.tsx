@@ -107,54 +107,85 @@ const UKNewsScanPanel = () => {
 
   const loadProspectIntelligence = async () => {
     try {
-      // Use a raw query to access the prospect_entities table since TypeScript types haven't been updated yet
+      // Use a direct query to the prospect_entities table
       const { data, error } = await supabase
-        .from('prospect_entities' as any)
-        .select('*')
-        .order('sales_opportunity_score', { ascending: false })
+        .rpc('get_prospect_entities_data')
         .limit(20);
 
       if (error) {
         console.error('Error loading prospect intelligence:', error);
+        // Fallback: try direct table access
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from('prospect_entities')
+          .select('*')
+          .order('sales_opportunity_score', { ascending: false })
+          .limit(20);
+
+        if (fallbackError) {
+          console.error('Fallback query also failed:', fallbackError);
+          return;
+        }
+
+        if (fallbackData && Array.isArray(fallbackData)) {
+          processProspectData(fallbackData);
+        }
         return;
       }
 
       if (data && Array.isArray(data)) {
-        // Type cast the data to match our interface
-        const typedData = data as ProspectIntelligence[];
-        setProspectIntel(typedData);
-        
-        // Calculate enhanced stats
-        const highValueProspects = typedData.filter(p => p.sales_opportunity_score >= 8).length;
-        
-        // Estimate total ad spend potential
-        const totalAdSpend = typedData.reduce((total, prospect) => {
-          const adSpend = prospect.potential_ad_spend || '£0';
-          const match = adSpend.match(/£([\d.]+)([KM]?)/);
-          if (match) {
-            let value = parseFloat(match[1]);
-            if (match[2] === 'K') value *= 1000;
-            if (match[2] === 'M') value *= 1000000;
-            return total + value;
-          }
-          return total;
-        }, 0);
-        
-        const formatAdSpend = (value: number) => {
-          if (value >= 1000000) return `£${(value / 1000000).toFixed(1)}M`;
-          if (value >= 1000) return `£${(value / 1000).toFixed(0)}K`;
-          return `£${value.toFixed(0)}`;
-        };
-
-        setScanStats(prev => ({
-          ...prev,
-          highValueProspects,
-          totalAdSpendPotential: formatAdSpend(totalAdSpend)
-        }));
+        processProspectData(data);
       }
     } catch (error) {
       console.error('Error loading prospect intelligence:', error);
     }
+  };
+
+  const processProspectData = (data: any[]) => {
+    // Type-safe processing of prospect data
+    const typedData = data.map(item => ({
+      entity_name: item.entity_name || 'Unknown',
+      estimated_company_size: item.estimated_company_size || 'Unknown',
+      estimated_revenue: item.estimated_revenue || 'Unknown',
+      potential_ad_spend: item.potential_ad_spend || 'Unknown',
+      urgency_score: item.urgency_score || 5,
+      sales_opportunity_score: item.sales_opportunity_score || 5,
+      contact_potential: item.contact_potential || 'low',
+      industry_category: item.industry_category || 'General',
+      reputation_risk_level: item.reputation_risk_level || 'Low',
+      contact_channels: item.contact_channels || [],
+      crisis_indicators: item.crisis_indicators || [],
+      growth_indicators: item.growth_indicators || []
+    })) as ProspectIntelligence[];
+
+    setProspectIntel(typedData);
+    
+    // Calculate enhanced stats
+    const highValueProspects = typedData.filter(p => p.sales_opportunity_score >= 8).length;
+    
+    // Estimate total ad spend potential
+    const totalAdSpend = typedData.reduce((total, prospect) => {
+      const adSpend = prospect.potential_ad_spend || '£0';
+      const match = adSpend.match(/£([\d.]+)([KM]?)/);
+      if (match) {
+        let value = parseFloat(match[1]);
+        if (match[2] === 'K') value *= 1000;
+        if (match[2] === 'M') value *= 1000000;
+        return total + value;
+      }
+      return total;
+    }, 0);
+    
+    const formatAdSpend = (value: number) => {
+      if (value >= 1000000) return `£${(value / 1000000).toFixed(1)}M`;
+      if (value >= 1000) return `£${(value / 1000).toFixed(0)}K`;
+      return `£${value.toFixed(0)}`;
+    };
+
+    setScanStats(prev => ({
+      ...prev,
+      highValueProspects,
+      totalAdSpendPotential: formatAdSpend(totalAdSpend)
+    }));
   };
 
   const getUrgencyColor = (score: number) => {
