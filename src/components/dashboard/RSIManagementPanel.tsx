@@ -6,13 +6,21 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Shield, Play, BarChart3, AlertTriangle } from "lucide-react";
-import { triggerRSISimulation, getRSIActivationLogs, generateRSIReports } from '@/services/rsi/rsiService';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+
+interface RSIActivationLog {
+  id: string;
+  matched_threat: string;
+  trigger_type: string;
+  activation_status: string;
+  created_at: string;
+}
 
 const RSIManagementPanel = () => {
   const [threatTopic, setThreatTopic] = useState('');
   const [isSimulating, setIsSimulating] = useState(false);
-  const [activationLogs, setActivationLogs] = useState([]);
+  const [activationLogs, setActivationLogs] = useState<RSIActivationLog[]>([]);
   const [stats, setStats] = useState({
     totalSimulations: 0,
     activeThreats: 0,
@@ -25,16 +33,33 @@ const RSIManagementPanel = () => {
 
   const loadActivationLogs = async () => {
     try {
-      const logs = await getRSIActivationLogs();
-      setActivationLogs(logs);
+      // Get real RSI activation logs
+      const { data: logs, error } = await supabase
+        .from('rsi_activation_logs')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (error) {
+        console.error('Error loading RSI logs:', error);
+        setActivationLogs([]);
+      } else {
+        setActivationLogs(logs || []);
+      }
+
+      // Calculate stats
+      const totalSims = logs?.length || 0;
+      const activeSims = logs?.filter(log => log.activation_status === 'active').length || 0;
+      const completedSims = logs?.filter(log => log.activation_status === 'completed').length || 0;
       
       setStats({
-        totalSimulations: logs.length,
-        activeThreats: logs.filter(log => log.activation_status === 'active').length,
-        successRate: logs.length > 0 ? (logs.filter(log => log.activation_status === 'completed').length / logs.length) * 100 : 0
+        totalSimulations: totalSims,
+        activeThreats: activeSims,
+        successRate: totalSims > 0 ? (completedSims / totalSims) * 100 : 0
       });
     } catch (error) {
-      console.error('Error loading activation logs:', error);
+      console.error('Error in loadActivationLogs:', error);
+      setActivationLogs([]);
     }
   };
 
@@ -46,11 +71,27 @@ const RSIManagementPanel = () => {
 
     setIsSimulating(true);
     try {
-      await triggerRSISimulation(threatTopic);
-      setThreatTopic('');
-      loadActivationLogs();
+      console.log('Triggering RSI simulation for:', threatTopic);
+      
+      const { data, error } = await supabase.functions.invoke('rsi-threat-simulator', {
+        body: { 
+          threat_topic: threatTopic,
+          simulation_type: 'manual'
+        }
+      });
+
+      if (error) {
+        console.error('RSI simulation error:', error);
+        toast.error('RSI simulation failed: ' + error.message);
+      } else {
+        console.log('RSI simulation result:', data);
+        toast.success('RSI simulation triggered successfully');
+        setThreatTopic('');
+        loadActivationLogs();
+      }
     } catch (error) {
       console.error('Error triggering simulation:', error);
+      toast.error('Failed to trigger RSI simulation');
     } finally {
       setIsSimulating(false);
     }
@@ -58,10 +99,33 @@ const RSIManagementPanel = () => {
 
   const handleGenerateReport = async () => {
     try {
-      await generateRSIReports('default-campaign');
-      toast.success('RSI effectiveness report generated');
+      toast.info('Generating RSI effectiveness report...');
+      
+      // Create a basic report entry
+      const { data, error } = await supabase
+        .from('executive_reports')
+        .insert({
+          title: 'RSI Effectiveness Report',
+          report_type: 'rsi_effectiveness',
+          executive_summary: `RSI system processed ${stats.totalSimulations} simulations with ${stats.successRate.toFixed(1)}% success rate.`,
+          period_start: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          period_end: new Date().toISOString().split('T')[0],
+          key_metrics: {
+            total_simulations: stats.totalSimulations,
+            active_threats: stats.activeThreats,
+            success_rate: stats.successRate
+          }
+        });
+
+      if (error) {
+        console.error('Error generating report:', error);
+        toast.error('Failed to generate report');
+      } else {
+        toast.success('RSI effectiveness report generated');
+      }
     } catch (error) {
       console.error('Error generating report:', error);
+      toast.error('Failed to generate report');
     }
   };
 
@@ -144,21 +208,25 @@ const RSIManagementPanel = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {activationLogs.slice(0, 5).map((log) => (
-              <div key={log.id} className="flex items-center justify-between p-3 border rounded">
-                <div>
-                  <p className="font-medium">{log.matched_threat}</p>
-                  <p className="text-sm text-gray-600">{log.trigger_type}</p>
+            {activationLogs.length > 0 ? (
+              activationLogs.slice(0, 5).map((log) => (
+                <div key={log.id} className="flex items-center justify-between p-3 border rounded">
+                  <div>
+                    <p className="font-medium">{log.matched_threat}</p>
+                    <p className="text-sm text-gray-600">{log.trigger_type}</p>
+                  </div>
+                  <Badge variant={
+                    log.activation_status === 'completed' ? 'default' :
+                    log.activation_status === 'active' ? 'secondary' :
+                    log.activation_status === 'failed' ? 'destructive' : 'outline'
+                  }>
+                    {log.activation_status}
+                  </Badge>
                 </div>
-                <Badge variant={
-                  log.activation_status === 'completed' ? 'default' :
-                  log.activation_status === 'active' ? 'secondary' :
-                  log.activation_status === 'failed' ? 'destructive' : 'outline'
-                }>
-                  {log.activation_status}
-                </Badge>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className="text-center text-muted-foreground py-4">No RSI activations yet</p>
+            )}
           </div>
         </CardContent>
       </Card>

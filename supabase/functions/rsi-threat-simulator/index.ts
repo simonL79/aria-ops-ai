@@ -1,114 +1,83 @@
 
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+};
 
-interface RSISimulationRequest {
-  threat_topic: string;
-  client_id?: string;
-  simulation_type: 'manual' | 'automated';
-  threat_level?: number;
-  likelihood_score?: number;
-}
-
-Deno.serve(async (req) => {
-  // Handle CORS preflight requests
+serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const { threat_topic, client_id, simulation_type, threat_level = 3, likelihood_score = 0.6 }: RSISimulationRequest = await req.json();
-
+    const { threat_topic, client_id, simulation_type = 'manual' } = await req.json();
+    
     console.log('RSI Threat Simulation triggered:', { threat_topic, client_id, simulation_type });
 
-    // Get a default client if none provided
-    let targetClientId = client_id;
-    if (!targetClientId) {
-      const { data: clients } = await supabase
-        .from('clients')
-        .select('id')
-        .limit(1);
-      
-      if (clients && clients.length > 0) {
-        targetClientId = clients[0].id;
-      }
-    }
-
-    if (!targetClientId) {
-      return new Response(
-        JSON.stringify({ error: 'No client found for simulation' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    // Create a content alert as our simulation record
+    // Create threat simulation record
     const { data: simulation, error: simError } = await supabase
-      .from('content_alerts')
+      .from('threat_simulations')
       .insert({
-        client_id: targetClientId,
-        content: `RSI Threat Simulation: ${threat_topic}`,
-        platform: 'RSI_Simulation',
-        threat_type: 'rsi_simulation',
-        severity: threat_level >= 4 ? 'high' : threat_level >= 2 ? 'medium' : 'low',
-        status: 'new',
-        confidence_score: Math.round(likelihood_score * 100),
-        sentiment: -50, // Negative sentiment for threat simulation
-        source_type: 'simulation'
+        threat_topic: threat_topic,
+        client_id: client_id,
+        threat_level: Math.floor(Math.random() * 5) + 3, // Random 3-7
+        likelihood_score: Math.random() * 0.5 + 0.5, // Random 0.5-1.0
+        created_at: new Date().toISOString()
       })
       .select()
       .single();
 
     if (simError) {
       console.error('Error creating simulation:', simError);
-      return new Response(
-        JSON.stringify({ error: 'Failed to create simulation', details: simError.message }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      throw new Error('Failed to create threat simulation');
     }
 
-    // Create RSI activation log if the table exists
-    const { error: logError } = await supabase
-      .from('activity_logs')
+    // Create RSI activation log
+    const { data: activation, error: activationError } = await supabase
+      .from('rsi_activation_logs')
       .insert({
-        action: 'rsi_simulation_triggered',
-        entity_type: 'rsi_simulation',
-        entity_id: simulation.id,
-        details: `RSI simulation for threat: ${threat_topic}. Type: ${simulation_type}. Threat level: ${threat_level}. Likelihood: ${likelihood_score}`,
-        user_email: 'system@rsi.local'
-      });
+        client_id: client_id,
+        threat_simulation_id: simulation.id,
+        trigger_type: simulation_type,
+        matched_threat: threat_topic,
+        activation_status: 'initiated',
+        triggered_at: new Date().toISOString()
+      })
+      .select()
+      .single();
 
-    if (logError) {
-      console.error('Error creating activation log:', logError);
+    if (activationError) {
+      console.error('Error creating activation log:', activationError);
+      // Continue anyway, simulation was created
     }
 
-    console.log('RSI simulation completed successfully');
+    console.log('RSI simulation created successfully:', simulation.id);
 
-    return new Response(
-      JSON.stringify({ 
-        success: true, 
-        simulation,
-        message: 'RSI threat simulation completed successfully'
-      }),
-      { 
-        status: 200, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
-    );
+    return new Response(JSON.stringify({
+      success: true,
+      simulation_id: simulation.id,
+      activation_id: activation?.id,
+      threat_topic: threat_topic,
+      status: 'initiated'
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
 
   } catch (error) {
-    console.error('RSI simulation error:', error);
-    return new Response(
-      JSON.stringify({ error: 'Internal server error', details: error.message }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
+    console.error('RSI Threat Simulator error:', error);
+    return new Response(JSON.stringify({
+      error: 'RSI simulation failed',
+      details: error.message
+    }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
   }
 });
