@@ -1,125 +1,92 @@
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Brain, Clock, Target, Zap, TrendingDown, Eye } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { Brain, Search, TrendingDown, Archive } from "lucide-react";
+import { scanMemoryFootprints, calculateDecayScores, triggerMemoryRecalibration } from '@/services/eidetic/eideticService';
 import MemoryFootprintsList from './MemoryFootprintsList';
 import DecayProfilesPanel from './DecayProfilesPanel';
 import MemoryRecalibratorsPanel from './MemoryRecalibratorsPanel';
 import AddMemoryFootprintDialog from './AddMemoryFootprintDialog';
-
-interface EideticStats {
-  totalFootprints: number;
-  activeFootprints: number;
-  avgDecayScore: number;
-  pendingActions: number;
-  deployedRecalibrators: number;
-  effectivenessScore: number;
-}
+import { toast } from 'sonner';
 
 const EideticDashboard = () => {
-  const [stats, setStats] = useState<EideticStats>({
+  const [searchEntity, setSearchEntity] = useState('');
+  const [isScanning, setIsScanning] = useState(false);
+  const [memoryFootprints, setMemoryFootprints] = useState([]);
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [stats, setStats] = useState({
     totalFootprints: 0,
     activeFootprints: 0,
-    avgDecayScore: 0,
-    pendingActions: 0,
-    deployedRecalibrators: 0,
-    effectivenessScore: 0
+    decayingFootprints: 0,
+    archivedFootprints: 0
   });
-  const [loading, setLoading] = useState(true);
-  const [showAddDialog, setShowAddDialog] = useState(false);
 
   useEffect(() => {
-    loadStats();
+    loadMemoryFootprints();
   }, []);
 
-  const loadStats = async () => {
+  const loadMemoryFootprints = async () => {
     try {
-      setLoading(true);
-      
-      // Get memory footprints stats with error handling
-      const { data: footprints, error: footprintsError } = await supabase
+      // Load from database
+      const { data, error } = await supabase
         .from('memory_footprints')
-        .select('decay_score, is_active');
+        .select('*')
+        .order('last_updated', { ascending: false });
 
-      if (footprintsError) {
-        console.error('Error loading footprints:', footprintsError);
-        // Continue with empty data instead of throwing
-      }
+      if (error) throw error;
 
-      // Get decay profiles stats with error handling
-      const { data: profiles, error: profilesError } = await supabase
-        .from('memory_decay_profiles')
-        .select('action_status');
-
-      if (profilesError) {
-        console.error('Error loading profiles:', profilesError);
-        // Continue with empty data instead of throwing
-      }
-
-      // Get recalibrators stats with error handling
-      const { data: recalibrators, error: recalibratorsError } = await supabase
-        .from('memory_recalibrators')
-        .select('is_deployed, effectiveness_score');
-
-      if (recalibratorsError) {
-        console.error('Error loading recalibrators:', recalibratorsError);
-        // Continue with empty data instead of throwing
-      }
-
-      const totalFootprints = footprints?.length || 0;
-      const activeFootprints = footprints?.filter(f => f.is_active).length || 0;
-      const avgDecayScore = footprints?.length ? 
-        footprints.reduce((sum, f) => sum + (f.decay_score || 0), 0) / footprints.length : 0;
-      
-      const pendingActions = profiles?.filter(p => p.action_status === 'pending').length || 0;
-      const deployedRecalibrators = recalibrators?.filter(r => r.is_deployed).length || 0;
-      const effectivenessScore = recalibrators?.length ? 
-        recalibrators.reduce((sum, r) => sum + (r.effectiveness_score || 0), 0) / recalibrators.length : 0;
-
-      setStats({
-        totalFootprints,
-        activeFootprints,
-        avgDecayScore: Math.round(avgDecayScore * 100) / 100,
-        pendingActions,
-        deployedRecalibrators,
-        effectivenessScore: Math.round(effectivenessScore * 100) / 100
-      });
-
+      setMemoryFootprints(data || []);
+      calculateStats(data || []);
     } catch (error) {
-      console.error('Error loading EIDETIC stats:', error);
-      toast.error('Failed to load EIDETIC statistics');
-    } finally {
-      setLoading(false);
+      console.error('Error loading memory footprints:', error);
     }
   };
 
-  const refreshData = async () => {
+  const calculateStats = (footprints) => {
+    setStats({
+      totalFootprints: footprints.length,
+      activeFootprints: footprints.filter(f => f.status === 'active').length,
+      decayingFootprints: footprints.filter(f => f.status === 'decaying').length,
+      archivedFootprints: footprints.filter(f => f.status === 'archived').length
+    });
+  };
+
+  const handleScanEntity = async () => {
+    if (!searchEntity.trim()) {
+      toast.error('Please enter an entity name');
+      return;
+    }
+
+    setIsScanning(true);
     try {
-      toast.success('EIDETIC™ data refreshed');
-      await loadStats();
+      const footprints = await scanMemoryFootprints(searchEntity);
+      if (footprints.length > 0) {
+        loadMemoryFootprints(); // Refresh the list
+      }
     } catch (error) {
-      console.error('Error refreshing EIDETIC data:', error);
-      toast.error('Failed to refresh data');
+      console.error('Error scanning entity:', error);
+    } finally {
+      setIsScanning(false);
     }
   };
 
-  if (loading) {
-    return (
-      <Card>
-        <CardContent className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <Brain className="h-8 w-8 animate-pulse mx-auto mb-2" />
-            <p>Loading EIDETIC™ Memory Firewall...</p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+  const handleRecalculateDecay = async () => {
+    try {
+      const activeFootprintIds = memoryFootprints
+        .filter(f => f.status === 'active')
+        .map(f => f.id);
+      
+      if (activeFootprintIds.length > 0) {
+        await calculateDecayScores(activeFootprintIds);
+        loadMemoryFootprints();
+      }
+    } catch (error) {
+      console.error('Error recalculating decay:', error);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -127,18 +94,17 @@ const EideticDashboard = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-3">
-            <Brain className="h-8 w-8" />
-            A.R.I.A™ EIDETIC™ Memory Firewall
+            <Brain className="h-8 w-8 text-purple-600" />
+            A.R.I.A™ EIDETIC™
           </h1>
           <p className="text-muted-foreground mt-1">
-            Digital memory management, decay analysis & content recalibration
+            Memory footprint analysis & decay management
           </p>
         </div>
         
         <div className="flex items-center gap-2">
-          <Button onClick={refreshData} variant="outline" size="sm">
-            <Zap className="h-4 w-4 mr-2" />
-            Refresh Data
+          <Button onClick={handleRecalculateDecay} variant="outline" size="sm">
+            Recalculate Decay
           </Button>
           <Button onClick={() => setShowAddDialog(true)}>
             Add Memory Footprint
@@ -147,7 +113,7 @@ const EideticDashboard = () => {
       </div>
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
@@ -155,7 +121,7 @@ const EideticDashboard = () => {
                 <p className="text-sm text-muted-foreground">Total Footprints</p>
                 <p className="text-2xl font-bold">{stats.totalFootprints}</p>
               </div>
-              <Brain className="h-8 w-8 text-blue-500" />
+              <Brain className="h-8 w-8 text-purple-500" />
             </div>
           </CardContent>
         </Card>
@@ -167,7 +133,7 @@ const EideticDashboard = () => {
                 <p className="text-sm text-muted-foreground">Active</p>
                 <p className="text-2xl font-bold">{stats.activeFootprints}</p>
               </div>
-              <Eye className="h-8 w-8 text-green-500" />
+              <Search className="h-8 w-8 text-green-500" />
             </div>
           </CardContent>
         </Card>
@@ -176,10 +142,10 @@ const EideticDashboard = () => {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Avg Decay</p>
-                <p className="text-2xl font-bold">{stats.avgDecayScore}</p>
+                <p className="text-sm text-muted-foreground">Decaying</p>
+                <p className="text-2xl font-bold">{stats.decayingFootprints}</p>
               </div>
-              <Clock className="h-8 w-8 text-orange-500" />
+              <TrendingDown className="h-8 w-8 text-orange-500" />
             </div>
           </CardContent>
         </Card>
@@ -188,49 +154,53 @@ const EideticDashboard = () => {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Pending Actions</p>
-                <p className="text-2xl font-bold">{stats.pendingActions}</p>
+                <p className="text-sm text-muted-foreground">Archived</p>
+                <p className="text-2xl font-bold">{stats.archivedFootprints}</p>
               </div>
-              <Target className="h-8 w-8 text-yellow-500" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Deployed</p>
-                <p className="text-2xl font-bold">{stats.deployedRecalibrators}</p>
-              </div>
-              <Zap className="h-8 w-8 text-purple-500" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Effectiveness</p>
-                <p className="text-2xl font-bold">{stats.effectivenessScore}</p>
-              </div>
-              <TrendingDown className="h-8 w-8 text-red-500" />
+              <Archive className="h-8 w-8 text-gray-500" />
             </div>
           </CardContent>
         </Card>
       </div>
+
+      {/* Entity Scanner */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Memory Footprint Scanner</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex gap-2">
+            <Input
+              value={searchEntity}
+              onChange={(e) => setSearchEntity(e.target.value)}
+              placeholder="Enter entity name to scan memory footprints..."
+              className="flex-1"
+            />
+            <Button 
+              onClick={handleScanEntity} 
+              disabled={isScanning}
+              className="flex items-center gap-2"
+            >
+              <Search className="h-4 w-4" />
+              {isScanning ? 'Scanning...' : 'Scan Entity'}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Main Content Tabs */}
       <Tabs defaultValue="footprints" className="space-y-4">
         <TabsList>
           <TabsTrigger value="footprints">Memory Footprints</TabsTrigger>
           <TabsTrigger value="decay">Decay Profiles</TabsTrigger>
-          <TabsTrigger value="recalibrators">Recalibrators</TabsTrigger>
+          <TabsTrigger value="recalibrators">Memory Recalibrators</TabsTrigger>
         </TabsList>
 
         <TabsContent value="footprints">
-          <MemoryFootprintsList onFootprintAdded={loadStats} />
+          <MemoryFootprintsList 
+            footprints={memoryFootprints}
+            onFootprintUpdated={loadMemoryFootprints}
+          />
         </TabsContent>
 
         <TabsContent value="decay">
@@ -245,7 +215,7 @@ const EideticDashboard = () => {
       <AddMemoryFootprintDialog 
         open={showAddDialog}
         onOpenChange={setShowAddDialog}
-        onFootprintAdded={loadStats}
+        onFootprintAdded={loadMemoryFootprints}
       />
     </div>
   );
