@@ -9,6 +9,7 @@ import AdminSessionManager from "@/components/auth/AdminSessionManager";
 import Index from "./pages/Index";
 import Discovery from "./pages/Discovery";
 import AdminLogin from "./pages/AdminLogin";
+import EmployeeBrandRiskPage from "./pages/EmployeeBrandRiskPage";
 import { useAuth } from "@/hooks/useAuth";
 
 const queryClient = new QueryClient();
@@ -39,6 +40,12 @@ const App = () => {
               <Route path="/discovery" element={
                 <SecureRouteGuard requireAdmin={true}>
                   <Discovery />
+                </SecureRouteGuard>
+              } />
+              
+              <Route path="/employee-risk" element={
+                <SecureRouteGuard requireAdmin={true}>
+                  <EmployeeBrandRiskPage />
                 </SecureRouteGuard>
               } />
               

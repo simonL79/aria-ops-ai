@@ -323,6 +323,108 @@ export type Database = {
         }
         Relationships: []
       }
+      companies: {
+        Row: {
+          created_at: string | null
+          id: string
+          industry: string | null
+          name: string
+          updated_at: string | null
+          website: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          industry?: string | null
+          name: string
+          updated_at?: string | null
+          website?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          industry?: string | null
+          name?: string
+          updated_at?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
+      company_employees: {
+        Row: {
+          alt_names: string[] | null
+          company_id: string | null
+          created_at: string | null
+          email: string
+          flagged: boolean | null
+          full_name: string
+          id: string
+          last_scan: string | null
+          linked_profiles: Json | null
+          location: string | null
+          risk_level: number | null
+          risk_tags: string[] | null
+          role: string | null
+          scan_status: string | null
+          sentiment_score: number | null
+          updated_at: string | null
+          visibility_score: number | null
+        }
+        Insert: {
+          alt_names?: string[] | null
+          company_id?: string | null
+          created_at?: string | null
+          email: string
+          flagged?: boolean | null
+          full_name: string
+          id?: string
+          last_scan?: string | null
+          linked_profiles?: Json | null
+          location?: string | null
+          risk_level?: number | null
+          risk_tags?: string[] | null
+          role?: string | null
+          scan_status?: string | null
+          sentiment_score?: number | null
+          updated_at?: string | null
+          visibility_score?: number | null
+        }
+        Update: {
+          alt_names?: string[] | null
+          company_id?: string | null
+          created_at?: string | null
+          email?: string
+          flagged?: boolean | null
+          full_name?: string
+          id?: string
+          last_scan?: string | null
+          linked_profiles?: Json | null
+          location?: string | null
+          risk_level?: number | null
+          risk_tags?: string[] | null
+          role?: string | null
+          scan_status?: string | null
+          sentiment_score?: number | null
+          updated_at?: string | null
+          visibility_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_employees_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_employees_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "employee_risk_summary"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
       content_actions: {
         Row: {
           action: string
@@ -539,6 +641,252 @@ export type Database = {
             columns: ["threat_id"]
             isOneToOne: false
             referencedRelation: "scan_results"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_batch_scans: {
+        Row: {
+          company_id: string | null
+          completed_at: string | null
+          completed_employees: number | null
+          created_at: string | null
+          failed_employees: number | null
+          id: string
+          scan_name: string
+          started_at: string | null
+          started_by: string | null
+          status: string | null
+          total_employees: number | null
+        }
+        Insert: {
+          company_id?: string | null
+          completed_at?: string | null
+          completed_employees?: number | null
+          created_at?: string | null
+          failed_employees?: number | null
+          id?: string
+          scan_name: string
+          started_at?: string | null
+          started_by?: string | null
+          status?: string | null
+          total_employees?: number | null
+        }
+        Update: {
+          company_id?: string | null
+          completed_at?: string | null
+          completed_employees?: number | null
+          created_at?: string | null
+          failed_employees?: number | null
+          id?: string
+          scan_name?: string
+          started_at?: string | null
+          started_by?: string | null
+          status?: string | null
+          total_employees?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_batch_scans_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_batch_scans_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "employee_risk_summary"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
+      employee_risk_alerts: {
+        Row: {
+          acknowledged: boolean | null
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          alert_type: string
+          company_id: string | null
+          created_at: string | null
+          employee_id: string | null
+          id: string
+          message: string | null
+          risk_level: number | null
+        }
+        Insert: {
+          acknowledged?: boolean | null
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_type: string
+          company_id?: string | null
+          created_at?: string | null
+          employee_id?: string | null
+          id?: string
+          message?: string | null
+          risk_level?: number | null
+        }
+        Update: {
+          acknowledged?: boolean | null
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          alert_type?: string
+          company_id?: string | null
+          created_at?: string | null
+          employee_id?: string | null
+          id?: string
+          message?: string | null
+          risk_level?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_risk_alerts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_risk_alerts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "employee_risk_summary"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "employee_risk_alerts_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "company_employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_risk_tags: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          severity_weight: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          severity_weight?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          severity_weight?: number | null
+        }
+        Relationships: []
+      }
+      employee_scan_queue: {
+        Row: {
+          batch_scan_id: string | null
+          completed_at: string | null
+          created_at: string | null
+          employee_id: string | null
+          error_message: string | null
+          id: string
+          max_retries: number | null
+          priority: number | null
+          retry_count: number | null
+          started_at: string | null
+          status: string | null
+        }
+        Insert: {
+          batch_scan_id?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          employee_id?: string | null
+          error_message?: string | null
+          id?: string
+          max_retries?: number | null
+          priority?: number | null
+          retry_count?: number | null
+          started_at?: string | null
+          status?: string | null
+        }
+        Update: {
+          batch_scan_id?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          employee_id?: string | null
+          error_message?: string | null
+          id?: string
+          max_retries?: number | null
+          priority?: number | null
+          retry_count?: number | null
+          started_at?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_scan_queue_batch_scan_id_fkey"
+            columns: ["batch_scan_id"]
+            isOneToOne: false
+            referencedRelation: "employee_batch_scans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_scan_queue_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "company_employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_scan_results: {
+        Row: {
+          content: string | null
+          created_at: string | null
+          employee_id: string | null
+          found_at: string | null
+          id: string
+          platform: string
+          risk_category: string | null
+          sentiment: number | null
+          severity: string | null
+          url: string | null
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string | null
+          employee_id?: string | null
+          found_at?: string | null
+          id?: string
+          platform: string
+          risk_category?: string | null
+          sentiment?: number | null
+          severity?: string | null
+          url?: string | null
+        }
+        Update: {
+          content?: string | null
+          created_at?: string | null
+          employee_id?: string | null
+          found_at?: string | null
+          id?: string
+          platform?: string
+          risk_category?: string | null
+          sentiment?: number | null
+          severity?: string | null
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_scan_results_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "company_employees"
             referencedColumns: ["id"]
           },
         ]
@@ -1004,6 +1352,48 @@ export type Database = {
         }
         Relationships: []
       }
+      scan_job_configs: {
+        Row: {
+          alert_channels: string[] | null
+          auto_flag_threshold: number | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          name: string
+          platforms: string[] | null
+          risk_threshold: number | null
+          scan_depth: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          alert_channels?: string[] | null
+          auto_flag_threshold?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          platforms?: string[] | null
+          risk_threshold?: number | null
+          scan_depth?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          alert_channels?: string[] | null
+          auto_flag_threshold?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          platforms?: string[] | null
+          risk_threshold?: number | null
+          scan_depth?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       scan_jobs: {
         Row: {
           id: string
@@ -1302,6 +1692,22 @@ export type Database = {
           risk_category?: string | null
           risk_score?: number | null
           scan_status?: string | null
+        }
+        Relationships: []
+      }
+      employee_risk_summary: {
+        Row: {
+          active_batches: number | null
+          avg_sentiment: number | null
+          company_id: string | null
+          company_name: string | null
+          flagged_employees: number | null
+          high_risk_employees: number | null
+          last_scan_date: string | null
+          low_risk_employees: number | null
+          medium_risk_employees: number | null
+          percent_negative: number | null
+          total_employees: number | null
         }
         Relationships: []
       }
