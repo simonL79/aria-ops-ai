@@ -17,7 +17,7 @@ const AdminLoginGateway = () => {
   const [loginAttempts, setLoginAttempts] = useState(0);
   const [isLocked, setIsLocked] = useState(false);
   const [lockoutTime, setLockoutTime] = useState<Date | null>(null);
-  const { isAuthenticated, isAdmin, signIn, signOut } = useAuth();
+  const { isAuthenticated, isAdmin, signIn, signOut, isLoading: authLoading } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -57,23 +57,20 @@ const AdminLoginGateway = () => {
     }
   }, [isLocked, lockoutTime]);
 
-  // Handle successful authentication redirect - updated logic
+  // Handle successful authentication redirect - fixed logic
   useEffect(() => {
-    console.log('Auth state in AdminLoginGateway:', { isAuthenticated, isAdmin, isLoading });
+    console.log('Auth state in AdminLoginGateway:', { isAuthenticated, isAdmin, authLoading });
     
-    if (!isLoading && isAuthenticated && isAdmin) {
+    // Only redirect if auth is not loading and user is authenticated and admin
+    if (!authLoading && isAuthenticated && isAdmin) {
       const from = location.state?.from?.pathname || '/discovery';
       console.log('Admin authenticated, redirecting to:', from);
-      
-      // Use timeout to ensure state updates are complete
-      setTimeout(() => {
-        navigate(from, { replace: true });
-      }, 100);
+      navigate(from, { replace: true });
     }
-  }, [isAuthenticated, isAdmin, isLoading, navigate, location.state]);
+  }, [isAuthenticated, isAdmin, authLoading, navigate, location.state]);
 
   // Show loading while authentication is being processed
-  if (isLoading) {
+  if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
         <div className="text-center space-y-4">
@@ -88,13 +85,13 @@ const AdminLoginGateway = () => {
   }
 
   // Redirect if already authenticated and admin
-  if (isAuthenticated && isAdmin) {
+  if (!authLoading && isAuthenticated && isAdmin) {
     const from = location.state?.from?.pathname || '/discovery';
     return <Navigate to={from} replace />;
   }
 
   // If authenticated but not admin, show error
-  if (isAuthenticated && !isAdmin) {
+  if (!authLoading && isAuthenticated && !isAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
         <div className="text-center space-y-4">
