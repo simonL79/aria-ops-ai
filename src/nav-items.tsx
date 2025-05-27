@@ -1,4 +1,3 @@
-
 import { HomeIcon, Users, Activity, UserCheck, AlertTriangle, Shield, Brain, Target, Building2, TrendingUp, FileText, Zap } from "lucide-react";
 import Index from "./pages/Index";
 import ClientsPage from "./pages/ClientsPage";
@@ -8,7 +7,7 @@ import EnhancedIntelligenceWorkbench from "./pages/intelligence/EnhancedIntellig
 import OffensiveOperations from "./pages/intelligence/OffensiveOperations";
 import AdminDashboard from "./pages/AdminDashboard";
 import QATestPage from "./pages/QATestPage";
-import AIScrapingPage from "./pages/AIScrapingPage";
+import AiScrapingPage from "./pages/AiScrapingPage";
 import CleanLaunchPage from "./pages/CleanLaunchPage";
 import BlogPage from "./pages/BlogPage";
 import ReputationScanPage from "./pages/ReputationScanPage";
@@ -66,7 +65,7 @@ export const navItems = [
     title: "AI Scraping",
     to: "/ai-scraping",
     icon: <Zap className="h-4 w-4" />,
-    page: <AIScrapingPage />,
+    page: <AiScrapingPage />,
   },
   {
     title: "Clean Launch",
