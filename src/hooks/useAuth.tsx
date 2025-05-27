@@ -26,7 +26,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       console.log('Checking admin status for user:', userId);
       
-      // Check if user has admin role - use count to be more reliable
+      // First try: Check with count
       const { count, error } = await supabase
         .from('user_roles')
         .select('*', { count: 'exact', head: true })
@@ -35,7 +35,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
       if (error) {
         console.error('Error checking admin status:', error);
-        setIsAdmin(false);
+        
+        // Fallback: Try direct select if count fails
+        console.log('Count query failed, trying direct select...');
+        const { data: directData, error: directError } = await supabase
+          .from('user_roles')
+          .select('id, role')
+          .eq('user_id', userId)
+          .eq('role', 'admin')
+          .limit(1);
+        
+        if (directError) {
+          console.error('Direct select also failed:', directError);
+          setIsAdmin(false);
+          return;
+        }
+        
+        const hasAdminRole = directData && directData.length > 0;
+        console.log('Direct select result:', directData, 'hasAdminRole:', hasAdminRole);
+        setIsAdmin(hasAdminRole);
         return;
       }
 
@@ -43,21 +61,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       console.log('Admin status check - count:', count, 'hasAdminRole:', hasAdminRole);
       setIsAdmin(hasAdminRole);
       
-      // If no admin role found, try a direct select query as fallback
+      // If count is 0, double-check with direct select
       if (!hasAdminRole) {
-        console.log('Count query returned 0, trying direct select...');
+        console.log('Count returned 0, double-checking with direct select...');
         const { data: directData, error: directError } = await supabase
           .from('user_roles')
-          .select('id')
+          .select('id, role')
           .eq('user_id', userId)
           .eq('role', 'admin')
           .limit(1);
         
         if (!directError && directData && directData.length > 0) {
-          console.log('Direct select found admin role:', directData);
+          console.log('Direct select found admin role (count was wrong):', directData);
           setIsAdmin(true);
         } else {
-          console.log('No admin role found in direct select either');
+          console.log('Confirmed: No admin role found for user');
+          setIsAdmin(false);
         }
       }
     } catch (error) {
@@ -160,13 +179,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signOut = async () => {
     try {
       console.log('Signing out user...');
+      // Clear local state immediately
       setIsAdmin(false);
       setUser(null);
       setSession(null);
+      
+      // Then sign out from Supabase
       await supabase.auth.signOut();
       console.log('Sign out successful');
     } catch (error) {
       console.error('Error signing out:', error);
+      // Even if signOut fails, clear local state
+      setIsAdmin(false);
+      setUser(null);
+      setSession(null);
     }
   };
 
