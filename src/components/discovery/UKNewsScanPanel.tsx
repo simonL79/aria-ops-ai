@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Newspaper, Loader2, ExternalLink, CheckCircle, AlertTriangle } from "lucide-react";
+import { Newspaper, Loader2, ExternalLink, CheckCircle, AlertTriangle, Users, Building2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from '@/integrations/supabase/client';
 
@@ -12,6 +12,7 @@ interface UKNewsScanResult {
   domain: string;
   entities: string[];
   client_matched: boolean;
+  prospect_entities: string[];
 }
 
 const UKNewsScanPanel = () => {
@@ -22,14 +23,15 @@ const UKNewsScanPanel = () => {
     scannedDomains: 0,
     articlesFound: 0,
     entitiesDetected: 0,
-    clientsMatched: 0
+    clientsMatched: 0,
+    prospectsIdentified: 0
   });
 
   const runUKNewsScan = async () => {
     setIsScanning(true);
     
     try {
-      toast.info("Starting UK newspaper scan...");
+      toast.info("Starting comprehensive UK newspaper scan...");
       
       const response = await fetch('/functions/v1/uk-news-scanner', {
         method: 'POST',
@@ -49,23 +51,26 @@ const UKNewsScanPanel = () => {
         setResults(data.results || []);
         setLastScanTime(data.scan_timestamp);
         
-        // Calculate statistics
+        // Calculate statistics including prospects
         const uniqueEntities = new Set<string>();
         let clientMatches = 0;
+        let totalProspects = 0;
         
         (data.results || []).forEach((result: UKNewsScanResult) => {
           result.entities.forEach(entity => uniqueEntities.add(entity));
           if (result.client_matched) clientMatches++;
+          if (result.prospect_entities) totalProspects += result.prospect_entities.length;
         });
         
         setScanStats({
           scannedDomains: data.scanned_domains?.length || 0,
           articlesFound: data.articles_found || 0,
           entitiesDetected: uniqueEntities.size,
-          clientsMatched: clientMatches
+          clientsMatched: clientMatches,
+          prospectsIdentified: data.prospects_identified || totalProspects
         });
         
-        toast.success(`Scan completed: Found ${data.articles_found || 0} articles across ${data.scanned_domains?.length || 0} domains`);
+        toast.success(`Scan completed: Found ${data.articles_found || 0} articles, ${data.prospects_identified || 0} new prospects identified`);
       } else {
         toast.error("Scan completed but returned no results");
       }
@@ -82,10 +87,10 @@ const UKNewsScanPanel = () => {
       <CardHeader className="bg-gradient-to-br from-blue-900 to-blue-800 text-white rounded-t-lg">
         <CardTitle className="flex items-center gap-2">
           <Newspaper className="h-5 w-5" />
-          UK Newspaper Zero-Input Scanner
+          UK Newspaper Intelligence Scanner
         </CardTitle>
         <CardDescription className="text-blue-100">
-          Automatically detect public figures and organizations mentioned in UK news outlets
+          Automatically detect clients and prospects mentioned in UK news outlets with comprehensive intelligence gathering
         </CardDescription>
       </CardHeader>
       
@@ -99,12 +104,12 @@ const UKNewsScanPanel = () => {
             {isScanning ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Scanning UK News Sites...
+                Scanning UK News & Gathering Intel...
               </>
             ) : (
               <>
                 <Newspaper className="mr-2 h-4 w-4" />
-                Scan UK News Sources
+                Run Intelligence Scan
               </>
             )}
           </Button>
@@ -117,7 +122,7 @@ const UKNewsScanPanel = () => {
         </div>
 
         {scanStats.articlesFound > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
             <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
               <div className="text-lg font-medium text-blue-800">{scanStats.scannedDomains}</div>
               <div className="text-sm text-gray-500">Domains Scanned</div>
@@ -130,9 +135,13 @@ const UKNewsScanPanel = () => {
               <div className="text-lg font-medium text-blue-800">{scanStats.entitiesDetected}</div>
               <div className="text-sm text-gray-500">Entities Detected</div>
             </div>
-            <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
-              <div className="text-lg font-medium text-blue-800">{scanStats.clientsMatched}</div>
+            <div className="bg-green-50 p-4 rounded-lg border border-green-100">
+              <div className="text-lg font-medium text-green-800">{scanStats.clientsMatched}</div>
               <div className="text-sm text-gray-500">Client Matches</div>
+            </div>
+            <div className="bg-purple-50 p-4 rounded-lg border border-purple-100">
+              <div className="text-lg font-medium text-purple-800">{scanStats.prospectsIdentified}</div>
+              <div className="text-sm text-gray-500">New Prospects</div>
             </div>
           </div>
         )}
@@ -145,27 +154,53 @@ const UKNewsScanPanel = () => {
               {results.map((result, index) => (
                 <div key={index} className="p-4">
                   <div className="flex items-start justify-between">
-                    <div>
+                    <div className="flex-1">
                       <div className="font-medium mb-1">{result.headline}</div>
                       <div className="text-sm text-gray-500 mb-2">Source: {result.domain}</div>
-                      <div className="flex flex-wrap gap-2 mb-2">
-                        {result.entities.map((entity, i) => (
-                          <Badge key={i} variant="outline" className="bg-gray-100">
-                            {entity}
-                          </Badge>
-                        ))}
+                      
+                      <div className="space-y-2">
+                        {result.entities.length > 0 && (
+                          <div>
+                            <div className="text-xs text-gray-500 mb-1">All Entities:</div>
+                            <div className="flex flex-wrap gap-2">
+                              {result.entities.map((entity, i) => (
+                                <Badge key={i} variant="outline" className="bg-gray-100">
+                                  {entity}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {result.prospect_entities && result.prospect_entities.length > 0 && (
+                          <div>
+                            <div className="text-xs text-purple-600 mb-1 flex items-center gap-1">
+                              <Users className="h-3 w-3" />
+                              New Prospects:
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                              {result.prospect_entities.map((entity, i) => (
+                                <Badge key={i} className="bg-purple-100 text-purple-800 border-purple-200">
+                                  <Building2 className="h-3 w-3 mr-1" />
+                                  {entity}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                     
-                    <div className="flex items-center">
+                    <div className="flex items-center ml-4">
                       {result.client_matched ? (
-                        <Badge className="bg-purple-100 text-purple-800 flex items-center gap-1">
+                        <Badge className="bg-green-100 text-green-800 flex items-center gap-1">
                           <CheckCircle className="h-3 w-3" />
-                          Client Match
+                          Existing Client
                         </Badge>
                       ) : (
                         <Badge variant="outline" className="text-gray-500 flex items-center gap-1">
-                          No Client Match
+                          <AlertTriangle className="h-3 w-3" />
+                          Potential Prospect
                         </Badge>
                       )}
                     </div>
@@ -180,13 +215,21 @@ const UKNewsScanPanel = () => {
           </div>
         ) : (
           <div className="bg-blue-50 p-6 rounded-lg border border-blue-100">
-            <h3 className="font-medium text-blue-800 mb-2">What This Scanner Does:</h3>
+            <h3 className="font-medium text-blue-800 mb-2">Enhanced Intelligence Scanner Features:</h3>
             <ul className="text-sm space-y-2 text-blue-700 list-disc pl-5">
-              <li>Crawls major UK news sites (The Guardian, BBC News, Daily Mail, etc.)</li>
+              <li>Crawls major UK news sites (The Guardian, BBC News, Daily Mail, Telegraph, etc.)</li>
               <li>Identifies people and organizations mentioned in headlines and content</li>
-              <li>Evaluates sentiment and visibility scores for each mention</li>
-              <li>Automatically matches entities to your client database</li>
-              <li>Adds high-risk content to scan results with proper flagging</li>
+              <li>Automatically matches entities to your existing client database</li>
+              <li>Collects comprehensive prospect information for non-clients including:</li>
+              <ul className="text-sm space-y-1 text-blue-600 list-disc pl-5 mt-1">
+                <li>Industry category and business type</li>
+                <li>Sentiment analysis and reputation risk assessment</li>
+                <li>Visibility scores and potential reach metrics</li>
+                <li>Contact potential rating (High/Medium/Low)</li>
+                <li>Context summary and mention tracking</li>
+              </ul>
+              <li>Flags high-risk content with proper threat classification</li>
+              <li>Stores all prospect data for sales outreach and lead generation</li>
             </ul>
           </div>
         )}
