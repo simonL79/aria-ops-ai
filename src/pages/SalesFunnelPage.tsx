@@ -17,8 +17,20 @@ const SalesFunnelPage = () => {
     return <AdminDashboardWelcome />;
   }
 
+  // Handle smooth scroll to form
+  const scrollToForm = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    const formElement = document.getElementById('scan-form');
+    if (formElement) {
+      formElement.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  };
+
   return (
-    <div className="bg-white text-gray-900 font-sans min-h-screen">
+    <div className="bg-white text-gray-900 font-sans min-h-screen scroll-smooth">
       {/* Header */}
       <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-16 items-center justify-between">
@@ -51,10 +63,10 @@ const SalesFunnelPage = () => {
             A.R.I.A™ is a real-time digital intelligence system that scans the internet for risks to your brand, employees, and public image — and delivers actionable, private insights. No dashboards. No training. Just answers.
           </p>
           <Button asChild size="lg" className="bg-white text-blue-900 px-12 py-6 text-lg font-bold rounded-lg shadow-lg hover:bg-blue-50 transform hover:scale-105 transition-all duration-300">
-            <Link to="#scan-form" className="flex items-center">
+            <a href="#scan-form" onClick={scrollToForm} className="flex items-center">
               <Search className="mr-3 h-6 w-6" />
               🔎 Run a Reputation Scan
-            </Link>
+            </a>
           </Button>
         </div>
       </section>
@@ -249,9 +261,9 @@ const SalesFunnelPage = () => {
           <p className="text-xl mb-8 text-blue-200">No setup. No software. Just intelligence you can use.</p>
           <div className="space-y-4">
             <Button asChild size="lg" className="bg-white text-blue-900 px-12 py-6 text-lg font-bold rounded-lg shadow-lg hover:bg-blue-50">
-              <Link to="#scan-form">
+              <a href="#scan-form" onClick={scrollToForm}>
                 🎯 Request My Scan
-              </Link>
+              </a>
             </Button>
             <p className="text-blue-200">📩 Prefer email? <a href="mailto:simon@ariaops.co.uk" className="underline">simon@ariaops.co.uk</a></p>
           </div>

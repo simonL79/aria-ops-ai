@@ -4,13 +4,11 @@ import { QATestSuite, QATestResult } from './types';
 import { Phase1DataIntegrity } from './phases/Phase1DataIntegrity';
 import { Phase2CoreSystems } from './phases/Phase2CoreSystems';
 import { Phase3Scanning } from './phases/Phase3Scanning';
-import { 
-  Phase4ClientManagement, 
-  Phase5Security, 
-  Phase6EdgeFunctions, 
-  Phase7DataProtection, 
-  Phase8RealTimeOps 
-} from './phases/RemainingPhases';
+import { Phase4ClientManagement } from './phases/Phase4ClientManagement';
+import { Phase5Security } from './phases/Phase5Security';
+import { Phase6EdgeFunctions } from './phases/Phase6EdgeFunctions';
+import { Phase7DataProtection } from './phases/Phase7DataProtection';
+import { Phase8RealTimeOps } from './phases/Phase8RealTimeOps';
 
 export class QATestRunner {
   private results: QATestResult[] = [];

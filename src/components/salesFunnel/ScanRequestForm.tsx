@@ -44,24 +44,6 @@ const ScanRequestForm = () => {
         return;
       }
       
-      // Check if there are any matching influencer alerts
-      // Note: This is commented out because the table doesn't exist yet
-      /*
-      const match = await supabase
-        .from('influencer_alerts')
-        .select('*')
-        .eq('influencer_name', full_name)
-        .maybeSingle();
-
-      // Update the influencer alert status if there's a match
-      if (match.data) {
-        await supabase
-          .from('influencer_alerts')
-          .update({ status: 'responded' })
-          .eq('id', match.data.id);
-      }
-      */
-
       // Track conversion events
       trackConversionEvents();
       
@@ -82,7 +64,7 @@ const ScanRequestForm = () => {
   };
 
   return (
-    <section id="scan-form" className="bg-blue-600 py-16 px-6 md:px-8 text-center">
+    <section id="scan-form" className="bg-blue-600 py-16 px-6 md:px-8 text-center scroll-mt-16">
       <div className="container mx-auto">
         <h2 className="text-3xl font-bold mb-4 text-white">Request Your Free A.R.I.A™ Scan</h2>
         {formSubmitted ? (
