@@ -78,15 +78,14 @@ export class QATestRunner {
   private async runPhase1Tests() {
     const phase = 'Phase 1: Public Entry Points';
     
-    // Test 1.1: Form Submission
+    // Test 1.1: Form Submission - Fixed count query
     try {
-      const { data, error } = await supabase
+      const { count, error } = await supabase
         .from('reputation_scan_submissions')
-        .select('count(*)')
-        .limit(1);
+        .select('*', { count: 'exact', head: true });
       
       if (error) throw error;
-      this.addResult('Form Submission Table', 'pass', 'Reputation scan submissions table accessible', phase);
+      this.addResult('Form Submission Table', 'pass', `Reputation scan submissions table accessible with ${count || 0} entries`, phase);
     } catch (error) {
       this.addResult('Form Submission Table', 'fail', `Database error: ${error.message}`, phase);
     }
@@ -143,10 +142,9 @@ export class QATestRunner {
       this.addResult('Real-time Threat Feed', 'fail', `Feed error: ${error.message}`, phase);
     }
 
-    // Test 3.2: Case Thread Management
+    // Test 3.2: Case Thread Management - Updated for new table
     try {
-      // Use type assertion for new table
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('case_threads')
         .select('id, title, status, priority')
         .limit(5);
@@ -154,7 +152,7 @@ export class QATestRunner {
       if (error) throw error;
       this.addResult('Case Thread Management', 'pass', `Case threads accessible with ${data?.length || 0} threads`, phase);
     } catch (error) {
-      this.addResult('Case Thread Management', 'warning', `Case threads may not be fully configured: ${error.message}`, phase);
+      this.addResult('Case Thread Management', 'fail', `Case threads error: ${error.message}`, phase);
     }
   }
 
@@ -195,7 +193,7 @@ export class QATestRunner {
       this.addResult('Activity Logging', 'fail', `Logging error: ${error.message}`, phase);
     }
 
-    // Test 5.2: User Roles & Permissions
+    // Test 5.2: User Roles & Permissions - Fixed with new security definer function
     try {
       const { data, error } = await supabase
         .from('user_roles')
@@ -212,10 +210,9 @@ export class QATestRunner {
   private async runPhase6Tests() {
     const phase = 'Phase 6: System Health';
     
-    // Test 6.1: Health Monitoring
+    // Test 6.1: Health Monitoring - Updated for new table
     try {
-      // Use type assertion for new table
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('system_health_checks')
         .select('check_type, status, created_at')
         .order('created_at', { ascending: false })

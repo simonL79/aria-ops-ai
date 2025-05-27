@@ -81,6 +81,42 @@ export type Database = {
         }
         Relationships: []
       }
+      case_threads: {
+        Row: {
+          assigned_to: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          priority: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          priority?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          priority?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       clean_launch_targets: {
         Row: {
           company_name: string
@@ -761,6 +797,33 @@ export type Database = {
           },
         ]
       }
+      system_health_checks: {
+        Row: {
+          check_type: string
+          created_at: string
+          id: string
+          message: string | null
+          metadata: Json | null
+          status: string
+        }
+        Insert: {
+          check_type: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          metadata?: Json | null
+          status: string
+        }
+        Update: {
+          check_type?: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          metadata?: Json | null
+          status?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -933,6 +996,10 @@ export type Database = {
       column_exists: {
         Args: { p_table_name: string; p_column_name: string }
         Returns: boolean
+      }
+      get_current_user_role: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       has_role: {
         Args: {
