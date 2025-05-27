@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setUser(null);
     setSession(null);
     setIsAdmin(false);
-    setIsLoading(true);
+    setIsLoading(false); // Set to false immediately
     
     // Clear all possible storage locations
     localStorage.removeItem('admin_lockout');
@@ -39,13 +39,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     sessionStorage.clear();
     
     try {
-      // Force sign out from Supabase
       await supabase.auth.signOut({ scope: 'global' });
       console.log('Force reset complete');
     } catch (error) {
       console.error('Error during force reset:', error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -81,49 +78,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     console.log('AuthProvider initializing...');
     
-    // Force reset on mount to clear any stuck state
-    const initializeAuth = async () => {
-      try {
-        // Clear any potentially stuck state
-        await forceReset();
-        
-        // Wait a moment for cleanup
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
-        // Now get fresh session
-        const { data: { session: initialSession }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error('Error getting initial session:', error);
-          setIsLoading(false);
-          return;
-        }
-        
-        console.log('Fresh session check:', { 
-          hasSession: !!initialSession,
-          userId: initialSession?.user?.id 
-        });
-        
-        setSession(initialSession);
-        setUser(initialSession?.user ?? null);
-        
-        if (initialSession?.user) {
-          await checkAdminStatus(initialSession.user.id);
-          try {
-            await initializeDatabase();
-          } catch (dbError) {
-            console.error('Error initializing database:', dbError);
-          }
-        }
-        
-        setIsLoading(false);
-      } catch (error) {
-        console.error('Error in initializeAuth:', error);
-        setIsLoading(false);
-      }
-    };
-
-    // Set up auth state change listener
+    // Set up auth state change listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
         console.log('Auth state change:', event, { 
@@ -154,12 +109,47 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           await checkAdminStatus(currentSession.user.id);
         }
 
+        // Always set loading to false after processing auth state
         setIsLoading(false);
       }
     );
 
-    // Initialize with reset
-    initializeAuth();
+    // Get initial session
+    const getInitialSession = async () => {
+      try {
+        const { data: { session: initialSession }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Error getting initial session:', error);
+          setIsLoading(false);
+          return;
+        }
+        
+        console.log('Initial session check:', { 
+          hasSession: !!initialSession,
+          userId: initialSession?.user?.id 
+        });
+        
+        setSession(initialSession);
+        setUser(initialSession?.user ?? null);
+        
+        if (initialSession?.user) {
+          await checkAdminStatus(initialSession.user.id);
+          try {
+            await initializeDatabase();
+          } catch (dbError) {
+            console.error('Error initializing database:', dbError);
+          }
+        }
+        
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Error in getInitialSession:', error);
+        setIsLoading(false);
+      }
+    };
+
+    getInitialSession();
 
     return () => {
       subscription.unsubscribe();

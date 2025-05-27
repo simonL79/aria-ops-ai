@@ -1,19 +1,20 @@
 
-import { createRoot } from 'react-dom/client'
-import { AuthProvider } from './hooks/useAuth'
-import { RbacProvider } from './hooks/useRbac'
-import { BrowserRouter } from 'react-router-dom'
-import App from './App.tsx'
-import './index.css'
-import { Toaster } from 'sonner'
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { BrowserRouter } from "react-router-dom";
+import App from "./App.tsx";
+import { AuthProvider } from "@/hooks/useAuth";
+import { RbacProvider } from "@/hooks/useRbac";
+import "./index.css";
 
-createRoot(document.getElementById("root")!).render(
-  <BrowserRouter>
-    <AuthProvider>
-      <RbacProvider>
-        <App />
-        <Toaster richColors />
-      </RbacProvider>
-    </AuthProvider>
-  </BrowserRouter>
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <React.StrictMode>
+    <BrowserRouter>
+      <AuthProvider>
+        <RbacProvider>
+          <App />
+        </RbacProvider>
+      </AuthProvider>
+    </BrowserRouter>
+  </React.StrictMode>
 );
