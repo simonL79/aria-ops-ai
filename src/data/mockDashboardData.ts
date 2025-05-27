@@ -62,12 +62,12 @@ export const fetchRealSources = async (): Promise<ContentSource[]> => {
         negative: Math.floor((100 - (item.positive_ratio || 0)) * (item.total || 0) / 100),
         neutral: 0
       },
-      positiveRatio: item.positive_ratio,
-      total: item.total,
+      positiveRatio: item.positive_ratio || 0,
+      total: item.total || 0,
       active: item.active,
       lastUpdated: new Date(item.last_updated).toLocaleDateString(),
-      mentionCount: item.mention_count,
-      sentiment: item.sentiment
+      mentionCount: item.mention_count || 0,
+      sentiment: item.sentiment || 0
     }));
   } catch (error) {
     console.error('Error in fetchRealSources:', error);
@@ -105,138 +105,67 @@ export const fetchRealActions = async (): Promise<ContentAction[]> => {
   }
 };
 
-// Fallback mock data (kept for development/testing)
-export const mockAlerts: ContentAlert[] = [
-  {
-    id: "1",
-    platform: "Twitter",
-    content: "This company is terrible! Worst customer service ever!",
-    date: "2024-01-15T10:30:00",
-    severity: "high",
-    status: "new",
-    threatType: "customer_complaint",
-    url: "https://twitter.com/user/status/123",
-    sourceType: "social",
-    confidenceScore: 85,
-    sentiment: "negative",
-    detectedEntities: ["customer service"],
-    potentialReach: 1500
-  },
-  {
-    id: "2",
-    platform: "Reddit",
-    content: "Has anyone had issues with this company? They seem shady...",
-    date: "2024-01-14T15:45:00",
-    severity: "medium",
-    status: "read",
-    threatType: "reputation_inquiry",
-    url: "https://reddit.com/r/reviews/post/456",
-    sourceType: "forum",
-    confidenceScore: 70,
-    sentiment: "negative",
-    detectedEntities: ["company reputation"],
-    potentialReach: 800
-  },
-  {
-    id: "3",
-    platform: "News Site",
-    content: "Local business receives positive review for community involvement",
-    date: "2024-01-13T09:15:00",
-    severity: "low",
-    status: "dismissed",
-    threatType: "positive_mention",
-    url: "https://localnews.com/article/789",
-    sourceType: "news",
-    confidenceScore: 95,
-    sentiment: "positive",
-    detectedEntities: ["community involvement"],
-    potentialReach: 5000
-  }
-];
+// Function to calculate real metrics from database
+export const fetchRealMetrics = async (): Promise<MetricValue[]> => {
+  try {
+    const [alertsData, sourcesData] = await Promise.all([
+      supabase.from('scan_results').select('*'),
+      supabase.from('monitored_platforms').select('*')
+    ]);
 
-export const mockClassifiedAlerts: ContentAlert[] = [
-  {
-    id: "classified-1",
-    platform: "Twitter",
-    content: "I'm considering legal action against this company for their negligence",
-    date: "2024-01-16T08:00:00",
-    severity: "high",
-    status: "new",
-    threatType: "legal_threat",
-    confidenceScore: 92,
-    sourceType: "social",
-    sentiment: "threatening",
-    potentialReach: 2500,
-    detectedEntities: ["legal action", "negligence"],
-    url: "https://twitter.com/user/status/legal123"
-  },
-  {
-    id: "classified-2",
-    platform: "Facebook",
-    content: "Warning everyone about this business - they're scammers!",
-    date: "2024-01-15T14:30:00",
-    severity: "high",
-    status: "new",
-    threatType: "defamation",
-    confidenceScore: 88,
-    sourceType: "social",
-    sentiment: "threatening",
-    potentialReach: 1200,
-    detectedEntities: ["scam", "warning"],
-    url: "https://facebook.com/post/scam456"
-  }
-];
+    const totalMentions = alertsData.data?.length || 0;
+    const negativeSentiment = alertsData.data?.filter(item => item.sentiment < 0).length || 0;
+    const activeSources = sourcesData.data?.filter(item => item.active).length || 0;
+    const threatLevel = Math.round((negativeSentiment / totalMentions) * 100) || 0;
 
-export const mockSources: ContentSource[] = [
-  { 
-    id: '1',
-    name: 'Twitter', 
-    type: 'social',
-    status: 'critical', 
-    lastUpdate: '2 hours ago',
-    metrics: {
-      total: 120,
-      positive: 42,
-      negative: 78,
-      neutral: 0
-    },
-    positiveRatio: 35, 
-    total: 120, 
-    active: true,
-    lastUpdated: '2 hours ago',
-    mentionCount: 120,
-    sentiment: -15
-  },
-  { 
-    id: '2',
-    name: 'Facebook', 
-    type: 'social',
-    status: 'good', 
-    lastUpdate: '5 hours ago',
-    metrics: {
-      total: 230,
-      positive: 200,
-      negative: 30,
-      neutral: 0
-    },
-    positiveRatio: 87, 
-    total: 230, 
-    active: true,
-    lastUpdated: '5 hours ago',
-    mentionCount: 230,
-    sentiment: 25
+    return [
+      { 
+        id: "1", 
+        title: "Total Mentions", 
+        value: totalMentions, 
+        change: 0, 
+        icon: "trending-up", 
+        color: "blue", 
+        delta: 0, 
+        deltaType: "neutral" 
+      },
+      { 
+        id: "2", 
+        title: "Negative Sentiment", 
+        value: negativeSentiment, 
+        change: 0, 
+        icon: "trending-down", 
+        color: "red", 
+        delta: 0, 
+        deltaType: "neutral" 
+      },
+      { 
+        id: "3", 
+        title: "Active Sources", 
+        value: activeSources, 
+        change: 0, 
+        icon: "trending-up", 
+        color: "green", 
+        delta: 0, 
+        deltaType: "neutral" 
+      },
+      { 
+        id: "4", 
+        title: "Threat Level", 
+        value: threatLevel, 
+        change: 0, 
+        icon: "trending-down", 
+        color: "yellow", 
+        delta: 0, 
+        deltaType: "neutral" 
+      }
+    ];
+  } catch (error) {
+    console.error('Error fetching metrics:', error);
+    return [];
   }
-];
+};
 
-export const mockActions: ContentAction[] = [
-  { 
-    id: '1', 
-    type: 'removal',
-    description: 'Requested removal of negative review targeting Emma Smith at DataTech Corp',
-    timestamp: '3 hours ago', 
-    status: 'completed',
-    platform: 'Twitter', 
-    action: 'removal_requested', 
-    date: '3 hours ago'
-  }
-];
+// Remove all mock data exports
+export const mockAlerts: ContentAlert[] = [];
+export const mockClassifiedAlerts: ContentAlert[] = [];

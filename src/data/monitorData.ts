@@ -1,58 +1,38 @@
 
 import { ContentItem } from "@/types/monitor";
+import { supabase } from "@/integrations/supabase/client";
 
-export const mockContent: ContentItem[] = [
-  {
-    id: '1',
-    platform: 'Twitter',
-    type: 'post',
-    content: 'The worst experience I\'ve ever had with a company. Complete waste of money and time. #NeverAgain',
-    date: '2 hours ago',
-    sentiment: 'negative',
-    impact: 'high',
-    url: 'https://twitter.com/user/status/123456'
-  },
-  {
-    id: '2',
-    platform: 'Reddit',
-    type: 'comment',
-    content: 'Their customer service could be better, but overall the product works as advertised.',
-    date: '1 day ago',
-    sentiment: 'neutral',
-    impact: 'low',
-    url: 'https://reddit.com/r/subreddit/comments/123'
-  },
-  {
-    id: '3',
-    platform: 'Facebook',
-    type: 'post',
-    content: 'Very disappointed with the quality of the product I received. Not what I expected at all.',
-    date: '3 days ago',
-    sentiment: 'negative',
-    impact: 'medium',
-    url: 'https://facebook.com/post/123456'
-  },
-  {
-    id: '4',
-    platform: 'Yelp',
-    type: 'review',
-    content: 'One star service. The staff was rude and unprofessional. Will not be coming back!',
-    date: '1 week ago',
-    sentiment: 'negative',
-    impact: 'high',
-    url: 'https://yelp.com/biz/business/review/123456'
-  },
-  {
-    id: '5',
-    platform: 'Twitter',
-    type: 'post',
-    content: 'Actually had a great experience with their support team today. Problem solved quickly!',
-    date: '2 days ago',
-    sentiment: 'positive',
-    impact: 'low',
-    url: 'https://twitter.com/user/status/789012'
+export const fetchRealContent = async (): Promise<ContentItem[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('scan_results')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(20);
+    
+    if (error) {
+      console.error('Error fetching content:', error);
+      return [];
+    }
+    
+    return data.map(item => ({
+      id: item.id,
+      platform: item.platform,
+      type: 'post',
+      content: item.content,
+      date: new Date(item.created_at).toLocaleDateString(),
+      sentiment: item.sentiment > 0 ? 'positive' : item.sentiment < 0 ? 'negative' : 'neutral',
+      impact: item.severity as 'high' | 'medium' | 'low',
+      url: item.url || ''
+    }));
+  } catch (error) {
+    console.error('Error in fetchRealContent:', error);
+    return [];
   }
-];
+};
+
+// Remove mock data
+export const mockContent: ContentItem[] = [];
 
 export const getSentimentColor = (sentiment: string): string => {
   switch (sentiment) {

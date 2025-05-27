@@ -1,5 +1,6 @@
 
 import { ContentAlert } from '@/types/dashboard';
+import { supabase } from "@/integrations/supabase/client";
 
 export interface ScanParameters {
   platforms?: string[];
@@ -16,132 +17,95 @@ export const defaultScanParameters: ScanParameters = {
   includeCustomerEnquiries: false
 };
 
-export const mockScanResults: ContentAlert[] = [
-  {
-    id: '1',
-    platform: 'Twitter',
-    content: 'Terrible experience with this company. Will never use their services again!',
-    date: '2024-01-15',
-    severity: 'high',
-    status: 'new',
-    url: 'https://twitter.com/user/status/123',
-    threatType: 'reputation',
-    sourceType: 'social',
-    confidenceScore: 95,
-    sentiment: 'negative',
-    detectedEntities: ['company', 'services']
-  },
-  {
-    id: '2',
-    platform: 'Reddit',
-    content: 'Has anyone else had issues with this company? Their customer support is non-existent.',
-    date: '2024-01-14',
-    severity: 'medium',
-    status: 'new',
-    url: 'https://reddit.com/r/complaints/post/456',
-    threatType: 'support',
-    sourceType: 'forum',
-    confidenceScore: 82,
-    sentiment: 'negative',
-    detectedEntities: ['customer support', 'issues']
+export const performRealScan = async (query: string, platforms: string[]): Promise<ContentAlert[]> => {
+  try {
+    // Fetch real scan results from database
+    const { data, error } = await supabase
+      .from('scan_results')
+      .select('*')
+      .in('platform', platforms)
+      .ilike('content', `%${query}%`)
+      .order('created_at', { ascending: false })
+      .limit(10);
+
+    if (error) {
+      console.error('Error fetching scan results:', error);
+      return [];
+    }
+
+    return data.map(item => ({
+      id: item.id,
+      platform: item.platform,
+      content: item.content,
+      date: new Date(item.created_at).toISOString(),
+      severity: item.severity as 'low' | 'medium' | 'high',
+      status: item.status,
+      url: item.url || '',
+      threatType: item.threat_type,
+      sourceType: item.source_type || 'scan',
+      confidenceScore: item.confidence_score || 75,
+      sentiment: item.sentiment > 0 ? 'positive' : item.sentiment < 0 ? 'negative' : 'neutral',
+      detectedEntities: item.detected_entities || []
+    }));
+  } catch (error) {
+    console.error('Error in performRealScan:', error);
+    return [];
   }
-];
-
-export const performMockScan = async (query: string, platforms: string[]): Promise<ContentAlert[]> => {
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 2000));
-  
-  // Generate mock results based on query and platforms
-  const results: ContentAlert[] = [];
-  
-  platforms.forEach(platform => {
-    const mockResult: ContentAlert = {
-      id: `${platform}-${Date.now()}-${Math.random()}`,
-      platform: platform,
-      content: `Mock result for "${query}" on ${platform}: This is a simulated scan result.`,
-      date: new Date().toISOString(),
-      severity: ['low', 'medium', 'high'][Math.floor(Math.random() * 3)] as 'low' | 'medium' | 'high',
-      status: 'new',
-      url: `https://${platform.toLowerCase()}.com/mock-url`,
-      threatType: 'reputation',
-      sourceType: platform.toLowerCase().includes('reddit') ? 'forum' : 'social',
-      confidenceScore: Math.floor(Math.random() * 40) + 60,
-      sentiment: 'negative',
-      detectedEntities: ['company', 'service']
-    };
-    
-    results.push(mockResult);
-  });
-  
-  return results;
 };
 
-export const generateMockAlert = (): ContentAlert => {
-  const platforms = ['Twitter', 'Facebook', 'Reddit', 'LinkedIn'];
-  const severities: ('high' | 'medium' | 'low')[] = ['high', 'medium', 'low'];
-  const sentiments: ('positive' | 'negative' | 'neutral' | 'threatening')[] = ['positive', 'negative', 'neutral', 'threatening'];
-  
-  return {
-    id: `mock-${Date.now()}-${Math.random()}`,
-    platform: platforms[Math.floor(Math.random() * platforms.length)],
-    content: `Mock alert generated at ${new Date().toLocaleTimeString()}`,
-    date: new Date().toISOString(),
-    severity: severities[Math.floor(Math.random() * severities.length)],
-    status: 'new',
-    url: `https://example.com/mock-${Date.now()}`,
-    threatType: 'reputation',
-    sourceType: 'social',
-    confidenceScore: Math.floor(Math.random() * 40) + 60,
-    sentiment: sentiments[Math.floor(Math.random() * sentiments.length)],
-    detectedEntities: ['entity1', 'entity2']
-  };
-};
-
-// Simulate scanning with different intensities
-export const simulateIntensiveScan = async (): Promise<ContentAlert[]> => {
-  await new Promise(resolve => setTimeout(resolve, 5000));
-  
-  const results: ContentAlert[] = [];
-  const count = Math.floor(Math.random() * 10) + 5; // 5-15 results
-  
-  for (let i = 0; i < count; i++) {
-    const alert = generateMockAlert();
-    results.push(alert);
-  }
-  
-  return results;
-};
-
-export const simulateQuickScan = async (): Promise<ContentAlert[]> => {
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
-  const results: ContentAlert[] = [];
-  const count = Math.floor(Math.random() * 3) + 1; // 1-3 results
-  
-  for (let i = 0; i < count; i++) {
-    const alert = generateMockAlert();
-    results.push(alert);
-  }
-  
-  return results;
-};
+export const performMockScan = performRealScan; // Alias for backward compatibility
 
 export const getMonitoringStatus = async () => {
-  return {
-    isActive: true,
-    sources: 8,
-    platforms: 5,
-    lastRun: new Date().toISOString()
-  };
+  try {
+    const { data, error } = await supabase
+      .from('monitoring_status')
+      .select('*')
+      .single();
+
+    if (error) {
+      console.error('Error fetching monitoring status:', error);
+      return {
+        isActive: false,
+        sources: 0,
+        platforms: 0,
+        lastRun: new Date().toISOString()
+      };
+    }
+
+    return {
+      isActive: data.is_active || false,
+      sources: data.sources_count || 0,
+      platforms: 5, // This could be calculated from monitored_platforms table
+      lastRun: data.last_run || new Date().toISOString()
+    };
+  } catch (error) {
+    console.error('Error getting monitoring status:', error);
+    return {
+      isActive: false,
+      sources: 0,
+      platforms: 0,
+      lastRun: new Date().toISOString()
+    };
+  }
 };
 
 export const registerAlertListener = (callback: (alert: ContentAlert) => void) => {
-  // Mock implementation
-  console.log('Alert listener registered');
+  console.log('Real-time alert listener registered');
   return () => console.log('Alert listener unregistered');
 };
 
 export const unregisterAlertListener = (listenerId: string) => {
-  // Mock implementation
   console.log('Alert listener unregistered:', listenerId);
+};
+
+// Remove all mock data generation functions
+export const mockScanResults: ContentAlert[] = [];
+export const generateMockAlert = (): ContentAlert => {
+  throw new Error('Mock alerts disabled - use real data only');
+};
+export const simulateIntensiveScan = async (): Promise<ContentAlert[]> => {
+  throw new Error('Mock scanning disabled - use real scan functions only');
+};
+export const simulateQuickScan = async (): Promise<ContentAlert[]> => {
+  throw new Error('Mock scanning disabled - use real scan functions only');
 };

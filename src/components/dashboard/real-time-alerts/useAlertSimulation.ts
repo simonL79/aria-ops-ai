@@ -1,34 +1,52 @@
+
 import { useState, useEffect } from 'react';
 import { ContentAlert } from '@/types/dashboard';
-
-const generateMockAlert = (): ContentAlert => {
-  const platforms = ['Twitter', 'Facebook', 'Reddit', 'LinkedIn'];
-  const severities: ('high' | 'medium' | 'low')[] = ['high', 'medium', 'low'];
-  const sentiments: ('positive' | 'negative' | 'neutral' | 'threatening')[] = ['positive', 'negative', 'neutral', 'threatening'];
-  
-  return {
-    id: `alert-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-    platform: platforms[Math.floor(Math.random() * platforms.length)],
-    content: `Real-time alert detected at ${new Date().toLocaleTimeString()}`,
-    date: new Date().toISOString(),
-    severity: severities[Math.floor(Math.random() * severities.length)],
-    status: 'new',
-    url: `https://example.com/alert/${Math.random().toString(36).substring(2, 9)}`,
-    sourceType: 'social',
-    confidenceScore: Math.floor(Math.random() * 40) + 60,
-    sentiment: sentiments[Math.floor(Math.random() * sentiments.length)],
-    detectedEntities: ['entity1', 'entity2'],
-    category: 'Real-time Detection'
-  };
-};
+import { supabase } from "@/integrations/supabase/client";
 
 const useAlertSimulation = (interval: number = 60000) => {
   const [alert, setAlert] = useState<ContentAlert | null>(null);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setAlert(generateMockAlert());
-    }, interval);
+    const fetchLatestAlert = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('scan_results')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(1);
+        
+        if (error) {
+          console.error('Error fetching latest alert:', error);
+          return;
+        }
+
+        if (data && data.length > 0) {
+          const item = data[0];
+          setAlert({
+            id: item.id,
+            platform: item.platform,
+            content: item.content,
+            date: new Date(item.created_at).toISOString(),
+            severity: item.severity as 'high' | 'medium' | 'low',
+            status: item.status,
+            url: item.url || '',
+            sourceType: item.source_type || 'scan',
+            confidenceScore: item.confidence_score || 75,
+            sentiment: item.sentiment > 0 ? 'positive' : item.sentiment < 0 ? 'negative' : 'neutral',
+            detectedEntities: item.detected_entities || [],
+            category: 'Real-time Detection'
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching real alert:', error);
+      }
+    };
+
+    // Fetch immediately
+    fetchLatestAlert();
+
+    // Set up interval to check for new alerts
+    const timer = setInterval(fetchLatestAlert, interval);
 
     return () => clearInterval(timer);
   }, [interval]);

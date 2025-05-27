@@ -1,13 +1,6 @@
 
 import { useState, useEffect, useCallback } from "react";
 import {
-  getMetrics,
-  getSources,
-  getRecentActivity,
-  getSeoContent,
-  getToneStyles,
-} from "@/services/api/dashboardApiService";
-import {
   ContentAlert,
   ContentSource,
   ContentAction,
@@ -15,7 +8,12 @@ import {
   ResponseToneStyle,
   SeoContent as SeoContentType,
 } from "@/types/dashboard";
-import { mockAlerts, mockClassifiedAlerts } from "@/data/mockDashboardData";
+import { 
+  fetchRealAlerts, 
+  fetchRealSources, 
+  fetchRealActions, 
+  fetchRealMetrics 
+} from "@/data/mockDashboardData";
 
 interface DashboardData {
   metrics: MetricValue[];
@@ -38,12 +36,10 @@ interface DashboardData {
 const useDashboardData = (): DashboardData => {
   const [metrics, setMetrics] = useState<MetricValue[]>([]);
   const [alerts, setAlerts] = useState<ContentAlert[]>([]);
-  const [classifiedAlerts, setClassifiedAlerts] = useState<ContentAlert[]>(
-    mockClassifiedAlerts
-  );
+  const [classifiedAlerts, setClassifiedAlerts] = useState<ContentAlert[]>([]);
   const [sources, setSources] = useState<ContentSource[]>([]);
   const [actions, setActions] = useState<ContentAction[]>([]);
-  const [toneStyles, setToneStyles] = useState<ResponseToneStyle[]>([]);
+  const [toneStyles, setToneStyles] = useState<ResponseToneStyle[]>(['professional', 'casual', 'empathetic', 'assertive']);
   const [recentActivity, setRecentActivity] = useState<ContentAction[]>([]);
   const [seoContent, setSeoContent] = useState<SeoContentType[]>([]);
   const [negativeContent, setNegativeContent] = useState<number>(0);
@@ -57,36 +53,32 @@ const useDashboardData = (): DashboardData => {
     try {
       const [
         metricsData,
+        alertsData,
         sourcesData,
         actionsData,
-        toneStylesData,
-        recentActivityData,
-        seoContentData,
       ] = await Promise.all([
-        getMetrics(),
-        getSources(),
-        getRecentActivity(),
-        getToneStyles(),
-        getRecentActivity(),
-        getSeoContent(),
+        fetchRealMetrics(),
+        fetchRealAlerts(),
+        fetchRealSources(),
+        fetchRealActions(),
       ]);
 
       setMetrics(metricsData);
+      setAlerts(alertsData);
+      setClassifiedAlerts(alertsData);
       setSources(sourcesData);
       setActions(actionsData);
-      setToneStyles(toneStylesData);
-      setRecentActivity(recentActivityData);
-      setSeoContent(seoContentData);
-      setAlerts(mockAlerts);
+      setRecentActivity(actionsData);
+      setSeoContent([]);
 
-      // Calculate content metrics
-      const negative = mockAlerts.filter(
+      // Calculate content metrics from real data
+      const negative = alertsData.filter(
         (alert) => alert.sentiment === "negative"
       ).length;
-      const positive = mockAlerts.filter(
+      const positive = alertsData.filter(
         (alert) => alert.sentiment === "positive"
       ).length;
-      const neutral = mockAlerts.filter(
+      const neutral = alertsData.filter(
         (alert) => alert.sentiment === "neutral"
       ).length;
 
@@ -128,6 +120,7 @@ const useDashboardData = (): DashboardData => {
     }));
     
     setAlerts(prev => [...newAlerts, ...prev]);
+    setClassifiedAlerts(prev => [...newAlerts, ...prev]);
     
     const newNegativeCount = scanResults.filter((r: any) => r.severity === 'high').length;
     setNegativeContent(prev => prev + newNegativeCount);
