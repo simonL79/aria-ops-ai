@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -133,7 +132,14 @@ export const getReportExports = async (): Promise<ReportExport[]> => {
       return [];
     }
 
-    return data || [];
+    // Cast the data to match our interface types
+    const typedData: ReportExport[] = (data || []).map(item => ({
+      ...item,
+      export_type: item.export_type as 'pdf' | 'email' | 'slack',
+      status: item.status as 'queued' | 'processing' | 'sent' | 'error'
+    }));
+
+    return typedData;
   } catch (error) {
     console.error('Error in getReportExports:', error);
     return [];
