@@ -280,6 +280,7 @@ export type Database = {
           contactemail: string
           contactname: string
           created_at: string
+          eidetic_enabled: boolean | null
           id: string
           industry: string
           keywordtargets: string | null
@@ -293,6 +294,7 @@ export type Database = {
           contactemail: string
           contactname: string
           created_at?: string
+          eidetic_enabled?: boolean | null
           id?: string
           industry: string
           keywordtargets?: string | null
@@ -306,6 +308,7 @@ export type Database = {
           contactemail?: string
           contactname?: string
           created_at?: string
+          eidetic_enabled?: boolean | null
           id?: string
           industry?: string
           keywordtargets?: string | null
@@ -1144,6 +1147,38 @@ export type Database = {
         }
         Relationships: []
       }
+      eidetic_decay_history: {
+        Row: {
+          decay_score: number | null
+          footprint_id: string | null
+          id: string
+          recorded_at: string | null
+          relevancy_score: number | null
+        }
+        Insert: {
+          decay_score?: number | null
+          footprint_id?: string | null
+          id?: string
+          recorded_at?: string | null
+          relevancy_score?: number | null
+        }
+        Update: {
+          decay_score?: number | null
+          footprint_id?: string | null
+          id?: string
+          recorded_at?: string | null
+          relevancy_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "eidetic_decay_history_footprint_id_fkey"
+            columns: ["footprint_id"]
+            isOneToOne: false
+            referencedRelation: "memory_footprints"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_batch_scans: {
         Row: {
           company_id: string | null
@@ -1820,6 +1855,168 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      memory_decay_profiles: {
+        Row: {
+          action_status: string | null
+          created_at: string | null
+          decay_trigger: string | null
+          emotional_charge: string | null
+          footprint_id: string | null
+          id: string
+          legal_outcome: string | null
+          recommended_action: string | null
+          relevancy_score: number | null
+          scheduled_for: string | null
+          social_velocity: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          action_status?: string | null
+          created_at?: string | null
+          decay_trigger?: string | null
+          emotional_charge?: string | null
+          footprint_id?: string | null
+          id?: string
+          legal_outcome?: string | null
+          recommended_action?: string | null
+          relevancy_score?: number | null
+          scheduled_for?: string | null
+          social_velocity?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          action_status?: string | null
+          created_at?: string | null
+          decay_trigger?: string | null
+          emotional_charge?: string | null
+          footprint_id?: string | null
+          id?: string
+          legal_outcome?: string | null
+          recommended_action?: string | null
+          relevancy_score?: number | null
+          scheduled_for?: string | null
+          social_velocity?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memory_decay_profiles_footprint_id_fkey"
+            columns: ["footprint_id"]
+            isOneToOne: false
+            referencedRelation: "memory_footprints"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      memory_footprints: {
+        Row: {
+          ai_memory_tags: string[] | null
+          client_id: string | null
+          content_url: string
+          created_at: string | null
+          decay_score: number | null
+          discovered_at: string | null
+          first_seen: string | null
+          id: string
+          is_active: boolean | null
+          last_seen: string | null
+          memory_context: string | null
+          memory_type: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          ai_memory_tags?: string[] | null
+          client_id?: string | null
+          content_url: string
+          created_at?: string | null
+          decay_score?: number | null
+          discovered_at?: string | null
+          first_seen?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_seen?: string | null
+          memory_context?: string | null
+          memory_type?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          ai_memory_tags?: string[] | null
+          client_id?: string | null
+          content_url?: string
+          created_at?: string | null
+          decay_score?: number | null
+          discovered_at?: string | null
+          first_seen?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_seen?: string | null
+          memory_context?: string | null
+          memory_type?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memory_footprints_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      memory_recalibrators: {
+        Row: {
+          asset_url: string | null
+          content_excerpt: string | null
+          created_at: string | null
+          created_by: string | null
+          deployed_at: string | null
+          effectiveness_score: number | null
+          footprint_id: string | null
+          full_text: string | null
+          id: string
+          is_deployed: boolean | null
+          recalibration_type: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          asset_url?: string | null
+          content_excerpt?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          deployed_at?: string | null
+          effectiveness_score?: number | null
+          footprint_id?: string | null
+          full_text?: string | null
+          id?: string
+          is_deployed?: boolean | null
+          recalibration_type?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          asset_url?: string | null
+          content_excerpt?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          deployed_at?: string | null
+          effectiveness_score?: number | null
+          footprint_id?: string | null
+          full_text?: string | null
+          id?: string
+          is_deployed?: boolean | null
+          recalibration_type?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memory_recalibrators_footprint_id_fkey"
+            columns: ["footprint_id"]
+            isOneToOne: false
+            referencedRelation: "memory_footprints"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       monitored_platforms: {
         Row: {
@@ -3025,6 +3222,32 @@ export type Database = {
         }
         Relationships: []
       }
+      eidetic_summary: {
+        Row: {
+          action_status: string | null
+          asset_url: string | null
+          client_id: string | null
+          client_name: string | null
+          content_url: string | null
+          decay_score: number | null
+          effectiveness_score: number | null
+          first_seen: string | null
+          last_seen: string | null
+          memory_type: string | null
+          recommended_action: string | null
+          relevancy_score: number | null
+          scheduled_for: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memory_footprints_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_risk_summary: {
         Row: {
           active_batches: number | null
@@ -3226,6 +3449,15 @@ export type Database = {
       column_exists: {
         Args: { p_table_name: string; p_column_name: string }
         Returns: boolean
+      }
+      generate_decay_score: {
+        Args: {
+          relevancy: number
+          velocity: number
+          first_seen: string
+          now_time?: string
+        }
+        Returns: number
       }
       get_active_case_dashboard: {
         Args: Record<PropertyKey, never>
