@@ -38,7 +38,19 @@ class DriftAlertService {
         return [];
       }
 
-      return data || [];
+      // Transform the data to match our interface
+      return (data || []).map(item => ({
+        entity_name: item.entity_name,
+        platform: item.platform,
+        drift_score: item.drift_score,
+        trend_direction: item.trend_direction,
+        detected_at: item.detected_at,
+        key_changes: Array.isArray(item.key_changes) 
+          ? item.key_changes 
+          : typeof item.key_changes === 'string' 
+            ? JSON.parse(item.key_changes) 
+            : []
+      }));
     } catch (error) {
       console.error('Error in checkForDriftAlerts:', error);
       return [];
@@ -158,24 +170,10 @@ class DriftAlertService {
       driftAlerts.slice(0, 5).forEach(alert => {
         blocks.push({
           type: "section",
-          fields: [
-            {
-              type: "mrkdwn",
-              text: `*Entity:* ${alert.entity_name}`
-            },
-            {
-              type: "mrkdwn",
-              text: `*Platform:* ${alert.platform}`
-            },
-            {
-              type: "mrkdwn",
-              text: `*Drift Score:* ${alert.drift_score.toFixed(2)}`
-            },
-            {
-              type: "mrkdwn",
-              text: `*Trend:* ${alert.trend_direction}`
-            }
-          ]
+          text: {
+            type: "mrkdwn",
+            text: `*Entity:* ${alert.entity_name}\n*Platform:* ${alert.platform}\n*Drift Score:* ${alert.drift_score.toFixed(2)}\n*Trend:* ${alert.trend_direction}`
+          }
         });
       });
     }
@@ -192,24 +190,10 @@ class DriftAlertService {
       sentimentAlerts.slice(0, 5).forEach(alert => {
         blocks.push({
           type: "section",
-          fields: [
-            {
-              type: "mrkdwn",
-              text: `*Entity:* ${alert.entity_name}`
-            },
-            {
-              type: "mrkdwn",
-              text: `*Platform:* ${alert.platform}`
-            },
-            {
-              type: "mrkdwn",
-              text: `*Change:* ${alert.delta_score.toFixed(2)}`
-            },
-            {
-              type: "mrkdwn",
-              text: `*Time:* ${new Date(alert.measurement_date).toLocaleString()}`
-            }
-          ]
+          text: {
+            type: "mrkdwn",
+            text: `*Entity:* ${alert.entity_name}\n*Platform:* ${alert.platform}\n*Change:* ${alert.delta_score.toFixed(2)}\n*Time:* ${new Date(alert.measurement_date).toLocaleString()}`
+          }
         });
       });
     }
