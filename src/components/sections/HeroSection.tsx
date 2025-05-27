@@ -19,9 +19,9 @@ const HeroSection = () => {
         <p className="text-xl md:text-2xl mb-10 max-w-2xl mx-auto leading-relaxed text-white text-center">
           ARIA is your real-time Reputation NOC — a centralized threat intelligence hub built for rapid digital risk response.
         </p>
-        <div className="flex justify-center">
-          <Button asChild size="lg" className="bg-white text-premium-black px-8 py-7 text-lg font-semibold rounded-md shadow-lg hover:bg-gray-200 transition-all duration-300 hover:shadow-xl">
-            <Link to="/scan" className="flex items-center gap-2">
+        <div className="flex justify-center w-full">
+          <Button asChild size="lg" className="w-full max-w-md bg-white text-premium-black px-8 py-7 text-lg font-semibold rounded-md shadow-lg hover:bg-gray-200 transition-all duration-300 hover:shadow-xl mx-auto">
+            <Link to="/scan" className="flex items-center justify-center gap-2">
               Enter Command Center <ArrowRight className="w-5 h-5" />
             </Link>
           </Button>
