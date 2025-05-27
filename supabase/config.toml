@@ -47,3 +47,7 @@ schedule = "0 */2 * * *"
 verify_jwt = false
 # Set up a cron job to run the YouTube RSS scraper daily at 8 AM UTC
 schedule = "0 8 * * *"
+[functions.slack-alert]
+verify_jwt = false
+[functions.executive-reports]
+verify_jwt = false

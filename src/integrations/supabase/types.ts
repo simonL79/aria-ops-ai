@@ -117,6 +117,54 @@ export type Database = {
         }
         Relationships: []
       }
+      case_timelines: {
+        Row: {
+          case_id: string | null
+          created_at: string | null
+          created_by: string | null
+          event_description: string | null
+          event_title: string
+          event_type: string
+          id: string
+          metadata: Json | null
+        }
+        Insert: {
+          case_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          event_description?: string | null
+          event_title: string
+          event_type: string
+          id?: string
+          metadata?: Json | null
+        }
+        Update: {
+          case_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          event_description?: string | null
+          event_title?: string
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "case_timelines_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "active_case_dashboard"
+            referencedColumns: ["case_id"]
+          },
+          {
+            foreignKeyName: "case_timelines_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "case_threads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clean_launch_targets: {
         Row: {
           company_name: string
@@ -415,6 +463,102 @@ export type Database = {
           },
         ]
       }
+      entity_threat_history: {
+        Row: {
+          average_sentiment: number | null
+          entity_name: string
+          entity_type: string
+          first_detected: string | null
+          id: string
+          last_updated: string | null
+          platform: string
+          resolution_status: string | null
+          severity: string | null
+          threat_content: string | null
+          threat_id: string | null
+          threat_type: string | null
+          total_mentions: number | null
+        }
+        Insert: {
+          average_sentiment?: number | null
+          entity_name: string
+          entity_type: string
+          first_detected?: string | null
+          id?: string
+          last_updated?: string | null
+          platform: string
+          resolution_status?: string | null
+          severity?: string | null
+          threat_content?: string | null
+          threat_id?: string | null
+          threat_type?: string | null
+          total_mentions?: number | null
+        }
+        Update: {
+          average_sentiment?: number | null
+          entity_name?: string
+          entity_type?: string
+          first_detected?: string | null
+          id?: string
+          last_updated?: string | null
+          platform?: string
+          resolution_status?: string | null
+          severity?: string | null
+          threat_content?: string | null
+          threat_id?: string | null
+          threat_type?: string | null
+          total_mentions?: number | null
+        }
+        Relationships: []
+      }
+      executive_reports: {
+        Row: {
+          created_at: string | null
+          executive_summary: string
+          generated_by: string | null
+          id: string
+          key_metrics: Json | null
+          period_end: string
+          period_start: string
+          recommendations: Json | null
+          report_type: string
+          risk_score: number | null
+          status: string | null
+          threat_highlights: Json | null
+          title: string
+        }
+        Insert: {
+          created_at?: string | null
+          executive_summary: string
+          generated_by?: string | null
+          id?: string
+          key_metrics?: Json | null
+          period_end: string
+          period_start: string
+          recommendations?: Json | null
+          report_type?: string
+          risk_score?: number | null
+          status?: string | null
+          threat_highlights?: Json | null
+          title: string
+        }
+        Update: {
+          created_at?: string | null
+          executive_summary?: string
+          generated_by?: string | null
+          id?: string
+          key_metrics?: Json | null
+          period_end?: string
+          period_start?: string
+          recommendations?: Json | null
+          report_type?: string
+          risk_score?: number | null
+          status?: string | null
+          threat_highlights?: Json | null
+          title?: string
+        }
+        Relationships: []
+      }
       generated_responses: {
         Row: {
           client_id: string | null
@@ -615,6 +759,45 @@ export type Database = {
         }
         Relationships: []
       }
+      narrative_drift_tracking: {
+        Row: {
+          created_at: string | null
+          current_narrative: string
+          detected_at: string | null
+          drift_score: number | null
+          entity_name: string
+          id: string
+          key_changes: Json | null
+          original_narrative: string
+          platform: string
+          trend_direction: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          current_narrative: string
+          detected_at?: string | null
+          drift_score?: number | null
+          entity_name: string
+          id?: string
+          key_changes?: Json | null
+          original_narrative: string
+          platform: string
+          trend_direction?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          current_narrative?: string
+          detected_at?: string | null
+          drift_score?: number | null
+          entity_name?: string
+          id?: string
+          key_changes?: Json | null
+          original_narrative?: string
+          platform?: string
+          trend_direction?: string | null
+        }
+        Relationships: []
+      }
       reputation_scan_submissions: {
         Row: {
           admin_notes: string | null
@@ -622,8 +805,11 @@ export type Database = {
           email: string
           full_name: string
           id: string
+          job_id: string | null
           keywords: string
           phone: string | null
+          platform: string | null
+          scan_type: string | null
           status: Database["public"]["Enums"]["reputation_scan_status"]
           updated_at: string
         }
@@ -633,8 +819,11 @@ export type Database = {
           email: string
           full_name: string
           id?: string
+          job_id?: string | null
           keywords: string
           phone?: string | null
+          platform?: string | null
+          scan_type?: string | null
           status?: Database["public"]["Enums"]["reputation_scan_status"]
           updated_at?: string
         }
@@ -644,10 +833,58 @@ export type Database = {
           email?: string
           full_name?: string
           id?: string
+          job_id?: string | null
           keywords?: string
           phone?: string | null
+          platform?: string | null
+          scan_type?: string | null
           status?: Database["public"]["Enums"]["reputation_scan_status"]
           updated_at?: string
+        }
+        Relationships: []
+      }
+      response_effectiveness: {
+        Row: {
+          ai_confidence_score: number | null
+          analyst_rating: number | null
+          created_at: string | null
+          effectiveness_score: number | null
+          engagement_metrics: Json | null
+          id: string
+          measured_at: string | null
+          response_id: string
+          sentiment_improvement: number | null
+          strategy_type: string
+          threat_id: string | null
+          time_to_resolution: unknown | null
+        }
+        Insert: {
+          ai_confidence_score?: number | null
+          analyst_rating?: number | null
+          created_at?: string | null
+          effectiveness_score?: number | null
+          engagement_metrics?: Json | null
+          id?: string
+          measured_at?: string | null
+          response_id: string
+          sentiment_improvement?: number | null
+          strategy_type: string
+          threat_id?: string | null
+          time_to_resolution?: unknown | null
+        }
+        Update: {
+          ai_confidence_score?: number | null
+          analyst_rating?: number | null
+          created_at?: string | null
+          effectiveness_score?: number | null
+          engagement_metrics?: Json | null
+          id?: string
+          measured_at?: string | null
+          response_id?: string
+          sentiment_improvement?: number | null
+          strategy_type?: string
+          threat_id?: string | null
+          time_to_resolution?: unknown | null
         }
         Relationships: []
       }
@@ -684,6 +921,30 @@ export type Database = {
           notes?: string | null
           response_type?: string | null
           source_table_id?: string | null
+        }
+        Relationships: []
+      }
+      scan_jobs: {
+        Row: {
+          id: string
+          notes: string | null
+          status: string
+          triggered_at: string | null
+          triggered_by: string | null
+        }
+        Insert: {
+          id?: string
+          notes?: string | null
+          status?: string
+          triggered_at?: string | null
+          triggered_by?: string | null
+        }
+        Update: {
+          id?: string
+          notes?: string | null
+          status?: string
+          triggered_at?: string | null
+          triggered_by?: string | null
         }
         Relationships: []
       }
@@ -797,6 +1058,45 @@ export type Database = {
           },
         ]
       }
+      sentiment_tracking: {
+        Row: {
+          created_at: string | null
+          delta_score: number | null
+          entity_name: string | null
+          id: string
+          measurement_date: string | null
+          platform: string
+          response_id: string | null
+          sentiment_after: number | null
+          sentiment_before: number | null
+          threat_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          delta_score?: number | null
+          entity_name?: string | null
+          id?: string
+          measurement_date?: string | null
+          platform: string
+          response_id?: string | null
+          sentiment_after?: number | null
+          sentiment_before?: number | null
+          threat_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          delta_score?: number | null
+          entity_name?: string | null
+          id?: string
+          measurement_date?: string | null
+          platform?: string
+          response_id?: string | null
+          sentiment_after?: number | null
+          sentiment_before?: number | null
+          threat_id?: string | null
+        }
+        Relationships: []
+      }
       system_health_checks: {
         Row: {
           check_type: string
@@ -804,6 +1104,7 @@ export type Database = {
           id: string
           message: string | null
           metadata: Json | null
+          platform: string | null
           status: string
         }
         Insert: {
@@ -812,6 +1113,7 @@ export type Database = {
           id?: string
           message?: string | null
           metadata?: Json | null
+          platform?: string | null
           status: string
         }
         Update: {
@@ -820,6 +1122,7 @@ export type Database = {
           id?: string
           message?: string | null
           metadata?: Json | null
+          platform?: string | null
           status?: string
         }
         Relationships: []
@@ -847,6 +1150,19 @@ export type Database = {
       }
     }
     Views: {
+      active_case_dashboard: {
+        Row: {
+          assigned_to: string | null
+          case_id: string | null
+          last_activity: string | null
+          last_case_update: string | null
+          log_count: number | null
+          priority: string | null
+          status: string | null
+          title: string | null
+        }
+        Relationships: []
+      }
       clean_launch_dashboard: {
         Row: {
           company_name: string | null
@@ -1007,6 +1323,18 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
         }
         Returns: boolean
+      }
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      refresh_active_case_dashboard: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      run_global_scan: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       run_scan: {
         Args: { scan_depth?: string }
