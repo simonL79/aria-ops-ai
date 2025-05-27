@@ -2,20 +2,20 @@
 import React from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, Edit, Eye } from 'lucide-react';
+import { Users, Building2, UserCheck } from 'lucide-react';
 
-const BlogPage = () => {
+const ClientsPage = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">
-              <FileText className="h-8 w-8" />
-              Content Management
+              <Users className="h-8 w-8" />
+              Client Management
             </h1>
             <p className="text-muted-foreground mt-1">
-              Manage blog posts and content strategy
+              Manage client accounts and reputation monitoring
             </p>
           </div>
         </div>
@@ -24,36 +24,36 @@ const BlogPage = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Edit className="h-5 w-5" />
-                Draft Posts
+                <Building2 className="h-5 w-5" />
+                Active Clients
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">5</div>
-              <p className="text-xs text-muted-foreground">Ready for review</p>
+              <div className="text-2xl font-bold">12</div>
+              <p className="text-xs text-muted-foreground">Monitored accounts</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Eye className="h-5 w-5" />
-                Published
+                <UserCheck className="h-5 w-5" />
+                Premium Clients
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">47</div>
-              <p className="text-xs text-muted-foreground">Live articles</p>
+              <div className="text-2xl font-bold">8</div>
+              <p className="text-xs text-muted-foreground">Elite tier</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle>Engagement</CardTitle>
+              <CardTitle>Response Rate</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">89%</div>
-              <p className="text-xs text-muted-foreground">Average read rate</p>
+              <div className="text-2xl font-bold text-green-600">97%</div>
+              <p className="text-xs text-muted-foreground">Threat resolution</p>
             </CardContent>
           </Card>
         </div>
@@ -62,4 +62,4 @@ const BlogPage = () => {
   );
 };
 
-export default BlogPage;
+export default ClientsPage;

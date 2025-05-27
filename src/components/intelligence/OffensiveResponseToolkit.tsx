@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -131,10 +130,27 @@ const OffensiveResponseToolkit = ({ selectedThreats = [], threatId }: OffensiveR
       if (simulations.error) throw simulations.error;
       if (disruptions.error) throw disruptions.error;
 
-      setCounterNarratives(narratives.data || []);
-      setDiversionCampaigns(campaigns.data || []);
-      setInfluenceSimulations(simulations.data || []);
-      setActorDisruptions(disruptions.data || []);
+      // Type-safe data mapping with proper validation
+      setCounterNarratives((narratives.data || []).map(item => ({
+        ...item,
+        tone: item.tone as CounterNarrative['tone'],
+        status: item.status as CounterNarrative['status']
+      })));
+      
+      setDiversionCampaigns((campaigns.data || []).map(item => ({
+        ...item,
+        content_type: item.content_type as DiversionCampaign['content_type']
+      })));
+      
+      setInfluenceSimulations((simulations.data || []).map(item => ({
+        ...item,
+        scenario: item.scenario as InfluenceSimulation['scenario']
+      })));
+      
+      setActorDisruptions((disruptions.data || []).map(item => ({
+        ...item,
+        reason: item.reason as ActorDisruption['reason']
+      })));
     } catch (error) {
       console.error('Failed to load offensive toolkit data:', error);
       toast.error('Failed to load data');

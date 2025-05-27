@@ -2,20 +2,20 @@
 import React from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, Edit, Eye } from 'lucide-react';
+import { TrendingUp, Search, AlertTriangle } from 'lucide-react';
 
-const BlogPage = () => {
+const ReputationScanPage = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">
-              <FileText className="h-8 w-8" />
-              Content Management
+              <TrendingUp className="h-8 w-8" />
+              Reputation Scanning
             </h1>
             <p className="text-muted-foreground mt-1">
-              Manage blog posts and content strategy
+              Comprehensive reputation analysis and monitoring
             </p>
           </div>
         </div>
@@ -24,36 +24,36 @@ const BlogPage = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Edit className="h-5 w-5" />
-                Draft Posts
+                <Search className="h-5 w-5" />
+                Active Scans
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">5</div>
-              <p className="text-xs text-muted-foreground">Ready for review</p>
+              <div className="text-2xl font-bold">12</div>
+              <p className="text-xs text-muted-foreground">Running now</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Eye className="h-5 w-5" />
-                Published
+                <AlertTriangle className="h-5 w-5" />
+                Alerts Found
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">47</div>
-              <p className="text-xs text-muted-foreground">Live articles</p>
+              <div className="text-2xl font-bold">7</div>
+              <p className="text-xs text-muted-foreground">Require attention</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle>Engagement</CardTitle>
+              <CardTitle>Health Score</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">89%</div>
-              <p className="text-xs text-muted-foreground">Average read rate</p>
+              <div className="text-2xl font-bold text-green-600">87%</div>
+              <p className="text-xs text-muted-foreground">Overall reputation</p>
             </CardContent>
           </Card>
         </div>
@@ -62,4 +62,4 @@ const BlogPage = () => {
   );
 };
 
-export default BlogPage;
+export default ReputationScanPage;

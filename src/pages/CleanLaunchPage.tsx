@@ -2,20 +2,20 @@
 import React from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, Edit, Eye } from 'lucide-react';
+import { Building2, Rocket, CheckCircle } from 'lucide-react';
 
-const BlogPage = () => {
+const CleanLaunchPage = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">
-              <FileText className="h-8 w-8" />
-              Content Management
+              <Building2 className="h-8 w-8" />
+              Clean Launch Protocol
             </h1>
             <p className="text-muted-foreground mt-1">
-              Manage blog posts and content strategy
+              Pre-launch reputation assessment and protection
             </p>
           </div>
         </div>
@@ -24,36 +24,36 @@ const BlogPage = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Edit className="h-5 w-5" />
-                Draft Posts
+                <Rocket className="h-5 w-5" />
+                Active Launches
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">5</div>
-              <p className="text-xs text-muted-foreground">Ready for review</p>
+              <div className="text-2xl font-bold">3</div>
+              <p className="text-xs text-muted-foreground">In progress</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Eye className="h-5 w-5" />
-                Published
+                <CheckCircle className="h-5 w-5" />
+                Completed
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">47</div>
-              <p className="text-xs text-muted-foreground">Live articles</p>
+              <div className="text-2xl font-bold">28</div>
+              <p className="text-xs text-muted-foreground">Successful launches</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle>Engagement</CardTitle>
+              <CardTitle>Success Rate</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">89%</div>
-              <p className="text-xs text-muted-foreground">Average read rate</p>
+              <div className="text-2xl font-bold text-green-600">100%</div>
+              <p className="text-xs text-muted-foreground">Clean launches</p>
             </CardContent>
           </Card>
         </div>
@@ -62,4 +62,4 @@ const BlogPage = () => {
   );
 };
 
-export default BlogPage;
+export default CleanLaunchPage;
