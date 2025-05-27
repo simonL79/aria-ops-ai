@@ -1,31 +1,12 @@
-
 import React from 'react';
+import PublicLayout from "@/components/layout/PublicLayout";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Shield, Users, Award, MapPin, Mail, Globe } from 'lucide-react';
+import { Shield, Users, Award, MapPin, Mail, Globe, TrendingUp } from 'lucide-react';
 
 const AboutPage = () => {
   return (
-    <div className="bg-white text-gray-900 font-sans min-h-screen">
-      {/* Header */}
-      <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center justify-between">
-          <div className="flex items-center gap-2">
-            <a href="/" className="flex items-center space-x-2">
-              <Shield className="h-6 w-6 text-primary" />
-              <span className="font-bold text-xl">A.R.I.A.™</span>
-            </a>
-          </div>
-          
-          {/* Navigation */}
-          <nav className="hidden md:flex items-center space-x-6">
-            <a href="/" className="text-sm font-medium hover:text-primary">Home</a>
-            <a href="/about" className="text-sm font-medium hover:text-primary">About</a>
-            <a href="/blog" className="text-sm font-medium hover:text-primary">Blog</a>
-          </nav>
-        </div>
-      </header>
-
+    <PublicLayout>
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 text-white py-20 px-6">
         <div className="container mx-auto text-center max-w-4xl">
@@ -196,8 +177,8 @@ const AboutPage = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-8 px-6 bg-gray-50">
+      {/* Trust Badges */}
+      <section className="py-8 px-6 bg-gray-50">
         <div className="container mx-auto">
           <div className="flex flex-wrap justify-center items-center gap-8 text-sm text-gray-600">
             <div className="flex items-center">
@@ -214,8 +195,8 @@ const AboutPage = () => {
             </div>
           </div>
         </div>
-      </footer>
-    </div>
+      </section>
+    </PublicLayout>
   );
 };
 
