@@ -122,15 +122,56 @@ export const useDiscoveryScanning = () => {
     setScanProgress(0);
     
     try {
-      // Simulate progressive scanning across platforms
-      const platforms = ['Reddit', 'Google News', 'TrustPilot', 'Twitter', 'Forums', 'Blogs', 'Reviews', 'Social Media'];
+      // Call actual edge functions for real scanning
+      const platforms = [
+        { name: 'Reddit', function: 'reddit-scan' },
+        { name: 'UK News', function: 'uk-news-scanner' },
+        { name: 'RSS Feeds', function: 'rss-scraper' },
+        { name: 'Google Search', function: 'google-search-crawler' },
+        { name: 'A.R.I.A Scraper', function: 'aria-scraper' },
+        { name: 'Discovery Scanner', function: 'discovery-scanner' }
+      ];
+      
+      let totalNewThreats = 0;
       
       for (let i = 0; i < platforms.length; i++) {
         const platform = platforms[i];
-        toast.info(`Scanning ${platform}...`);
+        toast.info(`Scanning ${platform.name}...`);
         
-        // Call the discovery scanner for this platform
-        await scanPlatform(platform);
+        try {
+          // Call the actual edge function
+          const { data, error } = await supabase.functions.invoke(platform.function, {
+            body: { 
+              scan_type: 'zero_input_discovery',
+              platforms: ['all'],
+              depth: 'standard'
+            }
+          });
+          
+          if (error) {
+            console.error(`Error scanning ${platform.name}:`, error);
+            toast.error(`Failed to scan ${platform.name}: ${error.message}`);
+          } else if (data) {
+            console.log(`${platform.name} scan result:`, data);
+            
+            // Process the results and add new threats
+            const newThreats = await processEdgeFunctionResults(data, platform.name);
+            totalNewThreats += newThreats.length;
+            
+            if (newThreats.length > 0) {
+              setDiscoveredThreats(prev => [...newThreats, ...prev]);
+              
+              // Show success message for this platform
+              toast.success(`${platform.name}: Found ${newThreats.length} potential threats`);
+            } else {
+              toast.info(`${platform.name}: No new threats detected`);
+            }
+          }
+          
+        } catch (platformError) {
+          console.error(`Error scanning ${platform.name}:`, platformError);
+          toast.error(`Failed to scan ${platform.name}`);
+        }
         
         setScanProgress(((i + 1) / platforms.length) * 100);
         setScanStats(prev => ({
@@ -138,14 +179,19 @@ export const useDiscoveryScanning = () => {
           platformsScanned: i + 1
         }));
         
-        // Simulate scanning delay
+        // Add delay between scans
         await new Promise(resolve => setTimeout(resolve, 2000));
       }
       
-      // After scanning, run client-entity matching on new results
-      await processClientEntityMatching();
+      // Final success message
+      if (totalNewThreats > 0) {
+        toast.success(`Discovery scan completed! Found ${totalNewThreats} new potential threats across all platforms.`);
+      } else {
+        toast.info("Discovery scan completed. No new threats detected across all platforms.");
+      }
       
-      toast.success("Discovery scan completed successfully!");
+      // Reload all threats to get the latest data
+      await loadExistingThreats();
       
     } catch (error) {
       console.error('Error during discovery scan:', error);
@@ -155,66 +201,56 @@ export const useDiscoveryScanning = () => {
     }
   };
 
-  const scanPlatform = async (platform: string) => {
+  const processEdgeFunctionResults = async (data: any, platformName: string): Promise<DiscoveredThreat[]> => {
+    const newThreats: DiscoveredThreat[] = [];
+    
     try {
-      // Call the discovery scanner edge function
-      const response = await fetch('/functions/v1/discovery-scanner', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          platform: platform.toLowerCase(),
-          scanType: 'zero_input_discovery'
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to scan ${platform}`);
-      }
-
-      const results = await response.json();
+      // Handle different response formats from different edge functions
+      let results = [];
       
-      if (results.threats && results.threats.length > 0) {
-        const newThreats: DiscoveredThreat[] = results.threats.map((threat: any) => ({
+      if (data.results && Array.isArray(data.results)) {
+        results = data.results;
+      } else if (data.threats && Array.isArray(data.threats)) {
+        results = data.threats;
+      } else if (data.matches && Array.isArray(data.matches)) {
+        results = data.matches;
+      } else if (Array.isArray(data)) {
+        results = data;
+      }
+      
+      for (const result of results) {
+        const threat: DiscoveredThreat = {
           id: Math.random().toString(36).substr(2, 9),
-          entityName: threat.entity_name || 'Unknown Entity',
-          entityType: threat.entity_type || 'brand',
-          platform,
-          content: threat.content || '',
-          threatLevel: threat.threat_level || 5,
-          threatType: threat.threat_type || 'reputation_risk',
-          sentiment: threat.sentiment || 0,
-          sourceUrl: threat.source_url || '',
-          contextSnippet: threat.context_snippet || '',
-          mentionCount: threat.mention_count || 1,
-          spreadVelocity: threat.spread_velocity || 1,
+          entityName: result.entity_name || result.entityName || 'Unknown Entity',
+          entityType: result.entity_type || result.entityType || 'brand',
+          platform: platformName,
+          content: result.content || result.description || '',
+          threatLevel: result.threat_level || result.threatLevel || Math.floor(Math.abs(result.sentiment || 0) * 10) || 5,
+          threatType: result.threat_type || result.threatType || 'reputation_risk',
+          sentiment: result.sentiment || 0,
+          sourceUrl: result.source_url || result.url || '',
+          contextSnippet: (result.content || result.description || '').substring(0, 150) + '...',
+          mentionCount: result.mention_count || 1,
+          spreadVelocity: result.spread_velocity || Math.floor(Math.random() * 10) + 1,
           timestamp: new Date().toISOString(),
           status: 'active' as const,
-          clientLinked: false, // Will be updated by client-entity matching
-          matchConfidence: 0
-        }));
-
-        setDiscoveredThreats(prev => [...newThreats, ...prev]);
+          clientLinked: result.client_linked || false,
+          matchConfidence: result.confidence_score || 0
+        };
         
-        // Update stats
-        setScanStats(prev => ({
-          ...prev,
-          entitiesFound: prev.entitiesFound + new Set(newThreats.map(t => t.entityName)).size,
-          threatsDetected: prev.threatsDetected + newThreats.length,
-          highPriorityThreats: prev.highPriorityThreats + newThreats.filter(t => t.threatLevel >= 8).length
-        }));
-
-        // Show high priority alerts
-        const highPriorityThreats = newThreats.filter(t => t.threatLevel >= 8);
-        if (highPriorityThreats.length > 0) {
-          toast.error(`🚨 ${highPriorityThreats.length} high priority threats detected on ${platform}!`);
-        }
+        newThreats.push(threat);
       }
       
     } catch (error) {
-      console.error(`Error scanning ${platform}:`, error);
+      console.error(`Error processing results from ${platformName}:`, error);
     }
+    
+    return newThreats;
+  };
+
+  const stopDiscoveryScan = async () => {
+    setIsScanning(false);
+    toast.info("Discovery scan stopped");
   };
 
   const processClientEntityMatching = async () => {
@@ -238,11 +274,6 @@ export const useDiscoveryScanning = () => {
     } catch (error) {
       console.error('Error processing client-entity matching:', error);
     }
-  };
-
-  const stopDiscoveryScan = async () => {
-    setIsScanning(false);
-    toast.info("Discovery scan stopped");
   };
 
   return {

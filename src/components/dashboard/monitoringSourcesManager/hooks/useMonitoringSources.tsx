@@ -58,6 +58,7 @@ export const useMonitoringSources = () => {
       }
 
       console.log(`Triggering scan for ${sourceId} using function ${functionName}`);
+      console.log('Request body:', requestBody);
       
       const { data, error } = await supabase.functions.invoke(functionName, {
         body: requestBody
@@ -84,6 +85,23 @@ export const useMonitoringSources = () => {
       
       const sourceName = sources.find(s => s.id === sourceId)?.name;
       let contentType = 'potential threats';
+      let resultsCount = 0;
+      
+      // Handle different response formats
+      if (data?.results?.length) {
+        resultsCount = data.results.length;
+      } else if (data?.threats?.length) {
+        resultsCount = data.threats.length;
+      } else if (data?.matches_found) {
+        resultsCount = data.matches_found;
+      } else if (data?.processed_count) {
+        resultsCount = data.processed_count;
+      } else if (data?.articles_found) {
+        resultsCount = data.articles_found;
+        contentType = 'articles with entities';
+      } else if (data?.total) {
+        resultsCount = data.total;
+      }
       
       if (sourceId === 'rss-news' || sourceId === 'uk-news') {
         contentType = 'UK news threats';
@@ -92,8 +110,6 @@ export const useMonitoringSources = () => {
       } else if (sourceId === 'reddit') {
         contentType = 'Reddit threats';
       }
-      
-      const resultsCount = data?.results?.length || data?.total || data?.matches_found || data?.threats?.length || 0;
       
       toast.success(`${sourceName} scan completed`, {
         description: `Found ${resultsCount} ${contentType}`
