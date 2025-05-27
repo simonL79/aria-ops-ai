@@ -947,6 +947,65 @@ export type Database = {
         }
         Relationships: []
       }
+      decoy_assets: {
+        Row: {
+          access_count: number | null
+          asset_description: string | null
+          asset_title: string | null
+          click_through_rate: number | null
+          client_id: string | null
+          created_at: string | null
+          decoy_url: string
+          deployed_at: string | null
+          engagement_score: number | null
+          id: string
+          is_active: boolean | null
+          last_accessed: string | null
+          relevance_weight: number | null
+          topic_match: string
+        }
+        Insert: {
+          access_count?: number | null
+          asset_description?: string | null
+          asset_title?: string | null
+          click_through_rate?: number | null
+          client_id?: string | null
+          created_at?: string | null
+          decoy_url: string
+          deployed_at?: string | null
+          engagement_score?: number | null
+          id?: string
+          is_active?: boolean | null
+          last_accessed?: string | null
+          relevance_weight?: number | null
+          topic_match: string
+        }
+        Update: {
+          access_count?: number | null
+          asset_description?: string | null
+          asset_title?: string | null
+          click_through_rate?: number | null
+          client_id?: string | null
+          created_at?: string | null
+          decoy_url?: string
+          deployed_at?: string | null
+          engagement_score?: number | null
+          id?: string
+          is_active?: boolean | null
+          last_accessed?: string | null
+          relevance_weight?: number | null
+          topic_match?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "decoy_assets_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       diversion_campaigns: {
         Row: {
           content_title: string
@@ -1455,6 +1514,74 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "generated_responses_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      indexing_footprint: {
+        Row: {
+          asset_title: string | null
+          asset_type: string | null
+          asset_url: string | null
+          client_id: string | null
+          competition_level: string | null
+          created_at: string | null
+          domain_authority: number | null
+          freshness_score: number | null
+          id: string
+          index_rank: number | null
+          keyword: string
+          last_crawled: string | null
+          page_authority: number | null
+          search_volume: number | null
+          target_rank: number | null
+          updated_at: string | null
+          visibility_score: number | null
+        }
+        Insert: {
+          asset_title?: string | null
+          asset_type?: string | null
+          asset_url?: string | null
+          client_id?: string | null
+          competition_level?: string | null
+          created_at?: string | null
+          domain_authority?: number | null
+          freshness_score?: number | null
+          id?: string
+          index_rank?: number | null
+          keyword: string
+          last_crawled?: string | null
+          page_authority?: number | null
+          search_volume?: number | null
+          target_rank?: number | null
+          updated_at?: string | null
+          visibility_score?: number | null
+        }
+        Update: {
+          asset_title?: string | null
+          asset_type?: string | null
+          asset_url?: string | null
+          client_id?: string | null
+          competition_level?: string | null
+          created_at?: string | null
+          domain_authority?: number | null
+          freshness_score?: number | null
+          id?: string
+          index_rank?: number | null
+          keyword?: string
+          last_crawled?: string | null
+          page_authority?: number | null
+          search_volume?: number | null
+          target_rank?: number | null
+          updated_at?: string | null
+          visibility_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "indexing_footprint_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
@@ -1972,6 +2099,71 @@ export type Database = {
         }
         Relationships: []
       }
+      reputation_counters: {
+        Row: {
+          content_type: string | null
+          counter_content: string
+          counter_title: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          is_published: boolean | null
+          performance_metrics: Json | null
+          priority_score: number | null
+          publish_targets: string[] | null
+          published_at: string | null
+          seo_keywords: string[] | null
+          target_audience: string | null
+          threat_id: string | null
+          tone: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          content_type?: string | null
+          counter_content: string
+          counter_title: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_published?: boolean | null
+          performance_metrics?: Json | null
+          priority_score?: number | null
+          publish_targets?: string[] | null
+          published_at?: string | null
+          seo_keywords?: string[] | null
+          target_audience?: string | null
+          threat_id?: string | null
+          tone?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          content_type?: string | null
+          counter_content?: string
+          counter_title?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_published?: boolean | null
+          performance_metrics?: Json | null
+          priority_score?: number | null
+          publish_targets?: string[] | null
+          published_at?: string | null
+          seo_keywords?: string[] | null
+          target_audience?: string | null
+          threat_id?: string | null
+          tone?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reputation_counters_threat_id_fkey"
+            columns: ["threat_id"]
+            isOneToOne: false
+            referencedRelation: "threat_simulations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reputation_scan_submissions: {
         Row: {
           admin_notes: string | null
@@ -2097,6 +2289,128 @@ export type Database = {
           source_table_id?: string | null
         }
         Relationships: []
+      }
+      rsi_activation_logs: {
+        Row: {
+          activation_status: string | null
+          client_id: string | null
+          completed_at: string | null
+          effectiveness_score: number | null
+          id: string
+          matched_threat: string | null
+          notes: string | null
+          response_count: number | null
+          threat_simulation_id: string | null
+          trigger_type: string
+          triggered_at: string | null
+          triggered_by: string | null
+        }
+        Insert: {
+          activation_status?: string | null
+          client_id?: string | null
+          completed_at?: string | null
+          effectiveness_score?: number | null
+          id?: string
+          matched_threat?: string | null
+          notes?: string | null
+          response_count?: number | null
+          threat_simulation_id?: string | null
+          trigger_type: string
+          triggered_at?: string | null
+          triggered_by?: string | null
+        }
+        Update: {
+          activation_status?: string | null
+          client_id?: string | null
+          completed_at?: string | null
+          effectiveness_score?: number | null
+          id?: string
+          matched_threat?: string | null
+          notes?: string | null
+          response_count?: number | null
+          threat_simulation_id?: string | null
+          trigger_type?: string
+          triggered_at?: string | null
+          triggered_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rsi_activation_logs_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rsi_activation_logs_threat_simulation_id_fkey"
+            columns: ["threat_simulation_id"]
+            isOneToOne: false
+            referencedRelation: "threat_simulations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rsi_campaigns: {
+        Row: {
+          budget_allocation: number | null
+          campaign_description: string | null
+          campaign_name: string
+          client_id: string | null
+          created_at: string | null
+          created_by: string | null
+          end_date: string | null
+          forever_active: boolean | null
+          id: string
+          roi_score: number | null
+          start_date: string | null
+          status: string | null
+          success_metrics: Json | null
+          target_threats: string[] | null
+          updated_at: string | null
+        }
+        Insert: {
+          budget_allocation?: number | null
+          campaign_description?: string | null
+          campaign_name: string
+          client_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          end_date?: string | null
+          forever_active?: boolean | null
+          id?: string
+          roi_score?: number | null
+          start_date?: string | null
+          status?: string | null
+          success_metrics?: Json | null
+          target_threats?: string[] | null
+          updated_at?: string | null
+        }
+        Update: {
+          budget_allocation?: number | null
+          campaign_description?: string | null
+          campaign_name?: string
+          client_id?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          end_date?: string | null
+          forever_active?: boolean | null
+          id?: string
+          roi_score?: number | null
+          start_date?: string | null
+          status?: string | null
+          success_metrics?: Json | null
+          target_threats?: string[] | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rsi_campaigns_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       scan_job_configs: {
         Row: {
@@ -2393,6 +2707,53 @@ export type Database = {
         }
         Relationships: []
       }
+      threat_simulations: {
+        Row: {
+          client_id: string | null
+          created_at: string | null
+          geographical_scope: string[] | null
+          id: string
+          likelihood_score: number | null
+          predicted_keywords: string[] | null
+          threat_level: number | null
+          threat_source: string | null
+          threat_topic: string
+          updated_at: string | null
+        }
+        Insert: {
+          client_id?: string | null
+          created_at?: string | null
+          geographical_scope?: string[] | null
+          id?: string
+          likelihood_score?: number | null
+          predicted_keywords?: string[] | null
+          threat_level?: number | null
+          threat_source?: string | null
+          threat_topic: string
+          updated_at?: string | null
+        }
+        Update: {
+          client_id?: string | null
+          created_at?: string | null
+          geographical_scope?: string[] | null
+          id?: string
+          likelihood_score?: number | null
+          predicted_keywords?: string[] | null
+          threat_level?: number | null
+          threat_source?: string | null
+          threat_topic?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "threat_simulations_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -2572,11 +2933,41 @@ export type Database = {
           },
         ]
       }
+      rsi_dashboard_summary: {
+        Row: {
+          activation_count: number | null
+          active_decoys: number | null
+          avg_index_rank: number | null
+          avg_visibility_score: number | null
+          client_id: string | null
+          client_name: string | null
+          counter_narratives_count: number | null
+          decoy_assets_count: number | null
+          likelihood_score: number | null
+          published_counters: number | null
+          threat_detected_at: string | null
+          threat_level: number | null
+          threat_topic: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "threat_simulations_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       assign_staff_role: {
         Args: { user_email: string }
         Returns: undefined
+      }
+      calculate_threat_urgency: {
+        Args: { threat_level: number; likelihood_score: number }
+        Returns: number
       }
       check_entity_client_match: {
         Args: { entity_name_input: string }
@@ -2602,6 +2993,15 @@ export type Database = {
       get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_rsi_effectiveness: {
+        Args: { campaign_id: string }
+        Returns: {
+          total_threats: number
+          countered_threats: number
+          avg_response_time: unknown
+          success_rate: number
+        }[]
       }
       has_role: {
         Args: {
