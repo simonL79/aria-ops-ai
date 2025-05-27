@@ -117,6 +117,45 @@ export type Database = {
         }
         Relationships: []
       }
+      aria_access_audit: {
+        Row: {
+          attempted_action: string | null
+          attempted_at: string | null
+          id: string
+          ip_address: string | null
+          module_target: string | null
+          reason: string | null
+          success: boolean | null
+          user_agent: string | null
+          user_email: string | null
+          user_id: string | null
+        }
+        Insert: {
+          attempted_action?: string | null
+          attempted_at?: string | null
+          id?: string
+          ip_address?: string | null
+          module_target?: string | null
+          reason?: string | null
+          success?: boolean | null
+          user_agent?: string | null
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          attempted_action?: string | null
+          attempted_at?: string | null
+          id?: string
+          ip_address?: string | null
+          module_target?: string | null
+          reason?: string | null
+          success?: boolean | null
+          user_agent?: string | null
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       aria_notifications: {
         Row: {
           created_at: string | null
@@ -2465,6 +2504,30 @@ export type Database = {
         }
         Relationships: []
       }
+      private_modules_registry: {
+        Row: {
+          classification: string | null
+          declared_at: string | null
+          id: string
+          module_name: string
+          owner: string
+        }
+        Insert: {
+          classification?: string | null
+          declared_at?: string | null
+          id?: string
+          module_name: string
+          owner: string
+        }
+        Update: {
+          classification?: string | null
+          declared_at?: string | null
+          id?: string
+          module_name?: string
+          owner?: string
+        }
+        Relationships: []
+      }
       processing_activities: {
         Row: {
           accuracy_measures: string | null
@@ -3892,6 +3955,10 @@ export type Database = {
           confidence_score: number
         }[]
       }
+      check_internal_access: {
+        Args: { module_name: string }
+        Returns: undefined
+      }
       column_exists: {
         Args: { p_table_name: string; p_column_name: string }
         Returns: boolean
@@ -3912,6 +3979,16 @@ export type Database = {
       get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_module_access_stats: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          module_name: string
+          total_attempts: number
+          successful_access: number
+          blocked_attempts: number
+          last_access: string
+        }[]
       }
       get_rsi_effectiveness: {
         Args: { campaign_id: string }
@@ -3946,6 +4023,10 @@ export type Database = {
           p_data_sources?: string[]
         }
         Returns: string
+      }
+      log_module_usage: {
+        Args: { p_module_name: string; p_action: string; p_details?: string }
+        Returns: undefined
       }
       mark_notification_seen: {
         Args: { notification_id: string }
