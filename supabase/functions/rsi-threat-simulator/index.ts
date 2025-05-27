@@ -50,18 +50,19 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Create threat simulation record
+    // Create a content alert as our simulation record
     const { data: simulation, error: simError } = await supabase
-      .from('threat_simulations')
+      .from('content_alerts')
       .insert({
         client_id: targetClientId,
-        threat_topic,
-        threat_level,
-        likelihood_score,
-        predicted_keywords: [threat_topic.toLowerCase()],
-        threat_source: 'manual_simulation',
-        geographical_scope: ['global'],
-        simulation_status: 'running'
+        content: `RSI Threat Simulation: ${threat_topic}`,
+        platform: 'RSI_Simulation',
+        threat_type: 'rsi_simulation',
+        severity: threat_level >= 4 ? 'high' : threat_level >= 2 ? 'medium' : 'low',
+        status: 'new',
+        confidence_score: Math.round(likelihood_score * 100),
+        sentiment: -50, // Negative sentiment for threat simulation
+        source_type: 'simulation'
       })
       .select()
       .single();
@@ -69,32 +70,25 @@ Deno.serve(async (req) => {
     if (simError) {
       console.error('Error creating simulation:', simError);
       return new Response(
-        JSON.stringify({ error: 'Failed to create simulation' }),
+        JSON.stringify({ error: 'Failed to create simulation', details: simError.message }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Create RSI activation log
+    // Create RSI activation log if the table exists
     const { error: logError } = await supabase
-      .from('rsi_activation_logs')
+      .from('activity_logs')
       .insert({
-        client_id: targetClientId,
-        threat_simulation_id: simulation.id,
-        trigger_type: simulation_type,
-        matched_threat: threat_topic,
-        activation_status: 'initiated',
-        triggered_at: new Date().toISOString()
+        action: 'rsi_simulation_triggered',
+        entity_type: 'rsi_simulation',
+        entity_id: simulation.id,
+        details: `RSI simulation for threat: ${threat_topic}. Type: ${simulation_type}. Threat level: ${threat_level}. Likelihood: ${likelihood_score}`,
+        user_email: 'system@rsi.local'
       });
 
     if (logError) {
       console.error('Error creating activation log:', logError);
     }
-
-    // Update simulation status to completed
-    await supabase
-      .from('threat_simulations')
-      .update({ simulation_status: 'completed' })
-      .eq('id', simulation.id);
 
     console.log('RSI simulation completed successfully');
 
@@ -113,7 +107,7 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error('RSI simulation error:', error);
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
+      JSON.stringify({ error: 'Internal server error', details: error.message }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
