@@ -21,16 +21,40 @@ export class Phase1DataIntegrity extends BaseTestPhase {
       let allTablesExist = true;
       let tableCount = 0;
 
-      const tables = ['consent_records', 'data_subject_requests', 'compliance_audit_logs', 'data_retention_schedule'];
-      
-      for (const tableName of tables) {
-        try {
-          const { count, error } = await this.getSupabase().from(tableName).select('*', { count: 'exact', head: true });
-          if (error) throw error;
-          tableCount += count || 0;
-        } catch {
-          allTablesExist = false;
-        }
+      // Check consent_records table
+      try {
+        const { count, error } = await this.getSupabase().from('consent_records').select('*', { count: 'exact', head: true });
+        if (error) throw error;
+        tableCount += count || 0;
+      } catch {
+        allTablesExist = false;
+      }
+
+      // Check data_subject_requests table
+      try {
+        const { count, error } = await this.getSupabase().from('data_subject_requests').select('*', { count: 'exact', head: true });
+        if (error) throw error;
+        tableCount += count || 0;
+      } catch {
+        allTablesExist = false;
+      }
+
+      // Check compliance_audit_logs table
+      try {
+        const { count, error } = await this.getSupabase().from('compliance_audit_logs').select('*', { count: 'exact', head: true });
+        if (error) throw error;
+        tableCount += count || 0;
+      } catch {
+        allTablesExist = false;
+      }
+
+      // Check data_retention_schedule table
+      try {
+        const { count, error } = await this.getSupabase().from('data_retention_schedule').select('*', { count: 'exact', head: true });
+        if (error) throw error;
+        tableCount += count || 0;
+      } catch {
+        allTablesExist = false;
       }
 
       if (allTablesExist) {
