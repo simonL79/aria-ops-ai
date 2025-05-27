@@ -13,7 +13,11 @@ import {
   AlertTriangle,
   TestTube,
   Clock,
-  TrendingUp
+  TrendingUp,
+  Shield,
+  Database,
+  Eye,
+  RefreshCw
 } from 'lucide-react';
 import { qaTestRunner, type QATestSuite, type QATestResult } from '@/services/testing/qaTestRunner';
 import { toast } from 'sonner';
@@ -22,28 +26,39 @@ const QATestDashboard = () => {
   const [testSuite, setTestSuite] = useState<QATestSuite | null>(null);
   const [running, setRunning] = useState(false);
   const [selectedPhase, setSelectedPhase] = useState<string>('all');
+  const [autoRefresh, setAutoRefresh] = useState(false);
 
   const runQATests = async () => {
     try {
       setRunning(true);
-      toast.info('Starting QA test suite...');
+      toast.info('🧪 Starting ARIA™ NOC QA Master Suite...', {
+        description: 'Running comprehensive system health checks'
+      });
       
       const results = await qaTestRunner.runFullQASuite();
       setTestSuite(results);
       
-      const { passedTests, failedTests, warningTests } = results;
+      const { passedTests, failedTests, warningTests, gdprCompliance } = results;
       
       if (failedTests > 0) {
-        toast.error(`QA Suite completed with ${failedTests} failures`);
+        toast.error(`❌ QA Suite: ${failedTests} critical failures detected`, {
+          description: `${warningTests} warnings, ${gdprCompliance.compliancePercentage}% GDPR compliant`
+        });
       } else if (warningTests > 0) {
-        toast.warning(`QA Suite completed with ${warningTests} warnings`);
+        toast.warning(`⚠️ QA Suite: ${warningTests} warnings found`, {
+          description: `All tests passed with warnings, ${gdprCompliance.compliancePercentage}% GDPR compliant`
+        });
       } else {
-        toast.success('QA Suite passed all tests!');
+        toast.success('✅ QA Suite: All systems operational!', {
+          description: `${passedTests}/${results.totalTests} tests passed, ${gdprCompliance.compliancePercentage}% GDPR compliant`
+        });
       }
       
     } catch (error) {
       console.error('QA test suite failed:', error);
-      toast.error('QA test suite execution failed');
+      toast.error('❌ QA test suite execution failed', {
+        description: 'Check console for detailed error information'
+      });
     } finally {
       setRunning(false);
     }
@@ -69,6 +84,15 @@ const QATestDashboard = () => {
       case 'warning':
         return 'bg-yellow-100 text-yellow-800 border-yellow-200';
     }
+  };
+
+  const getDataSourceIcon = (dataSource?: 'live' | 'none') => {
+    if (dataSource === 'live') {
+      return <Database className="h-3 w-3 text-green-600" />;
+    } else if (dataSource === 'none') {
+      return <Eye className="h-3 w-3 text-gray-400" />;
+    }
+    return null;
   };
 
   const getPhases = (): string[] => {
@@ -105,42 +129,60 @@ const QATestDashboard = () => {
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
             <TestTube className="h-6 w-6" />
-            QA Test Dashboard
+            ARIA™ NOC QA Master Suite
           </h2>
           <p className="text-muted-foreground">
-            ARIA™ NOC QA Master Suite - Comprehensive system testing
+            Daily system health monitoring • GDPR compliance • Live data validation
           </p>
         </div>
         
-        <Button 
-          onClick={runQATests} 
-          disabled={running}
-          size="lg"
-        >
-          <Play className={`h-4 w-4 mr-2 ${running ? 'animate-spin' : ''}`} />
-          {running ? 'Running Tests...' : 'Run QA Suite'}
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            onClick={runQATests} 
+            disabled={running}
+            size="lg"
+            className="bg-blue-600 hover:bg-blue-700"
+          >
+            {running ? (
+              <>
+                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                Running Diagnostics...
+              </>
+            ) : (
+              <>
+                <Play className="h-4 w-4 mr-2" />
+                Run QA Suite
+              </>
+            )}
+          </Button>
+        </div>
       </div>
 
       {/* Test Suite Overview */}
       {testSuite && (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm">Total Tests</CardTitle>
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <TestTube className="h-4 w-4" />
+                  Total Tests
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{testSuite.totalTests}</div>
                 <p className="text-xs text-muted-foreground">
-                  Completed in {(testSuite.duration / 1000).toFixed(1)}s
+                  {(testSuite.duration / 1000).toFixed(1)}s runtime
                 </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm">Passed</CardTitle>
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-600" />
+                  Passed
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-green-600">{testSuite.passedTests}</div>
@@ -152,7 +194,10 @@ const QATestDashboard = () => {
 
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm">Failed</CardTitle>
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <XCircle className="h-4 w-4 text-red-600" />
+                  Failed
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-red-600">{testSuite.failedTests}</div>
@@ -164,7 +209,10 @@ const QATestDashboard = () => {
 
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm">Warnings</CardTitle>
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4 text-yellow-600" />
+                  Warnings
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-yellow-600">{testSuite.warningTests}</div>
@@ -173,20 +221,67 @@ const QATestDashboard = () => {
                 </p>
               </CardContent>
             </Card>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Shield className="h-4 w-4 text-blue-600" />
+                  GDPR
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-blue-600">{testSuite.gdprCompliance.compliancePercentage}%</div>
+                <p className="text-xs text-muted-foreground">
+                  {testSuite.gdprCompliance.compliantTests}/{testSuite.gdprCompliance.totalGdprTests} compliant
+                </p>
+              </CardContent>
+            </Card>
           </div>
+
+          {/* GDPR Compliance Overview */}
+          <Card className="border-blue-200 bg-blue-50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Shield className="h-5 w-5 text-blue-600" />
+                GDPR Compliance Status
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex justify-between text-sm">
+                  <span>Compliance Score</span>
+                  <span className="font-medium">{testSuite.gdprCompliance.compliancePercentage}%</span>
+                </div>
+                <Progress 
+                  value={testSuite.gdprCompliance.compliancePercentage} 
+                  className="h-2"
+                />
+                <div className="flex gap-4 text-xs">
+                  <span className="flex items-center gap-1">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    Compliant: {testSuite.gdprCompliance.compliantTests}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                    Non-compliant: {testSuite.gdprCompliance.totalGdprTests - testSuite.gdprCompliance.compliantTests}
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Progress Overview */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <TrendingUp className="h-5 w-5" />
-                Test Suite Progress
+                System Health Overview
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
                 <div className="flex justify-between text-sm">
-                  <span>Overall Progress</span>
+                  <span>Overall System Health</span>
                   <span>{testSuite.passedTests}/{testSuite.totalTests}</span>
                 </div>
                 <Progress 
@@ -214,7 +309,7 @@ const QATestDashboard = () => {
 
           {/* Test Results by Phase */}
           <Tabs value={selectedPhase} onValueChange={setSelectedPhase}>
-            <TabsList className="grid grid-cols-3 lg:grid-cols-8 w-full">
+            <TabsList className="grid grid-cols-3 lg:grid-cols-9 w-full">
               {getPhases().map((phase) => (
                 <TabsTrigger key={phase} value={phase} className="text-xs">
                   {phase === 'all' ? 'All' : phase.replace('Phase ', 'P')}
@@ -243,7 +338,13 @@ const QATestDashboard = () => {
                         <div className="flex items-start gap-3">
                           {getStatusIcon(result.status)}
                           <div className="flex-1">
-                            <h4 className="font-medium">{result.testName}</h4>
+                            <h4 className="font-medium flex items-center gap-2">
+                              {result.testName}
+                              {getDataSourceIcon(result.dataSource)}
+                              {result.gdprCompliant !== undefined && (
+                                <Shield className={`h-3 w-3 ${result.gdprCompliant ? 'text-blue-600' : 'text-red-600'}`} />
+                              )}
+                            </h4>
                             <p className="text-sm text-muted-foreground mt-1">
                               {result.message}
                             </p>
@@ -252,13 +353,28 @@ const QATestDashboard = () => {
                               {result.timestamp.toLocaleTimeString()}
                               <span>•</span>
                               <span>{result.phase}</span>
+                              {result.dataSource && (
+                                <>
+                                  <span>•</span>
+                                  <span className={result.dataSource === 'live' ? 'text-green-600' : 'text-gray-500'}>
+                                    {result.dataSource === 'live' ? 'Live Data' : 'No Data'}
+                                  </span>
+                                </>
+                              )}
                             </div>
                           </div>
                         </div>
                         
-                        <Badge className={getStatusColor(result.status)}>
-                          {result.status}
-                        </Badge>
+                        <div className="flex flex-col items-end gap-1">
+                          <Badge className={getStatusColor(result.status)}>
+                            {result.status}
+                          </Badge>
+                          {result.gdprCompliant !== undefined && (
+                            <Badge variant="outline" className={result.gdprCompliant ? 'text-blue-600' : 'text-red-600'}>
+                              {result.gdprCompliant ? 'GDPR ✓' : 'GDPR ✗'}
+                            </Badge>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -272,8 +388,13 @@ const QATestDashboard = () => {
             <Alert className="border-l-4 border-l-red-500">
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>
-                <strong>Critical Issues Detected:</strong> {testSuite.failedTests} test(s) failed. 
+                <strong>⚠️ Critical Issues Detected:</strong> {testSuite.failedTests} test(s) failed. 
                 These issues may affect system functionality and should be addressed immediately.
+                {testSuite.gdprCompliance.compliancePercentage < 100 && (
+                  <span className="block mt-1">
+                    <strong>GDPR Compliance:</strong> {100 - testSuite.gdprCompliance.compliancePercentage}% of compliance tests need attention.
+                  </span>
+                )}
               </AlertDescription>
             </Alert>
           )}
@@ -285,13 +406,14 @@ const QATestDashboard = () => {
         <Card className="text-center py-12">
           <CardContent>
             <TestTube className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-medium mb-2">Ready to Run QA Suite</h3>
+            <h3 className="text-lg font-medium mb-2">ARIA™ NOC QA Master Suite</h3>
             <p className="text-muted-foreground mb-6">
-              Run the comprehensive QA Master Suite to test all ARIA system components
+              Comprehensive system health monitoring with GDPR compliance validation.
+              No mock data - all tests use live system data only.
             </p>
-            <Button onClick={runQATests} size="lg">
+            <Button onClick={runQATests} size="lg" className="bg-blue-600 hover:bg-blue-700">
               <Play className="h-4 w-4 mr-2" />
-              Start QA Testing
+              Start Daily Health Check
             </Button>
           </CardContent>
         </Card>
@@ -302,9 +424,9 @@ const QATestDashboard = () => {
         <Card className="text-center py-12">
           <CardContent>
             <div className="animate-spin h-16 w-16 border-b-2 border-primary mx-auto mb-4"></div>
-            <h3 className="text-lg font-medium mb-2">Running QA Suite...</h3>
+            <h3 className="text-lg font-medium mb-2">Running ARIA™ NOC QA Suite...</h3>
             <p className="text-muted-foreground">
-              Testing all system components. This may take a few minutes.
+              Testing all system components with live data validation and GDPR compliance checks.
             </p>
           </CardContent>
         </Card>

@@ -6,7 +6,9 @@ import QATestDashboard from '@/components/admin/QATestDashboard';
 const QATestPage = () => {
   return (
     <DashboardLayout>
-      <QATestDashboard />
+      <div className="container mx-auto py-6">
+        <QATestDashboard />
+      </div>
     </DashboardLayout>
   );
 };
