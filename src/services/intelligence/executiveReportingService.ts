@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -40,7 +41,7 @@ class ExecutiveReportingService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${supabase.supabaseKey}`,
+          'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNzdnNrYmVqZmFjbWplbXBobXJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc2Njc2NDksImV4cCI6MjA2MzI0MzY0OX0._UVl3ImgN-opAhne5FItzGXlLq41BqJmfAdqZO3vZXY'}`,
         },
         body: JSON.stringify({ action: 'generate' }),
       });
@@ -172,7 +173,7 @@ class ExecutiveReportingService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${supabase.supabaseKey}`,
+          'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNzdnNrYmVqZmFjbWplbXBobXJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc2Njc2NDksImV4cCI6MjA2MzI0MzY0OX0._UVl3ImgN-opAhne5FItzGXlLq41BqJmfAdqZO3vZXY'}`,
         },
         body: JSON.stringify({ action: 'refresh_routines' }),
       });
@@ -197,7 +198,7 @@ class ExecutiveReportingService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${supabase.supabaseKey}`,
+          'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNzdnNrYmVqZmFjbWplbXBobXJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc2Njc2NDksImV4cCI6MjA2MzI0MzY0OX0._UVl3ImgN-opAhne5FItzGXlLq41BqJmfAdqZO3vZXY'}`,
         },
         body: JSON.stringify({ 
           action: 'auto_ingest',
