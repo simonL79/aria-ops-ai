@@ -3,43 +3,53 @@ import { BlogPost } from '@/types/blog';
 
 export const reputationPosts: BlogPost[] = [
   {
-    title: "Surviving Online Reputation Attacks: A Step-by-Step Guide",
-    slug: "surviving-online-reputation-attacks",
-    description: "Essential strategies to protect yourself from digital smear campaigns and recover your good name online.",
+    slug: "founder-reputation-risks",
+    title: "The Hidden Reputation Risks Every Founder Must Address",
+    description: "From investor scrutiny to competitor research, learn how founders can protect their most valuable asset — their reputation.",
+    date: "May 17, 2025",
     author: "Simon Lindsay",
-    date: "February 28, 2025",
-    image: "https://images.unsplash.com/photo-1560732488-6b0df240254a?q=80&w=1974&auto=format&fit=crop",
-    category: "Reputation Management",
-    status: "published"
-  },
-  {
-    title: "The Hidden Dangers of Digital Exposure for Business Leaders",
-    slug: "hidden-dangers-digital-exposure",
-    description: "Why executives and founders need to pay close attention to their digital footprints in today's connected world.",
-    author: "Simon Lindsay",
-    date: "February 10, 2025",
-    image: "https://images.unsplash.com/photo-1493612276216-ee3925520721?q=80&w=1964&auto=format&fit=crop",
-    category: "Digital Security",
-    status: "published"
-  },
-  {
-    title: "Building a Resilient Online Presence That Can Withstand Scrutiny",
-    slug: "building-resilient-online-presence",
-    description: "Strategies for creating a digital footprint that can survive challenges and maintain credibility.",
-    author: "Simon Lindsay",
-    date: "January 22, 2025",
-    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=2015&auto=format&fit=crop",
-    category: "Business",
-    status: "published"
-  },
-  {
-    title: "Why Most Reputation Management Services Fail",
-    slug: "why-reputation-management-services-fail",
-    description: "Common pitfalls in traditional reputation management and how A.R.I.A™ takes a different approach.",
-    author: "Simon Lindsay",
-    date: "December 12, 2024",
-    image: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=2071&auto=format&fit=crop",
-    category: "Industry Trends",
-    status: "draft"
+    category: "Founder Insights",
+    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=400&fit=crop",
+    content: `
+# The Hidden Reputation Risks Every Founder Must Address
+
+Founders face unique reputation challenges that go far beyond typical personal branding concerns. Your reputation directly impacts investor confidence, customer trust, employee recruitment, and partnership opportunities.
+
+## The Founder's Dilemma
+
+Unlike employees who can maintain relative anonymity, founders are the public face of their companies. Every statement, every association, and every past action becomes a reflection of the business itself.
+
+## Critical Risk Areas for Founders
+
+### Investor Due Diligence
+Venture capitalists and angel investors routinely conduct deep background research on founders. They're not just looking at your business plan – they're investigating your entire digital history.
+
+### Competitive Intelligence
+Your competitors are actively monitoring your activities, looking for opportunities to gain advantage or discredit your market position.
+
+### Employee and Partner Vetting
+Top talent and strategic partners increasingly research leadership teams before committing to relationships.
+
+### Media and Industry Attention
+As your company grows, media attention intensifies. Reporters dig deeper, and any inconsistencies or past issues become magnified.
+
+## Proactive Protection Strategies
+
+### Comprehensive Monitoring
+A.R.I.A™ provides founders with enterprise-grade monitoring that goes beyond basic Google alerts:
+
+- **Deep web scanning** including investor forums and industry discussions
+- **Historical content analysis** to identify potential issues before they surface
+- **Competitive intelligence** to understand how rivals might exploit reputation gaps
+- **Crisis simulation** to prepare response strategies for various scenarios
+
+### Strategic Content Development
+We help founders build positive digital narratives that naturally outrank negative content and demonstrate thought leadership.
+
+### Relationship Mapping
+Understanding who's talking about you and in what context allows for proactive relationship management.
+
+Your reputation as a founder is your company's most valuable asset. Protect it like the strategic resource it is.
+    `
   }
 ];

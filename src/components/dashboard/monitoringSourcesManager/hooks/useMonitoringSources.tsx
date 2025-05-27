@@ -18,29 +18,57 @@ export const useMonitoringSources = () => {
 
   const triggerScan = async (sourceId: string) => {
     setIsLoading(true);
+    
     try {
       let functionName = '';
+      let requestBody = {};
       
       switch (sourceId) {
         case 'reddit':
           functionName = 'reddit-scan';
+          requestBody = { 
+            subreddits: ['ukpolitics', 'unitedkingdom', 'soccer', 'ukpersonalfinance'],
+            keywords: ['scandal', 'controversy', 'crisis']
+          };
           break;
         case 'rss-news':
           functionName = 'rss-scraper';
+          requestBody = { 
+            sources: ['bbc', 'guardian', 'telegraph', 'sky'],
+            categories: ['politics', 'business', 'sport', 'entertainment']
+          };
+          break;
+        case 'uk-news':
+          functionName = 'uk-news-scanner';
+          requestBody = { 
+            sources: ['BBC News', 'The Guardian', 'The Telegraph', 'Sky News'],
+            scan_type: 'reputation_threats'
+          };
           break;
         case 'aria-scraper':
           functionName = 'aria-scraper';
+          requestBody = { 
+            platform: 'youtube',
+            search_terms: ['UK celebrity news', 'British politics scandal']
+          };
           break;
         default:
-          toast.error('Scanner not yet implemented for this source');
+          toast.error('Scanner not configured for this source');
           return;
       }
 
-      const { data, error } = await supabase.functions.invoke(functionName);
+      console.log(`Triggering scan for ${sourceId} using function ${functionName}`);
+      
+      const { data, error } = await supabase.functions.invoke(functionName, {
+        body: requestBody
+      });
       
       if (error) {
-        throw new Error(error.message);
+        console.error('Function invocation error:', error);
+        throw new Error(error.message || 'Function call failed');
       }
+      
+      console.log('Scan result:', data);
       
       setScanResults(prev => ({
         ...prev,
@@ -57,19 +85,30 @@ export const useMonitoringSources = () => {
       const sourceName = sources.find(s => s.id === sourceId)?.name;
       let contentType = 'potential threats';
       
-      if (sourceId === 'rss-news') {
-        contentType = 'celebrity/sports threats';
+      if (sourceId === 'rss-news' || sourceId === 'uk-news') {
+        contentType = 'UK news threats';
       } else if (sourceId === 'aria-scraper') {
         contentType = 'YouTube threats';
+      } else if (sourceId === 'reddit') {
+        contentType = 'Reddit threats';
       }
       
+      const resultsCount = data?.results?.length || data?.total || data?.matches_found || data?.threats?.length || 0;
+      
       toast.success(`${sourceName} scan completed`, {
-        description: `Found ${data.results?.total || data.total || data.matches_found || 0} ${contentType}`
+        description: `Found ${resultsCount} ${contentType}`
       });
+      
     } catch (error) {
       console.error('Error triggering scan:', error);
+      
+      let errorMessage = 'Unknown error occurred';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
       toast.error('Scan failed', {
-        description: error instanceof Error ? error.message : 'Unknown error'
+        description: errorMessage
       });
       
       // Update status to error
