@@ -45,6 +45,42 @@ export type Database = {
         }
         Relationships: []
       }
+      actor_disruption_events: {
+        Row: {
+          actor_handle: string
+          created_at: string | null
+          evidence_url: string | null
+          id: string
+          platform: string | null
+          reason: string | null
+          report_submitted_at: string | null
+          reported_to_platform: boolean | null
+          submitted_by: string | null
+        }
+        Insert: {
+          actor_handle: string
+          created_at?: string | null
+          evidence_url?: string | null
+          id?: string
+          platform?: string | null
+          reason?: string | null
+          report_submitted_at?: string | null
+          reported_to_platform?: boolean | null
+          submitted_by?: string | null
+        }
+        Update: {
+          actor_handle?: string
+          created_at?: string | null
+          evidence_url?: string | null
+          id?: string
+          platform?: string | null
+          reason?: string | null
+          report_submitted_at?: string | null
+          reported_to_platform?: boolean | null
+          submitted_by?: string | null
+        }
+        Relationships: []
+      }
       clean_launch_targets: {
         Row: {
           company_name: string
@@ -232,6 +268,117 @@ export type Database = {
           },
         ]
       }
+      counter_narratives: {
+        Row: {
+          created_at: string | null
+          deployed_at: string | null
+          deployed_by: string | null
+          id: string
+          message: string
+          platform: string | null
+          scheduled_at: string | null
+          status: string
+          threat_id: string | null
+          tone: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          deployed_at?: string | null
+          deployed_by?: string | null
+          id?: string
+          message: string
+          platform?: string | null
+          scheduled_at?: string | null
+          status?: string
+          threat_id?: string | null
+          tone?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          deployed_at?: string | null
+          deployed_by?: string | null
+          id?: string
+          message?: string
+          platform?: string | null
+          scheduled_at?: string | null
+          status?: string
+          threat_id?: string | null
+          tone?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "counter_narratives_threat_id_fkey"
+            columns: ["threat_id"]
+            isOneToOne: false
+            referencedRelation: "high_priority_threats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "counter_narratives_threat_id_fkey"
+            columns: ["threat_id"]
+            isOneToOne: false
+            referencedRelation: "scan_results"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      diversion_campaigns: {
+        Row: {
+          content_title: string
+          content_type: string | null
+          created_at: string | null
+          deployed: boolean | null
+          deployed_by: string | null
+          distraction_strength_score: number | null
+          id: string
+          scheduled_time: string | null
+          target_platform: string | null
+          threat_id: string | null
+        }
+        Insert: {
+          content_title: string
+          content_type?: string | null
+          created_at?: string | null
+          deployed?: boolean | null
+          deployed_by?: string | null
+          distraction_strength_score?: number | null
+          id?: string
+          scheduled_time?: string | null
+          target_platform?: string | null
+          threat_id?: string | null
+        }
+        Update: {
+          content_title?: string
+          content_type?: string | null
+          created_at?: string | null
+          deployed?: boolean | null
+          deployed_by?: string | null
+          distraction_strength_score?: number | null
+          id?: string
+          scheduled_time?: string | null
+          target_platform?: string | null
+          threat_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "diversion_campaigns_threat_id_fkey"
+            columns: ["threat_id"]
+            isOneToOne: false
+            referencedRelation: "high_priority_threats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "diversion_campaigns_threat_id_fkey"
+            columns: ["threat_id"]
+            isOneToOne: false
+            referencedRelation: "scan_results"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       generated_responses: {
         Row: {
           client_id: string | null
@@ -266,6 +413,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      influence_simulations: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          id: string
+          input_summary: string
+          predicted_sentiment_shift: string | null
+          recommended_tactic: string | null
+          scenario: string | null
+          virality_risk_score: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          input_summary: string
+          predicted_sentiment_shift?: string | null
+          recommended_tactic?: string | null
+          scenario?: string | null
+          virality_risk_score?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          input_summary?: string
+          predicted_sentiment_shift?: string | null
+          recommended_tactic?: string | null
+          scenario?: string | null
+          virality_risk_score?: number | null
+        }
+        Relationships: []
       }
       lead_magnets: {
         Row: {
@@ -432,6 +612,42 @@ export type Database = {
           phone?: string | null
           status?: Database["public"]["Enums"]["reputation_scan_status"]
           updated_at?: string
+        }
+        Relationships: []
+      }
+      response_transparency_log: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          initiated_by: string | null
+          notes: string | null
+          response_type: string | null
+          source_table_id: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          initiated_by?: string | null
+          notes?: string | null
+          response_type?: string | null
+          source_table_id?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          initiated_by?: string | null
+          notes?: string | null
+          response_type?: string | null
+          source_table_id?: string | null
         }
         Relationships: []
       }

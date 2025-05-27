@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,12 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Brain, Shield, Network, Users, GitBranch, Zap, Activity } from 'lucide-react';
+import { Brain, Shield, Network, Users, GitBranch, Zap, Activity, Target } from 'lucide-react';
 import { ThreatIntelligencePanel } from '@/components/intelligence/ThreatIntelligencePanel';
 import ThreatCorrelationPanel from '@/components/intelligence/ThreatCorrelationPanel';
 import EnhancedSigintVisualizer from '@/components/intelligence/EnhancedSigintVisualizer';
 import RealTimeCollaboration from '@/components/intelligence/RealTimeCollaboration';
 import EnhancedCaseThreading from '@/components/intelligence/EnhancedCaseThreading';
+import OffensiveResponsePanel from '@/components/intelligence/OffensiveResponsePanel';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
@@ -152,7 +152,7 @@ const EnhancedIntelligenceWorkbench = () => {
 
         {/* Enhanced Main Interface */}
         <Tabs defaultValue="threats" className="space-y-4">
-          <TabsList className="grid grid-cols-6">
+          <TabsList className="grid grid-cols-7">
             <TabsTrigger value="threats" className="flex items-center gap-1">
               <Shield className="h-4 w-4" />
               Threat Matrix
@@ -176,6 +176,10 @@ const EnhancedIntelligenceWorkbench = () => {
             <TabsTrigger value="cases" className="flex items-center gap-1">
               <GitBranch className="h-4 w-4" />
               Case Threading
+            </TabsTrigger>
+            <TabsTrigger value="offensive" className="flex items-center gap-1">
+              <Target className="h-4 w-4" />
+              Offensive Ops
             </TabsTrigger>
           </TabsList>
 
@@ -340,6 +344,12 @@ const EnhancedIntelligenceWorkbench = () => {
                 });
                 setRealTimeStats(prev => ({ ...prev, activeCases: prev.activeCases + 1 }));
               }}
+            />
+          </TabsContent>
+
+          <TabsContent value="offensive">
+            <OffensiveResponsePanel 
+              selectedThreats={selectedThreats}
             />
           </TabsContent>
         </Tabs>
