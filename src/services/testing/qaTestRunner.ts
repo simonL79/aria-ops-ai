@@ -112,25 +112,49 @@ export class QATestRunner {
       const { data, error } = await supabase.from('monitoring_status').select('*').limit(1);
       if (error) throw error;
       this.addResult('Database Connection', 'pass', 'Database accessible and responsive', phase, true, 'live');
-    } catch (error) {
+    } catch (error: any) {
       this.addResult('Database Connection', 'fail', `Database connection failed: ${error.message}`, phase, true, 'none');
     }
 
     // Test 1.2: GDPR Compliance Tables
     try {
-      const tables = ['consent_records', 'data_subject_requests', 'compliance_audit_logs', 'data_retention_schedule'];
       let allTablesExist = true;
       let tableCount = 0;
 
-      for (const table of tables) {
-        try {
-          const { count, error } = await supabase.from(table).select('*', { count: 'exact', head: true });
-          if (error) throw error;
-          tableCount += count || 0;
-        } catch {
-          allTablesExist = false;
-          break;
-        }
+      // Check consent_records table
+      try {
+        const { count, error } = await supabase.from('consent_records').select('*', { count: 'exact', head: true });
+        if (error) throw error;
+        tableCount += count || 0;
+      } catch {
+        allTablesExist = false;
+      }
+
+      // Check data_subject_requests table
+      try {
+        const { count, error } = await supabase.from('data_subject_requests').select('*', { count: 'exact', head: true });
+        if (error) throw error;
+        tableCount += count || 0;
+      } catch {
+        allTablesExist = false;
+      }
+
+      // Check compliance_audit_logs table
+      try {
+        const { count, error } = await supabase.from('compliance_audit_logs').select('*', { count: 'exact', head: true });
+        if (error) throw error;
+        tableCount += count || 0;
+      } catch {
+        allTablesExist = false;
+      }
+
+      // Check data_retention_schedule table
+      try {
+        const { count, error } = await supabase.from('data_retention_schedule').select('*', { count: 'exact', head: true });
+        if (error) throw error;
+        tableCount += count || 0;
+      } catch {
+        allTablesExist = false;
       }
 
       if (allTablesExist) {
@@ -138,7 +162,7 @@ export class QATestRunner {
       } else {
         this.addResult('GDPR Tables Structure', 'fail', 'One or more GDPR compliance tables missing', phase, false, 'none');
       }
-    } catch (error) {
+    } catch (error: any) {
       this.addResult('GDPR Tables Structure', 'fail', `GDPR table check failed: ${error.message}`, phase, false, 'none');
     }
 
@@ -156,7 +180,7 @@ export class QATestRunner {
       } else {
         this.addResult('Data Retention Schedule', 'warning', 'No data retention policies found', phase, false, 'none');
       }
-    } catch (error) {
+    } catch (error: any) {
       this.addResult('Data Retention Schedule', 'fail', `Retention check failed: ${error.message}`, phase, false, 'none');
     }
   }
@@ -172,7 +196,7 @@ export class QATestRunner {
       
       if (error) throw error;
       this.addResult('Scan Results Storage', 'pass', `Scan results table accessible with ${count || 0} records`, phase, true, 'live');
-    } catch (error) {
+    } catch (error: any) {
       this.addResult('Scan Results Storage', 'fail', `Scan results check failed: ${error.message}`, phase, true, 'none');
     }
 
@@ -184,7 +208,7 @@ export class QATestRunner {
       
       if (error) throw error;
       this.addResult('Client Management System', 'pass', `Client system operational with ${count || 0} clients`, phase, true, 'live');
-    } catch (error) {
+    } catch (error: any) {
       this.addResult('Client Management System', 'fail', `Client system check failed: ${error.message}`, phase, true, 'none');
     }
 
@@ -196,7 +220,7 @@ export class QATestRunner {
       
       if (error) throw error;
       this.addResult('Prospect Intelligence', 'pass', `Prospect system operational with ${count || 0} prospects`, phase, true, 'live');
-    } catch (error) {
+    } catch (error: any) {
       this.addResult('Prospect Intelligence', 'fail', `Prospect system check failed: ${error.message}`, phase, true, 'none');
     }
   }
@@ -216,7 +240,7 @@ export class QATestRunner {
       
       const status = data.is_active ? 'active' : 'inactive';
       this.addResult('Monitoring Status', 'pass', `Monitoring system ${status}, ${data.sources_count || 0} sources`, phase, true, 'live');
-    } catch (error) {
+    } catch (error: any) {
       this.addResult('Monitoring Status', 'fail', `Monitoring status check failed: ${error.message}`, phase, true, 'none');
     }
 
@@ -229,7 +253,7 @@ export class QATestRunner {
       
       if (error) throw error;
       this.addResult('Platform Configuration', 'pass', `${data?.length || 0} active platforms configured`, phase, true, 'live');
-    } catch (error) {
+    } catch (error: any) {
       this.addResult('Platform Configuration', 'fail', `Platform config check failed: ${error.message}`, phase, true, 'none');
     }
 
@@ -250,7 +274,7 @@ export class QATestRunner {
       } else {
         this.addResult('Recent Scan Activity', 'warning', 'No scan activity in last 24 hours', phase, true, 'none');
       }
-    } catch (error) {
+    } catch (error: any) {
       this.addResult('Recent Scan Activity', 'fail', `Scan activity check failed: ${error.message}`, phase, true, 'none');
     }
   }
@@ -266,7 +290,7 @@ export class QATestRunner {
       
       if (error) throw error;
       this.addResult('Client Entities', 'pass', `Client entities table accessible with ${count || 0} entities`, phase, true, 'live');
-    } catch (error) {
+    } catch (error: any) {
       this.addResult('Client Entities', 'fail', `Client entities check failed: ${error.message}`, phase, true, 'none');
     }
 
@@ -278,7 +302,7 @@ export class QATestRunner {
       
       if (error) throw error;
       this.addResult('Content Actions', 'pass', `Content actions system operational with ${count || 0} actions`, phase, true, 'live');
-    } catch (error) {
+    } catch (error: any) {
       this.addResult('Content Actions', 'fail', `Content actions check failed: ${error.message}`, phase, true, 'none');
     }
   }
@@ -294,7 +318,7 @@ export class QATestRunner {
       
       if (error) throw error;
       this.addResult('User Roles System', 'pass', `Role-based access control operational with ${count || 0} role assignments`, phase, true, 'live');
-    } catch (error) {
+    } catch (error: any) {
       this.addResult('User Roles System', 'fail', `User roles check failed: ${error.message}`, phase, false, 'none');
     }
 
@@ -306,7 +330,7 @@ export class QATestRunner {
       
       if (error) throw error;
       this.addResult('Activity Logging', 'pass', `Activity logging operational with ${count || 0} log entries`, phase, true, 'live');
-    } catch (error) {
+    } catch (error: any) {
       this.addResult('Activity Logging', 'fail', `Activity logging check failed: ${error.message}`, phase, false, 'none');
     }
   }
@@ -323,7 +347,6 @@ export class QATestRunner {
       'generate-response'
     ];
 
-    let functionsHealthy = 0;
     for (const func of edgeFunctions) {
       // Note: We can't directly test edge functions from client-side, so we check for related data
       this.addResult(`Edge Function: ${func}`, 'warning', 'Edge function health requires manual verification', phase, true, 'none');
@@ -344,7 +367,7 @@ export class QATestRunner {
       
       if (error) throw error;
       this.addResult('Consent Management', 'pass', `Consent management system operational with ${count || 0} consent records`, phase, true, 'live');
-    } catch (error) {
+    } catch (error: any) {
       this.addResult('Consent Management', 'fail', `Consent management check failed: ${error.message}`, phase, false, 'none');
     }
 
@@ -356,7 +379,7 @@ export class QATestRunner {
       
       if (error) throw error;
       this.addResult('Data Subject Rights', 'pass', `Data subject rights system operational with ${count || 0} requests`, phase, true, 'live');
-    } catch (error) {
+    } catch (error: any) {
       this.addResult('Data Subject Rights', 'fail', `Data subject rights check failed: ${error.message}`, phase, false, 'none');
     }
 
@@ -368,7 +391,7 @@ export class QATestRunner {
       
       if (error) throw error;
       this.addResult('Compliance Audit Trail', 'pass', `Audit trail operational with ${count || 0} compliance logs`, phase, true, 'live');
-    } catch (error) {
+    } catch (error: any) {
       this.addResult('Compliance Audit Trail', 'fail', `Compliance audit check failed: ${error.message}`, phase, false, 'none');
     }
   }
@@ -388,7 +411,7 @@ export class QATestRunner {
       } else {
         this.addResult('System Health Monitoring', 'pass', `Health monitoring operational with ${count || 0} health checks`, phase, true, 'live');
       }
-    } catch (error) {
+    } catch (error: any) {
       this.addResult('System Health Monitoring', 'warning', `Health monitoring check inconclusive: ${error.message}`, phase, true, 'none');
     }
 
@@ -405,7 +428,7 @@ export class QATestRunner {
       if (error) throw error;
       
       this.addResult('Real-time Data Integrity', 'pass', `${count || 0} data updates in last hour`, phase, true, 'live');
-    } catch (error) {
+    } catch (error: any) {
       this.addResult('Real-time Data Integrity', 'fail', `Data integrity check failed: ${error.message}`, phase, true, 'none');
     }
 
