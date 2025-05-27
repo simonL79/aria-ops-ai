@@ -1,6 +1,5 @@
 
 import React, { useState, useEffect } from "react";
-import PublicLayout from "@/components/layout/PublicLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -15,15 +14,30 @@ const SalesFunnelPage = () => {
 
   // If authenticated, show admin dashboard walkthrough
   if (isAuthenticated) {
-    return (
-      <PublicLayout>
-        <AdminDashboardWelcome />
-      </PublicLayout>
-    );
+    return <AdminDashboardWelcome />;
   }
 
   return (
     <div className="bg-white text-gray-900 font-sans min-h-screen">
+      {/* Header */}
+      <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container flex h-16 items-center justify-between">
+          <div className="flex items-center gap-2">
+            <a href="/" className="flex items-center space-x-2">
+              <Shield className="h-6 w-6 text-primary" />
+              <span className="font-bold text-xl">A.R.I.A.™</span>
+            </a>
+          </div>
+          
+          {/* Navigation */}
+          <nav className="hidden md:flex items-center space-x-6">
+            <a href="/about" className="text-sm font-medium hover:text-primary">About</a>
+            <a href="/blog" className="text-sm font-medium hover:text-primary">Blog</a>
+            <a href="/admin/login" className="text-sm font-medium text-blue-600 hover:text-blue-700">Admin Login</a>
+          </nav>
+        </div>
+      </header>
+
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 text-white py-20 px-6">
         <div className="container mx-auto text-center max-w-4xl">
