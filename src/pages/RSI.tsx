@@ -6,16 +6,16 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import RSIDashboard from '@/components/dashboard/RSIDashboard';
 
 const RSI = () => {
-  const { user, loading } = useAuth();
+  const { user, isLoading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (!isLoading && !user) {
       navigate('/login');
     }
-  }, [user, loading, navigate]);
+  }, [user, isLoading, navigate]);
 
-  if (loading) {
+  if (isLoading) {
     return <div>Loading...</div>;
   }
 
