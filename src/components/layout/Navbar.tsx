@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -23,6 +24,7 @@ const Navbar = () => {
     { name: 'Discovery', href: '/discovery', icon: Search },
     { name: 'Employee Risk', href: '/employee-risk', icon: Users },
     { name: 'Compliance', href: '/compliance', icon: Shield },
+    { name: 'EIDETIC', href: '/eidetic', icon: FileText },
   ];
 
   const isActivePath = (path: string) => {
@@ -48,7 +50,7 @@ const Navbar = () => {
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
               <Link to="/discovery" className="flex items-center gap-2">
-                <Logo variant="default" size="lg" />
+                <Logo variant="default" size="md" />
               </Link>
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">

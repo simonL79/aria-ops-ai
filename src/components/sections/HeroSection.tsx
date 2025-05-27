@@ -10,12 +10,17 @@ const HeroSection = () => {
     <section className="hero bg-gradient-to-r from-premium-black to-premium-darkGray text-white py-16 relative overflow-hidden">
       <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1557682250-33bd709cbe85?q=80&w=1000')] bg-cover bg-center opacity-5"></div>
       <div className="container mx-auto px-6 relative z-10">
-        <div className="flex flex-col items-center justify-center mb-6">
-          <Logo variant="light" size="10x" className="mb-4" />
+        <div className="flex flex-col items-center justify-center mb-8">
+          <Logo variant="light" size="xl" className="mb-6" />
+          <div className="text-center">
+            <p className="text-lg md:text-xl mb-4 text-blue-200 font-medium">
+              Your Reputation Is Being Shaped Online
+            </p>
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 max-w-4xl mx-auto leading-tight text-shadow-lg">
+              Monitor. Analyze. <span className="text-white">Command.</span>
+            </h1>
+          </div>
         </div>
-        <h1 className="text-4xl md:text-6xl font-bold mb-6 max-w-4xl mx-auto leading-tight text-shadow-lg text-center">
-          Monitor. Analyze. <span className="text-white">Command.</span>
-        </h1>
         <p className="text-xl md:text-2xl mb-10 max-w-2xl mx-auto leading-relaxed text-white text-center">
           ARIA is your real-time Reputation NOC — a centralized threat intelligence hub built for rapid digital risk response.
         </p>
