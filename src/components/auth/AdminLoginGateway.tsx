@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -18,7 +17,7 @@ const AdminLoginGateway = () => {
   const [loginAttempts, setLoginAttempts] = useState(0);
   const [isLocked, setIsLocked] = useState(false);
   const [lockoutTime, setLockoutTime] = useState<Date | null>(null);
-  const { isAuthenticated, isAdmin, signIn } = useAuth();
+  const { isAuthenticated, isAdmin, signIn, signOut } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -58,19 +57,58 @@ const AdminLoginGateway = () => {
     }
   }, [isLocked, lockoutTime]);
 
-  // Handle successful authentication redirect
+  // Handle successful authentication redirect - updated logic
   useEffect(() => {
-    if (isAuthenticated && isAdmin) {
+    console.log('Auth state in AdminLoginGateway:', { isAuthenticated, isAdmin, isLoading });
+    
+    if (!isLoading && isAuthenticated && isAdmin) {
       const from = location.state?.from?.pathname || '/discovery';
       console.log('Admin authenticated, redirecting to:', from);
-      navigate(from, { replace: true });
+      
+      // Use timeout to ensure state updates are complete
+      setTimeout(() => {
+        navigate(from, { replace: true });
+      }, 100);
     }
-  }, [isAuthenticated, isAdmin, navigate, location.state]);
+  }, [isAuthenticated, isAdmin, isLoading, navigate, location.state]);
+
+  // Show loading while authentication is being processed
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+        <div className="text-center space-y-4">
+          <div className="animate-spin h-12 w-12 border-4 border-blue-400 border-t-transparent rounded-full mx-auto"></div>
+          <div className="text-white">
+            <div className="font-semibold">Verifying Access</div>
+            <div className="text-sm text-gray-400">Checking authentication...</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Redirect if already authenticated and admin
   if (isAuthenticated && isAdmin) {
     const from = location.state?.from?.pathname || '/discovery';
     return <Navigate to={from} replace />;
+  }
+
+  // If authenticated but not admin, show error
+  if (isAuthenticated && !isAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+        <div className="text-center space-y-4">
+          <div className="text-red-400 text-xl font-semibold">Access Denied</div>
+          <div className="text-gray-300">Admin privileges required</div>
+          <button 
+            onClick={() => signOut()}
+            className="px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600"
+          >
+            Sign Out
+          </button>
+        </div>
+      </div>
+    );
   }
 
   // Audit log function
@@ -133,7 +171,7 @@ const AdminLoginGateway = () => {
         setLoginAttempts(0);
         localStorage.removeItem('admin_lockout');
         await logAdminAction('admin_login_success', true, 'Successful admin login');
-        toast.success('Admin access granted');
+        toast.success('Admin access granted - redirecting...');
         
         // The redirect will be handled by the useEffect above
       }

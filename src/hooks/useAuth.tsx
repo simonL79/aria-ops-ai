@@ -22,17 +22,37 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
+  const checkAdminStatus = async (userId: string) => {
+    try {
+      console.log('Checking admin status for user:', userId);
+      
+      // Simple query to check if user has admin role
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .eq('role', 'admin')
+        .maybeSingle();
+      
+      if (error) {
+        console.error('Error checking admin status:', error);
+        setIsAdmin(false);
+        return;
+      }
+
+      const hasAdminRole = !!data;
+      console.log('Admin status result:', hasAdminRole);
+      setIsAdmin(hasAdminRole);
+    } catch (error) {
+      console.error('Error in checkAdminStatus:', error);
+      setIsAdmin(false);
+    }
+  };
+
   useEffect(() => {
     console.log('AuthProvider initializing...');
     
-    const authTimeout = setTimeout(() => {
-      if (isLoading) {
-        console.warn('Auth loading timed out - forcing completion');
-        setIsLoading(false);
-      }
-    }, 5000);
-
-    // Set up auth state change listener first
+    // Set up auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, currentSession) => {
         console.log('Auth state change:', event, { 
@@ -42,13 +62,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
-        setIsLoading(false);
-        clearTimeout(authTimeout);
 
-        // Handle different auth events
+        // Handle admin status checking
         if (event === 'SIGNED_IN' && currentSession?.user) {
+          // Use setTimeout to avoid potential recursion
+          setTimeout(() => {
+            checkAdminStatus(currentSession.user.id);
+          }, 100);
+          
           try {
-            await checkAdminStatus(currentSession.user.id);
             await initializeDatabase();
             console.log('User signed in successfully:', currentSession.user.email);
           } catch (error) {
@@ -63,15 +85,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         if (event === 'TOKEN_REFRESHED') {
           console.log('Token refreshed successfully');
+          if (currentSession?.user) {
+            setTimeout(() => {
+              checkAdminStatus(currentSession.user.id);
+            }, 100);
+          }
         }
 
-        if (event === 'PASSWORD_RECOVERY') {
-          console.log('Password recovery initiated');
-        }
+        setIsLoading(false);
       }
     );
 
-    // Then get initial session
+    // Get initial session
     const getInitialSession = async () => {
       try {
         const { data: { session: initialSession }, error } = await supabase.auth.getSession();
@@ -98,34 +123,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         console.error('Error in getInitialSession:', error);
       } finally {
         setIsLoading(false);
-        clearTimeout(authTimeout);
       }
     };
 
     getInitialSession();
 
     return () => {
-      clearTimeout(authTimeout);
       subscription.unsubscribe();
     };
   }, []);
-
-  const checkAdminStatus = async (userId: string) => {
-    try {
-      const { data } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', userId)
-        .eq('role', 'admin')
-        .single();
-      
-      setIsAdmin(!!data);
-      console.log('Admin status checked:', !!data);
-    } catch (error) {
-      console.error('Error checking admin status:', error);
-      setIsAdmin(false);
-    }
-  };
 
   const signIn = async (email: string, password: string) => {
     try {
