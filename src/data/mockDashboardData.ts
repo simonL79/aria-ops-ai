@@ -2,7 +2,7 @@
 import { ContentAlert, ContentSource, ContentAction, MetricValue } from "@/types/dashboard";
 import { supabase } from "@/integrations/supabase/client";
 
-// Function to fetch real alerts from database only - no mock data
+// Function to fetch real alerts from database only
 export const fetchRealAlerts = async (): Promise<ContentAlert[]> => {
   try {
     const { data, error } = await supabase
@@ -16,7 +16,7 @@ export const fetchRealAlerts = async (): Promise<ContentAlert[]> => {
       return [];
     }
     
-    // Return empty array if no data - never return mock data
+    // Return empty array if no data
     if (!data || data.length === 0) {
       return [];
     }
@@ -42,7 +42,7 @@ export const fetchRealAlerts = async (): Promise<ContentAlert[]> => {
   }
 };
 
-// Function to fetch real sources from database only - no mock data
+// Function to fetch real sources from database only
 export const fetchRealSources = async (): Promise<ContentSource[]> => {
   try {
     const { data, error } = await supabase
@@ -55,7 +55,7 @@ export const fetchRealSources = async (): Promise<ContentSource[]> => {
       return [];
     }
     
-    // Return empty array if no data - never return mock data
+    // Return empty array if no data
     if (!data || data.length === 0) {
       return [];
     }
@@ -85,7 +85,7 @@ export const fetchRealSources = async (): Promise<ContentSource[]> => {
   }
 };
 
-// Function to fetch real actions from database only - no mock data
+// Function to fetch real actions from database only
 export const fetchRealActions = async (): Promise<ContentAction[]> => {
   try {
     const { data, error } = await supabase
@@ -99,7 +99,7 @@ export const fetchRealActions = async (): Promise<ContentAction[]> => {
       return [];
     }
     
-    // Return empty array if no data - never return mock data
+    // Return empty array if no data
     if (!data || data.length === 0) {
       return [];
     }
@@ -120,7 +120,7 @@ export const fetchRealActions = async (): Promise<ContentAction[]> => {
   }
 };
 
-// Function to calculate real metrics from database only - no mock data
+// Function to calculate real metrics from database only
 export const fetchRealMetrics = async (): Promise<MetricValue[]> => {
   try {
     const [alertsData, sourcesData] = await Promise.all([
@@ -187,6 +187,6 @@ export const fetchRealMetrics = async (): Promise<MetricValue[]> => {
   }
 };
 
-// Remove all mock data exports - only empty arrays
+// All mock data removed - production environment
 export const mockAlerts: ContentAlert[] = [];
 export const mockClassifiedAlerts: ContentAlert[] = [];

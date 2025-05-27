@@ -19,7 +19,7 @@ export const defaultScanParameters: ScanParameters = {
 
 export const performRealScan = async (query: string, platforms: string[]): Promise<ContentAlert[]> => {
   try {
-    // Fetch real scan results from database only - no mock data
+    // Fetch real scan results from database only
     const { data, error } = await supabase
       .from('scan_results')
       .select('*')
@@ -33,7 +33,7 @@ export const performRealScan = async (query: string, platforms: string[]): Promi
       return [];
     }
 
-    // Return empty array if no data - never return mock data
+    // Return empty array if no data
     if (!data || data.length === 0) {
       return [];
     }
@@ -80,7 +80,7 @@ export const getMonitoringStatus = async () => {
     return {
       isActive: data.is_active || false,
       sources: data.sources_count || 0,
-      platforms: 5, // This could be calculated from monitored_platforms table
+      platforms: 5,
       lastRun: data.last_run || new Date().toISOString()
     };
   } catch (error) {
@@ -103,5 +103,5 @@ export const unregisterAlertListener = (listenerId: string) => {
   console.log('Alert listener unregistered:', listenerId);
 };
 
-// All mock data exports removed - only empty arrays to prevent errors
+// All mock data removed - production environment
 export const mockScanResults: ContentAlert[] = [];

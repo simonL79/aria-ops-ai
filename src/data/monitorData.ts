@@ -31,7 +31,7 @@ export const fetchRealContent = async (): Promise<ContentItem[]> => {
   }
 };
 
-// Remove mock data
+// All mock data removed - production environment
 export const mockContent: ContentItem[] = [];
 
 export const getSentimentColor = (sentiment: string): string => {
