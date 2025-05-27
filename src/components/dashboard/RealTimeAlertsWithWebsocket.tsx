@@ -33,12 +33,12 @@ const RealTimeAlertsWithWebsocket = () => {
           content: item.content,
           date: new Date(item.created_at).toISOString(),
           severity: item.severity as 'high' | 'medium' | 'low',
-          status: item.status,
+          status: (item.status as ContentAlert['status']) || 'new',
           url: item.url || '',
           sourceType: item.source_type || 'scan',
           confidenceScore: item.confidence_score || 75,
           sentiment: item.sentiment > 0 ? 'positive' : item.sentiment < 0 ? 'negative' : 'neutral',
-          detectedEntities: item.detected_entities || []
+          detectedEntities: Array.isArray(item.detected_entities) ? item.detected_entities.map(String) : []
         }));
 
         setAlerts(formattedAlerts);
@@ -66,12 +66,12 @@ const RealTimeAlertsWithWebsocket = () => {
             content: payload.new.content,
             date: new Date(payload.new.created_at).toISOString(),
             severity: payload.new.severity as 'high' | 'medium' | 'low',
-            status: payload.new.status,
+            status: (payload.new.status as ContentAlert['status']) || 'new',
             url: payload.new.url || '',
             sourceType: payload.new.source_type || 'scan',
             confidenceScore: payload.new.confidence_score || 75,
             sentiment: payload.new.sentiment > 0 ? 'positive' : payload.new.sentiment < 0 ? 'negative' : 'neutral',
-            detectedEntities: payload.new.detected_entities || []
+            detectedEntities: Array.isArray(payload.new.detected_entities) ? payload.new.detected_entities.map(String) : []
           };
           
           setAlerts(prev => [newAlert, ...prev].slice(0, 10));

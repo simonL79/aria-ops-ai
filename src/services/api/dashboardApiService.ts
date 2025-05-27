@@ -15,10 +15,10 @@ export const getMetrics = async (): Promise<MetricValue[]> => {
     const threatLevel = Math.round((negativeSentiment / totalMentions) * 100) || 0;
 
     return [
-      { id: "1", title: "Total Mentions", value: totalMentions, change: 0, icon: "trending-up", color: "blue", delta: 0, deltaType: "neutral" },
-      { id: "2", title: "Negative Sentiment", value: negativeSentiment, change: 0, icon: "trending-down", color: "red", delta: 0, deltaType: "neutral" },
-      { id: "3", title: "Active Sources", value: activeSources, change: 0, icon: "trending-up", color: "green", delta: 0, deltaType: "neutral" },
-      { id: "4", title: "Threat Level", value: threatLevel, change: 0, icon: "trending-down", color: "yellow", delta: 0, deltaType: "neutral" }
+      { id: "1", title: "Total Mentions", value: totalMentions, change: 0, icon: "trending-up", color: "blue", delta: 0, deltaType: "increase" },
+      { id: "2", title: "Negative Sentiment", value: negativeSentiment, change: 0, icon: "trending-down", color: "red", delta: 0, deltaType: "increase" },
+      { id: "3", title: "Active Sources", value: activeSources, change: 0, icon: "trending-up", color: "green", delta: 0, deltaType: "increase" },
+      { id: "4", title: "Threat Level", value: threatLevel, change: 0, icon: "trending-down", color: "yellow", delta: 0, deltaType: "increase" }
     ];
   } catch (error) {
     console.error('Error fetching metrics:', error);

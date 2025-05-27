@@ -39,13 +39,13 @@ export const performRealScan = async (query: string, platforms: string[]): Promi
       content: item.content,
       date: new Date(item.created_at).toISOString(),
       severity: item.severity as 'low' | 'medium' | 'high',
-      status: item.status,
+      status: (item.status as ContentAlert['status']) || 'new',
       url: item.url || '',
       threatType: item.threat_type,
       sourceType: item.source_type || 'scan',
       confidenceScore: item.confidence_score || 75,
       sentiment: item.sentiment > 0 ? 'positive' : item.sentiment < 0 ? 'negative' : 'neutral',
-      detectedEntities: item.detected_entities || []
+      detectedEntities: Array.isArray(item.detected_entities) ? item.detected_entities.map(String) : []
     }));
   } catch (error) {
     console.error('Error in performRealScan:', error);

@@ -22,13 +22,13 @@ export const fetchRealAlerts = async (): Promise<ContentAlert[]> => {
       content: item.content,
       date: new Date(item.created_at).toLocaleDateString(),
       severity: item.severity as 'high' | 'medium' | 'low',
-      status: item.status as 'new' | 'read' | 'actioned' | 'reviewing' | 'resolved',
+      status: (item.status as ContentAlert['status']) || 'new',
       threatType: item.threat_type,
       confidenceScore: item.confidence_score,
       sourceType: item.source_type,
       sentiment: item.sentiment > 0 ? 'positive' : item.sentiment < 0 ? 'negative' : 'neutral',
       potentialReach: item.potential_reach,
-      detectedEntities: item.detected_entities ? JSON.parse(JSON.stringify(item.detected_entities)) : [],
+      detectedEntities: Array.isArray(item.detected_entities) ? item.detected_entities.map(String) : [],
       url: item.url
     }));
   } catch (error) {
@@ -127,7 +127,7 @@ export const fetchRealMetrics = async (): Promise<MetricValue[]> => {
         icon: "trending-up", 
         color: "blue", 
         delta: 0, 
-        deltaType: "neutral" 
+        deltaType: "increase" 
       },
       { 
         id: "2", 
@@ -137,7 +137,7 @@ export const fetchRealMetrics = async (): Promise<MetricValue[]> => {
         icon: "trending-down", 
         color: "red", 
         delta: 0, 
-        deltaType: "neutral" 
+        deltaType: "increase" 
       },
       { 
         id: "3", 
@@ -147,7 +147,7 @@ export const fetchRealMetrics = async (): Promise<MetricValue[]> => {
         icon: "trending-up", 
         color: "green", 
         delta: 0, 
-        deltaType: "neutral" 
+        deltaType: "increase" 
       },
       { 
         id: "4", 
@@ -157,7 +157,7 @@ export const fetchRealMetrics = async (): Promise<MetricValue[]> => {
         icon: "trending-down", 
         color: "yellow", 
         delta: 0, 
-        deltaType: "neutral" 
+        deltaType: "increase" 
       }
     ];
   } catch (error) {
