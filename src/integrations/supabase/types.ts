@@ -81,6 +81,42 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_action_logs: {
+        Row: {
+          action: string
+          created_at: string | null
+          details: string | null
+          email_attempted: string | null
+          id: string
+          ip_address: string | null
+          success: boolean
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          details?: string | null
+          email_attempted?: string | null
+          id?: string
+          ip_address?: string | null
+          success?: boolean
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          details?: string | null
+          email_attempted?: string | null
+          id?: string
+          ip_address?: string | null
+          success?: boolean
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       case_threads: {
         Row: {
           assigned_to: string | null
