@@ -16,15 +16,29 @@ const QATestDashboard = () => {
   const [testSuite, setTestSuite] = useState<QATestSuite | null>(null);
   const [running, setRunning] = useState(false);
   const [selectedPhase, setSelectedPhase] = useState<string>('all');
+  const [progress, setProgress] = useState(0);
 
   const runQATests = async () => {
     try {
       setRunning(true);
+      setProgress(0);
       toast.info('🧪 Starting ARIA™ NOC QA Master Suite...', {
         description: 'Running comprehensive system health checks'
       });
       
+      // Simulate progress updates
+      const progressInterval = setInterval(() => {
+        setProgress(prev => {
+          if (prev >= 90) {
+            clearInterval(progressInterval);
+            return 90;
+          }
+          return prev + 10;
+        });
+      }, 500);
+      
       const results = await qaTestRunner.runFullQASuite();
+      setProgress(100);
       setTestSuite(results);
       
       const { passedTests, failedTests, warningTests, gdprCompliance } = results;
@@ -50,12 +64,27 @@ const QATestDashboard = () => {
       });
     } finally {
       setRunning(false);
+      setProgress(0);
     }
+  };
+
+  const resetResults = () => {
+    setTestSuite(null);
+    setProgress(0);
+  };
+
+  const getCriticalIssues = () => {
+    if (!testSuite) return [];
+    return testSuite.results.filter(result => result.status === 'fail');
   };
 
   return (
     <div className="space-y-6">
-      <QATestHeader onRunTests={runQATests} running={running} />
+      <QATestHeader 
+        onRunTests={runQATests} 
+        isRunning={running}
+        onReset={resetResults}
+      />
 
       {testSuite && (
         <>
@@ -75,15 +104,23 @@ const QATestDashboard = () => {
             />
           </TabsContent>
 
-          <QACriticalIssuesAlert testSuite={testSuite} />
+          <QACriticalIssuesAlert 
+            criticalIssues={getCriticalIssues()}
+          />
         </>
       )}
 
       {!testSuite && !running && (
-        <QAInitialState onRunTests={runQATests} />
+        <QAInitialState />
       )}
 
-      {running && <QARunningState />}
+      {running && (
+        <QARunningState 
+          progress={progress}
+          currentPhase="Running comprehensive tests..."
+          estimatedTime={Math.max(30 - Math.floor(progress / 3), 5)}
+        />
+      )}
     </div>
   );
 };
