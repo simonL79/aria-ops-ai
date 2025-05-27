@@ -1179,6 +1179,33 @@ export type Database = {
           },
         ]
       }
+      eidetic_footprint_queue: {
+        Row: {
+          content_excerpt: string | null
+          decay_score: number | null
+          id: string
+          prospect_name: string | null
+          routed_at: string | null
+          status: string | null
+        }
+        Insert: {
+          content_excerpt?: string | null
+          decay_score?: number | null
+          id?: string
+          prospect_name?: string | null
+          routed_at?: string | null
+          status?: string | null
+        }
+        Update: {
+          content_excerpt?: string | null
+          decay_score?: number | null
+          id?: string
+          prospect_name?: string | null
+          routed_at?: string | null
+          status?: string | null
+        }
+        Relationships: []
+      }
       employee_batch_scans: {
         Row: {
           company_id: string | null
@@ -1424,6 +1451,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      entity_risk_profiles: {
+        Row: {
+          entity_name: string
+          id: string
+          risk_score: number | null
+          total_signals: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          entity_name: string
+          id?: string
+          risk_score?: number | null
+          total_signals?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          entity_name?: string
+          id?: string
+          risk_score?: number | null
+          total_signals?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       entity_threat_history: {
         Row: {
@@ -2444,6 +2495,33 @@ export type Database = {
         }
         Relationships: []
       }
+      prospect_alerts: {
+        Row: {
+          created_at: string | null
+          entity: string | null
+          event: string | null
+          id: string
+          medium: string | null
+          status: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          entity?: string | null
+          event?: string | null
+          id?: string
+          medium?: string | null
+          status?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          entity?: string | null
+          event?: string | null
+          id?: string
+          medium?: string | null
+          status?: string | null
+        }
+        Relationships: []
+      }
       prospect_entities: {
         Row: {
           average_sentiment: number | null
@@ -2814,6 +2892,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      rsi_activation_queue: {
+        Row: {
+          id: string
+          prospect_name: string | null
+          queued_at: string | null
+          source: string | null
+          status: string | null
+          threat_reason: string | null
+        }
+        Insert: {
+          id?: string
+          prospect_name?: string | null
+          queued_at?: string | null
+          source?: string | null
+          status?: string | null
+          threat_reason?: string | null
+        }
+        Update: {
+          id?: string
+          prospect_name?: string | null
+          queued_at?: string | null
+          source?: string | null
+          status?: string | null
+          threat_reason?: string | null
+        }
+        Relationships: []
       }
       rsi_campaigns: {
         Row: {
@@ -3465,6 +3570,18 @@ export type Database = {
         }
         Relationships: []
       }
+      entity_risk_dashboard: {
+        Row: {
+          alert_pending: string | null
+          eidetic_queued: boolean | null
+          entity_name: string | null
+          risk_score: number | null
+          rsi_triggered: boolean | null
+          total_signals: number | null
+          updated_at: string | null
+        }
+        Relationships: []
+      }
       graveyard_summary: {
         Row: {
           actions_taken: number | null
@@ -3593,6 +3710,14 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      risk_score_inputs: {
+        Row: {
+          entity_name: string | null
+          risk_score: number | null
+          total_signals: number | null
+        }
+        Relationships: []
       }
       rsi_dashboard_summary: {
         Row: {
@@ -3754,6 +3879,14 @@ export type Database = {
           _user_id: string
           _role: Database["public"]["Enums"]["app_role"]
         }
+        Returns: undefined
+      }
+      trigger_risk_escalations: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      update_entity_risk_scores: {
+        Args: Record<PropertyKey, never>
         Returns: undefined
       }
     }

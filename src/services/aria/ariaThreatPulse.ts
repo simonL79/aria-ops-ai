@@ -27,6 +27,7 @@ export interface RSIActivationItem {
   threat_reason?: string;
   source?: string;
   queued_at: string;
+  status?: string;
 }
 
 export interface EideticFootprintItem {
@@ -35,6 +36,7 @@ export interface EideticFootprintItem {
   content_excerpt?: string;
   decay_score: number;
   routed_at: string;
+  status?: string;
 }
 
 export interface ProspectAlert {
@@ -46,14 +48,31 @@ export interface ProspectAlert {
   created_at: string;
 }
 
+export interface EntityRiskProfile {
+  id: string;
+  entity_name: string;
+  total_signals: number;
+  risk_score: number;
+  updated_at: string;
+}
+
+export interface EntityRiskDashboard {
+  entity_name: string;
+  total_signals: number;
+  risk_score: number;
+  rsi_triggered: boolean;
+  eidetic_queued: boolean;
+  alert_pending?: string;
+  updated_at: string;
+}
+
 export const getProspectEntities = async (): Promise<ProspectEntity[]> => {
   try {
-    // Use scan_results table to simulate prospect entities
+    // Get entities from the new risk profiles system
     const { data, error } = await supabase
-      .from('scan_results')
+      .from('entity_risk_profiles')
       .select('*')
-      .eq('threat_type', 'reputation_risk')
-      .order('created_at', { ascending: false })
+      .order('risk_score', { ascending: false })
       .limit(50);
 
     if (error) {
@@ -61,16 +80,16 @@ export const getProspectEntities = async (): Promise<ProspectEntity[]> => {
       return [];
     }
 
-    // Map scan_results to ProspectEntity format
+    // Map entity_risk_profiles to ProspectEntity format
     const entities: ProspectEntity[] = (data || []).map(item => ({
       id: item.id,
-      detected_name: item.risk_entity_name || 'Unknown Entity',
-      source: item.platform || 'Unknown Source',
-      context_excerpt: (item.content || '').substring(0, 150) + '...',
-      mention_count: 1,
-      escalation_score: Math.abs(item.sentiment || 0),
-      created_at: item.created_at,
-      updated_at: item.updated_at || item.created_at
+      detected_name: item.entity_name,
+      source: 'Risk Profile System',
+      context_excerpt: `Risk Score: ${item.risk_score} | Signals: ${item.total_signals}`,
+      mention_count: item.total_signals,
+      escalation_score: item.risk_score,
+      created_at: item.updated_at,
+      updated_at: item.updated_at
     }));
 
     return entities;
@@ -82,12 +101,10 @@ export const getProspectEntities = async (): Promise<ProspectEntity[]> => {
 
 export const getRSIActivationQueue = async (): Promise<RSIActivationItem[]> => {
   try {
-    // Use activity_logs table to simulate RSI activation queue
     const { data, error } = await supabase
-      .from('activity_logs')
+      .from('rsi_activation_queue')
       .select('*')
-      .eq('action', 'rsi_simulation_triggered')
-      .order('created_at', { ascending: false })
+      .order('queued_at', { ascending: false })
       .limit(20);
 
     if (error) {
@@ -95,16 +112,7 @@ export const getRSIActivationQueue = async (): Promise<RSIActivationItem[]> => {
       return [];
     }
 
-    // Map activity_logs to RSIActivationItem format
-    const items: RSIActivationItem[] = (data || []).map(log => ({
-      id: log.id,
-      prospect_name: log.entity_id || 'Unknown Prospect',
-      threat_reason: log.details || 'RSI Simulation',
-      source: 'Manual Trigger',
-      queued_at: log.created_at
-    }));
-
-    return items;
+    return data || [];
   } catch (error) {
     console.error('Error in getRSIActivationQueue:', error);
     return [];
@@ -113,12 +121,10 @@ export const getRSIActivationQueue = async (): Promise<RSIActivationItem[]> => {
 
 export const getEideticFootprintQueue = async (): Promise<EideticFootprintItem[]> => {
   try {
-    // Use memory_footprints table to simulate eidetic queue
     const { data, error } = await supabase
-      .from('memory_footprints')
+      .from('eidetic_footprint_queue')
       .select('*')
-      .eq('is_active', true)
-      .order('updated_at', { ascending: false })
+      .order('routed_at', { ascending: false })
       .limit(20);
 
     if (error) {
@@ -126,16 +132,7 @@ export const getEideticFootprintQueue = async (): Promise<EideticFootprintItem[]
       return [];
     }
 
-    // Map memory_footprints to EideticFootprintItem format
-    const items: EideticFootprintItem[] = (data || []).map(footprint => ({
-      id: footprint.id,
-      prospect_name: footprint.memory_type || 'Unknown Prospect',
-      content_excerpt: (footprint.memory_context || '').substring(0, 100) + '...',
-      decay_score: footprint.decay_score || 0,
-      routed_at: footprint.updated_at
-    }));
-
-    return items;
+    return data || [];
   } catch (error) {
     console.error('Error in getEideticFootprintQueue:', error);
     return [];
@@ -144,9 +141,8 @@ export const getEideticFootprintQueue = async (): Promise<EideticFootprintItem[]
 
 export const getProspectAlerts = async (): Promise<ProspectAlert[]> => {
   try {
-    // Use content_alerts table for prospect alerts
     const { data, error } = await supabase
-      .from('content_alerts')
+      .from('prospect_alerts')
       .select('*')
       .eq('status', 'pending')
       .order('created_at', { ascending: false })
@@ -157,20 +153,64 @@ export const getProspectAlerts = async (): Promise<ProspectAlert[]> => {
       return [];
     }
 
-    // Map content_alerts to ProspectAlert format
-    const alerts: ProspectAlert[] = (data || []).map(alert => ({
-      id: alert.id,
-      entity: alert.detected_entities ? JSON.stringify(alert.detected_entities) : 'Unknown Entity',
-      event: alert.threat_type || 'Threat Detected',
-      status: alert.status || 'pending',
-      medium: alert.platform || 'Unknown Medium',
-      created_at: alert.created_at
-    }));
-
-    return alerts;
+    return data || [];
   } catch (error) {
     console.error('Error in getProspectAlerts:', error);
     return [];
+  }
+};
+
+export const getEntityRiskDashboard = async (): Promise<EntityRiskDashboard[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('entity_risk_dashboard')
+      .select('*')
+      .order('risk_score', { ascending: false })
+      .limit(50);
+
+    if (error) {
+      console.error('Error fetching entity risk dashboard:', error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error('Error in getEntityRiskDashboard:', error);
+    return [];
+  }
+};
+
+export const updateEntityRiskScores = async (): Promise<boolean> => {
+  try {
+    const { error } = await supabase.rpc('update_entity_risk_scores');
+    
+    if (error) {
+      console.error('Error updating entity risk scores:', error);
+      return false;
+    }
+    
+    toast.success('Entity risk scores updated successfully');
+    return true;
+  } catch (error) {
+    console.error('Error in updateEntityRiskScores:', error);
+    return false;
+  }
+};
+
+export const triggerRiskEscalations = async (): Promise<boolean> => {
+  try {
+    const { error } = await supabase.rpc('trigger_risk_escalations');
+    
+    if (error) {
+      console.error('Error triggering risk escalations:', error);
+      return false;
+    }
+    
+    toast.success('Risk escalations triggered successfully');
+    return true;
+  } catch (error) {
+    console.error('Error in triggerRiskEscalations:', error);
+    return false;
   }
 };
 
@@ -208,8 +248,8 @@ export const getRejectedThreats = async (): Promise<RejectedThreat[]> => {
 export const markAlertProcessed = async (alertId: string): Promise<boolean> => {
   try {
     const { error } = await supabase
-      .from('content_alerts')
-      .update({ status: 'sent' })
+      .from('prospect_alerts')
+      .update({ status: 'processed' })
       .eq('id', alertId);
 
     if (error) {
@@ -226,15 +266,16 @@ export const markAlertProcessed = async (alertId: string): Promise<boolean> => {
 
 export const getARIAStats = async () => {
   try {
-    const [entities, rsiQueue, eideticQueue, alerts] = await Promise.all([
+    const [entities, rsiQueue, eideticQueue, alerts, riskDashboard] = await Promise.all([
       getProspectEntities(),
       getRSIActivationQueue(),
       getEideticFootprintQueue(),
-      getProspectAlerts()
+      getProspectAlerts(),
+      getEntityRiskDashboard()
     ]);
 
-    const highScoreProspects = entities.filter(e => e.escalation_score >= 0.8).length;
-    const totalMentions = entities.reduce((sum, e) => sum + e.mention_count, 0);
+    const highScoreProspects = riskDashboard.filter(e => e.risk_score >= 0.8).length;
+    const totalMentions = riskDashboard.reduce((sum, e) => sum + e.total_signals, 0);
     
     return {
       totalProspects: entities.length,
