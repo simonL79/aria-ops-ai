@@ -12,6 +12,7 @@ interface AuthContextType {
   isAdmin: boolean;
   signOut: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<{ error?: any }>;
+  forceReset: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -21,6 +22,32 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+
+  // Force reset function to clear all auth state
+  const forceReset = async () => {
+    console.log('Force resetting authentication state...');
+    
+    // Clear all local state first
+    setUser(null);
+    setSession(null);
+    setIsAdmin(false);
+    setIsLoading(true);
+    
+    // Clear all possible storage locations
+    localStorage.removeItem('admin_lockout');
+    localStorage.removeItem('supabase.auth.token');
+    sessionStorage.clear();
+    
+    try {
+      // Force sign out from Supabase
+      await supabase.auth.signOut({ scope: 'global' });
+      console.log('Force reset complete');
+    } catch (error) {
+      console.error('Error during force reset:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const checkAdminStatus = async (userId: string) => {
     try {
@@ -54,9 +81,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     console.log('AuthProvider initializing...');
     
-    // Get initial session first
-    const getInitialSession = async () => {
+    // Force reset on mount to clear any stuck state
+    const initializeAuth = async () => {
       try {
+        // Clear any potentially stuck state
+        await forceReset();
+        
+        // Wait a moment for cleanup
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Now get fresh session
         const { data: { session: initialSession }, error } = await supabase.auth.getSession();
         
         if (error) {
@@ -65,7 +99,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           return;
         }
         
-        console.log('Initial session check:', { 
+        console.log('Fresh session check:', { 
           hasSession: !!initialSession,
           userId: initialSession?.user?.id 
         });
@@ -82,10 +116,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           }
         }
         
-        // Always set loading to false after processing
         setIsLoading(false);
       } catch (error) {
-        console.error('Error in getInitialSession:', error);
+        console.error('Error in initializeAuth:', error);
         setIsLoading(false);
       }
     };
@@ -121,13 +154,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           await checkAdminStatus(currentSession.user.id);
         }
 
-        // Always set loading to false after handling auth state changes
         setIsLoading(false);
       }
     );
 
-    // Initialize session
-    getInitialSession();
+    // Initialize with reset
+    initializeAuth();
 
     return () => {
       subscription.unsubscribe();
@@ -172,6 +204,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     isAdmin,
     signOut,
     signIn,
+    forceReset,
   };
 
   return (

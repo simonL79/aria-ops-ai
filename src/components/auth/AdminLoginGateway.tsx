@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Shield, Lock, Eye, EyeOff, Loader2, AlertTriangle } from 'lucide-react';
+import { Shield, Lock, Eye, EyeOff, Loader2, AlertTriangle, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -17,12 +17,24 @@ const AdminLoginGateway = () => {
   const [loginAttempts, setLoginAttempts] = useState(0);
   const [isLocked, setIsLocked] = useState(false);
   const [lockoutTime, setLockoutTime] = useState<Date | null>(null);
-  const { isAuthenticated, isAdmin, signIn, signOut, isLoading: authLoading } = useAuth();
+  const { isAuthenticated, isAdmin, signIn, signOut, isLoading: authLoading, forceReset } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
   const MAX_ATTEMPTS = 5;
   const LOCKOUT_DURATION = 15 * 60 * 1000; // 15 minutes
+
+  // Handle force reset
+  const handleForceReset = async () => {
+    toast.info('Resetting authentication state...');
+    await forceReset();
+    setEmail('');
+    setPassword('');
+    setLoginAttempts(0);
+    setIsLocked(false);
+    setLockoutTime(null);
+    toast.success('Authentication reset complete');
+  };
 
   // Check for existing lockout
   useEffect(() => {
@@ -57,11 +69,10 @@ const AdminLoginGateway = () => {
     }
   }, [isLocked, lockoutTime]);
 
-  // Handle successful authentication redirect - fixed logic
+  // Handle successful authentication redirect
   useEffect(() => {
     console.log('Auth state in AdminLoginGateway:', { isAuthenticated, isAdmin, authLoading });
     
-    // Only redirect if auth is not loading and user is authenticated and admin
     if (!authLoading && isAuthenticated && isAdmin) {
       const from = location.state?.from?.pathname || '/discovery';
       console.log('Admin authenticated, redirecting to:', from);
@@ -79,6 +90,14 @@ const AdminLoginGateway = () => {
             <div className="font-semibold">Verifying Access</div>
             <div className="text-sm text-gray-400">Checking authentication...</div>
           </div>
+          <Button
+            onClick={handleForceReset}
+            variant="outline"
+            className="mt-4 text-gray-300 border-gray-600 hover:bg-gray-700"
+          >
+            <RotateCcw className="mr-2 h-4 w-4" />
+            Reset Auth State
+          </Button>
         </div>
       </div>
     );
@@ -97,12 +116,22 @@ const AdminLoginGateway = () => {
         <div className="text-center space-y-4">
           <div className="text-red-400 text-xl font-semibold">Access Denied</div>
           <div className="text-gray-300">Admin privileges required</div>
-          <button 
-            onClick={() => signOut()}
-            className="px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600"
-          >
-            Sign Out
-          </button>
+          <div className="space-x-2">
+            <button 
+              onClick={() => signOut()}
+              className="px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600"
+            >
+              Sign Out
+            </button>
+            <Button
+              onClick={handleForceReset}
+              variant="outline"
+              className="text-gray-300 border-gray-600 hover:bg-gray-700"
+            >
+              <RotateCcw className="mr-2 h-4 w-4" />
+              Reset
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -135,7 +164,6 @@ const AdminLoginGateway = () => {
     setIsLoading(true);
 
     try {
-      // Validate admin email format
       if (!email.includes('@') || email.length < 5) {
         throw new Error('Invalid email format');
       }
@@ -146,7 +174,6 @@ const AdminLoginGateway = () => {
         const newAttempts = loginAttempts + 1;
         setLoginAttempts(newAttempts);
 
-        // Log failed attempt
         await logAdminAction('admin_login_failed', false, `Failed attempt ${newAttempts}: ${error.message}`);
 
         if (newAttempts >= MAX_ATTEMPTS) {
@@ -164,13 +191,10 @@ const AdminLoginGateway = () => {
           toast.error(`Login failed. ${MAX_ATTEMPTS - newAttempts} attempts remaining.`);
         }
       } else {
-        // Success - reset attempts and log
         setLoginAttempts(0);
         localStorage.removeItem('admin_lockout');
         await logAdminAction('admin_login_success', true, 'Successful admin login');
         toast.success('Admin access granted - redirecting...');
-        
-        // The redirect will be handled by the useEffect above
       }
     } catch (error: any) {
       console.error('Login error:', error);
@@ -199,6 +223,18 @@ const AdminLoginGateway = () => {
             <h1 className="text-4xl font-bold text-white">A.R.I.A™</h1>
           </div>
           <p className="text-gray-300">Secure Admin Access Gateway</p>
+        </div>
+
+        {/* Reset Button */}
+        <div className="text-center">
+          <Button
+            onClick={handleForceReset}
+            variant="outline"
+            className="text-gray-300 border-gray-600 hover:bg-gray-700"
+          >
+            <RotateCcw className="mr-2 h-4 w-4" />
+            Reset Authentication
+          </Button>
         </div>
 
         {/* Security Notice */}
