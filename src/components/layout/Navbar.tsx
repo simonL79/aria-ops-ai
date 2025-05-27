@@ -13,6 +13,7 @@ import {
   FileText,
   BarChart3
 } from 'lucide-react';
+import Logo from '@/components/ui/logo';
 
 const Navbar = () => {
   const { signOut, isAdmin } = useAuth();
@@ -48,8 +49,7 @@ const Navbar = () => {
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
               <Link to="/discovery" className="flex items-center gap-2">
-                <Shield className="h-8 w-8 text-blue-600" />
-                <span className="font-bold text-xl text-gray-900">A.R.I.A™</span>
+                <Logo variant="default" size="sm" />
               </Link>
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">

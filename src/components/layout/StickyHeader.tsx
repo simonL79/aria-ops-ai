@@ -28,11 +28,11 @@ const StickyHeader = ({ isScrolled }: StickyHeaderProps) => {
   };
   
   return (
-    <header className={`sticky top-0 z-50 w-full transition-all duration-300 ${isScrolled ? 'bg-premium-black/90 shadow-lg backdrop-blur-sm' : 'bg-transparent'}`}>
+    <header className={`sticky top-0 z-50 w-full transition-all duration-300 ${isScrolled ? 'bg-white/95 shadow-lg backdrop-blur-sm border-b border-blue-200' : 'bg-transparent'}`}>
       <div className="container mx-auto px-6">
         <div className="flex items-center justify-between py-4">
           <Link to="/" className="flex items-center">
-            <Logo variant={isScrolled ? "light" : "default"} size="lg" />
+            <Logo variant={isScrolled ? "default" : "default"} size="md" />
           </Link>
           
           {/* Desktop Navigation */}
@@ -40,37 +40,37 @@ const StickyHeader = ({ isScrolled }: StickyHeaderProps) => {
             <NavigationMenu>
               <NavigationMenuList>
                 <NavigationMenuItem>
-                  <Link to="/" className={`${navigationMenuTriggerStyle()} font-medium transition-colors duration-300 ${isScrolled ? 'text-white hover:text-premium-silver' : 'text-premium-black hover:text-premium-darkGray'}`}>
+                  <Link to="/" className={`${navigationMenuTriggerStyle()} font-medium transition-colors duration-300 ${isScrolled ? 'text-blue-900 hover:text-blue-600' : 'text-blue-900 hover:text-blue-600'}`}>
                     Home
                   </Link>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
-                  <Link to="/about" className={`${navigationMenuTriggerStyle()} font-medium transition-colors duration-300 ${isScrolled ? 'text-white hover:text-premium-silver' : 'text-premium-black hover:text-premium-darkGray'}`}>
+                  <Link to="/about" className={`${navigationMenuTriggerStyle()} font-medium transition-colors duration-300 ${isScrolled ? 'text-blue-900 hover:text-blue-600' : 'text-blue-900 hover:text-blue-600'}`}>
                     About
                   </Link>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
                   <button 
                     onClick={() => scrollToSection('how-it-works')}
-                    className={`${navigationMenuTriggerStyle()} font-medium transition-colors duration-300 ${isScrolled ? 'text-white hover:text-premium-silver' : 'text-premium-black hover:text-premium-darkGray'}`}
+                    className={`${navigationMenuTriggerStyle()} font-medium transition-colors duration-300 ${isScrolled ? 'text-blue-900 hover:text-blue-600' : 'text-blue-900 hover:text-blue-600'}`}
                   >
                     How It Works
                   </button>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
-                  <Link to="/simon-lindsay" className={`${navigationMenuTriggerStyle()} font-medium transition-colors duration-300 ${isScrolled ? 'text-white hover:text-premium-silver' : 'text-premium-black hover:text-premium-darkGray'}`}>
+                  <Link to="/simon-lindsay" className={`${navigationMenuTriggerStyle()} font-medium transition-colors duration-300 ${isScrolled ? 'text-blue-900 hover:text-blue-600' : 'text-blue-900 hover:text-blue-600'}`}>
                     Simon Lindsay
                   </Link>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
-                  <Link to="/blog" className={`${navigationMenuTriggerStyle()} font-medium transition-colors duration-300 ${isScrolled ? 'text-white hover:text-premium-silver' : 'text-premium-black hover:text-premium-darkGray'}`}>
+                  <Link to="/blog" className={`${navigationMenuTriggerStyle()} font-medium transition-colors duration-300 ${isScrolled ? 'text-blue-900 hover:text-blue-600' : 'text-blue-900 hover:text-blue-600'}`}>
                     Blog
                   </Link>
                 </NavigationMenuItem>
               </NavigationMenuList>
             </NavigationMenu>
             
-            <Button asChild size="sm" className="ml-4 bg-primary text-white hover:bg-primary/90">
+            <Button asChild size="sm" className="ml-4 bg-blue-600 text-white hover:bg-blue-700">
               <Link to="/scan">Scan My Name Now</Link>
             </Button>
             
@@ -78,8 +78,8 @@ const StickyHeader = ({ isScrolled }: StickyHeaderProps) => {
               variant="outline" 
               size="sm" 
               className={`ml-2 ${isScrolled 
-                ? 'border-white text-white hover:bg-white hover:text-premium-black' 
-                : 'border-premium-black text-premium-black hover:bg-premium-black hover:text-white'}`}
+                ? 'border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white' 
+                : 'border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white'}`}
               onClick={() => navigate("/auth")}
             >
               Login
@@ -92,9 +92,9 @@ const StickyHeader = ({ isScrolled }: StickyHeaderProps) => {
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? (
-              <X className={`h-6 w-6 transition-colors duration-300 ${isScrolled ? 'text-white' : 'text-premium-black'}`} />
+              <X className={`h-6 w-6 transition-colors duration-300 ${isScrolled ? 'text-blue-900' : 'text-blue-900'}`} />
             ) : (
-              <Menu className={`h-6 w-6 transition-colors duration-300 ${isScrolled ? 'text-white' : 'text-premium-black'}`} />
+              <Menu className={`h-6 w-6 transition-colors duration-300 ${isScrolled ? 'text-blue-900' : 'text-blue-900'}`} />
             )}
           </button>
         </div>

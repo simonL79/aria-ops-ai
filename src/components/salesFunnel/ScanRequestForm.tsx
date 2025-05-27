@@ -95,21 +95,21 @@ const ScanRequestForm = () => {
           <form onSubmit={handleSubmit} className="max-w-xl mx-auto space-y-4">
             <input 
               name="full_name"
-              className="w-full p-3 rounded" 
+              className="w-full p-3 rounded border border-blue-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200" 
               type="text" 
               placeholder="Your Full Name" 
               required 
             />
             <input 
               name="email"
-              className="w-full p-3 rounded" 
+              className="w-full p-3 rounded border border-blue-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200" 
               type="email" 
               placeholder="Your Email Address" 
               required 
             />
             <Button 
               type="submit" 
-              className="w-full bg-black text-white font-semibold py-6 rounded hover:bg-gray-800"
+              className="w-full bg-blue-800 text-white font-semibold py-6 rounded hover:bg-blue-900 transition-colors"
               disabled={isSubmitting}
             >
               {isSubmitting ? "SUBMITTING..." : "SCAN ME"}

@@ -43,7 +43,7 @@ const SalesFunnelPage = () => {
 
   // For public users, show the landing page with proper navigation
   return (
-    <div className="bg-black text-white font-sans min-h-screen flex flex-col">
+    <div className="bg-white text-gray-900 font-sans min-h-screen flex flex-col">
       {/* Use the StickyHeader component for consistent navigation */}
       <StickyHeader isScrolled={isScrolled} />
       
@@ -71,38 +71,38 @@ const SalesFunnelPage = () => {
       <EnhancedTestimonialsSection />
 
       {/* Lead Magnet Section */}
-      <section className="bg-white py-16 px-6">
+      <section className="bg-blue-50 py-16 px-6">
         <div className="container mx-auto">
           <div className="grid md:grid-cols-2 gap-12 max-w-5xl mx-auto">
             <div className="flex flex-col justify-center">
-              <h2 className="text-3xl font-bold mb-6 text-premium-black">
+              <h2 className="text-3xl font-bold mb-6 text-blue-900">
                 Get Your FREE Threat Intelligence Briefing
               </h2>
-              <p className="text-premium-darkGray mb-6">
+              <p className="text-blue-700 mb-6">
                 Discover how threat actors target your reputation and learn command center strategies to defend against them:
               </p>
               <ul className="space-y-3 mb-6">
                 <li className="flex items-start gap-2">
-                  <Check className="h-5 w-5 text-green-500 mt-1" />
-                  <span className="text-premium-darkGray">Build your personal threat intelligence NOC</span>
+                  <Check className="h-5 w-5 text-blue-600 mt-1" />
+                  <span className="text-blue-700">Build your personal threat intelligence NOC</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <Check className="h-5 w-5 text-green-500 mt-1" />
-                  <span className="text-premium-darkGray">Learn case threading and triage methodologies</span>
+                  <Check className="h-5 w-5 text-blue-600 mt-1" />
+                  <span className="text-blue-700">Learn case threading and triage methodologies</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <Check className="h-5 w-5 text-green-500 mt-1" />
-                  <span className="text-premium-darkGray">Get operator-level response playbooks</span>
+                  <Check className="h-5 w-5 text-blue-600 mt-1" />
+                  <span className="text-blue-700">Get operator-level response playbooks</span>
                 </li>
               </ul>
               
               <div className="mt-4 flex flex-col sm:flex-row gap-4">
-                <Button asChild variant="outline" className="text-premium-gray">
+                <Button asChild variant="outline" className="text-blue-600 border-blue-600 hover:bg-blue-600 hover:text-white">
                   <Link to="/resources" className="flex items-center">
                     Browse resources <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
-                <Button asChild variant="outline" className="text-premium-gray">
+                <Button asChild variant="outline" className="text-blue-600 border-blue-600 hover:bg-blue-600 hover:text-white">
                   <Link to="/blog" className="flex items-center">
                     Read our blog <BookOpen className="ml-2 h-4 w-4" />
                   </Link>

@@ -22,13 +22,13 @@ const MobileMenu = ({ isOpen, setIsOpen, isScrolled }: MobileMenuProps) => {
   if (!isOpen) return null;
   
   return (
-    <div className="md:hidden bg-premium-black/95 backdrop-blur-sm fixed top-16 left-0 right-0 z-50">
+    <div className="md:hidden bg-white/95 backdrop-blur-sm border-b border-blue-200 shadow-lg">
       <nav className="container mx-auto px-6 py-4">
         <ul className="space-y-4">
           <li>
             <Link 
               to="/" 
-              className="block text-white hover:text-premium-silver transition-colors"
+              className="block text-blue-900 hover:text-blue-600 transition-colors"
               onClick={() => setIsOpen(false)}
             >
               Home
@@ -37,7 +37,7 @@ const MobileMenu = ({ isOpen, setIsOpen, isScrolled }: MobileMenuProps) => {
           <li>
             <Link 
               to="/about" 
-              className="block text-white hover:text-premium-silver transition-colors"
+              className="block text-blue-900 hover:text-blue-600 transition-colors"
               onClick={() => setIsOpen(false)}
             >
               About
@@ -46,7 +46,7 @@ const MobileMenu = ({ isOpen, setIsOpen, isScrolled }: MobileMenuProps) => {
           <li>
             <button
               onClick={() => scrollToSection('how-it-works')}
-              className="block text-white hover:text-premium-silver transition-colors text-left w-full"
+              className="block text-blue-900 hover:text-blue-600 transition-colors text-left w-full"
             >
               How It Works
             </button>
@@ -54,7 +54,7 @@ const MobileMenu = ({ isOpen, setIsOpen, isScrolled }: MobileMenuProps) => {
           <li>
             <Link 
               to="/simon-lindsay" 
-              className="block text-white hover:text-premium-silver transition-colors"
+              className="block text-blue-900 hover:text-blue-600 transition-colors"
               onClick={() => setIsOpen(false)}
             >
               Simon Lindsay
@@ -63,7 +63,7 @@ const MobileMenu = ({ isOpen, setIsOpen, isScrolled }: MobileMenuProps) => {
           <li>
             <Link 
               to="/blog" 
-              className="block text-white hover:text-premium-silver transition-colors"
+              className="block text-blue-900 hover:text-blue-600 transition-colors"
               onClick={() => setIsOpen(false)}
             >
               Blog
@@ -72,14 +72,14 @@ const MobileMenu = ({ isOpen, setIsOpen, isScrolled }: MobileMenuProps) => {
           <li>
             <Link 
               to="/resources" 
-              className="block text-white hover:text-premium-silver transition-colors"
+              className="block text-blue-900 hover:text-blue-600 transition-colors"
               onClick={() => setIsOpen(false)}
             >
               Resources
             </Link>
           </li>
           <li className="pt-4">
-            <Button asChild className="w-full bg-primary text-white hover:bg-primary/90" onClick={() => setIsOpen(false)}>
+            <Button asChild className="w-full bg-blue-600 text-white hover:bg-blue-700" onClick={() => setIsOpen(false)}>
               <Link to="/scan">Scan My Name Now</Link>
             </Button>
           </li>
@@ -87,7 +87,7 @@ const MobileMenu = ({ isOpen, setIsOpen, isScrolled }: MobileMenuProps) => {
             <Button 
               asChild 
               variant="outline" 
-              className="w-full border-white text-white hover:bg-white hover:text-premium-black"
+              className="w-full border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white"
               onClick={() => setIsOpen(false)}
             >
               <Link to="/auth">Login</Link>
