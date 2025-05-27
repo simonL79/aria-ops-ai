@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,6 +20,7 @@ const AdminLoginGateway = () => {
   const [lockoutTime, setLockoutTime] = useState<Date | null>(null);
   const { isAuthenticated, isAdmin, signIn } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
 
   const MAX_ATTEMPTS = 5;
   const LOCKOUT_DURATION = 15 * 60 * 1000; // 15 minutes
@@ -57,9 +58,18 @@ const AdminLoginGateway = () => {
     }
   }, [isLocked, lockoutTime]);
 
+  // Handle successful authentication redirect
+  useEffect(() => {
+    if (isAuthenticated && isAdmin) {
+      const from = location.state?.from?.pathname || '/discovery';
+      console.log('Admin authenticated, redirecting to:', from);
+      navigate(from, { replace: true });
+    }
+  }, [isAuthenticated, isAdmin, navigate, location.state]);
+
   // Redirect if already authenticated and admin
   if (isAuthenticated && isAdmin) {
-    const from = location.state?.from?.pathname || '/dashboard';
+    const from = location.state?.from?.pathname || '/discovery';
     return <Navigate to={from} replace />;
   }
 
@@ -124,6 +134,8 @@ const AdminLoginGateway = () => {
         localStorage.removeItem('admin_lockout');
         await logAdminAction('admin_login_success', true, 'Successful admin login');
         toast.success('Admin access granted');
+        
+        // The redirect will be handled by the useEffect above
       }
     } catch (error: any) {
       console.error('Login error:', error);
@@ -201,6 +213,7 @@ const AdminLoginGateway = () => {
                     placeholder="admin@aria.com"
                     required
                     disabled={isLoading}
+                    autoComplete="email"
                     className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500"
                   />
                 </div>
@@ -218,6 +231,7 @@ const AdminLoginGateway = () => {
                       placeholder="Enter secure password"
                       required
                       disabled={isLoading}
+                      autoComplete="current-password"
                       className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500 pr-12"
                     />
                     <Button
