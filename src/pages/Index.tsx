@@ -11,15 +11,17 @@ import EnhancedCTASection from '@/components/sections/EnhancedCTASection';
 
 const Index = () => {
   return (
-    <div className="min-h-screen">
-      <HeroSection />
-      <NOCFeaturesSection />
-      <ProblemSection />
-      <HowItWorksSection />
-      <PlatformsSection />
-      <ReputationOpsCenterSection />
-      <EnhancedCTASection />
-    </div>
+    <DashboardLayout>
+      <div className="min-h-screen">
+        <HeroSection />
+        <NOCFeaturesSection />
+        <ProblemSection />
+        <HowItWorksSection />
+        <PlatformsSection />
+        <ReputationOpsCenterSection />
+        <EnhancedCTASection />
+      </div>
+    </DashboardLayout>
   );
 };
 

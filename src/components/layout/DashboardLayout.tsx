@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ReactNode } from 'react';
 import { 
@@ -23,7 +24,12 @@ import {
   LogOut,
   MessageSquare,
   Bell,
-  BarChart 
+  BarChart,
+  Users,
+  FileText,
+  TrendingUp,
+  AlertTriangle,
+  Shield
 } from 'lucide-react';
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from '@/hooks/useAuth';
@@ -42,7 +48,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     try {
       await signOut();
       toast.success("Signed out successfully");
-      navigate("/auth");
+      navigate("/");
     } catch (error) {
       console.error("Error signing out:", error);
       toast.error("Error signing out");
@@ -68,62 +74,74 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     {
       label: "Dashboard",
       icon: <Home className="h-4 w-4" />,
-      href: "/dashboard",
-      active: pathname === "/dashboard",
+      href: "/",
+      active: pathname === "/",
     },
     {
-      label: "Intelligence",
-      icon: <Brain className="h-4 w-4" />,
-      href: "/dashboard/intelligence",
-      active: pathname === "/dashboard/intelligence",
-    },
-    {
-      label: "Radar",
-      icon: <Radar className="h-4 w-4" />,
-      href: "/dashboard/radar",
-      active: pathname === "/dashboard/radar",
-    },
-    {
-      label: "AI Scraping",
-      icon: <Search className="h-4 w-4" />,
-      href: "/dashboard/ai-scraping",
-      active: pathname === "/dashboard/ai-scraping",
-    },
-    {
-      label: "Mentions",
-      icon: <Bell className="h-4 w-4" />,
-      href: "/dashboard/mentions",
-      active: pathname === "/dashboard/mentions",
-    },
-    {
-      label: "Engagement",
-      icon: <MessageSquare className="h-4 w-4" />,
-      href: "/dashboard/engagement",
-      active: pathname === "/dashboard/engagement",
+      label: "Clients",
+      icon: <Users className="h-4 w-4" />,
+      href: "/clients",
+      active: pathname === "/clients",
     },
     {
       label: "Analytics",
       icon: <BarChart className="h-4 w-4" />,
-      href: "/dashboard/analytics",
-      active: pathname === "/dashboard/analytics",
+      href: "/analytics",
+      active: pathname === "/analytics",
     },
     {
-      label: "Monitor",
-      icon: <Activity className="h-4 w-4" />,
-      href: "/dashboard/monitor",
-      active: pathname === "/dashboard/monitor" || pathname === "/monitor",
+      label: "Intelligence Workbench",
+      icon: <Brain className="h-4 w-4" />,
+      href: "/intelligence/workbench",
+      active: pathname === "/intelligence/workbench",
     },
     {
-      label: "New Companies",
+      label: "Enhanced Intelligence",
+      icon: <Shield className="h-4 w-4" />,
+      href: "/intelligence/enhanced",
+      active: pathname === "/intelligence/enhanced",
+    },
+    {
+      label: "Offensive Operations",
+      icon: <AlertTriangle className="h-4 w-4" />,
+      href: "/intelligence/offensive-operations",
+      active: pathname === "/intelligence/offensive-operations",
+    },
+    {
+      label: "AI Scraping",
+      icon: <Search className="h-4 w-4" />,
+      href: "/ai-scraping",
+      active: pathname === "/ai-scraping",
+    },
+    {
+      label: "Clean Launch",
       icon: <Building2 className="h-4 w-4" />,
-      href: "/dashboard/new-companies",
-      active: pathname === "/dashboard/new-companies",
+      href: "/clean-launch",
+      active: pathname === "/clean-launch",
     },
     {
-      label: "Settings",
-      icon: <Settings className="h-4 w-4" />,
-      href: "/settings",
-      active: pathname === "/settings",
+      label: "Blog",
+      icon: <FileText className="h-4 w-4" />,
+      href: "/blog",
+      active: pathname === "/blog",
+    },
+    {
+      label: "Reputation Scan",
+      icon: <TrendingUp className="h-4 w-4" />,
+      href: "/reputation-scan",
+      active: pathname === "/reputation-scan",
+    },
+    {
+      label: "Admin",
+      icon: <Shield className="h-4 w-4" />,
+      href: "/admin",
+      active: pathname === "/admin",
+    },
+    {
+      label: "QA Testing",
+      icon: <AlertTriangle className="h-4 w-4" />,
+      href: "/qa-test",
+      active: pathname === "/qa-test",
     }
   ];
 
