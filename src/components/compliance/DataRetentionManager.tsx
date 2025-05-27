@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,18 +16,18 @@ interface RetentionSchedule {
   id: string;
   data_category: string;
   table_name: string;
-  retention_period: string; // Changed from string to match database type
+  retention_period: string;
   retention_justification: string;
   deletion_method: string;
   legal_basis: string;
-  review_frequency: string; // Changed from string to match database type
-  last_review_date: string;
-  next_review_date: string;
+  review_frequency: string;
+  last_review_date: string | null;
+  next_review_date: string | null;
   responsible_role: string;
   automated_deletion: boolean;
-  deletion_job_name: string;
+  deletion_job_name: string | null;
   special_category_data: boolean;
-  cross_border_considerations: string;
+  cross_border_considerations: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -65,12 +66,18 @@ const DataRetentionManager = () => {
         .order('data_category');
 
       if (error) throw error;
+      
       // Transform the data to handle interval types properly
       const transformedData = data?.map(item => ({
         ...item,
-        retention_period: item.retention_period || '',
-        review_frequency: item.review_frequency || '1 year'
+        retention_period: item.retention_period ? String(item.retention_period) : '',
+        review_frequency: item.review_frequency ? String(item.review_frequency) : '1 year',
+        last_review_date: item.last_review_date || null,
+        next_review_date: item.next_review_date || null,
+        deletion_job_name: item.deletion_job_name || null,
+        cross_border_considerations: item.cross_border_considerations || null
       })) || [];
+      
       setSchedules(transformedData);
     } catch (error) {
       console.error('Error fetching retention schedules:', error);

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,20 +20,20 @@ interface DPIA {
   legal_basis: string;
   necessity_justification: string;
   proportionality_assessment: string;
-  identified_risks: any; // Changed from any[] to any to match database Json type
-  mitigation_measures: any; // Changed from any[] to any to match database Json type
-  data_retention_period: string;
-  data_minimization_measures: string;
-  security_measures: string;
+  identified_risks: any;
+  mitigation_measures: any;
+  data_retention_period: string | null;
+  data_minimization_measures: string | null;
+  security_measures: string | null;
   automated_decision_making: boolean;
   profiling_activities: boolean;
   assessment_date: string;
-  review_date: string;
+  review_date: string | null;
   assessor_name: string;
   assessor_role: string;
   status: string;
-  approval_date: string;
-  approved_by: string;
+  approval_date: string | null;
+  approved_by: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -74,12 +75,20 @@ const DPIAManagement = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      // Transform the data to ensure arrays are properly handled
+      
+      // Transform the data to ensure proper type handling
       const transformedData = data?.map(item => ({
         ...item,
         identified_risks: Array.isArray(item.identified_risks) ? item.identified_risks : [],
-        mitigation_measures: Array.isArray(item.mitigation_measures) ? item.mitigation_measures : []
+        mitigation_measures: Array.isArray(item.mitigation_measures) ? item.mitigation_measures : [],
+        data_retention_period: item.data_retention_period ? String(item.data_retention_period) : null,
+        data_minimization_measures: item.data_minimization_measures || null,
+        security_measures: item.security_measures || null,
+        review_date: item.review_date || null,
+        approval_date: item.approval_date || null,
+        approved_by: item.approved_by || null
       })) || [];
+      
       setDpias(transformedData);
     } catch (error) {
       console.error('Error fetching DPIAs:', error);
