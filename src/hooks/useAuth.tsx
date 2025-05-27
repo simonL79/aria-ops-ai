@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { User, Session } from '@supabase/supabase-js';
@@ -12,6 +13,7 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<{ error?: any }>;
   forceReset: () => Promise<void>;
+  forceAdminAccess: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -21,6 +23,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+
+  // Emergency admin access for business owner
+  const forceAdminAccess = () => {
+    console.log('🚨 FORCE ADMIN ACCESS: Business owner override');
+    setIsAdmin(true);
+    localStorage.setItem('force_admin_access', 'true');
+  };
 
   // Simple force reset - clears everything immediately
   const forceReset = async () => {
@@ -46,10 +55,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     console.log('✅ FORCE RESET: Complete');
   };
 
-  // Simple admin check
-  const checkAdminStatus = async (userId: string) => {
+  // Enhanced admin check with business owner email override
+  const checkAdminStatus = async (userId: string, userEmail: string) => {
     try {
-      console.log('🔍 Checking admin status for:', userId);
+      console.log('🔍 Checking admin status for:', userId, userEmail);
+      
+      // Business owner email override
+      if (userEmail === 'simonlindsay7988@gmail.com') {
+        console.log('✅ Business owner detected - granting admin access');
+        setIsAdmin(true);
+        return true;
+      }
+
+      // Check for forced admin access
+      if (localStorage.getItem('force_admin_access') === 'true') {
+        console.log('✅ Force admin access detected');
+        setIsAdmin(true);
+        return true;
+      }
       
       const { data, error } = await supabase
         .from('user_roles')
@@ -59,11 +82,38 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         .limit(1);
       
       const hasAdminRole = !error && data && data.length > 0;
-      console.log('✅ Admin status:', hasAdminRole);
+      console.log('✅ Database admin status:', hasAdminRole);
+      
+      // If no admin role found but this is the business owner, create one
+      if (!hasAdminRole && userEmail === 'simonlindsay7988@gmail.com') {
+        console.log('🔧 Creating admin role for business owner');
+        try {
+          await supabase.from('user_roles').insert({
+            user_id: userId,
+            role: 'admin'
+          });
+          setIsAdmin(true);
+          return true;
+        } catch (insertError) {
+          console.error('Failed to create admin role:', insertError);
+          // Still grant access to business owner
+          setIsAdmin(true);
+          return true;
+        }
+      }
+      
       setIsAdmin(hasAdminRole);
       return hasAdminRole;
     } catch (error) {
       console.error('❌ Error checking admin status:', error);
+      
+      // Fallback: if this is the business owner email, grant access anyway
+      if (userEmail === 'simonlindsay7988@gmail.com') {
+        console.log('🚨 Fallback: Granting admin access to business owner');
+        setIsAdmin(true);
+        return true;
+      }
+      
       setIsAdmin(false);
       return false;
     }
@@ -95,7 +145,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         
         // Check admin if user exists
         if (currentSession?.user) {
-          await checkAdminStatus(currentSession.user.id);
+          await checkAdminStatus(currentSession.user.id, currentSession.user.email || '');
           
           // Initialize database
           try {
@@ -127,11 +177,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(newSession?.user ?? null);
         
         if (event === 'SIGNED_IN' && newSession?.user) {
-          await checkAdminStatus(newSession.user.id);
+          await checkAdminStatus(newSession.user.id, newSession.user.email || '');
         }
         
         if (event === 'SIGNED_OUT') {
           setIsAdmin(false);
+          localStorage.removeItem('force_admin_access');
         }
       }
     );
@@ -170,6 +221,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       console.log('🚪 Signing out...');
       setIsAdmin(false);
+      localStorage.removeItem('force_admin_access');
       await supabase.auth.signOut();
       console.log('✅ Sign out complete');
     } catch (error) {
@@ -186,6 +238,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     signOut,
     signIn,
     forceReset,
+    forceAdminAccess,
   };
 
   return (

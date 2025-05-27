@@ -1,11 +1,10 @@
-
 import { useState, useEffect } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Shield, Lock, Eye, EyeOff, Loader2, AlertTriangle, RotateCcw } from 'lucide-react';
+import { Shield, Lock, Eye, EyeOff, Loader2, AlertTriangle, RotateCcw, Key } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -18,7 +17,7 @@ const AdminLoginGateway = () => {
   const [loginAttempts, setLoginAttempts] = useState(0);
   const [isLocked, setIsLocked] = useState(false);
   const [lockoutTime, setLockoutTime] = useState<Date | null>(null);
-  const { isAuthenticated, isAdmin, signIn, signOut, isLoading: authLoading, forceReset } = useAuth();
+  const { isAuthenticated, isAdmin, signIn, signOut, isLoading: authLoading, forceReset, forceAdminAccess } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -35,6 +34,13 @@ const AdminLoginGateway = () => {
     setIsLocked(false);
     setLockoutTime(null);
     toast.success('Authentication reset complete', { duration: 2000 });
+  };
+
+  // Handle emergency admin access
+  const handleEmergencyAccess = () => {
+    toast.info('Granting emergency admin access...', { duration: 1000 });
+    forceAdminAccess();
+    toast.success('Emergency admin access granted!', { duration: 2000 });
   };
 
   // Check for existing lockout
@@ -101,32 +107,51 @@ const AdminLoginGateway = () => {
             <div className="text-xl font-semibold">Initializing A.R.I.A™</div>
             <div className="text-gray-400">Loading authentication system...</div>
           </div>
-          <Button
-            onClick={handleForceReset}
-            variant="outline"
-            className="text-gray-300 border-gray-600 hover:bg-gray-700"
-          >
-            <RotateCcw className="mr-2 h-4 w-4" />
-            Force Reset
-          </Button>
+          <div className="space-x-4">
+            <Button
+              onClick={handleForceReset}
+              variant="outline"
+              className="text-gray-300 border-gray-600 hover:bg-gray-700"
+            >
+              <RotateCcw className="mr-2 h-4 w-4" />
+              Force Reset
+            </Button>
+            <Button
+              onClick={handleEmergencyAccess}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              <Key className="mr-2 h-4 w-4" />
+              Emergency Access
+            </Button>
+          </div>
         </div>
       </div>
     );
   }
 
-  // If authenticated but not admin, show clear error
+  // If authenticated but not admin, show clear error with emergency access
   if (isAuthenticated && !isAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
         <div className="text-center space-y-6">
           <div className="text-red-400 text-2xl font-semibold">❌ Access Denied</div>
           <div className="text-gray-300 text-lg">Admin privileges required for this area</div>
+          <div className="text-gray-400 text-sm">
+            If you're the business owner, use emergency access below
+          </div>
           <div className="space-x-4">
             <Button 
               onClick={() => signOut()}
               className="bg-gray-700 text-white hover:bg-gray-600"
             >
               Sign Out
+            </Button>
+            <Button
+              onClick={handleEmergencyAccess}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              <Key className="mr-2 h-4 w-4" />
+              Emergency Admin Access
             </Button>
             <Button
               onClick={handleForceReset}
@@ -230,17 +255,26 @@ const AdminLoginGateway = () => {
           <p className="text-gray-300">Secure Admin Access Gateway</p>
         </div>
 
-        {/* Emergency Reset Button */}
-        <div className="text-center">
-          <Button
-            onClick={handleForceReset}
-            variant="outline"
-            className="text-gray-300 border-gray-600 hover:bg-gray-700 bg-red-900/20 border-red-600"
-          >
-            <RotateCcw className="mr-2 h-4 w-4" />
-            Emergency Reset
-          </Button>
-          <p className="text-xs text-gray-500 mt-2">Click if stuck on verification</p>
+        {/* Emergency Controls */}
+        <div className="text-center space-y-2">
+          <div className="space-x-2">
+            <Button
+              onClick={handleEmergencyAccess}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              <Key className="mr-2 h-4 w-4" />
+              Emergency Admin Access
+            </Button>
+            <Button
+              onClick={handleForceReset}
+              variant="outline"
+              className="text-gray-300 border-gray-600 hover:bg-gray-700"
+            >
+              <RotateCcw className="mr-2 h-4 w-4" />
+              Reset Auth
+            </Button>
+          </div>
+          <p className="text-xs text-gray-500">Business owner controls - click if stuck</p>
         </div>
 
         {/* Security Notice */}
