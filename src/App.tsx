@@ -9,6 +9,8 @@ import AdminSessionManager from "@/components/auth/AdminSessionManager";
 import Index from "./pages/Index";
 import Discovery from "./pages/Discovery";
 import AdminLogin from "./pages/AdminLogin";
+import AboutPage from "./pages/AboutPage";
+import BlogPage from "./pages/BlogPage";
 import EmployeeBrandRiskPage from "./pages/EmployeeBrandRiskPage";
 import ComplianceDashboard from "./components/compliance/ComplianceDashboard";
 import { useAuth } from "@/hooks/useAuth";
@@ -33,6 +35,8 @@ const App = () => {
             <Routes>
               {/* Public Routes */}
               <Route path="/" element={<Index />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/blog" element={<BlogPage />} />
               
               {/* Admin Login */}
               <Route path="/admin/login" element={<AdminLogin />} />
