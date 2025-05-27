@@ -56,18 +56,31 @@ export const useDiscoveryScanning = () => {
 
   const loadExistingThreats = async () => {
     try {
-      // Use the enriched view that includes client information
-      const { data, error } = await supabase
-        .from('scan_results_with_client')
-        .select('*')
+      // Get scan results with client information using a manual join
+      const { data: scanResults, error } = await supabase
+        .from('scan_results')
+        .select(`
+          *,
+          clients!linked_client_id (
+            id,
+            name,
+            contactemail
+          ),
+          client_entities!linked_entity_id (
+            id,
+            entity_name,
+            entity_type,
+            alias
+          )
+        `)
         .order('created_at', { ascending: false })
         .limit(50);
 
       if (error) throw error;
 
-      const threats: DiscoveredThreat[] = (data || []).map(item => ({
+      const threats: DiscoveredThreat[] = (scanResults || []).map(item => ({
         id: item.id,
-        entityName: item.risk_entity_name || item.matched_entity_name || 'Unknown Entity',
+        entityName: item.risk_entity_name || item.client_entities?.entity_name || 'Unknown Entity',
         entityType: item.risk_entity_type === 'person' ? 'person' : 'brand',
         platform: item.platform,
         content: item.content,
@@ -83,7 +96,7 @@ export const useDiscoveryScanning = () => {
         // Client-entity mapping enrichment
         clientLinked: item.client_linked || false,
         linkedClientId: item.linked_client_id,
-        linkedClientName: item.client_name,
+        linkedClientName: item.clients?.name,
         matchType: item.entity_match_type,
         matchConfidence: item.entity_similarity_score ? Math.round(item.entity_similarity_score * 100) : undefined
       }));
