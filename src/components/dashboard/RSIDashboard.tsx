@@ -2,12 +2,13 @@
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Shield, Brain, Target, Activity, Zap } from "lucide-react";
+import { Shield, Brain, Target, Activity, Zap, Eye } from "lucide-react";
 import RSIManagementPanel from './RSIManagementPanel';
 import RSIThreatSimulator from './RSIThreatSimulator';
 import RSICampaignBuilder from './rsi/RSICampaignBuilder';
 import RSIAnalytics from './rsi/RSIAnalytics';
 import ARIAThreatPulsePanel from './rsi/ARIAThreatPulsePanel';
+import ARIAAdvancedModules from './rsi/ARIAAdvancedModules';
 
 const RSIDashboard = () => {
   const [activeTab, setActiveTab] = useState('management');
@@ -44,7 +45,7 @@ const RSIDashboard = () => {
       </Card>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-5">
+        <TabsList className="grid grid-cols-6">
           <TabsTrigger value="management" className="flex items-center gap-2">
             <Activity className="h-4 w-4" />
             Management
@@ -64,6 +65,10 @@ const RSIDashboard = () => {
           <TabsTrigger value="aria" className="flex items-center gap-2">
             <Zap className="h-4 w-4" />
             A.R.I.A™ Pulse
+          </TabsTrigger>
+          <TabsTrigger value="advanced" className="flex items-center gap-2">
+            <Eye className="h-4 w-4" />
+            A.R.I.A™ Advanced
           </TabsTrigger>
         </TabsList>
 
@@ -85,6 +90,10 @@ const RSIDashboard = () => {
 
         <TabsContent value="aria">
           <ARIAThreatPulsePanel />
+        </TabsContent>
+
+        <TabsContent value="advanced">
+          <ARIAAdvancedModules />
         </TabsContent>
       </Tabs>
     </div>

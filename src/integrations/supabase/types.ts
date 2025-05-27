@@ -1790,6 +1790,36 @@ export type Database = {
           },
         ]
       }
+      legal_indicators: {
+        Row: {
+          context_excerpt: string | null
+          detected_keywords: string[] | null
+          discovered_at: string | null
+          entity_name: string | null
+          id: string
+          platform: string | null
+          risk_level: string | null
+        }
+        Insert: {
+          context_excerpt?: string | null
+          detected_keywords?: string[] | null
+          discovered_at?: string | null
+          entity_name?: string | null
+          id?: string
+          platform?: string | null
+          risk_level?: string | null
+        }
+        Update: {
+          context_excerpt?: string | null
+          detected_keywords?: string[] | null
+          discovered_at?: string | null
+          entity_name?: string | null
+          id?: string
+          platform?: string | null
+          risk_level?: string | null
+        }
+        Relationships: []
+      }
       lia_records: {
         Row: {
           assessment_date: string
@@ -1853,6 +1883,42 @@ export type Database = {
           review_date?: string | null
           status?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      llm_memory_audit: {
+        Row: {
+          audit_timestamp: string | null
+          bias_score: number | null
+          entity_name: string
+          id: string
+          model_name: string | null
+          model_version: string | null
+          query: string | null
+          reference_detected: boolean | null
+          response_excerpt: string | null
+        }
+        Insert: {
+          audit_timestamp?: string | null
+          bias_score?: number | null
+          entity_name: string
+          id?: string
+          model_name?: string | null
+          model_version?: string | null
+          query?: string | null
+          reference_detected?: boolean | null
+          response_excerpt?: string | null
+        }
+        Update: {
+          audit_timestamp?: string | null
+          bias_score?: number | null
+          entity_name?: string
+          id?: string
+          model_name?: string | null
+          model_version?: string | null
+          query?: string | null
+          reference_detected?: boolean | null
+          response_excerpt?: string | null
         }
         Relationships: []
       }
@@ -2120,6 +2186,36 @@ export type Database = {
         }
         Relationships: []
       }
+      narrative_clusters: {
+        Row: {
+          attack_surface_score: number | null
+          created_at: string | null
+          entity_name: string | null
+          id: string
+          intent_label: string | null
+          narrative_snippet: string | null
+          source_platform: string | null
+        }
+        Insert: {
+          attack_surface_score?: number | null
+          created_at?: string | null
+          entity_name?: string | null
+          id?: string
+          intent_label?: string | null
+          narrative_snippet?: string | null
+          source_platform?: string | null
+        }
+        Update: {
+          attack_surface_score?: number | null
+          created_at?: string | null
+          entity_name?: string | null
+          id?: string
+          intent_label?: string | null
+          narrative_snippet?: string | null
+          source_platform?: string | null
+        }
+        Relationships: []
+      }
       narrative_drift_tracking: {
         Row: {
           created_at: string | null
@@ -2156,6 +2252,39 @@ export type Database = {
           original_narrative?: string
           platform?: string
           trend_direction?: string | null
+        }
+        Relationships: []
+      }
+      offline_spill_events: {
+        Row: {
+          created_at: string | null
+          entity_involved: string | null
+          event_description: string | null
+          first_online_mention: string | null
+          id: string
+          offline_date: string | null
+          source_platform: string | null
+          spill_severity: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          entity_involved?: string | null
+          event_description?: string | null
+          first_online_mention?: string | null
+          id?: string
+          offline_date?: string | null
+          source_platform?: string | null
+          spill_severity?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          entity_involved?: string | null
+          event_description?: string | null
+          first_online_mention?: string | null
+          id?: string
+          offline_date?: string | null
+          source_platform?: string | null
+          spill_severity?: string | null
         }
         Relationships: []
       }
@@ -2463,6 +2592,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      reputation_forecasts: {
+        Row: {
+          created_at: string | null
+          entity_name: string
+          forecast_window: string | null
+          id: string
+          projected_impact: string | null
+          sentiment_avg: number | null
+          source_type: string | null
+          trajectory: string | null
+          velocity: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          entity_name: string
+          forecast_window?: string | null
+          id?: string
+          projected_impact?: string | null
+          sentiment_avg?: number | null
+          source_type?: string | null
+          trajectory?: string | null
+          velocity?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          entity_name?: string
+          forecast_window?: string | null
+          id?: string
+          projected_impact?: string | null
+          sentiment_avg?: number | null
+          source_type?: string | null
+          trajectory?: string | null
+          velocity?: number | null
+        }
+        Relationships: []
       }
       reputation_scan_submissions: {
         Row: {
@@ -3055,6 +3220,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      synthetic_threats: {
+        Row: {
+          confidence_score: number | null
+          detected_at: string | null
+          detection_tool: string | null
+          entity_name: string | null
+          id: string
+          is_confirmed: boolean | null
+          matched_phrase: string | null
+          media_type: string | null
+          sample_url: string | null
+        }
+        Insert: {
+          confidence_score?: number | null
+          detected_at?: string | null
+          detection_tool?: string | null
+          entity_name?: string | null
+          id?: string
+          is_confirmed?: boolean | null
+          matched_phrase?: string | null
+          media_type?: string | null
+          sample_url?: string | null
+        }
+        Update: {
+          confidence_score?: number | null
+          detected_at?: string | null
+          detection_tool?: string | null
+          entity_name?: string | null
+          id?: string
+          is_confirmed?: boolean | null
+          matched_phrase?: string | null
+          media_type?: string | null
+          sample_url?: string | null
+        }
+        Relationships: []
       }
       system_config: {
         Row: {
