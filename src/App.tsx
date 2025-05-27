@@ -17,6 +17,7 @@ import EmployeeBrandRiskPage from "./pages/EmployeeBrandRiskPage";
 import ComplianceDashboard from "./components/compliance/ComplianceDashboard";
 import RSI from "./pages/RSI";
 import GraveyardPage from "./pages/GraveyardPage";
+import Clients from "./pages/Clients";
 import { useAuth } from "@/hooks/useAuth";
 
 const queryClient = new QueryClient();
@@ -50,6 +51,12 @@ const App = () => {
                 <Route path="/discovery" element={
                   <SecureRouteGuard requireAdmin={true}>
                     <Discovery />
+                  </SecureRouteGuard>
+                } />
+                
+                <Route path="/clients" element={
+                  <SecureRouteGuard requireAdmin={true}>
+                    <Clients />
                   </SecureRouteGuard>
                 } />
                 
