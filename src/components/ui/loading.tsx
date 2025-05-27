@@ -2,7 +2,7 @@
 import React from 'react';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 
-export const LoadingSpinner as LoadingSpinnerExport = LoadingSpinner;
+export { default as LoadingSpinner } from '@/components/common/LoadingSpinner';
 
 export const Loading = ({ message = 'Loading...', className }: { message?: string; className?: string }) => {
   return (
