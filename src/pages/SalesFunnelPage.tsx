@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
@@ -8,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Check, Shield, Search, FileText, Users, AlertTriangle, Eye, TrendingUp, Clock, Star } from "lucide-react";
 import ScanRequestForm from "@/components/salesFunnel/ScanRequestForm";
 import AdminDashboardWelcome from "@/components/salesFunnel/AdminDashboardWelcome";
+import Logo from "@/components/ui/logo";
 
 const SalesFunnelPage = () => {
   const { isAuthenticated } = useAuth();
@@ -36,8 +36,7 @@ const SalesFunnelPage = () => {
         <div className="container flex h-16 items-center justify-between">
           <div className="flex items-center gap-2">
             <a href="/" className="flex items-center space-x-2">
-              <Shield className="h-6 w-6 text-primary" />
-              <span className="font-bold text-xl">A.R.I.A.™</span>
+              <Logo variant="default" size="sm" />
             </a>
           </div>
           
@@ -45,6 +44,7 @@ const SalesFunnelPage = () => {
           <nav className="hidden md:flex items-center space-x-6">
             <a href="/about" className="text-sm font-medium hover:text-primary">About</a>
             <a href="/blog" className="text-sm font-medium hover:text-primary">Blog</a>
+            <a href="/simon-lindsay" className="text-sm font-medium hover:text-primary">Simon Lindsay</a>
             <a href="/admin/login" className="text-sm font-medium text-blue-600 hover:text-blue-700">Admin Login</a>
           </nav>
         </div>
