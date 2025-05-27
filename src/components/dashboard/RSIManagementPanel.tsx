@@ -329,7 +329,7 @@ const RSIManagementPanel = () => {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm">Average Response Time</span>
-                      <span className="text-sm font-medium">< 5min</span>
+                      <span className="text-sm font-medium">&lt; 5min</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-sm">Success Rate</span>
