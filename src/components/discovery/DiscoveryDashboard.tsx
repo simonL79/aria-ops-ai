@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
-import { Scanner, Users, FileText, Mail, TrendingUp, AlertTriangle } from "lucide-react";
+import { Search, Users, FileText, Mail, TrendingUp, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import DiscoveryScanPanel from './DiscoveryScanPanel';
 import ThreatIntelligencePanel from './ThreatIntelligencePanel';
@@ -53,7 +53,7 @@ const DiscoveryDashboard = () => {
             disabled={isScanning}
             className="bg-green-600 hover:bg-green-700"
           >
-            <Scanner className="mr-2 h-4 w-4" />
+            <Search className="mr-2 h-4 w-4" />
             {isScanning ? "Scanning..." : "Start Discovery Scan"}
           </Button>
           {isScanning && (

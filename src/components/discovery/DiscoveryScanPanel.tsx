@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Scanner, Search, AlertTriangle, Eye, ExternalLink } from "lucide-react";
+import { Search, AlertTriangle, Eye, ExternalLink } from "lucide-react";
 import { DiscoveredThreat } from '@/hooks/useDiscoveryScanning';
 
 interface DiscoveryScanPanelProps {
@@ -50,7 +50,7 @@ const DiscoveryScanPanel = ({ isScanning, discoveredThreats, onStartScan }: Disc
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Scanner className="h-5 w-5" />
+            <Search className="h-5 w-5" />
             Zero-Input Discovery Engine
           </CardTitle>
           <CardDescription>
@@ -79,7 +79,7 @@ const DiscoveryScanPanel = ({ isScanning, discoveredThreats, onStartScan }: Disc
               size="lg"
               className="w-full bg-green-600 hover:bg-green-700"
             >
-              <Scanner className="mr-2 h-4 w-4" />
+              <Search className="mr-2 h-4 w-4" />
               {isScanning ? "Discovery Scan Running..." : "Start Zero-Input Discovery Scan"}
             </Button>
           </div>
