@@ -16,7 +16,8 @@ export const getMonitoringStatus = async (): Promise<MonitoringStatus> => {
         isActive: false,
         lastRun: null,
         nextRun: null,
-        scanInterval: 60
+        sourcesCount: 0,
+        sources: 0
       };
     }
     
@@ -24,7 +25,8 @@ export const getMonitoringStatus = async (): Promise<MonitoringStatus> => {
       isActive: data?.is_active || false,
       lastRun: data?.last_run ? new Date(data.last_run) : null,
       nextRun: data?.next_run ? new Date(data.next_run) : null,
-      scanInterval: data?.scan_interval || 60
+      sourcesCount: data?.sources_count || 0,
+      sources: data?.sources_count || 0
     };
   } catch (error) {
     console.error("Error in getMonitoringStatus:", error);
@@ -32,7 +34,8 @@ export const getMonitoringStatus = async (): Promise<MonitoringStatus> => {
       isActive: false,
       lastRun: null,
       nextRun: null,
-      scanInterval: 60
+      sourcesCount: 0,
+      sources: 0
     };
   }
 };
