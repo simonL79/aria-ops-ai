@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
-import Navbar from "@/components/layout/Navbar";
+import DashboardSidebar from "@/components/layout/DashboardSidebar";
 import SecureRouteGuard from "@/components/auth/SecureRouteGuard";
 import AdminSessionManager from "@/components/auth/AdminSessionManager";
 import SalesFunnelPage from "./pages/SalesFunnelPage";
@@ -30,14 +30,14 @@ const App = () => {
       <HelmetProvider>
         <TooltipProvider>
           <Toaster />
-          <div className="min-h-screen bg-gray-50">
+          <div className="min-h-screen bg-gray-50 flex w-full">
             {/* Show session manager only for authenticated admins */}
             {isAuthenticated && isAdmin && <AdminSessionManager />}
             
-            {/* Show navbar only for authenticated routes */}
-            {isAuthenticated && <Navbar />}
+            {/* Show sidebar only for authenticated routes */}
+            {isAuthenticated && <DashboardSidebar />}
             
-            <main>
+            <main className="flex-1 overflow-auto">
               <Routes>
                 {/* Public Routes */}
                 <Route path="/" element={<SalesFunnelPage />} />
@@ -49,6 +49,12 @@ const App = () => {
                 
                 {/* Protected Admin Routes */}
                 <Route path="/discovery" element={
+                  <SecureRouteGuard requireAdmin={true}>
+                    <Discovery />
+                  </SecureRouteGuard>
+                } />
+                
+                <Route path="/dashboard" element={
                   <SecureRouteGuard requireAdmin={true}>
                     <Discovery />
                   </SecureRouteGuard>
@@ -87,13 +93,6 @@ const App = () => {
                 <Route path="/graveyard" element={
                   <SecureRouteGuard requireAdmin={true}>
                     <GraveyardPage />
-                  </SecureRouteGuard>
-                } />
-                
-                {/* Dashboard route pointing to discovery */}
-                <Route path="/dashboard" element={
-                  <SecureRouteGuard requireAdmin={true}>
-                    <Discovery />
                   </SecureRouteGuard>
                 } />
               </Routes>
