@@ -26,13 +26,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       console.log('Checking admin status for user:', userId);
       
-      // Simple query to check if user has admin role
+      // Use a more direct query approach
       const { data, error } = await supabase
         .from('user_roles')
-        .select('role')
+        .select('*')
         .eq('user_id', userId)
-        .eq('role', 'admin')
-        .maybeSingle();
+        .eq('role', 'admin');
       
       if (error) {
         console.error('Error checking admin status:', error);
@@ -40,24 +39,30 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return;
       }
 
-      const hasAdminRole = !!data;
-      console.log('Admin status result:', hasAdminRole);
+      const hasAdminRole = data && data.length > 0;
+      console.log('Admin status check - data:', data, 'hasAdminRole:', hasAdminRole);
       setIsAdmin(hasAdminRole);
       
-      // If this is immediately after login and user should be admin, force refresh
-      if (!hasAdminRole && userId) {
-        console.log('Admin role not found, checking again in 1 second...');
+      // If no admin role found, try one more time after a brief delay
+      if (!hasAdminRole) {
+        console.log('Admin role not found, retrying once...');
         setTimeout(async () => {
-          const { data: retryData } = await supabase
-            .from('user_roles')
-            .select('role')
-            .eq('user_id', userId)
-            .eq('role', 'admin')
-            .maybeSingle();
-          
-          const retryHasAdmin = !!retryData;
-          console.log('Retry admin status result:', retryHasAdmin);
-          setIsAdmin(retryHasAdmin);
+          try {
+            const { data: retryData, error: retryError } = await supabase
+              .from('user_roles')
+              .select('*')
+              .eq('user_id', userId)
+              .eq('role', 'admin');
+            
+            if (!retryError && retryData && retryData.length > 0) {
+              console.log('Retry successful - admin role found:', retryData);
+              setIsAdmin(true);
+            } else {
+              console.log('Retry failed - no admin role found');
+            }
+          } catch (retryError) {
+            console.error('Retry admin check failed:', retryError);
+          }
         }, 1000);
       }
     } catch (error) {
@@ -82,10 +87,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         // Handle admin status checking
         if (event === 'SIGNED_IN' && currentSession?.user) {
-          // Use setTimeout to avoid potential recursion
-          setTimeout(() => {
-            checkAdminStatus(currentSession.user.id);
-          }, 100);
+          // Check admin status immediately
+          await checkAdminStatus(currentSession.user.id);
           
           try {
             await initializeDatabase();
@@ -100,13 +103,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           console.log('User signed out');
         }
 
-        if (event === 'TOKEN_REFRESHED') {
+        if (event === 'TOKEN_REFRESHED' && currentSession?.user) {
           console.log('Token refreshed successfully');
-          if (currentSession?.user) {
-            setTimeout(() => {
-              checkAdminStatus(currentSession.user.id);
-            }, 100);
-          }
+          await checkAdminStatus(currentSession.user.id);
         }
 
         setIsLoading(false);
@@ -165,8 +164,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signOut = async () => {
     try {
-      await supabase.auth.signOut();
+      console.log('Signing out user...');
       setIsAdmin(false);
+      await supabase.auth.signOut();
+      console.log('Sign out successful');
     } catch (error) {
       console.error('Error signing out:', error);
     }
