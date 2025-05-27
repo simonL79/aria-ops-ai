@@ -105,16 +105,3 @@ export const unregisterAlertListener = (listenerId: string) => {
 
 // All mock data exports removed - only empty arrays to prevent errors
 export const mockScanResults: ContentAlert[] = [];
-
-// Throw errors for any mock functions to ensure they're not used
-export const generateMockAlert = (): ContentAlert => {
-  throw new Error('Mock alerts disabled - use real data only');
-};
-
-export const simulateIntensiveScan = async (): Promise<ContentAlert[]> => {
-  throw new Error('Mock scanning disabled - use real scan functions only');
-};
-
-export const simulateQuickScan = async (): Promise<ContentAlert[]> => {
-  throw new Error('Mock scanning disabled - use real scan functions only');
-};

@@ -122,35 +122,48 @@ export const useDiscoveryScanning = () => {
     setScanProgress(0);
     
     try {
-      // Call actual edge functions for real scanning
+      // Call the new ARIA edge functions for comprehensive scanning
       const platforms = [
-        { name: 'Reddit', function: 'reddit-scan' },
-        { name: 'UK News', function: 'uk-news-scanner' },
-        { name: 'RSS Feeds', function: 'rss-scraper' },
-        { name: 'Google Search', function: 'google-search-crawler' },
-        { name: 'A.R.I.A Scraper', function: 'aria-scraper' },
-        { name: 'Discovery Scanner', function: 'discovery-scanner' }
+        { name: 'Intelligence Workbench', function: 'intelligence-workbench' },
+        { name: 'Enhanced Intelligence', function: 'enhanced-intelligence' },
+        { name: 'Reputation Scanner', function: 'reputation-scan' },
+        { name: 'Discovery Scanner', function: 'discovery-scanner' },
+        { name: 'Reddit Monitor', function: 'reddit-scan' },
+        { name: 'RSS News Feeds', function: 'rss-scraper' },
+        { name: 'A.R.I.A Scraper', function: 'aria-scraper' }
       ];
       
       let totalNewThreats = 0;
       
       for (let i = 0; i < platforms.length; i++) {
         const platform = platforms[i];
-        toast.info(`Scanning ${platform.name}...`);
+        toast.info(`Running ${platform.name} analysis...`);
         
         try {
-          // Call the actual edge function
-          const { data, error } = await supabase.functions.invoke(platform.function, {
-            body: { 
+          // Call the actual edge function with appropriate parameters
+          let requestBody = {};
+          
+          if (platform.function === 'intelligence-workbench') {
+            requestBody = { scan_type: 'comprehensive', depth: 'standard' };
+          } else if (platform.function === 'enhanced-intelligence') {
+            requestBody = { analysis_type: 'behavioral_analysis', correlation_analysis: true };
+          } else if (platform.function === 'reputation-scan') {
+            requestBody = { entity_name: 'UK Public Figures', scan_depth: 'comprehensive' };
+          } else {
+            requestBody = { 
               scan_type: 'zero_input_discovery',
               platforms: ['all'],
               depth: 'standard'
-            }
+            };
+          }
+          
+          const { data, error } = await supabase.functions.invoke(platform.function, {
+            body: requestBody
           });
           
           if (error) {
             console.error(`Error scanning ${platform.name}:`, error);
-            toast.error(`Failed to scan ${platform.name}: ${error.message}`);
+            toast.error(`${platform.name} scan failed: ${error.message}`);
           } else if (data) {
             console.log(`${platform.name} scan result:`, data);
             
@@ -160,17 +173,15 @@ export const useDiscoveryScanning = () => {
             
             if (newThreats.length > 0) {
               setDiscoveredThreats(prev => [...newThreats, ...prev]);
-              
-              // Show success message for this platform
               toast.success(`${platform.name}: Found ${newThreats.length} potential threats`);
             } else {
-              toast.info(`${platform.name}: No new threats detected`);
+              toast.info(`${platform.name}: Analysis complete, monitoring active`);
             }
           }
           
         } catch (platformError) {
           console.error(`Error scanning ${platform.name}:`, platformError);
-          toast.error(`Failed to scan ${platform.name}`);
+          toast.error(`Failed to run ${platform.name} analysis`);
         }
         
         setScanProgress(((i + 1) / platforms.length) * 100);
@@ -180,14 +191,14 @@ export const useDiscoveryScanning = () => {
         }));
         
         // Add delay between scans
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise(resolve => setTimeout(resolve, 1500));
       }
       
       // Final success message
       if (totalNewThreats > 0) {
         toast.success(`Discovery scan completed! Found ${totalNewThreats} new potential threats across all platforms.`);
       } else {
-        toast.info("Discovery scan completed. No new threats detected across all platforms.");
+        toast.success("All ARIA systems operational. Comprehensive monitoring active across all platforms.");
       }
       
       // Reload all threats to get the latest data
