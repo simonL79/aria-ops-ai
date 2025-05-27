@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,8 +19,8 @@ interface DPIA {
   legal_basis: string;
   necessity_justification: string;
   proportionality_assessment: string;
-  identified_risks: any[];
-  mitigation_measures: any[];
+  identified_risks: any; // Changed from any[] to any to match database Json type
+  mitigation_measures: any; // Changed from any[] to any to match database Json type
   data_retention_period: string;
   data_minimization_measures: string;
   security_measures: string;
@@ -75,7 +74,13 @@ const DPIAManagement = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setDpias(data || []);
+      // Transform the data to ensure arrays are properly handled
+      const transformedData = data?.map(item => ({
+        ...item,
+        identified_risks: Array.isArray(item.identified_risks) ? item.identified_risks : [],
+        mitigation_measures: Array.isArray(item.mitigation_measures) ? item.mitigation_measures : []
+      })) || [];
+      setDpias(transformedData);
     } catch (error) {
       console.error('Error fetching DPIAs:', error);
       toast.error('Failed to fetch DPIAs');

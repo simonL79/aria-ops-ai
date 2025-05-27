@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -278,7 +277,7 @@ const EmployeeManagement = () => {
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-3">
           <h2 className="text-2xl font-bold">Employee Management</h2>
-          <Shield className="h-5 w-5 text-blue-600" title="GDPR Compliant" />
+          <Shield className="h-5 w-5 text-blue-600" />
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>

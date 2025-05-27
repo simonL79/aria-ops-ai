@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,11 +15,11 @@ interface RetentionSchedule {
   id: string;
   data_category: string;
   table_name: string;
-  retention_period: string;
+  retention_period: string; // Changed from string to match database type
   retention_justification: string;
   deletion_method: string;
   legal_basis: string;
-  review_frequency: string;
+  review_frequency: string; // Changed from string to match database type
   last_review_date: string;
   next_review_date: string;
   responsible_role: string;
@@ -66,7 +65,13 @@ const DataRetentionManager = () => {
         .order('data_category');
 
       if (error) throw error;
-      setSchedules(data || []);
+      // Transform the data to handle interval types properly
+      const transformedData = data?.map(item => ({
+        ...item,
+        retention_period: item.retention_period || '',
+        review_frequency: item.review_frequency || '1 year'
+      })) || [];
+      setSchedules(transformedData);
     } catch (error) {
       console.error('Error fetching retention schedules:', error);
       toast.error('Failed to fetch retention schedules');
