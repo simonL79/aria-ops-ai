@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -12,10 +11,12 @@ import {
   Lock,
   Activity,
   AlertTriangle,
-  CheckCircle
+  CheckCircle,
+  TrendingUp
 } from "lucide-react";
 import ARIASecurityPanel from './ARIASecurityPanel';
 import CerebraPanel from './CerebraPanel';
+import PraxisPanel from './PraxisPanel';
 import { logModuleUsage } from '@/services/aria/securityService';
 import { toast } from 'sonner';
 
@@ -63,6 +64,20 @@ const ARIAAdvancedModules = () => {
         'Memory override injection',
         'Influence echo mapping',
         'Automated bias alerts'
+      ]
+    },
+    {
+      id: 'praxis',
+      name: 'PRAXIS™ Reputation Foresight System',
+      description: 'Pre-crisis risk engine and narrative fallout prediction',
+      icon: TrendingUp,
+      status: 'active',
+      classification: 'restricted',
+      features: [
+        'Internal signal detection',
+        'Tone drift analysis',
+        'Risk archetype modeling',
+        'Crisis simulation triggers'
       ]
     },
     {
@@ -134,9 +149,10 @@ const ARIAAdvancedModules = () => {
       </div>
 
       <Tabs defaultValue="modules" className="w-full">
-        <TabsList className="grid grid-cols-3 w-full">
+        <TabsList className="grid grid-cols-4 w-full">
           <TabsTrigger value="modules">Protected Modules</TabsTrigger>
           <TabsTrigger value="cerebra">CEREBRA™ Control</TabsTrigger>
+          <TabsTrigger value="praxis">PRAXIS™ Foresight</TabsTrigger>
           <TabsTrigger value="security">Security Control</TabsTrigger>
         </TabsList>
 
@@ -230,6 +246,10 @@ const ARIAAdvancedModules = () => {
 
         <TabsContent value="cerebra">
           <CerebraPanel />
+        </TabsContent>
+
+        <TabsContent value="praxis">
+          <PraxisPanel />
         </TabsContent>
 
         <TabsContent value="security">

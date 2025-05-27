@@ -1964,6 +1964,42 @@ export type Database = {
         }
         Relationships: []
       }
+      internal_behavior_signals: {
+        Row: {
+          captured_at: string | null
+          entity_name: string | null
+          id: string
+          metadata: Json | null
+          notes: string | null
+          severity: number | null
+          signal_type: string | null
+          signal_value: string | null
+          source: string | null
+        }
+        Insert: {
+          captured_at?: string | null
+          entity_name?: string | null
+          id?: string
+          metadata?: Json | null
+          notes?: string | null
+          severity?: number | null
+          signal_type?: string | null
+          signal_value?: string | null
+          source?: string | null
+        }
+        Update: {
+          captured_at?: string | null
+          entity_name?: string | null
+          id?: string
+          metadata?: Json | null
+          notes?: string | null
+          severity?: number | null
+          signal_type?: string | null
+          signal_value?: string | null
+          source?: string | null
+        }
+        Relationships: []
+      }
       lead_magnets: {
         Row: {
           created_at: string | null
@@ -2593,6 +2629,134 @@ export type Database = {
           offline_date?: string | null
           source_platform?: string | null
           spill_severity?: string | null
+        }
+        Relationships: []
+      }
+      praxis_crisis_simulations: {
+        Row: {
+          archetype_id: string | null
+          created_at: string | null
+          effectiveness_score: number | null
+          entity_name: string | null
+          id: string
+          notes: string | null
+          outcome_projection: string | null
+          rsi_simulation_id: string | null
+          simulated_narrative: string | null
+          simulation_status: string | null
+          triggered_by: string | null
+        }
+        Insert: {
+          archetype_id?: string | null
+          created_at?: string | null
+          effectiveness_score?: number | null
+          entity_name?: string | null
+          id?: string
+          notes?: string | null
+          outcome_projection?: string | null
+          rsi_simulation_id?: string | null
+          simulated_narrative?: string | null
+          simulation_status?: string | null
+          triggered_by?: string | null
+        }
+        Update: {
+          archetype_id?: string | null
+          created_at?: string | null
+          effectiveness_score?: number | null
+          entity_name?: string | null
+          id?: string
+          notes?: string | null
+          outcome_projection?: string | null
+          rsi_simulation_id?: string | null
+          simulated_narrative?: string | null
+          simulation_status?: string | null
+          triggered_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "praxis_crisis_simulations_archetype_id_fkey"
+            columns: ["archetype_id"]
+            isOneToOne: false
+            referencedRelation: "praxis_risk_archetypes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      praxis_risk_archetypes: {
+        Row: {
+          confidence_score: number | null
+          drift_score: number | null
+          entity_name: string | null
+          forecast_type: string | null
+          id: string
+          last_updated: string | null
+          likely_visibility: string | null
+          mitigation_suggested: string | null
+          predicted_window: string | null
+          risk_level: string | null
+          status: string | null
+          supporting_signals: string[] | null
+          triggered_at: string | null
+        }
+        Insert: {
+          confidence_score?: number | null
+          drift_score?: number | null
+          entity_name?: string | null
+          forecast_type?: string | null
+          id?: string
+          last_updated?: string | null
+          likely_visibility?: string | null
+          mitigation_suggested?: string | null
+          predicted_window?: string | null
+          risk_level?: string | null
+          status?: string | null
+          supporting_signals?: string[] | null
+          triggered_at?: string | null
+        }
+        Update: {
+          confidence_score?: number | null
+          drift_score?: number | null
+          entity_name?: string | null
+          forecast_type?: string | null
+          id?: string
+          last_updated?: string | null
+          likely_visibility?: string | null
+          mitigation_suggested?: string | null
+          predicted_window?: string | null
+          risk_level?: string | null
+          status?: string | null
+          supporting_signals?: string[] | null
+          triggered_at?: string | null
+        }
+        Relationships: []
+      }
+      praxis_signal_correlations: {
+        Row: {
+          correlation_strength: number | null
+          created_at: string | null
+          entity_name: string | null
+          forecast_type: string | null
+          historical_accuracy: number | null
+          id: string
+          signal_combination: string[] | null
+        }
+        Insert: {
+          correlation_strength?: number | null
+          created_at?: string | null
+          entity_name?: string | null
+          forecast_type?: string | null
+          historical_accuracy?: number | null
+          id?: string
+          signal_combination?: string[] | null
+        }
+        Update: {
+          correlation_strength?: number | null
+          created_at?: string | null
+          entity_name?: string | null
+          forecast_type?: string | null
+          historical_accuracy?: number | null
+          id?: string
+          signal_combination?: string[] | null
         }
         Relationships: []
       }
@@ -3791,6 +3955,45 @@ export type Database = {
           },
         ]
       }
+      tone_drift_profiles: {
+        Row: {
+          baseline_tone: string | null
+          confidence_level: number | null
+          created_at: string | null
+          deviation_keywords: string[] | null
+          drift_score: number | null
+          entity_name: string | null
+          id: string
+          recent_tone: string | null
+          reference_period: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          baseline_tone?: string | null
+          confidence_level?: number | null
+          created_at?: string | null
+          deviation_keywords?: string[] | null
+          drift_score?: number | null
+          entity_name?: string | null
+          id?: string
+          recent_tone?: string | null
+          reference_period?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          baseline_tone?: string | null
+          confidence_level?: number | null
+          created_at?: string | null
+          deviation_keywords?: string[] | null
+          drift_score?: number | null
+          entity_name?: string | null
+          id?: string
+          recent_tone?: string | null
+          reference_period?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -4090,6 +4293,34 @@ export type Database = {
           },
         ]
       }
+      praxis_forecast_dashboard: {
+        Row: {
+          active_signals: number | null
+          confidence_score: number | null
+          crisis_simulated: number | null
+          entity_name: string | null
+          forecast_type: string | null
+          last_triggered: string | null
+          last_updated: string | null
+          likely_visibility: string | null
+          risk_level: string | null
+          status: string | null
+        }
+        Relationships: []
+      }
+      praxis_signal_trends: {
+        Row: {
+          avg_severity: number | null
+          entity_name: string | null
+          first_detected: string | null
+          latest_signal: string | null
+          peak_severity: number | null
+          signal_count: number | null
+          signal_type: string | null
+          trend_duration_days: number | null
+        }
+        Relationships: []
+      }
       risk_score_inputs: {
         Row: {
           entity_name: string | null
@@ -4241,6 +4472,10 @@ export type Database = {
         Returns: undefined
       }
       refresh_cerebra_views: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      refresh_praxis_views: {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
