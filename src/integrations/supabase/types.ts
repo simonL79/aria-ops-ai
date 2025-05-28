@@ -153,6 +153,62 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_swarm_consensus: {
+        Row: {
+          consensus_score: number | null
+          final_verdict: string | null
+          resolved_at: string | null
+          threat_id: string
+        }
+        Insert: {
+          consensus_score?: number | null
+          final_verdict?: string | null
+          resolved_at?: string | null
+          threat_id: string
+        }
+        Update: {
+          consensus_score?: number | null
+          final_verdict?: string | null
+          resolved_at?: string | null
+          threat_id?: string
+        }
+        Relationships: []
+      }
+      ai_watchdog_verdicts: {
+        Row: {
+          confidence: number | null
+          id: string
+          submitted_at: string | null
+          threat_id: string | null
+          verdict: string | null
+          watchdog_name: string | null
+        }
+        Insert: {
+          confidence?: number | null
+          id?: string
+          submitted_at?: string | null
+          threat_id?: string | null
+          verdict?: string | null
+          watchdog_name?: string | null
+        }
+        Update: {
+          confidence?: number | null
+          id?: string
+          submitted_at?: string | null
+          threat_id?: string | null
+          verdict?: string | null
+          watchdog_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_watchdog_verdicts_threat_id_fkey"
+            columns: ["threat_id"]
+            isOneToOne: false
+            referencedRelation: "zero_day_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       anubis_ai_attack_log: {
         Row: {
           attack_vector: string | null
@@ -4875,6 +4931,39 @@ export type Database = {
         }
         Relationships: []
       }
+      zero_day_events: {
+        Row: {
+          anomaly_signature: string | null
+          auto_neutralized: boolean | null
+          detected_at: string | null
+          entropy_score: number | null
+          id: string
+          source_url: string | null
+          threat_vector: string
+          trigger_token: string | null
+        }
+        Insert: {
+          anomaly_signature?: string | null
+          auto_neutralized?: boolean | null
+          detected_at?: string | null
+          entropy_score?: number | null
+          id?: string
+          source_url?: string | null
+          threat_vector: string
+          trigger_token?: string | null
+        }
+        Update: {
+          anomaly_signature?: string | null
+          auto_neutralized?: boolean | null
+          detected_at?: string | null
+          entropy_score?: number | null
+          id?: string
+          source_url?: string | null
+          threat_vector?: string
+          trigger_token?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       aria_notifications_dashboard: {
@@ -5185,6 +5274,28 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      api_anubis_resolve_consensus: {
+        Args: { p_threat_id: string }
+        Returns: undefined
+      }
+      api_anubis_submit_verdict: {
+        Args: {
+          p_threat_id: string
+          p_watchdog: string
+          p_verdict: string
+          p_confidence: number
+        }
+        Returns: undefined
+      }
+      api_anubis_trigger_zero_day: {
+        Args: {
+          p_vector: string
+          p_score: number
+          p_signature: string
+          p_url: string
+        }
+        Returns: string
+      }
       assign_staff_role: {
         Args: { user_email: string }
         Returns: undefined
@@ -5217,6 +5328,10 @@ export type Database = {
       column_exists: {
         Args: { p_table_name: string; p_column_name: string }
         Returns: boolean
+      }
+      compute_swarm_consensus: {
+        Args: { threat: string }
+        Returns: undefined
       }
       generate_decay_score: {
         Args: {

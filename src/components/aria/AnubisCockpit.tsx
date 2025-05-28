@@ -1,402 +1,361 @@
+
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { 
   Shield, 
-  Brain, 
-  Mic, 
-  MessageSquare, 
-  TestTube, 
-  Smartphone, 
-  AlertTriangle,
-  Activity,
-  Loader,
-  Globe,
+  Zap, 
+  Activity, 
+  AlertTriangle, 
   Eye,
   Bot,
-  Languages
-} from 'lucide-react';
-import { useAnubisControl } from '@/hooks/useAnubisControl';
-import { useAuth } from '@/hooks/useAuth';
+  Radar
+} from "lucide-react";
+import { anubisService, type AnubisSystemReport, type AnubisState } from '@/services/aria/anubisService';
+import ZeroDayFirewallPanel from './ZeroDayFirewallPanel';
+import { toast } from 'sonner';
 
 const AnubisCockpit = () => {
-  const { user, isAdmin } = useAuth();
-  const {
-    runDiagnostic,
-    logHotword,
-    logSlackEvent,
-    pushTestResult,
-    registerMobileDevice,
-    logAIAttack,
-    getSecurityMetrics,
-    logMultilingualThreat,
-    deployDarkWebAgent,
-    logLLMWatchdog,
-    getIntelligenceMetrics,
-    isLoading,
-    status
-  } = useAnubisControl();
-
-  const [metrics, setMetrics] = useState<any>(null);
-  const [intelligenceMetrics, setIntelligenceMetrics] = useState<any>(null);
+  const [systemReport, setSystemReport] = useState<AnubisSystemReport | null>(null);
+  const [systemStates, setSystemStates] = useState<AnubisState[]>([]);
+  const [isRunningDiagnostics, setIsRunningDiagnostics] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (isAdmin) {
-      loadMetrics();
-      loadIntelligenceMetrics();
+    loadSystemData();
+  }, []);
+
+  const loadSystemData = async () => {
+    setIsLoading(true);
+    try {
+      const [states, health] = await Promise.all([
+        anubisService.getSystemStatus(),
+        anubisService.getSystemHealth()
+      ]);
+
+      setSystemStates(states);
+      
+      // Create system report from health data
+      if (health) {
+        const healthyModules = states.filter(s => s.status === 'healthy').length;
+        const warningModules = states.filter(s => s.status === 'warning').length;
+        const errorModules = states.filter(s => s.status === 'error').length;
+        
+        setSystemReport({
+          overall_status: health.overallStatus,
+          summary: {
+            healthy_modules: healthyModules,
+            warning_modules: warningModules,
+            error_modules: errorModules,
+            total_modules: states.length
+          },
+          module_status: states,
+          active_issues: states.filter(s => s.anomaly_detected),
+          last_check: health.lastCheck || new Date().toISOString()
+        });
+      }
+    } catch (error) {
+      console.error('Error loading system data:', error);
+      toast.error('Failed to load Anubis system data');
+    } finally {
+      setIsLoading(false);
     }
-  }, [isAdmin]);
-
-  const loadMetrics = async () => {
-    const securityMetrics = await getSecurityMetrics();
-    setMetrics(securityMetrics);
   };
 
-  const loadIntelligenceMetrics = async () => {
-    const intelMetrics = await getIntelligenceMetrics();
-    setIntelligenceMetrics(intelMetrics);
+  const runComprehensiveDiagnostics = async () => {
+    setIsRunningDiagnostics(true);
+    try {
+      const report = await anubisService.runDiagnostics();
+      if (report) {
+        setSystemReport(report);
+        toast.success('Comprehensive diagnostics completed successfully');
+      }
+      // Reload system data after diagnostics
+      await loadSystemData();
+    } catch (error) {
+      console.error('Error running diagnostics:', error);
+      toast.error('Failed to run comprehensive diagnostics');
+    } finally {
+      setIsRunningDiagnostics(false);
+    }
   };
 
-  if (!isAdmin) {
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'healthy': return 'bg-green-500';
+      case 'warning': return 'bg-yellow-500';
+      case 'error': return 'bg-red-500';
+      case 'critical': return 'bg-red-600';
+      default: return 'bg-gray-500';
+    }
+  };
+
+  const getOverallStatusColor = (status: string) => {
+    switch (status) {
+      case 'healthy': return 'text-green-600';
+      case 'warning': return 'text-yellow-600';
+      case 'critical': return 'text-red-600';
+      default: return 'text-gray-600';
+    }
+  };
+
+  if (isLoading) {
     return (
-      <Card className="max-w-md mx-auto">
-        <CardContent className="p-6 text-center">
-          <Shield className="h-12 w-12 mx-auto mb-4 text-red-500" />
-          <h3 className="text-lg font-semibold mb-2">Access Denied</h3>
-          <p className="text-muted-foreground">Admin privileges required for Anubis Cockpit</p>
-        </CardContent>
-      </Card>
+      <div className="flex items-center justify-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <span className="ml-2">Loading Anubis Cockpit...</span>
+      </div>
     );
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-6 space-y-6">
-      <Card className="bg-gradient-to-r from-purple-900 to-blue-900 text-white">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-2xl">
-            <Shield className="h-8 w-8" />
-            A.R.I.A™ Anubis Security Cockpit
-          </CardTitle>
-          <p className="text-purple-200">Advanced monitoring, security controls, and intelligence operations</p>
-        </CardHeader>
-      </Card>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold flex items-center gap-2">
+            <Radar className="h-6 w-6 text-blue-600" />
+            Anubis™ Cockpit
+          </h1>
+          <p className="text-muted-foreground">
+            Autonomous Command Pilot - A.R.I.A™ Security Control Center
+          </p>
+        </div>
+        <Button 
+          onClick={runComprehensiveDiagnostics}
+          disabled={isRunningDiagnostics}
+          className="bg-blue-600 hover:bg-blue-700 text-white"
+        >
+          {isRunningDiagnostics ? (
+            <>
+              <Activity className="mr-2 h-4 w-4 animate-spin" />
+              Running Diagnostics...
+            </>
+          ) : (
+            <>
+              <Shield className="mr-2 h-4 w-4" />
+              Run Full Diagnostics
+            </>
+          )}
+        </Button>
+      </div>
 
-      {/* Enhanced Security Metrics */}
-      {metrics && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Activity className="h-5 w-5" />
-              Security Metrics
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      {/* System Overview */}
+      {systemReport && (
+        <div className="grid grid-cols-5 gap-4">
+          <Card>
+            <CardContent className="p-4">
               <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">{metrics.passedTests}</div>
-                <div className="text-sm text-muted-foreground">Tests Passed</div>
+                <p className="text-sm text-muted-foreground">Overall Status</p>
+                <p className={`text-lg font-bold ${getOverallStatusColor(systemReport.overall_status)}`}>
+                  {systemReport.overall_status.toUpperCase()}
+                </p>
               </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
               <div className="text-center">
-                <div className="text-2xl font-bold text-red-600">{metrics.attacksDetected}</div>
-                <div className="text-sm text-muted-foreground">Attacks Detected</div>
+                <p className="text-sm text-muted-foreground">Healthy</p>
+                <p className="text-lg font-bold text-green-600">
+                  {systemReport.summary.healthy_modules}
+                </p>
               </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
               <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">{metrics.activeSessions}</div>
-                <div className="text-sm text-muted-foreground">Active Sessions</div>
+                <p className="text-sm text-muted-foreground">Warnings</p>
+                <p className="text-lg font-bold text-yellow-600">
+                  {systemReport.summary.warning_modules}
+                </p>
               </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
               <div className="text-center">
-                <div className="text-2xl font-bold text-yellow-600">{metrics.hotwordTriggers}</div>
-                <div className="text-sm text-muted-foreground">Hotword Triggers</div>
+                <p className="text-sm text-muted-foreground">Errors</p>
+                <p className="text-lg font-bold text-red-600">
+                  {systemReport.summary.error_modules}
+                </p>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <div className="text-center">
+                <p className="text-sm text-muted-foreground">Total Modules</p>
+                <p className="text-lg font-bold text-blue-600">
+                  {systemReport.summary.total_modules}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       )}
 
-      {/* Intelligence Metrics */}
-      {intelligenceMetrics && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Brain className="h-5 w-5" />
-              Intelligence Operations
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">{intelligenceMetrics.multilingualThreats}</div>
-                <div className="text-sm text-muted-foreground">Multilingual Threats</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">{intelligenceMetrics.activeAgents}</div>
-                <div className="text-sm text-muted-foreground">Active Agents</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-orange-600">{intelligenceMetrics.biasDetections}</div>
-                <div className="text-sm text-muted-foreground">Bias Detected</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-red-600">{intelligenceMetrics.hallucinations}</div>
-                <div className="text-sm text-muted-foreground">Hallucinations</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-purple-600">{intelligenceMetrics.criticalWatchdogAlerts}</div>
-                <div className="text-sm text-muted-foreground">Critical Alerts</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      <Tabs defaultValue="overview">
+        <TabsList className="grid grid-cols-4">
+          <TabsTrigger value="overview" className="flex items-center gap-1">
+            <Eye className="h-3 w-3" />
+            Overview
+          </TabsTrigger>
+          <TabsTrigger value="modules" className="flex items-center gap-1">
+            <Activity className="h-3 w-3" />
+            Modules
+          </TabsTrigger>
+          <TabsTrigger value="zeroday" className="flex items-center gap-1">
+            <Shield className="h-3 w-3" />
+            Zero-Day Firewall
+          </TabsTrigger>
+          <TabsTrigger value="issues" className="flex items-center gap-1">
+            <AlertTriangle className="h-3 w-3" />
+            Active Issues
+          </TabsTrigger>
+        </TabsList>
 
-      {/* System Controls */}
-      <div className="grid md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Brain className="h-5 w-5" />
-              System Diagnostics
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Button
-              onClick={runDiagnostic}
-              disabled={isLoading}
-              className="w-full bg-purple-600 hover:bg-purple-700"
-            >
-              {isLoading ? (
-                <>
-                  <Loader className="h-4 w-4 mr-2 animate-spin" />
-                  Running Diagnostics...
-                </>
+        <TabsContent value="overview">
+          <Card>
+            <CardHeader>
+              <CardTitle>System Health Overview</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {systemReport ? (
+                <div className="space-y-4">
+                  <div className="text-sm text-gray-600">
+                    Last Check: {new Date(systemReport.last_check).toLocaleString()}
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <h4 className="font-medium mb-2">Module Status Distribution</h4>
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span>Healthy:</span>
+                          <Badge className="bg-green-500 text-white">
+                            {systemReport.summary.healthy_modules}
+                          </Badge>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Warnings:</span>
+                          <Badge className="bg-yellow-500 text-white">
+                            {systemReport.summary.warning_modules}
+                          </Badge>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Errors:</span>
+                          <Badge className="bg-red-500 text-white">
+                            {systemReport.summary.error_modules}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h4 className="font-medium mb-2">Active Issues</h4>
+                      <div className="text-2xl font-bold text-red-600">
+                        {systemReport.active_issues.length}
+                      </div>
+                      <p className="text-sm text-gray-600">
+                        Anomalies requiring attention
+                      </p>
+                    </div>
+                  </div>
+                </div>
               ) : (
-                <>
-                  <Brain className="h-4 w-4 mr-2" />
-                  Run System Diagnostic
-                </>
+                <div className="text-center py-8 text-gray-500">
+                  No system report available. Run diagnostics to generate report.
+                </div>
               )}
-            </Button>
-            
-            <Separator />
-            
-            <Button
-              onClick={() => pushTestResult('AnubisCockpit', 'manual_test', true, 150)}
-              variant="outline"
-              className="w-full"
-            >
-              <TestTube className="h-4 w-4 mr-2" />
-              Log Test Result
-            </Button>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Mic className="h-5 w-5" />
-              Voice & Detection
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Button
-              onClick={() => logHotword('Hey Anubis, status report', true)}
-              variant="outline"
-              className="w-full"
-            >
-              <Mic className="h-4 w-4 mr-2" />
-              Log Hotword Detection
-            </Button>
-            
-            <Button
-              onClick={() => registerMobileDevice('Test Device', 'WebApp', 'test-token-123')}
-              variant="outline"
-              className="w-full"
-            >
-              <Smartphone className="h-4 w-4 mr-2" />
-              Register Mobile Session
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+        <TabsContent value="modules">
+          <Card>
+            <CardHeader>
+              <CardTitle>A.R.I.A™ Module Status</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3 max-h-96 overflow-y-auto">
+                {systemStates.length > 0 ? (
+                  systemStates.map((module) => (
+                    <div key={module.id} className="p-4 border rounded-lg">
+                      <div className="flex justify-between items-start mb-2">
+                        <div>
+                          <h4 className="font-medium">{anubisService.getModuleName(module.module)}</h4>
+                          <p className="text-sm text-gray-600">{module.issue_summary}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge className={`${getStatusColor(module.status)} text-white`}>
+                            {module.status.toUpperCase()}
+                          </Badge>
+                          {module.anomaly_detected && (
+                            <Badge variant="destructive">
+                              Anomaly
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <div className="flex justify-between items-center text-sm text-gray-500">
+                        <span>Records: {module.record_count}</span>
+                        <span>Last Check: {new Date(module.last_checked).toLocaleString()}</span>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    No module data available
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-      {/* Intelligence Operations */}
-      <div className="grid md:grid-cols-3 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Languages className="h-5 w-5" />
-              Multilingual Intelligence
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Button
-              onClick={() => logMultilingualThreat(
-                'Ejemplo de amenaza en español',
-                'es',
-                'Example threat in Spanish'
-              )}
-              variant="outline"
-              className="w-full"
-            >
-              <Globe className="h-4 w-4 mr-2" />
-              Log Spanish Threat
-            </Button>
-            
-            <Button
-              onClick={() => logMultilingualThreat(
-                'Exemple de menace en français',
-                'fr',
-                'Example threat in French'
-              )}
-              variant="outline"
-              className="w-full"
-            >
-              <Globe className="h-4 w-4 mr-2" />
-              Log French Threat
-            </Button>
-          </CardContent>
-        </Card>
+        <TabsContent value="zeroday">
+          <ZeroDayFirewallPanel />
+        </TabsContent>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Eye className="h-5 w-5" />
-              Dark Web Operations
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Button
-              onClick={() => deployDarkWebAgent(
-                'Agent-Shadow-' + Math.random().toString(36).substr(2, 5),
-                'surveillance'
-              )}
-              variant="outline"
-              className="w-full border-gray-700 text-gray-700 hover:bg-gray-100"
-            >
-              <Eye className="h-4 w-4 mr-2" />
-              Deploy Surveillance Agent
-            </Button>
-            
-            <Button
-              onClick={() => deployDarkWebAgent(
-                'Agent-Bait-' + Math.random().toString(36).substr(2, 5),
-                'bait',
-                'threat-actor-unknown'
-              )}
-              variant="outline"
-              className="w-full border-orange-500 text-orange-600 hover:bg-orange-50"
-            >
-              <AlertTriangle className="h-4 w-4 mr-2" />
-              Deploy Bait Operation
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Bot className="h-5 w-5" />
-              LLM Watchdog
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Button
-              onClick={() => logLLMWatchdog(
-                'gpt-4',
-                'Detected potential bias in entity representation',
-                true,
-                false,
-                'medium'
-              )}
-              variant="outline"
-              className="w-full border-yellow-500 text-yellow-600 hover:bg-yellow-50"
-            >
-              <Bot className="h-4 w-4 mr-2" />
-              Log Bias Detection
-            </Button>
-            
-            <Button
-              onClick={() => logLLMWatchdog(
-                'claude',
-                'Hallucination detected in factual response',
-                false,
-                true,
-                'high'
-              )}
-              variant="outline"
-              className="w-full border-red-500 text-red-600 hover:bg-red-50"
-            >
-              <AlertTriangle className="h-4 w-4 mr-2" />
-              Log Hallucination
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Security & Alerts */}
-      <div className="grid md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <MessageSquare className="h-5 w-5" />
-              Communication
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Button
-              onClick={() => logSlackEvent('#security-alerts', 'test_alert', { 
-                message: '🛡️ Anubis cockpit test alert',
-                timestamp: new Date().toISOString(),
-                severity: 'low'
-              })}
-              variant="outline"
-              className="w-full"
-            >
-              <MessageSquare className="h-4 w-4 mr-2" />
-              Queue Slack Alert
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5" />
-              Security Threats
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Button
-              onClick={() => logAIAttack(
-                'cockpit_test', 
-                'This is a test attack simulation', 
-                'prompt_injection', 
-                0.85, 
-                'quarantined_by_cockpit'
-              )}
-              variant="outline"
-              className="w-full border-red-200 text-red-600 hover:bg-red-50"
-            >
-              <AlertTriangle className="h-4 w-4 mr-2" />
-              Simulate AI Attack
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Status Display */}
-      {status && (
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <Badge variant="outline">Status</Badge>
-              <span className="text-sm font-mono">{status}</span>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+        <TabsContent value="issues">
+          <Card>
+            <CardHeader>
+              <CardTitle>Active System Issues</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {systemReport?.active_issues.length ? (
+                  systemReport.active_issues.map((issue) => (
+                    <div key={issue.id} className="p-4 border-l-4 border-red-500 bg-red-50">
+                      <div className="flex justify-between items-start mb-2">
+                        <h4 className="font-medium text-red-800">
+                          {anubisService.getModuleName(issue.module)}
+                        </h4>
+                        <Badge className="bg-red-500 text-white">
+                          {issue.status.toUpperCase()}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-red-700 mb-2">{issue.issue_summary}</p>
+                      <div className="text-xs text-red-600">
+                        Records affected: {issue.record_count} | 
+                        Last detected: {new Date(issue.last_checked).toLocaleString()}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-green-600">
+                    ✅ No active issues detected. All systems operational.
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
