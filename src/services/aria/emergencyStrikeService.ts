@@ -1,6 +1,6 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { enhancedEmergencyConnector } from './enhancedEmergencyConnector';
 
 export interface EmergencyThreat {
   id: string;
@@ -64,6 +64,16 @@ class EmergencyStrikeService {
 
       console.log('Emergency threat added:', data);
       toast.error(`🚨 EMERGENCY THREAT DETECTED: ${type.toUpperCase()}`);
+      
+      // Log to Anubis
+      await enhancedEmergencyConnector.logThreatDetected({
+        id: data,
+        threat_type: type,
+        threat_description: description,
+        origin_url: url,
+        risk_level: riskLevel
+      });
+      
       return data;
     } catch (error) {
       console.error('Error in addEmergencyThreat:', error);
@@ -92,6 +102,10 @@ class EmergencyStrikeService {
 
       console.log('Strike plan added:', data);
       toast.success('Strike plan added to emergency queue');
+      
+      // Log to Anubis
+      await enhancedEmergencyConnector.logStrikePlanned(threatId, data, actionType);
+      
       return data;
     } catch (error) {
       console.error('Error in addStrikePlan:', error);
@@ -119,6 +133,11 @@ class EmergencyStrikeService {
       }
 
       toast.success(data || 'Emergency strike executed successfully');
+      
+      // Log to Anubis
+      await enhancedEmergencyConnector.logAdminConfirmation(threatId, adminId, reason);
+      await enhancedEmergencyConnector.logStrikeExecuted(threatId, data || 'Strike confirmed', adminId);
+      
       return true;
     } catch (error) {
       console.error('Error in confirmStrike:', error);
