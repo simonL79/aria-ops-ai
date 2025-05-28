@@ -11,7 +11,7 @@ import ErrorBoundary from "@/components/error/ErrorBoundary";
 import Loading from "@/components/ui/loading";
 import { useAuth } from "@/hooks/useAuth";
 import EmergencyStrikePage from "./pages/EmergencyStrikePage";
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import DashboardLayout from "@/components/layout/DashboardLayout";
 
 // Lazy load pages for better performance
 const SalesFunnelPage = lazy(() => import("./pages/SalesFunnelPage"));

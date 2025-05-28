@@ -161,7 +161,7 @@ class EmergencyStrikeService {
         return [];
       }
 
-      return data || [];
+      return (data || []) as EmergencyThreat[];
     } catch (error) {
       console.error('Error in getEmergencyThreats:', error);
       return [];
@@ -186,7 +186,7 @@ class EmergencyStrikeService {
         return [];
       }
 
-      return data || [];
+      return (data || []) as StrikePlan[];
     } catch (error) {
       console.error('Error in getStrikePlans:', error);
       return [];

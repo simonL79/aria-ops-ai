@@ -41,7 +41,8 @@ import {
 
 export type NavItem = {
   title: string;
-  to: string;
+  to?: string;
+  url?: string;
   icon:
     | "home"
     | "layout"
@@ -49,8 +50,10 @@ export type NavItem = {
     | "users"
     | "zap"
     | "fileAnalytics"
-    | "shield";
-  page: React.FC;
+    | "shield"
+    | typeof AlertOctagon;
+  page?: React.FC;
+  adminOnly?: boolean;
 };
 
 export const navItems: NavItem[] = [
@@ -99,7 +102,7 @@ export const navItems: NavItem[] = [
   {
     title: "A.R.I.A/EX™ Emergency",
     url: "/emergency-strike",
-    icon: AlertOctagon,
+    icon: "shield",
     adminOnly: true,
   },
 ];
