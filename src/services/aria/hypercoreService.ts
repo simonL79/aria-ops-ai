@@ -129,7 +129,7 @@ class HypercoreService {
     }
   }
 
-  async getRSIQueue(limit = 20): Promise<RSIQueueItem[]> {
+  async getRSIQueue(limit = 20): Promise<RSIQueueItem[]> => {
     try {
       const { data, error } = await supabase
         .from('rsi_queue')
@@ -144,8 +144,8 @@ class HypercoreService {
         entity_id: item.entity_id,
         threat_id: item.threat_id,
         counter_message: item.counter_message,
-        priority: item.priority,
-        status: item.status,
+        priority: item.priority as 'urgent' | 'high' | 'normal' | 'low',
+        status: item.status as 'pending' | 'processing' | 'deployed' | 'completed',
         created_at: item.created_at,
         processed_at: item.processed_at
       }));
@@ -155,7 +155,7 @@ class HypercoreService {
     }
   }
 
-  async getEventDispatchQueue(limit = 20): Promise<EventDispatch[]> {
+  async getEventDispatchQueue(limit = 20): Promise<EventDispatch[]> => {
     try {
       const { data, error } = await supabase
         .from('aria_event_dispatch')
@@ -170,7 +170,7 @@ class HypercoreService {
         event_type: item.event_type,
         threat_id: item.threat_id,
         entity_id: item.entity_id,
-        severity: item.severity,
+        severity: item.severity as 'critical' | 'high' | 'medium' | 'low',
         payload_json: item.payload_json,
         dispatched: item.dispatched,
         created_at: item.created_at,
@@ -196,7 +196,7 @@ class HypercoreService {
     }
   }
 
-  async getAriaOperationsLog(limit = 50): Promise<any[]> {
+  async getAriaOperationsLog(limit = 50): Promise<any[]> => {
     try {
       const { data, error } = await supabase
         .from('aria_ops_log')
@@ -312,7 +312,7 @@ class HypercoreService {
     }
   }
 
-  async getSyntheticThreats(limit = 10): Promise<any[]> {
+  async getSyntheticThreats(limit = 10): Promise<any[]> => {
     try {
       const { data, error } = await supabase
         .from('synthetic_threats')
@@ -331,7 +331,7 @@ class HypercoreService {
     }
   }
 
-  async getNarrativeClusters(limit = 10): Promise<any[]> {
+  async getNarrativeClusters(limit = 10): Promise<any[]> => {
     try {
       const { data, error } = await supabase
         .from('narrative_clusters')
