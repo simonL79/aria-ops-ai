@@ -129,7 +129,7 @@ class HypercoreService {
     }
   }
 
-  async getRSIQueue(limit = 20): Promise<RSIQueueItem[]> => {
+  async getRSIQueue(limit = 20): Promise<RSIQueueItem[]> {
     try {
       const { data, error } = await supabase
         .from('rsi_queue')
@@ -155,7 +155,7 @@ class HypercoreService {
     }
   }
 
-  async getEventDispatchQueue(limit = 20): Promise<EventDispatch[]> => {
+  async getEventDispatchQueue(limit = 20): Promise<EventDispatch[]> {
     try {
       const { data, error } = await supabase
         .from('aria_event_dispatch')
@@ -196,7 +196,7 @@ class HypercoreService {
     }
   }
 
-  async getAriaOperationsLog(limit = 50): Promise<any[]> => {
+  async getAriaOperationsLog(limit = 50): Promise<any[]> {
     try {
       const { data, error } = await supabase
         .from('aria_ops_log')
@@ -312,7 +312,7 @@ class HypercoreService {
     }
   }
 
-  async getSyntheticThreats(limit = 10): Promise<any[]> => {
+  async getSyntheticThreats(limit = 10): Promise<any[]> {
     try {
       const { data, error } = await supabase
         .from('synthetic_threats')
@@ -331,7 +331,7 @@ class HypercoreService {
     }
   }
 
-  async getNarrativeClusters(limit = 10): Promise<any[]> => {
+  async getNarrativeClusters(limit = 10): Promise<any[]> {
     try {
       const { data, error } = await supabase
         .from('narrative_clusters')
