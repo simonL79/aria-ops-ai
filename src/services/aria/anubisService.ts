@@ -100,7 +100,16 @@ class AnubisService {
         return [];
       }
 
-      return data || [];
+      // Type assertion to ensure proper typing from database
+      return (data || []).map(item => ({
+        id: item.id,
+        module: item.module,
+        status: item.status as 'healthy' | 'warning' | 'error',
+        last_checked: item.last_checked,
+        issue_summary: item.issue_summary,
+        record_count: item.record_count,
+        anomaly_detected: item.anomaly_detected
+      }));
     } catch (error) {
       console.error('Error in getSystemStatus:', error);
       return [];
@@ -180,7 +189,7 @@ class AnubisService {
         if (!breakdown[moduleStatus.module]) {
           breakdown[moduleStatus.module] = { healthy: 0, warning: 0, error: 0 };
         }
-        breakdown[moduleStatus.module][moduleStatus.status as keyof typeof breakdown[moduleStatus.module]]++;
+        breakdown[moduleStatus.module][moduleStatus.status]++;
       });
 
       return breakdown;
