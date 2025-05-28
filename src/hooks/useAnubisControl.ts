@@ -1,8 +1,8 @@
-
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { anubisSecurityService } from '@/services/aria/anubisSecurityService';
 import { anubisService } from '@/services/aria/anubisService';
+import { multilingualThreatService } from '@/services/aria/multilingualThreatService';
 import { useAuth } from '@/hooks/useAuth';
 
 export const useAnubisControl = () => {
@@ -185,6 +185,101 @@ export const useAnubisControl = () => {
     }
   };
 
+  const logMultilingualThreat = async (
+    originalText: string,
+    languageCode: string,
+    translatedText?: string
+  ) => {
+    try {
+      const success = await multilingualThreatService.logMultilingualThreat({
+        original_text: originalText,
+        language_code: languageCode,
+        translated_text: translatedText
+      });
+
+      if (success) {
+        setStatus(`🌍 Multilingual threat logged: ${languageCode}`);
+        toast.success('Multilingual threat logged successfully');
+      } else {
+        setStatus('❌ Failed to log multilingual threat');
+        toast.error('Failed to log multilingual threat');
+      }
+    } catch (error) {
+      console.error('Multilingual threat logging error:', error);
+      toast.error('Multilingual threat logging failed');
+    }
+  };
+
+  const deployDarkWebAgent = async (
+    agentAlias: string,
+    missionType: 'surveillance' | 'interaction' | 'bait' | 'extraction',
+    targetActor?: string
+  ) => {
+    try {
+      const success = await multilingualThreatService.deployDarkWebAgent({
+        agent_alias: agentAlias,
+        mission_type: missionType,
+        target_actor: targetActor
+      });
+
+      if (success) {
+        setStatus(`🕵️‍♂️ Dark web agent deployed: ${agentAlias} (${missionType})`);
+        toast.success('Dark web agent deployed successfully');
+      } else {
+        setStatus('❌ Failed to deploy dark web agent');
+        toast.error('Failed to deploy dark web agent');
+      }
+    } catch (error) {
+      console.error('Dark web agent deployment error:', error);
+      toast.error('Dark web agent deployment failed');
+    }
+  };
+
+  const logLLMWatchdog = async (
+    model: 'gpt-4' | 'claude' | 'gemini' | 'mistral' | 'other',
+    perceptionSummary: string,
+    containsBias = false,
+    hallucinationDetected = false,
+    threatLevel: 'low' | 'medium' | 'high' | 'critical' = 'low'
+  ) => {
+    try {
+      const success = await multilingualThreatService.logLLMWatchdog({
+        llm_model: model,
+        perception_summary: perceptionSummary,
+        contains_bias: containsBias,
+        hallucination_detected: hallucinationDetected,
+        threat_level: threatLevel
+      });
+
+      if (success) {
+        setStatus(`🤖 LLM watchdog alert logged: ${model} (${threatLevel})`);
+        if (containsBias || hallucinationDetected) {
+          toast.error(`LLM issue detected in ${model}`);
+        } else {
+          toast.success('LLM watchdog logged successfully');
+        }
+      } else {
+        setStatus('❌ Failed to log LLM watchdog');
+        toast.error('Failed to log LLM watchdog');
+      }
+    } catch (error) {
+      console.error('LLM watchdog logging error:', error);
+      toast.error('LLM watchdog logging failed');
+    }
+  };
+
+  const getIntelligenceMetrics = async () => {
+    try {
+      const metrics = await multilingualThreatService.getIntelligenceMetrics();
+      setStatus(`📊 Intelligence metrics: ${metrics.activeAgents} agents, ${metrics.biasDetections} bias alerts`);
+      return metrics;
+    } catch (error) {
+      console.error('Intelligence metrics error:', error);
+      toast.error('Failed to fetch intelligence metrics');
+      return null;
+    }
+  };
+
   return {
     // Core functions
     runDiagnostic,
@@ -194,6 +289,12 @@ export const useAnubisControl = () => {
     registerMobileDevice,
     logAIAttack,
     getSecurityMetrics,
+    
+    // New intelligence functions
+    logMultilingualThreat,
+    deployDarkWebAgent,
+    logLLMWatchdog,
+    getIntelligenceMetrics,
     
     // State
     isLoading,

@@ -459,6 +459,30 @@ export type Database = {
         }
         Relationships: []
       }
+      aria_cleanup_log: {
+        Row: {
+          deleted_at: string | null
+          id: string
+          object_type: string | null
+          status: string | null
+          table_name: string | null
+        }
+        Insert: {
+          deleted_at?: string | null
+          id?: string
+          object_type?: string | null
+          status?: string | null
+          table_name?: string | null
+        }
+        Update: {
+          deleted_at?: string | null
+          id?: string
+          object_type?: string | null
+          status?: string | null
+          table_name?: string | null
+        }
+        Relationships: []
+      }
       aria_event_dispatch: {
         Row: {
           created_at: string | null
@@ -1321,6 +1345,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      darkweb_agents: {
+        Row: {
+          agent_alias: string
+          ended_at: string | null
+          findings: Json | null
+          id: string
+          mission_status: string | null
+          mission_type: string | null
+          started_at: string | null
+          target_actor: string | null
+        }
+        Insert: {
+          agent_alias: string
+          ended_at?: string | null
+          findings?: Json | null
+          id?: string
+          mission_status?: string | null
+          mission_type?: string | null
+          started_at?: string | null
+          target_actor?: string | null
+        }
+        Update: {
+          agent_alias?: string
+          ended_at?: string | null
+          findings?: Json | null
+          id?: string
+          mission_status?: string | null
+          mission_type?: string | null
+          started_at?: string | null
+          target_actor?: string | null
+        }
+        Relationships: []
       }
       darkweb_feed: {
         Row: {
@@ -2587,71 +2644,6 @@ export type Database = {
         }
         Relationships: []
       }
-      legacy_reputation_posts: {
-        Row: {
-          backlink_count: number | null
-          client_id: string | null
-          created_at: string | null
-          excerpt: string | null
-          first_seen: string | null
-          id: string
-          is_active: boolean | null
-          last_seen: string | null
-          rank_score: number | null
-          resurfacing_score: number | null
-          source_domain: string | null
-          suppression_status: string | null
-          times_mentioned: number | null
-          title: string | null
-          updated_at: string | null
-          url: string
-        }
-        Insert: {
-          backlink_count?: number | null
-          client_id?: string | null
-          created_at?: string | null
-          excerpt?: string | null
-          first_seen?: string | null
-          id?: string
-          is_active?: boolean | null
-          last_seen?: string | null
-          rank_score?: number | null
-          resurfacing_score?: number | null
-          source_domain?: string | null
-          suppression_status?: string | null
-          times_mentioned?: number | null
-          title?: string | null
-          updated_at?: string | null
-          url: string
-        }
-        Update: {
-          backlink_count?: number | null
-          client_id?: string | null
-          created_at?: string | null
-          excerpt?: string | null
-          first_seen?: string | null
-          id?: string
-          is_active?: boolean | null
-          last_seen?: string | null
-          rank_score?: number | null
-          resurfacing_score?: number | null
-          source_domain?: string | null
-          suppression_status?: string | null
-          times_mentioned?: number | null
-          title?: string | null
-          updated_at?: string | null
-          url?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "legacy_reputation_posts_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       legal_escalation_queue: {
         Row: {
           auto_generated: boolean | null
@@ -2907,6 +2899,47 @@ export type Database = {
           vector_score?: number | null
         }
         Relationships: []
+      }
+      llm_watchdog_logs: {
+        Row: {
+          contains_bias: boolean | null
+          entity_id: string | null
+          hallucination_detected: boolean | null
+          id: string
+          llm_model: string | null
+          perception_summary: string | null
+          threat_level: string | null
+          timestamp: string | null
+        }
+        Insert: {
+          contains_bias?: boolean | null
+          entity_id?: string | null
+          hallucination_detected?: boolean | null
+          id?: string
+          llm_model?: string | null
+          perception_summary?: string | null
+          threat_level?: string | null
+          timestamp?: string | null
+        }
+        Update: {
+          contains_bias?: boolean | null
+          entity_id?: string | null
+          hallucination_detected?: boolean | null
+          id?: string
+          llm_model?: string | null
+          perception_summary?: string | null
+          threat_level?: string | null
+          timestamp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "llm_watchdog_logs_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "entities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       memory_decay_profiles: {
         Row: {
@@ -3210,6 +3243,44 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      multilingual_threats: {
+        Row: {
+          detected_at: string | null
+          entity_id: string | null
+          id: string
+          language_code: string
+          original_text: string
+          processed: boolean | null
+          translated_text: string | null
+        }
+        Insert: {
+          detected_at?: string | null
+          entity_id?: string | null
+          id?: string
+          language_code: string
+          original_text: string
+          processed?: boolean | null
+          translated_text?: string | null
+        }
+        Update: {
+          detected_at?: string | null
+          entity_id?: string | null
+          id?: string
+          language_code?: string
+          original_text?: string
+          processed?: boolean | null
+          translated_text?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "multilingual_threats_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "entities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       narrative_clusters: {
         Row: {
@@ -4506,15 +4577,7 @@ export type Database = {
           initiated_by?: string | null
           legacy_post_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "suppression_actions_legacy_post_id_fkey"
-            columns: ["legacy_post_id"]
-            isOneToOne: false
-            referencedRelation: "legacy_reputation_posts"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       suppression_assets: {
         Row: {
@@ -4571,15 +4634,7 @@ export type Database = {
           rank_goal?: number | null
           visibility_score?: number | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "suppression_assets_legacy_post_id_fkey"
-            columns: ["legacy_post_id"]
-            isOneToOne: false
-            referencedRelation: "legacy_reputation_posts"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       synthetic_threats: {
         Row: {
@@ -4944,34 +4999,6 @@ export type Database = {
           total_employees: number | null
         }
         Relationships: []
-      }
-      graveyard_summary: {
-        Row: {
-          actions_taken: number | null
-          assets_deployed: number | null
-          avg_position: number | null
-          avg_rank_goal: number | null
-          client_id: string | null
-          client_name: string | null
-          last_asset_published: string | null
-          rank_score: number | null
-          resurfacing_score: number | null
-          suppression_status: string | null
-          times_mentioned: number | null
-          title: string | null
-          total_clicks: number | null
-          total_impressions: number | null
-          url: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "legacy_reputation_posts_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "clients"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       high_priority_threats: {
         Row: {
