@@ -9,6 +9,41 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      action_matrix: {
+        Row: {
+          action_detail: string | null
+          action_type: string
+          ai_confidence: number | null
+          created_at: string | null
+          id: string
+          threat_id: string | null
+        }
+        Insert: {
+          action_detail?: string | null
+          action_type: string
+          ai_confidence?: number | null
+          created_at?: string | null
+          id?: string
+          threat_id?: string | null
+        }
+        Update: {
+          action_detail?: string | null
+          action_type?: string
+          ai_confidence?: number | null
+          created_at?: string | null
+          id?: string
+          threat_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "action_matrix_threat_id_fkey"
+            columns: ["threat_id"]
+            isOneToOne: false
+            referencedRelation: "threat_queue"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       activity_logs: {
         Row: {
           action: string
@@ -116,6 +151,41 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      admin_signals: {
+        Row: {
+          approved: boolean | null
+          comment: string | null
+          executor: string | null
+          id: string
+          reviewed_at: string | null
+          threat_id: string | null
+        }
+        Insert: {
+          approved?: boolean | null
+          comment?: string | null
+          executor?: string | null
+          id?: string
+          reviewed_at?: string | null
+          threat_id?: string | null
+        }
+        Update: {
+          approved?: boolean | null
+          comment?: string | null
+          executor?: string | null
+          id?: string
+          reviewed_at?: string | null
+          threat_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_signals_threat_id_fkey"
+            columns: ["threat_id"]
+            isOneToOne: false
+            referencedRelation: "threat_queue"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ai_influence_map: {
         Row: {
@@ -4641,6 +4711,33 @@ export type Database = {
         }
         Relationships: []
       }
+      sovra_action_log: {
+        Row: {
+          action_type: string | null
+          executed_at: string | null
+          executed_by: string | null
+          id: string
+          result: string | null
+          threat_id: string | null
+        }
+        Insert: {
+          action_type?: string | null
+          executed_at?: string | null
+          executed_by?: string | null
+          id?: string
+          result?: string | null
+          threat_id?: string | null
+        }
+        Update: {
+          action_type?: string | null
+          executed_at?: string | null
+          executed_by?: string | null
+          id?: string
+          result?: string | null
+          threat_id?: string | null
+        }
+        Relationships: []
+      }
       suppression_actions: {
         Row: {
           action_status: string | null
@@ -4821,6 +4918,39 @@ export type Database = {
           metadata?: Json | null
           platform?: string | null
           status?: string
+        }
+        Relationships: []
+      }
+      threat_queue: {
+        Row: {
+          detected_at: string | null
+          id: string
+          origin_platform: string | null
+          risk_score: number | null
+          status: string | null
+          target_identity: string | null
+          threat_payload: string | null
+          threat_type: string
+        }
+        Insert: {
+          detected_at?: string | null
+          id?: string
+          origin_platform?: string | null
+          risk_score?: number | null
+          status?: string | null
+          target_identity?: string | null
+          threat_payload?: string | null
+          threat_type: string
+        }
+        Update: {
+          detected_at?: string | null
+          id?: string
+          origin_platform?: string | null
+          risk_score?: number | null
+          status?: string | null
+          target_identity?: string | null
+          threat_payload?: string | null
+          threat_type?: string
         }
         Relationships: []
       }
@@ -5273,6 +5403,29 @@ export type Database = {
       anubis_run_diagnostics: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      api_add_ai_action: {
+        Args: {
+          p_threat_id: string
+          p_action_type: string
+          p_action_detail: string
+          p_confidence: number
+        }
+        Returns: string
+      }
+      api_add_threat_event: {
+        Args: {
+          p_type: string
+          p_identity: string
+          p_platform: string
+          p_payload: string
+          p_score: number
+        }
+        Returns: string
+      }
+      api_admin_approve_threat: {
+        Args: { p_threat_id: string; p_approved: boolean; p_comment: string }
+        Returns: string
       }
       api_anubis_resolve_consensus: {
         Args: { p_threat_id: string }
