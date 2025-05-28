@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,10 +6,13 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Shield, Brain, Zap, MessageSquare, Target, Lock, Mic, Send } from 'lucide-react';
+import { Shield, Brain, Zap, MessageSquare, Target, Lock, Mic, Send, Volume2, VolumeX } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import VoiceCommandButton from './VoiceCommandButton';
+import { useVoiceCommand } from '@/hooks/useVoiceCommand';
+import { getVoiceLogs, VoiceLogEntry } from '@/services/aria/voiceLogService';
 
 interface ChatMessage {
   id: string;
@@ -31,9 +33,12 @@ interface GraveyardSimulation {
 
 const AnubisGPTCockpit = () => {
   const { user, isAdmin } = useAuth();
+  const { speak, isSpeaking } = useVoiceCommand();
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [currentMessage, setCurrentMessage] = useState('');
   const [graveyardSims, setGraveyardSims] = useState<GraveyardSimulation[]>([]);
+  const [voiceLogs, setVoiceLogs] = useState<VoiceLogEntry[]>([]);
+  const [autoSpeak, setAutoSpeak] = useState(true);
   const [newSim, setNewSim] = useState({
     leak_title: '',
     synthetic_link: '',
@@ -46,6 +51,7 @@ const AnubisGPTCockpit = () => {
     if (isAdmin) {
       loadChatHistory();
       loadGraveyardSimulations();
+      loadVoiceLogs();
     }
   }, [isAdmin]);
 
@@ -78,19 +84,29 @@ const AnubisGPTCockpit = () => {
     }
   };
 
-  const sendMessage = async () => {
-    if (!currentMessage.trim() || loading) return;
+  const loadVoiceLogs = async () => {
+    try {
+      const logs = await getVoiceLogs(20);
+      setVoiceLogs(logs);
+    } catch (error) {
+      console.error('Error loading voice logs:', error);
+    }
+  };
+
+  const sendMessage = async (messageText?: string) => {
+    const messageToSend = messageText || currentMessage;
+    if (!messageToSend.trim() || loading) return;
 
     setLoading(true);
     try {
       // Simulate GPT response (in production, this would call OpenAI API)
-      const response = `A.R.I.A™ Analysis: ${currentMessage}. System status: Operational. Threat assessment: Low-Medium. Recommended actions: Continue monitoring.`;
+      const response = `A.R.I.A™ Analysis: ${messageToSend}. System status: Operational. Threat assessment: Low-Medium. Recommended actions: Continue monitoring.`;
 
       const { error } = await supabase
         .from('anubis_chat_memory')
         .insert({
           user_id: user?.id,
-          message: currentMessage,
+          message: messageToSend,
           response: response
         });
 
@@ -99,11 +115,24 @@ const AnubisGPTCockpit = () => {
       setCurrentMessage('');
       loadChatHistory();
       toast.success('Message processed by A.R.I.A™');
+
+      // Auto-speak response if enabled
+      if (autoSpeak && response) {
+        speak(response);
+      }
     } catch (error) {
       console.error('Error sending message:', error);
       toast.error('Failed to process message');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleVoiceTranscript = (transcript: string) => {
+    if (transcript.trim()) {
+      setCurrentMessage(transcript);
+      // Auto-send voice commands
+      setTimeout(() => sendMessage(transcript), 500);
     }
   };
 
@@ -179,7 +208,7 @@ const AnubisGPTCockpit = () => {
             Anubis GPT Cockpit
           </h1>
           <p className="text-muted-foreground">
-            Elite AI-powered command center with secure admin access
+            Elite AI-powered command center with voice control
           </p>
         </div>
         
@@ -203,15 +232,27 @@ const AnubisGPTCockpit = () => {
         <TabsList>
           <TabsTrigger value="chat">AI Chat Interface</TabsTrigger>
           <TabsTrigger value="graveyard">Graveyard Operations</TabsTrigger>
+          <TabsTrigger value="voice-logs">Voice Commands</TabsTrigger>
           <TabsTrigger value="history">Command History</TabsTrigger>
         </TabsList>
 
         <TabsContent value="chat" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MessageSquare className="h-5 w-5" />
-                A.R.I.A™ Command Interface
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <MessageSquare className="h-5 w-5" />
+                  A.R.I.A™ Command Interface
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setAutoSpeak(!autoSpeak)}
+                  className="flex items-center gap-1"
+                >
+                  {autoSpeak ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+                  {autoSpeak ? 'Auto-speak On' : 'Auto-speak Off'}
+                </Button>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -226,7 +267,20 @@ const AnubisGPTCockpit = () => {
                       </div>
                       <div className="flex items-start gap-2 ml-4">
                         <Badge className="bg-purple-600">A.R.I.A™</Badge>
-                        <p className="text-sm text-muted-foreground">{chat.response}</p>
+                        <div className="flex-1">
+                          <p className="text-sm text-muted-foreground">{chat.response}</p>
+                          {autoSpeak && !isSpeaking && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => speak(chat.response)}
+                              className="mt-1 h-6 px-2 text-xs"
+                            >
+                              <Volume2 className="h-3 w-3 mr-1" />
+                              Speak
+                            </Button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))
@@ -234,6 +288,7 @@ const AnubisGPTCockpit = () => {
                   <div className="text-center text-muted-foreground py-8">
                     <Brain className="h-12 w-12 mx-auto mb-4 opacity-50" />
                     <p>No chat history yet. Start a conversation with A.R.I.A™</p>
+                    <p className="text-xs mt-2">Use voice commands or type your message</p>
                   </div>
                 )}
               </div>
@@ -247,12 +302,54 @@ const AnubisGPTCockpit = () => {
                   onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
                   disabled={loading}
                 />
-                <Button onClick={sendMessage} disabled={loading || !currentMessage.trim()}>
+                <Button onClick={() => sendMessage()} disabled={loading || !currentMessage.trim()}>
                   <Send className="h-4 w-4" />
                 </Button>
-                <Button variant="outline" disabled>
-                  <Mic className="h-4 w-4" />
-                </Button>
+                <VoiceCommandButton 
+                  onTranscript={handleVoiceTranscript}
+                  disabled={loading}
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="voice-logs" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MessageSquare className="h-5 w-5" />
+                Voice Command Logs
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {voiceLogs.length > 0 ? (
+                  voiceLogs.map((log) => (
+                    <div key={log.id} className="border rounded-lg p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <Badge variant={log.processed ? 'default' : 'secondary'}>
+                          {log.source === 'mic' ? '🎤 Voice Input' : '🔊 TTS Output'}
+                        </Badge>
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(log.timestamp).toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="text-sm">
+                        <strong>Transcript:</strong> {log.transcript}
+                      </div>
+                      {log.response && (
+                        <div className="text-sm mt-2 text-muted-foreground">
+                          <strong>Response:</strong> {log.response}
+                        </div>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-muted-foreground text-center py-4">
+                    No voice commands logged yet
+                  </p>
+                )}
               </div>
             </CardContent>
           </Card>

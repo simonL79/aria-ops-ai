@@ -240,6 +240,39 @@ export type Database = {
         }
         Relationships: []
       }
+      anubis_voice_log: {
+        Row: {
+          id: string
+          processed: boolean | null
+          response: string | null
+          response_time: string | null
+          source: string | null
+          timestamp: string | null
+          transcript: string
+          user_id: string | null
+        }
+        Insert: {
+          id?: string
+          processed?: boolean | null
+          response?: string | null
+          response_time?: string | null
+          source?: string | null
+          timestamp?: string | null
+          transcript: string
+          user_id?: string | null
+        }
+        Update: {
+          id?: string
+          processed?: boolean | null
+          response?: string | null
+          response_time?: string | null
+          source?: string | null
+          timestamp?: string | null
+          transcript?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       aria_access_audit: {
         Row: {
           attempted_action: string | null
