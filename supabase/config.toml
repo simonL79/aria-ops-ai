@@ -1,6 +1,4 @@
 
-# This file was created and managed by the Lovable AI assistant.
-# Project ID should always stay as the first line
 project_id = "ssvskbejfacmjemphmry"
 
 [api]
@@ -37,17 +35,17 @@ enabled = true
 verify_jwt = false
 [functions.reddit-scan]
 verify_jwt = false
-# Set up a cron job to run the Reddit scanner every hour
 schedule = "0 * * * *"
 [functions.rss-scraper]
 verify_jwt = false
-# Set up a cron job to run the RSS scraper every 2 hours
 schedule = "0 */2 * * *"
 [functions.aria-scraper]
 verify_jwt = false
-# Set up a cron job to run the YouTube RSS scraper daily at 8 AM UTC
 schedule = "0 8 * * *"
 [functions.slack-alert]
 verify_jwt = false
 [functions.executive-reports]
 verify_jwt = false
+[functions.aria-hypercore-dispatch]
+verify_jwt = false
+schedule = "*/5 * * * *"
