@@ -3,7 +3,7 @@ import { DashboardPage } from "@/pages/dashboard/DashboardPage";
 import AiScrapingPage from "@/pages/AiScrapingPage";
 import CleanLaunchPage from "@/pages/CleanLaunchPage";
 import { ExecutiveReportsPage } from "@/pages/ExecutiveReportsPage";
-import { SettingsPage } from "@/pages/Settings";
+import SettingsPage from "@/pages/Settings";
 import { UsersPage } from "@/pages/UsersPage";
 import HyperCorePage from "@/pages/HyperCorePage";
 
