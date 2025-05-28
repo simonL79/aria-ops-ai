@@ -4,8 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Shield, Activity, AlertTriangle, CheckCircle, XCircle, RefreshCw, Eye, Clock, Brain, Zap, Scale, Target } from 'lucide-react';
+import { Shield, Activity, AlertTriangle, CheckCircle, XCircle, RefreshCw, Eye, Clock, Brain, Zap, Scale, Target, MessageSquare } from 'lucide-react';
 import { anubisService, AnubisState, LLMThreatMonitor, GraveyardSimulation, LegalEscalation } from '@/services/aria/anubisService';
+import AnubisGPTCockpit from './AnubisGPTCockpit';
 
 const EnhancedAnubisMonitor = () => {
   const [systemStatus, setSystemStatus] = useState<AnubisState[]>([]);
@@ -80,6 +81,7 @@ const EnhancedAnubisMonitor = () => {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
@@ -167,6 +169,10 @@ const EnhancedAnubisMonitor = () => {
       <Tabs defaultValue="modules" className="space-y-4">
         <TabsList>
           <TabsTrigger value="modules">Core Modules</TabsTrigger>
+          <TabsTrigger value="gpt-cockpit" className="flex items-center gap-1">
+            <MessageSquare className="h-3 w-3" />
+            GPT Cockpit
+          </TabsTrigger>
           <TabsTrigger value="llm">LLM Intel</TabsTrigger>
           <TabsTrigger value="graveyard">Graveyard Ops</TabsTrigger>
           <TabsTrigger value="legal">Legal Node</TabsTrigger>
@@ -174,7 +180,6 @@ const EnhancedAnubisMonitor = () => {
         </TabsList>
 
         <TabsContent value="modules" className="space-y-4">
-          
           <Card>
             <CardHeader>
               <CardTitle>A.R.I.A™ Module Health Status</CardTitle>
@@ -205,6 +210,10 @@ const EnhancedAnubisMonitor = () => {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="gpt-cockpit">
+          <AnubisGPTCockpit />
         </TabsContent>
 
         <TabsContent value="llm" className="space-y-4">
@@ -311,7 +320,6 @@ const EnhancedAnubisMonitor = () => {
         </TabsContent>
 
         <TabsContent value="logs" className="space-y-4">
-          
           <Card>
             <CardHeader>
               <CardTitle>Enhanced System Diagnostic Logs</CardTitle>
