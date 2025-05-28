@@ -153,6 +153,36 @@ export type Database = {
         }
         Relationships: []
       }
+      anubis_ai_attack_log: {
+        Row: {
+          attack_vector: string | null
+          confidence_score: number | null
+          created_at: string | null
+          id: string
+          mitigation_action: string | null
+          prompt: string | null
+          source: string | null
+        }
+        Insert: {
+          attack_vector?: string | null
+          confidence_score?: number | null
+          created_at?: string | null
+          id?: string
+          mitigation_action?: string | null
+          prompt?: string | null
+          source?: string | null
+        }
+        Update: {
+          attack_vector?: string | null
+          confidence_score?: number | null
+          created_at?: string | null
+          id?: string
+          mitigation_action?: string | null
+          prompt?: string | null
+          source?: string | null
+        }
+        Relationships: []
+      }
       anubis_chat_memory: {
         Row: {
           context: Json | null
@@ -179,6 +209,33 @@ export type Database = {
           message?: string | null
           response?: string | null
           session_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      anubis_hotword_events: {
+        Row: {
+          captured_phrase: string | null
+          detected_at: string | null
+          hotword: string | null
+          id: string
+          triggered: boolean | null
+          user_id: string | null
+        }
+        Insert: {
+          captured_phrase?: string | null
+          detected_at?: string | null
+          hotword?: string | null
+          id?: string
+          triggered?: boolean | null
+          user_id?: string | null
+        }
+        Update: {
+          captured_phrase?: string | null
+          detected_at?: string | null
+          hotword?: string | null
+          id?: string
+          triggered?: boolean | null
           user_id?: string | null
         }
         Relationships: []
@@ -210,6 +267,66 @@ export type Database = {
         }
         Relationships: []
       }
+      anubis_mobile_sessions: {
+        Row: {
+          active: boolean | null
+          device_name: string | null
+          id: string
+          last_seen: string | null
+          platform: string | null
+          push_token: string | null
+          user_id: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          device_name?: string | null
+          id?: string
+          last_seen?: string | null
+          platform?: string | null
+          push_token?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          device_name?: string | null
+          id?: string
+          last_seen?: string | null
+          platform?: string | null
+          push_token?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      anubis_slack_events: {
+        Row: {
+          channel: string | null
+          created_at: string | null
+          dispatched: boolean | null
+          dispatched_at: string | null
+          event_type: string | null
+          id: string
+          payload: Json | null
+        }
+        Insert: {
+          channel?: string | null
+          created_at?: string | null
+          dispatched?: boolean | null
+          dispatched_at?: string | null
+          event_type?: string | null
+          id?: string
+          payload?: Json | null
+        }
+        Update: {
+          channel?: string | null
+          created_at?: string | null
+          dispatched?: boolean | null
+          dispatched_at?: string | null
+          event_type?: string | null
+          id?: string
+          payload?: Json | null
+        }
+        Relationships: []
+      }
       anubis_state: {
         Row: {
           anomaly_detected: boolean | null
@@ -237,6 +354,36 @@ export type Database = {
           module?: string
           record_count?: number | null
           status?: string | null
+        }
+        Relationships: []
+      }
+      anubis_test_results: {
+        Row: {
+          error_message: string | null
+          execution_time_ms: number | null
+          id: string
+          module: string | null
+          passed: boolean | null
+          test_name: string | null
+          tested_at: string | null
+        }
+        Insert: {
+          error_message?: string | null
+          execution_time_ms?: number | null
+          id?: string
+          module?: string | null
+          passed?: boolean | null
+          test_name?: string | null
+          tested_at?: string | null
+        }
+        Update: {
+          error_message?: string | null
+          execution_time_ms?: number | null
+          id?: string
+          module?: string | null
+          passed?: boolean | null
+          test_name?: string | null
+          tested_at?: string | null
         }
         Relationships: []
       }

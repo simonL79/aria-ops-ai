@@ -1,5 +1,5 @@
-
 import { supabase } from '@/integrations/supabase/client';
+import { enhancedVoiceLogService } from './enhancedVoiceLogService';
 
 export interface VoiceLogEntry {
   id: string;
@@ -14,18 +14,20 @@ export interface VoiceLogEntry {
 
 export const getVoiceLogs = async (limit: number = 50): Promise<VoiceLogEntry[]> => {
   try {
-    const { data, error } = await supabase
-      .from('anubis_voice_log')
-      .select('*')
-      .order('timestamp', { ascending: false })
-      .limit(limit);
-
-    if (error) {
-      console.error('Error fetching voice logs:', error);
-      return [];
-    }
-
-    return data || [];
+    // Use enhanced voice log service for better functionality
+    const enhancedLogs = await enhancedVoiceLogService.getEnhancedVoiceLogs(limit);
+    
+    // Convert to original format for backward compatibility
+    return enhancedLogs.map(log => ({
+      id: log.id,
+      user_id: log.user_id,
+      transcript: log.transcript,
+      timestamp: log.timestamp,
+      source: log.source,
+      processed: log.processed,
+      response: log.response,
+      response_time: log.response_time
+    }));
   } catch (error) {
     console.error('Error in getVoiceLogs:', error);
     return [];

@@ -1,8 +1,9 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import { enhancedVoiceLogService } from '@/services/aria/enhancedVoiceLogService';
+import { anubisSecurityService } from '@/services/aria/anubisSecurityService';
 
 interface VoiceCommandHook {
   isListening: boolean;
@@ -54,7 +55,21 @@ export const useVoiceCommand = (): VoiceCommandHook => {
           setTranscript(transcriptText);
           
           if (event.results[current].isFinal) {
-            logVoiceInteraction({ transcript: transcriptText, source: 'mic' });
+            // Enhanced logging with security analysis
+            enhancedVoiceLogService.logVoiceInteraction({ 
+              user_id: user?.id || 'anonymous',
+              transcript: transcriptText, 
+              source: 'mic' 
+            });
+
+            // Check for hotword detection
+            if (user?.id) {
+              const hotwordDetected = anubisSecurityService.detectHotword(transcriptText, user.id);
+              if (hotwordDetected) {
+                console.log('🔥 Hotword detected:', transcriptText);
+                toast.success('Anubis activated!');
+              }
+            }
           }
         };
 
@@ -76,26 +91,19 @@ export const useVoiceCommand = (): VoiceCommandHook => {
         recognitionRef.current.stop();
       }
     };
-  }, [isSupported]);
+  }, [isSupported, user]);
 
   const logVoiceInteraction = async (entry: VoiceLogEntry) => {
     if (!user) return;
 
     try {
-      const { error } = await supabase
-        .from('anubis_voice_log')
-        .insert({
-          user_id: user.id,
-          transcript: entry.transcript,
-          response: entry.response,
-          source: entry.source,
-          processed: !!entry.response,
-          response_time: entry.response ? new Date().toISOString() : null
-        });
-
-      if (error) {
-        console.error('Voice log error:', error);
-      }
+      // Use enhanced voice logging service
+      await enhancedVoiceLogService.logVoiceInteraction({
+        user_id: user.id,
+        transcript: entry.transcript,
+        response: entry.response,
+        source: entry.source
+      });
     } catch (error) {
       console.error('Failed to log voice interaction:', error);
     }
@@ -113,9 +121,30 @@ export const useVoiceCommand = (): VoiceCommandHook => {
     try {
       recognitionRef.current.start();
       toast.success('🎤 Listening for voice command...');
+      
+      // Log test result for voice recognition start
+      if (user?.id) {
+        anubisSecurityService.logTestResult({
+          module: 'VoiceRecognition',
+          test_name: 'start_listening',
+          passed: true,
+          execution_time_ms: 0
+        });
+      }
     } catch (error) {
       console.error('Failed to start recognition:', error);
       toast.error('Failed to start voice recognition');
+      
+      // Log test failure
+      if (user?.id) {
+        anubisSecurityService.logTestResult({
+          module: 'VoiceRecognition',
+          test_name: 'start_listening',
+          passed: false,
+          execution_time_ms: 0,
+          error_message: error instanceof Error ? error.message : 'Unknown error'
+        });
+      }
     }
   };
 
@@ -127,6 +156,16 @@ export const useVoiceCommand = (): VoiceCommandHook => {
 
   const speak = (text: string) => {
     if (!synthRef.current || !text.trim()) return;
+
+    // Security check for TTS content
+    if (user?.id) {
+      const analysis = anubisSecurityService.analyzePromptForAttacks(text, 'tts_output');
+      if (analysis.isAttack) {
+        console.warn('🚨 Potential attack detected in TTS content, blocking');
+        toast.error('Content blocked for security reasons');
+        return;
+      }
+    }
 
     // Cancel any ongoing speech
     synthRef.current.cancel();
@@ -145,7 +184,7 @@ export const useVoiceCommand = (): VoiceCommandHook => {
       setIsSpeaking(false);
       console.log('🔊 A.R.I.A™ finished speaking');
       
-      // Log the voice response
+      // Log the voice response with enhanced logging
       logVoiceInteraction({ 
         transcript: text, 
         response: text, 
@@ -156,6 +195,17 @@ export const useVoiceCommand = (): VoiceCommandHook => {
     utterance.onerror = (event) => {
       setIsSpeaking(false);
       console.error('Speech synthesis error:', event.error);
+      
+      // Log TTS error
+      if (user?.id) {
+        anubisSecurityService.logTestResult({
+          module: 'TextToSpeech',
+          test_name: 'speak_text',
+          passed: false,
+          execution_time_ms: 0,
+          error_message: event.error
+        });
+      }
     };
 
     // Try to use a more robotic/AI voice if available

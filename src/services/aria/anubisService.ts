@@ -1,6 +1,6 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { anubisSecurityService } from './anubisSecurityService';
 
 export interface AnubisState {
   id: string;
@@ -90,19 +90,62 @@ export const ARIA_MODULES = {
 
 class AnubisService {
   async runDiagnostics(): Promise<AnubisSystemReport | null> {
+    const startTime = Date.now();
+    
     try {
       console.log('🔐 Triggering comprehensive A.R.I.A™ Anubis diagnostics...');
       
+      // Log test start
+      await anubisSecurityService.logTestResult({
+        module: 'AnubisCore',
+        test_name: 'comprehensive_diagnostics',
+        passed: false, // Will update on success
+        execution_time_ms: 0
+      });
+
       // Call the Anubis Edge Function
       const { data, error } = await supabase.functions.invoke('anubis-engine');
       
       if (error) {
+        const executionTime = Date.now() - startTime;
         console.error('Error calling Anubis engine:', error);
+        
+        // Log test failure
+        await anubisSecurityService.logTestResult({
+          module: 'AnubisCore',
+          test_name: 'comprehensive_diagnostics',
+          passed: false,
+          execution_time_ms: executionTime,
+          error_message: error.message
+        });
+        
         toast.error('Failed to run system diagnostics');
         return null;
       }
 
+      const executionTime = Date.now() - startTime;
+
       if (data?.success) {
+        // Log successful test
+        await anubisSecurityService.logTestResult({
+          module: 'AnubisCore',
+          test_name: 'comprehensive_diagnostics',
+          passed: true,
+          execution_time_ms: executionTime
+        });
+
+        // Queue Slack notification for successful diagnostics
+        await anubisSecurityService.queueSlackEvent({
+          channel: '#anubis-alerts',
+          event_type: 'diagnostics_completed',
+          payload: {
+            overall_status: data.overall_status,
+            summary: data.summary,
+            timestamp: data.timestamp,
+            execution_time_ms: executionTime
+          }
+        });
+
         toast.success('Comprehensive system diagnostics completed');
         return {
           overall_status: data.overall_status,
@@ -112,11 +155,31 @@ class AnubisService {
           last_check: data.timestamp
         };
       } else {
+        // Log test failure for unsuccessful response
+        await anubisSecurityService.logTestResult({
+          module: 'AnubisCore',
+          test_name: 'comprehensive_diagnostics',
+          passed: false,
+          execution_time_ms: executionTime,
+          error_message: 'Diagnostics completed with errors'
+        });
+
         toast.error('Diagnostics completed with errors');
         return null;
       }
     } catch (error) {
+      const executionTime = Date.now() - startTime;
       console.error('Error in runDiagnostics:', error);
+      
+      // Log test failure
+      await anubisSecurityService.logTestResult({
+        module: 'AnubisCore',
+        test_name: 'comprehensive_diagnostics',
+        passed: false,
+        execution_time_ms: executionTime,
+        error_message: error instanceof Error ? error.message : 'Unknown error'
+      });
+
       toast.error('Failed to run system diagnostics');
       return null;
     }
@@ -257,6 +320,7 @@ class AnubisService {
     moduleCount: number;
     issueCount: number;
     lastCheck: string | null;
+    securityMetrics?: any;
   }> {
     try {
       const status = await this.getSystemStatus();
@@ -275,11 +339,15 @@ class AnubisService {
 
       const lastCheck = status.length > 0 ? status[0].last_checked : null;
 
+      // Get enhanced security metrics
+      const securityMetrics = await anubisSecurityService.getSecurityMetrics();
+
       return {
         overallStatus,
         moduleCount: status.length,
         issueCount,
-        lastCheck
+        lastCheck,
+        securityMetrics
       };
     } catch (error) {
       console.error('Error in getSystemHealth:', error);
@@ -316,14 +384,36 @@ class AnubisService {
   }
 
   async runEnhancedDiagnostics(): Promise<void> {
+    const startTime = Date.now();
+    
     try {
       console.log('🚀 Running enhanced A.R.I.A™ diagnostics with admin security...');
+      
+      // Log enhanced diagnostics test
+      await anubisSecurityService.logTestResult({
+        module: 'AnubisEnhanced',
+        test_name: 'enhanced_diagnostics',
+        passed: false, // Will update on success
+        execution_time_ms: 0
+      });
       
       // Use the new secure admin trigger function
       const { data, error } = await supabase.rpc('admin_trigger_anubis');
       
+      const executionTime = Date.now() - startTime;
+      
       if (error) {
         console.error('Error running enhanced diagnostics:', error);
+        
+        // Log test failure
+        await anubisSecurityService.logTestResult({
+          module: 'AnubisEnhanced',
+          test_name: 'enhanced_diagnostics',
+          passed: false,
+          execution_time_ms: executionTime,
+          error_message: error.message
+        });
+
         if (error.message.includes('Access denied')) {
           toast.error('Access denied: Admin privileges required');
         } else {
@@ -332,10 +422,40 @@ class AnubisService {
         return;
       }
 
+      // Log successful test
+      await anubisSecurityService.logTestResult({
+        module: 'AnubisEnhanced',
+        test_name: 'enhanced_diagnostics',
+        passed: true,
+        execution_time_ms: executionTime
+      });
+
+      // Queue Slack notification
+      await anubisSecurityService.queueSlackEvent({
+        channel: '#anubis-alerts',
+        event_type: 'enhanced_diagnostics_completed',
+        payload: {
+          result: data,
+          execution_time_ms: executionTime,
+          timestamp: new Date().toISOString()
+        }
+      });
+
       toast.success('Enhanced A.R.I.A™ diagnostics completed');
       console.log('Enhanced diagnostics result:', data);
     } catch (error) {
+      const executionTime = Date.now() - startTime;
       console.error('Error in runEnhancedDiagnostics:', error);
+      
+      // Log test failure
+      await anubisSecurityService.logTestResult({
+        module: 'AnubisEnhanced',
+        test_name: 'enhanced_diagnostics',
+        passed: false,
+        execution_time_ms: executionTime,
+        error_message: error instanceof Error ? error.message : 'Unknown error'
+      });
+
       toast.error('Failed to run enhanced diagnostics');
     }
   }
