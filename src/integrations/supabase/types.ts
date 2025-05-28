@@ -2368,6 +2368,45 @@ export type Database = {
           },
         ]
       }
+      graveyard_legacy_posts: {
+        Row: {
+          content_snippet: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          platform: string
+          rank_score: number
+          suppression_status: string
+          title: string
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          content_snippet?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          platform: string
+          rank_score?: number
+          suppression_status?: string
+          title: string
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          content_snippet?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          platform?: string
+          rank_score?: number
+          suppression_status?: string
+          title?: string
+          updated_at?: string
+          url?: string
+        }
+        Relationships: []
+      }
       graveyard_simulations: {
         Row: {
           completed_at: string | null

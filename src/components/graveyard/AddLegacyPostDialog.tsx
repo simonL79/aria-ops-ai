@@ -27,7 +27,7 @@ const AddLegacyPostDialog = ({ onPostAdded }: { onPostAdded: () => void }) => {
 
     try {
       const { error } = await supabase
-        .from('graveyard_legacy_posts')
+        .from('graveyard_legacy_posts' as any)
         .insert([{
           ...formData,
           rank_score: parseInt(formData.rank_score.toString()),

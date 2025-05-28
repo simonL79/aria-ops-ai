@@ -23,17 +23,17 @@ const GraveyardDashboard = () => {
   const fetchStats = async () => {
     try {
       const { data: posts, error } = await supabase
-        .from('graveyard_legacy_posts')
+        .from('graveyard_legacy_posts' as any)
         .select('is_active, suppression_status, rank_score');
 
       if (error) throw error;
 
       if (posts) {
         const totalPosts = posts.length;
-        const activePosts = posts.filter(post => post.is_active).length;
-        const suppressedPosts = posts.filter(post => post.suppression_status === 'suppressed').length;
+        const activePosts = posts.filter((post: any) => post.is_active).length;
+        const suppressedPosts = posts.filter((post: any) => post.suppression_status === 'suppressed').length;
         const averageRank = posts.length > 0 
-          ? Math.round(posts.reduce((sum, post) => sum + (post.rank_score || 0), 0) / posts.length)
+          ? Math.round(posts.reduce((sum: number, post: any) => sum + (post.rank_score || 0), 0) / posts.length)
           : 0;
 
         setStats({

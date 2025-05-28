@@ -28,7 +28,7 @@ const LegacyPostsList = ({ onStatsChange }: { onStatsChange: () => void }) => {
   const fetchPosts = async () => {
     try {
       const { data, error } = await supabase
-        .from('graveyard_legacy_posts')
+        .from('graveyard_legacy_posts' as any)
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -46,7 +46,7 @@ const LegacyPostsList = ({ onStatsChange }: { onStatsChange: () => void }) => {
     setActionLoading(postId);
     try {
       const { error } = await supabase
-        .from('graveyard_legacy_posts')
+        .from('graveyard_legacy_posts' as any)
         .update(updates)
         .eq('id', postId);
 
@@ -69,7 +69,7 @@ const LegacyPostsList = ({ onStatsChange }: { onStatsChange: () => void }) => {
     setActionLoading(postId);
     try {
       const { error } = await supabase
-        .from('graveyard_legacy_posts')
+        .from('graveyard_legacy_posts' as any)
         .delete()
         .eq('id', postId);
 
