@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,8 +6,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Shield, Activity, Zap, AlertTriangle, Play, RefreshCw, Brain, Eye, Target } from 'lucide-react';
+import { Shield, Activity, Zap, AlertTriangle, Play, RefreshCw, Brain, Eye, Target, Monitor } from 'lucide-react';
 import { hypercoreService, RSIQueueItem, EventDispatch } from '@/services/aria/hypercoreService';
+import { anubisService } from '@/services/aria/anubisService';
+import AnubisMonitor from './AnubisMonitor';
 
 const HyperCoreDashboard = () => {
   const [rsiQueue, setRSIQueue] = useState<RSIQueueItem[]>([]);
@@ -18,16 +19,23 @@ const HyperCoreDashboard = () => {
   const [narrativeClusters, setNarrativeClusters] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [simulationTarget, setSimulationTarget] = useState('');
+  const [systemHealth, setSystemHealth] = useState({
+    overallStatus: 'healthy' as const,
+    moduleCount: 0,
+    issueCount: 0,
+    lastCheck: null as string | null
+  });
 
   const loadData = async () => {
     setLoading(true);
     try {
-      const [rsi, events, ops, synthetic, narrative] = await Promise.all([
+      const [rsi, events, ops, synthetic, narrative, health] = await Promise.all([
         hypercoreService.getRSIQueue(),
         hypercoreService.getEventDispatchQueue(),
         hypercoreService.getAriaOperationsLog(),
         hypercoreService.getSyntheticThreats(),
-        hypercoreService.getNarrativeClusters()
+        hypercoreService.getNarrativeClusters(),
+        anubisService.getSystemHealth()
       ]);
       
       setRSIQueue(rsi);
@@ -35,6 +43,7 @@ const HyperCoreDashboard = () => {
       setOperationsLog(ops);
       setSyntheticThreats(synthetic);
       setNarrativeClusters(narrative);
+      setSystemHealth(health);
     } catch (error) {
       console.error('Error loading HyperCore data:', error);
     } finally {
@@ -83,6 +92,15 @@ const HyperCoreDashboard = () => {
     }
   };
 
+  const getSystemHealthColor = (status: string) => {
+    switch (status) {
+      case 'healthy': return 'text-green-600';
+      case 'warning': return 'text-yellow-600';
+      case 'critical': return 'text-red-600';
+      default: return 'text-gray-600';
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -113,7 +131,22 @@ const HyperCoreDashboard = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">System Health</CardTitle>
+            <Monitor className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className={`text-2xl font-bold capitalize ${getSystemHealthColor(systemHealth.overallStatus)}`}>
+              {systemHealth.overallStatus}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {systemHealth.moduleCount} modules • {systemHealth.issueCount} issues
+            </p>
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">RSI Queue</CardTitle>
@@ -197,14 +230,19 @@ const HyperCoreDashboard = () => {
         </CardContent>
       </Card>
 
-      <Tabs defaultValue="rsi" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-5">
+      <Tabs defaultValue="anubis" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-6">
+          <TabsTrigger value="anubis">Anubis Monitor</TabsTrigger>
           <TabsTrigger value="rsi">RSI Queue</TabsTrigger>
           <TabsTrigger value="events">Event Dispatch</TabsTrigger>
           <TabsTrigger value="synthetic">Synthetic Threats</TabsTrigger>
           <TabsTrigger value="narrative">Narrative Clusters</TabsTrigger>
           <TabsTrigger value="operations">Operations Log</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="anubis" className="space-y-4">
+          <AnubisMonitor />
+        </TabsContent>
 
         <TabsContent value="rsi" className="space-y-4">
           <Card>

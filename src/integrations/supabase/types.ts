@@ -153,6 +153,63 @@ export type Database = {
         }
         Relationships: []
       }
+      anubis_log: {
+        Row: {
+          check_type: string | null
+          checked_at: string | null
+          details: string | null
+          id: string
+          module: string
+          result_status: string | null
+        }
+        Insert: {
+          check_type?: string | null
+          checked_at?: string | null
+          details?: string | null
+          id?: string
+          module: string
+          result_status?: string | null
+        }
+        Update: {
+          check_type?: string | null
+          checked_at?: string | null
+          details?: string | null
+          id?: string
+          module?: string
+          result_status?: string | null
+        }
+        Relationships: []
+      }
+      anubis_state: {
+        Row: {
+          anomaly_detected: boolean | null
+          id: string
+          issue_summary: string | null
+          last_checked: string | null
+          module: string
+          record_count: number | null
+          status: string | null
+        }
+        Insert: {
+          anomaly_detected?: boolean | null
+          id?: string
+          issue_summary?: string | null
+          last_checked?: string | null
+          module: string
+          record_count?: number | null
+          status?: string | null
+        }
+        Update: {
+          anomaly_detected?: boolean | null
+          id?: string
+          issue_summary?: string | null
+          last_checked?: string | null
+          module?: string
+          record_count?: number | null
+          status?: string | null
+        }
+        Relationships: []
+      }
       aria_access_audit: {
         Row: {
           attempted_action: string | null
@@ -4406,6 +4463,33 @@ export type Database = {
       }
     }
     Views: {
+      anubis_status_report: {
+        Row: {
+          anomaly_detected: boolean | null
+          issue_summary: string | null
+          last_checked: string | null
+          module: string | null
+          record_count: number | null
+          status: string | null
+        }
+        Insert: {
+          anomaly_detected?: boolean | null
+          issue_summary?: string | null
+          last_checked?: string | null
+          module?: string | null
+          record_count?: number | null
+          status?: string | null
+        }
+        Update: {
+          anomaly_detected?: boolean | null
+          issue_summary?: string | null
+          last_checked?: string | null
+          module?: string | null
+          record_count?: number | null
+          status?: string | null
+        }
+        Relationships: []
+      }
       aria_notifications_dashboard: {
         Row: {
           created_at: string | null
@@ -4734,6 +4818,10 @@ export type Database = {
       }
     }
     Functions: {
+      anubis_run_diagnostics: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       assign_staff_role: {
         Args: { user_email: string }
         Returns: undefined
@@ -4855,6 +4943,10 @@ export type Database = {
       refresh_praxis_views: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      run_anubis_now: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       run_global_scan: {
         Args: Record<PropertyKey, never> | { scan_depth?: string }
