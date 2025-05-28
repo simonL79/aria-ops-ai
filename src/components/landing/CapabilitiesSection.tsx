@@ -40,7 +40,7 @@ const CapabilitiesSection = () => {
   return (
     <section className="py-24 px-6 bg-[#D8DEE9]">
       <div className="container mx-auto max-w-6xl">
-        <h2 className="text-5xl md:text-6xl font-black text-center mb-6 text-[#0A0F2C] font-['Space_Grotesk'] tracking-tight">
+        <h2 className="text-3xl md:text-5xl lg:text-6xl font-black text-center mb-6 text-[#0A0F2C] font-['Space_Grotesk'] tracking-tight px-4">
           A.R.I.A™ IS THE WORLD'S FIRST FULLY-MANAGED REPUTATION INTELLIGENCE SYSTEM THAT:
         </h2>
         <div className="w-32 h-1 bg-gradient-to-r from-[#247CFF] to-[#38C172] mx-auto mb-20"></div>
@@ -54,16 +54,16 @@ const CapabilitiesSection = () => {
               <div className={`absolute inset-0 bg-gradient-to-r ${capability.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500`}></div>
               <div className={`absolute left-0 top-0 w-2 h-full bg-gradient-to-b ${capability.gradient} transform scale-y-0 group-hover:scale-y-100 transition-transform duration-500 origin-top`}></div>
               
-              <div className="relative p-10">
-                <div className="flex items-center mb-6">
-                  <div className={`p-3 rounded-2xl bg-gradient-to-r ${capability.gradient} shadow-lg group-hover:shadow-[0_0_20px_rgba(36,124,255,0.3)]`}>
+              <div className="relative p-8 md:p-10 text-center">
+                <div className="flex flex-col items-center mb-6">
+                  <div className={`p-3 rounded-2xl bg-gradient-to-r ${capability.gradient} shadow-lg group-hover:shadow-[0_0_20px_rgba(36,124,255,0.3)] mb-4`}>
                     <Check className="h-7 w-7 text-white" />
                   </div>
-                  <h3 className="font-bold text-xl ml-6 text-[#0A0F2C] group-hover:text-white transition-colors font-['Space_Grotesk'] tracking-wide">
+                  <h3 className="font-bold text-lg md:text-xl text-[#0A0F2C] group-hover:text-white transition-colors font-['Space_Grotesk'] tracking-wide text-center">
                     {capability.title.toUpperCase()}
                   </h3>
                 </div>
-                <p className="text-[#1C1C1E] group-hover:text-[#D8DEE9] transition-colors leading-relaxed font-['Inter']">
+                <p className="text-[#1C1C1E] group-hover:text-[#D8DEE9] transition-colors leading-relaxed font-['Inter'] text-center">
                   {capability.description}
                 </p>
               </div>
