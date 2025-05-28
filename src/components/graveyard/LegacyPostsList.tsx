@@ -33,7 +33,7 @@ const LegacyPostsList = ({ onStatsChange }: { onStatsChange: () => void }) => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setPosts(data || []);
+      setPosts((data as LegacyPost[]) || []);
     } catch (error) {
       console.error('Error fetching legacy posts:', error);
       toast.error('Failed to load legacy posts');
