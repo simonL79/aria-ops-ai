@@ -42,15 +42,16 @@ export const useDiscoveryScanning = () => {
     setScanProgress(0);
     
     try {
-      toast.info('Starting zero-input discovery scan...');
+      toast.info('Starting live zero-input discovery scan...');
       
       // Simulate progress updates
       const progressInterval = setInterval(() => {
-        setScanProgress(prev => Math.min(prev + 10, 90));
-      }, 500);
+        setScanProgress(prev => Math.min(prev + 15, 85));
+      }, 1000);
 
+      // Call live discovery scanner
       const { data, error } = await supabase.functions.invoke('discovery-scanner', {
-        body: { scanType: 'zero-input' }
+        body: { scanType: 'live_intelligence' }
       });
 
       clearInterval(progressInterval);
@@ -69,7 +70,11 @@ export const useDiscoveryScanning = () => {
         setDiscoveredThreats(threats);
         setScanStats(data.stats);
         
-        toast.success(`Discovery scan completed: ${data.stats.threatsFound} threats found`);
+        if (threats.length > 0) {
+          toast.success(`Live discovery scan completed: ${data.stats.threatsFound} real threats found`);
+        } else {
+          toast.success('Discovery scan completed: No active threats detected');
+        }
       } else {
         throw new Error('Scan failed');
       }

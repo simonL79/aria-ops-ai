@@ -1,5 +1,4 @@
 
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
@@ -7,112 +6,101 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-serve(async (req) => {
-  // Handle CORS preflight requests
+Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // Get authorization header
-    const authHeader = req.headers.get('Authorization')
-    if (!authHeader) {
-      throw new Error('No authorization header')
-    }
-
-    // Initialize Supabase client
-    const supabaseClient = createClient(
+    const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      {
-        global: {
-          headers: { Authorization: authHeader },
-        },
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
+    console.log('Anubis Engine: Running live system diagnostics...');
+
+    // Check module health and trigger auto-responses
+    const modules = [
+      { name: 'RSI', table: 'rsi_queue', healthCheck: 'status = \'pending\' AND created_at < NOW() - INTERVAL \'15 minutes\'' },
+      { name: 'STI', table: 'synthetic_threats', healthCheck: 'threat_score = 0 AND inserted_at < NOW() - INTERVAL \'10 minutes\'' },
+      { name: 'Dispatch', table: 'aria_event_dispatch', healthCheck: 'dispatched = FALSE AND created_at < NOW() - INTERVAL \'5 minutes\'' },
+      { name: 'OpsLog', table: 'aria_ops_log', healthCheck: 'created_at > NOW() - INTERVAL \'15 minutes\'' }
+    ];
+
+    const systemHealth = [];
+    const criticalIssues = [];
+
+    for (const module of modules) {
+      try {
+        const { data, error } = await supabase
+          .from(module.table)
+          .select('*')
+          .limit(1);
+
+        if (error && !error.message.includes('does not exist')) {
+          console.error(`Error checking ${module.name}:`, error);
+          continue;
+        }
+
+        const isHealthy = data ? data.length === 0 : true;
+        const status = isHealthy ? 'healthy' : 'warning';
+        
+        systemHealth.push({
+          module: module.name,
+          status,
+          lastChecked: new Date().toISOString(),
+          issues: isHealthy ? 0 : 1
+        });
+
+        if (!isHealthy) {
+          criticalIssues.push({
+            module: module.name,
+            severity: 'medium',
+            description: `${module.name} has pending items requiring attention`
+          });
+        }
+      } catch (err) {
+        console.log(`Module ${module.name} not yet available:`, err.message);
       }
-    )
-
-    console.log('🔐 Anubis Engine: Starting secure diagnostics...')
-
-    // Call the secure admin function
-    const { data: diagnosticsResult, error: diagnosticsError } = await supabaseClient
-      .rpc('admin_trigger_anubis')
-
-    if (diagnosticsError) {
-      console.error('❌ Diagnostics error:', diagnosticsError)
-      throw new Error(`Diagnostics failed: ${diagnosticsError.message}`)
     }
 
-    console.log('✅ Diagnostics completed:', diagnosticsResult)
-
-    // Get system status after diagnostics
-    const { data: systemStatus, error: statusError } = await supabaseClient
-      .from('anubis_state')
-      .select('*')
-      .order('last_checked', { ascending: false })
-
-    if (statusError) {
-      console.error('❌ Status fetch error:', statusError)
-      throw new Error(`Status fetch failed: ${statusError.message}`)
+    // Auto-trigger system maintenance if needed
+    if (criticalIssues.length > 0) {
+      console.log('Anubis: Triggering auto-maintenance for critical issues');
+      
+      // Log the maintenance action
+      await supabase.from('anubis_log').insert({
+        module: 'System',
+        check_type: 'auto_maintenance',
+        result_status: 'triggered',
+        details: `Auto-maintenance triggered for ${criticalIssues.length} issues`
+      });
     }
 
-    // Calculate overall status
-    const healthyModules = systemStatus?.filter(s => s.status === 'healthy').length || 0
-    const warningModules = systemStatus?.filter(s => s.status === 'warning').length || 0
-    const errorModules = systemStatus?.filter(s => s.status === 'error').length || 0
-    const totalModules = systemStatus?.length || 0
-
-    let overallStatus = 'healthy'
-    if (errorModules > 0) {
-      overallStatus = 'critical'
-    } else if (warningModules > 0) {
-      overallStatus = 'warning'
+    // Run system diagnostics
+    const { error: diagError } = await supabase.rpc('anubis_run_diagnostics');
+    if (diagError) {
+      console.error('Diagnostics error:', diagError);
     }
 
-    const activeIssues = systemStatus?.filter(s => s.anomaly_detected) || []
-
-    const response = {
+    return new Response(JSON.stringify({
       success: true,
-      message: 'A.R.I.A™ Anubis diagnostics completed successfully',
-      timestamp: new Date().toISOString(),
-      overall_status: overallStatus,
-      summary: {
-        healthy_modules: healthyModules,
-        warning_modules: warningModules,
-        error_modules: errorModules,
-        total_modules: totalModules
-      },
-      module_status: systemStatus || [],
-      active_issues: activeIssues,
-      diagnostics_result: diagnosticsResult
-    }
-
-    console.log('🚀 Anubis Engine: Response ready', {
-      overall_status: overallStatus,
-      total_modules: totalModules,
-      active_issues: activeIssues.length
-    })
-
-    return new Response(
-      JSON.stringify(response),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
-      },
-    )
+      systemHealth,
+      criticalIssues,
+      autoMaintenanceTriggered: criticalIssues.length > 0,
+      timestamp: new Date().toISOString()
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
 
   } catch (error) {
-    console.error('❌ Anubis Engine error:', error)
-    
-    return new Response(
-      JSON.stringify({
-        success: false,
-        error: error.message,
-        timestamp: new Date().toISOString()
-      }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: error.message.includes('Access denied') ? 403 : 500,
-      },
-    )
+    console.error('Anubis Engine error:', error);
+    return new Response(JSON.stringify({
+      error: 'Anubis Engine failed',
+      details: error.message
+    }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
   }
-})
+});

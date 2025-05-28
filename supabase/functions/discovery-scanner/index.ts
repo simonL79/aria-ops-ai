@@ -34,79 +34,86 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    console.log('Starting Real Discovery Scanner...');
+    console.log('Starting Live Discovery Scanner...');
 
-    // Check if mock data is disabled
-    const { data: configData } = await supabase
-      .from('system_config')
-      .select('config_value')
-      .eq('config_key', 'allow_mock_data')
-      .single();
+    // Get real scan results from the last 24 hours
+    const { data: realThreats, error } = await supabase
+      .from('scan_results')
+      .select('*')
+      .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+      .order('created_at', { ascending: false })
+      .limit(50);
 
-    const allowMockData = configData?.config_value === 'enabled';
+    if (error) {
+      console.error('Error fetching real threats:', error);
+      throw error;
+    }
 
-    if (!allowMockData) {
-      console.log('Mock data disabled, using real scan results only');
-      
-      // Get real scan results from the last 24 hours
-      const { data: realThreats, error } = await supabase
-        .from('scan_results')
-        .select('*')
-        .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
-        .order('created_at', { ascending: false })
-        .limit(20);
+    // Process real threats and match with client entities
+    const discoveredThreats: DiscoveredThreat[] = [];
 
-      if (error) {
-        console.error('Error fetching real threats:', error);
-        throw error;
-      }
+    for (const threat of realThreats || []) {
+      // Check for client entity matches
+      const { data: clientMatches } = await supabase
+        .rpc('check_entity_client_match', { 
+          entity_name_input: threat.risk_entity_name || threat.content?.substring(0, 100) 
+        });
 
-      const discoveredThreats: DiscoveredThreat[] = (realThreats || []).map(threat => ({
+      const isClientLinked = clientMatches && clientMatches.length > 0;
+      const clientMatch = clientMatches?.[0];
+
+      discoveredThreats.push({
         entityName: threat.risk_entity_name || 'Detected Entity',
         entityType: threat.risk_entity_type || 'organization',
         threatLevel: Math.min(10, Math.max(1, Math.abs(threat.sentiment || 0) * 10)),
-        spreadVelocity: Math.floor(Math.random() * 5) + 1,
+        spreadVelocity: threat.potential_reach ? Math.min(10, threat.potential_reach / 1000) : Math.floor(Math.random() * 5) + 1,
         mentionCount: 1,
         sentiment: threat.sentiment || 0,
         platform: threat.platform,
         contextSnippet: threat.content || '',
         sourceUrl: threat.url,
         timestamp: threat.created_at,
-        clientLinked: threat.client_linked || false,
-        linkedClientName: threat.linked_client_name,
-        matchType: threat.client_linked ? 'linked' : undefined,
-        matchConfidence: threat.confidence_score
-      }));
-
-      return new Response(
-        JSON.stringify({ 
-          success: true, 
-          threats: discoveredThreats,
-          stats: {
-            platformsScanned: new Set(discoveredThreats.map(t => t.platform)).size,
-            threatsFound: discoveredThreats.length,
-            clientLinkedThreats: discoveredThreats.filter(t => t.clientLinked).length
-          },
-          dataSource: 'real_scan_results'
-        }),
-        { 
-          status: 200, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
+        clientLinked: isClientLinked,
+        linkedClientName: clientMatch?.client_name,
+        matchType: clientMatch?.match_type,
+        matchConfidence: clientMatch?.confidence_score
+      });
     }
 
-    // If mock data is enabled, return empty results with a message
+    // Also check darkweb feed for additional threats
+    const { data: darkwebThreats } = await supabase
+      .from('darkweb_feed')
+      .select('*')
+      .gte('inserted_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+      .order('inserted_at', { ascending: false })
+      .limit(20);
+
+    for (const dwThreat of darkwebThreats || []) {
+      discoveredThreats.push({
+        entityName: dwThreat.actor_alias || 'Dark Web Entity',
+        entityType: 'threat_actor',
+        threatLevel: Math.min(10, Math.max(5, dwThreat.entropy_score * 10)),
+        spreadVelocity: 8,
+        mentionCount: 1,
+        sentiment: -0.8,
+        platform: 'Dark Web',
+        contextSnippet: dwThreat.content_text?.substring(0, 200) || '',
+        sourceUrl: dwThreat.source_url,
+        timestamp: dwThreat.inserted_at,
+        clientLinked: false
+      });
+    }
+
     return new Response(
       JSON.stringify({ 
         success: true, 
-        threats: [],
+        threats: discoveredThreats,
         stats: {
-          platformsScanned: 0,
-          threatsFound: 0,
-          clientLinkedThreats: 0
+          platformsScanned: new Set(discoveredThreats.map(t => t.platform)).size,
+          threatsFound: discoveredThreats.length,
+          clientLinkedThreats: discoveredThreats.filter(t => t.clientLinked).length
         },
-        message: 'Mock data mode enabled - no real threats to display'
+        dataSource: 'live_intelligence'
       }),
       { 
         status: 200, 
