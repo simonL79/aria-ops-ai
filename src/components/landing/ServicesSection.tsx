@@ -5,55 +5,56 @@ import { Card } from "@/components/ui/card";
 const ServicesSection = () => {
   const services = [
     {
-      emoji: "📄",
       title: "Weekly Intelligence Reports",
       description: "Summarized risks, shifts in sentiment, and clear next steps.",
-      color: "border-l-blue-500"
+      gradient: "from-[#247CFF] to-[#38C172]"
     },
     {
-      emoji: "🚨",
       title: "Instant Alerts",
       description: "When something urgent emerges — we notify you directly.",
-      color: "border-l-red-500"
+      gradient: "from-[#38C172] to-[#247CFF]"
     },
     {
-      emoji: "🧠",
       title: "Memory Overwrites",
       description: "We help correct what AI models and search engines \"remember\" about you.",
-      color: "border-l-purple-500"
+      gradient: "from-[#247CFF] to-[#1C1C1E]"
     },
     {
-      emoji: "🧬",
       title: "Pre-Crisis Forecasting",
       description: "Detect reputation risks before they happen, based on tone, behavior, and online chatter.",
-      color: "border-l-green-500"
+      gradient: "from-[#1C1C1E] to-[#38C172]"
     },
     {
-      emoji: "👁",
       title: "Zero Input Scanning",
       description: "No keywords needed. We look for everything — even what you didn't know to search for.",
-      color: "border-l-orange-500"
+      gradient: "from-[#38C172] to-[#247CFF]"
     },
     {
-      emoji: "🔒",
       title: "Private by Design",
       description: "GDPR-compliant, no public dashboards, enterprise-grade encryption.",
-      color: "border-l-indigo-500"
+      gradient: "from-[#247CFF] to-[#38C172]"
     }
   ];
 
   return (
-    <section className="py-16 px-6">
+    <section className="py-20 px-6 bg-[#0A0F2C]">
       <div className="container mx-auto max-w-5xl">
-        <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">🛡 What You Get</h2>
+        <h2 className="text-4xl md:text-5xl font-black text-center mb-16 text-white font-['Space_Grotesk'] tracking-tight">
+          WHAT YOU GET
+        </h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {services.map((service, index) => (
-            <Card key={index} className={`p-8 border-l-4 ${service.color}`}>
-              <div className="flex items-center mb-4">
-                <div className="text-3xl mr-4">{service.emoji}</div>
-                <h3 className="text-xl font-bold">{service.title}</h3>
-              </div>
-              <p className="text-gray-600">{service.description}</p>
+            <Card 
+              key={index} 
+              className="group p-8 bg-[#1C1C1E] hover:bg-[#1C1C1E]/80 border border-[#247CFF]/20 hover:border-[#247CFF]/50 shadow-lg hover:shadow-[0_0_25px_rgba(36,124,255,0.2)] transition-all duration-500 transform hover:-translate-y-3 hover:scale-105 rounded-2xl"
+            >
+              <div className={`w-4 h-20 bg-gradient-to-b ${service.gradient} mb-6 rounded-full group-hover:shadow-[0_0_15px_rgba(36,124,255,0.5)] transition-shadow duration-500`}></div>
+              <h3 className="text-xl font-bold mb-4 text-white group-hover:text-[#247CFF] transition-colors font-['Space_Grotesk'] tracking-wide">
+                {service.title.toUpperCase()}
+              </h3>
+              <p className="text-[#D8DEE9] group-hover:text-white transition-colors font-['Inter']">
+                {service.description}
+              </p>
             </Card>
           ))}
         </div>
