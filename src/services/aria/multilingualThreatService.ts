@@ -88,7 +88,11 @@ class MultilingualThreatService {
         return [];
       }
 
-      return data || [];
+      // Type assertion to ensure proper typing
+      return (data || []).map(agent => ({
+        ...agent,
+        mission_type: agent.mission_type as DarkWebAgent['mission_type']
+      }));
     } catch (error) {
       console.error('Error in getDarkWebAgents:', error);
       return [];
@@ -129,7 +133,12 @@ class MultilingualThreatService {
         return [];
       }
 
-      return data || [];
+      // Type assertion to ensure proper typing
+      return (data || []).map(log => ({
+        ...log,
+        llm_model: log.llm_model as LLMWatchdogLog['llm_model'],
+        threat_level: log.threat_level as LLMWatchdogLog['threat_level']
+      }));
     } catch (error) {
       console.error('Error in getLLMWatchdogLogs:', error);
       return [];

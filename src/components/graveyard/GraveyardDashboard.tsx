@@ -1,235 +1,160 @@
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Skull, TrendingDown, Eye, Target, BarChart3 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Trash2, Archive, TrendingDown, AlertCircle } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 import LegacyPostsList from './LegacyPostsList';
+import AddLegacyPostDialog from './AddLegacyPostDialog';
 import SuppressionAssets from './SuppressionAssets';
 import GSCRankTracker from './GSCRankTracker';
-import AddLegacyPostDialog from './AddLegacyPostDialog';
-
-interface GraveyardStats {
-  totalPosts: number;
-  activePosts: number;
-  suppressedPosts: number;
-  averageRankScore: number;
-  totalImpressions: number;
-  averagePosition: number;
-}
 
 const GraveyardDashboard = () => {
-  const [stats, setStats] = useState<GraveyardStats>({
+  const [stats, setStats] = useState({
     totalPosts: 0,
     activePosts: 0,
     suppressedPosts: 0,
-    averageRankScore: 0,
-    totalImpressions: 0,
-    averagePosition: 0
+    averageRank: 0
   });
   const [loading, setLoading] = useState(true);
-  const [showAddDialog, setShowAddDialog] = useState(false);
 
-  useEffect(() => {
-    loadStats();
-  }, []);
-
-  const loadStats = async () => {
+  const fetchStats = async () => {
     try {
-      setLoading(true);
-      
-      // Get basic post stats
-      const { data: posts, error: postsError } = await supabase
-        .from('legacy_reputation_posts')
-        .select('rank_score, suppression_status, is_active');
+      const { data: posts, error } = await supabase
+        .from('graveyard_legacy_posts')
+        .select('is_active, suppression_status, rank_score');
 
-      if (postsError) throw postsError;
+      if (error) throw error;
 
-      // Get GSC stats from suppression assets
-      const { data: assets, error: assetsError } = await supabase
-        .from('suppression_assets')
-        .select('gsc_impressions, rank_goal');
+      if (posts) {
+        const totalPosts = posts.length;
+        const activePosts = posts.filter(post => post.is_active).length;
+        const suppressedPosts = posts.filter(post => post.suppression_status === 'suppressed').length;
+        const averageRank = posts.length > 0 
+          ? Math.round(posts.reduce((sum, post) => sum + (post.rank_score || 0), 0) / posts.length)
+          : 0;
 
-      if (assetsError) throw assetsError;
-
-      const totalPosts = posts?.length || 0;
-      const activePosts = posts?.filter(p => p.is_active).length || 0;
-      const suppressedPosts = posts?.filter(p => p.suppression_status === 'suppressed').length || 0;
-      const averageRankScore = posts?.length ? 
-        posts.reduce((sum, p) => sum + (p.rank_score || 0), 0) / posts.length : 0;
-
-      const totalImpressions = assets?.reduce((sum, a) => sum + (a.gsc_impressions || 0), 0) || 0;
-      const averagePosition = assets?.length ? 
-        assets.reduce((sum, a) => sum + (a.rank_goal || 0), 0) / assets.length : 0;
-
-      setStats({
-        totalPosts,
-        activePosts,
-        suppressedPosts,
-        averageRankScore: Math.round(averageRankScore),
-        totalImpressions,
-        averagePosition: Math.round(averagePosition * 10) / 10
-      });
-
+        setStats({
+          totalPosts,
+          activePosts,
+          suppressedPosts,
+          averageRank
+        });
+      }
     } catch (error) {
-      console.error('Error loading graveyard stats:', error);
+      console.error('Error fetching graveyard stats:', error);
       toast.error('Failed to load graveyard statistics');
     } finally {
       setLoading(false);
     }
   };
 
-  const refreshData = async () => {
-    try {
-      toast.success('Graveyard data refreshed');
-      loadStats();
-    } catch (error) {
-      console.error('Error refreshing data:', error);
-      toast.error('Failed to refresh data');
-    }
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const handleRefresh = () => {
+    fetchStats();
   };
 
   if (loading) {
-    return (
-      <Card>
-        <CardContent className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <Skull className="h-8 w-8 animate-pulse mx-auto mb-2" />
-            <p>Loading GRAVEYARD...</p>
-          </div>
-        </CardContent>
-      </Card>
-    );
+    return <div className="p-6">Loading graveyard dashboard...</div>;
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <div className="p-6 space-y-6">
+      <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold flex items-center gap-3">
-            <Skull className="h-8 w-8" />
-            A.R.I.A™ GRAVEYARD™
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Legacy content suppression & GSC rank monitoring
-          </p>
+          <h1 className="text-3xl font-bold">🪦 Digital Graveyard</h1>
+          <p className="text-muted-foreground">Manage and suppress legacy content</p>
         </div>
-        
-        <div className="flex items-center gap-2">
-          <Button onClick={refreshData} variant="outline" size="sm">
-            <BarChart3 className="h-4 w-4 mr-2" />
-            Refresh Data
-          </Button>
-          <Button onClick={() => setShowAddDialog(true)}>
-            Add Legacy Post
+        <div className="flex gap-2">
+          <AddLegacyPostDialog onPostAdded={handleRefresh} />
+          <Button variant="outline" onClick={handleRefresh}>
+            Refresh
           </Button>
         </div>
       </div>
 
-      {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Posts</p>
-                <p className="text-2xl font-bold">{stats.totalPosts}</p>
-              </div>
-              <Skull className="h-8 w-8 text-gray-500" />
-            </div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Posts</CardTitle>
+            <Archive className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.totalPosts}</div>
+            <p className="text-xs text-muted-foreground">Legacy content tracked</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Active</p>
-                <p className="text-2xl font-bold">{stats.activePosts}</p>
-              </div>
-              <Eye className="h-8 w-8 text-red-500" />
-            </div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Active Posts</CardTitle>
+            <AlertCircle className="h-4 w-4 text-orange-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.activePosts}</div>
+            <p className="text-xs text-muted-foreground">Still visible online</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Suppressed</p>
-                <p className="text-2xl font-bold">{stats.suppressedPosts}</p>
-              </div>
-              <TrendingDown className="h-8 w-8 text-green-500" />
-            </div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Suppressed</CardTitle>
+            <Trash2 className="h-4 w-4 text-green-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.suppressedPosts}</div>
+            <p className="text-xs text-muted-foreground">Successfully removed</p>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Avg Rank</p>
-                <p className="text-2xl font-bold">{stats.averageRankScore}</p>
-              </div>
-              <Target className="h-8 w-8 text-blue-500" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">GSC Impressions</p>
-                <p className="text-2xl font-bold">{stats.totalImpressions.toLocaleString()}</p>
-              </div>
-              <BarChart3 className="h-8 w-8 text-purple-500" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Avg Goal</p>
-                <p className="text-2xl font-bold">{stats.averagePosition}</p>
-              </div>
-              <TrendingDown className="h-8 w-8 text-orange-500" />
-            </div>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Avg Rank</CardTitle>
+            <TrendingDown className="h-4 w-4 text-blue-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.averageRank}</div>
+            <p className="text-xs text-muted-foreground">Search ranking position</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Main Content Tabs */}
-      <Tabs defaultValue="posts" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="posts">Legacy Posts</TabsTrigger>
-          <TabsTrigger value="assets">Suppression Assets</TabsTrigger>
-          <TabsTrigger value="tracking">GSC Tracking</TabsTrigger>
-        </TabsList>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Legacy Posts Management</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <LegacyPostsList onStatsChange={handleRefresh} />
+          </CardContent>
+        </Card>
 
-        <TabsContent value="posts">
-          <LegacyPostsList onPostAdded={loadStats} />
-        </TabsContent>
+        <Card>
+          <CardHeader>
+            <CardTitle>Suppression Assets</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <SuppressionAssets />
+          </CardContent>
+        </Card>
+      </div>
 
-        <TabsContent value="assets">
-          <SuppressionAssets />
-        </TabsContent>
-
-        <TabsContent value="tracking">
+      {/* GSC Rank Tracker */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Google Search Console Rank Tracker</CardTitle>
+        </CardHeader>
+        <CardContent>
           <GSCRankTracker />
-        </TabsContent>
-      </Tabs>
-
-      <AddLegacyPostDialog 
-        open={showAddDialog}
-        onOpenChange={setShowAddDialog}
-        onPostAdded={loadStats}
-      />
+        </CardContent>
+      </Card>
     </div>
   );
 };
