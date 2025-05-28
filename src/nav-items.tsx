@@ -1,4 +1,3 @@
-
 import DashboardPage from "@/pages/dashboard/DashboardPage";
 import AiScrapingPage from "@/pages/AiScrapingPage";
 import CleanLaunchPage from "@/pages/CleanLaunchPage";
@@ -6,6 +5,39 @@ import { ExecutiveReportsPage } from "@/pages/ExecutiveReportsPage";
 import SettingsPage from "@/pages/Settings";
 import { UsersPage } from "@/pages/UsersPage";
 import HyperCorePage from "@/pages/HyperCorePage";
+import { 
+  Home,
+  Search,
+  Users,
+  BarChart3,
+  Settings,
+  ShieldCheck,
+  Bot,
+  Radar,
+  FileText,
+  Zap,
+  Shield,
+  Brain,
+  Eye,
+  Target,
+  Layers,
+  Gauge,
+  AlertTriangle,
+  Clock,
+  MessageSquare,
+  Building,
+  UserCheck,
+  Calendar,
+  LifeBuoy,
+  HelpCircle,
+  Lock,
+  Globe,
+  FileX,
+  Trash2,
+  UserPlus,
+  Calculator,
+  AlertOctagon
+} from "lucide-react";
 
 export type NavItem = {
   title: string;
@@ -63,5 +95,11 @@ export const navItems: NavItem[] = [
     to: "/settings",
     icon: "settings",
     page: SettingsPage,
+  },
+  {
+    title: "A.R.I.A/EX™ Emergency",
+    url: "/emergency-strike",
+    icon: AlertOctagon,
+    adminOnly: true,
   },
 ];

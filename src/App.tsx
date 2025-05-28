@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -11,6 +10,8 @@ import AdminSessionManager from "@/components/auth/AdminSessionManager";
 import ErrorBoundary from "@/components/error/ErrorBoundary";
 import Loading from "@/components/ui/loading";
 import { useAuth } from "@/hooks/useAuth";
+import EmergencyStrikePage from "./pages/EmergencyStrikePage";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
 
 // Lazy load pages for better performance
 const SalesFunnelPage = lazy(() => import("./pages/SalesFunnelPage"));
@@ -35,7 +36,7 @@ const queryClient = new QueryClient({
   },
 });
 
-const App = () => {
+function App() {
   const { isAuthenticated, isAdmin } = useAuth();
 
   return (
@@ -109,6 +110,15 @@ const App = () => {
                         <AnubisCockpitPage />
                       </SecureRouteGuard>
                     } />
+                    
+                    <Route 
+                      path="/emergency-strike" 
+                      element={
+                        <DashboardLayout>
+                          <EmergencyStrikePage />
+                        </DashboardLayout>
+                      } 
+                    />
                   </Routes>
                 </Suspense>
               </main>
@@ -118,6 +128,6 @@ const App = () => {
       </QueryClientProvider>
     </ErrorBoundary>
   );
-};
+}
 
 export default App;

@@ -2411,6 +2411,139 @@ export type Database = {
         }
         Relationships: []
       }
+      ex_action_log: {
+        Row: {
+          action_type: string | null
+          engine_version: string | null
+          executed_at: string | null
+          id: string
+          result: string | null
+          threat_id: string | null
+        }
+        Insert: {
+          action_type?: string | null
+          engine_version?: string | null
+          executed_at?: string | null
+          id?: string
+          result?: string | null
+          threat_id?: string | null
+        }
+        Update: {
+          action_type?: string | null
+          engine_version?: string | null
+          executed_at?: string | null
+          id?: string
+          result?: string | null
+          threat_id?: string | null
+        }
+        Relationships: []
+      }
+      ex_admin_decisions: {
+        Row: {
+          admin_id: string | null
+          approved: boolean | null
+          id: string
+          reason: string | null
+          reviewed_at: string | null
+          threat_id: string | null
+        }
+        Insert: {
+          admin_id?: string | null
+          approved?: boolean | null
+          id?: string
+          reason?: string | null
+          reviewed_at?: string | null
+          threat_id?: string | null
+        }
+        Update: {
+          admin_id?: string | null
+          approved?: boolean | null
+          id?: string
+          reason?: string | null
+          reviewed_at?: string | null
+          threat_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ex_admin_decisions_threat_id_fkey"
+            columns: ["threat_id"]
+            isOneToOne: false
+            referencedRelation: "ex_threat_queue"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ex_strike_plan: {
+        Row: {
+          action_detail: string | null
+          action_type: string | null
+          approved: boolean | null
+          created_at: string | null
+          id: string
+          threat_id: string | null
+          urgency_level: string | null
+        }
+        Insert: {
+          action_detail?: string | null
+          action_type?: string | null
+          approved?: boolean | null
+          created_at?: string | null
+          id?: string
+          threat_id?: string | null
+          urgency_level?: string | null
+        }
+        Update: {
+          action_detail?: string | null
+          action_type?: string | null
+          approved?: boolean | null
+          created_at?: string | null
+          id?: string
+          threat_id?: string | null
+          urgency_level?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ex_strike_plan_threat_id_fkey"
+            columns: ["threat_id"]
+            isOneToOne: false
+            referencedRelation: "ex_threat_queue"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ex_threat_queue: {
+        Row: {
+          confirmed_by_admin: boolean | null
+          detected_at: string | null
+          id: string
+          origin_url: string | null
+          risk_level: string | null
+          status: string | null
+          threat_description: string | null
+          threat_type: string | null
+        }
+        Insert: {
+          confirmed_by_admin?: boolean | null
+          detected_at?: string | null
+          id?: string
+          origin_url?: string | null
+          risk_level?: string | null
+          status?: string | null
+          threat_description?: string | null
+          threat_type?: string | null
+        }
+        Update: {
+          confirmed_by_admin?: boolean | null
+          detected_at?: string | null
+          id?: string
+          origin_url?: string | null
+          risk_level?: string | null
+          status?: string | null
+          threat_description?: string | null
+          threat_type?: string | null
+        }
+        Relationships: []
+      }
       executive_reports: {
         Row: {
           created_at: string | null
@@ -5485,6 +5618,26 @@ export type Database = {
       compute_swarm_consensus: {
         Args: { threat: string }
         Returns: undefined
+      }
+      ex_add_strike_plan: {
+        Args: {
+          p_threat_id: string
+          p_action_type: string
+          p_action_detail: string
+        }
+        Returns: string
+      }
+      ex_add_threat: {
+        Args: { p_desc: string; p_type: string; p_url: string; p_risk: string }
+        Returns: string
+      }
+      ex_admin_confirm_strike: {
+        Args: { p_threat_id: string; p_admin: string; p_reason: string }
+        Returns: string
+      }
+      ex_cancel_threat: {
+        Args: { p_threat_id: string; p_reason: string }
+        Returns: string
       }
       generate_decay_score: {
         Args: {
