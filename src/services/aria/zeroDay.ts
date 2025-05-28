@@ -147,7 +147,11 @@ class ZeroDayFirewallService {
         return [];
       }
 
-      return data || [];
+      // Type assertion to ensure verdict field matches our interface
+      return (data || []).map(item => ({
+        ...item,
+        verdict: item.verdict as 'benign' | 'malicious' | 'inconclusive'
+      }));
     } catch (error) {
       console.error('Error in getAIWatchdogVerdicts:', error);
       return [];
@@ -172,7 +176,11 @@ class ZeroDayFirewallService {
         return [];
       }
 
-      return data || [];
+      // Type assertion to ensure final_verdict field matches our interface
+      return (data || []).map(item => ({
+        ...item,
+        final_verdict: item.final_verdict as 'benign' | 'malicious' | 'inconclusive'
+      }));
     } catch (error) {
       console.error('Error in getAISwarmConsensus:', error);
       return [];
@@ -196,7 +204,7 @@ class ZeroDayFirewallService {
                      Math.random() > 0.5 ? 'benign' : 'inconclusive';
       const confidence = Math.random() * 0.4 + 0.6; // 0.6-1.0
 
-      await this.submitWatchdogVerdict(threatId, watchdog, verdict as any, confidence);
+      await this.submitWatchdogVerdict(threatId, watchdog, verdict as 'benign' | 'malicious' | 'inconclusive', confidence);
       
       // Small delay to simulate processing time
       await new Promise(resolve => setTimeout(resolve, 100));
