@@ -1,5 +1,5 @@
 
-import { DashboardPage } from "@/pages/dashboard/DashboardPage";
+import DashboardPage from "@/pages/dashboard/DashboardPage";
 import AiScrapingPage from "@/pages/AiScrapingPage";
 import CleanLaunchPage from "@/pages/CleanLaunchPage";
 import { ExecutiveReportsPage } from "@/pages/ExecutiveReportsPage";
