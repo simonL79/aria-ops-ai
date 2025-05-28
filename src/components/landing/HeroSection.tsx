@@ -28,22 +28,22 @@ const HeroSection = ({ onScrollToForm }: HeroSectionProps) => {
       
       <div className="container mx-auto text-center max-w-6xl relative z-10">
         {/* Logo prominently displayed */}
-        <div className="mb-8">
+        <div className="mb-8 flex justify-center">
           <Logo variant="light" size="xl" className="mx-auto" />
         </div>
         
         <div className="mb-12 space-y-8">
-          <div className="inline-block">
-            <h1 className="text-5xl md:text-7xl lg:text-9xl font-black mb-6 leading-tight font-['Space_Grotesk'] tracking-tight text-center">
+          <div className="flex justify-center">
+            <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-9xl font-black mb-6 leading-tight font-['Space_Grotesk'] tracking-tight text-center">
               <span className="bg-gradient-to-r from-white via-[#D8DEE9] to-[#247CFF] bg-clip-text text-transparent">
                 A.R.I.A™
               </span>
             </h1>
           </div>
-          <h2 className="text-xl md:text-3xl lg:text-5xl font-bold mb-8 text-[#D8DEE9] tracking-wide font-['Space_Grotesk'] text-center px-4">
+          <h2 className="text-lg sm:text-xl md:text-3xl lg:text-5xl font-bold mb-8 text-[#D8DEE9] tracking-wide font-['Space_Grotesk'] text-center px-4 mx-auto max-w-5xl">
             ADAPTIVE REPUTATION INTELLIGENCE & ANALYSIS
           </h2>
-          <p className="text-lg md:text-xl lg:text-2xl mb-12 text-[#D8DEE9] max-w-4xl mx-auto leading-relaxed font-['Inter'] text-center px-4">
+          <p className="text-base sm:text-lg md:text-xl lg:text-2xl mb-12 text-[#D8DEE9] max-w-4xl mx-auto leading-relaxed font-['Inter'] text-center px-4">
             Real-time protection for your name, your business, and your future.
           </p>
         </div>
@@ -54,20 +54,20 @@ const HeroSection = ({ onScrollToForm }: HeroSectionProps) => {
             <div className="w-3 h-3 bg-[#247CFF] rounded-full mr-4 animate-pulse shadow-lg shadow-[#247CFF]/50"></div>
             PROTECT WHAT MATTERS — BEFORE IT BREAKS
           </h3>
-          <p className="text-base md:text-lg text-[#D8DEE9] leading-relaxed font-['Inter'] text-center">
+          <p className="text-base md:text-lg text-[#D8DEE9] leading-relaxed font-['Inter'] text-center max-w-4xl mx-auto">
             You don't need to be famous to be at risk.<br className="hidden md:block" />
             You just need someone to say the wrong thing — in the wrong place — at the wrong time.
           </p>
         </div>
 
-        <div className="group px-4">
+        <div className="flex justify-center px-4">
           <Button 
             asChild 
             size="lg" 
-            className="w-full md:w-auto bg-[#247CFF] hover:bg-[#247CFF]/90 text-white px-12 md:px-20 py-8 md:py-10 text-lg md:text-xl font-bold rounded-2xl border border-[#247CFF]/50 hover:border-[#247CFF] hover:shadow-[0_0_30px_rgba(36,124,255,0.3)] transform hover:scale-105 transition-all duration-300 font-['Space_Grotesk'] tracking-widest uppercase"
+            className="w-full sm:w-auto bg-[#247CFF] hover:bg-[#1c63cc] text-white px-8 sm:px-12 md:px-20 py-6 sm:py-8 md:py-10 text-base sm:text-lg md:text-xl font-bold rounded-2xl border-2 border-[#247CFF] hover:border-[#1c63cc] hover:shadow-[0_0_30px_rgba(36,124,255,0.4)] transform hover:scale-105 transition-all duration-300 font-['Space_Grotesk'] tracking-widest uppercase"
           >
             <a href="#scan-form" onClick={onScrollToForm} className="flex items-center justify-center">
-              <Search className="mr-4 h-6 w-6 md:h-8 md:w-8" />
+              <Search className="mr-3 sm:mr-4 h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8" />
               REQUEST YOUR PRIVATE SCAN
             </a>
           </Button>
