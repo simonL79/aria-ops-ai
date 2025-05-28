@@ -33,40 +33,42 @@ export const useVoiceCommand = (): VoiceCommandHook => {
   useEffect(() => {
     if (!isSupported) return;
 
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    recognitionRef.current = new SpeechRecognition();
-    synthRef.current = window.speechSynthesis;
+    const SpeechRecognitionConstructor = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognitionConstructor) {
+      recognitionRef.current = new SpeechRecognitionConstructor();
+      synthRef.current = window.speechSynthesis;
 
-    if (recognitionRef.current) {
-      recognitionRef.current.continuous = false;
-      recognitionRef.current.interimResults = true;
-      recognitionRef.current.lang = 'en-US';
+      if (recognitionRef.current) {
+        recognitionRef.current.continuous = false;
+        recognitionRef.current.interimResults = true;
+        recognitionRef.current.lang = 'en-US';
 
-      recognitionRef.current.onstart = () => {
-        setIsListening(true);
-        console.log('🎤 Voice recognition started');
-      };
+        recognitionRef.current.onstart = () => {
+          setIsListening(true);
+          console.log('🎤 Voice recognition started');
+        };
 
-      recognitionRef.current.onresult = (event) => {
-        const current = event.resultIndex;
-        const transcriptText = event.results[current][0].transcript;
-        setTranscript(transcriptText);
-        
-        if (event.results[current].isFinal) {
-          logVoiceInteraction({ transcript: transcriptText, source: 'mic' });
-        }
-      };
+        recognitionRef.current.onresult = (event) => {
+          const current = event.resultIndex;
+          const transcriptText = event.results[current][0].transcript;
+          setTranscript(transcriptText);
+          
+          if (event.results[current].isFinal) {
+            logVoiceInteraction({ transcript: transcriptText, source: 'mic' });
+          }
+        };
 
-      recognitionRef.current.onend = () => {
-        setIsListening(false);
-        console.log('🎤 Voice recognition ended');
-      };
+        recognitionRef.current.onend = () => {
+          setIsListening(false);
+          console.log('🎤 Voice recognition ended');
+        };
 
-      recognitionRef.current.onerror = (event) => {
-        setIsListening(false);
-        console.error('🎤 Speech recognition error:', event.error);
-        toast.error(`Voice recognition error: ${event.error}`);
-      };
+        recognitionRef.current.onerror = (event) => {
+          setIsListening(false);
+          console.error('🎤 Speech recognition error:', event.error);
+          toast.error(`Voice recognition error: ${event.error}`);
+        };
+      }
     }
 
     return () => {
