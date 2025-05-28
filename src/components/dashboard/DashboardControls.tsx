@@ -7,7 +7,6 @@ import ProfileTestPanel from "@/components/dashboard/ProfileTestPanel";
 import ContentIntelligencePanel from "@/components/dashboard/ContentIntelligencePanel";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { hasOpenAIKey } from "@/services/api/openaiClient";
 
 interface DashboardControlsProps {
   isScanning: boolean;
@@ -28,19 +27,6 @@ const DashboardControls = ({
   const handleScan = (e: React.MouseEvent) => {
     e.preventDefault();
     
-    // Check if API key is available before scanning
-    if (!hasOpenAIKey()) {
-      toast.error("API Key Required", {
-        description: "Please set your OpenAI API key in the settings panel before scanning",
-        action: {
-          label: "Settings",
-          onClick: () => navigate("/settings")
-        },
-        duration: 7000
-      });
-      return;
-    }
-    
     // Track scan in analytics
     try {
       // Log scan to Supabase
@@ -49,7 +35,7 @@ const DashboardControls = ({
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ type: 'manual_scan' })
+        body: JSON.stringify({ type: 'live_scan', timestamp: new Date().toISOString() })
       }).catch(err => console.error('Error logging scan:', err));
     } catch (error) {
       console.error("Error tracking scan:", error);
@@ -68,17 +54,16 @@ const DashboardControls = ({
       <Button 
         onClick={handleScan} 
         disabled={isScanning}
-        className="w-full md:w-auto shadow-md"
+        className="w-full md:w-auto shadow-md bg-[#247CFF] hover:bg-[#1c63cc] text-white"
         type="button"
-        variant="scan"
       >
         {isScanning ? (
           <>
             <Loader className="mr-2 h-4 w-4 animate-spin" />
-            Running Intelligence Sweep...
+            Running Live Intelligence Sweep...
           </>
         ) : (
-          "Intelligence Sweep"
+          "Live Intelligence Sweep"
         )}
       </Button>
     </div>

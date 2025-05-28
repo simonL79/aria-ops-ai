@@ -1,113 +1,71 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { runMonitoringScan } from "@/services/monitoring";
 import { ContentAlert } from "@/types/dashboard";
-import { ScanResult } from "@/services/monitoring/types";
+import { performLiveScan, performRealTimeMonitoring } from "@/services/aiScraping/liveScanner";
 
 export const useDashboardScan = (
   alerts: ContentAlert[],
-  setAlerts: (alerts: ContentAlert[]) => void,
-  setFilteredAlerts: (alerts: ContentAlert[]) => void, 
-  setNegativeContent: React.Dispatch<React.SetStateAction<number>>
+  setAlerts: (alerts: ContentAlert[]) => void
 ) => {
   const [isScanning, setIsScanning] = useState(false);
-  const [scanComplete, setScanComplete] = useState(false);
-  const [newAlerts, setNewAlerts] = useState<ContentAlert[]>([]);
 
-  const handleScan = async () => {
+  const performScan = async (query: string = '', platforms: string[] = []) => {
+    if (isScanning) {
+      toast.warning("Scan already in progress");
+      return;
+    }
+
     setIsScanning(true);
-    setNewAlerts([]);
     
     try {
-      // Run a real scan and get results
-      const results = await runMonitoringScan();
-      
-      if (results && Array.isArray(results) && results.length > 0) {
-        // Format the new results to match ContentAlert type
-        const newAlerts: ContentAlert[] = results.map((result: ScanResult) => {
-          return {
-            id: result.id || `alert-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-            platform: result.platform || 'Unknown',
-            content: result.content || '',
-            date: result.date ? new Date(result.date).toLocaleString() : new Date().toLocaleString(),
-            severity: result.severity || 'low',
-            status: (result.status as ContentAlert['status']) || 'new',
-            sourceType: result.sourceType || (
-              result.platform?.toLowerCase().includes('news') ? 'news' :
-              result.platform?.toLowerCase().includes('reddit') ? 'forum' :
-              ['Twitter', 'Facebook', 'Instagram', 'LinkedIn'].includes(result.platform || '') ? 'social' : 
-              'scan'
-            ),
-            url: result.url || '',
-            threatType: result.threatType,
-            confidenceScore: result.confidenceScore || 75, // Default confidence score
-            sentiment: mapNumericSentimentToString(result.sentiment),
-            detectedEntities: Array.isArray(result.detectedEntities) ? result.detectedEntities : [],
-            potentialReach: typeof result.potentialReach === 'number' ? result.potentialReach : undefined,
-            category: result.category || (result.threatType === 'customerInquiry' ? 'customer_enquiry' : undefined)
-          };
-        });
-        
-        // Update alerts with new results
-        const updatedAlerts = [...newAlerts, ...alerts];
-        setAlerts(updatedAlerts);
-        setFilteredAlerts(updatedAlerts);
-        setNewAlerts(newAlerts);
-        
-        // Count new negative content
-        const newNegativeCount = results.filter(r => r.severity === 'high').length;
-        if (newNegativeCount > 0) {
-          setNegativeContent(prev => prev + newNegativeCount);
+      console.log('Starting dashboard scan with live data only');
+      toast.info("Starting live intelligence sweep...");
+
+      // Perform live scan across multiple platforms
+      const livePlatforms = platforms.length > 0 ? platforms : [
+        'Twitter', 'Reddit', 'Google News', 'Forums', 'Social Media'
+      ];
+
+      const liveResults = await performLiveScan(
+        query || 'reputation monitoring',
+        livePlatforms,
+        { maxResults: 25, includeRealTimeAlerts: true }
+      );
+
+      // Also get real-time monitoring data
+      const realTimeResults = await performRealTimeMonitoring();
+
+      // Combine results
+      const allResults = [...liveResults, ...realTimeResults];
+
+      if (allResults.length > 0) {
+        // Add new results to existing alerts, avoiding duplicates
+        const existingUrls = new Set(alerts.map(alert => alert.url));
+        const newResults = allResults.filter(result => 
+          result.url && !existingUrls.has(result.url)
+        );
+
+        if (newResults.length > 0) {
+          setAlerts([...newResults, ...alerts]);
+          toast.success(`Live scan completed: ${newResults.length} new threats detected`);
+        } else {
+          toast.info("Scan completed: No new threats detected");
         }
-        
-        toast.success("Scan completed", {
-          description: `Found ${results.length} new mentions across ${new Set(results.map(r => r.platform)).size} platforms.`,
-        });
       } else {
-        toast.success("Scan completed", {
-          description: "No new mentions found across monitored platforms.",
-        });
+        toast.info("Scan completed: No threats detected");
       }
-      
-      // Set scan complete
-      setScanComplete(true);
-      
-      // Reset scan complete after a delay
-      setTimeout(() => {
-        setScanComplete(false);
-      }, 1000);
-      
+
     } catch (error) {
-      console.error("Scan error:", error);
-      toast.error("Error during scan", {
-        description: "Could not complete the scan. Please try again.",
-      });
+      console.error("Dashboard scan failed:", error);
+      toast.error("Scan failed. Please try again.");
     } finally {
       setIsScanning(false);
     }
   };
 
-  const onResetScanStatus = () => {
-    setScanComplete(false);
-    setNewAlerts([]);
-  };
-
-  // Helper function to map numeric sentiment to string values expected by ContentAlert
-  const mapNumericSentimentToString = (sentiment?: number): ContentAlert["sentiment"] => {
-    if (sentiment === undefined) return "neutral";
-    
-    if (sentiment < -70) return "threatening";
-    if (sentiment < -20) return "negative";
-    if (sentiment > 50) return "positive";
-    return "neutral";
-  };
-
   return {
     isScanning,
-    handleScan,
-    scanComplete,
-    newAlerts,
-    onResetScanStatus
+    performScan
   };
 };
