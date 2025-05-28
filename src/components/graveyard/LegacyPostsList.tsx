@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -33,7 +32,7 @@ const LegacyPostsList = ({ onStatsChange }: { onStatsChange: () => void }) => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setPosts((data as LegacyPost[]) || []);
+      setPosts((data as unknown as LegacyPost[]) || []);
     } catch (error) {
       console.error('Error fetching legacy posts:', error);
       toast.error('Failed to load legacy posts');
