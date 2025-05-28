@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export interface AnubisTestResult {
@@ -284,7 +283,11 @@ class AnubisSecurityService {
         return [];
       }
 
-      return data || [];
+      // Type assertion to ensure platform is properly typed
+      return (data || []).map(session => ({
+        ...session,
+        platform: session.platform as 'iOS' | 'Android' | 'WebApp'
+      }));
     } catch (error) {
       console.error('Error in getActiveMobileSessions:', error);
       return [];
