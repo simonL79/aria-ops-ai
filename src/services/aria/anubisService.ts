@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -183,7 +182,17 @@ class AnubisService {
         return [];
       }
 
-      return data || [];
+      // Type assertion to ensure proper typing from database
+      return (data || []).map(item => ({
+        id: item.id,
+        entity_name: item.entity_name,
+        model_detected: item.model_detected,
+        vector_score: item.vector_score,
+        mention_type: item.mention_type as 'neutral' | 'threatening' | 'false_claim' | 'attack',
+        captured_prompt: item.captured_prompt,
+        captured_response: item.captured_response,
+        recorded_at: item.recorded_at
+      }));
     } catch (error) {
       console.error('Error in getLLMThreats:', error);
       return [];
@@ -223,7 +232,19 @@ class AnubisService {
         return [];
       }
 
-      return data || [];
+      // Type assertion to ensure proper typing from database
+      return (data || []).map(item => ({
+        id: item.id,
+        violation_type: item.violation_type,
+        entity_id: item.entity_id,
+        auto_generated: item.auto_generated,
+        jurisdiction: item.jurisdiction,
+        packet_payload: item.packet_payload,
+        delivery_status: item.delivery_status as 'pending' | 'dispatched' | 'error',
+        law_firm_contact: item.law_firm_contact,
+        created_at: item.created_at,
+        dispatched_at: item.dispatched_at
+      }));
     } catch (error) {
       console.error('Error in getLegalEscalations:', error);
       return [];
