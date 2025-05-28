@@ -4958,6 +4958,10 @@ export type Database = {
       }
     }
     Functions: {
+      admin_trigger_anubis: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       anubis_run_diagnostics: {
         Args: Record<PropertyKey, never>
         Returns: undefined

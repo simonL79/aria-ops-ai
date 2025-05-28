@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -316,13 +317,18 @@ class AnubisService {
 
   async runEnhancedDiagnostics(): Promise<void> {
     try {
-      console.log('🚀 Running enhanced A.R.I.A™ diagnostics with new modules...');
+      console.log('🚀 Running enhanced A.R.I.A™ diagnostics with admin security...');
       
-      const { data, error } = await supabase.rpc('run_anubis_now');
+      // Use the new secure admin trigger function
+      const { data, error } = await supabase.rpc('admin_trigger_anubis');
       
       if (error) {
         console.error('Error running enhanced diagnostics:', error);
-        toast.error('Enhanced diagnostics failed');
+        if (error.message.includes('Access denied')) {
+          toast.error('Access denied: Admin privileges required');
+        } else {
+          toast.error('Enhanced diagnostics failed');
+        }
         return;
       }
 
