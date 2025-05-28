@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Home, Settings, Users, AlertTriangle, Shield, Search, BarChart3, Mail, MessageSquare, FileText, Radar, Building, FileBarChart, Brain, Activity, Bell } from "lucide-react";
+import { Home, Settings, Users, AlertTriangle, Shield, Search, BarChart3, Mail, MessageSquare, FileText, Radar, Building, FileBarChart, Brain, Activity, Bell, Zap, Layout } from "lucide-react";
 
 interface SidebarProps {
   className?: string;
@@ -38,6 +38,50 @@ const DashboardSidebar = () => {
               <div className="flex items-center">
                 <Home className="mr-2 h-4 w-4" />
                 <span>Dashboard</span>
+              </div>
+            </Link>
+            <Link
+              to="/hypercore"
+              className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
+                location.pathname.includes('/hypercore') ? 'bg-accent text-accent-foreground' : ''
+              }`}
+            >
+              <div className="flex items-center">
+                <Shield className="mr-2 h-4 w-4" />
+                <span>HyperCore</span>
+              </div>
+            </Link>
+            <Link
+              to="/ai-scraping"
+              className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
+                location.pathname.includes('/ai-scraping') ? 'bg-accent text-accent-foreground' : ''
+              }`}
+            >
+              <div className="flex items-center">
+                <Zap className="mr-2 h-4 w-4" />
+                <span>AI Scraping</span>
+              </div>
+            </Link>
+            <Link
+              to="/clean-launch"
+              className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
+                location.pathname.includes('/clean-launch') ? 'bg-accent text-accent-foreground' : ''
+              }`}
+            >
+              <div className="flex items-center">
+                <Layout className="mr-2 h-4 w-4" />
+                <span>Clean Launch</span>
+              </div>
+            </Link>
+            <Link
+              to="/executive-reports"
+              className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
+                location.pathname.includes('/executive-reports') ? 'bg-accent text-accent-foreground' : ''
+              }`}
+            >
+              <div className="flex items-center">
+                <FileBarChart className="mr-2 h-4 w-4" />
+                <span>Executive Reports</span>
               </div>
             </Link>
             <Link
@@ -81,7 +125,18 @@ const DashboardSidebar = () => {
             >
               <div className="flex items-center">
                 <Activity className="mr-2 h-4 w-4" />
-                <span>Graveyard</span>
+                <span>🪦 Graveyard</span>
+              </div>
+            </Link>
+            <Link
+              to="/anubis-cockpit"
+              className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
+                location.pathname.includes('/anubis-cockpit') ? 'bg-accent text-accent-foreground' : ''
+              }`}
+            >
+              <div className="flex items-center">
+                <Radar className="mr-2 h-4 w-4" />
+                <span>Anubis Cockpit</span>
               </div>
             </Link>
             <Link

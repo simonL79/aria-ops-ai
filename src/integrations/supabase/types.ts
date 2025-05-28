@@ -4877,33 +4877,6 @@ export type Database = {
       }
     }
     Views: {
-      anubis_status_report: {
-        Row: {
-          anomaly_detected: boolean | null
-          issue_summary: string | null
-          last_checked: string | null
-          module: string | null
-          record_count: number | null
-          status: string | null
-        }
-        Insert: {
-          anomaly_detected?: boolean | null
-          issue_summary?: string | null
-          last_checked?: string | null
-          module?: string | null
-          record_count?: number | null
-          status?: string | null
-        }
-        Update: {
-          anomaly_detected?: boolean | null
-          issue_summary?: string | null
-          last_checked?: string | null
-          module?: string | null
-          record_count?: number | null
-          status?: string | null
-        }
-        Relationships: []
-      }
       aria_notifications_dashboard: {
         Row: {
           created_at: string | null
