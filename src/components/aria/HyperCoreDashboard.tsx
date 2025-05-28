@@ -19,11 +19,16 @@ const HyperCoreDashboard = () => {
   const [narrativeClusters, setNarrativeClusters] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [simulationTarget, setSimulationTarget] = useState('');
-  const [systemHealth, setSystemHealth] = useState({
-    overallStatus: 'healthy' as const,
+  const [systemHealth, setSystemHealth] = useState<{
+    overallStatus: 'healthy' | 'warning' | 'critical';
+    moduleCount: number;
+    issueCount: number;
+    lastCheck: string | null;
+  }>({
+    overallStatus: 'healthy',
     moduleCount: 0,
     issueCount: 0,
-    lastCheck: null as string | null
+    lastCheck: null
   });
 
   const loadData = async () => {

@@ -176,11 +176,11 @@ class AnubisService {
       const status = await this.getSystemStatus();
       const breakdown: Record<string, { healthy: number; warning: number; error: number }> = {};
 
-      status.forEach(module => {
-        if (!breakdown[module.module]) {
-          breakdown[module.module] = { healthy: 0, warning: 0, error: 0 };
+      status.forEach(moduleStatus => {
+        if (!breakdown[moduleStatus.module]) {
+          breakdown[moduleStatus.module] = { healthy: 0, warning: 0, error: 0 };
         }
-        breakdown[module.module][module.status as keyof typeof breakdown[module.module]]++;
+        breakdown[moduleStatus.module][moduleStatus.status as keyof typeof breakdown[moduleStatus.module]]++;
       });
 
       return breakdown;
