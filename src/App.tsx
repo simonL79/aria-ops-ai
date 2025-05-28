@@ -24,6 +24,7 @@ const ComplianceDashboard = lazy(() => import("./components/compliance/Complianc
 const RSI = lazy(() => import("./pages/RSI"));
 const GraveyardPage = lazy(() => import("./pages/GraveyardPage"));
 const Clients = lazy(() => import("./pages/Clients"));
+const AnubisCockpitPage = lazy(() => import("./pages/AnubisCockpitPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -100,6 +101,12 @@ const App = () => {
                     <Route path="/graveyard" element={
                       <SecureRouteGuard requireAdmin={true}>
                         <GraveyardPage />
+                      </SecureRouteGuard>
+                    } />
+
+                    <Route path="/anubis-cockpit" element={
+                      <SecureRouteGuard requireAdmin={true}>
+                        <AnubisCockpitPage />
                       </SecureRouteGuard>
                     } />
                   </Routes>
