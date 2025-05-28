@@ -1,4 +1,3 @@
-
 export interface ScanParameters {
   platforms?: string[];
   keywordFilters?: string[];
@@ -125,3 +124,10 @@ export interface EntityWatchlist {
   lastScan?: string;
   lastAlertAt?: string;
 }
+
+export const defaultScanParameters: ScanParameters = {
+  maxResults: 3,
+  includeCustomerEnquiries: false,
+  platforms: [],
+  keywordFilters: []
+};
