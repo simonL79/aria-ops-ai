@@ -153,6 +153,36 @@ export type Database = {
         }
         Relationships: []
       }
+      anubis_chat_memory: {
+        Row: {
+          context: Json | null
+          created_at: string | null
+          id: string
+          message: string | null
+          response: string | null
+          session_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          context?: Json | null
+          created_at?: string | null
+          id?: string
+          message?: string | null
+          response?: string | null
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          context?: Json | null
+          created_at?: string | null
+          id?: string
+          message?: string | null
+          response?: string | null
+          session_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       anubis_log: {
         Row: {
           check_type: string | null
@@ -2101,6 +2131,36 @@ export type Database = {
           },
         ]
       }
+      graveyard_simulations: {
+        Row: {
+          completed_at: string | null
+          expected_trigger_module: string | null
+          id: string
+          injected_at: string | null
+          leak_title: string | null
+          suppression_status: string | null
+          synthetic_link: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          expected_trigger_module?: string | null
+          id?: string
+          injected_at?: string | null
+          leak_title?: string | null
+          suppression_status?: string | null
+          synthetic_link?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          expected_trigger_module?: string | null
+          id?: string
+          injected_at?: string | null
+          leak_title?: string | null
+          suppression_status?: string | null
+          synthetic_link?: string | null
+        }
+        Relationships: []
+      }
       gsc_rank_tracking: {
         Row: {
           clicks: number | null
@@ -2412,6 +2472,53 @@ export type Database = {
           },
         ]
       }
+      legal_escalation_queue: {
+        Row: {
+          auto_generated: boolean | null
+          created_at: string | null
+          delivery_status: string | null
+          dispatched_at: string | null
+          entity_id: string | null
+          id: string
+          jurisdiction: string | null
+          law_firm_contact: string | null
+          packet_payload: Json | null
+          violation_type: string | null
+        }
+        Insert: {
+          auto_generated?: boolean | null
+          created_at?: string | null
+          delivery_status?: string | null
+          dispatched_at?: string | null
+          entity_id?: string | null
+          id?: string
+          jurisdiction?: string | null
+          law_firm_contact?: string | null
+          packet_payload?: Json | null
+          violation_type?: string | null
+        }
+        Update: {
+          auto_generated?: boolean | null
+          created_at?: string | null
+          delivery_status?: string | null
+          dispatched_at?: string | null
+          entity_id?: string | null
+          id?: string
+          jurisdiction?: string | null
+          law_firm_contact?: string | null
+          packet_payload?: Json | null
+          violation_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legal_escalation_queue_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "entities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       legal_indicators: {
         Row: {
           context_excerpt: string | null
@@ -2585,6 +2692,39 @@ export type Database = {
           query?: string | null
           reference_detected?: boolean | null
           response_excerpt?: string | null
+        }
+        Relationships: []
+      }
+      llm_threat_monitor: {
+        Row: {
+          captured_prompt: string | null
+          captured_response: string | null
+          entity_name: string
+          id: string
+          mention_type: string | null
+          model_detected: string | null
+          recorded_at: string | null
+          vector_score: number | null
+        }
+        Insert: {
+          captured_prompt?: string | null
+          captured_response?: string | null
+          entity_name: string
+          id?: string
+          mention_type?: string | null
+          model_detected?: string | null
+          recorded_at?: string | null
+          vector_score?: number | null
+        }
+        Update: {
+          captured_prompt?: string | null
+          captured_response?: string | null
+          entity_name?: string
+          id?: string
+          mention_type?: string | null
+          model_detected?: string | null
+          recorded_at?: string | null
+          vector_score?: number | null
         }
         Relationships: []
       }

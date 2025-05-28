@@ -34,6 +34,40 @@ export interface AnubisSystemReport {
   last_check: string;
 }
 
+export interface LLMThreatMonitor {
+  id: string;
+  entity_name: string;
+  model_detected?: string;
+  vector_score: number;
+  mention_type: 'neutral' | 'threatening' | 'false_claim' | 'attack';
+  captured_prompt?: string;
+  captured_response?: string;
+  recorded_at: string;
+}
+
+export interface GraveyardSimulation {
+  id: string;
+  leak_title?: string;
+  synthetic_link?: string;
+  expected_trigger_module?: string;
+  suppression_status: string;
+  injected_at: string;
+  completed_at?: string;
+}
+
+export interface LegalEscalation {
+  id: string;
+  violation_type?: string;
+  entity_id?: string;
+  auto_generated: boolean;
+  jurisdiction?: string;
+  packet_payload: any;
+  delivery_status: 'pending' | 'dispatched' | 'error';
+  law_firm_contact?: string;
+  created_at: string;
+  dispatched_at?: string;
+}
+
 // A.R.I.A™ Module definitions for comprehensive monitoring
 export const ARIA_MODULES = {
   RSI: 'Rapid Sentiment Intervention',
@@ -136,6 +170,66 @@ class AnubisService {
     }
   }
 
+  async getLLMThreats(limit = 20): Promise<LLMThreatMonitor[]> {
+    try {
+      const { data, error } = await supabase
+        .from('llm_threat_monitor')
+        .select('*')
+        .order('recorded_at', { ascending: false })
+        .limit(limit);
+
+      if (error) {
+        console.error('Error fetching LLM threats:', error);
+        return [];
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error('Error in getLLMThreats:', error);
+      return [];
+    }
+  }
+
+  async getGraveyardSimulations(limit = 20): Promise<GraveyardSimulation[]> {
+    try {
+      const { data, error } = await supabase
+        .from('graveyard_simulations')
+        .select('*')
+        .order('injected_at', { ascending: false })
+        .limit(limit);
+
+      if (error) {
+        console.error('Error fetching graveyard simulations:', error);
+        return [];
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error('Error in getGraveyardSimulations:', error);
+      return [];
+    }
+  }
+
+  async getLegalEscalations(limit = 20): Promise<LegalEscalation[]> {
+    try {
+      const { data, error } = await supabase
+        .from('legal_escalation_queue')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(limit);
+
+      if (error) {
+        console.error('Error fetching legal escalations:', error);
+        return [];
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error('Error in getLegalEscalations:', error);
+      return [];
+    }
+  }
+
   async getSystemHealth(): Promise<{
     overallStatus: 'healthy' | 'warning' | 'critical';
     moduleCount: number;
@@ -196,6 +290,26 @@ class AnubisService {
     } catch (error) {
       console.error('Error in getModuleBreakdown:', error);
       return {};
+    }
+  }
+
+  async runEnhancedDiagnostics(): Promise<void> {
+    try {
+      console.log('🚀 Running enhanced A.R.I.A™ diagnostics with new modules...');
+      
+      const { data, error } = await supabase.rpc('run_anubis_now');
+      
+      if (error) {
+        console.error('Error running enhanced diagnostics:', error);
+        toast.error('Enhanced diagnostics failed');
+        return;
+      }
+
+      toast.success('Enhanced A.R.I.A™ diagnostics completed');
+      console.log('Enhanced diagnostics result:', data);
+    } catch (error) {
+      console.error('Error in runEnhancedDiagnostics:', error);
+      toast.error('Failed to run enhanced diagnostics');
     }
   }
 }
