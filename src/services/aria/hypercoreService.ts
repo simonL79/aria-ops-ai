@@ -50,31 +50,23 @@ class HypercoreService {
     entropy_score: number;
   }): Promise<ThreatIntelligence | null> {
     try {
-      // For now, we'll simulate threat intelligence ingestion using activity logs
-      const { data: activity, error } = await supabase
-        .from('activity_logs')
-        .insert([{
-          action: 'threat_intelligence_ingested',
-          details: JSON.stringify(data),
-          entity_type: 'threat',
-          entity_id: crypto.randomUUID()
-        }])
+      const { data: threat, error } = await supabase
+        .from('darkweb_feed')
+        .insert([data])
         .select()
         .single();
 
       if (error) throw error;
 
-      // Return simulated threat intelligence
-      const threat: ThreatIntelligence = {
-        id: activity.id,
-        source_url: data.source_url,
-        content_text: data.content_text,
-        actor_alias: data.actor_alias,
-        entropy_score: data.entropy_score,
-        inserted_at: activity.created_at
+      toast.success('Threat intelligence ingested successfully');
+      return {
+        id: threat.id,
+        source_url: threat.source_url,
+        content_text: threat.content_text,
+        actor_alias: threat.actor_alias,
+        entropy_score: threat.entropy_score,
+        inserted_at: threat.inserted_at
       };
-
-      return threat;
     } catch (error) {
       console.error('Error ingesting threat intelligence:', error);
       toast.error('Failed to ingest threat intelligence');
@@ -88,29 +80,26 @@ class HypercoreService {
     risk_profile?: any;
   }): Promise<Entity | null> {
     try {
-      // Simulate entity creation using activity logs
-      const { data: activity, error } = await supabase
-        .from('activity_logs')
+      const { data: entity, error } = await supabase
+        .from('entities')
         .insert([{
-          action: 'entity_created',
-          details: JSON.stringify(data),
-          entity_type: data.entity_type || 'entity',
-          entity_id: crypto.randomUUID()
+          name: data.name,
+          entity_type: data.entity_type || 'individual',
+          risk_profile: data.risk_profile || {}
         }])
         .select()
         .single();
 
       if (error) throw error;
 
-      const entity: Entity = {
-        id: activity.id,
-        name: data.name,
-        entity_type: data.entity_type,
-        risk_profile: data.risk_profile || {},
-        created_at: activity.created_at
+      toast.success('Entity created successfully');
+      return {
+        id: entity.id,
+        name: entity.name,
+        entity_type: entity.entity_type,
+        risk_profile: entity.risk_profile,
+        created_at: entity.created_at
       };
-
-      return entity;
     } catch (error) {
       console.error('Error creating entity:', error);
       toast.error('Failed to create entity');
@@ -120,19 +109,19 @@ class HypercoreService {
 
   async processThreatIntelligence(threatId: string): Promise<void> {
     try {
-      // Log processing initiation
+      // Log processing in operations log
       const { error } = await supabase
-        .from('activity_logs')
+        .from('aria_ops_log')
         .insert([{
-          action: 'threat_processing_initiated',
-          entity_type: 'threat',
-          entity_id: threatId,
-          details: 'A.R.I.A™ HyperCore threat processing started'
+          operation_type: 'threat_processing',
+          module_source: 'sti',
+          threat_id: threatId,
+          operation_data: { message: 'A.R.I.A™ HyperCore threat processing initiated' },
+          success: true
         }]);
       
       if (error) throw error;
       
-      console.log('Threat intelligence processing initiated');
       toast.success('Threat processing initiated');
     } catch (error) {
       console.error('Error processing threat intelligence:', error);
@@ -143,24 +132,22 @@ class HypercoreService {
   async getRSIQueue(limit = 20): Promise<RSIQueueItem[]> {
     try {
       const { data, error } = await supabase
-        .from('activity_logs')
+        .from('rsi_queue')
         .select('*')
-        .eq('action', 'rsi_queue_item')
         .order('created_at', { ascending: false })
         .limit(limit);
 
       if (error) throw error;
 
-      // Transform activity logs to RSI queue items
-      return (data || []).map(log => ({
-        id: log.id,
-        entity_id: log.entity_id || '',
-        threat_id: log.details,
-        counter_message: `RSI counter for ${log.entity_type}`,
-        priority: 'normal' as const,
-        status: 'pending' as const,
-        created_at: log.created_at,
-        processed_at: log.updated_at
+      return (data || []).map(item => ({
+        id: item.id,
+        entity_id: item.entity_id,
+        threat_id: item.threat_id,
+        counter_message: item.counter_message,
+        priority: item.priority,
+        status: item.status,
+        created_at: item.created_at,
+        processed_at: item.processed_at
       }));
     } catch (error) {
       console.error('Error fetching RSI queue:', error);
@@ -171,25 +158,23 @@ class HypercoreService {
   async getEventDispatchQueue(limit = 20): Promise<EventDispatch[]> {
     try {
       const { data, error } = await supabase
-        .from('activity_logs')
+        .from('aria_event_dispatch')
         .select('*')
-        .eq('action', 'event_dispatch')
         .order('created_at', { ascending: false })
         .limit(limit);
 
       if (error) throw error;
 
-      // Transform activity logs to event dispatch items
-      return (data || []).map(log => ({
-        id: log.id,
-        event_type: log.entity_type || 'unknown',
-        threat_id: log.entity_id,
-        entity_id: log.entity_id,
-        severity: 'medium' as const,
-        payload_json: log.details ? JSON.parse(log.details) : {},
-        dispatched: false,
-        created_at: log.created_at,
-        dispatched_at: log.updated_at
+      return (data || []).map(item => ({
+        id: item.id,
+        event_type: item.event_type,
+        threat_id: item.threat_id,
+        entity_id: item.entity_id,
+        severity: item.severity,
+        payload_json: item.payload_json,
+        dispatched: item.dispatched,
+        created_at: item.created_at,
+        dispatched_at: item.dispatched_at
       }));
     } catch (error) {
       console.error('Error fetching event dispatch queue:', error);
@@ -214,9 +199,8 @@ class HypercoreService {
   async getAriaOperationsLog(limit = 50): Promise<any[]> {
     try {
       const { data, error } = await supabase
-        .from('activity_logs')
+        .from('aria_ops_log')
         .select('*')
-        .ilike('action', '%aria%')
         .order('created_at', { ascending: false })
         .limit(limit);
 
@@ -230,12 +214,14 @@ class HypercoreService {
 
   async updateRSIStatus(id: string, status: RSIQueueItem['status']): Promise<void> {
     try {
+      const updateData: any = { status };
+      if (status === 'completed' || status === 'deployed') {
+        updateData.processed_at = new Date().toISOString();
+      }
+
       const { error } = await supabase
-        .from('activity_logs')
-        .update({ 
-          details: JSON.stringify({ status }),
-          updated_at: new Date().toISOString()
-        })
+        .from('rsi_queue')
+        .update(updateData)
         .eq('id', id);
 
       if (error) throw error;
@@ -248,28 +234,119 @@ class HypercoreService {
 
   async simulateThreatDetection(entityName: string): Promise<void> {
     try {
-      // Create a simulated threat using activity logs
-      const { error } = await supabase
-        .from('activity_logs')
-        .insert([{
-          action: 'simulated_threat_detected',
-          entity_type: 'threat_simulation',
-          entity_id: crypto.randomUUID(),
-          details: JSON.stringify({
+      // First create or get the entity
+      let entity = await this.createEntity({
+        name: entityName,
+        entity_type: 'simulation_target'
+      });
+
+      if (!entity) {
+        // Try to find existing entity
+        const { data: existingEntity } = await supabase
+          .from('entities')
+          .select('*')
+          .eq('name', entityName)
+          .single();
+        
+        if (existingEntity) {
+          entity = {
+            id: existingEntity.id,
+            name: existingEntity.name,
+            entity_type: existingEntity.entity_type,
+            risk_profile: existingEntity.risk_profile,
+            created_at: existingEntity.created_at
+          };
+        } else {
+          throw new Error('Failed to create or find entity');
+        }
+      }
+
+      // Create threat intelligence
+      const threat = await this.ingestThreatIntelligence({
+        content_text: `Simulated threat detected for ${entityName}. Dark web mention found discussing potential reputation damage.`,
+        actor_alias: 'SimulatedActor',
+        entropy_score: 0.85,
+        source_url: 'https://simulated-darkweb-source.onion'
+      });
+
+      if (threat) {
+        // Add to RSI queue
+        await supabase.from('rsi_queue').insert([{
+          entity_id: entity.id,
+          threat_id: threat.id,
+          counter_message: `Automated response recommended for ${entityName}. Threat vector: simulated dark web mention.`,
+          priority: 'high',
+          status: 'pending'
+        }]);
+
+        // Create event dispatch
+        await supabase.from('aria_event_dispatch').insert([{
+          event_type: 'threat_simulation',
+          threat_id: threat.id,
+          entity_id: entity.id,
+          severity: 'high',
+          payload_json: {
             entity_name: entityName,
             threat_type: 'simulated',
             actor_alias: 'SimulatedActor',
-            entropy_score: 0.85,
-            source_url: 'https://simulated-darkweb-source.onion'
-          })
+            entropy_score: 0.85
+          },
+          dispatched: false
         }]);
 
-      if (error) throw error;
+        // Log the operation
+        await supabase.from('aria_ops_log').insert([{
+          operation_type: 'threat_simulation',
+          module_source: 'simulator',
+          entity_id: entity.id,
+          threat_id: threat.id,
+          operation_data: { entity_name: entityName, simulation_type: 'manual' },
+          success: true
+        }]);
+      }
       
-      toast.success('Threat simulation initiated');
+      toast.success('Threat simulation completed successfully');
     } catch (error) {
       console.error('Error in threat simulation:', error);
       toast.error('Failed to simulate threat');
+    }
+  }
+
+  async getSyntheticThreats(limit = 10): Promise<any[]> {
+    try {
+      const { data, error } = await supabase
+        .from('synthetic_threats')
+        .select(`
+          *,
+          entities:entity_id (name, entity_type)
+        `)
+        .order('inserted_at', { ascending: false })
+        .limit(limit);
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching synthetic threats:', error);
+      return [];
+    }
+  }
+
+  async getNarrativeClusters(limit = 10): Promise<any[]> {
+    try {
+      const { data, error } = await supabase
+        .from('narrative_clusters')
+        .select(`
+          *,
+          entities:entity_id (name, entity_type)
+        `)
+        .order('last_updated', { ascending: false })
+        .limit(limit);
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching narrative clusters:', error);
+      return [];
     }
   }
 }

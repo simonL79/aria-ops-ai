@@ -192,6 +192,45 @@ export type Database = {
         }
         Relationships: []
       }
+      aria_event_dispatch: {
+        Row: {
+          created_at: string | null
+          dispatch_channels: string[] | null
+          dispatched: boolean | null
+          dispatched_at: string | null
+          entity_id: string | null
+          event_type: string
+          id: string
+          payload_json: Json | null
+          severity: string | null
+          threat_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          dispatch_channels?: string[] | null
+          dispatched?: boolean | null
+          dispatched_at?: string | null
+          entity_id?: string | null
+          event_type: string
+          id?: string
+          payload_json?: Json | null
+          severity?: string | null
+          threat_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          dispatch_channels?: string[] | null
+          dispatched?: boolean | null
+          dispatched_at?: string | null
+          entity_id?: string | null
+          event_type?: string
+          id?: string
+          payload_json?: Json | null
+          severity?: string | null
+          threat_id?: string | null
+        }
+        Relationships: []
+      }
       aria_notifications: {
         Row: {
           created_at: string | null
@@ -221,6 +260,53 @@ export type Database = {
           summary?: string | null
         }
         Relationships: []
+      }
+      aria_ops_log: {
+        Row: {
+          created_at: string | null
+          entity_id: string | null
+          error_message: string | null
+          execution_time_ms: number | null
+          id: string
+          module_source: string | null
+          operation_data: Json | null
+          operation_type: string
+          success: boolean | null
+          threat_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          entity_id?: string | null
+          error_message?: string | null
+          execution_time_ms?: number | null
+          id?: string
+          module_source?: string | null
+          operation_data?: Json | null
+          operation_type: string
+          success?: boolean | null
+          threat_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          entity_id?: string | null
+          error_message?: string | null
+          execution_time_ms?: number | null
+          id?: string
+          module_source?: string | null
+          operation_data?: Json | null
+          operation_type?: string
+          success?: boolean | null
+          threat_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "aria_ops_log_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "entities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       aria_reports: {
         Row: {
@@ -254,6 +340,47 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      cancelation_simulations: {
+        Row: {
+          auto_recovery_playbook: string | null
+          entity_id: string | null
+          id: string
+          resilience_score: number | null
+          scenario_title: string
+          scenario_type: string | null
+          simulated_impact: Json | null
+          triggered_at: string | null
+        }
+        Insert: {
+          auto_recovery_playbook?: string | null
+          entity_id?: string | null
+          id?: string
+          resilience_score?: number | null
+          scenario_title: string
+          scenario_type?: string | null
+          simulated_impact?: Json | null
+          triggered_at?: string | null
+        }
+        Update: {
+          auto_recovery_playbook?: string | null
+          entity_id?: string | null
+          id?: string
+          resilience_score?: number | null
+          scenario_title?: string
+          scenario_type?: string | null
+          simulated_impact?: Json | null
+          triggered_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cancelation_simulations_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "entities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       case_threads: {
         Row: {
@@ -928,6 +1055,33 @@ export type Database = {
           },
         ]
       }
+      darkweb_feed: {
+        Row: {
+          actor_alias: string | null
+          content_text: string
+          entropy_score: number | null
+          id: string
+          inserted_at: string | null
+          source_url: string | null
+        }
+        Insert: {
+          actor_alias?: string | null
+          content_text: string
+          entropy_score?: number | null
+          id?: string
+          inserted_at?: string | null
+          source_url?: string | null
+        }
+        Update: {
+          actor_alias?: string | null
+          content_text?: string
+          entropy_score?: number | null
+          id?: string
+          inserted_at?: string | null
+          source_url?: string | null
+        }
+        Relationships: []
+      }
       data_breach_incidents: {
         Row: {
           breach_type: string
@@ -1223,6 +1377,47 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      disinfo_decoys: {
+        Row: {
+          actor_alias: string | null
+          decoy_type: string | null
+          deployed_at: string | null
+          deployment_status: string | null
+          effectiveness_score: number | null
+          id: string
+          notes: string | null
+          target_entity: string | null
+        }
+        Insert: {
+          actor_alias?: string | null
+          decoy_type?: string | null
+          deployed_at?: string | null
+          deployment_status?: string | null
+          effectiveness_score?: number | null
+          id?: string
+          notes?: string | null
+          target_entity?: string | null
+        }
+        Update: {
+          actor_alias?: string | null
+          decoy_type?: string | null
+          deployed_at?: string | null
+          deployment_status?: string | null
+          effectiveness_score?: number | null
+          id?: string
+          notes?: string | null
+          target_entity?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "disinfo_decoys_target_entity_fkey"
+            columns: ["target_entity"]
+            isOneToOne: false
+            referencedRelation: "entities"
             referencedColumns: ["id"]
           },
         ]
@@ -1670,6 +1865,30 @@ export type Database = {
           },
         ]
       }
+      entities: {
+        Row: {
+          created_at: string | null
+          entity_type: string | null
+          id: string
+          name: string
+          risk_profile: Json | null
+        }
+        Insert: {
+          created_at?: string | null
+          entity_type?: string | null
+          id?: string
+          name: string
+          risk_profile?: Json | null
+        }
+        Update: {
+          created_at?: string | null
+          entity_type?: string | null
+          id?: string
+          name?: string
+          risk_profile?: Json | null
+        }
+        Relationships: []
+      }
       entity_risk_profiles: {
         Row: {
           entity_name: string
@@ -1859,6 +2078,47 @@ export type Database = {
             columns: ["suppression_asset_id"]
             isOneToOne: false
             referencedRelation: "suppression_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      identity_challenges: {
+        Row: {
+          challenge_result: string | null
+          entity_id: string | null
+          id: string
+          incoming_reference: string
+          received_at: string | null
+          reviewed: boolean | null
+          threat_level: string | null
+          trust_score: number | null
+        }
+        Insert: {
+          challenge_result?: string | null
+          entity_id?: string | null
+          id?: string
+          incoming_reference: string
+          received_at?: string | null
+          reviewed?: boolean | null
+          threat_level?: string | null
+          trust_score?: number | null
+        }
+        Update: {
+          challenge_result?: string | null
+          entity_id?: string | null
+          id?: string
+          incoming_reference?: string
+          received_at?: string | null
+          reviewed?: boolean | null
+          threat_level?: string | null
+          trust_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "identity_challenges_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "entities"
             referencedColumns: ["id"]
           },
         ]
@@ -2124,6 +2384,50 @@ export type Database = {
           risk_level?: string | null
         }
         Relationships: []
+      }
+      legal_violations: {
+        Row: {
+          dsr_packet: Json | null
+          entity_id: string | null
+          id: string
+          jurisdiction: string | null
+          reported_at: string | null
+          status: string | null
+          threat_id: string | null
+          violation_notes: string | null
+          violation_type: string | null
+        }
+        Insert: {
+          dsr_packet?: Json | null
+          entity_id?: string | null
+          id?: string
+          jurisdiction?: string | null
+          reported_at?: string | null
+          status?: string | null
+          threat_id?: string | null
+          violation_notes?: string | null
+          violation_type?: string | null
+        }
+        Update: {
+          dsr_packet?: Json | null
+          entity_id?: string | null
+          id?: string
+          jurisdiction?: string | null
+          reported_at?: string | null
+          status?: string | null
+          threat_id?: string | null
+          violation_notes?: string | null
+          violation_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legal_violations_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "entities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       lia_records: {
         Row: {
@@ -2942,27 +3246,33 @@ export type Database = {
       }
       prospect_alerts: {
         Row: {
+          alert_type: string | null
           created_at: string | null
-          entity: string | null
-          event: string | null
+          entity: string
           id: string
-          medium: string | null
+          message: string | null
+          severity: string | null
+          source_module: string | null
           status: string | null
         }
         Insert: {
+          alert_type?: string | null
           created_at?: string | null
-          entity?: string | null
-          event?: string | null
+          entity: string
           id?: string
-          medium?: string | null
+          message?: string | null
+          severity?: string | null
+          source_module?: string | null
           status?: string | null
         }
         Update: {
+          alert_type?: string | null
           created_at?: string | null
-          entity?: string | null
-          event?: string | null
+          entity?: string
           id?: string
-          medium?: string | null
+          message?: string | null
+          severity?: string | null
+          source_module?: string | null
           status?: string | null
         }
         Relationships: []
@@ -3195,6 +3505,44 @@ export type Database = {
           velocity?: number | null
         }
         Relationships: []
+      }
+      reputation_genome: {
+        Row: {
+          entity_id: string | null
+          forecast_notes: string | null
+          forecasted_risk: string | null
+          id: string
+          last_updated: string | null
+          reputation_index: number | null
+          simulation_data: Json | null
+        }
+        Insert: {
+          entity_id?: string | null
+          forecast_notes?: string | null
+          forecasted_risk?: string | null
+          id?: string
+          last_updated?: string | null
+          reputation_index?: number | null
+          simulation_data?: Json | null
+        }
+        Update: {
+          entity_id?: string | null
+          forecast_notes?: string | null
+          forecasted_risk?: string | null
+          id?: string
+          last_updated?: string | null
+          reputation_index?: number | null
+          simulation_data?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reputation_genome_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "entities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reputation_scan_submissions: {
         Row: {
@@ -3467,6 +3815,47 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rsi_queue: {
+        Row: {
+          counter_message: string
+          created_at: string | null
+          entity_id: string | null
+          id: string
+          priority: string | null
+          processed_at: string | null
+          status: string | null
+          threat_id: string | null
+        }
+        Insert: {
+          counter_message: string
+          created_at?: string | null
+          entity_id?: string | null
+          id?: string
+          priority?: string | null
+          processed_at?: string | null
+          status?: string | null
+          threat_id?: string | null
+        }
+        Update: {
+          counter_message?: string
+          created_at?: string | null
+          entity_id?: string | null
+          id?: string
+          priority?: string | null
+          processed_at?: string | null
+          status?: string | null
+          threat_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rsi_queue_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "entities"
             referencedColumns: ["id"]
           },
         ]
@@ -4149,18 +4538,6 @@ export type Database = {
           medium_risk_employees: number | null
           percent_negative: number | null
           total_employees: number | null
-        }
-        Relationships: []
-      }
-      entity_risk_dashboard: {
-        Row: {
-          alert_pending: string | null
-          eidetic_queued: boolean | null
-          entity_name: string | null
-          risk_score: number | null
-          rsi_triggered: boolean | null
-          total_signals: number | null
-          updated_at: string | null
         }
         Relationships: []
       }
