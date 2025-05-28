@@ -84,7 +84,7 @@ export const useDiscoveryScanning = () => {
         status: item.status === 'resolved' ? 'resolved' : 'active',
         clientLinked: item.client_linked || false,
         linkedClientId: item.linked_client_id,
-        linkedClientName: item.linked_client_name,
+        linkedClientName: item.linked_client_id, // Using linked_client_id since linked_client_name doesn't exist
         matchType: item.client_linked ? 'linked' : undefined,
         matchConfidence: item.confidence_score || undefined
       }));
