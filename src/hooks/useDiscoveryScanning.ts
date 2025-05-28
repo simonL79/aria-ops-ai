@@ -19,7 +19,6 @@ export interface DiscoveredThreat {
   timestamp: string;
   status: 'active' | 'investigating' | 'resolved';
   screenshotUrl?: string;
-  // New client-entity mapping fields
   clientLinked?: boolean;
   linkedClientId?: string;
   linkedClientName?: string;
@@ -59,6 +58,7 @@ export const useDiscoveryScanning = () => {
       const { data: scanResults, error } = await supabase
         .from('scan_results')
         .select('*')
+        .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()) // Last 7 days
         .order('created_at', { ascending: false })
         .limit(50);
 
@@ -69,7 +69,7 @@ export const useDiscoveryScanning = () => {
 
       const threats: DiscoveredThreat[] = (scanResults || []).map(item => ({
         id: item.id,
-        entityName: item.risk_entity_name || 'Unknown Entity',
+        entityName: item.risk_entity_name || item.platform || 'Detected Entity',
         entityType: item.risk_entity_type === 'person' ? 'person' : 'brand',
         platform: item.platform || 'Unknown',
         content: item.content || '',
@@ -77,13 +77,14 @@ export const useDiscoveryScanning = () => {
         threatType: item.threat_type || 'reputation_risk',
         sentiment: item.sentiment || 0,
         sourceUrl: item.url || '',
-        contextSnippet: (item.content || '').substring(0, 150) + '...',
+        contextSnippet: (item.content || '').substring(0, 150) + (item.content && item.content.length > 150 ? '...' : ''),
         mentionCount: 1,
         spreadVelocity: Math.floor(Math.random() * 10) + 1,
         timestamp: item.created_at,
         status: item.status === 'resolved' ? 'resolved' : 'active',
         clientLinked: item.client_linked || false,
         linkedClientId: item.linked_client_id,
+        linkedClientName: item.linked_client_name,
         matchType: item.client_linked ? 'linked' : undefined,
         matchConfidence: item.confidence_score || undefined
       }));
@@ -108,29 +109,26 @@ export const useDiscoveryScanning = () => {
     setScanProgress(0);
     
     try {
-      toast.info('Starting comprehensive discovery scan...');
+      toast.info('Starting real-time discovery scan...');
       
       // Progress updates
       const progressInterval = setInterval(() => {
         setScanProgress(prev => Math.min(prev + 15, 85));
       }, 1000);
 
-      // Call UK News Scanner edge function
-      console.log('Calling UK News Scanner...');
-      const { data: ukNewsData, error: ukNewsError } = await supabase.functions.invoke('uk-news-scanner', {
-        body: { 
-          sources: ['BBC News', 'The Guardian', 'The Telegraph', 'Sky News'],
-          scan_type: 'reputation_threats'
-        }
+      // Call the updated discovery scanner
+      console.log('Calling Discovery Scanner...');
+      const { data: discoveryData, error: discoveryError } = await supabase.functions.invoke('discovery-scanner', {
+        body: { scanType: 'zero-input' }
       });
 
-      if (ukNewsError) {
-        console.error('UK News Scanner error:', ukNewsError);
+      if (discoveryError) {
+        console.error('Discovery Scanner error:', discoveryError);
       } else {
-        console.log('UK News Scanner result:', ukNewsData);
+        console.log('Discovery Scanner result:', discoveryData);
       }
 
-      // Call Enhanced Intelligence function
+      // Call Enhanced Intelligence function for additional data
       console.log('Calling Enhanced Intelligence...');
       const { data: intelligenceData, error: intelligenceError } = await supabase.functions.invoke('enhanced-intelligence', {
         body: { scan_depth: 'comprehensive' }
@@ -145,7 +143,7 @@ export const useDiscoveryScanning = () => {
       clearInterval(progressInterval);
       setScanProgress(100);
 
-      // Reload threats from database
+      // Reload threats from database to get latest data
       await loadExistingThreats();
       
       toast.success('Discovery scan completed successfully!');

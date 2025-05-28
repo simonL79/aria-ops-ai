@@ -34,108 +34,79 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    console.log('Starting Discovery Scanner...');
+    console.log('Starting Real Discovery Scanner...');
 
-    // Simulate scanning multiple platforms
-    const platforms = ['Reddit', 'Twitter', 'Google News', 'TrustPilot', 'Forums'];
-    const discoveredThreats: DiscoveredThreat[] = [];
+    // Check if mock data is disabled
+    const { data: configData } = await supabase
+      .from('system_config')
+      .select('config_value')
+      .eq('config_key', 'allow_mock_data')
+      .single();
 
-    // Get existing clients for matching
-    const { data: clients } = await supabase
-      .from('clients')
-      .select('id, name, contactemail');
+    const allowMockData = configData?.config_value === 'enabled';
 
-    const { data: clientEntities } = await supabase
-      .from('client_entities')
-      .select('client_id, entity_name, entity_type, alias');
-
-    // Simulate discovering threats across platforms
-    for (const platform of platforms) {
-      const threatCount = Math.floor(Math.random() * 3) + 1;
+    if (!allowMockData) {
+      console.log('Mock data disabled, using real scan results only');
       
-      for (let i = 0; i < threatCount; i++) {
-        const entities = [
-          'TechCorp Ltd', 'Sarah Johnson', 'Digital Marketing Pro', 'John Smith CEO',
-          'Innovation Inc', 'Emma Thompson', 'Future Tech Solutions', 'Mike Davis'
-        ];
-        
-        const entityName = entities[Math.floor(Math.random() * entities.length)];
-        const threatLevel = Math.floor(Math.random() * 10) + 1;
-        const sentiment = (Math.random() - 0.7) * 200; // Bias toward negative
-        
-        // Check if entity matches any client
-        let clientLinked = false;
-        let linkedClientName = '';
-        let matchType = '';
-        let matchConfidence = 0;
-        
-        if (clientEntities) {
-          const match = clientEntities.find(ce => 
-            ce.entity_name.toLowerCase().includes(entityName.toLowerCase()) ||
-            entityName.toLowerCase().includes(ce.entity_name.toLowerCase()) ||
-            (ce.alias && entityName.toLowerCase().includes(ce.alias.toLowerCase()))
-          );
-          
-          if (match) {
-            const client = clients?.find(c => c.id === match.client_id);
-            if (client) {
-              clientLinked = true;
-              linkedClientName = client.name;
-              matchType = 'partial';
-              matchConfidence = 85;
-            }
-          }
-        }
+      // Get real scan results from the last 24 hours
+      const { data: realThreats, error } = await supabase
+        .from('scan_results')
+        .select('*')
+        .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+        .order('created_at', { ascending: false })
+        .limit(20);
 
-        const threat: DiscoveredThreat = {
-          entityName,
-          entityType: entityName.includes('Ltd') || entityName.includes('Inc') ? 'organization' : 'person',
-          threatLevel,
-          spreadVelocity: Math.floor(Math.random() * 10) + 1,
-          mentionCount: Math.floor(Math.random() * 50) + 1,
-          sentiment,
-          platform,
-          contextSnippet: `Negative discussion about ${entityName} on ${platform}. Users reporting concerns about recent activities and questioning credibility.`,
-          sourceUrl: `https://${platform.toLowerCase()}.com/discussion/${entityName.replace(/\s+/g, '-').toLowerCase()}`,
-          timestamp: new Date().toISOString(),
-          clientLinked,
-          linkedClientName,
-          matchType,
-          matchConfidence
-        };
-
-        discoveredThreats.push(threat);
-
-        // Store in database
-        await supabase
-          .from('scan_results')
-          .insert({
-            platform,
-            content: threat.contextSnippet,
-            url: threat.sourceUrl,
-            severity: threatLevel >= 7 ? 'high' : threatLevel >= 4 ? 'medium' : 'low',
-            status: 'new',
-            threat_type: 'reputation_risk',
-            sentiment: sentiment,
-            detected_entities: [entityName],
-            risk_entity_name: entityName,
-            risk_entity_type: threat.entityType,
-            is_identified: true
-          });
+      if (error) {
+        console.error('Error fetching real threats:', error);
+        throw error;
       }
+
+      const discoveredThreats: DiscoveredThreat[] = (realThreats || []).map(threat => ({
+        entityName: threat.risk_entity_name || 'Detected Entity',
+        entityType: threat.risk_entity_type || 'organization',
+        threatLevel: Math.min(10, Math.max(1, Math.abs(threat.sentiment || 0) * 10)),
+        spreadVelocity: Math.floor(Math.random() * 5) + 1,
+        mentionCount: 1,
+        sentiment: threat.sentiment || 0,
+        platform: threat.platform,
+        contextSnippet: threat.content || '',
+        sourceUrl: threat.url,
+        timestamp: threat.created_at,
+        clientLinked: threat.client_linked || false,
+        linkedClientName: threat.linked_client_name,
+        matchType: threat.client_linked ? 'linked' : undefined,
+        matchConfidence: threat.confidence_score
+      }));
+
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          threats: discoveredThreats,
+          stats: {
+            platformsScanned: new Set(discoveredThreats.map(t => t.platform)).size,
+            threatsFound: discoveredThreats.length,
+            clientLinkedThreats: discoveredThreats.filter(t => t.clientLinked).length
+          },
+          dataSource: 'real_scan_results'
+        }),
+        { 
+          status: 200, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
     }
 
-    console.log(`Discovery scan completed. Found ${discoveredThreats.length} threats.`);
-
+    // If mock data is enabled, return empty results with a message
     return new Response(
       JSON.stringify({ 
         success: true, 
-        threats: discoveredThreats,
+        threats: [],
         stats: {
-          platformsScanned: platforms.length,
-          threatsFound: discoveredThreats.length,
-          clientLinkedThreats: discoveredThreats.filter(t => t.clientLinked).length
-        }
+          platformsScanned: 0,
+          threatsFound: 0,
+          clientLinkedThreats: 0
+        },
+        message: 'Mock data mode enabled - no real threats to display'
       }),
       { 
         status: 200, 
