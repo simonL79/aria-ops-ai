@@ -1,13 +1,13 @@
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
-import { Plus, Building, Edit, Trash2 } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Company {
   id: string;
@@ -17,226 +17,375 @@ interface Company {
   created_at: string;
 }
 
+interface Employee {
+  id: string;
+  company_id: string;
+  full_name: string;
+  email: string;
+  role: string;
+  location: string;
+  risk_level: number;
+  created_at: string;
+}
+
 const CompanyManagement = () => {
+  const { user } = useAuth();
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingCompany, setEditingCompany] = useState<Company | null>(null);
-  const [formData, setFormData] = useState({
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [selectedCompany, setSelectedCompany] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(false);
+  
+  // Form states
+  const [newCompany, setNewCompany] = useState({
     name: '',
     industry: '',
     website: ''
   });
+  
+  const [newEmployee, setNewEmployee] = useState({
+    full_name: '',
+    email: '',
+    role: '',
+    location: '',
+    risk_level: 0
+  });
 
   useEffect(() => {
-    fetchCompanies();
-  }, []);
+    if (user) {
+      fetchCompanies();
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (selectedCompany) {
+      fetchEmployees(selectedCompany);
+    }
+  }, [selectedCompany]);
 
   const fetchCompanies = async () => {
     try {
+      console.log('Fetching companies...');
       const { data, error } = await supabase
         .from('companies')
         .select('*')
-        .order('name');
+        .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching companies:', error);
+        toast.error('Failed to load companies');
+        return;
+      }
+
+      console.log('Companies loaded:', data?.length || 0);
       setCompanies(data || []);
     } catch (error) {
-      console.error('Error fetching companies:', error);
-      toast.error('Failed to fetch companies');
-    } finally {
-      setLoading(false);
+      console.error('Error in fetchCompanies:', error);
+      toast.error('Failed to load companies');
+    }
+  };
+
+  const fetchEmployees = async (companyId: string) => {
+    try {
+      console.log('Fetching employees for company:', companyId);
+      const { data, error } = await supabase
+        .from('company_employees')
+        .select('*')
+        .eq('company_id', companyId)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching employees:', error);
+        toast.error('Failed to load employees');
+        return;
+      }
+
+      console.log('Employees loaded:', data?.length || 0);
+      setEmployees(data || []);
+    } catch (error) {
+      console.error('Error in fetchEmployees:', error);
+      toast.error('Failed to load employees');
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    try {
-      if (editingCompany) {
-        const { error } = await supabase
-          .from('companies')
-          .update(formData)
-          .eq('id', editingCompany.id);
-        
-        if (error) throw error;
-        toast.success('Company updated successfully');
-      } else {
-        const { error } = await supabase
-          .from('companies')
-          .insert([formData]);
-        
-        if (error) throw error;
-        toast.success('Company created successfully');
-      }
-      
-      setDialogOpen(false);
-      setEditingCompany(null);
-      setFormData({ name: '', industry: '', website: '' });
-      fetchCompanies();
-    } catch (error) {
-      console.error('Error saving company:', error);
-      toast.error('Failed to save company');
-    }
-  };
-
-  const handleEdit = (company: Company) => {
-    setEditingCompany(company);
-    setFormData({
-      name: company.name,
-      industry: company.industry || '',
-      website: company.website || ''
-    });
-    setDialogOpen(true);
-  };
-
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this company? This will also delete all associated employee data.')) {
+    if (!user) {
+      toast.error('You must be logged in to save companies');
       return;
     }
 
+    if (!newCompany.name || !newCompany.industry) {
+      toast.error('Company name and industry are required');
+      return;
+    }
+
+    setIsLoading(true);
+    
     try {
-      const { error } = await supabase
-        .from('companies')
-        .delete()
-        .eq('id', id);
+      console.log('Saving company:', newCompany);
       
-      if (error) throw error;
-      toast.success('Company deleted successfully');
-      fetchCompanies();
+      const { data, error } = await supabase
+        .from('companies')
+        .insert({
+          name: newCompany.name.trim(),
+          industry: newCompany.industry.trim(),
+          website: newCompany.website.trim() || null
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error saving company:', error);
+        toast.error(`Failed to save company: ${error.message}`);
+        return;
+      }
+
+      console.log('Company saved successfully:', data);
+      toast.success('Company saved successfully');
+      
+      // Reset form
+      setNewCompany({
+        name: '',
+        industry: '',
+        website: ''
+      });
+      
+      // Refresh companies list
+      await fetchCompanies();
+      
     } catch (error) {
-      console.error('Error deleting company:', error);
-      toast.error('Failed to delete company');
+      console.error('Error in handleSubmit:', error);
+      toast.error('An unexpected error occurred');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const resetForm = () => {
-    setEditingCompany(null);
-    setFormData({ name: '', industry: '', website: '' });
-  };
+  const handleEmployeeSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!user) {
+      toast.error('You must be logged in to save employees');
+      return;
+    }
 
-  if (loading) {
-    return <div className="text-center p-8">Loading companies...</div>;
-  }
+    if (!selectedCompany) {
+      toast.error('Please select a company first');
+      return;
+    }
+
+    if (!newEmployee.full_name || !newEmployee.email) {
+      toast.error('Employee name and email are required');
+      return;
+    }
+
+    setIsLoading(true);
+    
+    try {
+      console.log('Saving employee:', newEmployee);
+      
+      const { data, error } = await supabase
+        .from('company_employees')
+        .insert({
+          company_id: selectedCompany,
+          full_name: newEmployee.full_name.trim(),
+          email: newEmployee.email.trim(),
+          role: newEmployee.role.trim() || null,
+          location: newEmployee.location.trim() || null,
+          risk_level: newEmployee.risk_level || 0
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error saving employee:', error);
+        toast.error(`Failed to save employee: ${error.message}`);
+        return;
+      }
+
+      console.log('Employee saved successfully:', data);
+      toast.success('Employee saved successfully');
+      
+      // Reset form
+      setNewEmployee({
+        full_name: '',
+        email: '',
+        role: '',
+        location: '',
+        risk_level: 0
+      });
+      
+      // Refresh employees list
+      await fetchEmployees(selectedCompany);
+      
+    } catch (error) {
+      console.error('Error in handleEmployeeSubmit:', error);
+      toast.error('An unexpected error occurred');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Company Management</h2>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={resetForm}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Company
+      <Card>
+        <CardHeader>
+          <CardTitle>Add New Company</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <Label htmlFor="company-name">Company Name *</Label>
+              <Input
+                id="company-name"
+                value={newCompany.name}
+                onChange={(e) => setNewCompany(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="Enter company name"
+                required
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="industry">Industry *</Label>
+              <Input
+                id="industry"
+                value={newCompany.industry}
+                onChange={(e) => setNewCompany(prev => ({ ...prev, industry: e.target.value }))}
+                placeholder="Enter industry"
+                required
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="website">Website</Label>
+              <Input
+                id="website"
+                type="url"
+                value={newCompany.website}
+                onChange={(e) => setNewCompany(prev => ({ ...prev, website: e.target.value }))}
+                placeholder="https://example.com"
+              />
+            </div>
+            
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? 'Saving...' : 'Save Company'}
             </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>
-                {editingCompany ? 'Edit Company' : 'Add New Company'}
-              </DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
+          </form>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Companies ({companies.length})</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {companies.length === 0 ? (
+            <p className="text-muted-foreground">No companies found. Add your first company above.</p>
+          ) : (
+            <div className="space-y-2">
+              {companies.map((company) => (
+                <div
+                  key={company.id}
+                  className={`p-3 border rounded cursor-pointer transition-colors ${
+                    selectedCompany === company.id ? 'bg-blue-50 border-blue-300' : 'hover:bg-gray-50'
+                  }`}
+                  onClick={() => setSelectedCompany(company.id)}
+                >
+                  <div className="font-medium">{company.name}</div>
+                  <div className="text-sm text-muted-foreground">{company.industry}</div>
+                  {company.website && (
+                    <div className="text-sm text-blue-600">{company.website}</div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {selectedCompany && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Add Employee</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleEmployeeSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="name">Company Name *</Label>
+                <Label htmlFor="employee-name">Full Name *</Label>
                 <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  id="employee-name"
+                  value={newEmployee.full_name}
+                  onChange={(e) => setNewEmployee(prev => ({ ...prev, full_name: e.target.value }))}
+                  placeholder="Enter full name"
                   required
                 />
               </div>
+              
               <div>
-                <Label htmlFor="industry">Industry</Label>
+                <Label htmlFor="employee-email">Email *</Label>
                 <Input
-                  id="industry"
-                  value={formData.industry}
-                  onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
+                  id="employee-email"
+                  type="email"
+                  value={newEmployee.email}
+                  onChange={(e) => setNewEmployee(prev => ({ ...prev, email: e.target.value }))}
+                  placeholder="Enter email address"
+                  required
                 />
-              </div>
-              <div>
-                <Label htmlFor="website">Website</Label>
-                <Input
-                  id="website"
-                  type="url"
-                  value={formData.website}
-                  onChange={(e) => setFormData({ ...formData, website: e.target.value })}
-                  placeholder="https://example.com"
-                />
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit">
-                  {editingCompany ? 'Update' : 'Create'}
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {companies.map((company) => (
-          <Card key={company.id}>
-            <CardHeader>
-              <div className="flex items-center gap-3">
-                <Building className="h-6 w-6 text-blue-600" />
-                <CardTitle className="text-lg">{company.name}</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2 mb-4">
-                {company.industry && (
-                  <p className="text-sm text-gray-600">
-                    <span className="font-medium">Industry:</span> {company.industry}
-                  </p>
-                )}
-                {company.website && (
-                  <p className="text-sm text-gray-600">
-                    <span className="font-medium">Website:</span>{' '}
-                    <a href={company.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                      {company.website}
-                    </a>
-                  </p>
-                )}
-                <p className="text-xs text-gray-500">
-                  Created: {new Date(company.created_at).toLocaleDateString()}
-                </p>
               </div>
               
-              <div className="flex gap-2">
-                <Button size="sm" variant="outline" onClick={() => handleEdit(company)}>
-                  <Edit className="h-4 w-4 mr-1" />
-                  Edit
-                </Button>
-                <Button size="sm" variant="outline" onClick={() => handleDelete(company.id)}>
-                  <Trash2 className="h-4 w-4 mr-1" />
-                  Delete
-                </Button>
+              <div>
+                <Label htmlFor="employee-role">Role</Label>
+                <Input
+                  id="employee-role"
+                  value={newEmployee.role}
+                  onChange={(e) => setNewEmployee(prev => ({ ...prev, role: e.target.value }))}
+                  placeholder="Enter job role"
+                />
               </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+              
+              <div>
+                <Label htmlFor="employee-location">Location</Label>
+                <Input
+                  id="employee-location"
+                  value={newEmployee.location}
+                  onChange={(e) => setNewEmployee(prev => ({ ...prev, location: e.target.value }))}
+                  placeholder="Enter location"
+                />
+              </div>
+              
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? 'Saving...' : 'Add Employee'}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      )}
 
-      {companies.length === 0 && (
+      {selectedCompany && (
         <Card>
-          <CardContent className="text-center py-12">
-            <Building className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No companies yet</h3>
-            <p className="text-gray-500 mb-4">
-              Start by adding a company to monitor employee brand risks.
-            </p>
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button onClick={resetForm}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Your First Company
-                </Button>
-              </DialogTrigger>
-            </Dialog>
+          <CardHeader>
+            <CardTitle>Employees ({employees.length})</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {employees.length === 0 ? (
+              <p className="text-muted-foreground">No employees found for this company.</p>
+            ) : (
+              <div className="space-y-2">
+                {employees.map((employee) => (
+                  <div key={employee.id} className="p-3 border rounded">
+                    <div className="font-medium">{employee.full_name}</div>
+                    <div className="text-sm text-muted-foreground">{employee.email}</div>
+                    {employee.role && (
+                      <div className="text-sm">{employee.role}</div>
+                    )}
+                    {employee.location && (
+                      <div className="text-sm text-muted-foreground">{employee.location}</div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
