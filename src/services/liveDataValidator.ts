@@ -112,17 +112,24 @@ export class LiveDataValidator {
    * Check access to core tables
    */
   private static async checkCoreTablesAccess() {
-    const tables = ['threats', 'scan_results', 'clients', 'aria_notifications'];
+    // Define core tables with proper typing
+    const coreTableChecks = [
+      { name: 'threats', query: () => supabase.from('threats').select('id').limit(1) },
+      { name: 'scan_results', query: () => supabase.from('scan_results').select('id').limit(1) },
+      { name: 'clients', query: () => supabase.from('clients').select('id').limit(1) },
+      { name: 'aria_notifications', query: () => supabase.from('aria_notifications').select('id').limit(1) }
+    ];
+    
     const issues: string[] = [];
     
-    for (const table of tables) {
+    for (const tableCheck of coreTableChecks) {
       try {
-        const { error } = await supabase.from(table).select('id').limit(1);
+        const { error } = await tableCheck.query();
         if (error) {
-          issues.push(`${table}: ${error.message}`);
+          issues.push(`${tableCheck.name}: ${error.message}`);
         }
       } catch (error) {
-        issues.push(`${table}: Access failed`);
+        issues.push(`${tableCheck.name}: Access failed`);
       }
     }
 
