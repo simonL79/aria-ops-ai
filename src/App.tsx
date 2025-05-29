@@ -1,6 +1,5 @@
 
 import {
-  BrowserRouter as Router,
   Route,
   Routes,
 } from "react-router-dom";
@@ -17,15 +16,13 @@ function App() {
   return (
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
-        <Router>
-          <div className="min-h-screen bg-background">
-            <Toaster />
-            <Routes>
-              <Route path="/" element={<div className="p-8"><h1 className="text-2xl">Welcome to A.R.I.A/EX™</h1><p><a href="/strikes" className="text-blue-600 underline">Access Strike Management</a></p></div>} />
-              <Route path="/strikes" element={<StrikeManagementPage />} />
-            </Routes>
-          </div>
-        </Router>
+        <div className="min-h-screen bg-background">
+          <Toaster />
+          <Routes>
+            <Route path="/" element={<div className="p-8"><h1 className="text-2xl">Welcome to A.R.I.A/EX™</h1><p><a href="/strikes" className="text-blue-600 underline">Access Strike Management</a></p></div>} />
+            <Route path="/strikes" element={<StrikeManagementPage />} />
+          </Routes>
+        </div>
       </QueryClientProvider>
     </HelmetProvider>
   );
