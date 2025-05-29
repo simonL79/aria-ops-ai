@@ -236,7 +236,7 @@ export const FeedbackPanel = ({ commandHistory }: FeedbackPanelProps) => {
               </div>
             ))}
           </CardContent>
-        </div>
+        </Card>
       )}
     </div>
   );
