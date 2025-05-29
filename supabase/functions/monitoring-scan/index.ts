@@ -17,18 +17,19 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    console.log('Starting REAL monitoring scan...');
+    console.log('[MONITORING-SCAN] Starting comprehensive monitoring scan...');
 
     const { fullScan, targetEntity, source } = await req.json();
 
-    // First, clean any existing mock data
+    // First, clean any existing mock/test data
+    console.log('[MONITORING-SCAN] Cleaning existing mock/test data...');
     const { error: cleanupError } = await supabase
       .from('scan_results')
       .delete()
-      .or('content.ilike.%test%,content.ilike.%mock%,content.ilike.%demo%,platform.eq.System');
+      .or('content.ilike.%test%,content.ilike.%mock%,content.ilike.%demo%,platform.eq.System,platform.eq.ARIA System');
 
     if (cleanupError) {
-      console.error('Error cleaning mock data:', cleanupError);
+      console.error('[MONITORING-SCAN] Error cleaning mock data:', cleanupError);
     }
 
     // Also clean content_alerts mock data
@@ -37,7 +38,7 @@ Deno.serve(async (req) => {
       .delete()
       .or('content.ilike.%test%,content.ilike.%mock%,content.ilike.%demo%');
 
-    console.log('Cleaned existing mock/test data');
+    console.log('[MONITORING-SCAN] Cleaned existing mock/test data');
 
     // Update monitoring status to show scan is active
     const { error: statusError } = await supabase
@@ -50,59 +51,58 @@ Deno.serve(async (req) => {
       });
 
     if (statusError) {
-      console.error('Error updating monitoring status:', statusError);
+      console.error('[MONITORING-SCAN] Error updating monitoring status:', statusError);
     }
 
     const results = [];
 
     // Call the Reddit scan function directly
     try {
-      console.log('Calling Reddit scan function...');
+      console.log('[MONITORING-SCAN] Calling Reddit scan function...');
       const { data: redditData, error: redditError } = await supabase.functions.invoke('reddit-scan');
       
       if (redditError) {
-        console.error('Reddit scan error:', redditError);
-      } else if (redditData) {
-        console.log(`Reddit scan completed: found ${redditData.matchesFound || 0} matches`);
+        console.error('[MONITORING-SCAN] Reddit scan error:', redditError);
+      } else if (redditData && redditData.results) {
+        console.log(`[MONITORING-SCAN] Reddit scan completed: found ${redditData.matchesFound || 0} matches`);
         
         // Insert Reddit results directly into scan_results with correct schema
-        if (redditData.results && redditData.results.length > 0) {
-          for (const result of redditData.results) {
-            const scanResult = {
-              platform: 'Reddit',
-              content: result.title || result.content || 'Reddit post content',
-              url: result.url || '',
-              severity: 'medium',
-              status: 'new',
-              threat_type: 'social_media',
-              sentiment: -0.3,
-              confidence_score: 75,
-              potential_reach: result.potential_reach || 1000,
-              detected_entities: Array.isArray(result.detected_entities) ? result.detected_entities : [],
-              source_type: 'social'
-            };
+        for (const result of redditData.results) {
+          const scanResult = {
+            platform: 'Reddit',
+            content: result.title || result.content || 'Reddit post content',
+            url: result.url || '',
+            severity: 'medium',
+            status: 'new',
+            threat_type: 'social_media',
+            sentiment: -0.2,
+            confidence_score: 75,
+            potential_reach: result.potential_reach || 1000,
+            detected_entities: Array.isArray(result.detected_entities) ? result.detected_entities : [],
+            source_type: 'social'
+          };
+          
+          const { error: insertError } = await supabase
+            .from('scan_results')
+            .insert(scanResult);
             
-            const { error: insertError } = await supabase
-              .from('scan_results')
-              .insert(scanResult);
-              
-            if (insertError) {
-              console.error('Error inserting Reddit result:', insertError);
-            } else {
-              results.push(scanResult);
-            }
+          if (insertError) {
+            console.error('[MONITORING-SCAN] Error inserting Reddit result:', insertError);
+          } else {
+            results.push(scanResult);
+            console.log(`[MONITORING-SCAN] Successfully inserted Reddit result: ${scanResult.content.substring(0, 50)}...`);
           }
         }
       }
     } catch (redditScanError) {
-      console.error('Error calling Reddit scan:', redditScanError);
+      console.error('[MONITORING-SCAN] Error calling Reddit scan:', redditScanError);
     }
 
     // Perform Google News simulation (since real news APIs need paid keys)
     try {
-      console.log('Performing news monitoring scan...');
+      console.log('[MONITORING-SCAN] Performing news monitoring scan...');
       
-      const newsTerms = targetEntity ? [`"${targetEntity}" news`, `"${targetEntity}" business`] : ['tech news', 'business news'];
+      const newsTerms = targetEntity ? [`"${targetEntity}" news`, `"${targetEntity}" business`] : ['reputation management news', 'corporate crisis news'];
       
       for (const term of newsTerms.slice(0, 2)) { // Limit to 2 news items
         const newsResult = {
@@ -126,16 +126,18 @@ Deno.serve(async (req) => {
           .insert(newsResult);
           
         if (insertError) {
-          console.error('Error inserting news result:', insertError);
+          console.error('[MONITORING-SCAN] Error inserting news result:', insertError);
+        } else {
+          console.log(`[MONITORING-SCAN] Successfully inserted news result: ${newsResult.content.substring(0, 50)}...`);
         }
       }
     } catch (newsError) {
-      console.error('News scanning error:', newsError);
+      console.error('[MONITORING-SCAN] News scanning error:', newsError);
     }
 
     // If no results found, add a system status message
     if (results.length === 0) {
-      console.log('No threats detected in current scan');
+      console.log('[MONITORING-SCAN] No threats detected in current scan');
       
       const statusResult = {
         platform: 'ARIA Monitor',
@@ -158,13 +160,13 @@ Deno.serve(async (req) => {
         .insert(statusResult);
     }
 
-    console.log(`Real monitoring scan completed. Found ${results.length} results.`);
+    console.log(`[MONITORING-SCAN] Monitoring scan completed. Found ${results.length} results.`);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
         results,
-        message: `Real scan completed: ${results.length} results found`,
+        message: `Monitoring scan completed: ${results.length} results found`,
         cleanup_performed: true,
         stats: {
           platformsScanned: ['Reddit', 'Google News'],
@@ -179,10 +181,10 @@ Deno.serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('Real monitoring scan error:', error);
+    console.error('[MONITORING-SCAN] Monitoring scan error:', error);
     return new Response(
       JSON.stringify({ 
-        error: 'Real monitoring scan failed', 
+        error: 'Monitoring scan failed', 
         details: error.message,
         cleanup_attempted: true 
       }),
