@@ -2,7 +2,7 @@
 // Re-export all core services
 export { threatProcessor, AriaCoreThreatProcessor } from './threatProcessor';
 export { LiveDataEnforcer } from './liveDataEnforcer';
-export * from './threatIngestion';
+export { ThreatIngestionService } from './threatIngestion';
 
 // Initialize core services
 export const initializeAriaCore = async () => {
