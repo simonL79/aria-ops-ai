@@ -1,6 +1,7 @@
 
 import { Helmet } from 'react-helmet-async';
 import AnubisCockpit from '@/components/aria/AnubisCockpit';
+import LiveDataGuard from '@/components/dashboard/LiveDataGuard';
 
 const AnubisCockpitPage = () => {
   return (
@@ -10,9 +11,11 @@ const AnubisCockpitPage = () => {
         <meta name="description" content="Advanced security monitoring and control dashboard for A.R.I.A™ Anubis system" />
       </Helmet>
       
-      <div className="container mx-auto py-8">
-        <AnubisCockpit />
-      </div>
+      <LiveDataGuard enforceStrict={true}>
+        <div className="container mx-auto py-8">
+          <AnubisCockpit />
+        </div>
+      </LiveDataGuard>
     </>
   );
 };

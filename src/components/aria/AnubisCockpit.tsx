@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -89,14 +88,14 @@ const AnubisCockpit = () => {
       setSystemHealth(health);
       setMonitoringStatus(monitoring);
       
-      // Calculate stats
+      // Calculate stats with proper type checking
       const pendingItems = queue.find(q => q.status === 'pending')?.count || 0;
       const activeThreats = threats.filter(t => t.status === 'active').length;
       
       setSystemStats({
         totalThreats: threats.length,
         activeThreats,
-        pendingQueue: pendingItems,
+        pendingQueue: typeof pendingItems === 'number' ? pendingItems : 0,
         systemStatus: monitoring?.isActive ? 'LIVE' : 'OFFLINE'
       });
       
