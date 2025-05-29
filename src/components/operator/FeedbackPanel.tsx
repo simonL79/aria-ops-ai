@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -15,6 +16,7 @@ import { NexusPanel } from './NexusPanel';
 import { SentinelShieldPanel } from './SentinelShieldPanel';
 import { PropheticVisionPanel } from './PropheticVisionPanel';
 import { CitadelPanel } from './CitadelPanel';
+import { MirrorspacePanel } from './MirrorspacePanel';
 
 interface CommandFeedback {
   id: string;
@@ -136,6 +138,9 @@ export const FeedbackPanel = ({ commandHistory }: FeedbackPanelProps) => {
 
   return (
     <div className="space-y-4">
+      {/* MIRRORSPACE™ Behavioral Surveillance & Influence Index Panel */}
+      <MirrorspacePanel />
+
       {/* CITADEL™ Infrastructure Reinforcement & Policy Vaulting Panel */}
       <CitadelPanel />
 
