@@ -51,7 +51,7 @@ const AnubisValidationPanel = () => {
         .from('anubis_log')
         .select('*')
         .eq('module', 'Enhanced_Validator')
-        .order('logged_at', { ascending: false })
+        .order('checked_at', { ascending: false })
         .limit(5);
       
       if (error) throw error;
@@ -63,10 +63,13 @@ const AnubisValidationPanel = () => {
   const runValidation = async () => {
     setIsRunningValidation(true);
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+
       const response = await fetch('/functions/v1/anubis-validator', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${supabase.supabaseKey}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
@@ -186,7 +189,7 @@ const AnubisValidationPanel = () => {
                     </Badge>
                   </div>
                   <p className="text-sm text-[#D8DEE9]/80 mt-2">
-                    Last updated: {new Date(anubisState.updated_at).toLocaleTimeString()}
+                    Last updated: {new Date(anubisState.last_checked).toLocaleTimeString()}
                   </p>
                 </CardContent>
               </Card>
@@ -208,7 +211,7 @@ const AnubisValidationPanel = () => {
                             {validation.check_type.replace(/_/g, ' ').toUpperCase()}
                           </p>
                           <p className="text-[#D8DEE9]/60 text-xs">
-                            {new Date(validation.logged_at).toLocaleString()}
+                            {new Date(validation.checked_at).toLocaleString()}
                           </p>
                         </div>
                       </div>

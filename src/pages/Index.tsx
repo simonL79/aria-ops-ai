@@ -1,15 +1,15 @@
-
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Shield, TrendingUp, Eye, Check, ArrowRight } from "lucide-react";
+import { Shield, TrendingUp, Eye, Check, ArrowRight, Menu, X } from "lucide-react";
 
 const Index = () => {
   const navigate = useNavigate();
   const { isAuthenticated, isAdmin } = useAuth();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleAdminAccess = () => {
     if (isAuthenticated && isAdmin) {
@@ -26,6 +26,66 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-[#0A0F2C]">
+      {/* Navigation Header */}
+      <header className="sticky top-0 z-50 w-full border-b border-[#247CFF]/20 bg-[#0A0F2C]/95 backdrop-blur supports-[backdrop-filter]:bg-[#0A0F2C]/60">
+        <div className="container mx-auto px-6">
+          <div className="flex items-center justify-between py-4">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-gradient-to-r from-[#247CFF] to-[#38C172] rounded-full flex items-center justify-center">
+                <div className="w-4 h-4 bg-white rounded-full"></div>
+              </div>
+              <span className="text-xl font-bold text-white font-['Space_Grotesk'] tracking-wide">A.R.I.A™</span>
+            </div>
+            
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center space-x-8">
+              <a href="/about" className="text-[#D8DEE9] hover:text-white transition-colors font-['Inter']">About</a>
+              <a href="/blog" className="text-[#D8DEE9] hover:text-white transition-colors font-['Inter']">Blog</a>
+              <a href="/simon-lindsay" className="text-[#D8DEE9] hover:text-white transition-colors font-['Inter']">Simon Lindsay</a>
+              <a href="/resources" className="text-[#D8DEE9] hover:text-white transition-colors font-['Inter']">Resources</a>
+              <a href="/gdpr-compliance" className="text-[#D8DEE9] hover:text-white transition-colors font-['Inter']">GDPR</a>
+              <Button
+                onClick={handleAdminAccess}
+                variant="outline"
+                className="border-[#247CFF] text-[#247CFF] hover:bg-[#247CFF] hover:text-white"
+              >
+                {isAuthenticated && isAdmin ? 'Dashboard' : 'Admin'}
+              </Button>
+            </nav>
+
+            {/* Mobile menu button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="md:hidden text-white"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </Button>
+          </div>
+
+          {/* Mobile Navigation */}
+          {mobileMenuOpen && (
+            <div className="md:hidden border-t border-[#247CFF]/20 py-4">
+              <nav className="flex flex-col space-y-4">
+                <a href="/about" className="text-[#D8DEE9] hover:text-white transition-colors font-['Inter']">About</a>
+                <a href="/blog" className="text-[#D8DEE9] hover:text-white transition-colors font-['Inter']">Blog</a>
+                <a href="/simon-lindsay" className="text-[#D8DEE9] hover:text-white transition-colors font-['Inter']">Simon Lindsay</a>
+                <a href="/resources" className="text-[#D8DEE9] hover:text-white transition-colors font-['Inter']">Resources</a>
+                <a href="/gdpr-compliance" className="text-[#D8DEE9] hover:text-white transition-colors font-['Inter']">GDPR</a>
+                <Button
+                  onClick={handleAdminAccess}
+                  variant="outline"
+                  className="border-[#247CFF] text-[#247CFF] hover:bg-[#247CFF] hover:text-white w-full"
+                >
+                  {isAuthenticated && isAdmin ? 'Dashboard' : 'Admin'}
+                </Button>
+              </nav>
+            </div>
+          )}
+        </div>
+      </header>
+
       {/* Hero Section */}
       <section className="relative px-6 py-20 text-center">
         <div className="container mx-auto max-w-4xl">
@@ -473,18 +533,68 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-[#1C1C1E]/40 backdrop-blur-sm border-t border-[#247CFF]/20 py-12">
-        <div className="container mx-auto px-6 text-center">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="w-8 h-8 bg-gradient-to-r from-[#247CFF] to-[#38C172] rounded-full flex items-center justify-center">
-              <div className="w-4 h-4 bg-white rounded-full"></div>
+      {/* Enhanced Footer */}
+      <footer className="bg-[#1C1C1E]/90 backdrop-blur-sm border-t border-[#247CFF]/20 py-16">
+        <div className="container mx-auto px-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+            {/* Brand Column */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-gradient-to-r from-[#247CFF] to-[#38C172] rounded-full flex items-center justify-center">
+                  <div className="w-4 h-4 bg-white rounded-full"></div>
+                </div>
+                <span className="text-xl font-bold text-white font-['Space_Grotesk'] tracking-wide">A.R.I.A™</span>
+              </div>
+              <p className="text-[#D8DEE9] text-sm font-['Inter']">
+                Adaptive Reputation Intelligence & Analysis - Protecting what matters most.
+              </p>
             </div>
-            <span className="text-xl font-bold text-white font-['Space_Grotesk'] tracking-wide">A.R.I.A™</span>
+
+            {/* Company Column */}
+            <div>
+              <h3 className="text-white font-bold mb-4 font-['Space_Grotesk']">Company</h3>
+              <ul className="space-y-2">
+                <li><a href="/about" className="text-[#D8DEE9] hover:text-white transition-colors text-sm font-['Inter']">About</a></li>
+                <li><a href="/simon-lindsay" className="text-[#D8DEE9] hover:text-white transition-colors text-sm font-['Inter']">Simon Lindsay</a></li>
+                <li><a href="/blog" className="text-[#D8DEE9] hover:text-white transition-colors text-sm font-['Inter']">Blog</a></li>
+                <li><a href="/resources" className="text-[#D8DEE9] hover:text-white transition-colors text-sm font-['Inter']">Resources</a></li>
+              </ul>
+            </div>
+
+            {/* Legal Column */}
+            <div>
+              <h3 className="text-white font-bold mb-4 font-['Space_Grotesk']">Legal</h3>
+              <ul className="space-y-2">
+                <li><a href="/privacy-policy" className="text-[#D8DEE9] hover:text-white transition-colors text-sm font-['Inter']">Privacy Policy</a></li>
+                <li><a href="/disclaimer" className="text-[#D8DEE9] hover:text-white transition-colors text-sm font-['Inter']">Disclaimer</a></li>
+                <li><a href="/gdpr-compliance" className="text-[#D8DEE9] hover:text-white transition-colors text-sm font-['Inter']">GDPR Compliance</a></li>
+                <li><a href="/terms" className="text-[#D8DEE9] hover:text-white transition-colors text-sm font-['Inter']">Terms of Service</a></li>
+              </ul>
+            </div>
+
+            {/* Contact Column */}
+            <div>
+              <h3 className="text-white font-bold mb-4 font-['Space_Grotesk']">Get Started</h3>
+              <ul className="space-y-2">
+                <li><a href="/scan" className="text-[#D8DEE9] hover:text-white transition-colors text-sm font-['Inter']">Request Scan</a></li>
+                <li><a href="/pricing" className="text-[#D8DEE9] hover:text-white transition-colors text-sm font-['Inter']">Pricing</a></li>
+                <li><button onClick={handleAdminAccess} className="text-[#D8DEE9] hover:text-white transition-colors text-sm font-['Inter'] text-left">Admin Access</button></li>
+              </ul>
+            </div>
           </div>
-          <p className="text-sm text-[#D8DEE9] font-['Inter']">
-            Adaptive Reputation Intelligence & Analysis • Secure • Autonomous • Intelligent
-          </p>
+          
+          <div className="border-t border-[#247CFF]/20 pt-8 mt-8">
+            <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+              <p className="text-[#D8DEE9] text-sm font-['Inter']">
+                &copy; 2025 A.R.I.A™ — AI Reputation Intelligence Agent. All rights reserved.
+              </p>
+              <div className="flex items-center space-x-6">
+                <span className="text-xs text-[#D8DEE9]/60 font-['Inter']">🔒 GDPR Compliant</span>
+                <span className="text-xs text-[#D8DEE9]/60 font-['Inter']">🛡️ Enterprise Security</span>
+                <span className="text-xs text-[#D8DEE9]/60 font-['Inter']">🇬🇧 Built in UK</span>
+              </div>
+            </div>
+          </div>
         </div>
       </footer>
     </div>
