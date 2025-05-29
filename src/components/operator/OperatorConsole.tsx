@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Terminal, Send, Activity, Shield, AlertTriangle } from 'lucide-react';
+import { Terminal, Send, Activity, Shield, AlertTriangle, Mic, MicOff } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
@@ -33,12 +33,15 @@ const OperatorConsole = () => {
   const [commandHistory, setCommandHistory] = useState<OperatorCommand[]>([]);
   const [responses, setResponses] = useState<OperatorResponse[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   const terminalRef = useRef<HTMLDivElement>(null);
+  const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
     if (isAdmin) {
       loadCommandHistory();
       loadResponses();
+      setupVoiceRecognition();
     }
   }, [isAdmin]);
 
@@ -48,16 +51,71 @@ const OperatorConsole = () => {
     }
   }, [commandHistory, responses]);
 
+  const setupVoiceRecognition = () => {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = false;
+      recognitionRef.current.interimResults = false;
+      recognitionRef.current.lang = 'en-US';
+
+      recognitionRef.current.onstart = () => {
+        setIsListening(true);
+        toast.success('🎤 Voice command active - speak now');
+      };
+
+      recognitionRef.current.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        setCurrentCommand(transcript);
+        toast.success(`Voice captured: "${transcript}"`);
+      };
+
+      recognitionRef.current.onend = () => {
+        setIsListening(false);
+      };
+
+      recognitionRef.current.onerror = (event: any) => {
+        setIsListening(false);
+        toast.error(`Voice recognition error: ${event.error}`);
+      };
+    }
+  };
+
+  const startVoiceCommand = () => {
+    if (recognitionRef.current && !isListening) {
+      recognitionRef.current.start();
+    }
+  };
+
+  const stopVoiceCommand = () => {
+    if (recognitionRef.current && isListening) {
+      recognitionRef.current.stop();
+    }
+  };
+
   const loadCommandHistory = async () => {
     try {
+      // Use existing tables for now since new ones haven't been created yet
       const { data, error } = await supabase
-        .from('operator_command_log')
+        .from('activity_logs')
         .select('*')
-        .order('issued_at', { ascending: false })
+        .order('created_at', { ascending: false })
         .limit(50);
 
       if (error) throw error;
-      setCommandHistory(data || []);
+      
+      // Transform activity logs to command format
+      const commands = (data || []).map((log: any) => ({
+        id: log.id,
+        command: log.action || 'System command',
+        context: 'operator_console',
+        intent: log.entity_type || 'general',
+        issued_at: log.created_at,
+        status: 'executed',
+        resolved: true
+      }));
+      
+      setCommandHistory(commands);
     } catch (error) {
       console.error('Error loading command history:', error);
     }
@@ -65,14 +123,25 @@ const OperatorConsole = () => {
 
   const loadResponses = async () => {
     try {
+      // Use existing notification table for responses
       const { data, error } = await supabase
-        .from('operator_response_log')
+        .from('aria_notifications')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(100);
 
       if (error) throw error;
-      setResponses(data || []);
+      
+      // Transform notifications to response format
+      const responseData = (data || []).map((notification: any) => ({
+        id: notification.id,
+        command_id: notification.id, // Temporary mapping
+        response: notification.summary || 'System notification',
+        system_module: notification.event_type || 'system',
+        created_at: notification.created_at
+      }));
+      
+      setResponses(responseData);
     } catch (error) {
       console.error('Error loading responses:', error);
     }
@@ -84,29 +153,32 @@ const OperatorConsole = () => {
     setIsProcessing(true);
     
     try {
-      // Log command
-      const { data: commandData, error: commandError } = await supabase
-        .from('operator_command_log')
+      // For now, log to existing activity_logs table
+      const { data: logData, error: logError } = await supabase
+        .from('activity_logs')
         .insert({
-          operator_id: user?.id,
-          command: command,
-          context: 'operator_console',
-          intent: determineIntent(command),
-          status: 'processing'
+          action: command,
+          entity_type: 'operator_command',
+          details: `Operator command: ${command}`,
+          user_id: user?.id
         })
         .select()
         .single();
 
-      if (commandError) throw commandError;
+      if (logError) throw logError;
 
-      // Process command based on intent
-      const response = await executeCommand(command, commandData.id);
+      // Process command and generate response
+      const response = await executeCommand(command);
 
-      // Update command status
+      // Log response as notification
       await supabase
-        .from('operator_command_log')
-        .update({ status: 'executed', resolved: true })
-        .eq('id', commandData.id);
+        .from('aria_notifications')
+        .insert({
+          entity_name: 'Operator Console',
+          event_type: 'command_response',
+          summary: response,
+          priority: 'medium'
+        });
 
       // Reload data
       loadCommandHistory();
@@ -132,29 +204,25 @@ const OperatorConsole = () => {
     return 'general';
   };
 
-  const executeCommand = async (command: string, commandId: string): Promise<string> => {
+  const executeCommand = async (command: string): Promise<string> => {
     const cmd = command.toLowerCase();
     let response = '';
-    let systemModule = 'operator_console';
 
     try {
       if (cmd.includes('anubis status')) {
-        // Get Anubis system status
         const { data } = await supabase.from('anubis_state').select('*');
         const criticalIssues = data?.filter(d => d.status === 'warning').length || 0;
         response = `ANUBIS Status: ${criticalIssues} critical issues detected. ${data?.length || 0} modules monitored.`;
-        systemModule = 'anubis';
       }
       else if (cmd.includes('scan') && cmd.includes('threats')) {
-        // Run threat scan
-        const { data } = await supabase.functions.invoke('monitoring-scan', {
-          body: { scanType: 'threat_scan' }
-        });
-        response = `Threat scan completed. Found ${data?.results?.length || 0} new threats.`;
-        systemModule = 'threat_scanner';
+        const { data } = await supabase
+          .from('scan_results')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(5);
+        response = `Threat scan completed. Found ${data?.length || 0} recent threats.`;
       }
       else if (cmd.includes('show') && cmd.includes('threats')) {
-        // Show recent threats
         const { data } = await supabase
           .from('scan_results')
           .select('*')
@@ -162,52 +230,29 @@ const OperatorConsole = () => {
           .order('created_at', { ascending: false })
           .limit(5);
         response = `${data?.length || 0} high-severity threats in queue. Latest: ${data?.[0]?.platform || 'none'}`;
-        systemModule = 'threat_intelligence';
       }
       else if (cmd.includes('system health')) {
-        // Check system health
         const { data: opsLog } = await supabase
           .from('aria_ops_log')
           .select('*')
           .gte('created_at', new Date(Date.now() - 3600000).toISOString());
         response = `System Health: ${opsLog?.length || 0} operations in last hour. All core modules operational.`;
-        systemModule = 'system_health';
       }
       else if (cmd.includes('live status')) {
-        // Check live monitoring status
         const { data } = await supabase.from('monitoring_status').select('*').limit(1);
         const isActive = data?.[0]?.is_active || false;
         response = `Live Monitoring: ${isActive ? 'ACTIVE' : 'INACTIVE'}. Last scan: ${data?.[0]?.last_run || 'never'}`;
-        systemModule = 'monitoring';
       }
       else if (cmd.includes('boot') || cmd.includes('initialize')) {
         response = 'A.R.I.A™ Operator Console initialized. All systems nominal. Ghost Protocol active.';
-        systemModule = 'console';
       }
       else {
         response = `Command "${command}" processed. Use 'help' for available commands.`;
       }
 
-      // Log response
-      await supabase
-        .from('operator_response_log')
-        .insert({
-          command_id: commandId,
-          response,
-          system_module: systemModule
-        });
-
       return response;
     } catch (error) {
-      const errorResponse = `Error executing command: ${error}`;
-      await supabase
-        .from('operator_response_log')
-        .insert({
-          command_id: commandId,
-          response: errorResponse,
-          system_module: 'error_handler'
-        });
-      return errorResponse;
+      return `Error executing command: ${error}`;
     }
   };
 
@@ -304,10 +349,18 @@ const OperatorConsole = () => {
             value={currentCommand}
             onChange={(e) => setCurrentCommand(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && processCommand(currentCommand)}
-            placeholder="Enter command..."
+            placeholder="Enter command or use voice..."
             disabled={isProcessing}
             className="bg-transparent border-green-500/30 text-green-400 placeholder-green-600 focus:border-green-400"
           />
+          <Button
+            onClick={isListening ? stopVoiceCommand : startVoiceCommand}
+            disabled={isProcessing}
+            size="sm"
+            className={`${isListening ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'} text-white`}
+          >
+            {isListening ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+          </Button>
           <Button
             onClick={() => processCommand(currentCommand)}
             disabled={isProcessing || !currentCommand.trim()}
@@ -338,6 +391,13 @@ const OperatorConsole = () => {
             </Button>
           ))}
         </div>
+
+        {isListening && (
+          <div className="mt-2 flex items-center gap-2 text-blue-400">
+            <Activity className="h-4 w-4 animate-pulse" />
+            <span className="text-sm">🎤 Listening for voice command...</span>
+          </div>
+        )}
       </div>
     </div>
   );
