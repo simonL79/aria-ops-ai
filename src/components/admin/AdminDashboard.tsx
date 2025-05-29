@@ -7,6 +7,7 @@ import { Activity, TestTube, Shield, Settings } from 'lucide-react';
 import QATestDashboard from './QATestDashboard';
 import SystemHealthDashboard from './SystemHealthDashboard';
 import ThreatIngestWorker from '../intelligence/ThreatIngestWorker';
+import AnubisValidationPanel from '../aria/AnubisValidationPanel';
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -23,10 +24,11 @@ const AdminDashboard = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="qa">QA Testing</TabsTrigger>
           <TabsTrigger value="health">System Health</TabsTrigger>
+          <TabsTrigger value="anubis">Anubis Security</TabsTrigger>
           <TabsTrigger value="workers">Workers</TabsTrigger>
         </TabsList>
 
@@ -166,6 +168,10 @@ const AdminDashboard = () => {
 
         <TabsContent value="health">
           <SystemHealthDashboard />
+        </TabsContent>
+
+        <TabsContent value="anubis">
+          <AnubisValidationPanel />
         </TabsContent>
 
         <TabsContent value="workers">
