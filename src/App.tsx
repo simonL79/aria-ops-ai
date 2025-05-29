@@ -1,42 +1,32 @@
+
 import {
   BrowserRouter as Router,
   Route,
   Routes,
 } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
-import { QueryClient } from "react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
-import DashboardPage from "@/pages/DashboardPage";
-import MonitoringPage from "@/pages/MonitoringPage";
-import EmployeeRiskPage from "@/pages/EmployeeRiskPage";
-import EmergencyStrikePage from "@/pages/EmergencyStrikePage";
-import SettingsPage from "@/pages/SettingsPage";
 import { useAuth } from "./hooks/useAuth";
-import LoginPage from "./pages/LoginPage";
-import { useEffect } from "react";
 import StrikeManagementPage from '@/pages/StrikeManagementPage';
+
+// Create a query client instance
+const queryClient = new QueryClient();
 
 function App() {
   return (
     <HelmetProvider>
-      <Router>
-        <QueryClient>
+      <QueryClientProvider client={queryClient}>
+        <Router>
           <div className="min-h-screen bg-background">
             <Toaster />
             <Routes>
-              <Route path="/" element={<LoginPage />} />
-              <Route path="/dashboard" element={<DashboardPage />} />
-              <Route path="/monitoring" element={<MonitoringPage />} />
-              <Route path="/employee-risk" element={<EmployeeRiskPage />} />
-              <Route path="/emergency-strike" element={<EmergencyStrikePage />} />
-              <Route path="/settings" element={<SettingsPage />} />
-
+              <Route path="/" element={<div className="p-8"><h1 className="text-2xl">Welcome to A.R.I.A/EX™</h1><p><a href="/strikes" className="text-blue-600 underline">Access Strike Management</a></p></div>} />
               <Route path="/strikes" element={<StrikeManagementPage />} />
-              
             </Routes>
           </div>
-        </QueryClient>
-      </Router>
+        </Router>
+      </QueryClientProvider>
     </HelmetProvider>
   );
 }

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -34,6 +33,7 @@ interface StrikeRequest {
   executed_at?: string;
   evidence_pdf?: string;
   execution_result?: any;
+  requester_email?: string;
 }
 
 interface BatchGroup {
@@ -61,24 +61,42 @@ const AdminStrikeDashboard = () => {
 
   const loadStrikeRequests = async () => {
     try {
+      // Get strike requests with user profile data
       const { data, error } = await supabase
         .from('strike_requests')
         .select(`
-          *,
-          profiles:requested_by(email)
+          *
         `)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
-      // Group by batch_id
+      // Get user emails separately to avoid the profiles issue
+      const userIds = [...new Set(data.map(request => request.requested_by))];
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('id, email')
+        .in('id', userIds);
+
+      // Create email lookup map
+      const emailMap = new Map();
+      profilesData?.forEach(profile => {
+        emailMap.set(profile.id, profile.email);
+      });
+
+      // Group by batch_id and add email data
       const batchMap = new Map<string, StrikeRequest[]>();
       
       data.forEach(request => {
+        const requestWithEmail = {
+          ...request,
+          requester_email: emailMap.get(request.requested_by) || 'Unknown'
+        };
+        
         if (!batchMap.has(request.batch_id)) {
           batchMap.set(request.batch_id, []);
         }
-        batchMap.get(request.batch_id)!.push(request);
+        batchMap.get(request.batch_id)!.push(requestWithEmail);
       });
 
       // Create batch groups
@@ -97,7 +115,7 @@ const AdminStrikeDashboard = () => {
           requests: requests.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()),
           status: batchStatus,
           created_at: requests[0].created_at,
-          requester_email: requests[0].profiles?.email
+          requester_email: requests[0].requester_email
         };
       });
 
