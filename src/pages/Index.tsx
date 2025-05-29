@@ -1,15 +1,21 @@
 
-import { useState } from "react";
+import React, { useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Shield, Search, Users, FileText, ArrowRight, Lock, Eye, TrendingUp } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import HeroSection from "@/components/landing/HeroSection";
+import TrustBadgesSection from "@/components/landing/TrustBadgesSection";
+import ClientTypesSection from "@/components/landing/ClientTypesSection";
 
 const Index = () => {
   const navigate = useNavigate();
   const { isAuthenticated, isAdmin } = useAuth();
+  const scanFormRef = useRef<HTMLDivElement>(null);
+
+  const handleScrollToForm = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    // For now, navigate to scan page since the form isn't on this page
+    navigate('/scan');
+  };
 
   const handleAdminAccess = () => {
     if (isAuthenticated && isAdmin) {
@@ -20,133 +26,49 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900">
-      {/* Header */}
-      <header className="bg-black/20 backdrop-blur-sm border-b border-white/10">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Shield className="h-8 w-8 text-blue-400" />
-              <h1 className="text-2xl font-bold text-white">A.R.I.A™</h1>
-              <Badge variant="secondary" className="bg-blue-600 text-white">
-                AI Reputation Intelligence
-              </Badge>
+    <div className="min-h-screen bg-[#0A0F2C]">
+      {/* Hero Section with sophisticated A.R.I.A™ design */}
+      <HeroSection onScrollToForm={handleScrollToForm} />
+      
+      {/* Trust Badges */}
+      <TrustBadgesSection />
+      
+      {/* Client Types */}
+      <ClientTypesSection />
+      
+      {/* Admin Access Section */}
+      <section className="py-16 px-6 bg-[#0A0F2C] border-t border-[#247CFF]/20">
+        <div className="container mx-auto text-center">
+          <div className="max-w-md mx-auto">
+            <div className="bg-gradient-to-r from-[#1C1C1E]/40 via-[#0A0F2C]/60 to-[#1C1C1E]/40 border border-[#247CFF]/30 p-8 rounded-2xl backdrop-blur-sm">
+              <h3 className="text-lg font-bold mb-4 text-[#247CFF] font-['Space_Grotesk'] tracking-wide">
+                SECURE ADMIN PORTAL
+              </h3>
+              <p className="text-sm text-[#D8DEE9] mb-6 font-['Inter']">
+                Access the A.R.I.A™ intelligence platform. All access is logged and monitored.
+              </p>
+              <button
+                onClick={handleAdminAccess}
+                className="w-full bg-[#247CFF] hover:bg-[#1c63cc] text-white px-6 py-3 text-sm font-bold rounded-xl border-2 border-[#247CFF] hover:border-[#1c63cc] hover:shadow-[0_0_20px_rgba(36,124,255,0.4)] transform hover:scale-105 transition-all duration-300 font-['Space_Grotesk'] tracking-wide uppercase"
+              >
+                {isAuthenticated && isAdmin ? 'Enter Dashboard' : 'Admin Access'}
+              </button>
             </div>
-            <Button 
-              onClick={handleAdminAccess}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              <Lock className="h-4 w-4 mr-2" />
-              {isAuthenticated && isAdmin ? 'Dashboard' : 'Admin Access'}
-            </Button>
           </div>
         </div>
-      </header>
-
-      {/* Hero Section */}
-      <section className="container mx-auto px-4 py-20 text-center">
-        <div className="max-w-4xl mx-auto space-y-8">
-          <div className="space-y-4">
-            <h2 className="text-5xl font-bold text-white leading-tight">
-              AI-Powered Reputation
-              <span className="text-blue-400"> Intelligence</span>
-            </h2>
-            <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-              Autonomous threat detection, client-entity mapping, and real-time reputation management 
-              across all digital platforms.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
-            <Card className="bg-white/10 backdrop-blur-sm border-white/20 text-white">
-              <CardHeader>
-                <Search className="h-12 w-12 text-blue-400 mx-auto" />
-                <CardTitle>Zero-Input Discovery</CardTitle>
-                <CardDescription className="text-gray-300">
-                  Autonomous scanning across Reddit, Twitter, news platforms and forums
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2 text-sm text-gray-300">
-                  <div>• Real-time threat detection</div>
-                  <div>• Cross-platform monitoring</div>
-                  <div>• AI sentiment analysis</div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white/10 backdrop-blur-sm border-white/20 text-white">
-              <CardHeader>
-                <Users className="h-12 w-12 text-purple-400 mx-auto" />
-                <CardTitle>Client-Entity Intelligence</CardTitle>
-                <CardDescription className="text-gray-300">
-                  Smart linking between threats and your monitored entities
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2 text-sm text-gray-300">
-                  <div>• Automated entity matching</div>
-                  <div>• Priority threat alerts</div>
-                  <div>• Confidence scoring</div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white/10 backdrop-blur-sm border-white/20 text-white">
-              <CardHeader>
-                <FileText className="h-12 w-12 text-green-400 mx-auto" />
-                <CardTitle>Evidence & Outreach</CardTitle>
-                <CardDescription className="text-gray-300">
-                  Automated evidence collection and direct contact discovery
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2 text-sm text-gray-300">
-                  <div>• Screenshot capture</div>
-                  <div>• Contact discovery</div>
-                  <div>• Outreach automation</div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Button 
-            onClick={handleAdminAccess}
-            size="lg"
-            className="bg-blue-600 hover:bg-blue-700 text-white text-lg px-8 py-4"
-          >
-            <Shield className="h-5 w-5 mr-2" />
-            Access ARIA Intelligence Platform
-            <ArrowRight className="h-5 w-5 ml-2" />
-          </Button>
-        </div>
-      </section>
-
-      {/* Security Notice */}
-      <section className="container mx-auto px-4 py-12">
-        <Card className="bg-yellow-900/20 border-yellow-600/30 max-w-2xl mx-auto">
-          <CardContent className="p-6 text-center">
-            <Lock className="h-8 w-8 text-yellow-400 mx-auto mb-3" />
-            <h3 className="text-lg font-semibold text-yellow-100 mb-2">
-              Secure Admin Portal
-            </h3>
-            <p className="text-yellow-200 text-sm">
-              This platform contains sensitive reputation intelligence data. 
-              All access is logged and monitored for security purposes.
-            </p>
-          </CardContent>
-        </Card>
       </section>
 
       {/* Footer */}
-      <footer className="bg-black/40 backdrop-blur-sm border-t border-white/10 mt-20">
-        <div className="container mx-auto px-4 py-8 text-center text-gray-400">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Shield className="h-5 w-5" />
-            <span className="font-semibold">A.R.I.A™</span>
+      <footer className="bg-[#1C1C1E]/40 backdrop-blur-sm border-t border-[#247CFF]/20 py-12">
+        <div className="container mx-auto px-6 text-center">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="w-8 h-8 bg-gradient-to-r from-[#247CFF] to-[#38C172] rounded-full flex items-center justify-center">
+              <div className="w-4 h-4 bg-white rounded-full"></div>
+            </div>
+            <span className="text-xl font-bold text-white font-['Space_Grotesk'] tracking-wide">A.R.I.A™</span>
           </div>
-          <p className="text-sm">
-            AI Reputation Intelligence Agent • Secure • Autonomous • Intelligent
+          <p className="text-sm text-[#D8DEE9] font-['Inter']">
+            Adaptive Reputation Intelligence & Analysis • Secure • Autonomous • Intelligent
           </p>
         </div>
       </footer>
