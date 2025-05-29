@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -18,6 +17,7 @@ import { PropheticVisionPanel } from './PropheticVisionPanel';
 import { CitadelPanel } from './CitadelPanel';
 import { MirrorspacePanel } from './MirrorspacePanel';
 import { ShieldhavenPanel } from './ShieldhavenPanel';
+import { HalcyonPanel } from './HalcyonPanel';
 
 interface CommandFeedback {
   id: string;
@@ -139,6 +139,9 @@ export const FeedbackPanel = ({ commandHistory }: FeedbackPanelProps) => {
 
   return (
     <div className="space-y-4">
+      {/* HALCYON™ Media Manipulation & Propaganda Detection Panel */}
+      <HalcyonPanel />
+
       {/* SHIELDHAVEN™ Legal & Regulatory AI Defense Panel */}
       <ShieldhavenPanel />
 

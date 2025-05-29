@@ -18,3 +18,4 @@ export { PropheticVisionPanel } from './PropheticVisionPanel';
 export { CitadelPanel } from './CitadelPanel';
 export { MirrorspacePanel } from './MirrorspacePanel';
 export { ShieldhavenPanel } from './ShieldhavenPanel';
+export { HalcyonPanel } from './HalcyonPanel';
