@@ -1,15 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Trash2, Archive, TrendingDown, AlertCircle, Plus, Scan } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import LegacyPostsList from './LegacyPostsList';
-import AddLegacyPostDialog from './AddLegacyPostDialog';
-import SuppressionAssets from './SuppressionAssets';
-import GSCRankTracker from './GSCRankTracker';
+import GraveyardHeader from './GraveyardHeader';
+import GraveyardStatsOverview from './GraveyardStatsOverview';
+import GraveyardMainContent from './GraveyardMainContent';
 
 const GraveyardDashboard = () => {
   const [stats, setStats] = useState({
@@ -86,115 +81,14 @@ const GraveyardDashboard = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Trash2 className="h-8 w-8 text-red-600" />
-            GRAVEYARD™ Legacy Signal Suppressor
-          </h1>
-          <p className="text-muted-foreground">
-            Advanced legacy content identification and suppression system
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button onClick={scanForLegacyContent} disabled={isScanning}>
-            <Scan className={`h-4 w-4 mr-2 ${isScanning ? 'animate-spin' : ''}`} />
-            {isScanning ? 'Scanning...' : 'Scan for Legacy Content'}
-          </Button>
-        </div>
-      </div>
+      <GraveyardHeader 
+        isScanning={isScanning}
+        onScanForLegacyContent={scanForLegacyContent}
+      />
 
-      {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Legacy Posts</CardTitle>
-            <Archive className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalPosts}</div>
-            <p className="text-xs text-muted-foreground">
-              Identified legacy content items
-            </p>
-          </CardContent>
-        </Card>
+      <GraveyardStatsOverview stats={stats} />
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Suppressors</CardTitle>
-            <TrendingDown className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.suppressedPosts}</div>
-            <p className="text-xs text-muted-foreground">
-              Successfully suppressed
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Action</CardTitle>
-            <AlertCircle className="h-4 w-4 text-yellow-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">{stats.activePosts}</div>
-            <p className="text-xs text-muted-foreground">
-              Awaiting suppression
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Suppression Rate</CardTitle>
-            <TrendingDown className="h-4 w-4 text-blue-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{stats.averageRank}%</div>
-            <p className="text-xs text-muted-foreground">
-              Overall effectiveness
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                Legacy Posts Management
-                <AddLegacyPostDialog onPostAdded={fetchStats} />
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <LegacyPostsList />
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Suppression Assets</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <SuppressionAssets onStatsChange={fetchStats} />
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>GSC Rank Tracker</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <GSCRankTracker />
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+      <GraveyardMainContent onStatsChange={fetchStats} />
     </div>
   );
 };
