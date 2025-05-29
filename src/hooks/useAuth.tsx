@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { User, Session } from '@supabase/supabase-js';
@@ -74,36 +73,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return true;
       }
       
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', userId)
-        .eq('role', 'admin')
-        .limit(1);
+      // Use the new security definer function to check admin status
+      const { data, error } = await supabase.rpc('is_current_user_admin');
       
-      const hasAdminRole = !error && data && data.length > 0;
-      console.log('✅ Database admin status:', hasAdminRole);
-      
-      // If no admin role found but this is the business owner, create one
-      if (!hasAdminRole && userEmail === 'simonlindsay7988@gmail.com') {
-        console.log('🔧 Creating admin role for business owner');
-        try {
-          await supabase.from('user_roles').insert({
-            user_id: userId,
-            role: 'admin'
-          });
-          setIsAdmin(true);
-          return true;
-        } catch (insertError) {
-          console.error('Failed to create admin role:', insertError);
-          // Still grant access to business owner
+      if (error) {
+        console.error('Error checking admin status:', error);
+        // Fallback: if this is the business owner email, grant access anyway
+        if (userEmail === 'simonlindsay7988@gmail.com') {
+          console.log('🚨 Fallback: Granting admin access to business owner');
           setIsAdmin(true);
           return true;
         }
+        setIsAdmin(false);
+        return false;
       }
+
+      console.log('✅ Admin status from function:', data);
+      setIsAdmin(data || false);
+      return data || false;
       
-      setIsAdmin(hasAdminRole);
-      return hasAdminRole;
     } catch (error) {
       console.error('❌ Error checking admin status:', error);
       

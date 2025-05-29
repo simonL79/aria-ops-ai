@@ -1,36 +1,39 @@
 
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { supabase } from '@/integrations/supabase/client';
+import { LiveDataValidator } from '@/services/liveDataValidator';
+
+export interface LiveDataCompliance {
+  compliant: boolean;
+  issues: string[];
+  warnings: string[];
+  systemMode: string;
+  enforcementActive: boolean;
+}
 
 /**
- * Live Data Enforcer - Ensures all A.R.I.A™ scanners produce real data only
- * Eliminates mock/demo/simulation data throughout the system
+ * Live Data Enforcer - Ensures production-grade data integrity
  */
 export class LiveDataEnforcer {
   
   /**
-   * Enforce live data integrity across all scanner modules
+   * Enforce system-wide live data compliance
    */
   static async enforceSystemWideLiveData(): Promise<boolean> {
     try {
-      console.log('🔒 Enforcing system-wide live data integrity...');
+      console.log('🔒 Enforcing live data compliance...');
       
-      // 1. Clean threat ingestion queue
-      await this.cleanThreatIngestionQueue();
+      // Initialize system configuration for live mode
+      await this.initializeLiveSystemConfig();
       
-      // 2. Clean scan results
-      await this.cleanScanResults();
+      // Validate current system state
+      const validation = await LiveDataValidator.validateLiveIntegrity();
       
-      // 3. Clean entity data
-      await this.cleanEntityData();
+      if (!validation.isValid) {
+        console.warn('⚠️ Live data enforcement found issues:', validation.errors);
+        return false;
+      }
       
-      // 4. Update system configuration
-      await this.updateSystemConfig();
-      
-      // 5. Initialize live monitoring
-      await this.initializeLiveMonitoring();
-      
-      console.log('✅ Live data enforcement completed successfully');
+      console.log('✅ Live data enforcement successful');
       return true;
       
     } catch (error) {
@@ -40,195 +43,145 @@ export class LiveDataEnforcer {
   }
   
   /**
-   * Clean threat ingestion queue of any mock data
+   * Initialize live system configuration
    */
-  private static async cleanThreatIngestionQueue(): Promise<void> {
+  private static async initializeLiveSystemConfig(): Promise<void> {
     try {
-      console.log('🧹 Cleaning threat ingestion queue...');
-      
-      // Remove any entries with mock/demo/test content
-      const { error } = await supabase
-        .from('threat_ingestion_queue')
-        .delete()
-        .or('raw_content.ilike.%mock%,raw_content.ilike.%demo%,raw_content.ilike.%test%,raw_content.ilike.%sample%');
-      
-      if (error && error.code !== 'PGRST116') { // Ignore "no rows found" error
-        console.error('Error cleaning threat queue:', error);
-      } else {
-        console.log('✅ Threat ingestion queue cleaned');
-      }
-    } catch (error) {
-      console.error('Error in cleanThreatIngestionQueue:', error);
-    }
-  }
-  
-  /**
-   * Clean scan results of any mock data
-   */
-  private static async cleanScanResults(): Promise<void> {
-    try {
-      console.log('🧹 Cleaning scan results...');
-      
-      // Remove mock scan results
-      const { error } = await supabase
-        .from('scan_results')
-        .delete()
-        .or('content.ilike.%mock%,content.ilike.%demo%,content.ilike.%test%,content.ilike.%sample%,platform.ilike.%test%');
-      
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error cleaning scan results:', error);
-      } else {
-        console.log('✅ Scan results cleaned');
-      }
-    } catch (error) {
-      console.error('Error in cleanScanResults:', error);
-    }
-  }
-  
-  /**
-   * Clean entity data of any test entities
-   */
-  private static async cleanEntityData(): Promise<void> {
-    try {
-      console.log('🧹 Cleaning entity data...');
-      
-      // Remove test entities
-      const { error } = await supabase
-        .from('client_entities')
-        .delete()
-        .or('entity_name.ilike.%test%,entity_name.ilike.%demo%,entity_name.ilike.%mock%,entity_name.ilike.%sample%');
-      
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error cleaning entities:', error);
-      } else {
-        console.log('✅ Entity data cleaned');
-      }
-    } catch (error) {
-      console.error('Error in cleanEntityData:', error);
-    }
-  }
-  
-  /**
-   * Update system configuration to enforce live data
-   */
-  private static async updateSystemConfig(): Promise<void> {
-    try {
-      console.log('⚙️ Updating system configuration...');
-      
-      // Set system to live mode
-      const { error } = await supabase
-        .from('system_config')
-        .upsert([
-          { config_key: 'allow_mock_data', config_value: 'disabled' },
-          { config_key: 'system_mode', config_value: 'live' },
-          { config_key: 'scanner_mode', config_value: 'production' },
-          { config_key: 'data_validation', config_value: 'strict' }
-        ], { onConflict: 'config_key' });
-      
-      if (error) {
-        console.error('Error updating system config:', error);
-      } else {
-        console.log('✅ System configuration updated');
-      }
-    } catch (error) {
-      console.error('Error in updateSystemConfig:', error);
-    }
-  }
-  
-  /**
-   * Initialize live monitoring status
-   */
-  private static async initializeLiveMonitoring(): Promise<void> {
-    try {
-      console.log('📊 Initializing live monitoring...');
-      
-      const liveModules = [
-        'Live Threat Scanner',
-        'Social Media Monitor',
-        'News Feed Scanner', 
-        'Forum Analysis Engine',
-        'Legal Discussion Monitor',
-        'Reputation Risk Detector'
+      const liveConfigs = [
+        { key: 'allow_mock_data', value: 'disabled' },
+        { key: 'system_mode', value: 'live' },
+        { key: 'scanner_mode', value: 'production' },
+        { key: 'data_validation', value: 'strict' },
+        { key: 'aria_core_active', value: 'true' },
+        { key: 'live_enforcement', value: 'enabled' }
       ];
       
-      for (const module of liveModules) {
-        await supabase
-          .from('live_status')
-          .upsert({
-            name: module,
-            active_threats: 0,
-            last_threat_seen: new Date().toISOString(),
-            last_report: new Date().toISOString(),
-            system_status: 'LIVE'
-          }, { onConflict: 'name' });
+      for (const config of liveConfigs) {
+        try {
+          const { error } = await supabase
+            .from('system_config')
+            .upsert({
+              config_key: config.key,
+              config_value: config.value
+            }, { onConflict: 'config_key' });
+          
+          if (error) {
+            console.warn(`Could not set config ${config.key}:`, error.message);
+          }
+        } catch (configError) {
+          console.warn(`Failed to set config ${config.key}:`, configError);
+        }
       }
       
-      console.log('✅ Live monitoring initialized');
     } catch (error) {
-      console.error('Error in initializeLiveMonitoring:', error);
+      console.error('Failed to initialize live system config:', error);
     }
   }
   
   /**
-   * Validate current system state for live data compliance
+   * Validate live data compliance
    */
-  static async validateLiveDataCompliance(): Promise<{
-    isCompliant: boolean;
-    issues: string[];
-    stats: Record<string, number>;
-  }> {
+  static async validateLiveDataCompliance(): Promise<LiveDataCompliance> {
+    const result: LiveDataCompliance = {
+      compliant: false,
+      issues: [],
+      warnings: [],
+      systemMode: 'unknown',
+      enforcementActive: false
+    };
+    
     try {
-      console.log('🔍 Validating live data compliance...');
+      // Check system configuration
+      const { data: configs, error } = await supabase
+        .from('system_config')
+        .select('config_key, config_value');
       
-      const issues: string[] = [];
-      const stats: Record<string, number> = {};
-      
-      // Check threats table
-      const { data: mockThreats } = await supabase
-        .from('threats')
-        .select('id')
-        .or('content.ilike.%mock%,content.ilike.%demo%,content.ilike.%test%,content.ilike.%sample%');
-      
-      stats.mockThreats = mockThreats?.length || 0;
-      if (stats.mockThreats > 0) {
-        issues.push(`Found ${stats.mockThreats} mock threats`);
+      if (error) {
+        result.issues.push('Cannot access system configuration');
+        return result;
       }
       
-      // Check threat queue
-      const { data: mockQueue } = await supabase
-        .from('threat_ingestion_queue')
-        .select('id')
-        .or('raw_content.ilike.%mock%,raw_content.ilike.%demo%,raw_content.ilike.%test%,raw_content.ilike.%sample%');
+      const configMap = new Map(configs?.map(c => [c.config_key, c.config_value]) || []);
       
-      stats.mockQueueItems = mockQueue?.length || 0;
-      if (stats.mockQueueItems > 0) {
-        issues.push(`Found ${stats.mockQueueItems} mock queue items`);
+      result.systemMode = configMap.get('system_mode') || 'unknown';
+      result.enforcementActive = configMap.get('live_enforcement') === 'enabled';
+      
+      // Validate configuration
+      if (result.systemMode !== 'live') {
+        result.warnings.push('System not in live mode');
       }
       
-      // Check scan results
-      const { data: mockScans } = await supabase
-        .from('scan_results')
-        .select('id')
-        .or('content.ilike.%mock%,content.ilike.%demo%,content.ilike.%test%,content.ilike.%sample%');
-      
-      stats.mockScanResults = mockScans?.length || 0;
-      if (stats.mockScanResults > 0) {
-        issues.push(`Found ${stats.mockScanResults} mock scan results`);
+      if (!result.enforcementActive) {
+        result.issues.push('Live enforcement is disabled');
       }
       
-      return {
-        isCompliant: issues.length === 0,
-        issues,
-        stats
-      };
+      if (configMap.get('allow_mock_data') === 'enabled') {
+        result.warnings.push('Mock data is allowed');
+      }
+      
+      result.compliant = result.issues.length === 0;
       
     } catch (error) {
-      console.error('Error validating compliance:', error);
-      return {
-        isCompliant: false,
-        issues: ['Validation failed due to system error'],
-        stats: {}
-      };
+      result.issues.push(`Validation failed: ${error.message}`);
+    }
+    
+    return result;
+  }
+  
+  /**
+   * Check if mock data is allowed
+   */
+  static async isMockDataAllowed(): Promise<boolean> {
+    try {
+      const { data: config, error } = await supabase
+        .from('system_config')
+        .select('config_value')
+        .eq('config_key', 'allow_mock_data')
+        .single();
+      
+      if (error) {
+        // Default to not allowing mock data if we can't check
+        return false;
+      }
+      
+      return config?.config_value === 'enabled';
+      
+    } catch (error) {
+      console.error('Error checking mock data policy:', error);
+      return false;
+    }
+  }
+  
+  /**
+   * Block operation if mock data is detected and not allowed
+   */
+  static async validateDataInput(content: string, source: string): Promise<boolean> {
+    try {
+      const mockAllowed = await this.isMockDataAllowed();
+      
+      if (mockAllowed) {
+        return true;
+      }
+      
+      // Check for mock data indicators
+      const lowerContent = content.toLowerCase();
+      const mockIndicators = ['test', 'mock', 'demo', 'sample', 'example'];
+      
+      const hasMockData = mockIndicators.some(indicator => 
+        lowerContent.includes(indicator)
+      );
+      
+      if (hasMockData) {
+        console.warn(`🚫 Mock data rejected from ${source}: Live enforcement active`);
+        return false;
+      }
+      
+      return true;
+      
+    } catch (error) {
+      console.error('Error validating data input:', error);
+      // Be conservative - reject if we can't validate
+      return false;
     }
   }
 }
