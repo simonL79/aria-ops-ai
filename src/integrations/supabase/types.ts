@@ -279,6 +279,39 @@ export type Database = {
           },
         ]
       }
+      anubis_activity_log: {
+        Row: {
+          activity_type: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          module: string
+          severity: string
+          source_component: string
+          user_id: string | null
+        }
+        Insert: {
+          activity_type: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          module: string
+          severity: string
+          source_component: string
+          user_id?: string | null
+        }
+        Update: {
+          activity_type?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          module?: string
+          severity?: string
+          source_component?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       anubis_ai_attack_log: {
         Row: {
           attack_vector: string | null
@@ -390,6 +423,36 @@ export type Database = {
           id?: string
           module?: string
           result_status?: string | null
+        }
+        Relationships: []
+      }
+      anubis_metrics: {
+        Row: {
+          created_at: string
+          id: string
+          metric_name: string
+          metric_unit: string | null
+          metric_value: number
+          module: string
+          timestamp: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          metric_name: string
+          metric_unit?: string | null
+          metric_value: number
+          module: string
+          timestamp?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          metric_name?: string
+          metric_unit?: string | null
+          metric_value?: number
+          module?: string
+          timestamp?: string
         }
         Relationships: []
       }
