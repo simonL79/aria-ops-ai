@@ -49,7 +49,6 @@ export class AriaCoreThreatProcessor {
       await supabase
         .from('threats')
         .update({
-          severity,
           analysis_result: {
             ...analysis,
             entity_matches: entityMatches,
@@ -73,6 +72,67 @@ export class AriaCoreThreatProcessor {
     } catch (error) {
       console.error('Threat processing failed:', error);
       return null;
+    }
+  }
+
+  /**
+   * Process pending threats
+   */
+  static async processPendingThreats(): Promise<number> {
+    try {
+      const { data: pendingThreats, error } = await supabase
+        .from('threats')
+        .select('id')
+        .is('analysis_result', null)
+        .limit(10);
+
+      if (error) {
+        console.error('Failed to fetch pending threats:', error);
+        return 0;
+      }
+
+      if (!pendingThreats || pendingThreats.length === 0) {
+        return 0;
+      }
+
+      let processed = 0;
+      for (const threat of pendingThreats) {
+        const result = await this.processThreat(threat.id);
+        if (result?.processed) {
+          processed++;
+        }
+      }
+
+      return processed;
+    } catch (error) {
+      console.error('Error processing pending threats:', error);
+      return 0;
+    }
+  }
+
+  /**
+   * Validate live data integrity
+   */
+  static async validateLiveDataIntegrity(): Promise<any> {
+    try {
+      const { data: config, error } = await supabase
+        .from('system_config')
+        .select('*')
+        .eq('config_key', 'live_enforcement')
+        .single();
+
+      if (error) {
+        return { valid: false, message: 'Could not check live enforcement status' };
+      }
+
+      const isLiveEnabled = config?.config_value === 'enabled';
+      
+      return {
+        valid: isLiveEnabled,
+        message: isLiveEnabled ? 'Live data enforcement is active' : 'Live data enforcement is disabled'
+      };
+    } catch (error) {
+      return { valid: false, message: 'Validation failed' };
     }
   }
   
@@ -179,10 +239,15 @@ export class AriaCoreThreatProcessor {
       await supabase
         .from('aria_ops_log')
         .insert({
-          operation: 'threat_processing',
-          details: `Processed threat ${threatId} - Severity: ${severity}, Actions: ${actions.join(', ')}`,
-          status: 'success',
-          threat_id: threatId
+          operation_type: 'threat_processing',
+          module_source: 'AriaCore',
+          success: true,
+          threat_id: threatId,
+          operation_data: {
+            severity,
+            actions,
+            processed_at: new Date().toISOString()
+          }
         });
     } catch (error) {
       console.error('Failed to log processing:', error);

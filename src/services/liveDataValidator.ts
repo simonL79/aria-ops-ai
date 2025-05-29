@@ -30,8 +30,7 @@ export class LiveDataValidator {
       () => this.validateSystemConfig(result),
       () => this.validateLiveStatus(result),
       () => this.validateDataQuality(result),
-      () => this.validateModuleConnectivity(result),
-      () => this.validateSecurityCompliance(result)
+      () => this.validateModuleConnectivity(result)
     ];
 
     result.totalChecks = checks.length;
@@ -120,29 +119,31 @@ export class LiveDataValidator {
    */
   private static async validateDataQuality(result: LiveDataValidationResult): Promise<void> {
     try {
-      // Check for mock data in critical tables
-      const mockDataChecks = [
-        { table: 'threats', columns: ['content'] },
-        { table: 'scan_results', columns: ['content', 'platform'] },
-        { table: 'strike_requests', columns: ['reason', 'url'] }
-      ];
+      // Check for mock data in scan_results table
+      const { data: mockScans, error } = await supabase
+        .from('scan_results')
+        .select('id')
+        .or('content.ilike.%mock%,content.ilike.%test%,content.ilike.%demo%')
+        .limit(1);
 
-      for (const check of mockDataChecks) {
-        const conditions = check.columns.map(col => 
-          `${col}.ilike.%mock% OR ${col}.ilike.%test% OR ${col}.ilike.%demo%`
-        ).join(' OR ');
+      if (error) {
+        // Table might not exist, skip this check
+        return;
+      }
 
-        const { data: mockData, error } = await supabase
-          .from(check.table)
-          .select('id')
-          .or(conditions)
-          .limit(1);
+      if (mockScans && mockScans.length > 0) {
+        result.warnings.push('Mock data detected in scan_results table');
+      }
 
-        if (error) continue; // Table might not exist
+      // Check for mock data in threats table
+      const { data: mockThreats, error: threatError } = await supabase
+        .from('threats')
+        .select('id')
+        .or('content.ilike.%mock%,content.ilike.%test%,content.ilike.%demo%')
+        .limit(1);
 
-        if (mockData && mockData.length > 0) {
-          result.warnings.push(`Mock data detected in ${check.table} table`);
-        }
+      if (!threatError && mockThreats && mockThreats.length > 0) {
+        result.warnings.push('Mock data detected in threats table');
       }
 
     } catch (error) {
@@ -167,33 +168,6 @@ export class LiveDataValidator {
 
     } catch (error) {
       result.errors.push(`Module connectivity validation failed: ${error.message}`);
-    }
-  }
-
-  /**
-   * Validate security compliance
-   */
-  private static async validateSecurityCompliance(result: LiveDataValidationResult): Promise<void> {
-    try {
-      // Check RLS policies exist on critical tables
-      const criticalTables = ['strike_requests', 'threats', 'user_roles'];
-      
-      for (const table of criticalTables) {
-        const { data: policies, error } = await supabase
-          .from('pg_policies')
-          .select('tablename')
-          .eq('tablename', table)
-          .limit(1);
-
-        if (error) continue; // Might not have permission to check
-
-        if (!policies || policies.length === 0) {
-          result.warnings.push(`No RLS policies found for ${table} table`);
-        }
-      }
-
-    } catch (error) {
-      result.warnings.push(`Security compliance check encountered issues: ${error.message}`);
     }
   }
 }

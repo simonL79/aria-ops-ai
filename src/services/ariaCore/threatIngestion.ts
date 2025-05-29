@@ -48,11 +48,8 @@ export class ThreatIngestionService {
         .from('threats')
         .insert({
           content: data.content,
-          platform: data.platform,
-          url: data.url,
-          entity_name: data.entityName,
+          source: data.platform,
           threat_type: data.threatType || 'general',
-          severity: data.severity || 'medium',
           detected_at: new Date().toISOString(),
           is_live: true
         })
@@ -65,7 +62,7 @@ export class ThreatIngestionService {
           .from('threat_ingestion_queue')
           .insert({
             raw_content: data.content,
-            source_platform: data.platform,
+            source: data.platform,
             status: 'pending'
           })
           .select('id')
@@ -139,5 +136,161 @@ export class ThreatIngestionService {
     };
     
     return platformMap[platform.toLowerCase()] || 'Live Threat Scanner';
+  }
+
+  /**
+   * Get live threats from the system
+   */
+  static async getLiveThreats(): Promise<any[]> {
+    try {
+      const { data, error } = await supabase
+        .from('threats')
+        .select('*')
+        .eq('is_live', true)
+        .order('detected_at', { ascending: false })
+        .limit(50);
+
+      if (error) {
+        console.error('Failed to fetch live threats:', error);
+        return [];
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching live threats:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get queue status
+   */
+  static async getQueueStatus(): Promise<any> {
+    try {
+      const { data, error } = await supabase
+        .from('threat_ingestion_queue')
+        .select('status')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Failed to fetch queue status:', error);
+        return { pending: 0, processed: 0, failed: 0 };
+      }
+
+      const statusCounts = data?.reduce((acc: any, item: any) => {
+        acc[item.status] = (acc[item.status] || 0) + 1;
+        return acc;
+      }, {}) || {};
+
+      return {
+        pending: statusCounts.pending || 0,
+        processed: statusCounts.processed || 0,
+        failed: statusCounts.failed || 0
+      };
+    } catch (error) {
+      console.error('Error fetching queue status:', error);
+      return { pending: 0, processed: 0, failed: 0 };
+    }
+  }
+
+  /**
+   * Get system health status
+   */
+  static async getSystemHealth(): Promise<any> {
+    try {
+      const { data, error } = await supabase
+        .from('live_status')
+        .select('*')
+        .order('last_report', { ascending: false });
+
+      if (error) {
+        console.error('Failed to fetch system health:', error);
+        return { modules: [], overall: 'unknown' };
+      }
+
+      const modules = data || [];
+      const liveModules = modules.filter(m => m.system_status === 'LIVE');
+      const overall = liveModules.length === modules.length ? 'healthy' : 'degraded';
+
+      return { modules, overall };
+    } catch (error) {
+      console.error('Error fetching system health:', error);
+      return { modules: [], overall: 'unknown' };
+    }
+  }
+
+  /**
+   * Initialize live system
+   */
+  static async initializeLiveSystem(): Promise<boolean> {
+    try {
+      console.log('🚀 Initializing live system...');
+      
+      // Check system configuration
+      const { data: configs, error } = await supabase
+        .from('system_config')
+        .select('*');
+
+      if (error) {
+        console.error('Failed to check system config:', error);
+        return false;
+      }
+
+      const configMap = new Map(configs?.map(c => [c.config_key, c.config_value]) || []);
+      
+      if (configMap.get('live_enforcement') === 'enabled') {
+        console.log('✅ Live system already initialized');
+        return true;
+      }
+
+      console.log('⚠️ Live enforcement not enabled');
+      return false;
+    } catch (error) {
+      console.error('Error initializing live system:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Trigger pipeline processing
+   */
+  static async triggerPipelineProcessing(): Promise<boolean> {
+    try {
+      console.log('🔄 Triggering pipeline processing...');
+      
+      // Process pending items in queue
+      const { data: pendingItems, error } = await supabase
+        .from('threat_ingestion_queue')
+        .select('*')
+        .eq('status', 'pending')
+        .limit(10);
+
+      if (error) {
+        console.error('Failed to fetch pending items:', error);
+        return false;
+      }
+
+      if (!pendingItems || pendingItems.length === 0) {
+        console.log('No pending items to process');
+        return true;
+      }
+
+      // Update processed items
+      for (const item of pendingItems) {
+        await supabase
+          .from('threat_ingestion_queue')
+          .update({ 
+            status: 'processed',
+            processed_at: new Date().toISOString()
+          })
+          .eq('id', item.id);
+      }
+
+      console.log(`✅ Processed ${pendingItems.length} items`);
+      return true;
+    } catch (error) {
+      console.error('Error triggering pipeline processing:', error);
+      return false;
+    }
   }
 }
