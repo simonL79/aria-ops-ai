@@ -1,3 +1,4 @@
+
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -35,6 +36,7 @@ serve(async (req) => {
     let selfHealingRequired = false;
     let strategicResponseNeeded = false;
     let truthAnalysisRequired = false;
+    let erisSimulationNeeded = false;
     
     if (OPENAI_API_KEY) {
       try {
@@ -49,8 +51,8 @@ serve(async (req) => {
             messages: [
               {
                 role: 'system',
-                content: `You are A.R.I.A™'s advanced command classification AI with self-healing, strategic response, and truth verification capabilities. Analyze operator commands and return JSON with:
-                - intent: scan_threats, system_status, anubis_check, threat_response, intelligence_gather, data_query, strategic_containment, truth_verification, or general
+                content: `You are A.R.I.A™'s advanced command classification AI with self-healing, strategic response, truth verification, and adversarial defense capabilities. Analyze operator commands and return JSON with:
+                - intent: scan_threats, system_status, anubis_check, threat_response, intelligence_gather, data_query, strategic_containment, truth_verification, eris_simulation, or general
                 - confidence: 0-1 confidence score
                 - summary: brief description of what the command requests
                 - execution_plan: specific steps to execute the command
@@ -58,9 +60,10 @@ serve(async (req) => {
                 - self_healing_check: boolean indicating if the command might reveal system issues
                 - strategic_response_needed: boolean indicating if auto-strategy generation is recommended
                 - truth_analysis_needed: boolean indicating if Aletheia™ truth verification is required
+                - eris_simulation_needed: boolean indicating if adversarial simulation should be triggered
                 - threat_indicators: array of detected threat indicators in the command
                 
-                Be precise and actionable in your classification. Flag potential system issues for self-healing, strategic threats for auto-containment, and claims requiring truth verification for Aletheia™ analysis.`
+                Be precise and actionable in your classification. Flag potential system issues for self-healing, strategic threats for auto-containment, claims requiring truth verification for Aletheia™ analysis, and attack scenarios for Eris™ simulation.`
               },
               {
                 role: 'user',
@@ -80,6 +83,7 @@ serve(async (req) => {
           selfHealingRequired = classification.self_healing_check || false;
           strategicResponseNeeded = classification.strategic_response_needed || false;
           truthAnalysisRequired = classification.truth_analysis_needed || false;
+          erisSimulationNeeded = classification.eris_simulation_needed || false;
         }
       } catch (error) {
         console.error('OpenAI classification error:', error);
@@ -163,13 +167,49 @@ serve(async (req) => {
       }
     }
 
+    // Trigger Eris™ adversarial simulation if needed
+    if (erisSimulationNeeded || commandText.toLowerCase().includes('simulate') || commandText.toLowerCase().includes('attack') || commandText.toLowerCase().includes('defense')) {
+      const attackVectors = ['sentiment_inversion', 'disinfo_campaign', 'phishing', 'social_engineering'];
+      const randomVector = attackVectors[Math.floor(Math.random() * attackVectors.length)];
+      
+      const { error: erisError } = await supabase
+        .from('eris_attack_simulations')
+        .insert({
+          attack_vector: randomVector,
+          origin_source: 'operator_command',
+          scenario_description: `Adversarial simulation triggered by command: "${commandText.substring(0, 50)}..."`,
+          threat_score: Math.floor(Math.random() * 40) + 60, // 60-100 range
+          created_by: 'A.R.I.A™ Operator'
+        });
+
+      if (!erisError) {
+        // Generate defensive strategy
+        const { data: simulationData } = await supabase
+          .from('eris_attack_simulations')
+          .select('id')
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        if (simulationData && simulationData.length > 0) {
+          await supabase
+            .from('eris_response_strategies')
+            .insert({
+              simulation_id: simulationData[0].id,
+              strategy_type: 'counter_narrative',
+              gpt_recommendation: `Deploy defensive countermeasures against ${randomVector} scenario with ${Math.round(confidence * 100)}% priority`,
+              effectiveness_score: 70 + (confidence * 25)
+            });
+        }
+      }
+    }
+
     // Create feedback entry
     const { error: feedbackError } = await supabase
       .from('command_response_feedback')
       .insert({
         command_id: commandId,
         execution_status: 'success',
-        summary: `AI classified command as '${intent}' with ${Math.round(confidence * 100)}% confidence${strategicResponseNeeded ? ' - Strategic response generated' : ''}${truthAnalysisRequired ? ' - Truth verification requested' : ''}`,
+        summary: `AI classified command as '${intent}' with ${Math.round(confidence * 100)}% confidence${strategicResponseNeeded ? ' - Strategic response generated' : ''}${truthAnalysisRequired ? ' - Truth verification requested' : ''}${erisSimulationNeeded ? ' - Adversarial simulation triggered' : ''}`,
         created_by: 'AI_Classifier'
       });
 
@@ -183,7 +223,7 @@ serve(async (req) => {
         .from('command_remediation_suggestions')
         .insert({
           command_id: commandId,
-          suggestion: 'Consider using more specific command syntax. Try commands like "anubis status", "scan threats", or "system health".',
+          suggestion: 'Consider using more specific command syntax. Try commands like "anubis status", "scan threats", "simulate attack", or "verify truth".',
           rationale: 'Low confidence classification suggests the command may be ambiguous',
           proposed_by: 'AI_Assistant'
         });
@@ -219,7 +259,8 @@ serve(async (req) => {
         commandId,
         selfHealingActive: selfHealingRequired,
         strategicResponseGenerated: strategicResponseNeeded,
-        truthAnalysisTriggered: truthAnalysisRequired
+        truthAnalysisTriggered: truthAnalysisRequired,
+        erisSimulationTriggered: erisSimulationNeeded
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

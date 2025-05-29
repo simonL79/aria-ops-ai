@@ -2843,6 +2843,85 @@ export type Database = {
         }
         Relationships: []
       }
+      eris_attack_simulations: {
+        Row: {
+          attack_vector: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          origin_source: string | null
+          scenario_description: string | null
+          target_entity: string | null
+          threat_score: number | null
+        }
+        Insert: {
+          attack_vector: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          origin_source?: string | null
+          scenario_description?: string | null
+          target_entity?: string | null
+          threat_score?: number | null
+        }
+        Update: {
+          attack_vector?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          origin_source?: string | null
+          scenario_description?: string | null
+          target_entity?: string | null
+          threat_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "eris_attack_simulations_target_entity_fkey"
+            columns: ["target_entity"]
+            isOneToOne: false
+            referencedRelation: "client_entities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      eris_response_strategies: {
+        Row: {
+          created_at: string | null
+          effectiveness_score: number | null
+          executed: boolean | null
+          gpt_recommendation: string | null
+          id: string
+          simulation_id: string | null
+          strategy_type: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          effectiveness_score?: number | null
+          executed?: boolean | null
+          gpt_recommendation?: string | null
+          id?: string
+          simulation_id?: string | null
+          strategy_type?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          effectiveness_score?: number | null
+          executed?: boolean | null
+          gpt_recommendation?: string | null
+          id?: string
+          simulation_id?: string | null
+          strategy_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "eris_response_strategies_simulation_id_fkey"
+            columns: ["simulation_id"]
+            isOneToOne: false
+            referencedRelation: "eris_attack_simulations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ex_action_log: {
         Row: {
           action_type: string | null

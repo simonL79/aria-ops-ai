@@ -9,3 +9,4 @@ export { FeedbackPanel } from './FeedbackPanel';
 export { SelfHealingPanel } from './SelfHealingPanel';
 export { StrategicResponsePanel } from './StrategicResponsePanel';
 export { AletheiaTruthPanel } from './AletheiaTruthPanel';
+export { ErisPanel } from './ErisPanel';

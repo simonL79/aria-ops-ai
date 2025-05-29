@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { SelfHealingPanel } from './SelfHealingPanel';
 import { StrategicResponsePanel } from './StrategicResponsePanel';
 import { AletheiaTruthPanel } from './AletheiaTruthPanel';
+import { ErisPanel } from './ErisPanel';
 
 interface CommandFeedback {
   id: string;
@@ -137,6 +138,9 @@ export const FeedbackPanel = ({ commandHistory }: FeedbackPanelProps) => {
 
       {/* Aletheia Truth Panel */}
       <AletheiaTruthPanel />
+
+      {/* Eris Adversarial Defense Panel */}
+      <ErisPanel />
 
       {/* Command Execution Feedback */}
       <Card className="bg-black border-green-500/30">
