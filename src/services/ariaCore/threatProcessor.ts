@@ -45,16 +45,12 @@ export class AriaCoreThreatProcessor {
       // Generate recommended actions
       const actions = this.generateActions(severity, analysis, entityMatches);
       
-      // Update threat with analysis results
+      // Update threat with analysis results (using existing columns)
       await supabase
         .from('threats')
         .update({
-          analysis_result: {
-            ...analysis,
-            entity_matches: entityMatches,
-            recommended_actions: actions,
-            processed_at: new Date().toISOString()
-          }
+          threat_type: severity,
+          risk_score: analysis.confidence * 100
         })
         .eq('id', threatId);
       
@@ -83,7 +79,7 @@ export class AriaCoreThreatProcessor {
       const { data: pendingThreats, error } = await supabase
         .from('threats')
         .select('id')
-        .is('analysis_result', null)
+        .is('risk_score', null)
         .limit(10);
 
       if (error) {

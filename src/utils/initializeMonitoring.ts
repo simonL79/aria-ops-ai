@@ -18,9 +18,6 @@ export const initializeDatabase = async (): Promise<void> => {
     // Initialize system config for live data enforcement
     await initializeSystemConfig();
     
-    // Trigger initial data validation
-    await validateSystemIntegrity();
-    
     console.log('✅ A.R.I.A™ database initialization complete');
     
   } catch (error) {
@@ -86,45 +83,5 @@ const initializeSystemConfig = async (): Promise<void> => {
     console.log('✅ System configuration initialized for live operation');
   } catch (error) {
     console.error('❌ System config initialization failed:', error);
-  }
-};
-
-/**
- * Validate system integrity and live data flows
- */
-const validateSystemIntegrity = async (): Promise<void> => {
-  try {
-    // Check if core tables exist and have proper structure
-    const { data: tables, error } = await supabase
-      .from('information_schema.tables')
-      .select('table_name')
-      .eq('table_schema', 'public')
-      .in('table_name', [
-        'live_status',
-        'system_config',
-        'threats',
-        'scan_results',
-        'strike_requests',
-        'monitoring_status'
-      ]);
-
-    if (error) {
-      console.warn('⚠️ Could not validate all system tables:', error);
-      return;
-    }
-
-    console.log('✅ System integrity validation complete');
-    
-    // Log system startup
-    await supabase
-      .from('aria_ops_log')
-      .insert({
-        operation: 'system_startup',
-        details: 'A.R.I.A/EX™ system initialized with live data enforcement',
-        status: 'success'
-      });
-
-  } catch (error) {
-    console.error('❌ System integrity validation failed:', error);
   }
 };

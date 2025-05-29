@@ -294,3 +294,12 @@ export class ThreatIngestionService {
     }
   }
 }
+
+// Export convenience functions
+export const {
+  getLiveThreats,
+  getQueueStatus,
+  getSystemHealth,
+  initializeLiveSystem,
+  triggerPipelineProcessing
+} = ThreatIngestionService;

@@ -1,7 +1,12 @@
 
-export * from './monitoringService';
 export * from './status';
 export * from './types';
+
+// Import services to avoid naming conflicts
+import { getMonitoringStatus as getStatus, runMonitoringScan as runScan, startMonitoring as start, stopMonitoring as stop } from './monitoringService';
+
+// Re-export with explicit names to avoid conflicts
+export { getStatus as getMonitoringStatus, runScan as runMonitoringScan, start as startMonitoring, stop as stopMonitoring };
 
 /**
  * Initialize monitoring platforms
