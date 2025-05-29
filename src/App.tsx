@@ -32,6 +32,7 @@ import InfluencerRadar from "@/pages/InfluencerRadar";
 import QATestPage from "@/pages/QATestPage";
 import NotFound from "@/pages/NotFound";
 import AdminLogin from "@/pages/AdminLogin";
+import AdminDashboard from "@/components/admin/AdminDashboard";
 
 // Import layouts
 import DashboardLayout from "@/components/layout/DashboardLayout";
@@ -108,10 +109,7 @@ function App() {
               {/* Admin Routes */}
               <Route path="/admin" element={
                 <DashboardLayout>
-                  <div className="container mx-auto p-6">
-                    <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
-                    <p className="text-muted-foreground">Administrative controls and system management.</p>
-                  </div>
+                  <AdminDashboard />
                 </DashboardLayout>
               } />
 

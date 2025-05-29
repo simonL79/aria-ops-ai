@@ -129,7 +129,7 @@ const AdminLoginGateway = () => {
     });
     
     if (!authLoading && isAuthenticated && isAdmin) {
-      const from = location.state?.from?.pathname || '/discovery';
+      const from = location.state?.from?.pathname || '/admin';
       console.log('✅ Admin authenticated, redirecting to:', from);
       logSecurityEvent('admin_access_granted', true, `Redirecting to: ${from}`);
       toast.success('Welcome back, admin!');

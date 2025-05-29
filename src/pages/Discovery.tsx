@@ -1,11 +1,12 @@
 
+import DashboardLayout from '@/components/layout/DashboardLayout';
 import DiscoveryDashboard from '@/components/discovery/DiscoveryDashboard';
 
 const Discovery = () => {
   return (
-    <div className="container mx-auto p-6">
+    <DashboardLayout>
       <DiscoveryDashboard />
-    </div>
+    </DashboardLayout>
   );
 };
 
