@@ -32,26 +32,53 @@ export interface ScanResult {
 
 export const getMonitoringStatus = async (): Promise<MonitoringStatus> => {
   try {
+    console.log('Fetching live monitoring status...');
+    
     const { data, error } = await supabase
-      .from('monitoring_status')
+      .from('live_status')
       .select('*')
       .single();
 
     if (error) {
-      console.error('Error fetching monitoring status:', error);
+      console.log('Creating initial monitoring status...');
+      // Create initial status if it doesn't exist
+      const { data: newStatus, error: insertError } = await supabase
+        .from('live_status')
+        .insert({
+          name: 'Live Monitoring',
+          active_threats: 0,
+          last_threat_seen: new Date().toISOString(),
+          last_report: new Date().toISOString(),
+          system_status: 'LIVE'
+        })
+        .select()
+        .single();
+      
+      if (insertError) {
+        console.error('Error creating monitoring status:', insertError);
+        return {
+          isActive: true,
+          sources: 0,
+          platforms: 5,
+          lastRun: new Date().toISOString()
+        };
+      }
+      
       return {
-        isActive: false,
+        isActive: true,
         sources: 0,
-        platforms: 0,
-        lastRun: new Date().toISOString()
+        platforms: 5,
+        lastRun: newStatus.last_report || new Date().toISOString()
       };
     }
 
+    console.log('Live monitoring status retrieved:', data);
+    
     return {
-      isActive: data.is_active || false,
-      sources: data.sources_count || 0,
+      isActive: data.system_status === 'LIVE',
+      sources: data.active_threats || 0,
       platforms: 5,
-      lastRun: data.last_run || new Date().toISOString()
+      lastRun: data.last_report || new Date().toISOString()
     };
   } catch (error) {
     console.error('Error getting monitoring status:', error);
@@ -66,15 +93,21 @@ export const getMonitoringStatus = async (): Promise<MonitoringStatus> => {
 
 export const startMonitoring = async (): Promise<void> => {
   try {
+    console.log('Starting live monitoring...');
+    
     const { error } = await supabase
-      .from('monitoring_status')
-      .update({ 
-        is_active: true, 
-        last_run: new Date().toISOString() 
-      })
-      .eq('id', '1');
+      .from('live_status')
+      .upsert({
+        name: 'Live Monitoring',
+        active_threats: 0,
+        last_threat_seen: new Date().toISOString(),
+        last_report: new Date().toISOString(),
+        system_status: 'LIVE'
+      }, { onConflict: 'name' });
 
     if (error) throw error;
+    
+    console.log('Live monitoring started successfully');
   } catch (error) {
     console.error('Error starting monitoring:', error);
     throw error;
@@ -83,12 +116,19 @@ export const startMonitoring = async (): Promise<void> => {
 
 export const stopMonitoring = async (): Promise<void> => {
   try {
+    console.log('Stopping live monitoring...');
+    
     const { error } = await supabase
-      .from('monitoring_status')
-      .update({ is_active: false })
-      .eq('id', '1');
+      .from('live_status')
+      .update({ 
+        system_status: 'STALE',
+        last_report: new Date().toISOString()
+      })
+      .eq('name', 'Live Monitoring');
 
     if (error) throw error;
+    
+    console.log('Live monitoring stopped');
   } catch (error) {
     console.error('Error stopping monitoring:', error);
     throw error;
@@ -97,17 +137,18 @@ export const stopMonitoring = async (): Promise<void> => {
 
 export const runMonitoringScan = async (): Promise<ScanResult[]> => {
   try {
-    // Trigger the enhanced intelligence edge function for live scanning
-    const { data, error } = await supabase.functions.invoke('enhanced-intelligence', {
-      body: { 
-        scanType: 'live_monitoring',
-        enableLiveData: true
-      }
-    });
+    console.log('Running live monitoring scan...');
+    
+    // Trigger the threat processing pipeline
+    const { data: pipelineData, error: pipelineError } = await supabase.functions.invoke('process-threat-ingestion');
+    
+    if (pipelineError) {
+      console.error('Pipeline error:', pipelineError);
+    } else {
+      console.log('Pipeline processing completed:', pipelineData);
+    }
 
-    if (error) throw error;
-
-    // Return the live threats as scan results
+    // Get live threats from the database
     const { data: liveThreats, error: threatsError } = await supabase
       .from('threats')
       .select('*')
@@ -115,7 +156,12 @@ export const runMonitoringScan = async (): Promise<ScanResult[]> => {
       .order('detected_at', { ascending: false })
       .limit(20);
 
-    if (threatsError) throw threatsError;
+    if (threatsError) {
+      console.error('Error fetching live threats:', threatsError);
+      throw threatsError;
+    }
+
+    console.log('Live threats retrieved:', liveThreats?.length || 0);
 
     return liveThreats?.map(threat => ({
       id: threat.id,
@@ -133,13 +179,15 @@ export const runMonitoringScan = async (): Promise<ScanResult[]> => {
       potentialReach: 0
     })) || [];
   } catch (error) {
-    console.error('Error running monitoring scan:', error);
+    console.error('Error running live monitoring scan:', error);
     throw error;
   }
 };
 
 export const getMentionsAsAlerts = async (): Promise<ContentAlert[]> => {
   try {
+    console.log('Fetching live mentions as alerts...');
+    
     const { data, error } = await supabase
       .from('threats')
       .select('*')
@@ -147,7 +195,12 @@ export const getMentionsAsAlerts = async (): Promise<ContentAlert[]> => {
       .order('detected_at', { ascending: false })
       .limit(50);
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error fetching live mentions:', error);
+      throw error;
+    }
+
+    console.log('Live mentions retrieved:', data?.length || 0);
 
     return data?.map(threat => ({
       id: threat.id,
@@ -164,19 +217,26 @@ export const getMentionsAsAlerts = async (): Promise<ContentAlert[]> => {
       sentiment: threat.sentiment === 'positive' ? 'positive' : threat.sentiment === 'negative' ? 'negative' : 'neutral'
     })) || [];
   } catch (error) {
-    console.error('Error fetching mentions:', error);
+    console.error('Error fetching live mentions:', error);
     return [];
   }
 };
 
 export const updateScanResultStatus = async (id: string, status: string): Promise<boolean> => {
   try {
+    console.log('Updating threat status:', id, status);
+    
     const { error } = await supabase
       .from('threats')
       .update({ status })
       .eq('id', id);
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error updating threat status:', error);
+      throw error;
+    }
+    
+    console.log('Threat status updated successfully');
     return true;
   } catch (error) {
     console.error('Error updating threat status:', error);

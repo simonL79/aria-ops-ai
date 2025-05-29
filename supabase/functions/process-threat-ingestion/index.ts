@@ -17,14 +17,15 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-    console.log('Processing threat ingestion queue...')
+    console.log('🔥 Processing live threat ingestion queue...')
 
     // Get pending items from the ingestion queue
     const { data: queue, error: queueError } = await supabase
       .from('threat_ingestion_queue')
       .select('*')
       .eq('status', 'pending')
-      .limit(5)
+      .order('created_at', { ascending: true })
+      .limit(10)
 
     if (queueError) {
       console.error('Queue fetch error:', queueError)
@@ -32,69 +33,105 @@ serve(async (req) => {
     }
 
     if (!queue || queue.length === 0) {
-      console.log('No pending items in queue')
+      console.log('No pending items in queue - system operational')
       
+      // Update live status to show system is active
+      await supabase.from('live_status').upsert([
+        {
+          name: 'Threat Processing',
+          active_threats: 0,
+          last_threat_seen: new Date().toISOString(),
+          last_report: new Date().toISOString(),
+          system_status: 'LIVE'
+        }
+      ], { onConflict: 'name' })
+
       // Log the successful check
       await supabase.from('edge_function_events').insert({
         function_name: 'process-threat-ingestion',
         status: 'success',
-        result_summary: 'No pending items to process',
-        event_payload: { checked_at: new Date().toISOString() }
+        result_summary: 'No pending items to process - system operational',
+        event_payload: { checked_at: new Date().toISOString(), queue_empty: true }
       })
 
       return new Response(JSON.stringify({
         success: true,
-        message: 'No pending items in queue',
-        processed: 0
+        message: 'No pending items in queue - system operational',
+        processed: 0,
+        systemStatus: 'LIVE'
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       })
     }
 
-    console.log(`Processing ${queue.length} items from queue...`)
+    console.log(`🔥 Processing ${queue.length} live threats from queue...`)
     let processedCount = 0
     let errorCount = 0
 
     for (const item of queue) {
       try {
-        console.log(`Processing item ${item.id}...`)
+        console.log(`Processing live threat ${item.id} from ${item.source}...`)
 
         // Update queue item to processing status
         await supabase
           .from('threat_ingestion_queue')
-          .update({ status: 'processing' })
+          .update({ 
+            status: 'processing',
+            processing_notes: `Processing started at ${new Date().toISOString()}`
+          })
           .eq('id', item.id)
 
-        // Create enriched threat summary
-        const enrichedSummary = `AI Analysis: ${item.raw_content.slice(0, 100)}... [Risk: ${item.risk_score}/100]`
-        
-        // Determine threat classification
+        // Create enriched threat analysis
         let threatType = 'reputation_risk'
         let sentiment = 'negative'
         
-        if (item.raw_content.toLowerCase().includes('legal')) {
+        const content = item.raw_content.toLowerCase()
+        
+        // Intelligent threat classification
+        if (content.includes('legal') || content.includes('lawsuit') || content.includes('court')) {
           threatType = 'legal'
-        } else if (item.raw_content.toLowerCase().includes('review') || item.raw_content.toLowerCase().includes('complaint')) {
+        } else if (content.includes('review') || content.includes('complaint') || content.includes('terrible')) {
           threatType = 'review'
-        } else if (item.raw_content.toLowerCase().includes('social')) {
+        } else if (content.includes('twitter') || content.includes('facebook') || content.includes('social')) {
           threatType = 'social_media'
+        } else if (content.includes('news') || content.includes('article') || content.includes('report')) {
+          threatType = 'media'
         }
 
-        // Insert into threats table
-        const { error: insertError } = await supabase
+        // Sentiment analysis
+        if (content.includes('positive') || content.includes('great') || content.includes('excellent')) {
+          sentiment = 'positive'
+        } else if (content.includes('neutral') || content.includes('okay')) {
+          sentiment = 'neutral'
+        }
+
+        // Calculate final risk score
+        const baseRisk = item.risk_score || 50
+        let finalRisk = baseRisk
+        
+        if (threatType === 'legal') finalRisk = Math.min(100, baseRisk + 20)
+        if (sentiment === 'negative') finalRisk = Math.min(100, finalRisk + 10)
+        if (content.includes('critical') || content.includes('urgent')) finalRisk = Math.min(100, finalRisk + 15)
+
+        const enrichedSummary = `Live A.R.I.A™ Analysis: ${threatType.toUpperCase()} threat detected from ${item.source}. Risk: ${finalRisk}/100. Content: "${item.raw_content.slice(0, 100)}..."`
+        
+        // Insert into live threats table
+        const { data: newThreat, error: insertError } = await supabase
           .from('threats')
           .insert({
             entity_id: item.entity_match,
             source: item.source,
             content: item.raw_content,
-            detected_at: item.detected_at,
+            detected_at: item.detected_at || new Date().toISOString(),
             threat_type: threatType,
             sentiment: sentiment,
-            risk_score: item.risk_score || 50,
+            risk_score: finalRisk,
             summary: enrichedSummary,
             is_live: true,
             status: 'active'
           })
+          .select()
+          .single()
 
         if (insertError) {
           console.error('Insert error:', insertError)
@@ -106,7 +143,8 @@ serve(async (req) => {
           .from('threat_ingestion_queue')
           .update({
             status: 'complete',
-            processing_notes: enrichedSummary
+            processing_notes: `✅ Processed successfully: ${enrichedSummary}`,
+            risk_score: finalRisk
           })
           .eq('id', item.id)
 
@@ -117,16 +155,18 @@ serve(async (req) => {
           event_payload: {
             item_id: item.id,
             source: item.source,
-            risk_score: item.risk_score
+            risk_score: finalRisk,
+            threat_type: threatType,
+            threat_id: newThreat.id
           },
-          result_summary: `Processed threat from ${item.source} with risk score ${item.risk_score}`
+          result_summary: `✅ Live threat processed: ${item.source} (Risk: ${finalRisk})`
         })
 
         processedCount++
-        console.log(`Successfully processed item ${item.id}`)
+        console.log(`✅ Successfully processed live threat ${item.id} - Risk: ${finalRisk}`)
 
       } catch (err) {
-        console.error(`Processing error for item ${item.id}:`, err)
+        console.error(`❌ Processing error for item ${item.id}:`, err)
         errorCount++
 
         // Update queue item to error status
@@ -134,7 +174,7 @@ serve(async (req) => {
           .from('threat_ingestion_queue')
           .update({
             status: 'error',
-            processing_notes: err.message || 'Unknown processing error'
+            processing_notes: `❌ Error: ${err.message || 'Unknown processing error'}`
           })
           .eq('id', item.id)
 
@@ -144,9 +184,10 @@ serve(async (req) => {
           status: 'fail',
           event_payload: {
             item_id: item.id,
-            error: err.message
+            error: err.message,
+            source: item.source
           },
-          result_summary: `Failed to process item: ${err.message}`
+          result_summary: `❌ Failed to process: ${err.message}`
         })
       }
     }
@@ -158,31 +199,55 @@ serve(async (req) => {
       .eq('is_live', true)
       .eq('status', 'active')
 
+    const activeThreatCount = threatCount?.length || 0
+
     await supabase.from('live_status').upsert([
       {
         name: 'Threat Processing',
-        active_threats: threatCount?.length || 0,
+        active_threats: activeThreatCount,
         last_threat_seen: new Date().toISOString(),
         last_report: new Date().toISOString(),
         system_status: 'LIVE'
       }
     ], { onConflict: 'name' })
 
+    console.log(`🔥 Live processing completed: ${processedCount} threats processed, ${errorCount} errors`)
+
     return new Response(JSON.stringify({
       success: true,
       processed: processedCount,
       errors: errorCount,
-      message: `Processing completed: ${processedCount} threats processed, ${errorCount} errors`
+      activeThreatCount,
+      systemStatus: 'LIVE',
+      message: `🔥 Live processing completed: ${processedCount} threats processed, ${errorCount} errors, ${activeThreatCount} active threats`
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     })
 
   } catch (error) {
-    console.error('Function error:', error)
+    console.error('❌ Live threat processing failed:', error)
+    
+    // Log system failure
+    try {
+      const supabase = createClient(
+        Deno.env.get('SUPABASE_URL')!, 
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+      )
+      
+      await supabase.from('edge_function_events').insert({
+        function_name: 'process-threat-ingestion',
+        status: 'fail',
+        event_payload: { error: error.message },
+        result_summary: `❌ System failure: ${error.message}`
+      })
+    } catch (logError) {
+      console.error('Failed to log error:', logError)
+    }
     
     return new Response(JSON.stringify({
       error: error.message,
-      success: false
+      success: false,
+      systemStatus: 'ERROR'
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
