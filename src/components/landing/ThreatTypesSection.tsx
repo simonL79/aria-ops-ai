@@ -39,11 +39,11 @@ const ThreatTypesSection = () => {
     <section className="py-24 px-6 bg-[#1C1C1E]">
       <div className="container mx-auto max-w-6xl">
         <div className="text-center mb-20">
-          <h2 className="text-5xl md:text-6xl font-black mb-8 text-white font-['Space_Grotesk'] tracking-tight">
+          <h2 className="text-5xl md:text-6xl font-black mb-8 text-white font-['Space_Grotesk'] tracking-tight text-center">
             THREAT INTELLIGENCE THAT MATTERS
           </h2>
           <div className="w-32 h-1 bg-gradient-to-r from-[#247CFF] to-[#38C172] mx-auto mb-10"></div>
-          <p className="text-xl text-[#D8DEE9] max-w-4xl mx-auto leading-relaxed font-['Inter']">
+          <p className="text-xl text-[#D8DEE9] max-w-4xl mx-auto leading-relaxed font-['Inter'] text-center">
             Our advanced monitoring systems detect and classify threats across multiple vectors, 
             providing early warning for reputation risks before they escalate.
           </p>
@@ -59,7 +59,7 @@ const ThreatTypesSection = () => {
               <div className={`absolute left-0 top-0 w-3 h-full bg-gradient-to-b ${threat.gradient} transform scale-y-0 group-hover:scale-y-100 transition-transform duration-500 origin-top`}></div>
               
               <div className="relative p-10">
-                <div className="flex items-start space-x-8">
+                <div className="flex flex-col md:flex-row items-center md:items-start space-y-6 md:space-y-0 md:space-x-8 text-center md:text-left">
                   <div className={`p-5 rounded-3xl bg-gradient-to-r ${threat.gradient} shadow-xl group-hover:shadow-[0_0_25px_rgba(36,124,255,0.4)] transition-shadow duration-500 flex-shrink-0`}>
                     <threat.icon className="h-10 w-10 text-white" />
                   </div>
