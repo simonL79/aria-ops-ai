@@ -29,6 +29,7 @@ import { PerimetrixPanel } from './PerimetrixPanel';
 import { ZeuslinkPanel } from './ZeuslinkPanel';
 import { SentinelgridPanel } from './SentinelgridPanel';
 import { CortextracePanel } from './CortextracePanel';
+import { LuminoscorePanel } from './LuminoscorePanel';
 
 interface CommandFeedback {
   id: string;
@@ -150,6 +151,9 @@ export const FeedbackPanel = ({ commandHistory }: FeedbackPanelProps) => {
 
   return (
     <div className="space-y-4">
+      {/* LUMINOSCORE™ Influence, Impact & Exposure Scoring System Panel */}
+      <LuminoscorePanel />
+
       {/* CORTEXTRACE™ Strategic Memory & Trajectory Engine Panel */}
       <CortextracePanel />
 

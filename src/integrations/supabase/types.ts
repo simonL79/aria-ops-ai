@@ -4005,6 +4005,108 @@ export type Database = {
           },
         ]
       }
+      luminoscore_audience_breakdown: {
+        Row: {
+          demographic_segment: string
+          engagement_rate: number | null
+          entity_name: string
+          id: string
+          influence_factor: number | null
+          measured_at: string | null
+          platform: string
+          reach_count: number | null
+        }
+        Insert: {
+          demographic_segment: string
+          engagement_rate?: number | null
+          entity_name: string
+          id?: string
+          influence_factor?: number | null
+          measured_at?: string | null
+          platform: string
+          reach_count?: number | null
+        }
+        Update: {
+          demographic_segment?: string
+          engagement_rate?: number | null
+          entity_name?: string
+          id?: string
+          influence_factor?: number | null
+          measured_at?: string | null
+          platform?: string
+          reach_count?: number | null
+        }
+        Relationships: []
+      }
+      luminoscore_impact_metrics: {
+        Row: {
+          audience_reach: number | null
+          calculated_at: string | null
+          entity_name: string
+          exposure_score: number | null
+          id: string
+          influence_rating: number | null
+          mention_count: number | null
+          sentiment_average: number | null
+          source: string
+        }
+        Insert: {
+          audience_reach?: number | null
+          calculated_at?: string | null
+          entity_name: string
+          exposure_score?: number | null
+          id?: string
+          influence_rating?: number | null
+          mention_count?: number | null
+          sentiment_average?: number | null
+          source: string
+        }
+        Update: {
+          audience_reach?: number | null
+          calculated_at?: string | null
+          entity_name?: string
+          exposure_score?: number | null
+          id?: string
+          influence_rating?: number | null
+          mention_count?: number | null
+          sentiment_average?: number | null
+          source?: string
+        }
+        Relationships: []
+      }
+      luminoscore_trend_analysis: {
+        Row: {
+          analyzed_at: string | null
+          entity_name: string
+          exposure_change: number | null
+          id: string
+          influence_change: number | null
+          sentiment_shift: number | null
+          trend_direction: string | null
+          trend_period: string
+        }
+        Insert: {
+          analyzed_at?: string | null
+          entity_name: string
+          exposure_change?: number | null
+          id?: string
+          influence_change?: number | null
+          sentiment_shift?: number | null
+          trend_direction?: string | null
+          trend_period: string
+        }
+        Update: {
+          analyzed_at?: string | null
+          entity_name?: string
+          exposure_change?: number | null
+          id?: string
+          influence_change?: number | null
+          sentiment_shift?: number | null
+          trend_direction?: string | null
+          trend_period?: string
+        }
+        Relationships: []
+      }
       memory_decay_profiles: {
         Row: {
           action_status: string | null
