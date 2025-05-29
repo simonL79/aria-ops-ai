@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -12,12 +11,12 @@ export interface LiveDataValidationResult {
 
 /**
  * Production-grade live data validation service
- * Updated to handle missing tables gracefully and avoid problematic tables
+ * Fixed to handle database connectivity more reliably
  */
 export class LiveDataValidator {
   
   /**
-   * Run comprehensive live data validation with development mode considerations
+   * Run comprehensive live data validation with improved connectivity checks
    */
   static async validateLiveIntegrity(): Promise<LiveDataValidationResult> {
     const result: LiveDataValidationResult = {
@@ -30,7 +29,7 @@ export class LiveDataValidator {
 
     console.log('🔍 Starting A.R.I.A™ Live Data Integrity Check...');
 
-    // Check 1: Database connectivity (using a safe table)
+    // Check 1: Database connectivity (using multiple safe approaches)
     result.totalChecks++;
     const dbCheck = await this.checkDatabaseConnectivity();
     if (!dbCheck.isConnected) {
@@ -91,29 +90,36 @@ export class LiveDataValidator {
   }
 
   /**
-   * Check database connectivity using a safe, simple table
+   * Check database connectivity using the most reliable approach
    */
   private static async checkDatabaseConnectivity() {
     try {
-      // Try clients table first (most reliable)
-      const { error: clientsError } = await supabase.from('clients').select('id').limit(1);
+      // Use a simple query that should always work if database is accessible
+      const { data, error } = await supabase
+        .from('scan_results')
+        .select('id')
+        .limit(1);
+      
+      if (!error) {
+        console.log('✅ Database connectivity verified via scan_results');
+        return { isConnected: true, error: null };
+      }
+
+      // Fallback: try a different table
+      const { error: clientsError } = await supabase
+        .from('clients')
+        .select('id')
+        .limit(1);
+      
       if (!clientsError) {
+        console.log('✅ Database connectivity verified via clients');
         return { isConnected: true, error: null };
       }
 
-      // Fallback to scan_results
-      const { error: scanError } = await supabase.from('scan_results').select('id').limit(1);
-      if (!scanError) {
-        return { isConnected: true, error: null };
-      }
-
-      // Fallback to live_status
-      const { error: liveError } = await supabase.from('live_status').select('id').limit(1);
-      if (!liveError) {
-        return { isConnected: true, error: null };
-      }
-
-      return { isConnected: false, error: 'No accessible tables found' };
+      // If both fail, database has issues
+      console.error('❌ Database connectivity failed on multiple tables');
+      return { isConnected: false, error: 'Multiple table access failed' };
+      
     } catch (error) {
       console.error('Database connectivity check failed:', error);
       return { isConnected: false, error: 'Connection failed' };
@@ -134,14 +140,13 @@ export class LiveDataValidator {
   }
 
   /**
-   * Check access to core tables with graceful fallbacks
+   * Check access to core tables with improved error handling
    */
   private static async checkCoreTablesAccess() {
-    // Define core tables with fallback options (avoiding problematic user_roles)
     const coreTableChecks = [
-      { name: 'threats', query: () => supabase.from('threats').select('id').limit(1), required: false },
       { name: 'scan_results', query: () => supabase.from('scan_results').select('id').limit(1), required: true },
       { name: 'clients', query: () => supabase.from('clients').select('id').limit(1), required: true },
+      { name: 'threats', query: () => supabase.from('threats').select('id').limit(1), required: false },
       { name: 'live_status', query: () => supabase.from('live_status').select('id').limit(1), required: false },
       { name: 'threat_ingestion_queue', query: () => supabase.from('threat_ingestion_queue').select('id').limit(1), required: false }
     ];
