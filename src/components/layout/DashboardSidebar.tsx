@@ -22,7 +22,7 @@ const DashboardSidebar = () => {
       <div className="flex-1 overflow-y-auto py-6">
         <div className="px-3 py-2">
           <Link
-            to="/dashboard"
+            to="/"
             className="mb-2 flex items-center space-x-2 px-4 text-lg font-semibold tracking-tight"
           >
             <Shield className="mr-2 h-4 w-4" />
@@ -30,58 +30,14 @@ const DashboardSidebar = () => {
           </Link>
           <div className="space-y-1">
             <Link
-              to="/dashboard"
+              to="/"
               className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
-                location.pathname === '/dashboard' ? 'bg-accent text-accent-foreground' : ''
+                location.pathname === '/' ? 'bg-accent text-accent-foreground' : ''
               }`}
             >
               <div className="flex items-center">
                 <Home className="mr-2 h-4 w-4" />
-                <span>Dashboard</span>
-              </div>
-            </Link>
-            <Link
-              to="/hypercore"
-              className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
-                location.pathname.includes('/hypercore') ? 'bg-accent text-accent-foreground' : ''
-              }`}
-            >
-              <div className="flex items-center">
-                <Shield className="mr-2 h-4 w-4" />
-                <span>HyperCore</span>
-              </div>
-            </Link>
-            <Link
-              to="/ai-scraping"
-              className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
-                location.pathname.includes('/ai-scraping') ? 'bg-accent text-accent-foreground' : ''
-              }`}
-            >
-              <div className="flex items-center">
-                <Zap className="mr-2 h-4 w-4" />
-                <span>AI Scraping</span>
-              </div>
-            </Link>
-            <Link
-              to="/clean-launch"
-              className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
-                location.pathname.includes('/clean-launch') ? 'bg-accent text-accent-foreground' : ''
-              }`}
-            >
-              <div className="flex items-center">
-                <Layout className="mr-2 h-4 w-4" />
-                <span>Clean Launch</span>
-              </div>
-            </Link>
-            <Link
-              to="/executive-reports"
-              className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
-                location.pathname.includes('/executive-reports') ? 'bg-accent text-accent-foreground' : ''
-              }`}
-            >
-              <div className="flex items-center">
-                <FileBarChart className="mr-2 h-4 w-4" />
-                <span>Executive Reports</span>
+                <span>Home</span>
               </div>
             </Link>
             <Link
@@ -93,6 +49,17 @@ const DashboardSidebar = () => {
               <div className="flex items-center">
                 <Brain className="mr-2 h-4 w-4" />
                 <span>Discovery</span>
+              </div>
+            </Link>
+            <Link
+              to="/dashboard"
+              className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
+                location.pathname === '/dashboard' ? 'bg-accent text-accent-foreground' : ''
+              }`}
+            >
+              <div className="flex items-center">
+                <Activity className="mr-2 h-4 w-4" />
+                <span>Dashboard</span>
               </div>
             </Link>
             <Link
@@ -170,6 +137,28 @@ const DashboardSidebar = () => {
               <div className="flex items-center">
                 <FileText className="mr-2 h-4 w-4" />
                 <span>Compliance</span>
+              </div>
+            </Link>
+            <Link
+              to="/about"
+              className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
+                location.pathname === '/about' ? 'bg-accent text-accent-foreground' : ''
+              }`}
+            >
+              <div className="flex items-center">
+                <FileText className="mr-2 h-4 w-4" />
+                <span>About</span>
+              </div>
+            </Link>
+            <Link
+              to="/blog"
+              className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
+                location.pathname === '/blog' ? 'bg-accent text-accent-foreground' : ''
+              }`}
+            >
+              <div className="flex items-center">
+                <FileText className="mr-2 h-4 w-4" />
+                <span>Blog</span>
               </div>
             </Link>
           </div>
