@@ -181,7 +181,7 @@ const GraveyardDashboard = () => {
               <CardTitle>Suppression Assets</CardTitle>
             </CardHeader>
             <CardContent>
-              <SuppressionAssets />
+              <SuppressionAssets onStatsChange={fetchStats} />
             </CardContent>
           </Card>
 
