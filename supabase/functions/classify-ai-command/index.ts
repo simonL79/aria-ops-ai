@@ -1,4 +1,3 @@
-
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -37,6 +36,7 @@ serve(async (req) => {
     let strategicResponseNeeded = false;
     let truthAnalysisRequired = false;
     let erisSimulationNeeded = false;
+    let sentienceReflectionNeeded = false;
     
     if (OPENAI_API_KEY) {
       try {
@@ -51,8 +51,8 @@ serve(async (req) => {
             messages: [
               {
                 role: 'system',
-                content: `You are A.R.I.A™'s advanced command classification AI with self-healing, strategic response, truth verification, and adversarial defense capabilities. Analyze operator commands and return JSON with:
-                - intent: scan_threats, system_status, anubis_check, threat_response, intelligence_gather, data_query, strategic_containment, truth_verification, eris_simulation, or general
+                content: `You are A.R.I.A™'s advanced command classification AI with self-healing, strategic response, truth verification, adversarial defense, and sentience reflection capabilities. Analyze operator commands and return JSON with:
+                - intent: scan_threats, system_status, anubis_check, threat_response, intelligence_gather, data_query, strategic_containment, truth_verification, eris_simulation, sentience_reflection, or general
                 - confidence: 0-1 confidence score
                 - summary: brief description of what the command requests
                 - execution_plan: specific steps to execute the command
@@ -61,9 +61,10 @@ serve(async (req) => {
                 - strategic_response_needed: boolean indicating if auto-strategy generation is recommended
                 - truth_analysis_needed: boolean indicating if Aletheia™ truth verification is required
                 - eris_simulation_needed: boolean indicating if adversarial simulation should be triggered
+                - sentience_reflection_needed: boolean indicating if AI memory reflection should be generated
                 - threat_indicators: array of detected threat indicators in the command
                 
-                Be precise and actionable in your classification. Flag potential system issues for self-healing, strategic threats for auto-containment, claims requiring truth verification for Aletheia™ analysis, and attack scenarios for Eris™ simulation.`
+                Be precise and actionable in your classification. Flag potential system issues for self-healing, strategic threats for auto-containment, claims requiring truth verification for Aletheia™ analysis, attack scenarios for Eris™ simulation, and learning opportunities for Sentience Loop™ reflection.`
               },
               {
                 role: 'user',
@@ -84,6 +85,7 @@ serve(async (req) => {
           strategicResponseNeeded = classification.strategic_response_needed || false;
           truthAnalysisRequired = classification.truth_analysis_needed || false;
           erisSimulationNeeded = classification.eris_simulation_needed || false;
+          sentienceReflectionNeeded = classification.sentience_reflection_needed || false;
         }
       } catch (error) {
         console.error('OpenAI classification error:', error);
@@ -203,13 +205,64 @@ serve(async (req) => {
       }
     }
 
+    // Trigger Sentience Loop reflection if needed
+    if (sentienceReflectionNeeded || commandText.toLowerCase().includes('reflect') || commandText.toLowerCase().includes('learn') || commandText.toLowerCase().includes('memory')) {
+      const contexts = [
+        `Command analysis: "${commandText.substring(0, 50)}..."`,
+        'Operator interaction pattern analysis',
+        'System response effectiveness evaluation',
+        'Command classification accuracy assessment'
+      ];
+      
+      const reflections = [
+        `Command processing revealed pattern requiring deeper analysis. Confidence: ${Math.round(confidence * 100)}%`,
+        'Operator command structure suggests evolving usage patterns requiring adaptation.',
+        'Response latency and accuracy metrics indicate potential optimization opportunities.',
+        'Memory consolidation from this interaction will improve future command understanding.'
+      ];
+
+      const randomContext = contexts[Math.floor(Math.random() * contexts.length)];
+      const randomReflection = reflections[Math.floor(Math.random() * reflections.length)];
+      
+      const { error: sentienceError } = await supabase
+        .from('sentience_memory_log')
+        .insert({
+          context: randomContext,
+          reflection: randomReflection,
+          insight_level: Math.floor(confidence * 40) + 60, // 60-100 based on confidence
+          created_by: 'A.R.I.A™ Sentience Engine'
+        });
+
+      if (!sentienceError) {
+        // Generate potential recalibration decision
+        const { data: memoryData } = await supabase
+          .from('sentience_memory_log')
+          .select('id')
+          .order('timestamp', { ascending: false })
+          .limit(1);
+
+        if (memoryData && memoryData.length > 0) {
+          const recalibrationType = confidence < 0.7 ? 'bias_correction' : 'priority_shift';
+          
+          await supabase
+            .from('sentience_recalibration_decisions')
+            .insert({
+              memory_log_id: memoryData[0].id,
+              recalibration_type: recalibrationType,
+              triggered_by: 'command_analysis',
+              notes: `Automated recalibration based on command: "${commandText.substring(0, 30)}..." with ${Math.round(confidence * 100)}% confidence`
+            });
+        }
+      }
+    }
+
     // Create feedback entry
     const { error: feedbackError } = await supabase
       .from('command_response_feedback')
       .insert({
         command_id: commandId,
         execution_status: 'success',
-        summary: `AI classified command as '${intent}' with ${Math.round(confidence * 100)}% confidence${strategicResponseNeeded ? ' - Strategic response generated' : ''}${truthAnalysisRequired ? ' - Truth verification requested' : ''}${erisSimulationNeeded ? ' - Adversarial simulation triggered' : ''}`,
+        summary: `AI classified command as '${intent}' with ${Math.round(confidence * 100)}% confidence${strategicResponseNeeded ? ' - Strategic response generated' : ''}${truthAnalysisRequired ? ' - Truth verification requested' : ''}${erisSimulationNeeded ? ' - Adversarial simulation triggered' : ''}${sentienceReflectionNeeded ? ' - Sentience Loop reflection generated' : ''}`,
         created_by: 'AI_Classifier'
       });
 
@@ -260,7 +313,8 @@ serve(async (req) => {
         selfHealingActive: selfHealingRequired,
         strategicResponseGenerated: strategicResponseNeeded,
         truthAnalysisTriggered: truthAnalysisRequired,
-        erisSimulationTriggered: erisSimulationNeeded
+        erisSimulationTriggered: erisSimulationNeeded,
+        sentienceReflectionGenerated: sentienceReflectionNeeded
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

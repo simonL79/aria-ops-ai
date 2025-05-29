@@ -9,6 +9,7 @@ import { SelfHealingPanel } from './SelfHealingPanel';
 import { StrategicResponsePanel } from './StrategicResponsePanel';
 import { AletheiaTruthPanel } from './AletheiaTruthPanel';
 import { ErisPanel } from './ErisPanel';
+import { SentiencePanel } from './SentiencePanel';
 
 interface CommandFeedback {
   id: string;
@@ -141,6 +142,9 @@ export const FeedbackPanel = ({ commandHistory }: FeedbackPanelProps) => {
 
       {/* Eris Adversarial Defense Panel */}
       <ErisPanel />
+
+      {/* Sentience Loop Panel */}
+      <SentiencePanel />
 
       {/* Command Execution Feedback */}
       <Card className="bg-black border-green-500/30">

@@ -5505,6 +5505,71 @@ export type Database = {
           },
         ]
       }
+      sentience_memory_log: {
+        Row: {
+          context: string
+          created_by: string | null
+          id: string
+          insight_level: number | null
+          reflection: string
+          timestamp: string | null
+        }
+        Insert: {
+          context: string
+          created_by?: string | null
+          id?: string
+          insight_level?: number | null
+          reflection: string
+          timestamp?: string | null
+        }
+        Update: {
+          context?: string
+          created_by?: string | null
+          id?: string
+          insight_level?: number | null
+          reflection?: string
+          timestamp?: string | null
+        }
+        Relationships: []
+      }
+      sentience_recalibration_decisions: {
+        Row: {
+          created_at: string | null
+          executed: boolean | null
+          id: string
+          memory_log_id: string | null
+          notes: string | null
+          recalibration_type: string | null
+          triggered_by: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          executed?: boolean | null
+          id?: string
+          memory_log_id?: string | null
+          notes?: string | null
+          recalibration_type?: string | null
+          triggered_by?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          executed?: boolean | null
+          id?: string
+          memory_log_id?: string | null
+          notes?: string | null
+          recalibration_type?: string | null
+          triggered_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sentience_recalibration_decisions_memory_log_id_fkey"
+            columns: ["memory_log_id"]
+            isOneToOne: false
+            referencedRelation: "sentience_memory_log"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sentiment_tracking: {
         Row: {
           created_at: string | null

@@ -10,3 +10,4 @@ export { SelfHealingPanel } from './SelfHealingPanel';
 export { StrategicResponsePanel } from './StrategicResponsePanel';
 export { AletheiaTruthPanel } from './AletheiaTruthPanel';
 export { ErisPanel } from './ErisPanel';
+export { SentiencePanel } from './SentiencePanel';
