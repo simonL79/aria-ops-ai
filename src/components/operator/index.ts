@@ -22,3 +22,4 @@ export { HalcyonPanel } from './HalcyonPanel';
 export { IronvaultPanel } from './IronvaultPanel';
 export { CerebraPanel } from './CerebraPanel';
 export { StrikecorePanel } from './StrikecorePanel';
+export { ShadowvaultPanel } from './ShadowvaultPanel';

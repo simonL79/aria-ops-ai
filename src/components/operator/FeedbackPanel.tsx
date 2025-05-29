@@ -21,6 +21,7 @@ import { HalcyonPanel } from './HalcyonPanel';
 import { IronvaultPanel } from './IronvaultPanel';
 import { CerebraPanel } from './CerebraPanel';
 import { StrikecorePanel } from './StrikecorePanel';
+import { ShadowvaultPanel } from './ShadowvaultPanel';
 
 interface CommandFeedback {
   id: string;
@@ -142,6 +143,9 @@ export const FeedbackPanel = ({ commandHistory }: FeedbackPanelProps) => {
 
   return (
     <div className="space-y-4">
+      {/* SHADOWVAULT™ Dark Web Threat Monitoring & Risk Indexing Panel */}
+      <ShadowvaultPanel />
+
       {/* STRIKECORE™ Reputation Strike & Recovery Analytics Panel */}
       <StrikecorePanel />
 
