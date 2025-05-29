@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ReactNode } from 'react';
 import { 
@@ -13,6 +12,7 @@ import {
   SidebarMenuButton,
   SidebarRail
 } from "@/components/ui/sidebar";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { 
   Home, 
   Search, 
@@ -70,6 +70,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     return displayName ? displayName[0] : (user?.email?.[0] || '?');
   };
   
+  // Get routes for sidebar
   const routes = [
     {
       label: "Dashboard",
@@ -146,78 +147,80 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   ];
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-gray-50">
-        <Sidebar>
-          <SidebarRail />
-          <SidebarHeader className="border-b">
-            <div className="px-4 py-3">
-              <h1 className="font-bold text-xl">A.R.I.A.™</h1>
-              <p className="text-muted-foreground text-sm">
-                Advanced Reputation Intelligence Assistant
-              </p>
-            </div>
-          </SidebarHeader>
-          <SidebarContent className="px-2 py-2">
-            <SidebarMenu>
-              {routes.map((route) => (
-                <SidebarMenuItem key={route.href}>
+    <TooltipProvider>
+      <SidebarProvider>
+        <div className="min-h-screen flex w-full bg-gray-50">
+          <Sidebar>
+            <SidebarRail />
+            <SidebarHeader className="border-b">
+              <div className="px-4 py-3">
+                <h1 className="font-bold text-xl">A.R.I.A.™</h1>
+                <p className="text-muted-foreground text-sm">
+                  Advanced Reputation Intelligence Assistant
+                </p>
+              </div>
+            </SidebarHeader>
+            <SidebarContent className="px-2 py-2">
+              <SidebarMenu>
+                {routes.map((route) => (
+                  <SidebarMenuItem key={route.href}>
+                    <SidebarMenuButton
+                      isActive={route.active}
+                      tooltip={route.label}
+                      onClick={() => navigate(route.href)}
+                    >
+                      {route.icon}
+                      <span>{route.label}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+                
+                <SidebarMenuItem>
                   <SidebarMenuButton
-                    isActive={route.active}
-                    tooltip={route.label}
-                    onClick={() => navigate(route.href)}
+                    tooltip="Sign Out"
+                    onClick={handleSignOut}
+                    className="text-red-500 hover:text-red-600 hover:bg-red-50"
                   >
-                    {route.icon}
-                    <span>{route.label}</span>
+                    <LogOut className="h-4 w-4" />
+                    <span>Sign Out</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-              ))}
-              
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  tooltip="Sign Out"
-                  onClick={handleSignOut}
-                  className="text-red-500 hover:text-red-600 hover:bg-red-50"
-                >
-                  <LogOut className="h-4 w-4" />
-                  <span>Sign Out</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarContent>
-          <SidebarFooter className="border-t p-4">
-            <div className="flex items-center gap-2 p-2">
-              {user && (
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">
-                    {getUserDisplayName()}
-                  </p>
-                  <p className="text-xs text-muted-foreground truncate">
-                    {user.email}
-                  </p>
+              </SidebarMenu>
+            </SidebarContent>
+            <SidebarFooter className="border-t p-4">
+              <div className="flex items-center gap-2 p-2">
+                {user && (
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">
+                      {getUserDisplayName()}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {user.email}
+                    </p>
+                  </div>
+                )}
+                <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground">
+                  {getAvatarInitial()}
                 </div>
-              )}
-              <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground">
-                {getAvatarInitial()}
+              </div>
+            </SidebarFooter>
+          </Sidebar>
+          <main className="flex-1 p-4 md:p-6">
+            <div className="flex items-center py-4 mb-6 justify-between">
+              <div>
+                <SidebarTrigger />
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="text-sm text-muted-foreground">
+                  <span className="font-medium text-foreground">Last scan:</span> Today, 10:30 AM
+                </div>
               </div>
             </div>
-          </SidebarFooter>
-        </Sidebar>
-        <main className="flex-1 p-4 md:p-6">
-          <div className="flex items-center py-4 mb-6 justify-between">
-            <div>
-              <SidebarTrigger />
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="text-sm text-muted-foreground">
-                <span className="font-medium text-foreground">Last scan:</span> Today, 10:30 AM
-              </div>
-            </div>
-          </div>
-          {children}
-        </main>
-      </div>
-    </SidebarProvider>
+            {children}
+          </main>
+        </div>
+      </SidebarProvider>
+    </TooltipProvider>
   );
 };
 
