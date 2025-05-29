@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -154,25 +153,18 @@ const OperatorConsole = () => {
     
     try {
       // Call the voice command processing edge function
-      const response = await fetch('/functions/v1/process-voice-command', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${supabase.supabaseKey}`,
-        },
-        body: JSON.stringify({
+      const { data, error } = await supabase.functions.invoke('process-voice-command', {
+        body: {
           command: command,
           userId: user?.id
-        })
+        }
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to process voice command');
+      if (error) {
+        throw new Error(error.message || 'Failed to process voice command');
       }
 
-      const result = await response.json();
-      
-      if (result.success) {
+      if (data?.success) {
         toast.success('Command processed successfully');
         setCurrentCommand('');
         
@@ -180,7 +172,7 @@ const OperatorConsole = () => {
         await loadCommandHistory();
         await loadResponses();
       } else {
-        throw new Error(result.error || 'Command processing failed');
+        throw new Error(data?.error || 'Command processing failed');
       }
     } catch (error) {
       console.error('Error processing voice command:', error);
