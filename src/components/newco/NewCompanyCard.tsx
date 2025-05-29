@@ -104,13 +104,7 @@ const NewCompanyCard: React.FC<NewCompanyCardProps> = ({ company }) => {
             </div>
             <Progress 
               value={company.cleanLaunchScore} 
-              max={100} 
               className="h-2"
-              indicatorClassName={
-                company.cleanLaunchCategory === 'green' ? 'bg-green-500' :
-                company.cleanLaunchCategory === 'yellow' ? 'bg-yellow-500' :
-                company.cleanLaunchCategory === 'red' ? 'bg-red-500' : ''
-              }
             />
           </div>
         )}

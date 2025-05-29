@@ -27,12 +27,6 @@ const EntityCard = ({ entity, onClick, isSelected }: EntityCardProps) => {
     return "text-blue-600";
   };
 
-  const getRiskBgColor = (score: number) => {
-    if (score >= 7) return "bg-red-600";
-    if (score >= 5) return "bg-amber-500";
-    return "bg-blue-500";
-  };
-
   const getOutreachStatusBadge = () => {
     switch (entity.outreachStatus) {
       case 'drafted':
@@ -113,9 +107,7 @@ const EntityCard = ({ entity, onClick, isSelected }: EntityCardProps) => {
         </div>
         <Progress 
           value={entity.riskScore * 10} 
-          max={100} 
-          className="h-1.5" 
-          indicatorClassName={getRiskBgColor(entity.riskScore)}
+          className="h-1.5"
         />
       </div>
       
