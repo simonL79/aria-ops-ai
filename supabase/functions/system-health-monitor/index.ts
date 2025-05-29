@@ -33,29 +33,40 @@ serve(async (req) => {
     // Check 2: Queue processing status
     let queueStatus = 'ok'
     let queueDetails = 'Queue processing normal'
-    const { data: pendingItems } = await supabase
+    const { data: pendingItems, error: queueError } = await supabase
       .from('threat_ingestion_queue')
-      .select('count')
+      .select('*', { count: 'exact', head: true })
       .eq('status', 'pending')
 
-    const pendingCount = pendingItems?.[0]?.count || 0
-    if (pendingCount > 50) {
+    if (queueError) {
       queueStatus = 'warn'
-      queueDetails = `High queue backlog: ${pendingCount} pending items`
+      queueDetails = 'Unable to check queue status'
+    } else {
+      const pendingCount = pendingItems?.length || 0
+      if (pendingCount > 50) {
+        queueStatus = 'warn'
+        queueDetails = `High queue backlog: ${pendingCount} pending items`
+      }
     }
 
     // Check 3: Recent threat detection
     let threatStatus = 'ok'
     let threatDetails = 'Recent threats detected'
-    const { data: recentThreats } = await supabase
+    const { data: recentThreats, error: threatError } = await supabase
       .from('threats')
-      .select('count')
+      .select('*', { count: 'exact', head: true })
+      .eq('is_live', true)
       .gte('detected_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
 
-    const threatCount = recentThreats?.[0]?.count || 0
-    if (threatCount === 0) {
+    if (threatError) {
       threatStatus = 'warn'
-      threatDetails = 'No threats detected in last 24 hours'
+      threatDetails = 'Unable to check threat status'
+    } else {
+      const threatCount = recentThreats?.length || 0
+      if (threatCount === 0) {
+        threatStatus = 'warn'
+        threatDetails = 'No threats detected in last 24 hours'
+      }
     }
 
     // Insert health check results
@@ -84,18 +95,16 @@ serve(async (req) => {
       await supabase.from('system_health_checks').insert(check)
     }
 
-    // Log the health check run
-    await supabase.from('edge_function_events').insert({
-      function_name: 'system-health-monitor',
-      status: 'success',
-      event_payload: { 
-        checks_run: healthChecks.length,
-        database_status: dbStatus,
-        queue_status: queueStatus,
-        threat_status: threatStatus
-      },
-      result_summary: `Health checks completed: DB=${dbStatus}, Queue=${queueStatus}, Threats=${threatStatus}`
-    })
+    // Update live status
+    await supabase.from('live_status').upsert([
+      {
+        name: 'Reputation Monitoring',
+        active_threats: recentThreats?.length || 0,
+        last_threat_seen: recentThreats?.[0]?.detected_at || null,
+        last_report: new Date().toISOString(),
+        system_status: threatStatus === 'ok' ? 'LIVE' : 'STALE'
+      }
+    ], { onConflict: 'name' })
 
     return new Response(JSON.stringify({
       success: true,

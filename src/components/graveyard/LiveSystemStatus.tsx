@@ -45,71 +45,54 @@ const LiveSystemStatus = () => {
 
   const fetchSystemStatus = async () => {
     try {
-      // For now, simulate live status from existing scan_results until schema is updated
-      const { data: scanResults, error: scanError } = await supabase
-        .from('scan_results')
+      // Fetch live status
+      const { data: liveStatusData, error: statusError } = await supabase
+        .from('live_status')
+        .select('*')
+        .order('last_report', { ascending: false });
+
+      if (statusError) throw statusError;
+
+      setLiveStatus(liveStatusData?.map(status => ({
+        name: status.name,
+        active_threats: status.active_threats || 0,
+        last_threat_seen: status.last_threat_seen,
+        last_report: status.last_report,
+        system_status: status.system_status as 'LIVE' | 'STALE'
+      })) || []);
+
+      // Fetch health checks
+      const { data: healthData, error: healthError } = await supabase
+        .from('system_health_checks')
+        .select('*')
+        .order('check_time', { ascending: false })
+        .limit(6);
+
+      if (healthError) throw healthError;
+
+      setHealthChecks(healthData?.map(check => ({
+        id: check.id,
+        module: check.module,
+        status: check.status as 'ok' | 'warn' | 'fail',
+        details: check.details || '',
+        check_time: check.check_time
+      })) || []);
+
+      // Fetch queue items
+      const { data: queueData, error: queueError } = await supabase
+        .from('threat_ingestion_queue')
         .select('*')
         .order('created_at', { ascending: false })
-        .limit(10);
+        .limit(5);
 
-      if (scanError) throw scanError;
+      if (queueError) throw queueError;
 
-      // Create mock live status based on scan results
-      const mockStatus: LiveStatus[] = [
-        {
-          name: 'Reputation Monitoring',
-          active_threats: scanResults?.filter(r => r.severity === 'high').length || 0,
-          last_threat_seen: scanResults?.[0]?.created_at || null,
-          last_report: new Date().toISOString(),
-          system_status: scanResults?.length > 0 ? 'LIVE' : 'STALE'
-        },
-        {
-          name: 'Content Analysis',
-          active_threats: scanResults?.filter(r => r.severity === 'medium').length || 0,
-          last_threat_seen: scanResults?.[1]?.created_at || null,
-          last_report: new Date().toISOString(),
-          system_status: 'LIVE'
-        }
-      ];
-
-      setLiveStatus(mockStatus);
-
-      // Create mock health checks
-      const mockHealthChecks: HealthCheck[] = [
-        {
-          id: '1',
-          module: 'database',
-          status: 'ok',
-          details: 'Database connections healthy',
-          check_time: new Date().toISOString()
-        },
-        {
-          id: '2',
-          module: 'queue_processor',
-          status: 'ok',
-          details: 'Processing queue operational',
-          check_time: new Date().toISOString()
-        },
-        {
-          id: '3',
-          module: 'threat_detector',
-          status: scanResults?.length > 0 ? 'ok' : 'warn',
-          details: scanResults?.length > 0 ? 'Active threat detection' : 'No recent activity',
-          check_time: new Date().toISOString()
-        }
-      ];
-
-      setHealthChecks(mockHealthChecks);
-
-      // Create mock queue items
-      const mockQueueItems: QueueItem[] = scanResults?.slice(0, 5).map(result => ({
-        id: result.id,
-        source: result.platform,
-        status: result.status,
-        detected_at: result.created_at
-      })) || [];
-
-      setQueueItems(mockQueueItems);
+      setQueueItems(queueData?.map(item => ({
+        id: item.id,
+        source: item.source,
+        status: item.status,
+        detected_at: item.detected_at
+      })) || []);
 
     } catch (error) {
       console.error('Error fetching system status:', error);
@@ -281,9 +264,9 @@ const LiveSystemStatus = () => {
                     </div>
                     <Badge 
                       className={
-                        item.status === 'resolved' ? 'bg-green-500' :
-                        item.status === 'actioned' ? 'bg-blue-500' :
-                        item.status === 'read' ? 'bg-yellow-500' : 'bg-gray-500'
+                        item.status === 'complete' ? 'bg-green-500' :
+                        item.status === 'processing' ? 'bg-blue-500' :
+                        item.status === 'error' ? 'bg-red-500' : 'bg-gray-500'
                       }
                     >
                       {item.status}

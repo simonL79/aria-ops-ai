@@ -3192,6 +3192,39 @@ export type Database = {
         }
         Relationships: []
       }
+      live_status: {
+        Row: {
+          active_threats: number | null
+          created_at: string | null
+          id: string
+          last_report: string | null
+          last_threat_seen: string | null
+          name: string
+          system_status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          active_threats?: number | null
+          created_at?: string | null
+          id?: string
+          last_report?: string | null
+          last_threat_seen?: string | null
+          name: string
+          system_status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          active_threats?: number | null
+          created_at?: string | null
+          id?: string
+          last_report?: string | null
+          last_threat_seen?: string | null
+          name?: string
+          system_status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       llm_memory_audit: {
         Row: {
           audit_timestamp: string | null
@@ -4214,6 +4247,44 @@ export type Database = {
           },
         ]
       }
+      reports: {
+        Row: {
+          content: Json | null
+          entity_id: string | null
+          generated_at: string | null
+          id: string
+          is_live: boolean | null
+          report_type: string
+          risk_rating: string | null
+        }
+        Insert: {
+          content?: Json | null
+          entity_id?: string | null
+          generated_at?: string | null
+          id?: string
+          is_live?: boolean | null
+          report_type: string
+          risk_rating?: string | null
+        }
+        Update: {
+          content?: Json | null
+          entity_id?: string | null
+          generated_at?: string | null
+          id?: string
+          is_live?: boolean | null
+          report_type?: string
+          risk_rating?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reports_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "entities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reputation_counters: {
         Row: {
           content_type: string | null
@@ -5089,33 +5160,83 @@ export type Database = {
       }
       system_health_checks: {
         Row: {
-          check_type: string
-          created_at: string
+          check_time: string | null
+          created_at: string | null
+          details: string | null
           id: string
-          message: string | null
-          metadata: Json | null
-          platform: string | null
-          status: string
+          is_automated: boolean | null
+          module: string
+          status: string | null
         }
         Insert: {
-          check_type: string
-          created_at?: string
+          check_time?: string | null
+          created_at?: string | null
+          details?: string | null
           id?: string
-          message?: string | null
-          metadata?: Json | null
-          platform?: string | null
-          status: string
+          is_automated?: boolean | null
+          module: string
+          status?: string | null
         }
         Update: {
-          check_type?: string
-          created_at?: string
+          check_time?: string | null
+          created_at?: string | null
+          details?: string | null
           id?: string
-          message?: string | null
-          metadata?: Json | null
-          platform?: string | null
-          status?: string
+          is_automated?: boolean | null
+          module?: string
+          status?: string | null
         }
         Relationships: []
+      }
+      threat_ingestion_queue: {
+        Row: {
+          created_at: string | null
+          detected_at: string | null
+          entity_match: string | null
+          id: string
+          processed_by: string | null
+          processing_notes: string | null
+          raw_content: string
+          risk_score: number | null
+          source: string
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          detected_at?: string | null
+          entity_match?: string | null
+          id?: string
+          processed_by?: string | null
+          processing_notes?: string | null
+          raw_content: string
+          risk_score?: number | null
+          source: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          detected_at?: string | null
+          entity_match?: string | null
+          id?: string
+          processed_by?: string | null
+          processing_notes?: string | null
+          raw_content?: string
+          risk_score?: number | null
+          source?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "threat_ingestion_queue_entity_match_fkey"
+            columns: ["entity_match"]
+            isOneToOne: false
+            referencedRelation: "entities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       threat_queue: {
         Row: {
@@ -5193,6 +5314,62 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      threats: {
+        Row: {
+          content: string
+          created_at: string | null
+          detected_at: string | null
+          entity_id: string | null
+          id: string
+          is_live: boolean | null
+          risk_score: number | null
+          sentiment: string | null
+          source: string
+          status: string | null
+          summary: string | null
+          threat_type: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          detected_at?: string | null
+          entity_id?: string | null
+          id?: string
+          is_live?: boolean | null
+          risk_score?: number | null
+          sentiment?: string | null
+          source: string
+          status?: string | null
+          summary?: string | null
+          threat_type?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          detected_at?: string | null
+          entity_id?: string | null
+          id?: string
+          is_live?: boolean | null
+          risk_score?: number | null
+          sentiment?: string | null
+          source?: string
+          status?: string | null
+          summary?: string | null
+          threat_type?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "threats_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "entities"
             referencedColumns: ["id"]
           },
         ]

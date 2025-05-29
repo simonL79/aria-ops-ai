@@ -11,18 +11,14 @@ export interface ThreatIngestionItem {
 
 export const addToThreatQueue = async (item: ThreatIngestionItem) => {
   try {
-    // For now, add to scan_results table until new schema is available
     const { data, error } = await supabase
-      .from('scan_results')
+      .from('threat_ingestion_queue')
       .insert({
-        content: item.raw_content,
-        platform: item.source,
-        severity: item.risk_score && item.risk_score > 70 ? 'high' : 
-                 item.risk_score && item.risk_score > 40 ? 'medium' : 'low',
-        status: 'new',
-        threat_type: 'reputation_risk',
-        sentiment: 0,
-        url: ''
+        raw_content: item.raw_content,
+        source: item.source,
+        entity_match: item.entity_match,
+        risk_score: item.risk_score,
+        status: 'pending'
       })
       .select()
       .single();
@@ -41,7 +37,7 @@ export const addToThreatQueue = async (item: ThreatIngestionItem) => {
 export const getQueueStatus = async () => {
   try {
     const { data, error } = await supabase
-      .from('scan_results')
+      .from('threat_ingestion_queue')
       .select('status')
       .order('created_at', { ascending: false })
       .limit(100);
@@ -82,10 +78,14 @@ export const triggerPipelineProcessing = async () => {
 export const getLiveThreats = async (entityId?: string) => {
   try {
     let query = supabase
-      .from('scan_results')
+      .from('threats')
       .select('*')
-      .in('severity', ['high', 'medium'])
-      .order('created_at', { ascending: false });
+      .eq('is_live', true)
+      .order('detected_at', { ascending: false });
+
+    if (entityId) {
+      query = query.eq('entity_id', entityId);
+    }
 
     const { data, error } = await query.limit(50);
 
@@ -99,27 +99,21 @@ export const getLiveThreats = async (entityId?: string) => {
 
 export const getSystemHealth = async () => {
   try {
-    // Check recent scan activity as a health indicator
     const { data, error } = await supabase
-      .from('scan_results')
+      .from('system_health_checks')
       .select('*')
-      .order('created_at', { ascending: false })
+      .order('check_time', { ascending: false })
       .limit(10);
 
     if (error) throw error;
     
-    // Generate health status based on recent activity
-    const recentActivity = data?.filter(item => 
-      new Date(item.created_at) > new Date(Date.now() - 24 * 60 * 60 * 1000)
-    );
-    
-    return [{
-      id: '1',
-      module: 'scanning',
-      status: recentActivity?.length > 0 ? 'healthy' : 'warning',
-      details: `${recentActivity?.length || 0} scans in last 24 hours`,
-      check_time: new Date().toISOString()
-    }];
+    return data?.map(check => ({
+      id: check.id,
+      module: check.module,
+      status: check.status,
+      details: check.details,
+      check_time: check.check_time
+    })) || [];
   } catch (error) {
     console.error('Error fetching system health:', error);
     return [];

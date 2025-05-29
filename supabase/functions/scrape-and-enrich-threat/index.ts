@@ -38,14 +38,6 @@ serve(async (req) => {
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-    // Log function start
-    await supabase.from('edge_function_events').insert({
-      function_name: 'scrape-and-enrich-threat',
-      status: 'success',
-      event_payload: { action: 'pipeline_start' },
-      result_summary: 'Threat enrichment pipeline initiated'
-    })
-
     // Get pending queue items
     const { data: queueItems, error: queueError } = await supabase
       .from('threat_ingestion_queue')
@@ -131,7 +123,8 @@ serve(async (req) => {
           sentiment: enrichment.sentiment,
           risk_score: enrichment.risk_score,
           summary: enrichment.summary,
-          is_live: true
+          is_live: true,
+          status: 'active'
         })
 
         if (insertError) {
@@ -163,25 +156,22 @@ serve(async (req) => {
       }
     }
 
-    // Log completion
-    await supabase.from('edge_function_events').insert({
-      function_name: 'scrape-and-enrich-threat',
-      status: processedCount > 0 ? 'success' : 'fail',
-      event_payload: { 
-        processed: processedCount, 
-        errors: errorCount,
-        total_items: queueItems.length 
-      },
-      result_summary: `Pipeline completed: ${processedCount} processed, ${errorCount} errors`
-    })
+    // Update live status after processing
+    const { data: threatCount } = await supabase
+      .from('threats')
+      .select('*', { count: 'exact', head: true })
+      .eq('is_live', true)
+      .eq('status', 'active')
 
-    // Insert test result
-    await supabase.from('test_results').insert({
-      test_name: 'Threat Enrichment Pipeline',
-      test_description: 'Queue processing with GPT enrichment',
-      passed: processedCount > 0,
-      notes: `Processed ${processedCount}/${queueItems.length} items successfully`
-    })
+    await supabase.from('live_status').upsert([
+      {
+        name: 'Threat Detection',
+        active_threats: threatCount?.length || 0,
+        last_threat_seen: new Date().toISOString(),
+        last_report: new Date().toISOString(),
+        system_status: 'LIVE'
+      }
+    ], { onConflict: 'name' })
 
     return new Response(JSON.stringify({ 
       success: true,
