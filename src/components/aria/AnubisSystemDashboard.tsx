@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -355,49 +354,6 @@ const AnubisSystemDashboard = () => {
       </Tabs>
     </div>
   );
-
-  function getModuleIcon(module: string) {
-    const icons: Record<string, React.ComponentType> = {
-      'SOVRA': Shield,
-      'EMERGENCY_STRIKE': AlertTriangle,
-      'CLEAN_LAUNCH': Zap,
-      'EIDETIC': Brain,
-      'COMPLIANCE': CheckCircle,
-      'CLIENT_MANAGEMENT': Users,
-      'RSI': Activity,
-      'PRAXIS': BarChart3,
-      'DISCOVERY': Eye,
-      'HYPERCORE': Server,
-      'GRAVEYARD': Clock
-    };
-    
-    const IconComponent = icons[module] || Activity;
-    return <IconComponent className="h-4 w-4" />;
-  }
-
-  function getStatusColor(status: string) {
-    switch (status) {
-      case 'healthy': return 'text-green-600 bg-green-100';
-      case 'warning': return 'text-yellow-600 bg-yellow-100';
-      case 'error': return 'text-red-600 bg-red-100';
-      default: return 'text-gray-600 bg-gray-100';
-    }
-  }
-
-  function getSeverityColor(severity: string) {
-    switch (severity) {
-      case 'info': return 'bg-blue-500';
-      case 'warning': return 'bg-yellow-500';
-      case 'error': return 'bg-red-500';
-      case 'critical': return 'bg-red-700';
-      default: return 'bg-gray-500';
-    }
-  }
-
-  function handleTimeframeChange(timeframe: '1h' | '24h' | '7d') {
-    setSelectedTimeframe(timeframe);
-    getSystemMetrics(timeframe);
-  }
 };
 
 export default AnubisSystemDashboard;
