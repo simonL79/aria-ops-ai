@@ -1034,6 +1034,27 @@ export type Database = {
         }
         Relationships: []
       }
+      aria_validation_log: {
+        Row: {
+          check_type: string | null
+          id: string
+          result_count: number | null
+          validated_at: string | null
+        }
+        Insert: {
+          check_type?: string | null
+          id?: string
+          result_count?: number | null
+          validated_at?: string | null
+        }
+        Update: {
+          check_type?: string | null
+          id?: string
+          result_count?: number | null
+          validated_at?: string | null
+        }
+        Relationships: []
+      }
       auto_containment_actions: {
         Row: {
           action_status: string | null
@@ -7731,6 +7752,10 @@ export type Database = {
         Returns: undefined
       }
       update_entity_risk_scores: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      validate_aria_on_admin_login: {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
