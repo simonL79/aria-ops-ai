@@ -10,7 +10,7 @@ interface HeroSectionProps {
 
 const HeroSection = ({ onScrollToForm }: HeroSectionProps) => {
   return (
-    <section className="relative min-h-screen bg-[#0A0F2C] text-white py-20 px-6 overflow-hidden">
+    <section className="relative min-h-screen bg-[#0A0F2C] text-white py-12 sm:py-16 md:py-20 px-4 sm:px-6 overflow-hidden">
       {/* Animated grid overlay */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#247CFF]/20 to-transparent animate-pulse"></div>
@@ -28,47 +28,47 @@ const HeroSection = ({ onScrollToForm }: HeroSectionProps) => {
       
       <div className="container mx-auto text-center max-w-6xl relative z-10">
         {/* Logo prominently displayed */}
-        <div className="mb-8 flex justify-center">
+        <div className="mb-6 sm:mb-8 flex justify-center">
           <Logo variant="light" size="xl" className="mx-auto" />
         </div>
         
-        <div className="mb-12 space-y-8">
+        <div className="mb-8 sm:mb-10 md:mb-12 space-y-4 sm:space-y-6 md:space-y-8">
           <div className="flex justify-center">
-            <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-9xl font-black mb-6 leading-tight font-['Space_Grotesk'] tracking-tight text-center">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl xl:text-8xl 2xl:text-9xl font-black mb-4 sm:mb-6 leading-tight font-['Space_Grotesk'] tracking-tight text-center px-2">
               <span className="bg-gradient-to-r from-white via-[#D8DEE9] to-[#247CFF] bg-clip-text text-transparent">
                 A.R.I.A™
               </span>
             </h1>
           </div>
-          <h2 className="text-lg sm:text-xl md:text-3xl lg:text-5xl font-bold mb-8 text-[#D8DEE9] tracking-wide font-['Space_Grotesk'] text-center px-4 mx-auto max-w-5xl">
+          <h2 className="text-sm sm:text-base md:text-lg lg:text-2xl xl:text-3xl 2xl:text-5xl font-bold mb-6 sm:mb-8 text-[#D8DEE9] tracking-wide font-['Space_Grotesk'] text-center px-2 mx-auto max-w-5xl">
             ADAPTIVE REPUTATION INTELLIGENCE & ANALYSIS
           </h2>
-          <p className="text-base sm:text-lg md:text-xl lg:text-2xl mb-12 text-[#D8DEE9] max-w-4xl mx-auto leading-relaxed font-['Inter'] text-center px-4">
+          <p className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl mb-8 sm:mb-10 md:mb-12 text-[#D8DEE9] max-w-4xl mx-auto leading-relaxed font-['Inter'] text-center px-2">
             Real-time protection for your name, your business, and your future.
           </p>
         </div>
         
-        <div className="relative bg-gradient-to-r from-[#1C1C1E]/40 via-[#0A0F2C]/60 to-[#1C1C1E]/40 border border-[#247CFF]/30 p-6 md:p-10 mb-16 rounded-3xl backdrop-blur-sm group hover:border-[#247CFF]/50 transition-all duration-500 mx-4">
+        <div className="relative bg-gradient-to-r from-[#1C1C1E]/40 via-[#0A0F2C]/60 to-[#1C1C1E]/40 border border-[#247CFF]/30 p-4 sm:p-6 md:p-10 mb-8 sm:mb-12 md:mb-16 rounded-2xl sm:rounded-3xl backdrop-blur-sm group hover:border-[#247CFF]/50 transition-all duration-500 mx-2 sm:mx-4">
           <div className="absolute inset-0 bg-gradient-to-r from-[#247CFF]/5 via-transparent to-[#247CFF]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-          <h3 className="text-lg md:text-2xl font-bold mb-6 flex items-center justify-center text-[#247CFF] font-['Space_Grotesk'] tracking-wide text-center">
-            <div className="w-3 h-3 bg-[#247CFF] rounded-full mr-4 animate-pulse shadow-lg shadow-[#247CFF]/50"></div>
+          <h3 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold mb-4 sm:mb-6 flex items-center justify-center text-[#247CFF] font-['Space_Grotesk'] tracking-wide text-center">
+            <div className="w-2 sm:w-3 h-2 sm:h-3 bg-[#247CFF] rounded-full mr-2 sm:mr-4 animate-pulse shadow-lg shadow-[#247CFF]/50"></div>
             PROTECT WHAT MATTERS — BEFORE IT BREAKS
           </h3>
-          <p className="text-base md:text-lg text-[#D8DEE9] leading-relaxed font-['Inter'] text-center max-w-4xl mx-auto">
+          <p className="text-sm sm:text-base md:text-lg text-[#D8DEE9] leading-relaxed font-['Inter'] text-center max-w-4xl mx-auto">
             You don't need to be famous to be at risk.<br className="hidden md:block" />
             You just need someone to say the wrong thing — in the wrong place — at the wrong time.
           </p>
         </div>
 
-        <div className="flex justify-center px-4">
+        <div className="flex justify-center px-2 sm:px-4">
           <Button 
             asChild 
             size="lg" 
-            className="w-full sm:w-auto bg-[#247CFF] hover:bg-[#1c63cc] text-white px-4 sm:px-8 md:px-12 lg:px-20 py-4 sm:py-6 md:py-8 lg:py-10 text-sm sm:text-base md:text-lg lg:text-xl font-bold rounded-2xl border-2 border-[#247CFF] hover:border-[#1c63cc] hover:shadow-[0_0_30px_rgba(36,124,255,0.4)] transform hover:scale-105 transition-all duration-300 font-['Space_Grotesk'] tracking-wide sm:tracking-widest uppercase whitespace-nowrap overflow-hidden"
+            className="w-full sm:w-auto bg-[#247CFF] hover:bg-[#1c63cc] text-white px-4 sm:px-6 md:px-8 lg:px-12 xl:px-20 py-4 sm:py-6 md:py-8 lg:py-10 text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl font-bold rounded-xl sm:rounded-2xl border-2 border-[#247CFF] hover:border-[#1c63cc] hover:shadow-[0_0_30px_rgba(36,124,255,0.4)] transform hover:scale-105 transition-all duration-300 font-['Space_Grotesk'] tracking-wide sm:tracking-widest uppercase"
           >
             <a href="#scan-form" onClick={onScrollToForm} className="flex items-center justify-center min-w-0">
-              <Search className="mr-2 sm:mr-3 md:mr-4 h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-8 lg:w-8 flex-shrink-0" />
-              <span className="truncate">REQUEST YOUR PRIVATE SCAN</span>
+              <Search className="mr-2 sm:mr-3 md:mr-4 h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5 lg:h-6 lg:w-6 xl:h-8 xl:w-8 flex-shrink-0" />
+              <span className="text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl">REQUEST YOUR PRIVATE SCAN</span>
             </a>
           </Button>
         </div>
