@@ -6171,6 +6171,71 @@ export type Database = {
         }
         Relationships: []
       }
+      sentinelgrid_entity_risk_links: {
+        Row: {
+          entity_name: string
+          id: string
+          linked_at: string | null
+          relevance_score: number | null
+          risk_id: string | null
+        }
+        Insert: {
+          entity_name: string
+          id?: string
+          linked_at?: string | null
+          relevance_score?: number | null
+          risk_id?: string | null
+        }
+        Update: {
+          entity_name?: string
+          id?: string
+          linked_at?: string | null
+          relevance_score?: number | null
+          risk_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sentinelgrid_entity_risk_links_risk_id_fkey"
+            columns: ["risk_id"]
+            isOneToOne: false
+            referencedRelation: "sentinelgrid_global_risk_indicators"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sentinelgrid_global_risk_indicators: {
+        Row: {
+          detected_at: string | null
+          id: string
+          indicator_details: string | null
+          is_active: boolean | null
+          region: string
+          risk_type: string
+          severity: number | null
+          source: string | null
+        }
+        Insert: {
+          detected_at?: string | null
+          id?: string
+          indicator_details?: string | null
+          is_active?: boolean | null
+          region: string
+          risk_type: string
+          severity?: number | null
+          source?: string | null
+        }
+        Update: {
+          detected_at?: string | null
+          id?: string
+          indicator_details?: string | null
+          is_active?: boolean | null
+          region?: string
+          risk_type?: string
+          severity?: number | null
+          source?: string | null
+        }
+        Relationships: []
+      }
       sovra_action_log: {
         Row: {
           action_type: string | null
