@@ -20,6 +20,7 @@ import { ShieldhavenPanel } from './ShieldhavenPanel';
 import { HalcyonPanel } from './HalcyonPanel';
 import { IronvaultPanel } from './IronvaultPanel';
 import { CerebraPanel } from './CerebraPanel';
+import { StrikecorePanel } from './StrikecorePanel';
 
 interface CommandFeedback {
   id: string;
@@ -141,6 +142,9 @@ export const FeedbackPanel = ({ commandHistory }: FeedbackPanelProps) => {
 
   return (
     <div className="space-y-4">
+      {/* STRIKECORE™ Reputation Strike & Recovery Analytics Panel */}
+      <StrikecorePanel />
+
       {/* CEREBRA™ AI Bias & Influence Detection Engine Panel */}
       <CerebraPanel />
 
