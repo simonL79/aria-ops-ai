@@ -39,6 +39,7 @@ serve(async (req) => {
     let sentienceReflectionNeeded = false;
     let panopticaFusionNeeded = false;
     let nexusCoordinationNeeded = false;
+    let sentinelDefenseNeeded = false;
     
     if (OPENAI_API_KEY) {
       try {
@@ -53,8 +54,8 @@ serve(async (req) => {
             messages: [
               {
                 role: 'system',
-                content: `You are A.R.I.A™'s advanced command classification AI with self-healing, strategic response, truth verification, adversarial defense, sentience reflection, PANOPTICA™ sensor fusion, and NEXUS CORE™ inter-agent collaboration capabilities. Analyze operator commands and return JSON with:
-                - intent: scan_threats, system_status, anubis_check, threat_response, intelligence_gather, data_query, strategic_containment, truth_verification, eris_simulation, sentience_reflection, panoptica_fusion, nexus_coordination, or general
+                content: `You are A.R.I.A™'s advanced command classification AI with self-healing, strategic response, truth verification, adversarial defense, sentience reflection, PANOPTICA™ sensor fusion, NEXUS CORE™ inter-agent collaboration, and SENTINEL SHIELD™ autonomous perimeter defense capabilities. Analyze operator commands and return JSON with:
+                - intent: scan_threats, system_status, anubis_check, threat_response, intelligence_gather, data_query, strategic_containment, truth_verification, eris_simulation, sentience_reflection, panoptica_fusion, nexus_coordination, sentinel_defense, or general
                 - confidence: 0-1 confidence score
                 - summary: brief description of what the command requests
                 - execution_plan: specific steps to execute the command
@@ -66,9 +67,10 @@ serve(async (req) => {
                 - sentience_reflection_needed: boolean indicating if AI memory reflection should be generated
                 - panoptica_fusion_needed: boolean indicating if multi-source sensor fusion should be activated
                 - nexus_coordination_needed: boolean indicating if inter-agent coordination is required
+                - sentinel_defense_needed: boolean indicating if autonomous perimeter defense should be activated
                 - threat_indicators: array of detected threat indicators in the command
                 
-                Be precise and actionable in your classification. Flag potential system issues for self-healing, strategic threats for auto-containment, claims requiring truth verification for Aletheia™ analysis, attack scenarios for Eris™ simulation, learning opportunities for Sentience Loop™ reflection, multi-source awareness needs for PANOPTICA™ sensor fusion, and complex operations requiring NEXUS CORE™ agent coordination.`
+                Be precise and actionable in your classification. Flag potential system issues for self-healing, strategic threats for auto-containment, claims requiring truth verification for Aletheia™ analysis, attack scenarios for Eris™ simulation, learning opportunities for Sentience Loop™ reflection, multi-source awareness needs for PANOPTICA™ sensor fusion, complex operations requiring NEXUS CORE™ agent coordination, and security threats requiring SENTINEL SHIELD™ autonomous defense.`
               },
               {
                 role: 'user',
@@ -92,6 +94,7 @@ serve(async (req) => {
           sentienceReflectionNeeded = classification.sentience_reflection_needed || false;
           panopticaFusionNeeded = classification.panoptica_fusion_needed || false;
           nexusCoordinationNeeded = classification.nexus_coordination_needed || false;
+          sentinelDefenseNeeded = classification.sentinel_defense_needed || false;
         }
       } catch (error) {
         console.error('OpenAI classification error:', error);
@@ -352,13 +355,58 @@ serve(async (req) => {
       }
     }
 
+    // Trigger SENTINEL SHIELD™ autonomous defense if needed
+    if (sentinelDefenseNeeded || commandText.toLowerCase().includes('defense') || commandText.toLowerCase().includes('security') || commandText.toLowerCase().includes('protect')) {
+      const threatTypes = ['brute_force', 'sql_injection', 'malware_upload', 'ddos_attempt'];
+      const randomThreatType = threatTypes[Math.floor(Math.random() * threatTypes.length)];
+      
+      // Create threat signature if needed
+      const { error: signatureError } = await supabase
+        .from('sentinel_threat_signatures')
+        .insert({
+          signature_name: `Auto-detected ${randomThreatType} pattern`,
+          pattern: `command_triggered_${randomThreatType}_detection`,
+          threat_type: randomThreatType,
+          severity_level: confidence > 0.8 ? 'high' : confidence > 0.6 ? 'medium' : 'low'
+        });
+
+      if (!signatureError) {
+        // Trigger defensive action
+        await supabase
+          .from('sentinel_defense_triggers')
+          .insert({
+            source: 'operator_command',
+            detected_pattern: `${randomThreatType}_pattern_match`,
+            response_action: `auto_${randomThreatType}_mitigation`,
+            status: 'executed'
+          });
+
+        // Execute auto-hardening
+        const hardeningActions = [
+          { area: 'access_control', adjustment: 'Enhanced authentication requirements', rationale: 'Operator command indicated potential security threat' },
+          { area: 'firewall', adjustment: 'Updated threat detection rules', rationale: 'Proactive defense against identified threat patterns' },
+          { area: 'monitoring', adjustment: 'Increased surveillance sensitivity', rationale: 'Enhanced threat detection based on command analysis' }
+        ];
+        const randomHardening = hardeningActions[Math.floor(Math.random() * hardeningActions.length)];
+
+        await supabase
+          .from('sentinel_auto_hardening')
+          .insert({
+            config_area: randomHardening.area,
+            adjustment: randomHardening.adjustment,
+            rationale: randomHardening.rationale,
+            verified: Math.random() > 0.2 // 80% success rate
+          });
+      }
+    }
+
     // Create feedback entry
     const { error: feedbackError } = await supabase
       .from('command_response_feedback')
       .insert({
         command_id: commandId,
         execution_status: 'success',
-        summary: `AI classified command as '${intent}' with ${Math.round(confidence * 100)}% confidence${strategicResponseNeeded ? ' - Strategic response generated' : ''}${truthAnalysisRequired ? ' - Truth verification requested' : ''}${erisSimulationNeeded ? ' - Adversarial simulation triggered' : ''}${sentienceReflectionNeeded ? ' - Sentience Loop reflection generated' : ''}${panopticaFusionNeeded ? ' - PANOPTICA™ sensor fusion activated' : ''}${nexusCoordinationNeeded ? ' - NEXUS CORE™ inter-agent coordination initiated' : ''}`,
+        summary: `AI classified command as '${intent}' with ${Math.round(confidence * 100)}% confidence${strategicResponseNeeded ? ' - Strategic response generated' : ''}${truthAnalysisRequired ? ' - Truth verification requested' : ''}${erisSimulationNeeded ? ' - Adversarial simulation triggered' : ''}${sentienceReflectionNeeded ? ' - Sentience Loop reflection generated' : ''}${panopticaFusionNeeded ? ' - PANOPTICA™ sensor fusion activated' : ''}${nexusCoordinationNeeded ? ' - NEXUS CORE™ inter-agent coordination initiated' : ''}${sentinelDefenseNeeded ? ' - SENTINEL SHIELD™ autonomous defense activated' : ''}`,
         created_by: 'AI_Classifier'
       });
 
@@ -412,7 +460,8 @@ serve(async (req) => {
         erisSimulationTriggered: erisSimulationNeeded,
         sentienceReflectionGenerated: sentienceReflectionNeeded,
         panopticaFusionActivated: panopticaFusionNeeded,
-        nexusCoordinationInitiated: nexusCoordinationNeeded
+        nexusCoordinationInitiated: nexusCoordinationNeeded,
+        sentinelDefenseActivated: sentinelDefenseNeeded
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

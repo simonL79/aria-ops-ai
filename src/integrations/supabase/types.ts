@@ -5788,6 +5788,101 @@ export type Database = {
         }
         Relationships: []
       }
+      sentinel_auto_hardening: {
+        Row: {
+          adjustment: string | null
+          config_area: string
+          executed_at: string | null
+          id: string
+          rationale: string | null
+          verified: boolean | null
+        }
+        Insert: {
+          adjustment?: string | null
+          config_area: string
+          executed_at?: string | null
+          id?: string
+          rationale?: string | null
+          verified?: boolean | null
+        }
+        Update: {
+          adjustment?: string | null
+          config_area?: string
+          executed_at?: string | null
+          id?: string
+          rationale?: string | null
+          verified?: boolean | null
+        }
+        Relationships: []
+      }
+      sentinel_defense_triggers: {
+        Row: {
+          detected_pattern: string | null
+          id: string
+          response_action: string | null
+          signature_id: string | null
+          source: string
+          status: string | null
+          triggered_at: string | null
+        }
+        Insert: {
+          detected_pattern?: string | null
+          id?: string
+          response_action?: string | null
+          signature_id?: string | null
+          source: string
+          status?: string | null
+          triggered_at?: string | null
+        }
+        Update: {
+          detected_pattern?: string | null
+          id?: string
+          response_action?: string | null
+          signature_id?: string | null
+          source?: string
+          status?: string | null
+          triggered_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sentinel_defense_triggers_signature_id_fkey"
+            columns: ["signature_id"]
+            isOneToOne: false
+            referencedRelation: "sentinel_threat_signatures"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sentinel_threat_signatures: {
+        Row: {
+          created_at: string | null
+          id: string
+          pattern: string
+          severity_level: string | null
+          signature_name: string
+          threat_type: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          pattern: string
+          severity_level?: string | null
+          signature_name: string
+          threat_type?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          pattern?: string
+          severity_level?: string | null
+          signature_name?: string
+          threat_type?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       sovra_action_log: {
         Row: {
           action_type: string | null

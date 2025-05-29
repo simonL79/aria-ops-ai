@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -13,6 +12,7 @@ import { ErisPanel } from './ErisPanel';
 import { SentiencePanel } from './SentiencePanel';
 import { PanopticaPanel } from './PanopticaPanel';
 import { NexusPanel } from './NexusPanel';
+import { SentinelShieldPanel } from './SentinelShieldPanel';
 
 interface CommandFeedback {
   id: string;
@@ -134,6 +134,9 @@ export const FeedbackPanel = ({ commandHistory }: FeedbackPanelProps) => {
 
   return (
     <div className="space-y-4">
+      {/* SENTINEL SHIELD™ Autonomous Perimeter Defense Panel */}
+      <SentinelShieldPanel />
+
       {/* NEXUS CORE™ Inter-Agent Collaboration Panel */}
       <NexusPanel />
 
