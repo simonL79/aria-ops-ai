@@ -1180,6 +1180,79 @@ export type Database = {
         }
         Relationships: []
       }
+      command_remediation_suggestions: {
+        Row: {
+          command_id: string | null
+          created_at: string | null
+          id: string
+          proposed_by: string | null
+          rationale: string | null
+          suggestion: string
+        }
+        Insert: {
+          command_id?: string | null
+          created_at?: string | null
+          id?: string
+          proposed_by?: string | null
+          rationale?: string | null
+          suggestion: string
+        }
+        Update: {
+          command_id?: string | null
+          created_at?: string | null
+          id?: string
+          proposed_by?: string | null
+          rationale?: string | null
+          suggestion?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "command_remediation_suggestions_command_id_fkey"
+            columns: ["command_id"]
+            isOneToOne: false
+            referencedRelation: "operator_command_log"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      command_response_feedback: {
+        Row: {
+          command_id: string | null
+          created_by: string | null
+          error_message: string | null
+          evaluated_at: string | null
+          execution_status: string
+          id: string
+          summary: string | null
+        }
+        Insert: {
+          command_id?: string | null
+          created_by?: string | null
+          error_message?: string | null
+          evaluated_at?: string | null
+          execution_status: string
+          id?: string
+          summary?: string | null
+        }
+        Update: {
+          command_id?: string | null
+          created_by?: string | null
+          error_message?: string | null
+          evaluated_at?: string | null
+          execution_status?: string
+          id?: string
+          summary?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "command_response_feedback_command_id_fkey"
+            columns: ["command_id"]
+            isOneToOne: false
+            referencedRelation: "operator_command_log"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companies: {
         Row: {
           created_at: string | null
@@ -3878,6 +3951,7 @@ export type Database = {
       }
       operator_command_log: {
         Row: {
+          command_summary: string | null
           command_text: string
           created_at: string | null
           id: string
@@ -3888,6 +3962,7 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          command_summary?: string | null
           command_text: string
           created_at?: string | null
           id?: string
@@ -3898,6 +3973,7 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          command_summary?: string | null
           command_text?: string
           created_at?: string | null
           id?: string

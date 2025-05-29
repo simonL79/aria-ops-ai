@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +10,7 @@ import { useCommandProcessor } from './CommandProcessor';
 import { TerminalDisplay } from './TerminalDisplay';
 import { CommandInput } from './CommandInput';
 import { QuickCommands } from './QuickCommands';
+import { FeedbackPanel } from './FeedbackPanel';
 
 interface OperatorCommand {
   id: string;
@@ -36,6 +36,7 @@ const OperatorConsole = () => {
   const [commandHistory, setCommandHistory] = useState<OperatorCommand[]>([]);
   const [responses, setResponses] = useState<OperatorResponse[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(true);
   const { processCommand } = useCommandProcessor();
   
   const voiceRecognition = VoiceRecognition({
@@ -139,45 +140,63 @@ const OperatorConsole = () => {
   }
 
   return (
-    <div className="h-screen bg-black text-green-400 font-mono flex flex-col">
-      {/* Header */}
-      <div className="border-b border-green-500/30 p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Terminal className="h-6 w-6 text-green-400" />
-            <h1 className="text-xl font-bold">A.R.I.A™ GHOST PROTOCOL</h1>
-            <Badge className="bg-green-500/20 text-green-400 border-green-500/50">
-              <Activity className="h-3 w-3 mr-1" />
-              OPERATOR CONSOLE
-            </Badge>
-          </div>
-          <div className="text-sm text-green-500/60">
-            {new Date().toLocaleString()} | {user?.email}
+    <div className="h-screen bg-black text-green-400 font-mono flex">
+      {/* Main Console */}
+      <div className="flex-1 flex flex-col">
+        {/* Header */}
+        <div className="border-b border-green-500/30 p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Terminal className="h-6 w-6 text-green-400" />
+              <h1 className="text-xl font-bold">A.R.I.A™ GHOST PROTOCOL</h1>
+              <Badge className="bg-green-500/20 text-green-400 border-green-500/50">
+                <Activity className="h-3 w-3 mr-1" />
+                OPERATOR CONSOLE
+              </Badge>
+            </div>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setShowFeedback(!showFeedback)}
+                className="text-xs text-green-400 hover:text-green-300"
+              >
+                {showFeedback ? 'Hide' : 'Show'} Feedback
+              </button>
+              <div className="text-sm text-green-500/60">
+                {new Date().toLocaleString()} | {user?.email}
+              </div>
+            </div>
           </div>
         </div>
+
+        {/* Terminal Output */}
+        <TerminalDisplay
+          commandHistory={commandHistory}
+          responses={responses}
+          isProcessing={isProcessing}
+        />
+
+        {/* Command Input */}
+        <CommandInput
+          currentCommand={currentCommand}
+          setCurrentCommand={setCurrentCommand}
+          onProcessCommand={handleProcessCommand}
+          isProcessing={isProcessing}
+          isListening={voiceRecognition.isListening}
+          startVoiceCommand={voiceRecognition.startVoiceCommand}
+          stopVoiceCommand={voiceRecognition.stopVoiceCommand}
+          isVoiceSupported={voiceRecognition.isSupported}
+        />
+
+        {/* Quick Commands */}
+        <QuickCommands onCommandSelect={setCurrentCommand} />
       </div>
 
-      {/* Terminal Output */}
-      <TerminalDisplay
-        commandHistory={commandHistory}
-        responses={responses}
-        isProcessing={isProcessing}
-      />
-
-      {/* Command Input */}
-      <CommandInput
-        currentCommand={currentCommand}
-        setCurrentCommand={setCurrentCommand}
-        onProcessCommand={handleProcessCommand}
-        isProcessing={isProcessing}
-        isListening={voiceRecognition.isListening}
-        startVoiceCommand={voiceRecognition.startVoiceCommand}
-        stopVoiceCommand={voiceRecognition.stopVoiceCommand}
-        isVoiceSupported={voiceRecognition.isSupported}
-      />
-
-      {/* Quick Commands */}
-      <QuickCommands onCommandSelect={setCurrentCommand} />
+      {/* Feedback Panel */}
+      {showFeedback && (
+        <div className="w-80 border-l border-green-500/30 p-4 overflow-y-auto">
+          <FeedbackPanel commandHistory={commandHistory} />
+        </div>
+      )}
     </div>
   );
 };

@@ -104,6 +104,19 @@ export const useCommandProcessor = () => {
 
       if (commandError) throw commandError;
 
+      // Trigger AI classification via edge function
+      try {
+        await supabase.functions.invoke('classify-ai-command', {
+          body: {
+            commandId: commandData.id,
+            commandText: command
+          }
+        });
+      } catch (aiError) {
+        console.error('AI classification failed:', aiError);
+        // Continue with basic processing even if AI fails
+      }
+
       // Generate response based on command
       const response = await executeCommand(command);
 

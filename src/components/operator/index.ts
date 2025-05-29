@@ -5,3 +5,4 @@ export { useCommandProcessor } from './CommandProcessor';
 export { TerminalDisplay } from './TerminalDisplay';
 export { CommandInput } from './CommandInput';
 export { QuickCommands } from './QuickCommands';
+export { FeedbackPanel } from './FeedbackPanel';
