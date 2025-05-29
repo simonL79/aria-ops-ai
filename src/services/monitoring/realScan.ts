@@ -2,86 +2,65 @@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-export const performRealScan = async (options: {
+export interface RealScanOptions {
   fullScan?: boolean;
-  targetEntity?: string;
   source?: string;
-} = {}) => {
-  try {
-    console.log('🚀 Starting real monitoring scan...');
-    
-    // Update monitoring status to show scan is active
-    const { error: statusError } = await supabase
-      .from('monitoring_status')
-      .upsert({
-        id: '1',
-        is_active: true,
-        last_run: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      });
-    
-    if (statusError) {
-      console.error('Error updating monitoring status:', statusError);
-    }
+  targetEntity?: string;
+}
 
-    // Call the monitoring-scan edge function
+export const performRealScan = async (options: RealScanOptions = {}) => {
+  try {
+    console.log('🔍 Starting LIVE monitoring scan...');
+    
+    toast.info("Initiating live threat scan...", {
+      description: "Connecting to live data sources"
+    });
+
+    // Call the monitoring scan edge function with live enforcement
     const { data, error } = await supabase.functions.invoke('monitoring-scan', {
       body: {
         fullScan: options.fullScan || true,
-        targetEntity: options.targetEntity || null,
-        source: options.source || 'real_scan'
+        targetEntity: options.targetEntity,
+        source: options.source || 'operator_console'
       }
     });
-    
-    if (error) {
-      console.error('Real scan error:', error);
-      toast.error('Real scan failed: ' + error.message);
-      return [];
-    }
-    
-    // Get the latest scan results
-    const { data: results, error: fetchError } = await supabase
-      .from('scan_results')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(20);
-    
-    if (fetchError) {
-      console.error('Error fetching scan results:', fetchError);
-      return [];
-    }
-    
-    console.log(`✅ Real scan completed: ${results?.length || 0} results`);
-    toast.success(`Real scan completed: ${results?.length || 0} new results`);
-    
-    return results || [];
-    
-  } catch (error) {
-    console.error('Error in real scan:', error);
-    toast.error('Real scan failed: ' + error.message);
-    return [];
-  }
-};
 
-export const getMonitoringStatus = async () => {
-  try {
-    const { data, error } = await supabase
-      .from('monitoring_status')
-      .select('*')
-      .single();
-    
     if (error) {
-      console.error('Error fetching monitoring status:', error);
-      return { isActive: false, lastRun: null };
+      console.error('Real scan failed:', error);
+      toast.error("Live scan failed", {
+        description: error.message || "Unable to connect to live data sources"
+      });
+      return [];
     }
-    
-    return {
-      isActive: data?.is_active || false,
-      lastRun: data?.last_run ? new Date(data.last_run) : null,
-      nextRun: data?.next_run ? new Date(data.next_run) : null
-    };
+
+    if (data?.success) {
+      const resultCount = data.results?.length || 0;
+      
+      if (resultCount > 0) {
+        toast.success("Live scan completed", {
+          description: `Found ${resultCount} real threats from live sources`
+        });
+        
+        console.log(`✅ Live scan completed: ${resultCount} real threats detected`);
+        return data.results;
+      } else {
+        toast.info("Live scan completed", {
+          description: "No threats detected in current scan"
+        });
+        
+        console.log('ℹ️ Live scan completed: No threats detected');
+        return [];
+      }
+    } else {
+      console.warn('Scan completed but no success flag returned');
+      return [];
+    }
+
   } catch (error) {
-    console.error('Error in getMonitoringStatus:', error);
-    return { isActive: false, lastRun: null };
+    console.error('Error performing real scan:', error);
+    toast.error("Scan error", {
+      description: "An error occurred while scanning live sources"
+    });
+    return [];
   }
 };

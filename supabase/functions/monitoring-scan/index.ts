@@ -19,7 +19,7 @@ Deno.serve(async (req) => {
 
     console.log('[MONITORING-SCAN] Starting LIVE-ONLY comprehensive monitoring scan...');
 
-    const { fullScan, targetEntity, source } = await req.json();
+    const { fullScan, targetEntity, source } = await req.json().catch(() => ({}));
 
     // STRICT: Clean ALL mock/demo/test data - ZERO TOLERANCE
     console.log('[MONITORING-SCAN] ENFORCING LIVE DATA ONLY - Purging all non-live data...');
@@ -69,7 +69,7 @@ Deno.serve(async (req) => {
       if (redditData && redditData.results && redditData.dataSource === 'LIVE_REDDIT_API') {
         console.log(`[MONITORING-SCAN] LIVE Reddit scan completed: found ${redditData.matchesFound || 0} real matches`);
         
-        // Insert LIVE Reddit results directly into scan_results
+        // Insert LIVE Reddit results directly into scan_results with proper fields
         for (const result of redditData.results) {
           const scanResult = {
             platform: 'Reddit',
@@ -82,7 +82,11 @@ Deno.serve(async (req) => {
             confidence_score: 85,
             potential_reach: result.potential_reach || 1000,
             detected_entities: Array.isArray(result.detected_entities) ? result.detected_entities : [],
-            source_type: 'live_api'
+            source_type: 'live_api',
+            entity_name: result.entity_name || 'business_entity',
+            source_credibility_score: 75,
+            media_is_ai_generated: false,
+            ai_detection_confidence: 0
           };
           
           const { error: insertError } = await supabase
@@ -103,9 +107,6 @@ Deno.serve(async (req) => {
       console.error('[MONITORING-SCAN] LIVE Reddit scan failed:', redditScanError);
       // NO FALLBACK DATA - LIVE ONLY ENFORCEMENT
     }
-
-    // REMOVED: All news simulation and system status messages
-    // A.R.I.A™ operates with LIVE data only - no synthetic content
 
     console.log(`[MONITORING-SCAN] LIVE monitoring scan completed. Found ${results.length} real results.`);
 

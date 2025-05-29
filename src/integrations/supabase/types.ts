@@ -6030,6 +6030,7 @@ export type Database = {
           content: string
           created_at: string | null
           detected_entities: Json | null
+          entity_name: string | null
           freshness_window: string | null
           id: string
           incident_playbook: string | null
@@ -6071,6 +6072,7 @@ export type Database = {
           content: string
           created_at?: string | null
           detected_entities?: Json | null
+          entity_name?: string | null
           freshness_window?: string | null
           id?: string
           incident_playbook?: string | null
@@ -6112,6 +6114,7 @@ export type Database = {
           content?: string
           created_at?: string | null
           detected_entities?: Json | null
+          entity_name?: string | null
           freshness_window?: string | null
           id?: string
           incident_playbook?: string | null
@@ -7684,6 +7687,7 @@ export type Database = {
           content: string
           created_at: string | null
           detected_entities: Json | null
+          entity_name: string | null
           freshness_window: string | null
           id: string
           incident_playbook: string | null

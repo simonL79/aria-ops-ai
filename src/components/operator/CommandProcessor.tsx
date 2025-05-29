@@ -44,7 +44,7 @@ export const useCommandProcessor = () => {
           fullScan: true,
           source: 'operator_console'
         });
-        response = `Real threat scan completed. Found ${results.length} recent threats/mentions.`;
+        response = `Real threat scan completed. Found ${results.length} live threats from Reddit and other sources.`;
       }
       else if (cmd.includes('anubis status')) {
         const { data } = await supabase.from('anubis_state').select('*');
@@ -56,17 +56,19 @@ export const useCommandProcessor = () => {
           .from('scan_results')
           .select('*')
           .eq('severity', 'high')
+          .eq('source_type', 'live_api')
           .order('created_at', { ascending: false })
           .limit(5);
-        response = `${data?.length || 0} high-severity threats found. Latest from: ${data?.[0]?.platform || 'none'}`;
+        response = `${data?.length || 0} high-severity live threats found. Latest from: ${data?.[0]?.platform || 'none'}`;
       }
       else if (cmd.includes('show') && cmd.includes('alerts')) {
         const { data } = await supabase
           .from('content_alerts')
           .select('*')
+          .eq('source_type', 'live_source')
           .order('created_at', { ascending: false })
           .limit(5);
-        response = `${data?.length || 0} content alerts in system. Latest: ${data?.[0]?.platform || 'none'}`;
+        response = `${data?.length || 0} live content alerts in system. Latest: ${data?.[0]?.platform || 'none'}`;
       }
       else if (cmd.includes('system health')) {
         const { data: opsLog } = await supabase
@@ -120,19 +122,6 @@ export const useCommandProcessor = () => {
         .single();
 
       if (commandError) throw commandError;
-
-      // Trigger AI classification via edge function
-      try {
-        await supabase.functions.invoke('classify-ai-command', {
-          body: {
-            commandId: commandData.id,
-            commandText: command
-          }
-        });
-      } catch (aiError) {
-        console.error('AI classification failed:', aiError);
-        // Continue with basic processing even if AI fails
-      }
 
       // Generate response based on command
       const response = await executeCommand(command);
