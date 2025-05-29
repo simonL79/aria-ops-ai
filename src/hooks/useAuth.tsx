@@ -74,8 +74,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return true;
       }
       
-      // Use the new is_current_user_admin function
-      const { data, error } = await supabase.rpc('is_current_user_admin');
+      // Use the new is_current_user_admin function with proper type casting
+      const { data, error } = await supabase.rpc('is_current_user_admin' as any);
       
       if (error) {
         console.error('Error checking admin status:', error);
