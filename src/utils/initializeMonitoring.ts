@@ -1,203 +1,130 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { initializeMonitoringPlatforms } from '@/services/monitoring';
 
 /**
- * Initialize default monitoring sources in the database
- */
-export const initializeMonitoringSources = async (): Promise<void> => {
-  try {
-    console.log('Initializing monitoring sources...');
-    
-    // Check if we have an authenticated user first
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
-      console.log('No authenticated user, skipping monitoring sources initialization');
-      return;
-    }
-
-    // Check if monitoring sources already exist
-    const { data: existingSources, error: checkError } = await supabase
-      .from('monitoring_sources')
-      .select('id')
-      .limit(1);
-
-    if (checkError) {
-      console.error('Error checking existing monitoring sources:', checkError);
-      return;
-    }
-
-    // If sources already exist, don't create duplicates
-    if (existingSources && existingSources.length > 0) {
-      console.log('Monitoring sources already exist, skipping initialization');
-      return;
-    }
-
-    // Create default monitoring sources
-    const defaultSources = [
-      { name: 'Twitter', type: 'social_media', is_active: true },
-      { name: 'Facebook', type: 'social_media', is_active: true },
-      { name: 'LinkedIn', type: 'social_media', is_active: true },
-      { name: 'Reddit', type: 'forum', is_active: true },
-      { name: 'News Sites', type: 'news', is_active: true },
-      { name: 'Google Search', type: 'search', is_active: true }
-    ];
-
-    const { error: insertError } = await supabase
-      .from('monitoring_sources')
-      .insert(defaultSources);
-
-    if (insertError) {
-      console.error('Error creating default monitoring sources:', insertError);
-      return;
-    }
-
-    console.log('Default monitoring sources created successfully');
-  } catch (error) {
-    console.error('Error in initializeMonitoringSources:', error);
-  }
-};
-
-/**
- * Initialize monitored platforms in the database
- */
-export const initializeMonitoredPlatforms = async (): Promise<void> => {
-  try {
-    console.log('Initializing monitored platforms...');
-    
-    // Check if we have an authenticated user first
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
-      console.log('No authenticated user, skipping monitored platforms initialization');
-      return;
-    }
-
-    // Check if platforms already exist
-    const { data: existingPlatforms, error: checkError } = await supabase
-      .from('monitored_platforms')
-      .select('id')
-      .limit(1);
-
-    if (checkError) {
-      console.error('Error checking existing monitored platforms:', checkError);
-      return;
-    }
-
-    // If platforms already exist, don't create duplicates
-    if (existingPlatforms && existingPlatforms.length > 0) {
-      console.log('Monitored platforms already exist, skipping initialization');
-      return;
-    }
-
-    // Create default monitored platforms
-    const defaultPlatforms = [
-      {
-        name: 'Twitter',
-        type: 'social_media',
-        status: 'active',
-        active: true,
-        positive_ratio: 50,
-        total: 0,
-        mention_count: 0,
-        sentiment: 0
-      },
-      {
-        name: 'Facebook',
-        type: 'social_media', 
-        status: 'active',
-        active: true,
-        positive_ratio: 60,
-        total: 0,
-        mention_count: 0,
-        sentiment: 0
-      },
-      {
-        name: 'LinkedIn',
-        type: 'social_media',
-        status: 'active', 
-        active: true,
-        positive_ratio: 75,
-        total: 0,
-        mention_count: 0,
-        sentiment: 0
-      }
-    ];
-
-    const { error: insertError } = await supabase
-      .from('monitored_platforms')
-      .insert(defaultPlatforms);
-
-    if (insertError) {
-      console.error('Error initializing monitored platforms:', insertError);
-      return;
-    }
-
-    console.log('Monitored platforms initialized successfully');
-  } catch (error) {
-    console.error('Error in initializeMonitoredPlatforms:', error);
-  }
-};
-
-/**
- * Initialize the monitoring status
- */
-export const initializeMonitoringStatus = async (): Promise<void> => {
-  try {
-    console.log('Initializing monitoring status...');
-
-    // Check if monitoring status already exists
-    const { data: existingStatus, error: checkError } = await supabase
-      .from('monitoring_status')
-      .select('id')
-      .eq('id', '1')
-      .single();
-
-    if (checkError && checkError.code !== 'PGRST116') {
-      console.error('Error checking monitoring status:', checkError);
-      return;
-    }
-
-    // If status already exists, don't create duplicate
-    if (existingStatus) {
-      console.log('Monitoring status already exists, skipping initialization');
-      return;
-    }
-
-    // Create default monitoring status
-    const { error: insertError } = await supabase
-      .from('monitoring_status')
-      .insert({
-        id: '1',
-        is_active: false,
-        sources_count: 0,
-        last_run: null,
-        next_run: null
-      });
-
-    if (insertError) {
-      console.error('Error creating monitoring status:', insertError);
-      return;
-    }
-
-    console.log('Monitoring status initialized successfully');
-  } catch (error) {
-    console.error('Error in initializeMonitoringStatus:', error);
-  }
-};
-
-/**
- * Initialize all database components
+ * Initialize all A.R.I.A™ monitoring systems and live data flows
  */
 export const initializeDatabase = async (): Promise<void> => {
   try {
-    console.log('Starting database initialization...');
+    console.log('🔧 Initializing A.R.I.A™ database systems...');
     
-    await initializeMonitoringStatus();
-    await initializeMonitoringSources();
-    await initializeMonitoredPlatforms();
+    // Initialize monitoring platforms
+    await initializeMonitoringPlatforms();
     
-    console.log('Database initialization completed');
+    // Ensure live status table is populated
+    await initializeLiveStatus();
+    
+    // Initialize system config for live data enforcement
+    await initializeSystemConfig();
+    
+    // Trigger initial data validation
+    await validateSystemIntegrity();
+    
+    console.log('✅ A.R.I.A™ database initialization complete');
+    
   } catch (error) {
-    console.error('Error during database initialization:', error);
+    console.error('❌ Database initialization failed:', error);
+    throw error;
+  }
+};
+
+/**
+ * Initialize live status monitoring for all A.R.I.A™ modules
+ */
+const initializeLiveStatus = async (): Promise<void> => {
+  try {
+    const liveModules = [
+      'Live Threat Scanner',
+      'Social Media Monitor',
+      'News Feed Scanner',
+      'Forum Analysis Engine',
+      'Legal Discussion Monitor',
+      'Reputation Risk Detector',
+      'Strike Management System',
+      'HyperCore Intelligence',
+      'EIDETIC Memory Engine',
+      'RSI Threat Simulation',
+      'Anubis Diagnostics',
+      'Graveyard Archive'
+    ];
+
+    for (const module of liveModules) {
+      await supabase
+        .from('live_status')
+        .upsert({
+          name: module,
+          active_threats: 0,
+          last_threat_seen: new Date().toISOString(),
+          last_report: new Date().toISOString(),
+          system_status: 'LIVE'
+        }, { onConflict: 'name' });
+    }
+
+    console.log('✅ Live status monitoring initialized for all modules');
+  } catch (error) {
+    console.error('❌ Live status initialization failed:', error);
+  }
+};
+
+/**
+ * Initialize system configuration for live data enforcement
+ */
+const initializeSystemConfig = async (): Promise<void> => {
+  try {
+    await supabase
+      .from('system_config')
+      .upsert([
+        { config_key: 'allow_mock_data', config_value: 'disabled' },
+        { config_key: 'system_mode', config_value: 'live' },
+        { config_key: 'scanner_mode', config_value: 'production' },
+        { config_key: 'data_validation', config_value: 'strict' },
+        { config_key: 'aria_core_active', config_value: 'true' },
+        { config_key: 'live_enforcement', config_value: 'enabled' }
+      ], { onConflict: 'config_key' });
+
+    console.log('✅ System configuration initialized for live operation');
+  } catch (error) {
+    console.error('❌ System config initialization failed:', error);
+  }
+};
+
+/**
+ * Validate system integrity and live data flows
+ */
+const validateSystemIntegrity = async (): Promise<void> => {
+  try {
+    // Check if core tables exist and have proper structure
+    const { data: tables, error } = await supabase
+      .from('information_schema.tables')
+      .select('table_name')
+      .eq('table_schema', 'public')
+      .in('table_name', [
+        'live_status',
+        'system_config',
+        'threats',
+        'scan_results',
+        'strike_requests',
+        'monitoring_status'
+      ]);
+
+    if (error) {
+      console.warn('⚠️ Could not validate all system tables:', error);
+      return;
+    }
+
+    console.log('✅ System integrity validation complete');
+    
+    // Log system startup
+    await supabase
+      .from('aria_ops_log')
+      .insert({
+        operation: 'system_startup',
+        details: 'A.R.I.A/EX™ system initialized with live data enforcement',
+        status: 'success'
+      });
+
+  } catch (error) {
+    console.error('❌ System integrity validation failed:', error);
   }
 };

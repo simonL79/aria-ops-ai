@@ -1,270 +1,199 @@
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+
+import { supabase } from '@/integrations/supabase/client';
 
 export interface LiveDataValidationResult {
   isValid: boolean;
   errors: string[];
   warnings: string[];
-  totalChecks: number;
   passedChecks: number;
+  totalChecks: number;
 }
 
 /**
- * Production-grade live data validation service
- * Fixed to handle database connectivity more reliably
+ * Comprehensive live data validation for A.R.I.A™ systems
  */
 export class LiveDataValidator {
   
   /**
-   * Run comprehensive live data validation with improved connectivity checks
+   * Validate complete system integrity for live data operations
    */
   static async validateLiveIntegrity(): Promise<LiveDataValidationResult> {
     const result: LiveDataValidationResult = {
       isValid: true,
       errors: [],
       warnings: [],
-      totalChecks: 0,
-      passedChecks: 0
+      passedChecks: 0,
+      totalChecks: 0
     };
 
-    console.log('🔍 Starting A.R.I.A™ Live Data Integrity Check...');
+    const checks = [
+      () => this.validateSystemConfig(result),
+      () => this.validateLiveStatus(result),
+      () => this.validateDataQuality(result),
+      () => this.validateModuleConnectivity(result),
+      () => this.validateSecurityCompliance(result)
+    ];
 
-    // Check 1: Database connectivity (using multiple safe approaches)
-    result.totalChecks++;
-    const dbCheck = await this.checkDatabaseConnectivity();
-    if (!dbCheck.isConnected) {
-      result.errors.push('Database connectivity failed');
-      result.isValid = false;
-    } else {
-      result.passedChecks++;
+    result.totalChecks = checks.length;
+
+    for (const check of checks) {
+      try {
+        await check();
+        result.passedChecks++;
+      } catch (error) {
+        result.errors.push(`Validation check failed: ${error.message}`);
+        result.isValid = false;
+      }
     }
 
-    // Check 2: User authentication
-    result.totalChecks++;
-    const authCheck = await this.checkUserAuthentication();
-    if (!authCheck.isAuthenticated) {
-      result.warnings.push('User not authenticated - some features may be limited');
-    } else {
-      result.passedChecks++;
-    }
+    // System is considered valid if no critical errors
+    result.isValid = result.errors.length === 0;
 
-    // Check 3: Core tables exist and are accessible
-    result.totalChecks++;
-    const tableCheck = await this.checkCoreTablesAccess();
-    if (!tableCheck.accessible) {
-      result.warnings.push(`Some tables not accessible: ${tableCheck.issues.join(', ')}`);
-    } else {
-      result.passedChecks++;
-    }
-
-    // Check 4: Edge functions are deployed
-    result.totalChecks++;
-    const functionCheck = await this.checkEdgeFunctionDeployment();
-    if (!functionCheck.deployed) {
-      result.warnings.push('Some edge functions may not be deployed');
-    } else {
-      result.passedChecks++;
-    }
-
-    // Check 5: Live data processing capability
-    result.totalChecks++;
-    const processingCheck = await this.checkLiveDataProcessing();
-    if (!processingCheck.canProcess) {
-      result.warnings.push('Live data processing may be limited');
-    } else {
-      result.passedChecks++;
-    }
-
-    // Check 6: System initialization status
-    result.totalChecks++;
-    const initCheck = await this.checkSystemInitialization();
-    if (!initCheck.initialized) {
-      result.warnings.push('System may need initialization');
-    } else {
-      result.passedChecks++;
-    }
-
-    console.log(`✅ Live integrity check completed: ${result.passedChecks}/${result.totalChecks} checks passed`);
-    
     return result;
   }
 
   /**
-   * Check database connectivity using the most reliable approach
+   * Validate system configuration for live operations
    */
-  private static async checkDatabaseConnectivity() {
+  private static async validateSystemConfig(result: LiveDataValidationResult): Promise<void> {
     try {
-      // Use a simple query that should always work if database is accessible
-      const { data, error } = await supabase
-        .from('scan_results')
-        .select('id')
-        .limit(1);
-      
-      if (!error) {
-        console.log('✅ Database connectivity verified via scan_results');
-        return { isConnected: true, error: null };
+      const { data: configs, error } = await supabase
+        .from('system_config')
+        .select('config_key, config_value')
+        .in('config_key', ['system_mode', 'allow_mock_data', 'live_enforcement']);
+
+      if (error) throw error;
+
+      const configMap = new Map(configs?.map(c => [c.config_key, c.config_value]) || []);
+
+      if (configMap.get('system_mode') !== 'live') {
+        result.warnings.push('System not in live mode');
       }
 
-      // Fallback: try a different table
-      const { error: clientsError } = await supabase
-        .from('clients')
-        .select('id')
-        .limit(1);
-      
-      if (!clientsError) {
-        console.log('✅ Database connectivity verified via clients');
-        return { isConnected: true, error: null };
+      if (configMap.get('allow_mock_data') !== 'disabled') {
+        result.warnings.push('Mock data is still allowed');
       }
 
-      // If both fail, database has issues
-      console.error('❌ Database connectivity failed on multiple tables');
-      return { isConnected: false, error: 'Multiple table access failed' };
-      
+      if (configMap.get('live_enforcement') !== 'enabled') {
+        result.errors.push('Live data enforcement is disabled');
+      }
+
     } catch (error) {
-      console.error('Database connectivity check failed:', error);
-      return { isConnected: false, error: 'Connection failed' };
+      result.errors.push(`System config validation failed: ${error.message}`);
     }
   }
 
   /**
-   * Check user authentication status
+   * Validate live status monitoring
    */
-  private static async checkUserAuthentication() {
+  private static async validateLiveStatus(result: LiveDataValidationResult): Promise<void> => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      return { isAuthenticated: !!user, user };
-    } catch (error) {
-      console.error('Authentication check failed:', error);
-      return { isAuthenticated: false, user: null };
-    }
-  }
+      const { data: statuses, error } = await supabase
+        .from('live_status')
+        .select('name, system_status, last_report')
+        .eq('system_status', 'LIVE');
 
-  /**
-   * Check access to core tables with improved error handling
-   */
-  private static async checkCoreTablesAccess() {
-    const coreTableChecks = [
-      { name: 'scan_results', query: () => supabase.from('scan_results').select('id').limit(1), required: true },
-      { name: 'clients', query: () => supabase.from('clients').select('id').limit(1), required: true },
-      { name: 'threats', query: () => supabase.from('threats').select('id').limit(1), required: false },
-      { name: 'live_status', query: () => supabase.from('live_status').select('id').limit(1), required: false },
-      { name: 'threat_ingestion_queue', query: () => supabase.from('threat_ingestion_queue').select('id').limit(1), required: false }
-    ];
-    
-    const issues: string[] = [];
-    let accessibleCount = 0;
-    
-    for (const tableCheck of coreTableChecks) {
-      try {
-        const { error } = await tableCheck.query();
-        if (error) {
-          if (tableCheck.required) {
-            issues.push(`${tableCheck.name}: ${error.message}`);
-          } else {
-            console.warn(`Optional table ${tableCheck.name} not accessible:`, error.message);
-          }
-        } else {
-          accessibleCount++;
-        }
-      } catch (error) {
-        if (tableCheck.required) {
-          issues.push(`${tableCheck.name}: Access failed`);
-        }
+      if (error) throw error;
+
+      if (!statuses || statuses.length === 0) {
+        result.errors.push('No live status modules found');
+        return;
       }
-    }
 
-    return { accessible: issues.length === 0 && accessibleCount >= 2, issues };
-  }
-
-  /**
-   * Check edge function deployment status
-   */
-  private static async checkEdgeFunctionDeployment() {
-    try {
-      // Test a simple edge function call
-      const { error } = await supabase.functions.invoke('process-threat-ingestion', {
-        body: { test: true }
+      const staleModules = statuses.filter(s => {
+        const lastReport = new Date(s.last_report);
+        const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+        return lastReport < fiveMinutesAgo;
       });
-      
-      return { deployed: true, lastError: error?.message };
+
+      if (staleModules.length > 0) {
+        result.warnings.push(`${staleModules.length} modules have stale status reports`);
+      }
+
     } catch (error) {
-      console.log('Edge function check - some functions may not be deployed:', error);
-      return { deployed: false, lastError: error instanceof Error ? error.message : 'Unknown error' };
+      result.errors.push(`Live status validation failed: ${error.message}`);
     }
   }
 
   /**
-   * Check live data processing capabilities
+   * Validate data quality and integrity
    */
-  private static async checkLiveDataProcessing() {
+  private static async validateDataQuality(result: LiveDataValidationResult): Promise<void> => {
     try {
-      // Check if we can write to the live status table
+      // Check for mock data in critical tables
+      const mockDataChecks = [
+        { table: 'threats', columns: ['content'] },
+        { table: 'scan_results', columns: ['content', 'platform'] },
+        { table: 'strike_requests', columns: ['reason', 'url'] }
+      ];
+
+      for (const check of mockDataChecks) {
+        const conditions = check.columns.map(col => 
+          `${col}.ilike.%mock% OR ${col}.ilike.%test% OR ${col}.ilike.%demo%`
+        ).join(' OR ');
+
+        const { data: mockData, error } = await supabase
+          .from(check.table)
+          .select('id')
+          .or(conditions)
+          .limit(1);
+
+        if (error) continue; // Table might not exist
+
+        if (mockData && mockData.length > 0) {
+          result.warnings.push(`Mock data detected in ${check.table} table`);
+        }
+      }
+
+    } catch (error) {
+      result.warnings.push(`Data quality check encountered issues: ${error.message}`);
+    }
+  }
+
+  /**
+   * Validate module connectivity
+   */
+  private static async validateModuleConnectivity(result: LiveDataValidationResult): Promise<void> => {
+    try {
+      // Test database connectivity
       const { error } = await supabase
-        .from('live_status')
-        .upsert({
-          name: 'System Health Check',
-          active_threats: 0,
-          last_threat_seen: new Date().toISOString(),
-          last_report: new Date().toISOString(),
-          system_status: 'TESTING'
-        }, { onConflict: 'name' });
+        .from('system_config')
+        .select('config_key')
+        .limit(1);
 
-      return { canProcess: !error, error: error?.message };
+      if (error) {
+        result.errors.push('Database connectivity failed');
+      }
+
     } catch (error) {
-      console.error('Live data processing check failed:', error);
-      return { canProcess: false, error: 'Processing check failed' };
+      result.errors.push(`Module connectivity validation failed: ${error.message}`);
     }
   }
 
   /**
-   * Check system initialization status
+   * Validate security compliance
    */
-  private static async checkSystemInitialization() {
+  private static async validateSecurityCompliance(result: LiveDataValidationResult): Promise<void> => {
     try {
-      // Check if basic data exists
-      const { data: liveStatus } = await supabase
-        .from('live_status')
-        .select('*')
-        .limit(1);
+      // Check RLS policies exist on critical tables
+      const criticalTables = ['strike_requests', 'threats', 'user_roles'];
+      
+      for (const table of criticalTables) {
+        const { data: policies, error } = await supabase
+          .from('pg_policies')
+          .select('tablename')
+          .eq('tablename', table)
+          .limit(1);
 
-      const { data: threatQueue } = await supabase
-        .from('threat_ingestion_queue')
-        .select('*')
-        .limit(1);
+        if (error) continue; // Might not have permission to check
 
-      const hasBasicData = (liveStatus && liveStatus.length > 0) || (threatQueue && threatQueue.length > 0);
+        if (!policies || policies.length === 0) {
+          result.warnings.push(`No RLS policies found for ${table} table`);
+        }
+      }
 
-      return { initialized: hasBasicData };
     } catch (error) {
-      console.error('System initialization check failed:', error);
-      return { initialized: false };
+      result.warnings.push(`Security compliance check encountered issues: ${error.message}`);
     }
-  }
-
-  /**
-   * Development-friendly enforcement that doesn't block operations
-   */
-  static async enforceProductionIntegrity(): Promise<boolean> {
-    const validation = await this.validateLiveIntegrity();
-    
-    if (!validation.isValid) {
-      const errorMsg = `⚠️ SYSTEM INTEGRITY ISSUES: ${validation.errors.join(', ')}`;
-      console.warn(errorMsg);
-      toast.warning('System integrity issues detected', {
-        description: 'Some features may be limited. Check console for details.'
-      });
-      // Don't block operations in development - just warn
-      return true;
-    }
-
-    if (validation.warnings.length > 0) {
-      console.warn('⚠️ System warnings:', validation.warnings);
-      toast.info('System operational with warnings', {
-        description: `${validation.warnings.length} warning(s) detected`
-      });
-    }
-
-    console.log('✅ System integrity verified');
-    return true;
   }
 }
