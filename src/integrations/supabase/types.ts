@@ -4603,6 +4603,93 @@ export type Database = {
         }
         Relationships: []
       }
+      perimetrix_blacklisted_ips: {
+        Row: {
+          active: boolean | null
+          added_at: string | null
+          ip_address: string
+          reason: string | null
+          severity: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          added_at?: string | null
+          ip_address: string
+          reason?: string | null
+          severity?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          added_at?: string | null
+          ip_address?: string
+          reason?: string | null
+          severity?: string | null
+        }
+        Relationships: []
+      }
+      perimetrix_ip_geolocation: {
+        Row: {
+          city: string | null
+          country: string | null
+          ip_address: string
+          last_updated: string | null
+          latitude: number | null
+          longitude: number | null
+          region: string | null
+        }
+        Insert: {
+          city?: string | null
+          country?: string | null
+          ip_address: string
+          last_updated?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          region?: string | null
+        }
+        Update: {
+          city?: string | null
+          country?: string | null
+          ip_address?: string
+          last_updated?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          region?: string | null
+        }
+        Relationships: []
+      }
+      perimetrix_ip_request_log: {
+        Row: {
+          detected_threat: boolean | null
+          endpoint_accessed: string | null
+          id: string
+          ip_address: string
+          notes: string | null
+          request_time: string | null
+          status_code: number | null
+          user_agent: string | null
+        }
+        Insert: {
+          detected_threat?: boolean | null
+          endpoint_accessed?: string | null
+          id?: string
+          ip_address: string
+          notes?: string | null
+          request_time?: string | null
+          status_code?: number | null
+          user_agent?: string | null
+        }
+        Update: {
+          detected_threat?: boolean | null
+          endpoint_accessed?: string | null
+          id?: string
+          ip_address?: string
+          notes?: string | null
+          request_time?: string | null
+          status_code?: number | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       praxis_crisis_simulations: {
         Row: {
           archetype_id: string | null

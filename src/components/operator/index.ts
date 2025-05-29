@@ -25,3 +25,4 @@ export { ShadowvaultPanel } from './ShadowvaultPanel';
 export { VoxtracePanel } from './VoxtracePanel';
 export { PolarisPanel } from './PolarisPanel';
 export { TitanvaultPanel } from './TitanvaultPanel';
+export { PerimetrixPanel } from './PerimetrixPanel';
