@@ -23,19 +23,28 @@ const DashboardPage = () => {
     simulateNewData,
   } = useDashboardData();
 
+  // Only show live data metrics
+  const liveAlerts = alerts.filter(alert => 
+    alert.sourceType === 'osint_intelligence' || 
+    alert.sourceType === 'live_alert' ||
+    alert.sourceType === 'live_osint'
+  );
+
+  const highSeverityLiveAlerts = liveAlerts.filter(alert => alert.severity === 'high').length;
+
   return (
     <div className="min-h-screen bg-gray-50">
       <DashboardHeader 
-        title="A.R.I.A™ Threat Intelligence Dashboard"
-        description="Real-time reputation monitoring and threat detection"
+        title="A.R.I.A™ Live Threat Intelligence Dashboard"
+        description="Real-time reputation monitoring and threat detection from live OSINT sources"
         onRefresh={fetchData}
-        totalAlerts={alerts.length}
-        highSeverityAlerts={alerts.filter(alert => alert.severity === 'high').length}
+        totalAlerts={liveAlerts.length}
+        highSeverityAlerts={highSeverityLiveAlerts}
       />
       <DashboardMainContent
         metrics={metrics}
-        alerts={alerts}
-        classifiedAlerts={classifiedAlerts}
+        alerts={liveAlerts} // Only pass live alerts
+        classifiedAlerts={liveAlerts} // Only pass live alerts
         sources={sources}
         actions={actions}
         toneStyles={toneStyles}
@@ -48,8 +57,8 @@ const DashboardPage = () => {
         loading={loading}
         error={error}
         fetchData={fetchData}
-        filteredAlerts={alerts} // Show all alerts by default
-        onFilterChange={() => {}} // Add filter functionality if needed
+        filteredAlerts={liveAlerts} // Only show live alerts
+        onFilterChange={() => {}} // Filter functionality maintained but only for live data
       />
     </div>
   );

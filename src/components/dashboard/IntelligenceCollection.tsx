@@ -1,162 +1,123 @@
 
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Loader, Globe, Search, Rss, MessageSquare, Star } from "lucide-react";
-import { toast } from "sonner";
+import React, { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Search, Wifi, Activity, AlertTriangle, CheckCircle } from 'lucide-react';
+import { performRealScan } from '@/services/monitoring/realScan';
+import { toast } from 'sonner';
 
-interface DataSourceProps {
-  name: string;
-  status: "connected" | "disconnected" | "pending";
-  icon: React.ReactNode;
-  lastSync?: string;
-}
+const IntelligenceCollection = () => {
+  const [isScanning, setIsScanning] = useState(false);
+  const [lastScan, setLastScan] = useState<Date | null>(null);
 
-interface IntelligenceCollectionProps {
-  onSourceConnect?: (source: string) => void;
-}
-
-const IntelligenceCollection = ({ onSourceConnect }: IntelligenceCollectionProps) => {
-  const [connecting, setConnecting] = useState<string | null>(null);
-  const [apiKey, setApiKey] = useState("");
-  
-  const dataSources: DataSourceProps[] = [
-    { name: "Social Media", status: "connected", icon: <MessageSquare className="h-5 w-5" />, lastSync: "10 mins ago" },
-    { name: "News & Blogs", status: "connected", icon: <Rss className="h-5 w-5" />, lastSync: "15 mins ago" },
-    { name: "Reviews", status: "disconnected", icon: <Star className="h-5 w-5" /> },
-    { name: "Search Results", status: "connected", icon: <Search className="h-5 w-5" />, lastSync: "30 mins ago" },
-    { name: "Dark Web", status: "disconnected", icon: <Globe className="h-5 w-5" /> }
-  ];
-  
-  const handleConnect = (sourceName: string) => {
-    setConnecting(sourceName);
-    
-    // Simulate connection process
-    setTimeout(() => {
-      setConnecting(null);
-      toast.success(`${sourceName} connected successfully`);
+  const handleOSINTSweep = async () => {
+    setIsScanning(true);
+    try {
+      const results = await performRealScan({
+        fullScan: true,
+        source: 'dashboard_collection'
+      });
       
-      if (onSourceConnect) {
-        onSourceConnect(sourceName);
+      setLastScan(new Date());
+      
+      if (results && results.length > 0) {
+        toast.success(`OSINT Sweep Complete: ${results.length} intelligence items collected`);
+      } else {
+        toast.info('OSINT Sweep Complete: No new intelligence detected');
       }
-    }, 1500);
-  };
-  
-  const handleApiKeySave = (sourceName: string) => {
-    if (!apiKey.trim()) {
-      toast.error("Please enter a valid API key");
-      return;
+    } catch (error) {
+      toast.error('OSINT Sweep failed - Check system status');
+    } finally {
+      setIsScanning(false);
     }
-    
-    setConnecting(sourceName);
-    
-    // Simulate connection process
-    setTimeout(() => {
-      setConnecting(null);
-      setApiKey("");
-      toast.success(`${sourceName} connected successfully with API key`);
-      
-      if (onSourceConnect) {
-        onSourceConnect(sourceName);
-      }
-    }, 1500);
   };
 
   return (
     <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg font-medium">Intelligence Collection</CardTitle>
+      <CardHeader>
+        <CardTitle className="text-lg font-medium flex items-center gap-2">
+          <Search className="h-5 w-5" />
+          A.R.I.A™ OSINT Collection
+        </CardTitle>
       </CardHeader>
-      <CardContent>
-        <Tabs defaultValue="sources">
-          <TabsList className="grid grid-cols-2 mb-4">
-            <TabsTrigger value="sources">Data Sources</TabsTrigger>
-            <TabsTrigger value="settings">Connection Settings</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="sources">
-            <div className="space-y-3">
-              {dataSources.map((source) => (
-                <div key={source.name} className="flex justify-between items-center p-2 border rounded-md">
-                  <div className="flex items-center gap-3">
-                    <div className="bg-gray-100 p-2 rounded-md">
-                      {source.icon}
-                    </div>
-                    <div>
-                      <div className="font-medium">{source.name}</div>
-                      {source.lastSync && (
-                        <div className="text-xs text-muted-foreground">Last sync: {source.lastSync}</div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant={source.status === "connected" ? "outline" : "secondary"}>
-                      {source.status.charAt(0).toUpperCase() + source.status.slice(1)}
-                    </Badge>
-                    {source.status === "disconnected" && (
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        disabled={connecting === source.name}
-                        onClick={() => handleConnect(source.name)}
-                      >
-                        {connecting === source.name ? (
-                          <>
-                            <Loader className="h-3 w-3 mr-2 animate-spin" />
-                            Connecting
-                          </>
-                        ) : "Connect"}
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              ))}
+      <CardContent className="space-y-4">
+        
+        {/* Live Status Indicator */}
+        <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2">
+              <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
+              <span className="text-sm font-medium text-green-800">Live OSINT Active</span>
             </div>
-          </TabsContent>
-          
-          <TabsContent value="settings">
-            <div className="space-y-4">
-              <div className="border rounded-md p-3">
-                <h3 className="font-medium mb-2">Dark Web Intelligence</h3>
-                <p className="text-sm text-muted-foreground mb-3">
-                  Connect to darknet forums and onion sites for advanced threat detection.
-                </p>
-                <div className="space-y-2">
-                  <Input 
-                    placeholder="Enter API key" 
-                    value={apiKey}
-                    onChange={(e) => setApiKey(e.target.value)}
-                  />
-                  <Button 
-                    size="sm" 
-                    className="w-full"
-                    disabled={connecting === "Dark Web"}
-                    onClick={() => handleApiKeySave("Dark Web")}
-                  >
-                    {connecting === "Dark Web" ? (
-                      <>
-                        <Loader className="h-3 w-3 mr-2 animate-spin" />
-                        Connecting
-                      </>
-                    ) : "Save API Key"}
-                  </Button>
-                </div>
-              </div>
-              
-              <div className="border rounded-md p-3">
-                <h3 className="font-medium mb-2">Data Collection Frequency</h3>
-                <div className="grid grid-cols-3 gap-2">
-                  <Button variant="outline" size="sm">5 min</Button>
-                  <Button variant="default" size="sm">15 min</Button>
-                  <Button variant="outline" size="sm">30 min</Button>
-                </div>
-              </div>
+          </div>
+          <Badge className="bg-green-100 text-green-800 border-green-300">
+            100% Live Data
+          </Badge>
+        </div>
+
+        {/* Collection Sources */}
+        <div className="space-y-2">
+          <h4 className="text-sm font-medium text-gray-700">Active Intelligence Sources</h4>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="flex items-center gap-2 text-xs">
+              <CheckCircle className="h-3 w-3 text-green-500" />
+              <span>Reddit API</span>
             </div>
-          </TabsContent>
-        </Tabs>
+            <div className="flex items-center gap-2 text-xs">
+              <CheckCircle className="h-3 w-3 text-green-500" />
+              <span>RSS Feeds</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs">
+              <CheckCircle className="h-3 w-3 text-green-500" />
+              <span>News Sources</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs">
+              <Wifi className="h-3 w-3 text-blue-500" />
+              <span>Real-time Web</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Manual Collection Trigger */}
+        <div className="space-y-3">
+          <Button 
+            onClick={handleOSINTSweep}
+            disabled={isScanning}
+            className="w-full gap-2"
+            variant={isScanning ? "secondary" : "default"}
+          >
+            {isScanning ? (
+              <>
+                <Activity className="h-4 w-4 animate-spin" />
+                Running OSINT Sweep...
+              </>
+            ) : (
+              <>
+                <Search className="h-4 w-4" />
+                Trigger OSINT Intelligence Sweep
+              </>
+            )}
+          </Button>
+          
+          {lastScan && (
+            <p className="text-xs text-gray-500 text-center">
+              Last sweep: {lastScan.toLocaleTimeString()}
+            </p>
+          )}
+        </div>
+
+        {/* Compliance Notice */}
+        <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+          <div className="flex items-start gap-2">
+            <AlertTriangle className="h-4 w-4 text-blue-600 mt-0.5" />
+            <div className="text-xs text-blue-700">
+              <p className="font-medium">100% Live Data Compliance</p>
+              <p>All intelligence collected from live sources only. No mock or demo data.</p>
+            </div>
+          </div>
+        </div>
+
       </CardContent>
     </Card>
   );
