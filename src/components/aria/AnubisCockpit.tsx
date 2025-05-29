@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,7 +11,8 @@ import {
   Zap,
   Eye,
   Brain,
-  Target
+  Target,
+  CheckCircle
 } from "lucide-react";
 import { LiveDataValidator, LiveDataValidationResult } from '@/services/liveDataValidator';
 import { 
@@ -28,6 +28,8 @@ import {
   getMonitoringStatus, 
   runMonitoringScan 
 } from '@/services/monitoring';
+import { LiveDataEnforcer } from '@/services/ariaCore/liveDataEnforcer';
+import { threatProcessor } from '@/services/ariaCore/threatProcessor';
 import SystemInitializationPanel from './SystemInitializationPanel';
 import { toast } from 'sonner';
 
@@ -39,6 +41,7 @@ const AnubisCockpit = () => {
   const [liveThreats, setLiveThreats] = useState<any[]>([]);
   const [systemHealth, setSystemHealth] = useState<any[]>([]);
   const [monitoringStatus, setMonitoringStatus] = useState<any>({});
+  const [liveDataCompliance, setLiveDataCompliance] = useState<any>(null);
 
   useEffect(() => {
     loadInitialData();
@@ -49,7 +52,8 @@ const AnubisCockpit = () => {
       validateSystem(),
       loadQueueStatus(),
       loadSystemHealth(),
-      loadMonitoringStatus()
+      loadMonitoringStatus(),
+      checkLiveDataCompliance()
     ]);
   };
 
@@ -93,19 +97,35 @@ const AnubisCockpit = () => {
     }
   };
 
+  const checkLiveDataCompliance = async () => {
+    try {
+      const compliance = await LiveDataEnforcer.validateLiveDataCompliance();
+      setLiveDataCompliance(compliance);
+    } catch (error) {
+      console.error('Failed to check live data compliance:', error);
+    }
+  };
+
   const handleRefreshLiveData = async () => {
     setIsProcessing(true);
     try {
       console.log('🔄 Refreshing live data...');
       
-      // Trigger live system initialization
+      // Enforce live data integrity first
+      const enforced = await LiveDataEnforcer.enforceSystemWideLiveData();
+      
+      if (enforced) {
+        toast.success('Live data integrity enforced');
+      }
+      
+      // Initialize live system
       const initResult = await initializeLiveSystem();
       console.log('🚀 Live system initialized:', initResult);
       
       // Refresh all data
       await loadInitialData();
       
-      toast.success('Live data refreshed successfully');
+      toast.success('Live data refreshed successfully - all mock data removed');
     } catch (error) {
       console.error('Failed to refresh live data:', error);
       toast.error('Failed to refresh live data');
@@ -119,9 +139,11 @@ const AnubisCockpit = () => {
     try {
       console.log('⚡ Processing live threats...');
       
-      // Trigger pipeline processing
-      const result = await triggerPipelineProcessing();
-      console.log('✅ Pipeline processing result:', result);
+      // Use the enhanced threat processor
+      const processedCount = await threatProcessor.processPendingThreats();
+      
+      // Validate data integrity
+      const isValid = await threatProcessor.validateLiveDataIntegrity();
       
       // Get updated live threats
       const threats = await getLiveThreats();
@@ -130,7 +152,15 @@ const AnubisCockpit = () => {
       // Refresh queue status
       await loadQueueStatus();
       
-      toast.success(`Live processing completed: ${result?.processed || 0} threats processed`);
+      // Update compliance check
+      await checkLiveDataCompliance();
+      
+      toast.success(`Live processing completed: ${processedCount} real threats processed`);
+      
+      if (!isValid) {
+        toast.warning('Live data integrity issues detected - check console');
+      }
+      
     } catch (error) {
       console.error('Failed to process threats:', error);
       toast.error('Failed to process threats');
@@ -157,7 +187,7 @@ const AnubisCockpit = () => {
       console.log('📊 Scan results:', results);
       
       await loadMonitoringStatus();
-      toast.success(`Live scan completed: ${results.length} results found`);
+      toast.success(`Live scan completed: ${results.length} real results found`);
     } catch (error) {
       console.error('Failed to run scan:', error);
       toast.error('Failed to run scan');
@@ -173,7 +203,7 @@ const AnubisCockpit = () => {
             Anubis Control Center
           </h1>
           <p className="text-muted-foreground">
-            A.R.I.A™ Live System Monitoring & Control Dashboard
+            A.R.I.A™ Live System Monitoring & Control Dashboard - Production Mode Only
           </p>
         </div>
         <div className="flex gap-2">
@@ -187,6 +217,43 @@ const AnubisCockpit = () => {
           </Button>
         </div>
       </div>
+
+      {/* Live Data Compliance Status */}
+      {liveDataCompliance && !liveDataCompliance.isCompliant && (
+        <Card className="border-orange-200 bg-orange-50">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <AlertTriangle className="h-4 w-4 text-orange-600" />
+              <span className="font-medium text-orange-800">Live Data Compliance Issues</span>
+            </div>
+            <div className="text-sm text-orange-700">
+              {liveDataCompliance.issues.map((issue: string, index: number) => (
+                <div key={index}>• {issue}</div>
+              ))}
+            </div>
+            <Button 
+              size="sm" 
+              className="mt-2" 
+              onClick={handleRefreshLiveData}
+              disabled={isProcessing}
+            >
+              Clean System
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {liveDataCompliance && liveDataCompliance.isCompliant && (
+        <Card className="border-green-200 bg-green-50">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <span className="font-medium text-green-800">System Operating in Live Mode Only</span>
+            </div>
+            <div className="text-sm text-green-700">All mock/demo/test data has been removed</div>
+          </CardContent>
+        </Card>
+      )}
 
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList className="grid grid-cols-5">
@@ -234,7 +301,7 @@ const AnubisCockpit = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Target className="h-4 w-4" />
-                  Threat Queue
+                  Live Threat Queue
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -246,7 +313,7 @@ const AnubisCockpit = () => {
                     </div>
                   ))}
                   {queueStatus.length === 0 && (
-                    <div className="text-sm text-muted-foreground">No queue data available</div>
+                    <div className="text-sm text-muted-foreground">No live queue data available</div>
                   )}
                 </div>
               </CardContent>

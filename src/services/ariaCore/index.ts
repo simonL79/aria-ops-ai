@@ -1,0 +1,30 @@
+
+// Re-export all core services
+export { threatProcessor, AriaCoreThreatProcessor } from './threatProcessor';
+export { LiveDataEnforcer } from './liveDataEnforcer';
+export * from './threatIngestion';
+
+// Initialize core services
+export const initializeAriaCore = async () => {
+  console.log('🚀 Initializing A.R.I.A™ Core Services...');
+  
+  try {
+    // Enforce live data integrity
+    const isCompliant = await LiveDataEnforcer.enforceSystemWideLiveData();
+    
+    if (!isCompliant) {
+      console.warn('⚠️ Live data enforcement had issues, but continuing...');
+    }
+    
+    // Validate compliance
+    const validation = await LiveDataEnforcer.validateLiveDataCompliance();
+    console.log('📊 Live data compliance:', validation);
+    
+    console.log('✅ A.R.I.A™ Core Services initialized');
+    return true;
+    
+  } catch (error) {
+    console.error('❌ Failed to initialize A.R.I.A™ Core Services:', error);
+    return false;
+  }
+};
