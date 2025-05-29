@@ -6741,6 +6741,80 @@ export type Database = {
         }
         Relationships: []
       }
+      zeuslink_osint_feeds: {
+        Row: {
+          created_at: string | null
+          fetch_frequency: string | null
+          id: string
+          is_active: boolean | null
+          last_fetched: string | null
+          source_name: string
+          source_url: string
+          trust_score: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          fetch_frequency?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_fetched?: string | null
+          source_name: string
+          source_url: string
+          trust_score?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          fetch_frequency?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_fetched?: string | null
+          source_name?: string
+          source_url?: string
+          trust_score?: number | null
+        }
+        Relationships: []
+      }
+      zeuslink_osint_signals: {
+        Row: {
+          confidence_score: number | null
+          detected_at: string | null
+          feed_id: string | null
+          id: string
+          is_live: boolean | null
+          related_entity_name: string | null
+          signal_content: string
+          signal_type: string | null
+        }
+        Insert: {
+          confidence_score?: number | null
+          detected_at?: string | null
+          feed_id?: string | null
+          id?: string
+          is_live?: boolean | null
+          related_entity_name?: string | null
+          signal_content: string
+          signal_type?: string | null
+        }
+        Update: {
+          confidence_score?: number | null
+          detected_at?: string | null
+          feed_id?: string | null
+          id?: string
+          is_live?: boolean | null
+          related_entity_name?: string | null
+          signal_content?: string
+          signal_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zeuslink_osint_signals_feed_id_fkey"
+            columns: ["feed_id"]
+            isOneToOne: false
+            referencedRelation: "zeuslink_osint_feeds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       aria_notifications_dashboard: {

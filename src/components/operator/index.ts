@@ -1,3 +1,4 @@
+
 export { default as OperatorConsole } from './OperatorConsole';
 export { VoiceRecognition } from './VoiceRecognition';
 export { useCommandProcessor } from './CommandProcessor';
@@ -26,3 +27,4 @@ export { VoxtracePanel } from './VoxtracePanel';
 export { PolarisPanel } from './PolarisPanel';
 export { TitanvaultPanel } from './TitanvaultPanel';
 export { PerimetrixPanel } from './PerimetrixPanel';
+export { ZeuslinkPanel } from './ZeuslinkPanel';
