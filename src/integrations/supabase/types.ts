@@ -5082,6 +5082,57 @@ export type Database = {
         }
         Relationships: []
       }
+      strike_requests: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          batch_id: string | null
+          created_at: string | null
+          evidence_pdf: string | null
+          executed_at: string | null
+          execution_result: Json | null
+          id: string
+          platform: string
+          reason: string
+          requested_by: string
+          status: string | null
+          strike_type: string | null
+          url: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          batch_id?: string | null
+          created_at?: string | null
+          evidence_pdf?: string | null
+          executed_at?: string | null
+          execution_result?: Json | null
+          id?: string
+          platform: string
+          reason: string
+          requested_by: string
+          status?: string | null
+          strike_type?: string | null
+          url: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          batch_id?: string | null
+          created_at?: string | null
+          evidence_pdf?: string | null
+          executed_at?: string | null
+          execution_result?: Json | null
+          id?: string
+          platform?: string
+          reason?: string
+          requested_by?: string
+          status?: string | null
+          strike_type?: string | null
+          url?: string
+        }
+        Relationships: []
+      }
       suppression_actions: {
         Row: {
           action_status: string | null
@@ -6040,6 +6091,10 @@ export type Database = {
       }
       ex_cancel_threat: {
         Args: { p_threat_id: string; p_reason: string }
+        Returns: string
+      }
+      execute_batch_strikes: {
+        Args: { p_batch_id: string; p_admin_id: string }
         Returns: string
       }
       generate_decay_score: {
