@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { AlertTriangle, Clock, ExternalLink, Eye, Target } from "lucide-react";
+import { AlertTriangle, Clock, ExternalLink, Eye, Target, Shield, CheckCircle } from "lucide-react";
 import { getLiveThreats } from '@/services/ariaCore/threatIngestion';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -19,6 +19,11 @@ interface ThreatResult {
   status: string;
   detected_at: string;
   is_live: boolean;
+  verified_source?: boolean;
+  verified_at?: string;
+  source_confidence_score?: number;
+  verification_method?: string;
+  freshness_window?: string;
 }
 
 const ThreatResultsPanel = () => {
@@ -33,11 +38,11 @@ const ThreatResultsPanel = () => {
   const loadResults = async () => {
     setIsLoading(true);
     try {
-      // Load live threats
+      // Load live threats with verification data
       const liveThreats = await getLiveThreats();
       setThreats(liveThreats || []);
 
-      // Load recent scan results
+      // Load recent scan results with verification data
       const { data: scanData, error } = await supabase
         .from('scan_results')
         .select('*')
@@ -66,6 +71,24 @@ const ThreatResultsPanel = () => {
     return 'bg-green-500 text-white';
   };
 
+  const getFreshnessColor = (freshness: string) => {
+    switch (freshness) {
+      case '0-12h': return 'bg-green-100 text-green-800';
+      case '12-24h': return 'bg-yellow-100 text-yellow-800';
+      case '24-48h': return 'bg-orange-100 text-orange-800';
+      case 'stale': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getVerificationIcon = (verified: boolean) => {
+    return verified ? (
+      <CheckCircle className="h-4 w-4 text-green-600" />
+    ) : (
+      <AlertTriangle className="h-4 w-4 text-yellow-600" />
+    );
+  };
+
   const getThreatTypeIcon = (threatType: string) => {
     switch (threatType) {
       case 'social_media':
@@ -88,6 +111,8 @@ const ThreatResultsPanel = () => {
   };
 
   const totalResults = threats.length + scanResults.length;
+  const verifiedCount = threats.filter(t => t.verified_source).length + 
+                       scanResults.filter(s => s.verified_source).length;
 
   if (isLoading) {
     return (
@@ -114,7 +139,7 @@ const ThreatResultsPanel = () => {
           <CardTitle className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5" />
-              Live Threat Results ({totalResults} found)
+              Live Threat Results ({totalResults} found, {verifiedCount} verified)
             </div>
             <Button onClick={loadResults} size="sm" variant="outline">
               <Eye className="h-4 w-4 mr-2" />
@@ -140,7 +165,7 @@ const ThreatResultsPanel = () => {
                     {threats.map((threat, index) => (
                       <div key={threat.id} className="border rounded-lg p-4">
                         <div className="flex items-start justify-between mb-2">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <span className="text-lg">{getThreatTypeIcon(threat.threat_type)}</span>
                             <Badge className={getSeverityColor(threat.risk_score)}>
                               Risk: {threat.risk_score}%
@@ -153,6 +178,24 @@ const ThreatResultsPanel = () => {
                                 LIVE
                               </Badge>
                             )}
+                            {threat.verified_source !== undefined && (
+                              <div className="flex items-center gap-1">
+                                {getVerificationIcon(threat.verified_source)}
+                                <Badge variant={threat.verified_source ? "default" : "secondary"}>
+                                  {threat.verified_source ? "VERIFIED" : "UNVERIFIED"}
+                                </Badge>
+                              </div>
+                            )}
+                            {threat.freshness_window && (
+                              <Badge className={getFreshnessColor(threat.freshness_window)}>
+                                {threat.freshness_window}
+                              </Badge>
+                            )}
+                            {threat.source_confidence_score && (
+                              <Badge variant="outline">
+                                Confidence: {threat.source_confidence_score}%
+                              </Badge>
+                            )}
                           </div>
                           <div className="text-xs text-muted-foreground flex items-center gap-1">
                             <Clock className="h-3 w-3" />
@@ -163,6 +206,11 @@ const ThreatResultsPanel = () => {
                         <div className="mb-2">
                           <p className="font-medium">{threat.source}</p>
                           <p className="text-sm text-muted-foreground">{threat.summary}</p>
+                          {threat.verification_method && (
+                            <p className="text-xs text-blue-600">
+                              Verification: {threat.verification_method.replace('_', ' ')}
+                            </p>
+                          )}
                         </div>
                         
                         <div className="text-sm bg-gray-50 p-3 rounded">
@@ -170,13 +218,18 @@ const ThreatResultsPanel = () => {
                           {threat.content.length > 200 && '...'}
                         </div>
                         
-                        <div className="mt-2 flex items-center gap-2">
+                        <div className="mt-2 flex items-center gap-2 flex-wrap">
                           <Badge variant="secondary">
                             Sentiment: {threat.sentiment}
                           </Badge>
                           <Badge variant={threat.status === 'active' ? 'default' : 'secondary'}>
                             {threat.status.toUpperCase()}
                           </Badge>
+                          {threat.verified_at && (
+                            <Badge variant="outline" className="text-xs">
+                              Verified: {formatDate(threat.verified_at)}
+                            </Badge>
+                          )}
                         </div>
                       </div>
                     ))}
@@ -196,7 +249,7 @@ const ThreatResultsPanel = () => {
                     {scanResults.map((result, index) => (
                       <div key={result.id} className="border rounded-lg p-4">
                         <div className="flex items-start justify-between mb-2">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <Badge variant="outline">
                               {result.platform || 'Unknown Platform'}
                             </Badge>
@@ -207,6 +260,24 @@ const ThreatResultsPanel = () => {
                             }>
                               {(result.severity || 'medium').toUpperCase()}
                             </Badge>
+                            {result.verified_source !== undefined && (
+                              <div className="flex items-center gap-1">
+                                {getVerificationIcon(result.verified_source)}
+                                <Badge variant={result.verified_source ? "default" : "secondary"}>
+                                  {result.verified_source ? "VERIFIED" : "UNVERIFIED"}
+                                </Badge>
+                              </div>
+                            )}
+                            {result.freshness_window && (
+                              <Badge className={getFreshnessColor(result.freshness_window)}>
+                                {result.freshness_window}
+                              </Badge>
+                            )}
+                            {result.source_confidence_score && (
+                              <Badge variant="outline">
+                                Confidence: {result.source_confidence_score}%
+                              </Badge>
+                            )}
                           </div>
                           <div className="text-xs text-muted-foreground flex items-center gap-1">
                             <Clock className="h-3 w-3" />
@@ -214,12 +285,20 @@ const ThreatResultsPanel = () => {
                           </div>
                         </div>
                         
+                        {result.verification_method && (
+                          <div className="mb-2">
+                            <p className="text-xs text-blue-600">
+                              Verification: {result.verification_method.replace('_', ' ')}
+                            </p>
+                          </div>
+                        )}
+                        
                         <div className="text-sm bg-gray-50 p-3 rounded mb-2">
                           {result.content?.substring(0, 200) || 'No content available'}
                           {result.content && result.content.length > 200 && '...'}
                         </div>
                         
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           {result.url && (
                             <Button size="sm" variant="outline" asChild>
                               <a href={result.url} target="_blank" rel="noopener noreferrer">
@@ -231,6 +310,11 @@ const ThreatResultsPanel = () => {
                           <Badge variant="secondary">
                             Status: {result.status || 'New'}
                           </Badge>
+                          {result.verified_at && (
+                            <Badge variant="outline" className="text-xs">
+                              Verified: {formatDate(result.verified_at)}
+                            </Badge>
+                          )}
                         </div>
                       </div>
                     ))}

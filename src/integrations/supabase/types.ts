@@ -4880,6 +4880,7 @@ export type Database = {
           content: string
           created_at: string | null
           detected_entities: Json | null
+          freshness_window: string | null
           id: string
           incident_playbook: string | null
           is_identified: boolean | null
@@ -4896,6 +4897,7 @@ export type Database = {
           risk_entity_type: string | null
           sentiment: number | null
           severity: string | null
+          source_confidence_score: number | null
           source_credibility_score: number | null
           source_type: string | null
           status: string | null
@@ -4904,6 +4906,9 @@ export type Database = {
           threat_type: string | null
           updated_at: string | null
           url: string
+          verification_method: string | null
+          verified_at: string | null
+          verified_source: boolean | null
         }
         Insert: {
           ai_detection_confidence?: number | null
@@ -4916,6 +4921,7 @@ export type Database = {
           content: string
           created_at?: string | null
           detected_entities?: Json | null
+          freshness_window?: string | null
           id?: string
           incident_playbook?: string | null
           is_identified?: boolean | null
@@ -4932,6 +4938,7 @@ export type Database = {
           risk_entity_type?: string | null
           sentiment?: number | null
           severity?: string | null
+          source_confidence_score?: number | null
           source_credibility_score?: number | null
           source_type?: string | null
           status?: string | null
@@ -4940,6 +4947,9 @@ export type Database = {
           threat_type?: string | null
           updated_at?: string | null
           url?: string
+          verification_method?: string | null
+          verified_at?: string | null
+          verified_source?: boolean | null
         }
         Update: {
           ai_detection_confidence?: number | null
@@ -4952,6 +4962,7 @@ export type Database = {
           content?: string
           created_at?: string | null
           detected_entities?: Json | null
+          freshness_window?: string | null
           id?: string
           incident_playbook?: string | null
           is_identified?: boolean | null
@@ -4968,6 +4979,7 @@ export type Database = {
           risk_entity_type?: string | null
           sentiment?: number | null
           severity?: string | null
+          source_confidence_score?: number | null
           source_credibility_score?: number | null
           source_type?: string | null
           status?: string | null
@@ -4976,6 +4988,9 @@ export type Database = {
           threat_type?: string | null
           updated_at?: string | null
           url?: string
+          verification_method?: string | null
+          verified_at?: string | null
+          verified_source?: boolean | null
         }
         Relationships: [
           {
@@ -5255,40 +5270,55 @@ export type Database = {
           created_at: string | null
           detected_at: string | null
           entity_match: string | null
+          freshness_window: string | null
           id: string
           processed_by: string | null
           processing_notes: string | null
           raw_content: string
           risk_score: number | null
           source: string
+          source_confidence_score: number | null
           status: string | null
           updated_at: string | null
+          verification_method: string | null
+          verified_at: string | null
+          verified_source: boolean | null
         }
         Insert: {
           created_at?: string | null
           detected_at?: string | null
           entity_match?: string | null
+          freshness_window?: string | null
           id?: string
           processed_by?: string | null
           processing_notes?: string | null
           raw_content: string
           risk_score?: number | null
           source: string
+          source_confidence_score?: number | null
           status?: string | null
           updated_at?: string | null
+          verification_method?: string | null
+          verified_at?: string | null
+          verified_source?: boolean | null
         }
         Update: {
           created_at?: string | null
           detected_at?: string | null
           entity_match?: string | null
+          freshness_window?: string | null
           id?: string
           processed_by?: string | null
           processing_notes?: string | null
           raw_content?: string
           risk_score?: number | null
           source?: string
+          source_confidence_score?: number | null
           status?: string | null
           updated_at?: string | null
+          verification_method?: string | null
+          verified_at?: string | null
+          verified_source?: boolean | null
         }
         Relationships: [
           {
@@ -5386,45 +5416,60 @@ export type Database = {
           created_at: string | null
           detected_at: string | null
           entity_id: string | null
+          freshness_window: string | null
           id: string
           is_live: boolean | null
           risk_score: number | null
           sentiment: string | null
           source: string
+          source_confidence_score: number | null
           status: string | null
           summary: string | null
           threat_type: string | null
           updated_at: string | null
+          verification_method: string | null
+          verified_at: string | null
+          verified_source: boolean | null
         }
         Insert: {
           content: string
           created_at?: string | null
           detected_at?: string | null
           entity_id?: string | null
+          freshness_window?: string | null
           id?: string
           is_live?: boolean | null
           risk_score?: number | null
           sentiment?: string | null
           source: string
+          source_confidence_score?: number | null
           status?: string | null
           summary?: string | null
           threat_type?: string | null
           updated_at?: string | null
+          verification_method?: string | null
+          verified_at?: string | null
+          verified_source?: boolean | null
         }
         Update: {
           content?: string
           created_at?: string | null
           detected_at?: string | null
           entity_id?: string | null
+          freshness_window?: string | null
           id?: string
           is_live?: boolean | null
           risk_score?: number | null
           sentiment?: string | null
           source?: string
+          source_confidence_score?: number | null
           status?: string | null
           summary?: string | null
           threat_type?: string | null
           updated_at?: string | null
+          verification_method?: string | null
+          verified_at?: string | null
+          verified_source?: boolean | null
         }
         Relationships: [
           {
@@ -5829,6 +5874,51 @@ export type Database = {
           },
         ]
       }
+      verified_live_threats: {
+        Row: {
+          content: string | null
+          detected_at: string | null
+          freshness_window: string | null
+          id: string | null
+          risk_score: number | null
+          source: string | null
+          source_confidence_score: number | null
+          status: string | null
+          threat_type: string | null
+          verification_method: string | null
+          verified_at: string | null
+          verified_source: boolean | null
+        }
+        Insert: {
+          content?: string | null
+          detected_at?: string | null
+          freshness_window?: string | null
+          id?: string | null
+          risk_score?: number | null
+          source?: string | null
+          source_confidence_score?: number | null
+          status?: string | null
+          threat_type?: string | null
+          verification_method?: string | null
+          verified_at?: string | null
+          verified_source?: boolean | null
+        }
+        Update: {
+          content?: string | null
+          detected_at?: string | null
+          freshness_window?: string | null
+          id?: string | null
+          risk_score?: number | null
+          source?: string | null
+          source_confidence_score?: number | null
+          status?: string | null
+          threat_type?: string | null
+          verification_method?: string | null
+          verified_at?: string | null
+          verified_source?: boolean | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       admin_trigger_anubis: {
@@ -5891,6 +5981,10 @@ export type Database = {
       calculate_decay_score: {
         Args: { rank_score: number; resurfacing_score: number }
         Returns: number
+      }
+      calculate_freshness_window: {
+        Args: { detected_time: string }
+        Returns: string
       }
       calculate_threat_urgency: {
         Args: { threat_level: number; likelihood_score: number }
@@ -6058,6 +6152,7 @@ export type Database = {
           content: string
           created_at: string | null
           detected_entities: Json | null
+          freshness_window: string | null
           id: string
           incident_playbook: string | null
           is_identified: boolean | null
@@ -6074,6 +6169,7 @@ export type Database = {
           risk_entity_type: string | null
           sentiment: number | null
           severity: string | null
+          source_confidence_score: number | null
           source_credibility_score: number | null
           source_type: string | null
           status: string | null
@@ -6082,6 +6178,9 @@ export type Database = {
           threat_type: string | null
           updated_at: string | null
           url: string
+          verification_method: string | null
+          verified_at: string | null
+          verified_source: boolean | null
         }[]
       }
       set_role: {
