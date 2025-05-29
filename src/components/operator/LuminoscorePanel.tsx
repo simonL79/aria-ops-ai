@@ -63,10 +63,28 @@ export const LuminoscorePanel = () => {
 
   useEffect(() => {
     loadRealData();
+    // Set up real-time subscription for new scan results
+    const scanSubscription = supabase
+      .channel('scan_results_changes')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'scan_results'
+      }, () => {
+        console.log('New scan result detected, reloading data...');
+        loadRealData();
+      })
+      .subscribe();
+
+    return () => {
+      scanSubscription.unsubscribe();
+    };
   }, []);
 
   const loadRealData = async () => {
     try {
+      console.log('🔄 Loading real data from database...');
+      
       // Load real scan results from the database
       const { data: scanData, error: scanError } = await supabase
         .from('scan_results')
@@ -76,21 +94,27 @@ export const LuminoscorePanel = () => {
 
       if (scanError) {
         console.error('Error loading scan results:', scanError);
-      } else {
-        setScanResults(scanData || []);
+      } else if (scanData && scanData.length > 0) {
+        console.log(`✅ Loaded ${scanData.length} real scan results`);
+        setScanResults(scanData);
+        
         // Convert scan results to impact metrics format
-        const metrics = scanData?.map((scan: any) => ({
+        const metrics = scanData.map((scan: any) => ({
           id: scan.id,
           entity_name: extractEntityName(scan.detected_entities),
           source: scan.platform,
           mention_count: 1,
           audience_reach: scan.potential_reach || 0,
           influence_rating: (scan.confidence_score || 75) / 100,
-          exposure_score: scan.sentiment * 50 + 50, // Convert sentiment to exposure score
+          exposure_score: (scan.sentiment || 0) * 50 + 50, // Convert sentiment to exposure score
           sentiment_average: scan.sentiment || 0,
           calculated_at: scan.created_at
-        })) || [];
+        }));
         setImpactMetrics(metrics);
+      } else {
+        console.log('ℹ️ No scan results found in database');
+        setScanResults([]);
+        setImpactMetrics([]);
       }
 
       // Load content alerts as additional metrics
@@ -102,7 +126,8 @@ export const LuminoscorePanel = () => {
 
       if (alertError) {
         console.error('Error loading content alerts:', alertError);
-      } else if (alertData) {
+      } else if (alertData && alertData.length > 0) {
+        console.log(`✅ Loaded ${alertData.length} content alerts`);
         const alertMetrics = alertData.map((alert: any) => ({
           id: alert.id,
           entity_name: extractEntityName(alert.detected_entities),
@@ -110,7 +135,7 @@ export const LuminoscorePanel = () => {
           mention_count: 1,
           audience_reach: alert.potential_reach || 0,
           influence_rating: (alert.confidence_score || 75) / 100,
-          exposure_score: alert.sentiment * 50 + 50,
+          exposure_score: (alert.sentiment || 0) * 50 + 50,
           sentiment_average: alert.sentiment || 0,
           calculated_at: alert.created_at
         }));
@@ -118,7 +143,7 @@ export const LuminoscorePanel = () => {
       }
 
     } catch (error) {
-      console.error('Error loading real data:', error);
+      console.error('❌ Error loading real data:', error);
       toast.error('Failed to load impact metrics from database');
     }
   };
@@ -146,6 +171,8 @@ export const LuminoscorePanel = () => {
   const triggerRealScan = async () => {
     setIsLoading(true);
     try {
+      console.log('🚀 Triggering real monitoring scan...');
+      
       // Call the real monitoring scan
       const { data, error } = await supabase.functions.invoke('monitoring-scan', {
         body: { 
@@ -155,9 +182,10 @@ export const LuminoscorePanel = () => {
       });
       
       if (error) {
-        console.error('Scan error:', error);
+        console.error('❌ Scan error:', error);
         toast.error('Failed to start real scan');
       } else {
+        console.log('✅ Real scan initiated successfully');
         toast.success('Real scan initiated - results will appear shortly');
         // Reload data after scan
         setTimeout(() => {
@@ -165,7 +193,7 @@ export const LuminoscorePanel = () => {
         }, 2000);
       }
     } catch (error) {
-      console.error('Error triggering scan:', error);
+      console.error('❌ Error triggering scan:', error);
       toast.error('Failed to trigger monitoring scan');
     } finally {
       setIsLoading(false);
@@ -213,7 +241,7 @@ export const LuminoscorePanel = () => {
         <CardContent className="space-y-2 max-h-48 overflow-y-auto">
           {impactMetrics.length === 0 ? (
             <div className="text-gray-500 text-sm">
-              No real impact metrics available. Click "Real Scan" to trigger monitoring scan.
+              No real impact metrics available. Click "Real Scan" to trigger monitoring scan and generate live data.
             </div>
           ) : (
             impactMetrics.map((metric) => (
@@ -252,12 +280,12 @@ export const LuminoscorePanel = () => {
         <CardHeader>
           <CardTitle className="text-cyan-400 text-sm flex items-center gap-2">
             <TrendingUp className="h-4 w-4" />
-            Live Scan Results
+            Live Scan Results ({scanResults.length} items)
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-2 max-h-40 overflow-y-auto">
           {scanResults.length === 0 ? (
-            <div className="text-gray-500 text-sm">No scan results available</div>
+            <div className="text-gray-500 text-sm">No scan results available - trigger a real scan to see live data</div>
           ) : (
             scanResults.slice(0, 5).map((result) => (
               <div key={result.id} className="flex items-start gap-3 p-2 bg-gray-900/50 rounded">
