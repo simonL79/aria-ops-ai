@@ -50,7 +50,7 @@ const useDashboardData = (): DashboardData => {
     try {
       console.log('🔄 A.R.I.A™ OSINT DATA: Loading real intelligence data...');
       
-      // Fetch ONLY real OSINT intelligence data
+      // Fetch ONLY real OSINT intelligence data from the corrected scan_results table
       const { data: scanResults, error: scanError } = await supabase
         .from('scan_results')
         .select('*')
@@ -62,6 +62,8 @@ const useDashboardData = (): DashboardData => {
         console.error('❌ Error fetching OSINT intelligence:', scanError);
         throw new Error(`Failed to fetch intelligence data: ${scanError.message}`);
       }
+
+      console.log(`📊 A.R.I.A™ OSINT: Found ${scanResults?.length || 0} intelligence items in database`);
 
       // Fetch real content alerts
       const { data: contentAlerts, error: alertsError } = await supabase
@@ -116,13 +118,13 @@ const useDashboardData = (): DashboardData => {
       // Combine all real intelligence
       const allIntelligence = [...osintResults, ...formattedContentAlerts];
       
-      console.log(`📊 A.R.I.A™ OSINT: Loaded ${allIntelligence.length} intelligence items`);
+      console.log(`📊 A.R.I.A™ OSINT: Loaded ${allIntelligence.length} total intelligence items`);
       console.log(`📊 Breakdown: ${osintResults.length} OSINT, ${formattedContentAlerts.length} alerts`);
       
       setAlerts(allIntelligence);
       setClassifiedAlerts(allIntelligence);
 
-      // Calculate real-time metrics
+      // Calculate real-time metrics based on actual data
       const highSeverity = allIntelligence.filter(alert => alert.severity === 'high').length;
       const mediumSeverity = allIntelligence.filter(alert => alert.severity === 'medium').length;
       const totalReach = allIntelligence.reduce((sum, alert) => sum + (alert.potentialReach || 0), 0);

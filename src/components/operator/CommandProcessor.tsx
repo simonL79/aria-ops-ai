@@ -45,7 +45,7 @@ export const useCommandProcessor = () => {
           fullScan: true,
           source: 'operator_console'
         });
-        response = `A.R.I.A™ OSINT Intelligence Sweep completed. Processed ${results.length} intelligence items from direct web crawling.`;
+        response = `A.R.I.A™ OSINT Intelligence Sweep completed. Processed ${results.length} intelligence items from live Reddit API and RSS feeds.`;
       }
       else if (cmd.includes('anubis status')) {
         const { data } = await supabase.from('anubis_state').select('*');
@@ -56,11 +56,10 @@ export const useCommandProcessor = () => {
         const { data } = await supabase
           .from('scan_results')
           .select('*')
-          .eq('severity', 'high')
           .eq('source_type', 'live_osint')
           .order('created_at', { ascending: false })
           .limit(5);
-        response = `${data?.length || 0} high-severity intelligence items found. Latest from: ${data?.[0]?.platform || 'none'}`;
+        response = `${data?.length || 0} live intelligence items found. Latest from: ${data?.[0]?.platform || 'none'}`;
       }
       else if (cmd.includes('show') && cmd.includes('alerts')) {
         const { data } = await supabase
@@ -83,14 +82,21 @@ export const useCommandProcessor = () => {
         const isActive = data?.[0]?.is_active || false;
         response = `A.R.I.A™ OSINT Intelligence: ${isActive ? 'ACTIVE' : 'INACTIVE'}. Last sweep: ${data?.[0]?.last_run || 'never'}`;
       }
+      else if (cmd.includes('data count') || cmd.includes('intelligence count')) {
+        const { data: scanCount } = await supabase
+          .from('scan_results')
+          .select('*', { count: 'exact' })
+          .eq('source_type', 'live_osint');
+        response = `Database contains ${scanCount?.length || 0} live OSINT intelligence items.`;
+      }
       else if (cmd.includes('boot') || cmd.includes('initialize')) {
         response = 'A.R.I.A™ OSINT Intelligence System initialized. Direct web crawling active. No external APIs required.';
       }
       else if (cmd.includes('data sources') || cmd.includes('sources')) {
-        response = 'A.R.I.A™ OSINT Sources: Reddit (direct crawling), RSS feeds, indexed search results. All API-independent.';
+        response = 'A.R.I.A™ OSINT Sources: Reddit (live API), RSS feeds, indexed search results. All API-independent.';
       }
       else {
-        response = `Command "${command}" processed. Available: scan intelligence, osint sweep, show threats, system health, live status, data sources`;
+        response = `Command "${command}" processed. Available: scan intelligence, osint sweep, show threats, system health, live status, data count`;
       }
 
       return response;

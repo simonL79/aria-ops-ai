@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
       } else if (redditData && redditData.results && redditData.dataSource === 'LIVE_REDDIT_API') {
         console.log(`[MONITORING-SCAN] Reddit OSINT completed: found ${redditData.matchesFound || 0} intelligence items`);
         
-        // Process each Reddit result with GPT-powered classification
+        // Process each Reddit result with proper data structure
         for (const result of redditData.results) {
           const processedResult = await processIntelligenceItem(result, 'reddit', supabase);
           if (processedResult) {
@@ -83,9 +83,27 @@ Deno.serve(async (req) => {
       console.log(`[MONITORING-SCAN] Storing ${results.length} intelligence items...`);
       
       for (const result of results) {
+        // Insert into scan_results with correct field names
         const { error: insertError } = await supabase
           .from('scan_results')
-          .insert(result);
+          .insert({
+            platform: result.platform,
+            content: result.content,
+            url: result.url,
+            severity: result.severity,
+            status: result.status,
+            threat_type: result.threat_type,
+            sentiment: result.sentiment,
+            confidence_score: result.confidence_score,
+            potential_reach: result.potential_reach,
+            detected_entities: result.detected_entities,
+            source_type: result.source_type,
+            entity_name: result.entity_name,
+            source_credibility_score: result.source_credibility_score,
+            media_is_ai_generated: result.media_is_ai_generated,
+            ai_detection_confidence: result.ai_detection_confidence,
+            created_at: new Date().toISOString()
+          });
           
         if (insertError) {
           console.error('[MONITORING-SCAN] Error storing intelligence:', insertError);
@@ -186,7 +204,7 @@ async function processIntelligenceItem(item, source, supabase) {
       potentialReach = 1000;
     }
     
-    // Return processed intelligence item
+    // Return processed intelligence item with correct field names
     return {
       platform: source === 'reddit' ? 'Reddit' : 'News',
       content: content.substring(0, 500),
