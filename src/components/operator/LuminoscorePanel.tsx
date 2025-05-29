@@ -19,6 +19,43 @@ interface ImpactMetric {
   calculated_at: string;
 }
 
+// Helper function to safely extract entity name from detected_entities
+const extractEntityName = (detectedEntities: any): string => {
+  if (!detectedEntities) return 'Unknown Entity';
+  
+  // If it's an array
+  if (Array.isArray(detectedEntities)) {
+    if (detectedEntities.length === 0) return 'Unknown Entity';
+    const firstEntity = detectedEntities[0];
+    
+    // If the first element is an object with name property
+    if (typeof firstEntity === 'object' && firstEntity.name) {
+      return firstEntity.name;
+    }
+    
+    // If the first element is a string
+    if (typeof firstEntity === 'string') {
+      return firstEntity;
+    }
+    
+    // Fallback - convert to string
+    return String(firstEntity);
+  }
+  
+  // If it's a string
+  if (typeof detectedEntities === 'string') {
+    return detectedEntities;
+  }
+  
+  // If it's an object with name property
+  if (typeof detectedEntities === 'object' && detectedEntities.name) {
+    return detectedEntities.name;
+  }
+  
+  // Fallback
+  return 'Unknown Entity';
+};
+
 export const LuminoscorePanel = () => {
   const [impactMetrics, setImpactMetrics] = useState<ImpactMetric[]>([]);
   const [scanResults, setScanResults] = useState<any[]>([]);
@@ -44,7 +81,7 @@ export const LuminoscorePanel = () => {
         // Convert scan results to impact metrics format
         const metrics = scanData?.map((scan: any) => ({
           id: scan.id,
-          entity_name: scan.detected_entities?.[0] || 'Unknown Entity',
+          entity_name: extractEntityName(scan.detected_entities),
           source: scan.platform,
           mention_count: 1,
           audience_reach: scan.potential_reach || 0,
@@ -68,7 +105,7 @@ export const LuminoscorePanel = () => {
       } else if (alertData) {
         const alertMetrics = alertData.map((alert: any) => ({
           id: alert.id,
-          entity_name: alert.detected_entities?.[0] || 'Alert Entity',
+          entity_name: extractEntityName(alert.detected_entities),
           source: alert.platform,
           mention_count: 1,
           audience_reach: alert.potential_reach || 0,
