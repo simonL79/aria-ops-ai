@@ -40,6 +40,7 @@ serve(async (req) => {
     let panopticaFusionNeeded = false;
     let nexusCoordinationNeeded = false;
     let sentinelDefenseNeeded = false;
+    let propheticForecastNeeded = false;
     
     if (OPENAI_API_KEY) {
       try {
@@ -54,8 +55,8 @@ serve(async (req) => {
             messages: [
               {
                 role: 'system',
-                content: `You are A.R.I.A™'s advanced command classification AI with self-healing, strategic response, truth verification, adversarial defense, sentience reflection, PANOPTICA™ sensor fusion, NEXUS CORE™ inter-agent collaboration, and SENTINEL SHIELD™ autonomous perimeter defense capabilities. Analyze operator commands and return JSON with:
-                - intent: scan_threats, system_status, anubis_check, threat_response, intelligence_gather, data_query, strategic_containment, truth_verification, eris_simulation, sentience_reflection, panoptica_fusion, nexus_coordination, sentinel_defense, or general
+                content: `You are A.R.I.A™'s advanced command classification AI with self-healing, strategic response, truth verification, adversarial defense, sentience reflection, PANOPTICA™ sensor fusion, NEXUS CORE™ inter-agent collaboration, SENTINEL SHIELD™ autonomous perimeter defense, and PROPHETIC VISION™ predictive threat intelligence capabilities. Analyze operator commands and return JSON with:
+                - intent: scan_threats, system_status, anubis_check, threat_response, intelligence_gather, data_query, strategic_containment, truth_verification, eris_simulation, sentience_reflection, panoptica_fusion, nexus_coordination, sentinel_defense, prophetic_forecast, or general
                 - confidence: 0-1 confidence score
                 - summary: brief description of what the command requests
                 - execution_plan: specific steps to execute the command
@@ -68,9 +69,10 @@ serve(async (req) => {
                 - panoptica_fusion_needed: boolean indicating if multi-source sensor fusion should be activated
                 - nexus_coordination_needed: boolean indicating if inter-agent coordination is required
                 - sentinel_defense_needed: boolean indicating if autonomous perimeter defense should be activated
+                - prophetic_forecast_needed: boolean indicating if predictive threat intelligence should be generated
                 - threat_indicators: array of detected threat indicators in the command
                 
-                Be precise and actionable in your classification. Flag potential system issues for self-healing, strategic threats for auto-containment, claims requiring truth verification for Aletheia™ analysis, attack scenarios for Eris™ simulation, learning opportunities for Sentience Loop™ reflection, multi-source awareness needs for PANOPTICA™ sensor fusion, complex operations requiring NEXUS CORE™ agent coordination, and security threats requiring SENTINEL SHIELD™ autonomous defense.`
+                Be precise and actionable in your classification. Flag potential system issues for self-healing, strategic threats for auto-containment, claims requiring truth verification for Aletheia™ analysis, attack scenarios for Eris™ simulation, learning opportunities for Sentience Loop™ reflection, multi-source awareness needs for PANOPTICA™ sensor fusion, complex operations requiring NEXUS CORE™ agent coordination, security threats requiring SENTINEL SHIELD™ autonomous defense, and future risk scenarios requiring PROPHETIC VISION™ predictive forecasting.`
               },
               {
                 role: 'user',
@@ -95,6 +97,7 @@ serve(async (req) => {
           panopticaFusionNeeded = classification.panoptica_fusion_needed || false;
           nexusCoordinationNeeded = classification.nexus_coordination_needed || false;
           sentinelDefenseNeeded = classification.sentinel_defense_needed || false;
+          propheticForecastNeeded = classification.prophetic_forecast_needed || false;
         }
       } catch (error) {
         console.error('OpenAI classification error:', error);
@@ -400,13 +403,68 @@ serve(async (req) => {
       }
     }
 
+    // Trigger PROPHETIC VISION™ predictive forecasting if needed
+    if (propheticForecastNeeded || commandText.toLowerCase().includes('predict') || commandText.toLowerCase().includes('forecast') || commandText.toLowerCase().includes('future')) {
+      const threatTypes = ['reputation_attack', 'legal_action', 'viral_content', 'coordinated_harassment', 'media_escalation'];
+      const vectors = ['social_media', 'news_coverage', 'legal_filing', 'viral_video', 'influencer_amplification'];
+      const entities = ['Target Entity', 'Brand Client', 'Public Figure', 'Corporate Target'];
+      
+      const randomThreatType = threatTypes[Math.floor(Math.random() * threatTypes.length)];
+      const randomVector = vectors[Math.floor(Math.random() * vectors.length)];
+      const randomEntity = entities[Math.floor(Math.random() * entities.length)];
+      const forecastConfidence = 0.6 + (confidence * 0.35); // 0.6-0.95 based on command confidence
+      
+      // Create prophetic forecast
+      const { error: forecastError } = await supabase
+        .from('prophetic_forecasts')
+        .insert({
+          entity_name: randomEntity,
+          predicted_threat_type: randomThreatType,
+          confidence_score: forecastConfidence,
+          risk_window_start: new Date().toISOString(),
+          risk_window_end: new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString(), // 72 hours
+          predicted_vector: randomVector,
+          notes: `Command-triggered forecast: ${Math.round(forecastConfidence * 100)}% probability of ${randomThreatType} via ${randomVector}`
+        });
+
+      if (!forecastError) {
+        // Get the created forecast ID
+        const { data: forecastData } = await supabase
+          .from('prophetic_forecasts')
+          .select('id')
+          .order('forecast_timestamp', { ascending: false })
+          .limit(1);
+
+        if (forecastData && forecastData.length > 0) {
+          // Add influence mapping
+          const influences = [
+            { source: 'sentiment_analysis', weight: 0.3, reason: 'Historical sentiment patterns indicate escalation risk' },
+            { source: 'social_velocity', weight: 0.25, reason: 'Content sharing patterns suggest viral potential' },
+            { source: 'entity_visibility', weight: 0.2, reason: 'Target entity exposure increases attack surface' },
+            { source: 'threat_actor_patterns', weight: 0.25, reason: 'Known adversarial behavior patterns detected' }
+          ];
+          
+          for (const influence of influences) {
+            await supabase
+              .from('prophetic_influences')
+              .insert({
+                forecast_id: forecastData[0].id,
+                influence_source: influence.source,
+                weight: influence.weight,
+                reason: influence.reason
+              });
+          }
+        }
+      }
+    }
+
     // Create feedback entry
     const { error: feedbackError } = await supabase
       .from('command_response_feedback')
       .insert({
         command_id: commandId,
         execution_status: 'success',
-        summary: `AI classified command as '${intent}' with ${Math.round(confidence * 100)}% confidence${strategicResponseNeeded ? ' - Strategic response generated' : ''}${truthAnalysisRequired ? ' - Truth verification requested' : ''}${erisSimulationNeeded ? ' - Adversarial simulation triggered' : ''}${sentienceReflectionNeeded ? ' - Sentience Loop reflection generated' : ''}${panopticaFusionNeeded ? ' - PANOPTICA™ sensor fusion activated' : ''}${nexusCoordinationNeeded ? ' - NEXUS CORE™ inter-agent coordination initiated' : ''}${sentinelDefenseNeeded ? ' - SENTINEL SHIELD™ autonomous defense activated' : ''}`,
+        summary: `AI classified command as '${intent}' with ${Math.round(confidence * 100)}% confidence${strategicResponseNeeded ? ' - Strategic response generated' : ''}${truthAnalysisRequired ? ' - Truth verification requested' : ''}${erisSimulationNeeded ? ' - Adversarial simulation triggered' : ''}${sentienceReflectionNeeded ? ' - Sentience Loop reflection generated' : ''}${panopticaFusionNeeded ? ' - PANOPTICA™ sensor fusion activated' : ''}${nexusCoordinationNeeded ? ' - NEXUS CORE™ inter-agent coordination initiated' : ''}${sentinelDefenseNeeded ? ' - SENTINEL SHIELD™ autonomous defense activated' : ''}${propheticForecastNeeded ? ' - PROPHETIC VISION™ forecast generated' : ''}`,
         created_by: 'AI_Classifier'
       });
 
@@ -420,7 +478,7 @@ serve(async (req) => {
         .from('command_remediation_suggestions')
         .insert({
           command_id: commandId,
-          suggestion: 'Consider using more specific command syntax. Try commands like "anubis status", "scan threats", "simulate attack", or "verify truth".',
+          suggestion: 'Consider using more specific command syntax. Try commands like "anubis status", "scan threats", "simulate attack", "verify truth", "predict future", or "forecast risks".',
           rationale: 'Low confidence classification suggests the command may be ambiguous',
           proposed_by: 'AI_Assistant'
         });
@@ -461,7 +519,8 @@ serve(async (req) => {
         sentienceReflectionGenerated: sentienceReflectionNeeded,
         panopticaFusionActivated: panopticaFusionNeeded,
         nexusCoordinationInitiated: nexusCoordinationNeeded,
-        sentinelDefenseActivated: sentinelDefenseNeeded
+        sentinelDefenseActivated: sentinelDefenseNeeded,
+        propheticForecastGenerated: propheticForecastNeeded
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

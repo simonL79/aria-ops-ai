@@ -1,4 +1,3 @@
-
 export { default as OperatorConsole } from './OperatorConsole';
 export { VoiceRecognition } from './VoiceRecognition';
 export { useCommandProcessor } from './CommandProcessor';
@@ -14,3 +13,4 @@ export { SentiencePanel } from './SentiencePanel';
 export { PanopticaPanel } from './PanopticaPanel';
 export { NexusPanel } from './NexusPanel';
 export { SentinelShieldPanel } from './SentinelShieldPanel';
+export { PropheticVisionPanel } from './PropheticVisionPanel';

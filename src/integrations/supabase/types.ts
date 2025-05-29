@@ -4816,6 +4816,112 @@ export type Database = {
         }
         Relationships: []
       }
+      prophetic_forecasts: {
+        Row: {
+          confidence_score: number | null
+          entity_name: string | null
+          forecast_timestamp: string | null
+          id: string
+          model_used: string | null
+          notes: string | null
+          predicted_threat_type: string | null
+          predicted_vector: string | null
+          risk_window_end: string | null
+          risk_window_start: string | null
+        }
+        Insert: {
+          confidence_score?: number | null
+          entity_name?: string | null
+          forecast_timestamp?: string | null
+          id?: string
+          model_used?: string | null
+          notes?: string | null
+          predicted_threat_type?: string | null
+          predicted_vector?: string | null
+          risk_window_end?: string | null
+          risk_window_start?: string | null
+        }
+        Update: {
+          confidence_score?: number | null
+          entity_name?: string | null
+          forecast_timestamp?: string | null
+          id?: string
+          model_used?: string | null
+          notes?: string | null
+          predicted_threat_type?: string | null
+          predicted_vector?: string | null
+          risk_window_end?: string | null
+          risk_window_start?: string | null
+        }
+        Relationships: []
+      }
+      prophetic_influences: {
+        Row: {
+          forecast_id: string | null
+          id: string
+          influence_source: string | null
+          reason: string | null
+          weight: number | null
+        }
+        Insert: {
+          forecast_id?: string | null
+          id?: string
+          influence_source?: string | null
+          reason?: string | null
+          weight?: number | null
+        }
+        Update: {
+          forecast_id?: string | null
+          id?: string
+          influence_source?: string | null
+          reason?: string | null
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prophetic_influences_forecast_id_fkey"
+            columns: ["forecast_id"]
+            isOneToOne: false
+            referencedRelation: "prophetic_forecasts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prophetic_validations: {
+        Row: {
+          forecast_id: string | null
+          id: string
+          outcome: string | null
+          reviewer: string | null
+          validated_at: string | null
+          validation_notes: string | null
+        }
+        Insert: {
+          forecast_id?: string | null
+          id?: string
+          outcome?: string | null
+          reviewer?: string | null
+          validated_at?: string | null
+          validation_notes?: string | null
+        }
+        Update: {
+          forecast_id?: string | null
+          id?: string
+          outcome?: string | null
+          reviewer?: string | null
+          validated_at?: string | null
+          validation_notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prophetic_validations_forecast_id_fkey"
+            columns: ["forecast_id"]
+            isOneToOne: false
+            referencedRelation: "prophetic_forecasts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       prospect_alerts: {
         Row: {
           alert_type: string | null
