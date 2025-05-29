@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -26,7 +25,11 @@ interface SuppressionAsset {
   legacy_post_id: string;
 }
 
-const SuppressionAssets = () => {
+interface SuppressionAssetsProps {
+  onStatsChange?: () => void;
+}
+
+const SuppressionAssets = ({ onStatsChange }: SuppressionAssetsProps) => {
   const [assets, setAssets] = useState<SuppressionAsset[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -71,6 +74,7 @@ const SuppressionAssets = () => {
       
       toast.success('GSC data updated');
       loadAssets();
+      onStatsChange?.(); // Call the callback to refresh parent stats
     } catch (error) {
       console.error('Error updating GSC data:', error);
       toast.error('Failed to update GSC data');
