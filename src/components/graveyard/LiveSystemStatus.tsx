@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Activity, Database, Queue, Shield, RefreshCw } from 'lucide-react';
+import { Activity, Database, Shield, RefreshCw } from 'lucide-react';
 
 interface LiveStatus {
   name: string;
@@ -126,7 +125,7 @@ const LiveSystemStatus = () => {
   const getStatusIcon = (module: string) => {
     switch (module) {
       case 'database': return <Database className="h-4 w-4" />;
-      case 'queue_processor': return <Queue className="h-4 w-4" />;
+      case 'queue_processor': return <Activity className="h-4 w-4" />;
       case 'threat_detector': return <Shield className="h-4 w-4" />;
       default: return <Activity className="h-4 w-4" />;
     }
