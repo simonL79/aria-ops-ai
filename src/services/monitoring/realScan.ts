@@ -10,13 +10,13 @@ export interface RealScanOptions {
 
 export const performRealScan = async (options: RealScanOptions = {}) => {
   try {
-    console.log('🔍 Starting LIVE monitoring scan...');
+    console.log('🔍 Starting A.R.I.A™ OSINT Intelligence Sweep...');
     
-    toast.info("Initiating live threat scan...", {
-      description: "Connecting to live data sources"
+    toast.info("A.R.I.A™ Intelligence Sweep initiated", {
+      description: "Direct web crawling & OSINT processing active"
     });
 
-    // Call the monitoring scan edge function with live enforcement
+    // Call the monitoring scan edge function for real OSINT
     const { data, error } = await supabase.functions.invoke('monitoring-scan', {
       body: {
         fullScan: options.fullScan || true,
@@ -26,40 +26,43 @@ export const performRealScan = async (options: RealScanOptions = {}) => {
     });
 
     if (error) {
-      console.error('Real scan failed:', error);
-      toast.error("Live scan failed", {
-        description: error.message || "Unable to connect to live data sources"
+      console.error('A.R.I.A™ Intelligence Sweep failed:', error);
+      toast.error("Intelligence sweep failed", {
+        description: error.message || "Unable to complete OSINT operations"
       });
       return [];
     }
 
     if (data?.success) {
       const resultCount = data.results?.length || 0;
+      const highRisk = data.stats?.high_risk || 0;
+      const mediumRisk = data.stats?.medium_risk || 0;
       
       if (resultCount > 0) {
-        toast.success("Live scan completed", {
-          description: `Found ${resultCount} real threats from live sources`
+        toast.success("A.R.I.A™ Intelligence Sweep completed", {
+          description: `${resultCount} intelligence items processed (${highRisk} high-risk, ${mediumRisk} medium-risk)`
         });
         
-        console.log(`✅ Live scan completed: ${resultCount} real threats detected`);
+        console.log(`✅ A.R.I.A™ OSINT completed: ${resultCount} intelligence items processed`);
+        console.log(`📊 Risk breakdown: ${highRisk} high, ${mediumRisk} medium`);
         return data.results;
       } else {
-        toast.info("Live scan completed", {
-          description: "No threats detected in current scan"
+        toast.info("Intelligence sweep completed", {
+          description: "No relevant intelligence detected in current sweep"
         });
         
-        console.log('ℹ️ Live scan completed: No threats detected');
+        console.log('ℹ️ A.R.I.A™ OSINT completed: No relevant intelligence detected');
         return [];
       }
     } else {
-      console.warn('Scan completed but no success flag returned');
+      console.warn('Intelligence sweep completed but no success flag returned');
       return [];
     }
 
   } catch (error) {
-    console.error('Error performing real scan:', error);
-    toast.error("Scan error", {
-      description: "An error occurred while scanning live sources"
+    console.error('Error performing A.R.I.A™ Intelligence Sweep:', error);
+    toast.error("Intelligence sweep error", {
+      description: "An error occurred during OSINT operations"
     });
     return [];
   }

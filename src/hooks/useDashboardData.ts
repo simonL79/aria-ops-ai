@@ -48,79 +48,35 @@ const useDashboardData = (): DashboardData => {
     setError(null);
     
     try {
-      console.log('🔄 A.R.I.A™ LIVE DATA ENFORCEMENT: Fetching ONLY real data...');
+      console.log('🔄 A.R.I.A™ OSINT DATA: Loading real intelligence data...');
       
-      // STRICT: Clean any remaining mock/demo/test data
-      console.log('🧹 LIVE DATA ENFORCEMENT: Purging all non-live data...');
-      await supabase
-        .from('scan_results')
-        .delete()
-        .or('content.ilike.%test%,content.ilike.%mock%,content.ilike.%demo%,content.ilike.%sample%,platform.eq.System,platform.eq.ARIA System,platform.eq.ARIA Monitor');
-
-      await supabase
-        .from('content_alerts')
-        .delete()
-        .or('content.ilike.%test%,content.ilike.%mock%,content.ilike.%demo%,content.ilike.%sample%');
-      
-      // Fetch ONLY verified live data (excluding any system messages)
+      // Fetch ONLY real OSINT intelligence data
       const { data: scanResults, error: scanError } = await supabase
         .from('scan_results')
         .select('*')
-        .not('platform', 'eq', 'ARIA System')
-        .not('platform', 'eq', 'ARIA Monitor')
-        .not('platform', 'eq', 'System')
-        .not('threat_type', 'eq', 'system_status')
-        .not('threat_type', 'eq', 'monitoring_status')
-        .eq('source_type', 'live_api')
+        .eq('source_type', 'live_osint')
         .order('created_at', { ascending: false })
-        .limit(50);
+        .limit(100);
 
       if (scanError) {
-        console.error('❌ Error fetching LIVE scan results:', scanError);
-        throw new Error(`Failed to fetch LIVE scan results: ${scanError.message}`);
+        console.error('❌ Error fetching OSINT intelligence:', scanError);
+        throw new Error(`Failed to fetch intelligence data: ${scanError.message}`);
       }
 
-      // Fetch ONLY verified live content alerts
+      // Fetch real content alerts
       const { data: contentAlerts, error: alertsError } = await supabase
         .from('content_alerts')
         .select('*')
-        .not('platform', 'eq', 'System')
-        .not('platform', 'eq', 'ARIA System')
         .eq('source_type', 'live_source')
         .order('created_at', { ascending: false })
         .limit(50);
 
       if (alertsError) {
-        console.error('❌ Error fetching LIVE content alerts:', alertsError);
-        throw new Error(`Failed to fetch LIVE content alerts: ${alertsError.message}`);
+        console.error('❌ Error fetching content alerts:', alertsError);
       }
 
-      // Process ONLY verified live threat data
-      const liveScanResults = (scanResults || []).filter(result => 
-        result.source_type === 'live_api' &&
-        result.platform !== 'ARIA System' && 
-        result.platform !== 'System' &&
-        result.threat_type !== 'system_status' &&
-        result.threat_type !== 'monitoring_status' &&
-        !result.content.toLowerCase().includes('scan completed') &&
-        !result.content.toLowerCase().includes('clean scan') &&
-        !result.content.toLowerCase().includes('test') &&
-        !result.content.toLowerCase().includes('demo') &&
-        !result.content.toLowerCase().includes('mock')
-      );
-
-      const liveContentAlerts = (contentAlerts || []).filter(alert =>
-        alert.source_type === 'live_source' &&
-        !alert.content.toLowerCase().includes('test') &&
-        !alert.content.toLowerCase().includes('demo') &&
-        !alert.content.toLowerCase().includes('mock')
-      );
-
-      console.log(`📊 LIVE DATA: Found ${liveScanResults.length} verified live scan results`);
-      console.log(`📊 LIVE DATA: Found ${liveContentAlerts.length} verified live content alerts`);
-
-      // Convert LIVE scan results to ContentAlert format
-      const scanAlerts: ContentAlert[] = liveScanResults.map((result: any) => ({
+      // Process OSINT intelligence data
+      const osintResults = (scanResults || []).map((result: any) => ({
         id: result.id,
         platform: result.platform || 'Unknown',
         content: result.content || 'No content available',
@@ -129,7 +85,7 @@ const useDashboardData = (): DashboardData => {
         status: 'new' as const,
         url: result.url || '',
         threatType: result.threat_type || 'unknown',
-        sourceType: 'live_scan' as const,
+        sourceType: 'osint_intelligence' as const,
         confidenceScore: result.confidence_score || 85,
         sentiment: result.sentiment > 0 ? 'positive' as const : result.sentiment < -0.2 ? 'negative' as const : 'neutral' as const,
         detectedEntities: Array.isArray(result.detected_entities) 
@@ -138,8 +94,8 @@ const useDashboardData = (): DashboardData => {
         potentialReach: result.potential_reach || 0
       }));
 
-      // Convert LIVE content alerts to ContentAlert format
-      const formattedContentAlerts: ContentAlert[] = liveContentAlerts.map((alert: any) => ({
+      // Process content alerts
+      const formattedContentAlerts: ContentAlert[] = (contentAlerts || []).map((alert: any) => ({
         id: alert.id,
         platform: alert.platform || 'Unknown',
         content: alert.content || 'No content available',
@@ -157,84 +113,79 @@ const useDashboardData = (): DashboardData => {
         potentialReach: alert.potential_reach || 0
       }));
 
-      // Combine all VERIFIED LIVE alerts
-      const allLiveAlerts = [...scanAlerts, ...formattedContentAlerts];
+      // Combine all real intelligence
+      const allIntelligence = [...osintResults, ...formattedContentAlerts];
       
-      if (allLiveAlerts.length === 0) {
-        console.log('ℹ️ A.R.I.A™ LIVE DATA: No live threats detected - system clean and operational');
-      } else {
-        console.log(`✅ A.R.I.A™ LIVE DATA: Successfully loaded ${allLiveAlerts.length} verified live threats`);
-      }
+      console.log(`📊 A.R.I.A™ OSINT: Loaded ${allIntelligence.length} intelligence items`);
+      console.log(`📊 Breakdown: ${osintResults.length} OSINT, ${formattedContentAlerts.length} alerts`);
       
-      setAlerts(allLiveAlerts);
-      setClassifiedAlerts(allLiveAlerts);
+      setAlerts(allIntelligence);
+      setClassifiedAlerts(allIntelligence);
 
-      // Calculate metrics from LIVE data only
-      const highSeverity = allLiveAlerts.filter(alert => alert.severity === 'high').length;
-      const mediumSeverity = allLiveAlerts.filter(alert => alert.severity === 'medium').length;
-      const totalReach = allLiveAlerts.reduce((sum, alert) => sum + (alert.potentialReach || 0), 0);
+      // Calculate real-time metrics
+      const highSeverity = allIntelligence.filter(alert => alert.severity === 'high').length;
+      const mediumSeverity = allIntelligence.filter(alert => alert.severity === 'medium').length;
+      const totalReach = allIntelligence.reduce((sum, alert) => sum + (alert.potentialReach || 0), 0);
       
-      const liveMetrics: MetricValue[] = [
-        { id: 'total-threats', title: 'Live Threats', value: allLiveAlerts.length, change: 0, icon: 'alert-triangle', color: 'red' },
-        { id: 'high-severity', title: 'High Severity', value: highSeverity, change: 0, icon: 'alert-circle', color: 'red' },
-        { id: 'medium-severity', title: 'Medium Severity', value: mediumSeverity, change: 0, icon: 'alert', color: 'yellow' },
-        { id: 'total-reach', title: 'Total Reach', value: totalReach, change: 0, icon: 'users', color: 'blue' }
+      const osintMetrics: MetricValue[] = [
+        { id: 'total-intelligence', title: 'Intelligence Items', value: allIntelligence.length, change: 0, icon: 'search', color: 'blue' },
+        { id: 'high-risk', title: 'High Risk', value: highSeverity, change: 0, icon: 'alert-triangle', color: 'red' },
+        { id: 'medium-risk', title: 'Medium Risk', value: mediumSeverity, change: 0, icon: 'alert', color: 'yellow' },
+        { id: 'total-reach', title: 'Total Reach', value: totalReach, change: 0, icon: 'users', color: 'green' }
       ];
       
-      setMetrics(liveMetrics);
+      setMetrics(osintMetrics);
 
-      // Calculate sentiment metrics from LIVE data
-      const negative = allLiveAlerts.filter(alert => alert.sentiment === 'negative').length;
-      const positive = allLiveAlerts.filter(alert => alert.sentiment === 'positive').length;
-      const neutral = allLiveAlerts.filter(alert => alert.sentiment === 'neutral').length;
+      // Calculate sentiment distribution
+      const negative = allIntelligence.filter(alert => alert.sentiment === 'negative').length;
+      const positive = allIntelligence.filter(alert => alert.sentiment === 'positive').length;
+      const neutral = allIntelligence.filter(alert => alert.sentiment === 'neutral').length;
 
       setNegativeContent(negative);
       setPositiveContent(positive);
       setNeutralContent(neutral);
 
-      // Set up sources based on LIVE platforms only
-      const platformCounts = allLiveAlerts.reduce((acc: any, alert) => {
+      // Set up sources based on platforms
+      const platformCounts = allIntelligence.reduce((acc: any, alert) => {
         acc[alert.platform] = (acc[alert.platform] || 0) + 1;
         return acc;
       }, {});
 
-      const liveSources: ContentSource[] = Object.entries(platformCounts).map(([platform, count]: [string, any]) => ({
+      const osintSources: ContentSource[] = Object.entries(platformCounts).map(([platform, count]: [string, any]) => ({
         id: platform.toLowerCase(),
         name: platform,
-        type: 'live_source',
+        type: 'osint_source',
         status: 'connected',
         lastUpdate: new Date().toISOString(),
         metrics: {
           total: count,
-          positive: allLiveAlerts.filter(a => a.platform === platform && a.sentiment === 'positive').length,
-          negative: allLiveAlerts.filter(a => a.platform === platform && a.sentiment === 'negative').length,
-          neutral: allLiveAlerts.filter(a => a.platform === platform && a.sentiment === 'neutral').length
+          positive: allIntelligence.filter(a => a.platform === platform && a.sentiment === 'positive').length,
+          negative: allIntelligence.filter(a => a.platform === platform && a.sentiment === 'negative').length,
+          neutral: allIntelligence.filter(a => a.platform === platform && a.sentiment === 'neutral').length
         }
       }));
 
-      setSources(liveSources);
+      setSources(osintSources);
 
-      // Generate actions from LIVE data only
-      const liveActions: ContentAction[] = allLiveAlerts.slice(0, 10).map((alert) => ({
+      // Generate actions from intelligence
+      const osintActions: ContentAction[] = allIntelligence.slice(0, 10).map((alert) => ({
         id: alert.id,
         type: alert.severity === 'high' ? 'urgent' as const : 'monitoring' as const,
-        description: `${alert.severity.toUpperCase()} LIVE threat detected on ${alert.platform}`,
+        description: `${alert.severity.toUpperCase()} intelligence from ${alert.platform}`,
         status: 'pending' as const,
         platform: alert.platform,
         timestamp: alert.date
       }));
 
-      setActions(liveActions);
-      setRecentActivity(liveActions);
-
-      // Clear any existing error
+      setActions(osintActions);
+      setRecentActivity(osintActions);
       setError(null);
       
     } catch (err: any) {
-      console.error('❌ Critical error fetching LIVE data:', err);
-      setError(`Failed to load LIVE data: ${err.message}`);
+      console.error('❌ Critical error fetching OSINT data:', err);
+      setError(`Failed to load intelligence data: ${err.message}`);
       
-      // Set empty arrays for live-only enforcement
+      // Set empty arrays for error state
       setAlerts([]);
       setClassifiedAlerts([]);
       setMetrics([]);
@@ -247,48 +198,48 @@ const useDashboardData = (): DashboardData => {
     }
   }, []);
 
-  // Set up real-time subscriptions for LIVE data updates only
+  // Set up real-time subscriptions for OSINT updates
   useEffect(() => {
     fetchData();
 
-    // Subscribe to LIVE updates only
-    const scanSubscription = supabase
-      .channel('live_scan_updates')
+    // Subscribe to OSINT updates
+    const osintSubscription = supabase
+      .channel('osint_updates')
       .on('postgres_changes', {
         event: 'INSERT',
         schema: 'public',
         table: 'scan_results',
-        filter: 'source_type=eq.live_api'
+        filter: 'source_type=eq.live_osint'
       }, () => {
-        console.log('🔄 New LIVE scan result detected, refreshing dashboard...');
+        console.log('🔄 New OSINT intelligence detected, refreshing dashboard...');
         fetchData();
       })
       .subscribe();
 
     const alertSubscription = supabase
-      .channel('live_alert_updates')
+      .channel('alert_updates')
       .on('postgres_changes', {
         event: 'INSERT',
         schema: 'public',
         table: 'content_alerts',
         filter: 'source_type=eq.live_source'
       }, () => {
-        console.log('🔄 New LIVE content alert detected, refreshing dashboard...');
+        console.log('🔄 New alert detected, refreshing dashboard...');
         fetchData();
       })
       .subscribe();
 
     return () => {
-      scanSubscription.unsubscribe();
+      osintSubscription.unsubscribe();
       alertSubscription.unsubscribe();
     };
   }, [fetchData]);
 
   const simulateNewData = useCallback((scanResults: any[]) => {
-    // This now processes ONLY real scan results - no simulation allowed
+    // Process real scan results only
     if (!scanResults || scanResults.length === 0) return;
     
-    console.log('🔄 Processing new LIVE scan results:', scanResults.length);
+    console.log('🔄 Processing new OSINT intelligence:', scanResults.length);
     fetchData(); // Refresh all data from database
   }, [fetchData]);
 
