@@ -1,4 +1,3 @@
-
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -35,6 +34,7 @@ serve(async (req) => {
     let summary = 'Command processed with basic classification';
     let selfHealingRequired = false;
     let strategicResponseNeeded = false;
+    let truthAnalysisRequired = false;
     
     if (OPENAI_API_KEY) {
       try {
@@ -49,17 +49,18 @@ serve(async (req) => {
             messages: [
               {
                 role: 'system',
-                content: `You are A.R.I.A™'s advanced command classification AI with self-healing and strategic response capabilities. Analyze operator commands and return JSON with:
-                - intent: scan_threats, system_status, anubis_check, threat_response, intelligence_gather, data_query, strategic_containment, or general
+                content: `You are A.R.I.A™'s advanced command classification AI with self-healing, strategic response, and truth verification capabilities. Analyze operator commands and return JSON with:
+                - intent: scan_threats, system_status, anubis_check, threat_response, intelligence_gather, data_query, strategic_containment, truth_verification, or general
                 - confidence: 0-1 confidence score
                 - summary: brief description of what the command requests
                 - execution_plan: specific steps to execute the command
                 - priority: low, medium, high, or critical
                 - self_healing_check: boolean indicating if the command might reveal system issues
                 - strategic_response_needed: boolean indicating if auto-strategy generation is recommended
+                - truth_analysis_needed: boolean indicating if Aletheia™ truth verification is required
                 - threat_indicators: array of detected threat indicators in the command
                 
-                Be precise and actionable in your classification. Flag potential system issues for self-healing and strategic threats for auto-containment.`
+                Be precise and actionable in your classification. Flag potential system issues for self-healing, strategic threats for auto-containment, and claims requiring truth verification for Aletheia™ analysis.`
               },
               {
                 role: 'user',
@@ -78,6 +79,7 @@ serve(async (req) => {
           summary = classification.summary || summary;
           selfHealingRequired = classification.self_healing_check || false;
           strategicResponseNeeded = classification.strategic_response_needed || false;
+          truthAnalysisRequired = classification.truth_analysis_needed || false;
         }
       } catch (error) {
         console.error('OpenAI classification error:', error);
@@ -128,13 +130,46 @@ serve(async (req) => {
       }
     }
 
+    // Trigger Aletheia™ truth analysis if needed
+    if (truthAnalysisRequired || commandText.toLowerCase().includes('verify') || commandText.toLowerCase().includes('truth') || commandText.toLowerCase().includes('fact')) {
+      const { error: truthError } = await supabase
+        .from('aletheia_truth_graph')
+        .insert({
+          claim_text: `Truth verification request from command: "${commandText}"`,
+          source_url: 'operator_command',
+          credibility_score: 0.5, // Initial neutral score
+          corroborating_sources: [],
+          refuted_sources: []
+        });
+
+      if (!truthError) {
+        // Log verification attempt
+        const { data: truthData } = await supabase
+          .from('aletheia_truth_graph')
+          .select('id')
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        if (truthData && truthData.length > 0) {
+          await supabase
+            .from('aletheia_verification_log')
+            .insert({
+              claim_id: truthData[0].id,
+              verified_by: 'A.R.I.A™ Operator',
+              verification_status: 'uncertain',
+              notes: `Initiated truth analysis from operator command with ${Math.round(confidence * 100)}% confidence`
+            });
+        }
+      }
+    }
+
     // Create feedback entry
     const { error: feedbackError } = await supabase
       .from('command_response_feedback')
       .insert({
         command_id: commandId,
         execution_status: 'success',
-        summary: `AI classified command as '${intent}' with ${Math.round(confidence * 100)}% confidence${strategicResponseNeeded ? ' - Strategic response generated' : ''}`,
+        summary: `AI classified command as '${intent}' with ${Math.round(confidence * 100)}% confidence${strategicResponseNeeded ? ' - Strategic response generated' : ''}${truthAnalysisRequired ? ' - Truth verification requested' : ''}`,
         created_by: 'AI_Classifier'
       });
 
@@ -183,7 +218,8 @@ serve(async (req) => {
         summary,
         commandId,
         selfHealingActive: selfHealingRequired,
-        strategicResponseGenerated: strategicResponseNeeded
+        strategicResponseGenerated: strategicResponseNeeded,
+        truthAnalysisTriggered: truthAnalysisRequired
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

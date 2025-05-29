@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { SelfHealingPanel } from './SelfHealingPanel';
 import { StrategicResponsePanel } from './StrategicResponsePanel';
+import { AletheiaTruthPanel } from './AletheiaTruthPanel';
 
 interface CommandFeedback {
   id: string;
@@ -133,6 +134,9 @@ export const FeedbackPanel = ({ commandHistory }: FeedbackPanelProps) => {
 
       {/* Strategic Response Panel */}
       <StrategicResponsePanel />
+
+      {/* Aletheia Truth Panel */}
+      <AletheiaTruthPanel />
 
       {/* Command Execution Feedback */}
       <Card className="bg-black border-green-500/30">

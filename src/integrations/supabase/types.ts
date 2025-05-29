@@ -350,6 +350,82 @@ export type Database = {
           },
         ]
       }
+      aletheia_truth_graph: {
+        Row: {
+          claim_text: string
+          corroborating_sources: string[] | null
+          created_at: string | null
+          credibility_score: number | null
+          entity_id: string | null
+          id: string
+          refuted_sources: string[] | null
+          source_url: string | null
+        }
+        Insert: {
+          claim_text: string
+          corroborating_sources?: string[] | null
+          created_at?: string | null
+          credibility_score?: number | null
+          entity_id?: string | null
+          id?: string
+          refuted_sources?: string[] | null
+          source_url?: string | null
+        }
+        Update: {
+          claim_text?: string
+          corroborating_sources?: string[] | null
+          created_at?: string | null
+          credibility_score?: number | null
+          entity_id?: string | null
+          id?: string
+          refuted_sources?: string[] | null
+          source_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "aletheia_truth_graph_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "client_entities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      aletheia_verification_log: {
+        Row: {
+          claim_id: string | null
+          id: string
+          notes: string | null
+          verification_status: string | null
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          claim_id?: string | null
+          id?: string
+          notes?: string | null
+          verification_status?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          claim_id?: string | null
+          id?: string
+          notes?: string | null
+          verification_status?: string | null
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "aletheia_verification_log_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "aletheia_truth_graph"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       anubis_activity_log: {
         Row: {
           activity_type: string
