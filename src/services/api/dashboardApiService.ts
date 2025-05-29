@@ -70,16 +70,33 @@ export const getRecentActivity = async (): Promise<ContentAction[]> => {
     
     if (error) throw error;
     
-    return data.map(item => ({
-      id: item.id,
-      type: item.type,
-      description: item.description,
-      timestamp: new Date(item.created_at).toLocaleDateString(),
-      status: item.status,
-      platform: item.platform,
-      action: item.action,
-      date: new Date(item.created_at).toLocaleDateString()
-    }));
+    return data.map(item => {
+      // Map database values to correct union types
+      const mapType = (dbType: string): "urgent" | "monitoring" | "response" => {
+        if (dbType === 'urgent' || dbType === 'monitoring' || dbType === 'response') {
+          return dbType;
+        }
+        return 'monitoring'; // default fallback
+      };
+
+      const mapStatus = (dbStatus: string): "pending" | "completed" | "failed" => {
+        if (dbStatus === 'pending' || dbStatus === 'completed' || dbStatus === 'failed') {
+          return dbStatus;
+        }
+        return 'pending'; // default fallback
+      };
+
+      return {
+        id: item.id,
+        type: mapType(item.type),
+        description: item.description,
+        timestamp: new Date(item.created_at).toLocaleDateString(),
+        status: mapStatus(item.status),
+        platform: item.platform,
+        action: item.action,
+        date: new Date(item.created_at).toLocaleDateString()
+      };
+    });
   } catch (error) {
     console.error('Error fetching recent activity:', error);
     return [];
