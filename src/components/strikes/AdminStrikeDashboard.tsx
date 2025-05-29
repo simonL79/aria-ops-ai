@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -61,36 +62,21 @@ const AdminStrikeDashboard = () => {
 
   const loadStrikeRequests = async () => {
     try {
-      // Get strike requests with user profile data
+      // Get strike requests only
       const { data, error } = await supabase
         .from('strike_requests')
-        .select(`
-          *
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
-      // Get user emails separately to avoid the profiles issue
-      const userIds = [...new Set(data.map(request => request.requested_by))];
-      const { data: profilesData } = await supabase
-        .from('profiles')
-        .select('id, email')
-        .in('id', userIds);
-
-      // Create email lookup map
-      const emailMap = new Map();
-      profilesData?.forEach(profile => {
-        emailMap.set(profile.id, profile.email);
-      });
-
-      // Group by batch_id and add email data
+      // Group by batch_id with default email fallback
       const batchMap = new Map<string, StrikeRequest[]>();
       
       data.forEach(request => {
         const requestWithEmail = {
           ...request,
-          requester_email: emailMap.get(request.requested_by) || 'Unknown'
+          requester_email: 'User'
         };
         
         if (!batchMap.has(request.batch_id)) {
