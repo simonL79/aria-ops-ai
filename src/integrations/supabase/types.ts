@@ -3876,6 +3876,71 @@ export type Database = {
         }
         Relationships: []
       }
+      operator_command_log: {
+        Row: {
+          command_text: string
+          created_at: string | null
+          id: string
+          intent: string | null
+          priority: string | null
+          response_type: string | null
+          target: string | null
+          user_id: string | null
+        }
+        Insert: {
+          command_text: string
+          created_at?: string | null
+          id?: string
+          intent?: string | null
+          priority?: string | null
+          response_type?: string | null
+          target?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          command_text?: string
+          created_at?: string | null
+          id?: string
+          intent?: string | null
+          priority?: string | null
+          response_type?: string | null
+          target?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      operator_response_log: {
+        Row: {
+          command_id: string | null
+          created_at: string | null
+          id: string
+          processed_by: string | null
+          response_text: string
+        }
+        Insert: {
+          command_id?: string | null
+          created_at?: string | null
+          id?: string
+          processed_by?: string | null
+          response_text: string
+        }
+        Update: {
+          command_id?: string | null
+          created_at?: string | null
+          id?: string
+          processed_by?: string | null
+          response_text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "operator_response_log_command_id_fkey"
+            columns: ["command_id"]
+            isOneToOne: false
+            referencedRelation: "operator_command_log"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       praxis_crisis_simulations: {
         Row: {
           archetype_id: string | null

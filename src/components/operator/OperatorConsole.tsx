@@ -11,19 +11,19 @@ import { toast } from 'sonner';
 
 interface OperatorCommand {
   id: string;
-  command: string;
-  context: string;
+  command_text: string;
   intent: string;
-  issued_at: string;
-  status: string;
-  resolved: boolean;
+  target: string;
+  priority: string;
+  response_type: string;
+  created_at: string;
 }
 
 interface OperatorResponse {
   id: string;
   command_id: string;
-  response: string;
-  system_module: string;
+  response_text: string;
+  processed_by: string;
   created_at: string;
 }
 
@@ -42,6 +42,7 @@ const OperatorConsole = () => {
       loadCommandHistory();
       loadResponses();
       setupVoiceRecognition();
+      subscribeToRealTimeUpdates();
     }
   }, [isAdmin]);
 
@@ -64,10 +65,13 @@ const OperatorConsole = () => {
         toast.success('🎤 Voice command active - speak now');
       };
 
-      recognitionRef.current.onresult = (event: any) => {
+      recognitionRef.current.onresult = async (event: any) => {
         const transcript = event.results[0][0].transcript;
         setCurrentCommand(transcript);
         toast.success(`Voice captured: "${transcript}"`);
+        
+        // Auto-process voice commands
+        await processVoiceCommand(transcript);
       };
 
       recognitionRef.current.onend = () => {
@@ -79,6 +83,26 @@ const OperatorConsole = () => {
         toast.error(`Voice recognition error: ${event.error}`);
       };
     }
+  };
+
+  const subscribeToRealTimeUpdates = () => {
+    const channel = supabase
+      .channel('operator-console-updates')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'operator_command_log' },
+        () => loadCommandHistory()
+      )
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'operator_response_log' },
+        () => loadResponses()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   };
 
   const startVoiceCommand = () => {
@@ -95,27 +119,14 @@ const OperatorConsole = () => {
 
   const loadCommandHistory = async () => {
     try {
-      // Use existing tables for now since new ones haven't been created yet
       const { data, error } = await supabase
-        .from('activity_logs')
+        .from('operator_command_log')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(50);
 
       if (error) throw error;
-      
-      // Transform activity logs to command format
-      const commands = (data || []).map((log: any) => ({
-        id: log.id,
-        command: log.action || 'System command',
-        context: 'operator_console',
-        intent: log.entity_type || 'general',
-        issued_at: log.created_at,
-        status: 'executed',
-        resolved: true
-      }));
-      
-      setCommandHistory(commands);
+      setCommandHistory(data || []);
     } catch (error) {
       console.error('Error loading command history:', error);
     }
@@ -123,27 +134,59 @@ const OperatorConsole = () => {
 
   const loadResponses = async () => {
     try {
-      // Use existing notification table for responses
       const { data, error } = await supabase
-        .from('aria_notifications')
+        .from('operator_response_log')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(100);
 
       if (error) throw error;
-      
-      // Transform notifications to response format
-      const responseData = (data || []).map((notification: any) => ({
-        id: notification.id,
-        command_id: notification.id, // Temporary mapping
-        response: notification.summary || 'System notification',
-        system_module: notification.event_type || 'system',
-        created_at: notification.created_at
-      }));
-      
-      setResponses(responseData);
+      setResponses(data || []);
     } catch (error) {
       console.error('Error loading responses:', error);
+    }
+  };
+
+  const processVoiceCommand = async (command: string) => {
+    if (!command.trim()) return;
+
+    setIsProcessing(true);
+    
+    try {
+      // Call the voice command processing edge function
+      const response = await fetch('/functions/v1/process-voice-command', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${supabase.supabaseKey}`,
+        },
+        body: JSON.stringify({
+          command: command,
+          userId: user?.id
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to process voice command');
+      }
+
+      const result = await response.json();
+      
+      if (result.success) {
+        toast.success('Command processed successfully');
+        setCurrentCommand('');
+        
+        // Reload data to show new command and response
+        await loadCommandHistory();
+        await loadResponses();
+      } else {
+        throw new Error(result.error || 'Command processing failed');
+      }
+    } catch (error) {
+      console.error('Error processing voice command:', error);
+      toast.error('Command processing failed');
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -153,37 +196,34 @@ const OperatorConsole = () => {
     setIsProcessing(true);
     
     try {
-      // For now, log to existing activity_logs table
-      const { data: logData, error: logError } = await supabase
-        .from('activity_logs')
+      // Insert command directly into operator_command_log
+      const { data: commandData, error: commandError } = await supabase
+        .from('operator_command_log')
         .insert({
-          action: command,
-          entity_type: 'operator_command',
-          details: `Operator command: ${command}`,
-          user_id: user?.id
+          user_id: user?.id,
+          command_text: command,
+          intent: determineIntent(command),
+          target: extractTarget(command),
+          priority: determinePriority(command),
+          response_type: 'manual'
         })
         .select()
         .single();
 
-      if (logError) throw logError;
+      if (commandError) throw commandError;
 
-      // Process command and generate response
+      // Generate response based on command
       const response = await executeCommand(command);
 
-      // Log response as notification
+      // Insert response
       await supabase
-        .from('aria_notifications')
+        .from('operator_response_log')
         .insert({
-          entity_name: 'Operator Console',
-          event_type: 'command_response',
-          summary: response,
-          priority: 'medium'
+          command_id: commandData.id,
+          response_text: response,
+          processed_by: 'A.R.I.A™ Operator Console'
         });
 
-      // Reload data
-      loadCommandHistory();
-      loadResponses();
-      
       setCurrentCommand('');
       toast.success('Command executed');
     } catch (error) {
@@ -196,12 +236,29 @@ const OperatorConsole = () => {
 
   const determineIntent = (command: string): string => {
     const cmd = command.toLowerCase();
-    if (cmd.includes('scan') || cmd.includes('monitor')) return 'intelligence';
-    if (cmd.includes('anubis') || cmd.includes('system')) return 'system';
+    if (cmd.includes('scan') || cmd.includes('monitor')) return 'scan_threats';
+    if (cmd.includes('anubis') || cmd.includes('system')) return 'system_status';
     if (cmd.includes('threat') || cmd.includes('alert')) return 'threat_management';
-    if (cmd.includes('status') || cmd.includes('health')) return 'status';
-    if (cmd.includes('show') || cmd.includes('list')) return 'query';
+    if (cmd.includes('status') || cmd.includes('health')) return 'health_check';
+    if (cmd.includes('show') || cmd.includes('list')) return 'data_query';
     return 'general';
+  };
+
+  const extractTarget = (command: string): string => {
+    const cmd = command.toLowerCase();
+    if (cmd.includes('anubis')) return 'anubis_system';
+    if (cmd.includes('threat')) return 'threat_scanner';
+    if (cmd.includes('system')) return 'system_health';
+    if (cmd.includes('live')) return 'monitoring_status';
+    return 'general';
+  };
+
+  const determinePriority = (command: string): string => {
+    const cmd = command.toLowerCase();
+    if (cmd.includes('critical') || cmd.includes('emergency')) return 'critical';
+    if (cmd.includes('urgent') || cmd.includes('high')) return 'high';
+    if (cmd.includes('scan') || cmd.includes('threat')) return 'medium';
+    return 'low';
   };
 
   const executeCommand = async (command: string): Promise<string> => {
@@ -313,20 +370,21 @@ const OperatorConsole = () => {
             <div key={cmd.id} className="space-y-1">
               <div className="flex items-center gap-2">
                 <span className="text-blue-400">operator@aria:~$</span>
-                <span className="text-white">{cmd.command}</span>
+                <span className="text-white">{cmd.command_text}</span>
                 <Badge 
                   className={`text-xs ${
-                    cmd.status === 'executed' ? 'bg-green-500/20 text-green-400' : 
-                    cmd.status === 'processing' ? 'bg-yellow-500/20 text-yellow-400' :
-                    'bg-red-500/20 text-red-400'
+                    cmd.priority === 'critical' ? 'bg-red-500/20 text-red-400' :
+                    cmd.priority === 'high' ? 'bg-orange-500/20 text-orange-400' :
+                    cmd.priority === 'medium' ? 'bg-yellow-500/20 text-yellow-400' :
+                    'bg-green-500/20 text-green-400'
                   }`}
                 >
-                  {cmd.status}
+                  {cmd.intent}
                 </Badge>
               </div>
               {response && (
                 <div className="ml-6 text-green-300">
-                  <span className="text-green-600">[{response.system_module.toUpperCase()}]</span> {response.response}
+                  <span className="text-green-600">[{response.processed_by}]</span> {response.response_text}
                 </div>
               )}
             </div>
