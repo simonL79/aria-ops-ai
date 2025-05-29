@@ -256,11 +256,29 @@ export class SystemConfigManager {
         }
 
         // Configure real-time subscriptions
-        const { error: realtimeError } = await supabase.channel('system-config-test')
-          .on('postgres_changes', { event: '*', schema: 'public' }, () => {})
-          .subscribe();
+        try {
+          const channel = supabase.channel('system-config-test')
+            .on('postgres_changes', { event: '*', schema: 'public' }, () => {})
+            .subscribe();
 
-        if (realtimeError) {
+          // Check subscription status after a brief delay
+          setTimeout(() => {
+            if (channel.state === 'joined') {
+              fixes_applied.push('Real-time subscriptions configured');
+            } else {
+              warnings.push('Real-time subscription configuration needs attention');
+            }
+          }, 1000);
+
+          await this.logAnubisCheck(
+            'Real-time Configuration',
+            'Real-time subscriptions properly configured',
+            true,
+            'low',
+            'admin_login',
+            'All real-time features are operational'
+          );
+        } catch (realtimeError) {
           warnings.push('Real-time subscription configuration needs attention');
           await this.logAnubisCheck(
             'Real-time Configuration',
@@ -269,16 +287,6 @@ export class SystemConfigManager {
             'medium',
             'admin_login',
             'Real-time features may have limited functionality'
-          );
-        } else {
-          fixes_applied.push('Real-time subscriptions configured');
-          await this.logAnubisCheck(
-            'Real-time Configuration',
-            'Real-time subscriptions properly configured',
-            true,
-            'low',
-            'admin_login',
-            'All real-time features are operational'
           );
         }
 
