@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { TooltipProvider } from '@/components/ui/tooltip';
 
 interface AuditLogEntry {
   id: string;
@@ -136,172 +137,174 @@ const AnubisAuditLogViewer = () => {
   const stats = getStats();
 
   return (
-    <div className="space-y-6">
-      <Card className="border-[#247CFF]/20 bg-[#0A0F2C]/90">
-        <CardHeader>
-          <CardTitle className="text-xl text-white flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <FileText className="h-6 w-6 text-[#247CFF]" />
-              Anubis Compliance Audit Log
-              <Badge className="bg-[#247CFF]/20 text-[#247CFF] border-[#247CFF]/30">
-                {stats.total} Entries
-              </Badge>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={exportLogs}
-                className="bg-transparent border-[#247CFF] text-[#247CFF] hover:bg-[#247CFF] hover:text-white"
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Export CSV
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={loadAuditLogs}
-                disabled={loading}
-                className="bg-transparent border-[#247CFF] text-[#247CFF] hover:bg-[#247CFF] hover:text-white"
-              >
-                <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                Refresh
-              </Button>
-            </div>
-          </CardTitle>
-        </CardHeader>
+    <TooltipProvider>
+      <div className="space-y-6">
+        <Card className="border-[#247CFF]/20 bg-[#0A0F2C]/90">
+          <CardHeader>
+            <CardTitle className="text-xl text-white flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <FileText className="h-6 w-6 text-[#247CFF]" />
+                Anubis Compliance Audit Log
+                <Badge className="bg-[#247CFF]/20 text-[#247CFF] border-[#247CFF]/30">
+                  {stats.total} Entries
+                </Badge>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={exportLogs}
+                  className="bg-transparent border-[#247CFF] text-[#247CFF] hover:bg-[#247CFF] hover:text-white"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Export CSV
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={loadAuditLogs}
+                  disabled={loading}
+                  className="bg-transparent border-[#247CFF] text-[#247CFF] hover:bg-[#247CFF] hover:text-white"
+                >
+                  <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                  Refresh
+                </Button>
+              </div>
+            </CardTitle>
+          </CardHeader>
 
-        <CardContent className="space-y-6">
-          {/* Statistics */}
-          <div className="grid grid-cols-4 gap-4">
+          <CardContent className="space-y-6">
+            {/* Statistics */}
+            <div className="grid grid-cols-4 gap-4">
+              <Card className="bg-[#1C1C1E]/50 border-[#247CFF]/10">
+                <CardContent className="p-4 text-center">
+                  <div className="text-2xl font-bold text-white">{stats.total}</div>
+                  <div className="text-sm text-[#D8DEE9]/60">Total Checks</div>
+                </CardContent>
+              </Card>
+              <Card className="bg-green-500/10 border-green-500/30">
+                <CardContent className="p-4 text-center">
+                  <div className="text-2xl font-bold text-green-500">{stats.passed}</div>
+                  <div className="text-sm text-[#D8DEE9]/60">Passed</div>
+                </CardContent>
+              </Card>
+              <Card className="bg-red-500/10 border-red-500/30">
+                <CardContent className="p-4 text-center">
+                  <div className="text-2xl font-bold text-red-500">{stats.failed}</div>
+                  <div className="text-sm text-[#D8DEE9]/60">Failed</div>
+                </CardContent>
+              </Card>
+              <Card className="bg-orange-500/10 border-orange-500/30">
+                <CardContent className="p-4 text-center">
+                  <div className="text-2xl font-bold text-orange-500">{stats.critical}</div>
+                  <div className="text-sm text-[#D8DEE9]/60">Critical</div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Filters */}
             <Card className="bg-[#1C1C1E]/50 border-[#247CFF]/10">
-              <CardContent className="p-4 text-center">
-                <div className="text-2xl font-bold text-white">{stats.total}</div>
-                <div className="text-sm text-[#D8DEE9]/60">Total Checks</div>
-              </CardContent>
-            </Card>
-            <Card className="bg-green-500/10 border-green-500/30">
-              <CardContent className="p-4 text-center">
-                <div className="text-2xl font-bold text-green-500">{stats.passed}</div>
-                <div className="text-sm text-[#D8DEE9]/60">Passed</div>
-              </CardContent>
-            </Card>
-            <Card className="bg-red-500/10 border-red-500/30">
-              <CardContent className="p-4 text-center">
-                <div className="text-2xl font-bold text-red-500">{stats.failed}</div>
-                <div className="text-sm text-[#D8DEE9]/60">Failed</div>
-              </CardContent>
-            </Card>
-            <Card className="bg-orange-500/10 border-orange-500/30">
-              <CardContent className="p-4 text-center">
-                <div className="text-2xl font-bold text-orange-500">{stats.critical}</div>
-                <div className="text-sm text-[#D8DEE9]/60">Critical</div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Filters */}
-          <Card className="bg-[#1C1C1E]/50 border-[#247CFF]/10">
-            <CardContent className="p-4">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#D8DEE9]/40 h-4 w-4" />
-                  <Input
-                    placeholder="Search logs..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 bg-[#0A0F2C]/50 border-[#247CFF]/30 text-white"
-                  />
+              <CardContent className="p-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#D8DEE9]/40 h-4 w-4" />
+                    <Input
+                      placeholder="Search logs..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-10 bg-[#0A0F2C]/50 border-[#247CFF]/30 text-white"
+                    />
+                  </div>
+                  <Select value={severityFilter} onValueChange={setSeverityFilter}>
+                    <SelectTrigger className="bg-[#0A0F2C]/50 border-[#247CFF]/30 text-white">
+                      <SelectValue placeholder="Severity" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Severities</SelectItem>
+                      <SelectItem value="critical">Critical</SelectItem>
+                      <SelectItem value="high">High</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="low">Low</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select value={contextFilter} onValueChange={setContextFilter}>
+                    <SelectTrigger className="bg-[#0A0F2C]/50 border-[#247CFF]/30 text-white">
+                      <SelectValue placeholder="Context" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Contexts</SelectItem>
+                      <SelectItem value="admin_login">Admin Login</SelectItem>
+                      <SelectItem value="health_check">Health Check</SelectItem>
+                      <SelectItem value="manual">Manual</SelectItem>
+                      <SelectItem value="automated">Automated</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="bg-[#0A0F2C]/50 border-[#247CFF]/30 text-white">
+                      <SelectValue placeholder="Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Status</SelectItem>
+                      <SelectItem value="passed">Passed</SelectItem>
+                      <SelectItem value="failed">Failed</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-                <Select value={severityFilter} onValueChange={setSeverityFilter}>
-                  <SelectTrigger className="bg-[#0A0F2C]/50 border-[#247CFF]/30 text-white">
-                    <SelectValue placeholder="Severity" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Severities</SelectItem>
-                    <SelectItem value="critical">Critical</SelectItem>
-                    <SelectItem value="high">High</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="low">Low</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Select value={contextFilter} onValueChange={setContextFilter}>
-                  <SelectTrigger className="bg-[#0A0F2C]/50 border-[#247CFF]/30 text-white">
-                    <SelectValue placeholder="Context" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Contexts</SelectItem>
-                    <SelectItem value="admin_login">Admin Login</SelectItem>
-                    <SelectItem value="health_check">Health Check</SelectItem>
-                    <SelectItem value="manual">Manual</SelectItem>
-                    <SelectItem value="automated">Automated</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="bg-[#0A0F2C]/50 border-[#247CFF]/30 text-white">
-                    <SelectValue placeholder="Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="passed">Passed</SelectItem>
-                    <SelectItem value="failed">Failed</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          {/* Audit Log Entries */}
-          <div className="space-y-3 max-h-96 overflow-y-auto">
-            {loading ? (
-              <div className="text-center py-8">
-                <RefreshCw className="h-8 w-8 animate-spin text-[#247CFF] mx-auto mb-2" />
-                <p className="text-[#D8DEE9]/60">Loading audit logs...</p>
-              </div>
-            ) : filteredLogs.length === 0 ? (
-              <div className="text-center py-8">
-                <AlertTriangle className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
-                <p className="text-[#D8DEE9]/60">No audit logs found matching your criteria</p>
-              </div>
-            ) : (
-              filteredLogs.map((log) => (
-                <Card key={log.id} className="bg-[#1C1C1E]/50 border-[#247CFF]/10">
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between mb-2">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="font-medium text-white">{log.check_name}</span>
-                          {log.passed ? (
-                            <CheckCircle className="h-4 w-4 text-green-500" />
-                          ) : (
-                            <XCircle className="h-4 w-4 text-red-500" />
+            {/* Audit Log Entries */}
+            <div className="space-y-3 max-h-96 overflow-y-auto">
+              {loading ? (
+                <div className="text-center py-8">
+                  <RefreshCw className="h-8 w-8 animate-spin text-[#247CFF] mx-auto mb-2" />
+                  <p className="text-[#D8DEE9]/60">Loading audit logs...</p>
+                </div>
+              ) : filteredLogs.length === 0 ? (
+                <div className="text-center py-8">
+                  <AlertTriangle className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
+                  <p className="text-[#D8DEE9]/60">No audit logs found matching your criteria</p>
+                </div>
+              ) : (
+                filteredLogs.map((log) => (
+                  <Card key={log.id} className="bg-[#1C1C1E]/50 border-[#247CFF]/10">
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-medium text-white">{log.check_name}</span>
+                            {log.passed ? (
+                              <CheckCircle className="h-4 w-4 text-green-500" />
+                            ) : (
+                              <XCircle className="h-4 w-4 text-red-500" />
+                            )}
+                          </div>
+                          <p className="text-sm text-[#D8DEE9]/80">{log.result}</p>
+                          {log.notes && (
+                            <p className="text-xs text-[#D8DEE9]/60 italic mt-1">{log.notes}</p>
                           )}
                         </div>
-                        <p className="text-sm text-[#D8DEE9]/80">{log.result}</p>
-                        {log.notes && (
-                          <p className="text-xs text-[#D8DEE9]/60 italic mt-1">{log.notes}</p>
-                        )}
+                        <div className="flex flex-col items-end gap-1">
+                          <Badge className={getSeverityBadge(log.severity)}>
+                            {log.severity}
+                          </Badge>
+                          <Badge className={getContextBadge(log.run_context)}>
+                            {log.run_context}
+                          </Badge>
+                          <span className="text-xs text-[#D8DEE9]/40">
+                            {new Date(log.run_at).toLocaleString()}
+                          </span>
+                        </div>
                       </div>
-                      <div className="flex flex-col items-end gap-1">
-                        <Badge className={getSeverityBadge(log.severity)}>
-                          {log.severity}
-                        </Badge>
-                        <Badge className={getContextBadge(log.run_context)}>
-                          {log.run_context}
-                        </Badge>
-                        <span className="text-xs text-[#D8DEE9]/40">
-                          {new Date(log.run_at).toLocaleString()}
-                        </span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </TooltipProvider>
   );
 };
 
