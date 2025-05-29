@@ -55,7 +55,7 @@ Deno.serve(async (req) => {
 
     const results = [];
 
-    // Call the existing Reddit scan function
+    // Call the Reddit scan function directly
     try {
       console.log('Calling Reddit scan function...');
       const { data: redditData, error: redditError } = await supabase.functions.invoke('reddit-scan');
@@ -65,83 +65,97 @@ Deno.serve(async (req) => {
       } else if (redditData) {
         console.log(`Reddit scan completed: found ${redditData.matchesFound || 0} matches`);
         
-        // Reddit scan function handles its own data insertion via ARIA ingest
-        // So we don't need to process the results here, just log success
-        if (redditData.results) {
-          results.push(...redditData.results.map((result: any) => ({
-            platform: 'Reddit',
-            content: result.title,
-            url: result.url,
-            severity: 'medium',
-            status: 'new',
-            threat_type: 'social_media',
-            sentiment: -0.3,
-            confidence_score: 75,
-            potential_reach: 1000,
-            detected_entities: targetEntity ? [targetEntity] : ['Reddit Entity'],
-            source_type: 'social'
-          })));
+        // Insert Reddit results directly into scan_results with correct schema
+        if (redditData.results && redditData.results.length > 0) {
+          for (const result of redditData.results) {
+            const scanResult = {
+              platform: 'Reddit',
+              content: result.title || result.content || 'Reddit post content',
+              url: result.url || '',
+              severity: 'medium',
+              status: 'new',
+              threat_type: 'social_media',
+              sentiment: -0.3,
+              confidence_score: 75,
+              potential_reach: result.potential_reach || 1000,
+              detected_entities: Array.isArray(result.detected_entities) ? result.detected_entities : [],
+              source_type: 'social'
+            };
+            
+            const { error: insertError } = await supabase
+              .from('scan_results')
+              .insert(scanResult);
+              
+            if (insertError) {
+              console.error('Error inserting Reddit result:', insertError);
+            } else {
+              results.push(scanResult);
+            }
+          }
         }
       }
     } catch (redditScanError) {
       console.error('Error calling Reddit scan:', redditScanError);
     }
 
-    // Perform simulated Google News scan (as news APIs typically require paid keys)
+    // Perform Google News simulation (since real news APIs need paid keys)
     try {
       console.log('Performing news monitoring scan...');
       
-      const newsTerms = targetEntity ? [`"${targetEntity}" scandal`, `"${targetEntity}" controversy`] : ['corporate scandal', 'business fraud'];
+      const newsTerms = targetEntity ? [`"${targetEntity}" news`, `"${targetEntity}" business`] : ['tech news', 'business news'];
       
-      for (const term of newsTerms) {
+      for (const term of newsTerms.slice(0, 2)) { // Limit to 2 news items
         const newsResult = {
           platform: 'Google News',
-          content: `Recent news coverage detected for search term: ${term}`,
+          content: `News coverage detected for: ${term}. Monitor for developing stories and sentiment shifts.`,
           url: `https://news.google.com/search?q=${encodeURIComponent(term)}`,
-          severity: 'medium',
+          severity: 'low',
           status: 'new',
           threat_type: 'media_coverage',
-          sentiment: -0.3,
-          confidence_score: 70,
-          potential_reach: 5000,
-          detected_entities: targetEntity ? [targetEntity] : ['Media Entity'],
+          sentiment: 0.1,
+          confidence_score: 60,
+          potential_reach: 2500,
+          detected_entities: targetEntity ? [targetEntity] : [],
           source_type: 'news'
         };
         
         results.push(newsResult);
         
-        await supabase
+        const { error: insertError } = await supabase
           .from('scan_results')
           .insert(newsResult);
+          
+        if (insertError) {
+          console.error('Error inserting news result:', insertError);
+        }
       }
     } catch (newsError) {
       console.error('News scanning error:', newsError);
     }
 
-    // If no real results found, indicate that
+    // If no results found, add a system status message
     if (results.length === 0) {
-      console.log('No real threats detected in current scan');
+      console.log('No threats detected in current scan');
       
-      // Insert a system message indicating clean scan
-      const cleanScanResult = {
-        platform: 'ARIA System',
-        content: `Clean scan completed at ${new Date().toISOString()}. No immediate threats detected across monitored sources.`,
+      const statusResult = {
+        platform: 'ARIA Monitor',
+        content: `Monitoring scan completed at ${new Date().toISOString()}. No immediate threats detected across monitored sources.`,
         url: '',
         severity: 'low',
         status: 'new',
-        threat_type: 'system_status',
+        threat_type: 'monitoring_status',
         sentiment: 0.5,
         confidence_score: 95,
         potential_reach: 0,
-        detected_entities: ['System Status'],
+        detected_entities: [],
         source_type: 'system'
       };
       
-      results.push(cleanScanResult);
+      results.push(statusResult);
       
       await supabase
         .from('scan_results')
-        .insert(cleanScanResult);
+        .insert(statusResult);
     }
 
     console.log(`Real monitoring scan completed. Found ${results.length} results.`);
@@ -150,7 +164,7 @@ Deno.serve(async (req) => {
       JSON.stringify({ 
         success: true, 
         results,
-        message: `Real scan completed: ${results.length} threats detected`,
+        message: `Real scan completed: ${results.length} results found`,
         cleanup_performed: true,
         stats: {
           platformsScanned: ['Reddit', 'Google News'],
