@@ -39,11 +39,11 @@ const ThreatTypesSection = () => {
     <section className="py-24 px-6 bg-[#1C1C1E]">
       <div className="container mx-auto max-w-6xl">
         <div className="text-center mb-20">
-          <h2 className="text-5xl md:text-6xl font-black mb-8 text-white font-['Space_Grotesk'] tracking-tight text-center">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-8 text-white font-['Space_Grotesk'] tracking-tight text-center">
             THREAT INTELLIGENCE THAT MATTERS
           </h2>
           <div className="w-32 h-1 bg-gradient-to-r from-[#247CFF] to-[#38C172] mx-auto mb-10"></div>
-          <p className="text-xl text-[#D8DEE9] max-w-4xl mx-auto leading-relaxed font-['Inter'] text-center">
+          <p className="text-lg sm:text-xl text-[#D8DEE9] max-w-4xl mx-auto leading-relaxed font-['Inter'] text-center px-4">
             Our advanced monitoring systems detect and classify threats across multiple vectors, 
             providing early warning for reputation risks before they escalate.
           </p>

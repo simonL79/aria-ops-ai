@@ -1,8 +1,11 @@
+
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Shield, Activity, BarChart3, Eye, Brain } from "lucide-react";
 import AnubisMonitor from './AnubisMonitor';
 import AnubisSystemDashboard from './AnubisSystemDashboard';
+import SecurityCenter from './SecurityCenter';
+import IntelligenceHub from './IntelligenceHub';
 
 const AnubisCockpit = () => {
   return (
@@ -48,21 +51,11 @@ const AnubisCockpit = () => {
         </TabsContent>
 
         <TabsContent value="security">
-          <div className="text-center py-8">
-            <Shield className="h-12 w-12 text-purple-600 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Security Center</h3>
-            <p className="text-muted-foreground">Advanced security monitoring and threat analysis</p>
-            <p className="text-sm text-muted-foreground mt-2">Coming soon...</p>
-          </div>
+          <SecurityCenter />
         </TabsContent>
 
         <TabsContent value="intelligence">
-          <div className="text-center py-8">
-            <Eye className="h-12 w-12 text-purple-600 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Intelligence Hub</h3>
-            <p className="text-muted-foreground">AI-powered threat intelligence and analysis</p>
-            <p className="text-sm text-muted-foreground mt-2">Coming soon...</p>
-          </div>
+          <IntelligenceHub />
         </TabsContent>
       </Tabs>
     </div>
