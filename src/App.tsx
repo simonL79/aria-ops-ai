@@ -9,6 +9,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { useAuth } from "./hooks/useAuth";
 
 // Import all page components
+import Index from "@/pages/Index";
 import StrikeManagementPage from '@/pages/StrikeManagementPage';
 import DashboardPage from "@/pages/dashboard/DashboardPage";
 import AiScrapingPage from "@/pages/AiScrapingPage";
@@ -49,52 +50,10 @@ function App() {
           <div className="min-h-screen bg-background">
             <Toaster />
             <Routes>
-              {/* Public Routes */}
-              <Route path="/" element={
-                <PublicLayout>
-                  <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-8">
-                    <div className="max-w-4xl mx-auto text-center space-y-8">
-                      <h1 className="text-4xl font-bold text-gray-900">Welcome to A.R.I.A/EX™</h1>
-                      <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                        Advanced Reputation Intelligence & Analysis - Real-time protection for your name, your business, and your future.
-                      </p>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
-                        <div className="bg-white p-6 rounded-lg shadow-md">
-                          <h3 className="text-lg font-semibold mb-2">Dashboard</h3>
-                          <p className="text-gray-600 mb-4">Access your intelligence dashboard</p>
-                          <a href="/dashboard" className="text-blue-600 underline">Go to Dashboard</a>
-                        </div>
-                        <div className="bg-white p-6 rounded-lg shadow-md">
-                          <h3 className="text-lg font-semibold mb-2">Strike Management</h3>
-                          <p className="text-gray-600 mb-4">Emergency content takedown system</p>
-                          <a href="/strikes" className="text-blue-600 underline">Access Strike Management</a>
-                        </div>
-                        <div className="bg-white p-6 rounded-lg shadow-md">
-                          <h3 className="text-lg font-semibold mb-2">AI Scraping</h3>
-                          <p className="text-gray-600 mb-4">Advanced content monitoring</p>
-                          <a href="/ai-scraping" className="text-blue-600 underline">View AI Scraping</a>
-                        </div>
-                        <div className="bg-white p-6 rounded-lg shadow-md">
-                          <h3 className="text-lg font-semibold mb-2">HyperCore™</h3>
-                          <p className="text-gray-600 mb-4">Deep intelligence analysis engine</p>
-                          <a href="/hypercore" className="text-blue-600 underline">Access HyperCore</a>
-                        </div>
-                        <div className="bg-white p-6 rounded-lg shadow-md">
-                          <h3 className="text-lg font-semibold mb-2">Discovery</h3>
-                          <p className="text-gray-600 mb-4">Threat discovery and analysis</p>
-                          <a href="/discovery" className="text-blue-600 underline">Start Discovery</a>
-                        </div>
-                        <div className="bg-white p-6 rounded-lg shadow-md">
-                          <h3 className="text-lg font-semibold mb-2">EIDETIC™</h3>
-                          <p className="text-gray-600 mb-4">Memory reconstruction system</p>
-                          <a href="/eidetic" className="text-blue-600 underline">Access EIDETIC</a>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </PublicLayout>
-              } />
+              {/* Standalone Index Route - Full luxurious A.R.I.A™ design */}
+              <Route path="/" element={<Index />} />
               
+              {/* Public Routes with Layout */}
               <Route path="/about" element={
                 <PublicLayout>
                   <div className="container mx-auto py-12 px-6">
