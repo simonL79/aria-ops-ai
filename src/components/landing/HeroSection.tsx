@@ -3,8 +3,24 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 
-const HeroSection = () => {
+interface HeroSectionProps {
+  onScrollToForm?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
+}
+
+const HeroSection = ({ onScrollToForm }: HeroSectionProps) => {
   const navigate = useNavigate();
+
+  const handleButtonClick = () => {
+    if (onScrollToForm) {
+      // Create a synthetic event for the onScrollToForm handler
+      const syntheticEvent = {
+        preventDefault: () => {},
+      } as React.MouseEvent<HTMLAnchorElement>;
+      onScrollToForm(syntheticEvent);
+    } else {
+      navigate('/scan');
+    }
+  };
 
   return (
     <section className="relative px-4 md:px-6 py-12 md:py-20 text-center">
@@ -33,7 +49,7 @@ const HeroSection = () => {
         </div>
 
         <Button
-          onClick={() => navigate('/scan')}
+          onClick={handleButtonClick}
           className="w-full md:w-auto bg-[#247CFF] hover:bg-[#1c63cc] text-white px-8 md:px-12 py-3 md:py-4 text-base md:text-lg font-bold rounded-xl border-2 border-[#247CFF] hover:border-[#1c63cc] hover:shadow-[0_0_20px_rgba(36,124,255,0.4)] transform hover:scale-105 transition-all duration-300 font-['Space_Grotesk'] tracking-wide uppercase"
         >
           REQUEST YOUR PRIVATE SCAN
