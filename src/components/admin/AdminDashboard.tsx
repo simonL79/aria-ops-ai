@@ -1,13 +1,13 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Activity, TestTube, Shield, Settings } from 'lucide-react';
+import { Activity, TestTube, Shield, Settings, Wrench } from 'lucide-react';
 import QATestDashboard from './QATestDashboard';
 import SystemHealthDashboard from './SystemHealthDashboard';
 import ThreatIngestWorker from '../intelligence/ThreatIngestWorker';
 import AnubisValidationPanel from '../aria/AnubisValidationPanel';
+import SystemConfigurationTab from './SystemConfigurationTab';
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -24,8 +24,9 @@ const AdminDashboard = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="config">System Config</TabsTrigger>
           <TabsTrigger value="qa">QA Testing</TabsTrigger>
           <TabsTrigger value="health">System Health</TabsTrigger>
           <TabsTrigger value="anubis">Anubis Security</TabsTrigger>
@@ -160,6 +161,10 @@ const AdminDashboard = () => {
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        <TabsContent value="config">
+          <SystemConfigurationTab />
         </TabsContent>
 
         <TabsContent value="qa">
