@@ -19,6 +19,7 @@ import { MirrorspacePanel } from './MirrorspacePanel';
 import { ShieldhavenPanel } from './ShieldhavenPanel';
 import { HalcyonPanel } from './HalcyonPanel';
 import { IronvaultPanel } from './IronvaultPanel';
+import { CerebraPanel } from './CerebraPanel';
 
 interface CommandFeedback {
   id: string;
@@ -140,6 +141,9 @@ export const FeedbackPanel = ({ commandHistory }: FeedbackPanelProps) => {
 
   return (
     <div className="space-y-4">
+      {/* CEREBRA™ AI Bias & Influence Detection Engine Panel */}
+      <CerebraPanel />
+
       {/* IRONVAULT™ Document Leak & Surveillance System Panel */}
       <IronvaultPanel />
 
