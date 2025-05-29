@@ -24,3 +24,4 @@ export { CerebraPanel } from './CerebraPanel';
 export { StrikecorePanel } from './StrikecorePanel';
 export { ShadowvaultPanel } from './ShadowvaultPanel';
 export { VoxtracePanel } from './VoxtracePanel';
+export { PolarisPanel } from './PolarisPanel';

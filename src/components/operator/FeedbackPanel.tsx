@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -24,6 +23,7 @@ import { CerebraPanel } from './CerebraPanel';
 import { StrikecorePanel } from './StrikecorePanel';
 import { ShadowvaultPanel } from './ShadowvaultPanel';
 import { VoxtracePanel } from './VoxtracePanel';
+import { PolarisPanel } from './PolarisPanel';
 
 interface CommandFeedback {
   id: string;
@@ -145,6 +145,9 @@ export const FeedbackPanel = ({ commandHistory }: FeedbackPanelProps) => {
 
   return (
     <div className="space-y-4">
+      {/* POLARIS™ Counter-Narrative Generator & Deployment Hub Panel */}
+      <PolarisPanel />
+
       {/* VOXTRACE™ Audio Threat Detection & Forensic Logging Panel */}
       <VoxtracePanel />
 
