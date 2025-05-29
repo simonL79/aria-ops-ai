@@ -35,7 +35,7 @@ const IntelligenceHub = () => {
 
       // Analyze threat patterns
       const patterns = (scanData || []).reduce((acc: any[], item) => {
-        const entities = item.detected_entities || [];
+        const entities = Array.isArray(item.detected_entities) ? item.detected_entities : [];
         entities.forEach((entity: string) => {
           const existing = acc.find(p => p.entity === entity);
           if (existing) {
@@ -250,7 +250,7 @@ const IntelligenceHub = () => {
                 </div>
                 <p className="text-sm text-muted-foreground mb-2">{item.content}</p>
                 <div className="flex flex-wrap gap-1 mb-2">
-                  {(item.detected_entities || []).map((entity: string, index: number) => (
+                  {(Array.isArray(item.detected_entities) ? item.detected_entities : []).map((entity: string, index: number) => (
                     <Badge key={index} variant="secondary" className="text-xs">
                       {entity}
                     </Badge>
