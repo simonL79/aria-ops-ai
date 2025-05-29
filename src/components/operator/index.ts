@@ -1,4 +1,3 @@
-
 export { default as OperatorConsole } from './OperatorConsole';
 export { VoiceRecognition } from './VoiceRecognition';
 export { useCommandProcessor } from './CommandProcessor';
@@ -25,3 +24,4 @@ export { StrikecorePanel } from './StrikecorePanel';
 export { ShadowvaultPanel } from './ShadowvaultPanel';
 export { VoxtracePanel } from './VoxtracePanel';
 export { PolarisPanel } from './PolarisPanel';
+export { TitanvaultPanel } from './TitanvaultPanel';

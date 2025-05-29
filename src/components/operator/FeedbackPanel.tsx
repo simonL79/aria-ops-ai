@@ -24,6 +24,7 @@ import { StrikecorePanel } from './StrikecorePanel';
 import { ShadowvaultPanel } from './ShadowvaultPanel';
 import { VoxtracePanel } from './VoxtracePanel';
 import { PolarisPanel } from './PolarisPanel';
+import { TitanvaultPanel } from './TitanvaultPanel';
 
 interface CommandFeedback {
   id: string;
@@ -145,6 +146,9 @@ export const FeedbackPanel = ({ commandHistory }: FeedbackPanelProps) => {
 
   return (
     <div className="space-y-4">
+      {/* TITANVAULT™ Legal & Compliance Fortress Panel */}
+      <TitanvaultPanel />
+
       {/* POLARIS™ Counter-Narrative Generator & Deployment Hub Panel */}
       <PolarisPanel />
 
