@@ -86,7 +86,7 @@ export class LiveDataValidator {
   /**
    * Validate live status monitoring
    */
-  private static async validateLiveStatus(result: LiveDataValidationResult): Promise<void> => {
+  private static async validateLiveStatus(result: LiveDataValidationResult): Promise<void> {
     try {
       const { data: statuses, error } = await supabase
         .from('live_status')
@@ -118,7 +118,7 @@ export class LiveDataValidator {
   /**
    * Validate data quality and integrity
    */
-  private static async validateDataQuality(result: LiveDataValidationResult): Promise<void> => {
+  private static async validateDataQuality(result: LiveDataValidationResult): Promise<void> {
     try {
       // Check for mock data in critical tables
       const mockDataChecks = [
@@ -153,7 +153,7 @@ export class LiveDataValidator {
   /**
    * Validate module connectivity
    */
-  private static async validateModuleConnectivity(result: LiveDataValidationResult): Promise<void> => {
+  private static async validateModuleConnectivity(result: LiveDataValidationResult): Promise<void> {
     try {
       // Test database connectivity
       const { error } = await supabase
@@ -173,7 +173,7 @@ export class LiveDataValidator {
   /**
    * Validate security compliance
    */
-  private static async validateSecurityCompliance(result: LiveDataValidationResult): Promise<void> => {
+  private static async validateSecurityCompliance(result: LiveDataValidationResult): Promise<void> {
     try {
       // Check RLS policies exist on critical tables
       const criticalTables = ['strike_requests', 'threats', 'user_roles'];
