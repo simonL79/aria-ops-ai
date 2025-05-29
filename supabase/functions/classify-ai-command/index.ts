@@ -34,6 +34,7 @@ serve(async (req) => {
     let confidence = 0.5;
     let summary = 'Command processed with basic classification';
     let selfHealingRequired = false;
+    let strategicResponseNeeded = false;
     
     if (OPENAI_API_KEY) {
       try {
@@ -48,15 +49,17 @@ serve(async (req) => {
             messages: [
               {
                 role: 'system',
-                content: `You are A.R.I.A™'s command classification AI with self-healing capabilities. Analyze operator commands and return JSON with:
-                - intent: scan_threats, system_status, anubis_check, threat_response, intelligence_gather, data_query, or general
+                content: `You are A.R.I.A™'s advanced command classification AI with self-healing and strategic response capabilities. Analyze operator commands and return JSON with:
+                - intent: scan_threats, system_status, anubis_check, threat_response, intelligence_gather, data_query, strategic_containment, or general
                 - confidence: 0-1 confidence score
                 - summary: brief description of what the command requests
                 - execution_plan: specific steps to execute the command
                 - priority: low, medium, high, or critical
                 - self_healing_check: boolean indicating if the command might reveal system issues
+                - strategic_response_needed: boolean indicating if auto-strategy generation is recommended
+                - threat_indicators: array of detected threat indicators in the command
                 
-                Be precise and actionable in your classification. Flag potential system issues for self-healing.`
+                Be precise and actionable in your classification. Flag potential system issues for self-healing and strategic threats for auto-containment.`
               },
               {
                 role: 'user',
@@ -74,6 +77,7 @@ serve(async (req) => {
           confidence = classification.confidence || 0.5;
           summary = classification.summary || summary;
           selfHealingRequired = classification.self_healing_check || false;
+          strategicResponseNeeded = classification.strategic_response_needed || false;
         }
       } catch (error) {
         console.error('OpenAI classification error:', error);
@@ -105,13 +109,32 @@ serve(async (req) => {
       throw updateError;
     }
 
+    // Generate strategic response if needed
+    if (strategicResponseNeeded || commandText.toLowerCase().includes('threat') || commandText.toLowerCase().includes('attack')) {
+      const strategyTypes = ['containment', 'engagement', 'legal', 'narrative'];
+      const strategicPriority = confidence > 0.7 ? 'high' : 'medium';
+      
+      const { error: strategyError } = await supabase
+        .from('auto_strategy_log')
+        .insert({
+          strategy_type: strategyTypes[Math.floor(Math.random() * strategyTypes.length)],
+          strategy_details: `Auto-generated response strategy for command: "${commandText.substring(0, 50)}..." - Confidence: ${Math.round(confidence * 100)}%`,
+          effectiveness_estimate: 0.70 + (confidence * 0.25), // 0.70 - 0.95 based on confidence
+          generated_by: 'A.R.I.A™ Strategic Engine'
+        });
+
+      if (strategyError) {
+        console.error('Strategic response generation error:', strategyError);
+      }
+    }
+
     // Create feedback entry
     const { error: feedbackError } = await supabase
       .from('command_response_feedback')
       .insert({
         command_id: commandId,
         execution_status: 'success',
-        summary: `AI classified command as '${intent}' with ${Math.round(confidence * 100)}% confidence`,
+        summary: `AI classified command as '${intent}' with ${Math.round(confidence * 100)}% confidence${strategicResponseNeeded ? ' - Strategic response generated' : ''}`,
         created_by: 'AI_Classifier'
       });
 
@@ -159,7 +182,8 @@ serve(async (req) => {
         confidence,
         summary,
         commandId,
-        selfHealingActive: selfHealingRequired
+        selfHealingActive: selfHealingRequired,
+        strategicResponseGenerated: strategicResponseNeeded
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

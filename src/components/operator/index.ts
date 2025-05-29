@@ -7,3 +7,4 @@ export { CommandInput } from './CommandInput';
 export { QuickCommands } from './QuickCommands';
 export { FeedbackPanel } from './FeedbackPanel';
 export { SelfHealingPanel } from './SelfHealingPanel';
+export { StrategicResponsePanel } from './StrategicResponsePanel';

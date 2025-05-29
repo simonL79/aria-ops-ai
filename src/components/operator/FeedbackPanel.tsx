@@ -6,6 +6,7 @@ import { CheckCircle, AlertCircle, Clock, XCircle, Lightbulb, Activity } from 'l
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { SelfHealingPanel } from './SelfHealingPanel';
+import { StrategicResponsePanel } from './StrategicResponsePanel';
 
 interface CommandFeedback {
   id: string;
@@ -129,6 +130,9 @@ export const FeedbackPanel = ({ commandHistory }: FeedbackPanelProps) => {
     <div className="space-y-4">
       {/* Self-Healing Panel */}
       <SelfHealingPanel />
+
+      {/* Strategic Response Panel */}
+      <StrategicResponsePanel />
 
       {/* Command Execution Feedback */}
       <Card className="bg-black border-green-500/30">

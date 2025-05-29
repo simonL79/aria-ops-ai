@@ -928,6 +928,92 @@ export type Database = {
         }
         Relationships: []
       }
+      auto_containment_actions: {
+        Row: {
+          action_status: string | null
+          action_type: string
+          confidence_level: number | null
+          created_at: string | null
+          executed_at: string | null
+          id: string
+          strategy_id: string | null
+        }
+        Insert: {
+          action_status?: string | null
+          action_type: string
+          confidence_level?: number | null
+          created_at?: string | null
+          executed_at?: string | null
+          id?: string
+          strategy_id?: string | null
+        }
+        Update: {
+          action_status?: string | null
+          action_type?: string
+          confidence_level?: number | null
+          created_at?: string | null
+          executed_at?: string | null
+          id?: string
+          strategy_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auto_containment_actions_strategy_id_fkey"
+            columns: ["strategy_id"]
+            isOneToOne: false
+            referencedRelation: "auto_strategy_log"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      auto_strategy_log: {
+        Row: {
+          created_at: string | null
+          effectiveness_estimate: number | null
+          executed: boolean | null
+          generated_by: string | null
+          id: string
+          strategy_details: string
+          strategy_type: string
+          threat_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          effectiveness_estimate?: number | null
+          executed?: boolean | null
+          generated_by?: string | null
+          id?: string
+          strategy_details: string
+          strategy_type: string
+          threat_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          effectiveness_estimate?: number | null
+          executed?: boolean | null
+          generated_by?: string | null
+          id?: string
+          strategy_details?: string
+          strategy_type?: string
+          threat_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "auto_strategy_log_threat_id_fkey"
+            columns: ["threat_id"]
+            isOneToOne: false
+            referencedRelation: "high_priority_threats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "auto_strategy_log_threat_id_fkey"
+            columns: ["threat_id"]
+            isOneToOne: false
+            referencedRelation: "scan_results"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cancelation_simulations: {
         Row: {
           auto_recovery_playbook: string | null
