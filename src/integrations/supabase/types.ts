@@ -2073,6 +2073,33 @@ export type Database = {
         }
         Relationships: []
       }
+      edge_function_events: {
+        Row: {
+          event_payload: Json | null
+          executed_at: string | null
+          function_name: string
+          id: string
+          result_summary: string | null
+          status: string
+        }
+        Insert: {
+          event_payload?: Json | null
+          executed_at?: string | null
+          function_name: string
+          id?: string
+          result_summary?: string | null
+          status: string
+        }
+        Update: {
+          event_payload?: Json | null
+          executed_at?: string | null
+          function_name?: string
+          id?: string
+          result_summary?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
       eidetic_decay_history: {
         Row: {
           decay_score: number | null
@@ -2654,6 +2681,41 @@ export type Database = {
           title?: string
         }
         Relationships: []
+      }
+      generated_reports: {
+        Row: {
+          created_at: string | null
+          entity_id: string | null
+          generated_at: string | null
+          generated_pdf_url: string | null
+          id: string
+          report_type: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          entity_id?: string | null
+          generated_at?: string | null
+          generated_pdf_url?: string | null
+          id?: string
+          report_type?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          entity_id?: string | null
+          generated_at?: string | null
+          generated_pdf_url?: string | null
+          id?: string
+          report_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "generated_reports_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "entities"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       generated_responses: {
         Row: {
@@ -5850,6 +5912,13 @@ export type Database = {
       check_internal_access: {
         Args: { module_name: string }
         Returns: undefined
+      }
+      check_rls_compliance: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          table_name: string
+          rls_enabled: boolean
+        }[]
       }
       column_exists: {
         Args: { p_table_name: string; p_column_name: string }
