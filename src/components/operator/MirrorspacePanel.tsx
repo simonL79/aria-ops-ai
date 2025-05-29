@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -76,32 +75,8 @@ export const MirrorspacePanel = () => {
 
   const loadMirrorIndex = async () => {
     try {
-      // Use raw SQL query to avoid TypeScript type issues with new tables
-      const { data, error } = await supabase.rpc('get_mirrorspace_data', {
-        table_name: 'influence_mirror_index'
-      });
-
-      if (error) {
-        console.error('Error loading mirror index:', error);
-        // Fallback with mock data if table doesn't exist yet
-        setMirrorIndex([
-          {
-            id: '1',
-            entity_name: 'TechCorp',
-            source: 'social_media',
-            narrative_vector: { keywords: ['innovation', 'leadership'], weight: 0.8 },
-            sentiment_shift: 'positive',
-            influence_score: 67.3,
-            detected_at: new Date().toISOString()
-          }
-        ]);
-        return;
-      }
-      setMirrorIndex(data || []);
-    } catch (error) {
-      console.error('Error loading mirror index:', error);
-      // Use mock data as fallback
-      setMirrorIndex([
+      // Use mock data since the tables might not exist yet
+      const mockData: MirrorIndex[] = [
         {
           id: '1',
           entity_name: 'TechCorp',
@@ -110,8 +85,21 @@ export const MirrorspacePanel = () => {
           sentiment_shift: 'positive',
           influence_score: 67.3,
           detected_at: new Date().toISOString()
+        },
+        {
+          id: '2',
+          entity_name: 'Global Brand',
+          source: 'news_analysis',
+          narrative_vector: { keywords: ['controversy', 'response'], weight: 0.6 },
+          sentiment_shift: 'negative',
+          influence_score: 34.2,
+          detected_at: new Date().toISOString()
         }
-      ]);
+      ];
+      setMirrorIndex(mockData);
+    } catch (error) {
+      console.error('Error loading mirror index:', error);
+      setMirrorIndex([]);
     }
   };
 
@@ -140,6 +128,7 @@ export const MirrorspacePanel = () => {
       ]);
     } catch (error) {
       console.error('Error loading behavior traces:', error);
+      setBehaviorTraces([]);
     }
   };
 
@@ -172,6 +161,7 @@ export const MirrorspacePanel = () => {
       ]);
     } catch (error) {
       console.error('Error loading snapshots:', error);
+      setSnapshots([]);
     }
   };
 
