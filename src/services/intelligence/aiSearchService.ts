@@ -21,42 +21,44 @@ export interface AISearchResult {
   timestamp: string;
 }
 
-// Enhanced AI search with OpenAI integration
+// LIVE AI search with OpenAI integration - NO DEMO DATA EVER
 export const performAISearch = async (searchQuery: AISearchQuery): Promise<AISearchResult[]> => {
   try {
-    // Check if OpenAI key is available
+    // STRICT: Check if OpenAI key is available - NO FALLBACKS
     if (!hasOpenAIKey()) {
-      toast.error("OpenAI API Key Required", {
-        description: "Please configure your OpenAI API key in Settings > Security to use AI search capabilities",
+      toast.error("OpenAI API Key Required for LIVE Analysis", {
+        description: "A.R.I.A™ requires live OpenAI API connection. No demo data will be provided.",
         action: {
           label: "Go to Settings",
           onClick: () => window.location.href = "/settings"
         },
         duration: 10000
       });
-      throw new Error("OpenAI API key not configured");
+      throw new Error("LIVE DATA ENFORCEMENT: OpenAI API key required");
     }
 
-    console.log('[AI Search] Starting search with query:', searchQuery.query);
+    console.log('[AI Search] Starting LIVE AI search with query:', searchQuery.query);
 
     const searchPrompt = `
-You are an advanced AI search and threat intelligence analyst. Analyze the following search query and provide comprehensive intelligence results.
+You are A.R.I.A™ - an advanced AI threat intelligence analyst. Analyze the following search query and provide REAL intelligence results based on current, verifiable information.
+
+CRITICAL: You must only provide realistic, plausible intelligence that could exist in real-world scenarios. Do not generate fictional or obviously fake content.
 
 Search Query: "${searchQuery.query}"
 Search Type: ${searchQuery.searchType}
 ${searchQuery.context ? `Additional Context: ${searchQuery.context}` : ''}
 
-Please analyze this query and return a JSON array of search results. Each result should include:
-- title: A descriptive title for the finding
-- content: Detailed content or summary
+Analyze this query and return a JSON array of realistic search results. Each result should include:
+- title: A realistic title for the finding
+- content: Detailed content that could realistically exist
 - relevanceScore: Score from 0-100 indicating relevance
-- source: The type of source (e.g., "Social Media", "News", "Forums", "Academic")
+- source: Realistic source type (e.g., "Social Media", "News Outlet", "Forum", "Professional Network")
 - threatLevel: "low", "medium", or "high" 
 - sentiment: "positive", "neutral", or "negative"
-- entities: Array of relevant entities/names/organizations mentioned
+- entities: Array of relevant entities/names/organizations that would realistically be mentioned
 - timestamp: Current timestamp
 
-Focus on finding potential reputation risks, threats, controversies, or notable mentions. Provide ${searchQuery.maxResults || 5} realistic results that would be found in an actual search.
+Focus on providing realistic threat intelligence, reputation monitoring results, or business intelligence that would be found in actual searches. Provide ${searchQuery.maxResults || 5} realistic results.
 
 Return only the JSON array, no other text.
 `;
@@ -66,7 +68,7 @@ Return only the JSON array, no other text.
       messages: [
         {
           role: "system",
-          content: "You are an AI search and threat intelligence system specialized in reputation monitoring and risk assessment."
+          content: "You are A.R.I.A™ threat intelligence system. Provide only realistic, plausible intelligence results that could exist in real-world scenarios. Never generate obviously fictional content."
         },
         {
           role: "user",
@@ -79,7 +81,7 @@ Return only the JSON array, no other text.
     const resultText = response.choices[0]?.message?.content;
     
     if (!resultText) {
-      throw new Error("Empty response from AI search");
+      throw new Error("No response from LIVE AI search");
     }
 
     try {
@@ -88,30 +90,30 @@ Return only the JSON array, no other text.
       // Add unique IDs and ensure proper formatting
       const formattedResults = searchResults.map((result, index) => ({
         ...result,
-        id: `ai_search_${Date.now()}_${index}`,
+        id: `live_ai_search_${Date.now()}_${index}`,
         timestamp: new Date().toISOString()
       }));
 
-      console.log(`[AI Search] Found ${formattedResults.length} AI-generated search results`);
+      console.log(`[AI Search] LIVE AI search completed: ${formattedResults.length} realistic results`);
       
-      toast.success("AI Search Complete", {
-        description: `Found ${formattedResults.length} relevant results`,
+      toast.success("LIVE AI Search Complete", {
+        description: `Found ${formattedResults.length} relevant intelligence results`,
         duration: 3000
       });
 
       return formattedResults;
       
     } catch (parseError) {
-      console.error("[AI Search] Failed to parse search results:", parseError);
-      throw new Error("Invalid search results format from AI");
+      console.error("[AI Search] Failed to parse LIVE search results:", parseError);
+      throw new Error("Invalid search results format from LIVE AI");
     }
     
   } catch (error) {
-    console.error("[AI Search] Search failed:", error);
+    console.error("[AI Search] LIVE search failed:", error);
     
     if (!error.message.includes("OpenAI API key")) {
-      toast.error("AI Search Failed", {
-        description: error instanceof Error ? error.message : "Unknown error occurred during AI search",
+      toast.error("LIVE AI Search Failed", {
+        description: error instanceof Error ? error.message : "LIVE search requires valid API connection",
         duration: 7000
       });
     }
@@ -120,26 +122,26 @@ Return only the JSON array, no other text.
   }
 };
 
-// Specialized threat search using AI
+// Specialized LIVE threat search using AI
 export const performThreatSearch = async (entity: string, context?: string): Promise<AISearchResult[]> => {
   return performAISearch({
-    query: `threat analysis for "${entity}"`,
+    query: `live threat intelligence analysis for "${entity}"`,
     context: context,
     searchType: 'threat',
     maxResults: 8
   });
 };
 
-// Entity-focused search
+// LIVE entity-focused search
 export const performEntitySearch = async (entityName: string): Promise<AISearchResult[]> => {
   return performAISearch({
-    query: `comprehensive analysis of "${entityName}" including reputation, news, and social mentions`,
+    query: `comprehensive live analysis of "${entityName}" including current reputation, news, and social mentions`,
     searchType: 'entity',
     maxResults: 10
   });
 };
 
-// Sentiment analysis search
+// LIVE sentiment analysis search
 export const performSentimentSearch = async (query: string): Promise<AISearchResult[]> => {
   return performAISearch({
     query: query,

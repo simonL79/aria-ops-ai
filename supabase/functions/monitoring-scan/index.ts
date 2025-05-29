@@ -17,28 +17,28 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    console.log('[MONITORING-SCAN] Starting comprehensive monitoring scan...');
+    console.log('[MONITORING-SCAN] Starting LIVE-ONLY comprehensive monitoring scan...');
 
     const { fullScan, targetEntity, source } = await req.json();
 
-    // First, clean any existing mock/test data
-    console.log('[MONITORING-SCAN] Cleaning existing mock/test data...');
+    // STRICT: Clean ALL mock/demo/test data - ZERO TOLERANCE
+    console.log('[MONITORING-SCAN] ENFORCING LIVE DATA ONLY - Purging all non-live data...');
     const { error: cleanupError } = await supabase
       .from('scan_results')
       .delete()
-      .or('content.ilike.%test%,content.ilike.%mock%,content.ilike.%demo%,platform.eq.System,platform.eq.ARIA System');
+      .or('content.ilike.%test%,content.ilike.%mock%,content.ilike.%demo%,content.ilike.%sample%,platform.eq.System,platform.eq.ARIA System,platform.eq.ARIA Monitor');
 
     if (cleanupError) {
-      console.error('[MONITORING-SCAN] Error cleaning mock data:', cleanupError);
+      console.error('[MONITORING-SCAN] Error purging non-live data:', cleanupError);
     }
 
-    // Also clean content_alerts mock data
+    // Also clean content_alerts of any non-live data
     await supabase
       .from('content_alerts')
       .delete()
-      .or('content.ilike.%test%,content.ilike.%mock%,content.ilike.%demo%');
+      .or('content.ilike.%test%,content.ilike.%mock%,content.ilike.%demo%,content.ilike.%sample%');
 
-    console.log('[MONITORING-SCAN] Cleaned existing mock/test data');
+    console.log('[MONITORING-SCAN] All non-live data purged from system');
 
     // Update monitoring status to show scan is active
     const { error: statusError } = await supabase
@@ -56,30 +56,33 @@ Deno.serve(async (req) => {
 
     const results = [];
 
-    // Call the Reddit scan function directly
+    // Call the Reddit scan function for LIVE data only
     try {
-      console.log('[MONITORING-SCAN] Calling Reddit scan function...');
+      console.log('[MONITORING-SCAN] Calling LIVE Reddit scan function...');
       const { data: redditData, error: redditError } = await supabase.functions.invoke('reddit-scan');
       
       if (redditError) {
-        console.error('[MONITORING-SCAN] Reddit scan error:', redditError);
-      } else if (redditData && redditData.results) {
-        console.log(`[MONITORING-SCAN] Reddit scan completed: found ${redditData.matchesFound || 0} matches`);
+        console.error('[MONITORING-SCAN] LIVE Reddit scan error:', redditError);
+        throw new Error(`LIVE Reddit scan failed: ${redditError.message}`);
+      } 
+      
+      if (redditData && redditData.results && redditData.dataSource === 'LIVE_REDDIT_API') {
+        console.log(`[MONITORING-SCAN] LIVE Reddit scan completed: found ${redditData.matchesFound || 0} real matches`);
         
-        // Insert Reddit results directly into scan_results with correct schema
+        // Insert LIVE Reddit results directly into scan_results
         for (const result of redditData.results) {
           const scanResult = {
             platform: 'Reddit',
-            content: result.title || result.content || 'Reddit post content',
+            content: result.title || result.content || 'Live Reddit post content',
             url: result.url || '',
             severity: 'medium',
             status: 'new',
             threat_type: 'social_media',
             sentiment: -0.2,
-            confidence_score: 75,
+            confidence_score: 85,
             potential_reach: result.potential_reach || 1000,
             detected_entities: Array.isArray(result.detected_entities) ? result.detected_entities : [],
-            source_type: 'social'
+            source_type: 'live_api'
           };
           
           const { error: insertError } = await supabase
@@ -87,91 +90,37 @@ Deno.serve(async (req) => {
             .insert(scanResult);
             
           if (insertError) {
-            console.error('[MONITORING-SCAN] Error inserting Reddit result:', insertError);
+            console.error('[MONITORING-SCAN] Error inserting LIVE Reddit result:', insertError);
           } else {
             results.push(scanResult);
-            console.log(`[MONITORING-SCAN] Successfully inserted Reddit result: ${scanResult.content.substring(0, 50)}...`);
+            console.log(`[MONITORING-SCAN] Successfully inserted LIVE Reddit result: ${scanResult.content.substring(0, 50)}...`);
           }
         }
+      } else {
+        console.log('[MONITORING-SCAN] No LIVE Reddit data received - will not add any fallback data');
       }
     } catch (redditScanError) {
-      console.error('[MONITORING-SCAN] Error calling Reddit scan:', redditScanError);
+      console.error('[MONITORING-SCAN] LIVE Reddit scan failed:', redditScanError);
+      // NO FALLBACK DATA - LIVE ONLY ENFORCEMENT
     }
 
-    // Perform Google News simulation (since real news APIs need paid keys)
-    try {
-      console.log('[MONITORING-SCAN] Performing news monitoring scan...');
-      
-      const newsTerms = targetEntity ? [`"${targetEntity}" news`, `"${targetEntity}" business`] : ['reputation management news', 'corporate crisis news'];
-      
-      for (const term of newsTerms.slice(0, 2)) { // Limit to 2 news items
-        const newsResult = {
-          platform: 'Google News',
-          content: `News coverage detected for: ${term}. Monitor for developing stories and sentiment shifts.`,
-          url: `https://news.google.com/search?q=${encodeURIComponent(term)}`,
-          severity: 'low',
-          status: 'new',
-          threat_type: 'media_coverage',
-          sentiment: 0.1,
-          confidence_score: 60,
-          potential_reach: 2500,
-          detected_entities: targetEntity ? [targetEntity] : [],
-          source_type: 'news'
-        };
-        
-        results.push(newsResult);
-        
-        const { error: insertError } = await supabase
-          .from('scan_results')
-          .insert(newsResult);
-          
-        if (insertError) {
-          console.error('[MONITORING-SCAN] Error inserting news result:', insertError);
-        } else {
-          console.log(`[MONITORING-SCAN] Successfully inserted news result: ${newsResult.content.substring(0, 50)}...`);
-        }
-      }
-    } catch (newsError) {
-      console.error('[MONITORING-SCAN] News scanning error:', newsError);
-    }
+    // REMOVED: All news simulation and system status messages
+    // A.R.I.A™ operates with LIVE data only - no synthetic content
 
-    // If no results found, add a system status message
-    if (results.length === 0) {
-      console.log('[MONITORING-SCAN] No threats detected in current scan');
-      
-      const statusResult = {
-        platform: 'ARIA Monitor',
-        content: `Monitoring scan completed at ${new Date().toISOString()}. No immediate threats detected across monitored sources.`,
-        url: '',
-        severity: 'low',
-        status: 'new',
-        threat_type: 'monitoring_status',
-        sentiment: 0.5,
-        confidence_score: 95,
-        potential_reach: 0,
-        detected_entities: [],
-        source_type: 'system'
-      };
-      
-      results.push(statusResult);
-      
-      await supabase
-        .from('scan_results')
-        .insert(statusResult);
-    }
-
-    console.log(`[MONITORING-SCAN] Monitoring scan completed. Found ${results.length} results.`);
+    console.log(`[MONITORING-SCAN] LIVE monitoring scan completed. Found ${results.length} real results.`);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
         results,
-        message: `Monitoring scan completed: ${results.length} results found`,
+        message: `LIVE monitoring scan completed: ${results.length} real results found`,
+        enforcement: 'LIVE_DATA_ONLY',
         cleanup_performed: true,
         stats: {
-          platformsScanned: ['Reddit', 'Google News'],
+          platformsScanned: ['Reddit (Live API)'],
           redditScanTriggered: true,
-          resultsFound: results.length
+          resultsFound: results.length,
+          dataSource: 'LIVE_ONLY'
         }
       }),
       { 
@@ -181,12 +130,12 @@ Deno.serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('[MONITORING-SCAN] Monitoring scan error:', error);
+    console.error('[MONITORING-SCAN] LIVE monitoring scan error:', error);
     return new Response(
       JSON.stringify({ 
-        error: 'Monitoring scan failed', 
+        error: 'LIVE monitoring scan failed', 
         details: error.message,
-        cleanup_attempted: true 
+        enforcement: 'LIVE_DATA_ONLY'
       }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
