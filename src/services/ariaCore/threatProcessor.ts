@@ -55,13 +55,12 @@ export class AriaCoreThreatProcessor implements LiveThreatProcessor {
               source: threat.source,
               content: threat.raw_content,
               threat_type: this.classifyThreatType(threat.raw_content),
-              sentiment: threat.risk_score ? (threat.risk_score > 50 ? -0.5 : -0.2) : -0.3,
+              sentiment: threat.risk_score ? (threat.risk_score > 50 ? '-0.5' : '-0.2') : '-0.3',
               risk_score: threat.risk_score || 75,
               summary: `Live threat from ${threat.source}: ${threat.raw_content.substring(0, 100)}...`,
               status: 'active',
               detected_at: threat.detected_at,
-              is_live: true,
-              entity_match: threat.entity_match
+              is_live: true
             });
 
           if (insertError) {
