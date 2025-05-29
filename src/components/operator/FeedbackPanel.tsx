@@ -18,6 +18,7 @@ import { CitadelPanel } from './CitadelPanel';
 import { MirrorspacePanel } from './MirrorspacePanel';
 import { ShieldhavenPanel } from './ShieldhavenPanel';
 import { HalcyonPanel } from './HalcyonPanel';
+import { IronvaultPanel } from './IronvaultPanel';
 
 interface CommandFeedback {
   id: string;
@@ -139,6 +140,9 @@ export const FeedbackPanel = ({ commandHistory }: FeedbackPanelProps) => {
 
   return (
     <div className="space-y-4">
+      {/* IRONVAULT™ Document Leak & Surveillance System Panel */}
+      <IronvaultPanel />
+
       {/* HALCYON™ Media Manipulation & Propaganda Detection Panel */}
       <HalcyonPanel />
 

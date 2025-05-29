@@ -19,3 +19,4 @@ export { CitadelPanel } from './CitadelPanel';
 export { MirrorspacePanel } from './MirrorspacePanel';
 export { ShieldhavenPanel } from './ShieldhavenPanel';
 export { HalcyonPanel } from './HalcyonPanel';
+export { IronvaultPanel } from './IronvaultPanel';
