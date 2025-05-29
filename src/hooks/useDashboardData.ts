@@ -120,16 +120,16 @@ const useDashboardData = (): DashboardData => {
       setAlerts(allAlerts);
       setClassifiedAlerts(allAlerts);
 
-      // Calculate real metrics from the actual data
+      // Calculate real metrics from the actual data - using correct MetricValue structure
       const highSeverity = allAlerts.filter(alert => alert.severity === 'high').length;
       const mediumSeverity = allAlerts.filter(alert => alert.severity === 'medium').length;
       const totalReach = allAlerts.reduce((sum, alert) => sum + (alert.potentialReach || 0), 0);
       
       const realMetrics: MetricValue[] = [
-        { label: 'Total Threats', value: allAlerts.length, change: 0 },
-        { label: 'High Severity', value: highSeverity, change: 0 },
-        { label: 'Medium Severity', value: mediumSeverity, change: 0 },
-        { label: 'Total Reach', value: totalReach, change: 0 }
+        { id: 'total-threats', title: 'Total Threats', value: allAlerts.length, change: 0, icon: 'alert-triangle', color: 'red' },
+        { id: 'high-severity', title: 'High Severity', value: highSeverity, change: 0, icon: 'alert-circle', color: 'red' },
+        { id: 'medium-severity', title: 'Medium Severity', value: mediumSeverity, change: 0, icon: 'alert', color: 'yellow' },
+        { id: 'total-reach', title: 'Total Reach', value: totalReach, change: 0, icon: 'users', color: 'blue' }
       ];
       
       setMetrics(realMetrics);
@@ -143,7 +143,7 @@ const useDashboardData = (): DashboardData => {
       setPositiveContent(positive);
       setNeutralContent(neutral);
 
-      // Set up real sources based on actual platforms found
+      // Set up real sources based on actual platforms found - using correct ContentSource structure
       const platformCounts = allAlerts.reduce((acc: any, alert) => {
         acc[alert.platform] = (acc[alert.platform] || 0) + 1;
         return acc;
@@ -152,9 +152,15 @@ const useDashboardData = (): DashboardData => {
       const realSources: ContentSource[] = Object.entries(platformCounts).map(([platform, count]: [string, any]) => ({
         id: platform.toLowerCase(),
         name: platform,
-        status: 'connected' as const,
+        type: 'social',
+        status: 'connected',
         lastUpdate: new Date().toISOString(),
-        alertCount: count
+        metrics: {
+          total: count,
+          positive: allAlerts.filter(a => a.platform === platform && a.sentiment === 'positive').length,
+          negative: allAlerts.filter(a => a.platform === platform && a.sentiment === 'negative').length,
+          neutral: allAlerts.filter(a => a.platform === platform && a.sentiment === 'neutral').length
+        }
       }));
 
       setSources(realSources);
@@ -166,12 +172,7 @@ const useDashboardData = (): DashboardData => {
         description: `${alert.severity.toUpperCase()} threat detected on ${alert.platform}`,
         status: 'pending' as const,
         platform: alert.platform,
-        timestamp: alert.date,
-        alert_id: alert.id,
-        user_id: null,
-        created_at: alert.date,
-        updated_at: alert.date,
-        action: alert.severity === 'high' ? 'immediate_response' : 'monitor'
+        timestamp: alert.date
       }));
 
       setActions(realActions);
