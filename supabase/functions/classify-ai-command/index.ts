@@ -33,6 +33,7 @@ serve(async (req) => {
     let intent = 'general';
     let confidence = 0.5;
     let summary = 'Command processed with basic classification';
+    let selfHealingRequired = false;
     
     if (OPENAI_API_KEY) {
       try {
@@ -47,14 +48,15 @@ serve(async (req) => {
             messages: [
               {
                 role: 'system',
-                content: `You are A.R.I.A™'s command classification AI. Analyze operator commands and return JSON with:
+                content: `You are A.R.I.A™'s command classification AI with self-healing capabilities. Analyze operator commands and return JSON with:
                 - intent: scan_threats, system_status, anubis_check, threat_response, intelligence_gather, data_query, or general
                 - confidence: 0-1 confidence score
                 - summary: brief description of what the command requests
                 - execution_plan: specific steps to execute the command
                 - priority: low, medium, high, or critical
+                - self_healing_check: boolean indicating if the command might reveal system issues
                 
-                Be precise and actionable in your classification.`
+                Be precise and actionable in your classification. Flag potential system issues for self-healing.`
               },
               {
                 role: 'user',
@@ -71,9 +73,21 @@ serve(async (req) => {
           intent = classification.intent || 'general';
           confidence = classification.confidence || 0.5;
           summary = classification.summary || summary;
+          selfHealingRequired = classification.self_healing_check || false;
         }
       } catch (error) {
         console.error('OpenAI classification error:', error);
+        
+        // Log self-healing action for AI classification failure
+        await supabase
+          .from('ai_self_healing_log')
+          .insert({
+            related_command: commandId,
+            issue_detected: 'OpenAI classification service failure',
+            correction_applied: 'Fallback to basic classification algorithm',
+            applied_by: 'AI_Classifier',
+            severity: 'medium'
+          });
       }
     }
 
@@ -117,13 +131,35 @@ serve(async (req) => {
         });
     }
 
+    // Self-healing checks
+    if (selfHealingRequired || commandText.toLowerCase().includes('error') || commandText.toLowerCase().includes('fail')) {
+      // Check for common system issues
+      const { data: recentErrors } = await supabase
+        .from('command_response_feedback')
+        .select('*')
+        .eq('execution_status', 'fail')
+        .gte('evaluated_at', new Date(Date.now() - 3600000).toISOString());
+
+      if (recentErrors && recentErrors.length > 3) {
+        await supabase
+          .from('ai_autocorrection_recommendations')
+          .insert({
+            module: 'Command_Processor',
+            finding: `High error rate detected: ${recentErrors.length} failed commands in last hour`,
+            suggested_fix: 'Run system diagnostics and check for resource constraints',
+            confidence_score: 0.8
+          });
+      }
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
         intent,
         confidence,
         summary,
-        commandId
+        commandId,
+        selfHealingActive: selfHealingRequired
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

@@ -187,6 +187,36 @@ export type Database = {
           },
         ]
       }
+      ai_autocorrection_recommendations: {
+        Row: {
+          confidence_score: number | null
+          created_at: string | null
+          finding: string
+          id: string
+          module: string
+          status: string | null
+          suggested_fix: string
+        }
+        Insert: {
+          confidence_score?: number | null
+          created_at?: string | null
+          finding: string
+          id?: string
+          module: string
+          status?: string | null
+          suggested_fix: string
+        }
+        Update: {
+          confidence_score?: number | null
+          created_at?: string | null
+          finding?: string
+          id?: string
+          module?: string
+          status?: string | null
+          suggested_fix?: string
+        }
+        Relationships: []
+      }
       ai_influence_map: {
         Row: {
           ai_model_origin: string | null
@@ -222,6 +252,47 @@ export type Database = {
           visibility_score?: number | null
         }
         Relationships: []
+      }
+      ai_self_healing_log: {
+        Row: {
+          applied_by: string | null
+          correction_applied: string
+          created_at: string | null
+          id: string
+          issue_detected: string
+          related_command: string | null
+          resolved: boolean | null
+          severity: string | null
+        }
+        Insert: {
+          applied_by?: string | null
+          correction_applied: string
+          created_at?: string | null
+          id?: string
+          issue_detected: string
+          related_command?: string | null
+          resolved?: boolean | null
+          severity?: string | null
+        }
+        Update: {
+          applied_by?: string | null
+          correction_applied?: string
+          created_at?: string | null
+          id?: string
+          issue_detected?: string
+          related_command?: string | null
+          resolved?: boolean | null
+          severity?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_self_healing_log_related_command_fkey"
+            columns: ["related_command"]
+            isOneToOne: false
+            referencedRelation: "operator_command_log"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ai_swarm_consensus: {
         Row: {

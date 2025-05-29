@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { CheckCircle, AlertCircle, Clock, XCircle, Lightbulb, Activity } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { SelfHealingPanel } from './SelfHealingPanel';
 
 interface CommandFeedback {
   id: string;
@@ -126,6 +127,9 @@ export const FeedbackPanel = ({ commandHistory }: FeedbackPanelProps) => {
 
   return (
     <div className="space-y-4">
+      {/* Self-Healing Panel */}
+      <SelfHealingPanel />
+
       {/* Command Execution Feedback */}
       <Card className="bg-black border-green-500/30">
         <CardHeader>
