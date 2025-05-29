@@ -342,6 +342,42 @@ export type Database = {
         }
         Relationships: []
       }
+      anubis_audit_log: {
+        Row: {
+          check_name: string
+          id: string
+          notes: string | null
+          passed: boolean | null
+          result: string | null
+          run_at: string | null
+          run_by: string | null
+          run_context: string | null
+          severity: string | null
+        }
+        Insert: {
+          check_name: string
+          id?: string
+          notes?: string | null
+          passed?: boolean | null
+          result?: string | null
+          run_at?: string | null
+          run_by?: string | null
+          run_context?: string | null
+          severity?: string | null
+        }
+        Update: {
+          check_name?: string
+          id?: string
+          notes?: string | null
+          passed?: boolean | null
+          result?: string | null
+          run_at?: string | null
+          run_by?: string | null
+          run_context?: string | null
+          severity?: string | null
+        }
+        Relationships: []
+      }
       anubis_chat_memory: {
         Row: {
           context: Json | null
@@ -6151,6 +6187,18 @@ export type Database = {
       is_mock_data_allowed: {
         Args: Record<PropertyKey, never>
         Returns: boolean
+      }
+      log_anubis_check: {
+        Args: {
+          check_name: string
+          result: string
+          passed: boolean
+          severity?: string
+          run_context?: string
+          run_by?: string
+          notes?: string
+        }
+        Returns: undefined
       }
       log_compliance_activity: {
         Args: {

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Button } from '@/components/ui/button';
 import { 
   Shield, 
   CheckCircle, 
@@ -10,13 +11,27 @@ import {
   XCircle, 
   RefreshCw,
   Activity,
-  Settings
+  Settings,
+  FileText,
+  Database
 } from 'lucide-react';
 import { SystemConfigManager, SystemConfigResult, SystemBugScanResult } from '@/services/ariaCore/systemConfigManager';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface AdminLoginSystemCheckProps {
   onComplete?: (success: boolean) => void;
+}
+
+interface AuditLogEntry {
+  id: string;
+  check_name: string;
+  result: string;
+  passed: boolean;
+  severity: string;
+  run_context: string;
+  run_at: string;
+  notes?: string;
 }
 
 const AdminLoginSystemCheck = ({ onComplete }: AdminLoginSystemCheckProps) => {
@@ -26,6 +41,8 @@ const AdminLoginSystemCheck = ({ onComplete }: AdminLoginSystemCheckProps) => {
   const [bugScanResult, setBugScanResult] = useState<SystemBugScanResult | null>(null);
   const [configResult, setConfigResult] = useState<SystemConfigResult | null>(null);
   const [completed, setCompleted] = useState(false);
+  const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>([]);
+  const [showAuditLogs, setShowAuditLogs] = useState(false);
 
   useEffect(() => {
     runAutomatedChecks();
@@ -37,7 +54,7 @@ const AdminLoginSystemCheck = ({ onComplete }: AdminLoginSystemCheckProps) => {
     
     try {
       // Step 1: Bug Scan
-      setCurrentStep('Running system bug scan...');
+      setCurrentStep('Running system bug scan with audit logging...');
       setProgress(20);
       
       const bugScan = await SystemConfigManager.runSystemBugScan();
@@ -52,7 +69,12 @@ const AdminLoginSystemCheck = ({ onComplete }: AdminLoginSystemCheckProps) => {
       setConfigResult(config);
       setProgress(90);
 
-      // Step 3: Final validation
+      // Step 3: Load audit logs
+      setCurrentStep('Loading compliance audit logs...');
+      await loadAuditLogs();
+      setProgress(95);
+
+      // Step 4: Final validation
       setCurrentStep('Validating system integrity...');
       setProgress(100);
 
@@ -64,9 +86,9 @@ const AdminLoginSystemCheck = ({ onComplete }: AdminLoginSystemCheckProps) => {
         setCurrentStep(overallSuccess ? 'System ready for operations' : 'System checks completed with issues');
         
         if (overallSuccess) {
-          toast.success('A.R.I.A™ system fully initialized and ready');
+          toast.success('A.R.I.A™ system fully initialized and ready - All checks logged');
         } else {
-          toast.warning('System initialized with some issues - review required');
+          toast.warning('System initialized with some issues - Review audit logs for details');
         }
         
         onComplete?.(overallSuccess);
@@ -76,8 +98,27 @@ const AdminLoginSystemCheck = ({ onComplete }: AdminLoginSystemCheckProps) => {
       console.error('Admin login system check failed:', error);
       setCurrentStep('System check failed');
       setIsRunning(false);
-      toast.error('System check failed');
+      toast.error('System check failed - Check audit logs for details');
       onComplete?.(false);
+    }
+  };
+
+  const loadAuditLogs = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('anubis_audit_log')
+        .select('*')
+        .eq('run_context', 'admin_login')
+        .order('run_at', { ascending: false })
+        .limit(20);
+
+      if (error) {
+        console.error('Failed to load audit logs:', error);
+      } else {
+        setAuditLogs(data || []);
+      }
+    } catch (error) {
+      console.error('Error loading audit logs:', error);
     }
   };
 
@@ -98,6 +139,16 @@ const AdminLoginSystemCheck = ({ onComplete }: AdminLoginSystemCheckProps) => {
     return 'success';
   };
 
+  const getSeverityBadge = (severity: string) => {
+    const colors = {
+      critical: 'bg-red-500 text-white',
+      high: 'bg-orange-500 text-white',
+      medium: 'bg-yellow-500 text-black',
+      low: 'bg-blue-500 text-white'
+    };
+    return colors[severity as keyof typeof colors] || 'bg-gray-500 text-white';
+  };
+
   return (
     <div className="space-y-6">
       <Card className="border-[#247CFF]/20 bg-[#0A0F2C]/90">
@@ -105,6 +156,10 @@ const AdminLoginSystemCheck = ({ onComplete }: AdminLoginSystemCheckProps) => {
           <CardTitle className="text-xl text-white flex items-center gap-2">
             <Shield className="h-6 w-6 text-[#247CFF]" />
             A.R.I.A™ Admin Login System Check
+            <Badge className="bg-[#247CFF]/20 text-[#247CFF] border-[#247CFF]/30">
+              <Database className="h-3 w-3 mr-1" />
+              Anubis Audit Enabled
+            </Badge>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -120,7 +175,7 @@ const AdminLoginSystemCheck = ({ onComplete }: AdminLoginSystemCheckProps) => {
                 <div>
                   <p className="text-white font-medium">{currentStep}</p>
                   <p className="text-[#D8DEE9]/80 text-sm">
-                    Automated system integrity and configuration validation
+                    Automated system integrity, configuration validation, and compliance audit logging
                   </p>
                 </div>
               </div>
@@ -135,6 +190,9 @@ const AdminLoginSystemCheck = ({ onComplete }: AdminLoginSystemCheckProps) => {
                 <CardTitle className="text-lg text-white flex items-center gap-2">
                   <Activity className="h-5 w-5 text-[#247CFF]" />
                   System Bug Scan Results
+                  <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                    Audit Logged
+                  </Badge>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -174,6 +232,9 @@ const AdminLoginSystemCheck = ({ onComplete }: AdminLoginSystemCheckProps) => {
                 <CardTitle className="text-lg text-white flex items-center gap-2">
                   <Settings className="h-5 w-5 text-[#247CFF]" />
                   System Configuration Results
+                  <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                    Audit Logged
+                  </Badge>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -213,6 +274,61 @@ const AdminLoginSystemCheck = ({ onComplete }: AdminLoginSystemCheckProps) => {
             </Card>
           )}
 
+          {/* Audit Logs Section */}
+          {completed && (
+            <Card className="bg-[#1C1C1E]/50 border-[#247CFF]/10">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg text-white flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-5 w-5 text-[#247CFF]" />
+                    Anubis Compliance Audit Log
+                    <Badge className="bg-[#247CFF]/20 text-[#247CFF] border-[#247CFF]/30">
+                      {auditLogs.length} Entries
+                    </Badge>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowAuditLogs(!showAuditLogs)}
+                    className="bg-transparent border-[#247CFF] text-[#247CFF] hover:bg-[#247CFF] hover:text-white"
+                  >
+                    {showAuditLogs ? 'Hide Logs' : 'View Logs'}
+                  </Button>
+                </CardTitle>
+              </CardHeader>
+              {showAuditLogs && (
+                <CardContent className="space-y-2">
+                  <div className="max-h-64 overflow-y-auto space-y-2">
+                    {auditLogs.map((log) => (
+                      <div key={log.id} className="bg-[#0A0F2C]/50 p-3 rounded border border-[#247CFF]/10">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-sm font-medium text-white">{log.check_name}</span>
+                          <div className="flex items-center gap-2">
+                            <Badge className={getSeverityBadge(log.severity)}>
+                              {log.severity}
+                            </Badge>
+                            {log.passed ? (
+                              <CheckCircle className="h-4 w-4 text-green-500" />
+                            ) : (
+                              <XCircle className="h-4 w-4 text-red-500" />
+                            )}
+                          </div>
+                        </div>
+                        <div className="text-xs text-[#D8DEE9]/80 mb-1">{log.result}</div>
+                        {log.notes && (
+                          <div className="text-xs text-[#D8DEE9]/60 italic">{log.notes}</div>
+                        )}
+                        <div className="text-xs text-[#D8DEE9]/40 mt-1">
+                          {new Date(log.run_at).toLocaleString()}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              )}
+            </Card>
+          )}
+
           {/* System Status Summary */}
           {completed && (
             <Card className="bg-[#247CFF]/10 border-[#247CFF]/30">
@@ -223,8 +339,8 @@ const AdminLoginSystemCheck = ({ onComplete }: AdminLoginSystemCheckProps) => {
                     <p className="text-white font-medium">Admin Login System Check Complete</p>
                     <p className="text-[#D8DEE9]/80 text-sm mt-1">
                       {getOverallStatus() === 'success' ? 
-                        'All systems operational. A.R.I.A™ is ready for live operations.' :
-                        'System check completed with issues. Some manual intervention may be required.'
+                        'All systems operational. A.R.I.A™ is ready for live operations. All checks have been logged to the Anubis compliance audit system.' :
+                        'System check completed with issues. Some manual intervention may be required. Check the audit logs for detailed compliance records.'
                       }
                     </p>
                   </div>

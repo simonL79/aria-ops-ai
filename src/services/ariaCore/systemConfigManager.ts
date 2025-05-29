@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -36,6 +37,36 @@ export interface SystemBugScanResult {
 export class SystemConfigManager {
   
   /**
+   * Log audit check to Anubis compliance system
+   */
+  private static async logAuditCheck(
+    checkName: string,
+    result: string,
+    passed: boolean,
+    severity: 'low' | 'medium' | 'high' | 'critical' = 'medium',
+    runContext: string = 'admin_login',
+    notes?: string
+  ): Promise<void> {
+    try {
+      const { error } = await supabase.rpc('log_anubis_check', {
+        check_name: checkName,
+        result: result,
+        passed: passed,
+        severity: severity,
+        run_context: runContext,
+        run_by: (await supabase.auth.getUser()).data.user?.id,
+        notes: notes
+      });
+
+      if (error) {
+        console.warn('Failed to log audit check:', error);
+      }
+    } catch (error) {
+      console.warn('Error logging audit check:', error);
+    }
+  }
+
+  /**
    * Run comprehensive system configuration and fixes
    */
   static async configureLiveSystem(): Promise<SystemConfigResult> {
@@ -48,6 +79,15 @@ export class SystemConfigManager {
 
     try {
       console.log('🔧 Starting A.R.I.A™ live system configuration...');
+      
+      await this.logAuditCheck(
+        'Live System Configuration',
+        'Configuration process initiated',
+        true,
+        'high',
+        'admin_login',
+        'A.R.I.A™ live system configuration started during admin login'
+      );
       
       // 1. Configure live system settings
       await this.setLiveSystemConfig(result);
@@ -66,6 +106,16 @@ export class SystemConfigManager {
       
       result.success = result.issues.length === 0;
       
+      // Log final configuration result
+      await this.logAuditCheck(
+        'Live System Configuration Complete',
+        `${result.fixes_applied.length} fixes applied, ${result.issues.length} issues, ${result.warnings.length} warnings`,
+        result.success,
+        result.issues.length > 0 ? 'critical' : 'high',
+        'admin_login',
+        result.success ? 'System successfully configured for live operations' : 'Configuration completed with issues requiring attention'
+      );
+      
       if (result.success) {
         console.log('✅ A.R.I.A™ system configured for live operations');
         toast.success('A.R.I.A™ system successfully configured for live operations');
@@ -77,6 +127,16 @@ export class SystemConfigManager {
     } catch (error: any) {
       console.error('❌ System configuration failed:', error);
       result.issues.push(`Configuration failed: ${error.message}`);
+      
+      await this.logAuditCheck(
+        'Live System Configuration Failed',
+        error.message,
+        false,
+        'critical',
+        'admin_login',
+        'System configuration encountered critical failure during admin login'
+      );
+      
       toast.error('System configuration failed');
     }
     
@@ -98,6 +158,15 @@ export class SystemConfigManager {
     try {
       console.log('🐞 Starting A.R.I.A™ system bug scan...');
 
+      await this.logAuditCheck(
+        'System Bug Scan',
+        'Bug scan process initiated',
+        true,
+        'high',
+        'admin_login',
+        'Comprehensive system bug scan started during admin login'
+      );
+
       // 1. Check for tables with missing RLS
       await this.checkRLSEnforcement(result);
 
@@ -118,12 +187,31 @@ export class SystemConfigManager {
       result.scan_summary = `Scan completed: ${result.critical_issues.length} critical issues, ${result.warnings.length} warnings, ${result.info.length} info items`;
       result.success = result.critical_issues.length === 0;
 
+      // Log comprehensive scan results
+      await this.logAuditCheck(
+        'System Bug Scan Complete',
+        result.scan_summary,
+        result.success,
+        result.critical_issues.length > 0 ? 'critical' : result.warnings.length > 0 ? 'medium' : 'low',
+        'admin_login',
+        `Total issues found: ${totalIssues}. ${result.success ? 'System passed all critical checks' : 'Critical issues require immediate attention'}`
+      );
+
       console.log('✅ System bug scan completed:', result.scan_summary);
 
     } catch (error: any) {
       console.error('❌ System bug scan failed:', error);
       result.critical_issues.push(`Bug scan failed: ${error.message}`);
       result.success = false;
+      
+      await this.logAuditCheck(
+        'System Bug Scan Failed',
+        error.message,
+        false,
+        'critical',
+        'admin_login',
+        'Bug scan encountered critical failure during admin login'
+      );
     }
 
     return result;
@@ -162,11 +250,32 @@ export class SystemConfigManager {
 
         if (error) {
           result.issues.push(`Failed to set ${config.config_key}: ${error.message}`);
+          await this.logAuditCheck(
+            `Config Setting: ${config.config_key}`,
+            error.message,
+            false,
+            'high',
+            'admin_login'
+          );
         } else {
           result.fixes_applied.push(`Set ${config.config_key} = ${config.config_value}`);
+          await this.logAuditCheck(
+            `Config Setting: ${config.config_key}`,
+            `Successfully set to ${config.config_value}`,
+            true,
+            'medium',
+            'admin_login'
+          );
         }
       } catch (error: any) {
         result.issues.push(`Error setting ${config.config_key}: ${error.message}`);
+        await this.logAuditCheck(
+          `Config Setting: ${config.config_key}`,
+          error.message,
+          false,
+          'high',
+          'admin_login'
+        );
       }
     }
   }
@@ -201,11 +310,32 @@ export class SystemConfigManager {
 
         if (error) {
           result.issues.push(`Failed to initialize ${module.name}: ${error.message}`);
+          await this.logAuditCheck(
+            `Module Init: ${module.name}`,
+            error.message,
+            false,
+            'medium',
+            'admin_login'
+          );
         } else {
           result.fixes_applied.push(`Initialized live status for ${module.name}`);
+          await this.logAuditCheck(
+            `Module Init: ${module.name}`,
+            'Successfully initialized for live operation',
+            true,
+            'low',
+            'admin_login'
+          );
         }
       } catch (error: any) {
         result.issues.push(`Error initializing ${module.name}: ${error.message}`);
+        await this.logAuditCheck(
+          `Module Init: ${module.name}`,
+          error.message,
+          false,
+          'medium',
+          'admin_login'
+        );
       }
     }
   }
@@ -220,16 +350,45 @@ export class SystemConfigManager {
 
       if (error) {
         result.issues.push(`Failed to check system config: ${error.message}`);
+        await this.logAuditCheck(
+          'System Config Cleanup',
+          error.message,
+          false,
+          'medium',
+          'admin_login'
+        );
         return;
       }
 
       if (configs && configs.length > 0) {
         result.fixes_applied.push(`Verified ${configs.length} system configuration entries`);
+        await this.logAuditCheck(
+          'System Config Cleanup',
+          `Verified ${configs.length} configuration entries`,
+          true,
+          'low',
+          'admin_login'
+        );
       } else {
         result.warnings.push('No system configuration found - this may be normal for a new system');
+        await this.logAuditCheck(
+          'System Config Cleanup',
+          'No configuration entries found',
+          true,
+          'low',
+          'admin_login',
+          'May be normal for new system deployment'
+        );
       }
     } catch (error: any) {
       result.issues.push(`Error checking system config: ${error.message}`);
+      await this.logAuditCheck(
+        'System Config Cleanup',
+        error.message,
+        false,
+        'medium',
+        'admin_login'
+      );
     }
   }
 
@@ -250,11 +409,32 @@ export class SystemConfigManager {
 
       if (error) {
         result.issues.push(`Failed to initialize monitoring status: ${error.message}`);
+        await this.logAuditCheck(
+          'Monitoring Status Init',
+          error.message,
+          false,
+          'high',
+          'admin_login'
+        );
       } else {
         result.fixes_applied.push('Initialized monitoring status');
+        await this.logAuditCheck(
+          'Monitoring Status Init',
+          'Successfully initialized with 6 sources',
+          true,
+          'medium',
+          'admin_login'
+        );
       }
     } catch (error: any) {
       result.issues.push(`Error initializing monitoring status: ${error.message}`);
+      await this.logAuditCheck(
+        'Monitoring Status Init',
+        error.message,
+        false,
+        'high',
+        'admin_login'
+      );
     }
   }
 
@@ -269,8 +449,22 @@ export class SystemConfigManager {
 
       if (liveConfig?.config_value === 'live') {
         result.fixes_applied.push('✅ System mode: LIVE');
+        await this.logAuditCheck(
+          'System Mode Verification',
+          'Confirmed LIVE mode active',
+          true,
+          'high',
+          'admin_login'
+        );
       } else {
         result.warnings.push('System mode may not be set to live');
+        await this.logAuditCheck(
+          'System Mode Verification',
+          'System mode not set to LIVE',
+          false,
+          'medium',
+          'admin_login'
+        );
       }
 
       // Check if mock data is disabled
@@ -282,8 +476,22 @@ export class SystemConfigManager {
 
       if (mockConfig?.config_value === 'disabled') {
         result.fixes_applied.push('✅ Mock data: DISABLED');
+        await this.logAuditCheck(
+          'Mock Data Policy Verification',
+          'Confirmed mock data disabled',
+          true,
+          'critical',
+          'admin_login'
+        );
       } else {
         result.warnings.push('Mock data may still be enabled');
+        await this.logAuditCheck(
+          'Mock Data Policy Verification',
+          'Mock data not properly disabled',
+          false,
+          'critical',
+          'admin_login'
+        );
       }
 
       // Check live status modules
@@ -294,22 +502,50 @@ export class SystemConfigManager {
 
       if (liveModules && liveModules.length > 0) {
         result.fixes_applied.push(`✅ Live modules: ${liveModules.length} active`);
+        await this.logAuditCheck(
+          'Live Modules Verification',
+          `${liveModules.length} modules active and operational`,
+          true,
+          'high',
+          'admin_login'
+        );
       } else {
         result.warnings.push('No live status modules found');
+        await this.logAuditCheck(
+          'Live Modules Verification',
+          'No active live modules detected',
+          false,
+          'high',
+          'admin_login'
+        );
       }
 
     } catch (error: any) {
       result.warnings.push(`Verification incomplete: ${error.message}`);
+      await this.logAuditCheck(
+        'System Configuration Verification',
+        error.message,
+        false,
+        'medium',
+        'admin_login'
+      );
     }
   }
 
-  // New bug scan methods
+  // New bug scan methods with audit logging
   private static async checkRLSEnforcement(result: SystemBugScanResult): Promise<void> {
     try {
       const { data: tableCheck, error } = await supabase.rpc('check_rls_compliance');
       
       if (error) {
         result.warnings.push(`Could not check RLS compliance: ${error.message}`);
+        await this.logAuditCheck(
+          'RLS Compliance Check',
+          error.message,
+          false,
+          'medium',
+          'admin_login'
+        );
         return;
       }
 
@@ -317,12 +553,34 @@ export class SystemConfigManager {
         const tablesWithoutRLS = tableCheck.filter((table: any) => !table.rls_enabled);
         if (tablesWithoutRLS.length > 0) {
           result.warnings.push(`${tablesWithoutRLS.length} tables missing RLS enforcement`);
+          await this.logAuditCheck(
+            'RLS Compliance Check',
+            `${tablesWithoutRLS.length} tables missing RLS enforcement`,
+            false,
+            'high',
+            'admin_login',
+            `Tables: ${tablesWithoutRLS.map((t: any) => t.table_name).join(', ')}`
+          );
         } else {
           result.info.push('All tables have RLS enforcement enabled');
+          await this.logAuditCheck(
+            'RLS Compliance Check',
+            'All tables have RLS enforcement enabled',
+            true,
+            'high',
+            'admin_login'
+          );
         }
       }
     } catch (error: any) {
       result.warnings.push(`RLS check failed: ${error.message}`);
+      await this.logAuditCheck(
+        'RLS Compliance Check',
+        error.message,
+        false,
+        'medium',
+        'admin_login'
+      );
     }
   }
 
@@ -335,17 +593,45 @@ export class SystemConfigManager {
 
       if (error) {
         result.critical_issues.push(`Failed to check admin presence: ${error.message}`);
+        await this.logAuditCheck(
+          'Admin Presence Check',
+          error.message,
+          false,
+          'critical',
+          'admin_login'
+        );
         return;
       }
 
       const adminCount = adminCheck?.length || 0;
       if (adminCount === 0) {
         result.critical_issues.push('No admin users found in the system');
+        await this.logAuditCheck(
+          'Admin Presence Check',
+          'No admin users found in the system',
+          false,
+          'critical',
+          'admin_login'
+        );
       } else {
         result.info.push(`${adminCount} admin users configured`);
+        await this.logAuditCheck(
+          'Admin Presence Check',
+          `${adminCount} admin users configured`,
+          true,
+          'high',
+          'admin_login'
+        );
       }
     } catch (error: any) {
       result.critical_issues.push(`Admin check failed: ${error.message}`);
+      await this.logAuditCheck(
+        'Admin Presence Check',
+        error.message,
+        false,
+        'critical',
+        'admin_login'
+      );
     }
   }
 
@@ -360,8 +646,22 @@ export class SystemConfigManager {
 
       if (!systemMode || systemMode.config_value !== 'live') {
         result.warnings.push('System not configured for live mode');
+        await this.logAuditCheck(
+          'System Mode Check',
+          'System not configured for live mode',
+          false,
+          'high',
+          'admin_login'
+        );
       } else {
         result.info.push('System configured for live mode');
+        await this.logAuditCheck(
+          'System Mode Check',
+          'System configured for live mode',
+          true,
+          'high',
+          'admin_login'
+        );
       }
 
       // Check for duplicate configs
@@ -380,12 +680,34 @@ export class SystemConfigManager {
         const duplicates = Array.from(keyMap.entries()).filter(([key, count]) => count > 1);
         if (duplicates.length > 0) {
           result.warnings.push(`${duplicates.length} duplicate configuration keys found`);
+          await this.logAuditCheck(
+            'Duplicate Config Check',
+            `${duplicates.length} duplicate configuration keys found`,
+            false,
+            'medium',
+            'admin_login',
+            `Duplicate keys: ${duplicates.map(([key]) => key).join(', ')}`
+          );
         } else {
           result.info.push('No duplicate configuration keys');
+          await this.logAuditCheck(
+            'Duplicate Config Check',
+            'No duplicate configuration keys',
+            true,
+            'low',
+            'admin_login'
+          );
         }
       }
     } catch (error: any) {
       result.warnings.push(`System configuration check failed: ${error.message}`);
+      await this.logAuditCheck(
+        'System Configuration Check',
+        error.message,
+        false,
+        'medium',
+        'admin_login'
+      );
     }
   }
 
@@ -397,11 +719,25 @@ export class SystemConfigManager {
 
       if (error) {
         result.warnings.push(`Failed to check live status modules: ${error.message}`);
+        await this.logAuditCheck(
+          'Live Status Modules Check',
+          error.message,
+          false,
+          'medium',
+          'admin_login'
+        );
         return;
       }
 
       if (!modules || modules.length === 0) {
         result.warnings.push('No live status modules found');
+        await this.logAuditCheck(
+          'Live Status Modules Check',
+          'No live status modules found',
+          false,
+          'high',
+          'admin_login'
+        );
         return;
       }
 
@@ -412,11 +748,33 @@ export class SystemConfigManager {
 
       if (outdatedModules.length > 0) {
         result.warnings.push(`${outdatedModules.length} modules have not reported in 24+ hours`);
+        await this.logAuditCheck(
+          'Live Status Modules Check',
+          `${outdatedModules.length} modules have not reported in 24+ hours`,
+          false,
+          'medium',
+          'admin_login',
+          `Outdated modules: ${outdatedModules.map(m => m.name).join(', ')}`
+        );
       } else {
         result.info.push(`All ${modules.length} live status modules are current`);
+        await this.logAuditCheck(
+          'Live Status Modules Check',
+          `All ${modules.length} live status modules are current`,
+          true,
+          'medium',
+          'admin_login'
+        );
       }
     } catch (error: any) {
       result.warnings.push(`Live status check failed: ${error.message}`);
+      await this.logAuditCheck(
+        'Live Status Modules Check',
+        error.message,
+        false,
+        'medium',
+        'admin_login'
+      );
     }
   }
 
@@ -430,17 +788,80 @@ export class SystemConfigManager {
 
       if (error) {
         result.warnings.push('Monitoring status not initialized');
+        await this.logAuditCheck(
+          'Monitoring Status Check',
+          'Monitoring status not initialized',
+          false,
+          'medium',
+          'admin_login'
+        );
         return;
       }
 
       if (!monitoring.is_active) {
         result.warnings.push('Monitoring is not active');
+        await this.logAuditCheck(
+          'Monitoring Status Check',
+          'Monitoring is not active',
+          false,
+          'high',
+          'admin_login'
+        );
       } else {
         result.info.push('Monitoring system is active');
+        await this.logAuditCheck(
+          'Monitoring Status Check',
+          'Monitoring system is active',
+          true,
+          'medium',
+          'admin_login'
+        );
       }
     } catch (error: any) {
       result.warnings.push(`Monitoring status check failed: ${error.message}`);
+      await this.logAuditCheck(
+        'Monitoring Status Check',
+        error.message,
+        false,
+        'medium',
+        'admin_login'
+      );
     }
+  }
+
+  /**
+   * Run automated admin login system checks
+   */
+  static async runAdminLoginChecks(): Promise<{ config: SystemConfigResult; bugScan: SystemBugScanResult }> {
+    console.log('🚀 Running automated admin login system checks...');
+
+    await this.logAuditCheck(
+      'Admin Login System Checks',
+      'Automated admin login system checks initiated',
+      true,
+      'critical',
+      'admin_login',
+      'Full system compliance audit started for admin authentication'
+    );
+
+    // Run bug scan first
+    const bugScan = await this.runSystemBugScan();
+    
+    // Then run configuration
+    const config = await this.configureLiveSystem();
+
+    // Log final admin login check result
+    const overallSuccess = bugScan.success && config.success;
+    await this.logAuditCheck(
+      'Admin Login System Checks Complete',
+      `Bug scan: ${bugScan.success ? 'PASSED' : 'FAILED'}, Config: ${config.success ? 'PASSED' : 'FAILED'}`,
+      overallSuccess,
+      overallSuccess ? 'high' : 'critical',
+      'admin_login',
+      overallSuccess ? 'All admin login system checks passed successfully' : 'Some admin login system checks failed - review required'
+    );
+
+    return { config, bugScan };
   }
 
   /**
@@ -479,9 +900,25 @@ export class SystemConfigManager {
         new Date(module.last_threat_seen) < new Date(Date.now() - 24 * 60 * 60 * 1000)
       ) || [];
 
+      await this.logAuditCheck(
+        'System Health Report Generated',
+        `Admin count: ${report.admin_count}, Unsync modules: ${report.unsync_modules.length}`,
+        true,
+        'low',
+        'health_check',
+        'System health report successfully generated'
+      );
+
       return report;
     } catch (error) {
       console.error('Failed to generate health report:', error);
+      await this.logAuditCheck(
+        'System Health Report Failed',
+        error instanceof Error ? error.message : 'Unknown error',
+        false,
+        'medium',
+        'health_check'
+      );
       return null;
     }
   }
