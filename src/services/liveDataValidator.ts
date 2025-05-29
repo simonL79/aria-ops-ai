@@ -44,7 +44,7 @@ export class LiveDataValidator {
     result.totalChecks++;
     const rlsCheck = await this.checkRLSCompliance();
     if (!rlsCheck.isCompliant) {
-      result.errors.push(`RLS not enabled on ${rlsCheck.unprotectedTables.join(', ')}`);
+      result.errors.push(`RLS not enabled on: ${rlsCheck.unprotectedTables.join(', ')}`);
       result.isValid = false;
     } else {
       result.passedChecks++;
@@ -93,7 +93,10 @@ export class LiveDataValidator {
         .select('id, content')
         .or('content.ilike.%mock%,content.ilike.%demo%,content.ilike.%test%');
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error checking mock data:', error);
+        return { hasMockData: false, count: 0, mockEntries: [] };
+      }
 
       return {
         hasMockData: (data?.length || 0) > 0,
@@ -113,19 +116,30 @@ export class LiveDataValidator {
     try {
       const { data, error } = await supabase.rpc('check_rls_compliance');
       
-      if (error) throw error;
+      if (error) {
+        console.error('RLS compliance check error:', error);
+        return { isCompliant: false, unprotectedTables: ['database_check_failed'], totalTables: 0 };
+      }
 
-      const unprotectedTables = data?.filter((table: any) => !table.rls_enabled)
+      if (!data || !Array.isArray(data)) {
+        console.error('Invalid RLS data format:', data);
+        return { isCompliant: false, unprotectedTables: ['invalid_response'], totalTables: 0 };
+      }
+
+      const unprotectedTables = data
+        .filter((table: any) => !table.rls_enabled)
         .map((table: any) => table.table_name) || [];
+
+      console.log('RLS Check Results:', { totalTables: data.length, unprotectedTables });
 
       return {
         isCompliant: unprotectedTables.length === 0,
         unprotectedTables,
-        totalTables: data?.length || 0
+        totalTables: data.length
       };
     } catch (error) {
       console.error('Error checking RLS compliance:', error);
-      return { isCompliant: false, unprotectedTables: ['unknown'], totalTables: 0 };
+      return { isCompliant: false, unprotectedTables: ['check_failed'], totalTables: 0 };
     }
   }
 
@@ -139,7 +153,10 @@ export class LiveDataValidator {
         .select('id, status, created_at')
         .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error checking threat queue:', error);
+        return { hasRealData: false, recentItems: 0, pendingItems: 0 };
+      }
 
       return {
         hasRealData: (data?.length || 0) > 0,
@@ -163,7 +180,10 @@ export class LiveDataValidator {
         .gte('executed_at', new Date(Date.now() - 60 * 60 * 1000).toISOString())
         .order('executed_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error checking edge function activity:', error);
+        return { isActive: false, recentCalls: 0, lastCall: null };
+      }
 
       return {
         isActive: (data?.length || 0) > 0,
@@ -187,7 +207,10 @@ export class LiveDataValidator {
         .gte('check_time', new Date(Date.now() - 30 * 60 * 1000).toISOString())
         .order('check_time', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error checking system health:', error);
+        return { isActive: false, recentChecks: 0, lastCheck: null };
+      }
 
       return {
         isActive: (data?.length || 0) > 0,
