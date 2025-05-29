@@ -28,6 +28,7 @@ import { TitanvaultPanel } from './TitanvaultPanel';
 import { PerimetrixPanel } from './PerimetrixPanel';
 import { ZeuslinkPanel } from './ZeuslinkPanel';
 import { SentinelgridPanel } from './SentinelgridPanel';
+import { CortextracePanel } from './CortextracePanel';
 
 interface CommandFeedback {
   id: string;
@@ -149,6 +150,9 @@ export const FeedbackPanel = ({ commandHistory }: FeedbackPanelProps) => {
 
   return (
     <div className="space-y-4">
+      {/* CORTEXTRACE™ Strategic Memory & Trajectory Engine Panel */}
+      <CortextracePanel />
+
       {/* SENTINELGRID™ Global Risk Sentinel Mesh Panel */}
       <SentinelgridPanel />
 

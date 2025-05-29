@@ -1850,6 +1850,98 @@ export type Database = {
           },
         ]
       }
+      cortex_insight_links: {
+        Row: {
+          created_at: string | null
+          id: string
+          insight_summary: string | null
+          relevance_score: number | null
+          trace_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          insight_summary?: string | null
+          relevance_score?: number | null
+          trace_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          insight_summary?: string | null
+          relevance_score?: number | null
+          trace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cortex_insight_links_trace_id_fkey"
+            columns: ["trace_id"]
+            isOneToOne: false
+            referencedRelation: "cortex_memory_trace"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cortex_memory_trace: {
+        Row: {
+          entity_name: string
+          id: string
+          is_ai_generated: boolean | null
+          memory_score: number | null
+          memory_snapshot: Json
+          recorded_at: string | null
+          trajectory_label: string | null
+        }
+        Insert: {
+          entity_name: string
+          id?: string
+          is_ai_generated?: boolean | null
+          memory_score?: number | null
+          memory_snapshot: Json
+          recorded_at?: string | null
+          trajectory_label?: string | null
+        }
+        Update: {
+          entity_name?: string
+          id?: string
+          is_ai_generated?: boolean | null
+          memory_score?: number | null
+          memory_snapshot?: Json
+          recorded_at?: string | null
+          trajectory_label?: string | null
+        }
+        Relationships: []
+      }
+      cortex_projections: {
+        Row: {
+          entity_name: string
+          id: string
+          probability: number | null
+          projected_at: string | null
+          projected_by: string | null
+          projection_summary: string | null
+          risk_trajectory: string | null
+        }
+        Insert: {
+          entity_name: string
+          id?: string
+          probability?: number | null
+          projected_at?: string | null
+          projected_by?: string | null
+          projection_summary?: string | null
+          risk_trajectory?: string | null
+        }
+        Update: {
+          entity_name?: string
+          id?: string
+          probability?: number | null
+          projected_at?: string | null
+          projected_by?: string | null
+          projection_summary?: string | null
+          risk_trajectory?: string | null
+        }
+        Relationships: []
+      }
       counter_narratives: {
         Row: {
           created_at: string | null
