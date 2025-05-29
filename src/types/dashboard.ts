@@ -34,10 +34,10 @@ export interface ContentSource {
 
 export interface ContentAction {
   id: string;
-  type: string;
+  type: "urgent" | "monitoring" | "response";
   description: string;
   platform: string;
-  status: string;
+  status: "pending" | "completed" | "failed";
   timestamp: string;
   // Additional properties used in some parts of the code
   action?: string;

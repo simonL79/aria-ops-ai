@@ -101,7 +101,10 @@ const MentionsPage = () => {
   return (
     <DashboardLayout>
       <div className="container mx-auto">
-        <DashboardHeader title="Reputation Intelligence" />
+        <DashboardHeader 
+          title="Reputation Intelligence" 
+          description="Live OSINT monitoring and threat detection for reputation management"
+        />
         
         <Tabs 
           defaultValue="mentions" 
