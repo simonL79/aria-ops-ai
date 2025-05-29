@@ -31,6 +31,7 @@ import {
 import { LiveDataEnforcer } from '@/services/ariaCore/liveDataEnforcer';
 import { threatProcessor } from '@/services/ariaCore/threatProcessor';
 import SystemInitializationPanel from './SystemInitializationPanel';
+import ThreatResultsPanel from './ThreatResultsPanel';
 import { toast } from 'sonner';
 
 const AnubisCockpit = () => {
@@ -256,8 +257,9 @@ const AnubisCockpit = () => {
       )}
 
       <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList className="grid grid-cols-5">
+        <TabsList className="grid grid-cols-6">
           <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="results">Results</TabsTrigger>
           <TabsTrigger value="validation">System Health</TabsTrigger>
           <TabsTrigger value="monitoring">Live Monitoring</TabsTrigger>
           <TabsTrigger value="threats">Threat Queue</TabsTrigger>
@@ -353,6 +355,10 @@ const AnubisCockpit = () => {
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        <TabsContent value="results">
+          <ThreatResultsPanel />
         </TabsContent>
 
         <TabsContent value="validation">
