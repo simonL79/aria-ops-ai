@@ -81,7 +81,12 @@ export const AletheiaTruthPanel = () => {
         .limit(20);
 
       if (error) throw error;
-      setVerificationLogs(data || []);
+      // Type assertion to ensure proper typing
+      const typedData = (data || []).map(log => ({
+        ...log,
+        verification_status: log.verification_status as 'verified' | 'refuted' | 'uncertain'
+      }));
+      setVerificationLogs(typedData);
     } catch (error) {
       console.error('Error loading verification logs:', error);
     }
