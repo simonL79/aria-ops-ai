@@ -17,6 +17,7 @@ import { SentinelShieldPanel } from './SentinelShieldPanel';
 import { PropheticVisionPanel } from './PropheticVisionPanel';
 import { CitadelPanel } from './CitadelPanel';
 import { MirrorspacePanel } from './MirrorspacePanel';
+import { ShieldhavenPanel } from './ShieldhavenPanel';
 
 interface CommandFeedback {
   id: string;
@@ -138,6 +139,9 @@ export const FeedbackPanel = ({ commandHistory }: FeedbackPanelProps) => {
 
   return (
     <div className="space-y-4">
+      {/* SHIELDHAVEN™ Legal & Regulatory AI Defense Panel */}
+      <ShieldhavenPanel />
+
       {/* MIRRORSPACE™ Behavioral Surveillance & Influence Index Panel */}
       <MirrorspacePanel />
 
@@ -232,7 +236,7 @@ export const FeedbackPanel = ({ commandHistory }: FeedbackPanelProps) => {
               </div>
             ))}
           </CardContent>
-        </Card>
+        </div>
       )}
     </div>
   );

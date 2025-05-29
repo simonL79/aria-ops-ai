@@ -1,3 +1,4 @@
+
 export { default as OperatorConsole } from './OperatorConsole';
 export { VoiceRecognition } from './VoiceRecognition';
 export { useCommandProcessor } from './CommandProcessor';
@@ -16,3 +17,4 @@ export { SentinelShieldPanel } from './SentinelShieldPanel';
 export { PropheticVisionPanel } from './PropheticVisionPanel';
 export { CitadelPanel } from './CitadelPanel';
 export { MirrorspacePanel } from './MirrorspacePanel';
+export { ShieldhavenPanel } from './ShieldhavenPanel';
