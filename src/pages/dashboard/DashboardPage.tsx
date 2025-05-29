@@ -3,7 +3,6 @@ import React from 'react';
 import { useDashboardData } from "@/hooks/useDashboardData";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import DashboardMainContent from "@/components/dashboard/DashboardMainContent";
-import { DashboardHeaderProps, DashboardMainContentProps } from "@/types/dashboard";
 
 const DashboardPage = () => {
   const {
@@ -24,19 +23,11 @@ const DashboardPage = () => {
     simulateNewData,
   } = useDashboardData();
 
-  if (loading) {
-    return <div className="flex justify-center items-center h-screen">Loading...</div>;
-  }
-
-  if (error) {
-    return <div className="flex justify-center items-center h-screen text-red-500">Error: {error}</div>;
-  }
-
   return (
     <div className="min-h-screen bg-gray-50">
       <DashboardHeader 
-        title="Dashboard"
-        description="Overview of your reputation monitoring"
+        title="A.R.I.A™ Threat Intelligence Dashboard"
+        description="Real-time reputation monitoring and threat detection"
         onRefresh={fetchData}
         totalAlerts={alerts.length}
         highSeverityAlerts={alerts.filter(alert => alert.severity === 'high').length}
@@ -54,6 +45,11 @@ const DashboardPage = () => {
         positiveContent={positiveContent}
         neutralContent={neutralContent}
         onSimulateNewData={simulateNewData}
+        loading={loading}
+        error={error}
+        fetchData={fetchData}
+        filteredAlerts={alerts} // Show all alerts by default
+        onFilterChange={() => {}} // Add filter functionality if needed
       />
     </div>
   );

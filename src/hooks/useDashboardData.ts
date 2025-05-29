@@ -1,5 +1,6 @@
 
 import { useState, useEffect, useCallback } from "react";
+import { supabase } from '@/integrations/supabase/client';
 import {
   ContentAlert,
   ContentSource,
@@ -8,12 +9,6 @@ import {
   ResponseToneStyle,
   SeoContent as SeoContentType,
 } from "@/types/dashboard";
-import { 
-  fetchRealAlerts, 
-  fetchRealSources, 
-  fetchRealActions, 
-  fetchRealMetrics 
-} from "@/data/mockDashboardData";
 
 interface DashboardData {
   metrics: MetricValue[];
@@ -50,81 +45,200 @@ const useDashboardData = (): DashboardData => {
 
   const fetchData = useCallback(async () => {
     setLoading(true);
+    setError(null);
+    
     try {
-      const [
-        metricsData,
-        alertsData,
-        sourcesData,
-        actionsData,
-      ] = await Promise.all([
-        fetchRealMetrics(),
-        fetchRealAlerts(),
-        fetchRealSources(),
-        fetchRealActions(),
-      ]);
+      console.log('🔄 Fetching real data from database...');
+      
+      // Fetch real scan results
+      const { data: scanResults, error: scanError } = await supabase
+        .from('scan_results')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(50);
 
-      setMetrics(metricsData);
-      setAlerts(alertsData);
-      setClassifiedAlerts(alertsData);
-      setSources(sourcesData);
-      setActions(actionsData);
-      setRecentActivity(actionsData);
-      setSeoContent([]);
+      if (scanError) {
+        console.error('❌ Error fetching scan results:', scanError);
+        throw new Error(`Failed to fetch scan results: ${scanError.message}`);
+      }
 
-      // Calculate content metrics from real data
-      const negative = alertsData.filter(
-        (alert) => alert.sentiment === "negative"
-      ).length;
-      const positive = alertsData.filter(
-        (alert) => alert.sentiment === "positive"
-      ).length;
-      const neutral = alertsData.filter(
-        (alert) => alert.sentiment === "neutral"
-      ).length;
+      // Fetch real content alerts
+      const { data: contentAlerts, error: alertsError } = await supabase
+        .from('content_alerts')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (alertsError) {
+        console.error('❌ Error fetching content alerts:', alertsError);
+        throw new Error(`Failed to fetch content alerts: ${alertsError.message}`);
+      }
+
+      // Convert scan results to ContentAlert format
+      const scanAlerts: ContentAlert[] = (scanResults || []).map((result: any) => ({
+        id: result.id,
+        platform: result.platform || 'Unknown',
+        content: result.content || 'No content available',
+        date: new Date(result.created_at).toLocaleString(),
+        severity: (result.severity as 'high' | 'medium' | 'low') || 'low',
+        status: 'new' as const,
+        url: result.url || '',
+        threatType: result.threat_type || 'unknown',
+        sourceType: 'scan' as const,
+        confidenceScore: result.confidence_score || 75,
+        sentiment: result.sentiment > 0 ? 'positive' as const : result.sentiment < -0.2 ? 'negative' as const : 'neutral' as const,
+        detectedEntities: Array.isArray(result.detected_entities) 
+          ? result.detected_entities.map((e: any) => typeof e === 'string' ? e : e.name || String(e))
+          : [],
+        potentialReach: result.potential_reach || 0
+      }));
+
+      // Convert content alerts to ContentAlert format
+      const formattedContentAlerts: ContentAlert[] = (contentAlerts || []).map((alert: any) => ({
+        id: alert.id,
+        platform: alert.platform || 'Unknown',
+        content: alert.content || 'No content available',
+        date: new Date(alert.created_at).toLocaleString(),
+        severity: (alert.severity as 'high' | 'medium' | 'low') || 'low',
+        status: 'new' as const,
+        url: alert.url || '',
+        threatType: alert.threat_type || 'unknown',
+        sourceType: alert.source_type || 'alert',
+        confidenceScore: alert.confidence_score || 75,
+        sentiment: alert.sentiment > 0 ? 'positive' as const : alert.sentiment < -0.2 ? 'negative' as const : 'neutral' as const,
+        detectedEntities: Array.isArray(alert.detected_entities) 
+          ? alert.detected_entities.map((e: any) => typeof e === 'string' ? e : e.name || String(e))
+          : [],
+        potentialReach: alert.potential_reach || 0
+      }));
+
+      // Combine all alerts
+      const allAlerts = [...scanAlerts, ...formattedContentAlerts];
+      
+      console.log(`✅ Successfully loaded ${allAlerts.length} real alerts from database`);
+      
+      setAlerts(allAlerts);
+      setClassifiedAlerts(allAlerts);
+
+      // Calculate real metrics from the actual data
+      const highSeverity = allAlerts.filter(alert => alert.severity === 'high').length;
+      const mediumSeverity = allAlerts.filter(alert => alert.severity === 'medium').length;
+      const totalReach = allAlerts.reduce((sum, alert) => sum + (alert.potentialReach || 0), 0);
+      
+      const realMetrics: MetricValue[] = [
+        { label: 'Total Threats', value: allAlerts.length, change: 0 },
+        { label: 'High Severity', value: highSeverity, change: 0 },
+        { label: 'Medium Severity', value: mediumSeverity, change: 0 },
+        { label: 'Total Reach', value: totalReach, change: 0 }
+      ];
+      
+      setMetrics(realMetrics);
+
+      // Calculate sentiment metrics from real data
+      const negative = allAlerts.filter(alert => alert.sentiment === 'negative').length;
+      const positive = allAlerts.filter(alert => alert.sentiment === 'positive').length;
+      const neutral = allAlerts.filter(alert => alert.sentiment === 'neutral').length;
 
       setNegativeContent(negative);
       setPositiveContent(positive);
       setNeutralContent(neutral);
+
+      // Set up real sources based on actual platforms found
+      const platformCounts = allAlerts.reduce((acc: any, alert) => {
+        acc[alert.platform] = (acc[alert.platform] || 0) + 1;
+        return acc;
+      }, {});
+
+      const realSources: ContentSource[] = Object.entries(platformCounts).map(([platform, count]: [string, any]) => ({
+        id: platform.toLowerCase(),
+        name: platform,
+        status: 'connected' as const,
+        lastUpdate: new Date().toISOString(),
+        alertCount: count
+      }));
+
+      setSources(realSources);
+
+      // Generate real actions from the data
+      const realActions: ContentAction[] = allAlerts.slice(0, 10).map((alert) => ({
+        id: alert.id,
+        type: alert.severity === 'high' ? 'urgent' as const : 'monitoring' as const,
+        description: `${alert.severity.toUpperCase()} threat detected on ${alert.platform}`,
+        status: 'pending' as const,
+        platform: alert.platform,
+        timestamp: alert.date,
+        alert_id: alert.id,
+        user_id: null,
+        created_at: alert.date,
+        updated_at: alert.date,
+        action: alert.severity === 'high' ? 'immediate_response' : 'monitor'
+      }));
+
+      setActions(realActions);
+      setRecentActivity(realActions);
+
+      // Clear any existing error
+      setError(null);
+      
     } catch (err: any) {
-      setError(err.message);
+      console.error('❌ Critical error fetching real data:', err);
+      setError(`Failed to load real data: ${err.message}`);
+      
+      // Don't fall back to mock data - show the error instead
+      setAlerts([]);
+      setClassifiedAlerts([]);
+      setMetrics([]);
+      setSources([]);
+      setActions([]);
+      setRecentActivity([]);
+      
     } finally {
       setLoading(false);
     }
   }, []);
 
+  // Set up real-time subscriptions for live data updates
   useEffect(() => {
     fetchData();
+
+    // Subscribe to real-time updates
+    const scanSubscription = supabase
+      .channel('dashboard_scan_updates')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'scan_results'
+      }, () => {
+        console.log('🔄 New scan result detected, refreshing dashboard...');
+        fetchData();
+      })
+      .subscribe();
+
+    const alertSubscription = supabase
+      .channel('dashboard_alert_updates')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'content_alerts'
+      }, () => {
+        console.log('🔄 New content alert detected, refreshing dashboard...');
+        fetchData();
+      })
+      .subscribe();
+
+    return () => {
+      scanSubscription.unsubscribe();
+      alertSubscription.unsubscribe();
+    };
   }, [fetchData]);
 
   const simulateNewData = useCallback((scanResults: any[]) => {
+    // This now processes real scan results, not mock data
     if (!scanResults || scanResults.length === 0) return;
     
-    const newAlerts = scanResults.map((result: any) => ({
-      id: result.id,
-      platform: result.platform,
-      content: result.content,
-      date: new Date(result.date || result.created_at).toLocaleString(),
-      severity: result.severity,
-      status: result.status,
-      threatType: result.threatType || result.threat_type,
-      confidenceScore: result.confidenceScore || result.confidence_score || 75,
-      sourceType: result.sourceType || result.source_type || 'scan',
-      sentiment: result.sentiment || 'neutral',
-      potentialReach: result.potentialReach || result.potential_reach || 0,
-      detectedEntities: result.detectedEntities || result.detected_entities || [],
-      url: result.url || '',
-      source_credibility_score: result.source_credibility_score,
-      media_is_ai_generated: result.media_is_ai_generated,
-      ai_detection_confidence: result.ai_detection_confidence,
-      incident_playbook: result.incident_playbook
-    }));
-    
-    setAlerts(prev => [...newAlerts, ...prev]);
-    setClassifiedAlerts(prev => [...newAlerts, ...prev]);
-    
-    const newNegativeCount = scanResults.filter((r: any) => r.severity === 'high').length;
-    setNegativeContent(prev => prev + newNegativeCount);
-  }, []);
+    console.log('🔄 Processing new real scan results:', scanResults.length);
+    fetchData(); // Refresh all data from database
+  }, [fetchData]);
 
   return {
     metrics,
