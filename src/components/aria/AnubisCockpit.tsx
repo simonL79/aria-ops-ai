@@ -1,263 +1,230 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
-  Shield, 
   Activity, 
+  Shield, 
   AlertTriangle, 
-  Database,
+  RefreshCw, 
   Zap,
-  Play,
-  RefreshCw,
-  CheckCircle
+  Eye,
+  Brain,
+  Target
 } from "lucide-react";
-import { toast } from "sonner";
+import { LiveDataValidator, LiveDataValidationResult } from '@/services/liveDataValidator';
 import { 
-  getLiveThreats, 
-  getQueueStatus, 
+  initializeLiveSystem, 
   triggerPipelineProcessing, 
-  getSystemHealth,
-  initializeLiveSystem 
+  getQueueStatus, 
+  getLiveThreats,
+  getSystemHealth 
 } from '@/services/ariaCore/threatIngestion';
-import { getMonitoringStatus, startMonitoring } from '@/services/monitoring';
+import { 
+  startMonitoring, 
+  stopMonitoring, 
+  getMonitoringStatus, 
+  runMonitoringScan 
+} from '@/services/monitoring';
+import SystemInitializationPanel from './SystemInitializationPanel';
+import { toast } from 'sonner';
 
 const AnubisCockpit = () => {
-  const [activeTab, setActiveTab] = useState('overview');
-  const [isLoading, setIsLoading] = useState(true);
+  const [validationResult, setValidationResult] = useState<LiveDataValidationResult | null>(null);
+  const [isValidating, setIsValidating] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  
-  // Live data states
-  const [liveThreats, setLiveThreats] = useState([]);
-  const [queueStatus, setQueueStatus] = useState([]);
-  const [systemHealth, setSystemHealth] = useState([]);
-  const [monitoringStatus, setMonitoringStatus] = useState(null);
-  const [systemStats, setSystemStats] = useState({
-    totalThreats: 0,
-    activeThreats: 0,
-    pendingQueue: 0,
-    systemStatus: 'INITIALIZING'
-  });
+  const [queueStatus, setQueueStatus] = useState<any[]>([]);
+  const [liveThreats, setLiveThreats] = useState<any[]>([]);
+  const [systemHealth, setSystemHealth] = useState<any[]>([]);
+  const [monitoringStatus, setMonitoringStatus] = useState<any>({});
 
   useEffect(() => {
-    initializeSystem();
-    
-    // Set up real-time updates every 30 seconds
-    const interval = setInterval(refreshLiveData, 30000);
-    return () => clearInterval(interval);
+    loadInitialData();
   }, []);
 
-  const initializeSystem = async () => {
-    setIsLoading(true);
+  const loadInitialData = async () => {
+    await Promise.all([
+      validateSystem(),
+      loadQueueStatus(),
+      loadSystemHealth(),
+      loadMonitoringStatus()
+    ]);
+  };
+
+  const validateSystem = async () => {
+    setIsValidating(true);
     try {
-      console.log('🚀 Initializing A.R.I.A™ live system...');
-      
-      // Initialize the live system
-      const initResult = await initializeLiveSystem();
-      console.log('System initialization result:', initResult);
-      
-      // Start monitoring
-      await startMonitoring();
-      
-      // Load all live data
-      await refreshLiveData();
-      
-      toast.success('🚀 A.R.I.A™ live system initialized successfully');
+      const result = await LiveDataValidator.validateLiveIntegrity();
+      setValidationResult(result);
     } catch (error) {
-      console.error('Failed to initialize system:', error);
-      toast.error('Failed to initialize A.R.I.A™ system');
+      console.error('Validation failed:', error);
+      toast.error('System validation failed');
     } finally {
-      setIsLoading(false);
+      setIsValidating(false);
     }
   };
 
-  const refreshLiveData = async () => {
+  const loadQueueStatus = async () => {
+    try {
+      const status = await getQueueStatus();
+      setQueueStatus(status);
+    } catch (error) {
+      console.error('Failed to load queue status:', error);
+    }
+  };
+
+  const loadSystemHealth = async () => {
+    try {
+      const health = await getSystemHealth();
+      setSystemHealth(health);
+    } catch (error) {
+      console.error('Failed to load system health:', error);
+    }
+  };
+
+  const loadMonitoringStatus = async () => {
+    try {
+      const status = await getMonitoringStatus();
+      setMonitoringStatus(status);
+    } catch (error) {
+      console.error('Failed to load monitoring status:', error);
+    }
+  };
+
+  const handleRefreshLiveData = async () => {
+    setIsProcessing(true);
     try {
       console.log('🔄 Refreshing live data...');
       
-      const [threats, queue, health, monitoring] = await Promise.all([
-        getLiveThreats(),
-        getQueueStatus(),
-        getSystemHealth(),
-        getMonitoringStatus()
-      ]);
-
-      setLiveThreats(threats);
-      setQueueStatus(queue);
-      setSystemHealth(health);
-      setMonitoringStatus(monitoring);
+      // Trigger live system initialization
+      const initResult = await initializeLiveSystem();
+      console.log('🚀 Live system initialized:', initResult);
       
-      // Calculate stats with proper type checking
-      const pendingItems = queue.find(q => q.status === 'pending')?.count || 0;
-      const activeThreats = threats.filter(t => t.status === 'active').length;
+      // Refresh all data
+      await loadInitialData();
       
-      setSystemStats({
-        totalThreats: threats.length,
-        activeThreats,
-        pendingQueue: typeof pendingItems === 'number' ? pendingItems : 0,
-        systemStatus: monitoring?.isActive ? 'LIVE' : 'OFFLINE'
-      });
-      
-      console.log('✅ Live data refreshed:', {
-        threats: threats.length,
-        queue: queue.length,
-        health: health.length,
-        activeThreats
-      });
-      
+      toast.success('Live data refreshed successfully');
     } catch (error) {
-      console.error('Error refreshing live data:', error);
-    }
-  };
-
-  const triggerLiveProcessing = async () => {
-    setIsProcessing(true);
-    try {
-      console.log('🔥 Triggering live threat processing...');
-      
-      const result = await triggerPipelineProcessing();
-      console.log('Processing result:', result);
-      
-      // Refresh data after processing
-      await refreshLiveData();
-      
-      toast.success(`🔥 Live processing completed: ${result?.processed || 0} threats processed`);
-    } catch (error) {
-      console.error('Processing failed:', error);
-      toast.error('Live processing failed');
+      console.error('Failed to refresh live data:', error);
+      toast.error('Failed to refresh live data');
     } finally {
       setIsProcessing(false);
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'LIVE':
-      case 'ok': return 'bg-green-500';
-      case 'warning': return 'bg-yellow-500';
-      case 'fail':
-      case 'OFFLINE': return 'bg-red-500';
-      default: return 'bg-gray-500';
+  const handleProcessThreats = async () => {
+    setIsProcessing(true);
+    try {
+      console.log('⚡ Processing live threats...');
+      
+      // Trigger pipeline processing
+      const result = await triggerPipelineProcessing();
+      console.log('✅ Pipeline processing result:', result);
+      
+      // Get updated live threats
+      const threats = await getLiveThreats();
+      setLiveThreats(threats);
+      
+      // Refresh queue status
+      await loadQueueStatus();
+      
+      toast.success(`Live processing completed: ${result?.processed || 0} threats processed`);
+    } catch (error) {
+      console.error('Failed to process threats:', error);
+      toast.error('Failed to process threats');
+    } finally {
+      setIsProcessing(false);
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
-        <span className="ml-2">Initializing A.R.I.A™ live system...</span>
-      </div>
-    );
-  }
+  const handleStartMonitoring = async () => {
+    try {
+      await startMonitoring();
+      await loadMonitoringStatus();
+      toast.success('Live monitoring started');
+    } catch (error) {
+      console.error('Failed to start monitoring:', error);
+      toast.error('Failed to start monitoring');
+    }
+  };
+
+  const handleRunScan = async () => {
+    try {
+      console.log('🔍 Running live monitoring scan...');
+      const results = await runMonitoringScan();
+      console.log('📊 Scan results:', results);
+      
+      await loadMonitoringStatus();
+      toast.success(`Live scan completed: ${results.length} results found`);
+    } catch (error) {
+      console.error('Failed to run scan:', error);
+      toast.error('Failed to run scan');
+    }
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Shield className="h-8 w-8 text-purple-600" />
-            A.R.I.A™ Anubis Cockpit
+            <Shield className="h-8 w-8 text-blue-600" />
+            Anubis Control Center
           </h1>
-          <p className="text-muted-foreground">Live Advanced Reputation Intelligence & Activation</p>
+          <p className="text-muted-foreground">
+            A.R.I.A™ Live System Monitoring & Control Dashboard
+          </p>
         </div>
         <div className="flex gap-2">
-          <Button 
-            onClick={refreshLiveData}
-            variant="outline"
-            size="sm"
-          >
-            <RefreshCw className="h-4 w-4 mr-2" />
+          <Button onClick={handleRefreshLiveData} disabled={isProcessing} variant="outline">
+            <RefreshCw className={`h-4 w-4 mr-2 ${isProcessing ? 'animate-spin' : ''}`} />
             Refresh Live Data
           </Button>
-          <Button 
-            onClick={triggerLiveProcessing}
-            disabled={isProcessing}
-            size="sm"
-          >
-            <Play className={`h-4 w-4 mr-2 ${isProcessing ? 'animate-spin' : ''}`} />
-            {isProcessing ? 'Processing...' : 'Process Threats'}
+          <Button onClick={handleProcessThreats} disabled={isProcessing}>
+            <Zap className="h-4 w-4 mr-2" />
+            Process Threats
           </Button>
         </div>
       </div>
 
-      {/* Live Status Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">System Status</p>
-                <p className="text-2xl font-bold">{systemStats.systemStatus}</p>
-              </div>
-              <Badge className={getStatusColor(systemStats.systemStatus)}>
-                LIVE
-              </Badge>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Active Threats</p>
-                <p className="text-2xl font-bold text-red-600">{systemStats.activeThreats}</p>
-              </div>
-              <AlertTriangle className="h-6 w-6 text-red-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Threats</p>
-                <p className="text-2xl font-bold">{systemStats.totalThreats}</p>
-              </div>
-              <Database className="h-6 w-6 text-blue-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Queue Pending</p>
-                <p className="text-2xl font-bold text-orange-600">{systemStats.pendingQueue}</p>
-              </div>
-              <Activity className="h-6 w-6 text-orange-600" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-3">
-          <TabsTrigger value="overview">Live Overview</TabsTrigger>
-          <TabsTrigger value="threats">Active Threats</TabsTrigger>
-          <TabsTrigger value="health">System Health</TabsTrigger>
+      <Tabs defaultValue="overview" className="space-y-4">
+        <TabsList className="grid grid-cols-5">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="validation">System Health</TabsTrigger>
+          <TabsTrigger value="monitoring">Live Monitoring</TabsTrigger>
+          <TabsTrigger value="threats">Threat Queue</TabsTrigger>
+          <TabsTrigger value="initialization">Initialize</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card>
               <CardHeader>
-                <CardTitle>Live Processing Queue</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <Activity className="h-4 w-4" />
+                  System Status
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                {queueStatus.length === 0 ? (
-                  <p className="text-muted-foreground">No queue data available</p>
-                ) : (
+                {validationResult ? (
                   <div className="space-y-2">
-                    {queueStatus.map((item, index) => (
-                      <div key={index} className="flex justify-between items-center p-2 border rounded">
-                        <span className="capitalize">{item.status}</span>
-                        <Badge variant="outline">{item.count}</Badge>
-                      </div>
-                    ))}
+                    <div className="flex items-center gap-2">
+                      {validationResult.isValid ? (
+                        <Badge variant="default" className="bg-green-100 text-green-800">
+                          OPERATIONAL
+                        </Badge>
+                      ) : (
+                        <Badge variant="destructive">ISSUES DETECTED</Badge>
+                      )}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      {validationResult.passedChecks}/{validationResult.totalChecks} checks passed
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-sm text-muted-foreground">
+                    Click "Refresh Live Data" to check system status
                   </div>
                 )}
               </CardContent>
@@ -265,96 +232,200 @@ const AnubisCockpit = () => {
 
             <Card>
               <CardHeader>
-                <CardTitle>System Health Checks</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <Target className="h-4 w-4" />
+                  Threat Queue
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                {systemHealth.length === 0 ? (
-                  <p className="text-muted-foreground">No health data available</p>
-                ) : (
-                  <div className="space-y-2">
-                    {systemHealth.slice(0, 5).map((check) => (
-                      <div key={check.id} className="flex justify-between items-center p-2 border rounded">
-                        <span className="capitalize">{check.module}</span>
-                        <Badge className={getStatusColor(check.status)}>
-                          {check.status.toUpperCase()}
-                        </Badge>
-                      </div>
-                    ))}
+                <div className="space-y-2">
+                  {queueStatus.map((item, index) => (
+                    <div key={index} className="flex justify-between">
+                      <span className="text-sm capitalize">{item.status}:</span>
+                      <span className="text-sm font-medium">{item.count}</span>
+                    </div>
+                  ))}
+                  {queueStatus.length === 0 && (
+                    <div className="text-sm text-muted-foreground">No queue data available</div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Eye className="h-4 w-4" />
+                  Live Monitoring
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    {monitoringStatus.isActive ? (
+                      <Badge variant="default" className="bg-green-100 text-green-800">
+                        ACTIVE
+                      </Badge>
+                    ) : (
+                      <Badge variant="secondary">INACTIVE</Badge>
+                    )}
                   </div>
-                )}
+                  <div className="text-sm text-muted-foreground">
+                    Sources: {monitoringStatus.sources || 0} | 
+                    Platforms: {monitoringStatus.platforms || 0}
+                  </div>
+                  <div className="flex gap-2">
+                    <Button size="sm" onClick={handleStartMonitoring}>
+                      Start Monitoring
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={handleRunScan}>
+                      Run Scan
+                    </Button>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>
         </TabsContent>
 
-        <TabsContent value="threats">
+        <TabsContent value="validation">
           <Card>
             <CardHeader>
-              <CardTitle>Live Active Threats</CardTitle>
+              <CardTitle>System Validation Results</CardTitle>
             </CardHeader>
             <CardContent>
-              {liveThreats.length === 0 ? (
-                <div className="text-center py-8">
-                  <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
-                  <p className="text-muted-foreground">No active threats detected</p>
+              {validationResult ? (
+                <div className="space-y-4">
+                  {validationResult.errors.length > 0 && (
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-red-600">Critical Issues:</h4>
+                      {validationResult.errors.map((error, index) => (
+                        <div key={index} className="text-sm text-red-600 bg-red-50 p-2 rounded">
+                          {error}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {validationResult.warnings.length > 0 && (
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-yellow-600">Warnings:</h4>
+                      {validationResult.warnings.map((warning, index) => (
+                        <div key={index} className="text-sm text-yellow-600 bg-yellow-50 p-2 rounded">
+                          {warning}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {validationResult.errors.length === 0 && validationResult.warnings.length === 0 && (
+                    <div className="text-green-600 bg-green-50 p-3 rounded">
+                      ✅ All system checks passed successfully
+                    </div>
+                  )}
                 </div>
               ) : (
-                <div className="space-y-4">
-                  {liveThreats.slice(0, 10).map((threat) => (
-                    <div key={threat.id} className="p-4 border rounded-lg">
-                      <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <p className="font-medium">{threat.source}</p>
-                          <p className="text-sm text-muted-foreground">
-                            Risk Score: {threat.risk_score}/100
-                          </p>
-                        </div>
-                        <Badge className={getStatusColor(threat.status)}>
-                          {threat.status}
-                        </Badge>
-                      </div>
-                      <p className="text-sm">{threat.content}</p>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        Detected: {new Date(threat.detected_at).toLocaleString()}
-                      </p>
-                    </div>
-                  ))}
+                <div className="text-center py-8">
+                  <Button onClick={validateSystem} disabled={isValidating}>
+                    {isValidating ? (
+                      <>
+                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                        Validating...
+                      </>
+                    ) : (
+                      <>
+                        <Brain className="h-4 w-4 mr-2" />
+                        Run System Validation
+                      </>
+                    )}
+                  </Button>
                 </div>
               )}
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="health">
+        <TabsContent value="monitoring">
           <Card>
             <CardHeader>
-              <CardTitle>Detailed System Health</CardTitle>
+              <CardTitle>Live Monitoring Control</CardTitle>
             </CardHeader>
             <CardContent>
-              {systemHealth.length === 0 ? (
-                <p className="text-muted-foreground">No health checks available</p>
-              ) : (
-                <div className="space-y-4">
-                  {systemHealth.map((check) => (
-                    <div key={check.id} className="p-4 border rounded-lg">
-                      <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <p className="font-medium capitalize">{check.module}</p>
-                          <p className="text-sm text-muted-foreground">{check.details}</p>
-                        </div>
-                        <Badge className={getStatusColor(check.status)}>
-                          {check.status.toUpperCase()}
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium">Status:</label>
+                    <div className="mt-1">
+                      {monitoringStatus.isActive ? (
+                        <Badge variant="default" className="bg-green-100 text-green-800">
+                          MONITORING ACTIVE
                         </Badge>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        Checked: {new Date(check.check_time).toLocaleString()}
-                      </p>
+                      ) : (
+                        <Badge variant="secondary">MONITORING INACTIVE</Badge>
+                      )}
                     </div>
-                  ))}
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Last Run:</label>
+                    <div className="mt-1 text-sm text-muted-foreground">
+                      {monitoringStatus.lastRun ? 
+                        new Date(monitoringStatus.lastRun).toLocaleString() : 
+                        'Never'
+                      }
+                    </div>
+                  </div>
                 </div>
-              )}
+                
+                <div className="flex gap-2">
+                  <Button onClick={handleStartMonitoring}>
+                    <Activity className="h-4 w-4 mr-2" />
+                    Start Live Monitoring
+                  </Button>
+                  <Button onClick={handleRunScan} variant="outline">
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Run Manual Scan
+                  </Button>
+                </div>
+              </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="threats">
+          <Card>
+            <CardHeader>
+              <CardTitle>Live Threat Processing Queue</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {queueStatus.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {queueStatus.map((item, index) => (
+                      <div key={index} className="border rounded p-3">
+                        <div className="flex justify-between items-center">
+                          <span className="font-medium capitalize">{item.status}</span>
+                          <Badge variant="outline">{item.count}</Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No threat queue data available. Click "Process Threats" to initialize.
+                  </div>
+                )}
+                
+                <Button onClick={handleProcessThreats} disabled={isProcessing}>
+                  <Zap className="h-4 w-4 mr-2" />
+                  Process Live Threats
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="initialization">
+          <SystemInitializationPanel />
         </TabsContent>
       </Tabs>
     </div>
