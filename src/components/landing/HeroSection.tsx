@@ -64,11 +64,11 @@ const HeroSection = ({ onScrollToForm }: HeroSectionProps) => {
           <Button 
             asChild 
             size="lg" 
-            className="w-full sm:w-auto bg-[#247CFF] hover:bg-[#1c63cc] text-white px-8 sm:px-12 md:px-20 py-6 sm:py-8 md:py-10 text-base sm:text-lg md:text-xl font-bold rounded-2xl border-2 border-[#247CFF] hover:border-[#1c63cc] hover:shadow-[0_0_30px_rgba(36,124,255,0.4)] transform hover:scale-105 transition-all duration-300 font-['Space_Grotesk'] tracking-widest uppercase"
+            className="w-full sm:w-auto bg-[#247CFF] hover:bg-[#1c63cc] text-white px-4 sm:px-8 md:px-12 lg:px-20 py-4 sm:py-6 md:py-8 lg:py-10 text-sm sm:text-base md:text-lg lg:text-xl font-bold rounded-2xl border-2 border-[#247CFF] hover:border-[#1c63cc] hover:shadow-[0_0_30px_rgba(36,124,255,0.4)] transform hover:scale-105 transition-all duration-300 font-['Space_Grotesk'] tracking-wide sm:tracking-widest uppercase whitespace-nowrap overflow-hidden"
           >
-            <a href="#scan-form" onClick={onScrollToForm} className="flex items-center justify-center">
-              <Search className="mr-3 sm:mr-4 h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8" />
-              REQUEST YOUR PRIVATE SCAN
+            <a href="#scan-form" onClick={onScrollToForm} className="flex items-center justify-center min-w-0">
+              <Search className="mr-2 sm:mr-3 md:mr-4 h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-8 lg:w-8 flex-shrink-0" />
+              <span className="truncate">REQUEST YOUR PRIVATE SCAN</span>
             </a>
           </Button>
         </div>
