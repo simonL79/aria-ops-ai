@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { User, Session } from '@supabase/supabase-js';
@@ -74,8 +73,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return true;
       }
       
-      // Use the new is_current_user_admin function with proper type casting
-      const { data, error } = await supabase.rpc('is_current_user_admin' as any);
+      // Use the new is_current_user_admin function
+      const { data, error } = await supabase.rpc('is_current_user_admin');
       
       if (error) {
         console.error('Error checking admin status:', error);
