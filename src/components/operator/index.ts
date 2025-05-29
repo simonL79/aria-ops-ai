@@ -1,2 +1,7 @@
 
 export { default as OperatorConsole } from './OperatorConsole';
+export { VoiceRecognition } from './VoiceRecognition';
+export { useCommandProcessor } from './CommandProcessor';
+export { TerminalDisplay } from './TerminalDisplay';
+export { CommandInput } from './CommandInput';
+export { QuickCommands } from './QuickCommands';
