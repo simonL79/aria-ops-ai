@@ -30,19 +30,17 @@ const AdminLoginGateway = () => {
     try {
       const timestamp = new Date().toISOString();
       const logEntry = {
-        timestamp,
-        event,
+        action: event,
         success,
         email_attempted: email,
         ip_address: 'client-side',
         user_agent: navigator.userAgent.substring(0, 200),
-        details: details || '',
-        session_id: sessionStorage.getItem('session_id') || 'unknown'
+        details: details || ''
       };
 
-      // Try to log to Supabase if available
+      // Try to log to Supabase using the correct table name
       try {
-        await supabase.from('security_audit_logs').insert(logEntry);
+        await supabase.from('admin_action_logs').insert(logEntry);
       } catch (dbError) {
         console.warn('Database logging failed, using local storage fallback');
         const existingLogs = JSON.parse(localStorage.getItem('security_logs') || '[]');
