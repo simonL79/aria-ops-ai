@@ -11,3 +11,4 @@ export { StrategicResponsePanel } from './StrategicResponsePanel';
 export { AletheiaTruthPanel } from './AletheiaTruthPanel';
 export { ErisPanel } from './ErisPanel';
 export { SentiencePanel } from './SentiencePanel';
+export { PanopticaPanel } from './PanopticaPanel';

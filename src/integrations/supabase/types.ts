@@ -4329,6 +4329,84 @@ export type Database = {
           },
         ]
       }
+      panoptica_sensor_events: {
+        Row: {
+          correlated_threat: string | null
+          created_at: string | null
+          detected_at: string | null
+          event_content: string
+          id: string
+          relevance_score: number | null
+          risk_level: string | null
+          source_detail: string | null
+          source_type: string
+          verified: boolean | null
+        }
+        Insert: {
+          correlated_threat?: string | null
+          created_at?: string | null
+          detected_at?: string | null
+          event_content: string
+          id?: string
+          relevance_score?: number | null
+          risk_level?: string | null
+          source_detail?: string | null
+          source_type: string
+          verified?: boolean | null
+        }
+        Update: {
+          correlated_threat?: string | null
+          created_at?: string | null
+          detected_at?: string | null
+          event_content?: string
+          id?: string
+          relevance_score?: number | null
+          risk_level?: string | null
+          source_detail?: string | null
+          source_type?: string
+          verified?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "panoptica_sensor_events_correlated_threat_fkey"
+            columns: ["correlated_threat"]
+            isOneToOne: false
+            referencedRelation: "threats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "panoptica_sensor_events_correlated_threat_fkey"
+            columns: ["correlated_threat"]
+            isOneToOne: false
+            referencedRelation: "verified_live_threats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      panoptica_system_health: {
+        Row: {
+          diagnostic: string | null
+          id: string
+          last_sync: string | null
+          sensor_name: string
+          sync_status: string | null
+        }
+        Insert: {
+          diagnostic?: string | null
+          id?: string
+          last_sync?: string | null
+          sensor_name: string
+          sync_status?: string | null
+        }
+        Update: {
+          diagnostic?: string | null
+          id?: string
+          last_sync?: string | null
+          sensor_name?: string
+          sync_status?: string | null
+        }
+        Relationships: []
+      }
       praxis_crisis_simulations: {
         Row: {
           archetype_id: string | null
@@ -6416,6 +6494,18 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      panoptica_fusion_view: {
+        Row: {
+          detected_at: string | null
+          event_content: string | null
+          relevance_score: number | null
+          risk_level: string | null
+          source_detail: string | null
+          source_type: string | null
+          threat_summary: string | null
+        }
+        Relationships: []
       }
       praxis_forecast_dashboard: {
         Row: {

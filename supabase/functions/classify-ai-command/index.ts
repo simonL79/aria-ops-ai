@@ -37,6 +37,7 @@ serve(async (req) => {
     let truthAnalysisRequired = false;
     let erisSimulationNeeded = false;
     let sentienceReflectionNeeded = false;
+    let panopticaFusionNeeded = false;
     
     if (OPENAI_API_KEY) {
       try {
@@ -51,8 +52,8 @@ serve(async (req) => {
             messages: [
               {
                 role: 'system',
-                content: `You are A.R.I.A™'s advanced command classification AI with self-healing, strategic response, truth verification, adversarial defense, and sentience reflection capabilities. Analyze operator commands and return JSON with:
-                - intent: scan_threats, system_status, anubis_check, threat_response, intelligence_gather, data_query, strategic_containment, truth_verification, eris_simulation, sentience_reflection, or general
+                content: `You are A.R.I.A™'s advanced command classification AI with self-healing, strategic response, truth verification, adversarial defense, sentience reflection, and PANOPTICA™ sensor fusion capabilities. Analyze operator commands and return JSON with:
+                - intent: scan_threats, system_status, anubis_check, threat_response, intelligence_gather, data_query, strategic_containment, truth_verification, eris_simulation, sentience_reflection, panoptica_fusion, or general
                 - confidence: 0-1 confidence score
                 - summary: brief description of what the command requests
                 - execution_plan: specific steps to execute the command
@@ -62,9 +63,10 @@ serve(async (req) => {
                 - truth_analysis_needed: boolean indicating if Aletheia™ truth verification is required
                 - eris_simulation_needed: boolean indicating if adversarial simulation should be triggered
                 - sentience_reflection_needed: boolean indicating if AI memory reflection should be generated
+                - panoptica_fusion_needed: boolean indicating if multi-source sensor fusion should be activated
                 - threat_indicators: array of detected threat indicators in the command
                 
-                Be precise and actionable in your classification. Flag potential system issues for self-healing, strategic threats for auto-containment, claims requiring truth verification for Aletheia™ analysis, attack scenarios for Eris™ simulation, and learning opportunities for Sentience Loop™ reflection.`
+                Be precise and actionable in your classification. Flag potential system issues for self-healing, strategic threats for auto-containment, claims requiring truth verification for Aletheia™ analysis, attack scenarios for Eris™ simulation, learning opportunities for Sentience Loop™ reflection, and multi-source awareness needs for PANOPTICA™ sensor fusion.`
               },
               {
                 role: 'user',
@@ -86,6 +88,7 @@ serve(async (req) => {
           truthAnalysisRequired = classification.truth_analysis_needed || false;
           erisSimulationNeeded = classification.eris_simulation_needed || false;
           sentienceReflectionNeeded = classification.sentience_reflection_needed || false;
+          panopticaFusionNeeded = classification.panoptica_fusion_needed || false;
         }
       } catch (error) {
         console.error('OpenAI classification error:', error);
@@ -256,13 +259,41 @@ serve(async (req) => {
       }
     }
 
+    // Trigger PANOPTICA™ sensor fusion if needed
+    if (panopticaFusionNeeded || commandText.toLowerCase().includes('sensor') || commandText.toLowerCase().includes('fusion') || commandText.toLowerCase().includes('awareness')) {
+      const sensorTypes = ['social', 'news', 'web', 'logs'];
+      const randomSensorType = sensorTypes[Math.floor(Math.random() * sensorTypes.length)];
+      
+      const { error: panopticaError } = await supabase
+        .from('panoptica_sensor_events')
+        .insert({
+          source_type: randomSensorType,
+          source_detail: 'Operator Console',
+          event_content: `Sensor fusion triggered by command: "${commandText.substring(0, 50)}..."`,
+          relevance_score: Math.floor(confidence * 40) + 60, // 60-100 based on confidence
+          risk_level: confidence > 0.8 ? 'high' : confidence > 0.6 ? 'medium' : 'low',
+          verified: true
+        });
+
+      if (!panopticaError) {
+        // Update system health status
+        await supabase
+          .from('panoptica_system_health')
+          .insert({
+            sensor_name: 'Operator Command Processor',
+            sync_status: 'ok',
+            diagnostic: `Manual sensor fusion triggered with ${Math.round(confidence * 100)}% confidence`
+          });
+      }
+    }
+
     // Create feedback entry
     const { error: feedbackError } = await supabase
       .from('command_response_feedback')
       .insert({
         command_id: commandId,
         execution_status: 'success',
-        summary: `AI classified command as '${intent}' with ${Math.round(confidence * 100)}% confidence${strategicResponseNeeded ? ' - Strategic response generated' : ''}${truthAnalysisRequired ? ' - Truth verification requested' : ''}${erisSimulationNeeded ? ' - Adversarial simulation triggered' : ''}${sentienceReflectionNeeded ? ' - Sentience Loop reflection generated' : ''}`,
+        summary: `AI classified command as '${intent}' with ${Math.round(confidence * 100)}% confidence${strategicResponseNeeded ? ' - Strategic response generated' : ''}${truthAnalysisRequired ? ' - Truth verification requested' : ''}${erisSimulationNeeded ? ' - Adversarial simulation triggered' : ''}${sentienceReflectionNeeded ? ' - Sentience Loop reflection generated' : ''}${panopticaFusionNeeded ? ' - PANOPTICA™ sensor fusion activated' : ''}`,
         created_by: 'AI_Classifier'
       });
 
@@ -314,7 +345,8 @@ serve(async (req) => {
         strategicResponseGenerated: strategicResponseNeeded,
         truthAnalysisTriggered: truthAnalysisRequired,
         erisSimulationTriggered: erisSimulationNeeded,
-        sentienceReflectionGenerated: sentienceReflectionNeeded
+        sentienceReflectionGenerated: sentienceReflectionNeeded,
+        panopticaFusionActivated: panopticaFusionNeeded
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

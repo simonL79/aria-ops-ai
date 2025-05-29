@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -10,6 +11,7 @@ import { StrategicResponsePanel } from './StrategicResponsePanel';
 import { AletheiaTruthPanel } from './AletheiaTruthPanel';
 import { ErisPanel } from './ErisPanel';
 import { SentiencePanel } from './SentiencePanel';
+import { PanopticaPanel } from './PanopticaPanel';
 
 interface CommandFeedback {
   id: string;
@@ -131,6 +133,9 @@ export const FeedbackPanel = ({ commandHistory }: FeedbackPanelProps) => {
 
   return (
     <div className="space-y-4">
+      {/* PANOPTICA™ Sensor Fusion Panel */}
+      <PanopticaPanel />
+
       {/* Self-Healing Panel */}
       <SelfHealingPanel />
 
