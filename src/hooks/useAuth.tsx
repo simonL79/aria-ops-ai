@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { User, Session } from '@supabase/supabase-js';
@@ -73,8 +74,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return true;
       }
       
-      // Use the new security definer function to check admin status
-      const { data, error } = await supabase.rpc('is_current_user_admin');
+      // Use the existing get_current_user_role function to check admin status
+      const { data, error } = await supabase.rpc('get_current_user_role');
       
       if (error) {
         console.error('Error checking admin status:', error);
@@ -89,8 +90,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       console.log('✅ Admin status from function:', data);
-      setIsAdmin(data || false);
-      return data || false;
+      const isAdminUser = data === 'admin';
+      setIsAdmin(isAdminUser);
+      return isAdminUser;
       
     } catch (error) {
       console.error('❌ Error checking admin status:', error);
