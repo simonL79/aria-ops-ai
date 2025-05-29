@@ -48,12 +48,26 @@ const useDashboardData = (): DashboardData => {
     setError(null);
     
     try {
-      console.log('🔄 Fetching real data from database...');
+      console.log('🔄 Fetching REAL data from database (no mock data)...');
       
-      // Fetch real scan results
+      // First, clean any remaining mock data
+      console.log('🧹 Cleaning any mock/test data...');
+      await supabase
+        .from('scan_results')
+        .delete()
+        .or('content.ilike.%test%,content.ilike.%mock%,content.ilike.%demo%,platform.eq.System');
+
+      await supabase
+        .from('content_alerts')
+        .delete()
+        .or('content.ilike.%test%,content.ilike.%mock%,content.ilike.%demo%');
+      
+      // Fetch ONLY real scan results (excluding system messages about scanning)
       const { data: scanResults, error: scanError } = await supabase
         .from('scan_results')
         .select('*')
+        .not('platform', 'eq', 'ARIA System')
+        .not('threat_type', 'eq', 'system_status')
         .order('created_at', { ascending: false })
         .limit(50);
 
@@ -66,6 +80,7 @@ const useDashboardData = (): DashboardData => {
       const { data: contentAlerts, error: alertsError } = await supabase
         .from('content_alerts')
         .select('*')
+        .not('platform', 'eq', 'System')
         .order('created_at', { ascending: false })
         .limit(50);
 
@@ -74,8 +89,18 @@ const useDashboardData = (): DashboardData => {
         throw new Error(`Failed to fetch content alerts: ${alertsError.message}`);
       }
 
+      // Only process if we have real threat data (not system status messages)
+      const realScanResults = (scanResults || []).filter(result => 
+        result.platform !== 'ARIA System' && 
+        result.threat_type !== 'system_status' &&
+        !result.content.toLowerCase().includes('clean scan completed')
+      );
+
+      console.log(`📊 Found ${realScanResults.length} REAL threat scan results`);
+      console.log(`📊 Found ${contentAlerts?.length || 0} content alerts`);
+
       // Convert scan results to ContentAlert format
-      const scanAlerts: ContentAlert[] = (scanResults || []).map((result: any) => ({
+      const scanAlerts: ContentAlert[] = realScanResults.map((result: any) => ({
         id: result.id,
         platform: result.platform || 'Unknown',
         content: result.content || 'No content available',
@@ -112,21 +137,25 @@ const useDashboardData = (): DashboardData => {
         potentialReach: alert.potential_reach || 0
       }));
 
-      // Combine all alerts
-      const allAlerts = [...scanAlerts, ...formattedContentAlerts];
+      // Combine all REAL alerts
+      const allRealAlerts = [...scanAlerts, ...formattedContentAlerts];
       
-      console.log(`✅ Successfully loaded ${allAlerts.length} real alerts from database`);
+      if (allRealAlerts.length === 0) {
+        console.log('ℹ️ No real threat data found - database is clean');
+      } else {
+        console.log(`✅ Successfully loaded ${allRealAlerts.length} REAL threats from database`);
+      }
       
-      setAlerts(allAlerts);
-      setClassifiedAlerts(allAlerts);
+      setAlerts(allRealAlerts);
+      setClassifiedAlerts(allRealAlerts);
 
       // Calculate real metrics from the actual data - using correct MetricValue structure
-      const highSeverity = allAlerts.filter(alert => alert.severity === 'high').length;
-      const mediumSeverity = allAlerts.filter(alert => alert.severity === 'medium').length;
-      const totalReach = allAlerts.reduce((sum, alert) => sum + (alert.potentialReach || 0), 0);
+      const highSeverity = allRealAlerts.filter(alert => alert.severity === 'high').length;
+      const mediumSeverity = allRealAlerts.filter(alert => alert.severity === 'medium').length;
+      const totalReach = allRealAlerts.reduce((sum, alert) => sum + (alert.potentialReach || 0), 0);
       
       const realMetrics: MetricValue[] = [
-        { id: 'total-threats', title: 'Total Threats', value: allAlerts.length, change: 0, icon: 'alert-triangle', color: 'red' },
+        { id: 'total-threats', title: 'Total Threats', value: allRealAlerts.length, change: 0, icon: 'alert-triangle', color: 'red' },
         { id: 'high-severity', title: 'High Severity', value: highSeverity, change: 0, icon: 'alert-circle', color: 'red' },
         { id: 'medium-severity', title: 'Medium Severity', value: mediumSeverity, change: 0, icon: 'alert', color: 'yellow' },
         { id: 'total-reach', title: 'Total Reach', value: totalReach, change: 0, icon: 'users', color: 'blue' }
@@ -135,16 +164,16 @@ const useDashboardData = (): DashboardData => {
       setMetrics(realMetrics);
 
       // Calculate sentiment metrics from real data
-      const negative = allAlerts.filter(alert => alert.sentiment === 'negative').length;
-      const positive = allAlerts.filter(alert => alert.sentiment === 'positive').length;
-      const neutral = allAlerts.filter(alert => alert.sentiment === 'neutral').length;
+      const negative = allRealAlerts.filter(alert => alert.sentiment === 'negative').length;
+      const positive = allRealAlerts.filter(alert => alert.sentiment === 'positive').length;
+      const neutral = allRealAlerts.filter(alert => alert.sentiment === 'neutral').length;
 
       setNegativeContent(negative);
       setPositiveContent(positive);
       setNeutralContent(neutral);
 
       // Set up real sources based on actual platforms found - using correct ContentSource structure
-      const platformCounts = allAlerts.reduce((acc: any, alert) => {
+      const platformCounts = allRealAlerts.reduce((acc: any, alert) => {
         acc[alert.platform] = (acc[alert.platform] || 0) + 1;
         return acc;
       }, {});
@@ -157,16 +186,16 @@ const useDashboardData = (): DashboardData => {
         lastUpdate: new Date().toISOString(),
         metrics: {
           total: count,
-          positive: allAlerts.filter(a => a.platform === platform && a.sentiment === 'positive').length,
-          negative: allAlerts.filter(a => a.platform === platform && a.sentiment === 'negative').length,
-          neutral: allAlerts.filter(a => a.platform === platform && a.sentiment === 'neutral').length
+          positive: allRealAlerts.filter(a => a.platform === platform && a.sentiment === 'positive').length,
+          negative: allRealAlerts.filter(a => a.platform === platform && a.sentiment === 'negative').length,
+          neutral: allRealAlerts.filter(a => a.platform === platform && a.sentiment === 'neutral').length
         }
       }));
 
       setSources(realSources);
 
       // Generate real actions from the data
-      const realActions: ContentAction[] = allAlerts.slice(0, 10).map((alert) => ({
+      const realActions: ContentAction[] = allRealAlerts.slice(0, 10).map((alert) => ({
         id: alert.id,
         type: alert.severity === 'high' ? 'urgent' as const : 'monitoring' as const,
         description: `${alert.severity.toUpperCase()} threat detected on ${alert.platform}`,
