@@ -253,6 +253,36 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_policy_vault: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          definition: Json
+          id: string
+          policy_name: string
+          scope: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          definition: Json
+          id?: string
+          policy_name: string
+          scope?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          definition?: Json
+          id?: string
+          policy_name?: string
+          scope?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       ai_self_healing_log: {
         Row: {
           applied_by: string | null
@@ -3280,6 +3310,41 @@ export type Database = {
           },
         ]
       }
+      hardening_event_log: {
+        Row: {
+          action_taken: string | null
+          executed_at: string | null
+          id: string
+          outcome_summary: string | null
+          rule_id: string | null
+          success: boolean | null
+        }
+        Insert: {
+          action_taken?: string | null
+          executed_at?: string | null
+          id?: string
+          outcome_summary?: string | null
+          rule_id?: string | null
+          success?: boolean | null
+        }
+        Update: {
+          action_taken?: string | null
+          executed_at?: string | null
+          id?: string
+          outcome_summary?: string | null
+          rule_id?: string | null
+          success?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hardening_event_log_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "infrastructure_hardening_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       identity_challenges: {
         Row: {
           challenge_result: string | null
@@ -3419,6 +3484,36 @@ export type Database = {
           recommended_tactic?: string | null
           scenario?: string | null
           virality_risk_score?: number | null
+        }
+        Relationships: []
+      }
+      infrastructure_hardening_rules: {
+        Row: {
+          action: string | null
+          applied: boolean | null
+          condition: string | null
+          evaluated_at: string | null
+          id: string
+          rule_name: string
+          system_trigger: string | null
+        }
+        Insert: {
+          action?: string | null
+          applied?: boolean | null
+          condition?: string | null
+          evaluated_at?: string | null
+          id?: string
+          rule_name: string
+          system_trigger?: string | null
+        }
+        Update: {
+          action?: string | null
+          applied?: boolean | null
+          condition?: string | null
+          evaluated_at?: string | null
+          id?: string
+          rule_name?: string
+          system_trigger?: string | null
         }
         Relationships: []
       }
