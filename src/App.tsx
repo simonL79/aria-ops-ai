@@ -9,6 +9,8 @@ import Index from "./pages/Index";
 import AdminDashboard from "./pages/AdminDashboard";
 import AnubisGPTCockpit from "./pages/AnubisGPTCockpit";
 import OperatorConsole from "./pages/OperatorConsole";
+import Authentication from "./pages/Authentication";
+import AdminLogin from "./pages/AdminLogin";
 import NotFound from "./pages/NotFound";
 import "./App.css";
 
@@ -22,6 +24,8 @@ const App = () => (
         <Sonner />
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/auth" element={<Authentication />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin/*" element={<AdminDashboard />} />
           <Route path="/anubis-gpt" element={<AnubisGPTCockpit />} />
           <Route path="/operator-console" element={<OperatorConsole />} />
