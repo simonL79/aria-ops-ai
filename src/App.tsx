@@ -31,6 +31,7 @@ import SovraPage from "@/pages/SovraPage";
 import InfluencerRadar from "@/pages/InfluencerRadar";
 import QATestPage from "@/pages/QATestPage";
 import NotFound from "@/pages/NotFound";
+import AdminLogin from "@/pages/AdminLogin";
 
 // Import layouts
 import DashboardLayout from "@/components/layout/DashboardLayout";
@@ -114,14 +115,7 @@ function App() {
                 </DashboardLayout>
               } />
 
-              <Route path="/admin/login" element={
-                <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                  <div className="max-w-md w-full bg-white rounded-lg shadow-md p-6">
-                    <h1 className="text-2xl font-bold text-center mb-4">Admin Login</h1>
-                    <p className="text-gray-600 text-center">Administrative access portal</p>
-                  </div>
-                </div>
-              } />
+              <Route path="/admin/login" element={<AdminLogin />} />
 
               {/* Catch-all route for 404 */}
               <Route path="*" element={<NotFound />} />
