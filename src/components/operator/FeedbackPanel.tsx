@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -22,6 +23,7 @@ import { IronvaultPanel } from './IronvaultPanel';
 import { CerebraPanel } from './CerebraPanel';
 import { StrikecorePanel } from './StrikecorePanel';
 import { ShadowvaultPanel } from './ShadowvaultPanel';
+import { VoxtracePanel } from './VoxtracePanel';
 
 interface CommandFeedback {
   id: string;
@@ -143,6 +145,9 @@ export const FeedbackPanel = ({ commandHistory }: FeedbackPanelProps) => {
 
   return (
     <div className="space-y-4">
+      {/* VOXTRACE™ Audio Threat Detection & Forensic Logging Panel */}
+      <VoxtracePanel />
+
       {/* SHADOWVAULT™ Dark Web Threat Monitoring & Risk Indexing Panel */}
       <ShadowvaultPanel />
 
