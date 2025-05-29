@@ -12,6 +12,7 @@ import { AletheiaTruthPanel } from './AletheiaTruthPanel';
 import { ErisPanel } from './ErisPanel';
 import { SentiencePanel } from './SentiencePanel';
 import { PanopticaPanel } from './PanopticaPanel';
+import { NexusPanel } from './NexusPanel';
 
 interface CommandFeedback {
   id: string;
@@ -133,6 +134,9 @@ export const FeedbackPanel = ({ commandHistory }: FeedbackPanelProps) => {
 
   return (
     <div className="space-y-4">
+      {/* NEXUS CORE™ Inter-Agent Collaboration Panel */}
+      <NexusPanel />
+
       {/* PANOPTICA™ Sensor Fusion Panel */}
       <PanopticaPanel />
 

@@ -4228,6 +4228,107 @@ export type Database = {
         }
         Relationships: []
       }
+      nexus_command_queue: {
+        Row: {
+          command: string
+          created_at: string | null
+          id: string
+          issued_by: string | null
+          parameters: Json | null
+          status: string | null
+          target_module: string
+          updated_at: string | null
+        }
+        Insert: {
+          command: string
+          created_at?: string | null
+          id?: string
+          issued_by?: string | null
+          parameters?: Json | null
+          status?: string | null
+          target_module: string
+          updated_at?: string | null
+        }
+        Update: {
+          command?: string
+          created_at?: string | null
+          id?: string
+          issued_by?: string | null
+          parameters?: Json | null
+          status?: string | null
+          target_module?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      nexus_communications: {
+        Row: {
+          agent_name: string
+          context: Json | null
+          id: string
+          message: string
+          mission_id: string | null
+          timestamp: string | null
+        }
+        Insert: {
+          agent_name: string
+          context?: Json | null
+          id?: string
+          message: string
+          mission_id?: string | null
+          timestamp?: string | null
+        }
+        Update: {
+          agent_name?: string
+          context?: Json | null
+          id?: string
+          message?: string
+          mission_id?: string | null
+          timestamp?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nexus_communications_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "nexus_missions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nexus_missions: {
+        Row: {
+          agents_involved: string[] | null
+          end_time: string | null
+          id: string
+          mission_name: string
+          mission_status: string | null
+          objective: string
+          outcome: string | null
+          start_time: string | null
+        }
+        Insert: {
+          agents_involved?: string[] | null
+          end_time?: string | null
+          id?: string
+          mission_name: string
+          mission_status?: string | null
+          objective: string
+          outcome?: string | null
+          start_time?: string | null
+        }
+        Update: {
+          agents_involved?: string[] | null
+          end_time?: string | null
+          id?: string
+          mission_name?: string
+          mission_status?: string | null
+          objective?: string
+          outcome?: string | null
+          start_time?: string | null
+        }
+        Relationships: []
+      }
       offline_spill_events: {
         Row: {
           created_at: string | null

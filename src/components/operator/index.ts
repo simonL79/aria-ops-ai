@@ -1,4 +1,3 @@
-
 export { default as OperatorConsole } from './OperatorConsole';
 export { VoiceRecognition } from './VoiceRecognition';
 export { useCommandProcessor } from './CommandProcessor';
@@ -12,3 +11,4 @@ export { AletheiaTruthPanel } from './AletheiaTruthPanel';
 export { ErisPanel } from './ErisPanel';
 export { SentiencePanel } from './SentiencePanel';
 export { PanopticaPanel } from './PanopticaPanel';
+export { NexusPanel } from './NexusPanel';

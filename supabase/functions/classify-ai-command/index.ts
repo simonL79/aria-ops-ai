@@ -38,6 +38,7 @@ serve(async (req) => {
     let erisSimulationNeeded = false;
     let sentienceReflectionNeeded = false;
     let panopticaFusionNeeded = false;
+    let nexusCoordinationNeeded = false;
     
     if (OPENAI_API_KEY) {
       try {
@@ -52,8 +53,8 @@ serve(async (req) => {
             messages: [
               {
                 role: 'system',
-                content: `You are A.R.I.A™'s advanced command classification AI with self-healing, strategic response, truth verification, adversarial defense, sentience reflection, and PANOPTICA™ sensor fusion capabilities. Analyze operator commands and return JSON with:
-                - intent: scan_threats, system_status, anubis_check, threat_response, intelligence_gather, data_query, strategic_containment, truth_verification, eris_simulation, sentience_reflection, panoptica_fusion, or general
+                content: `You are A.R.I.A™'s advanced command classification AI with self-healing, strategic response, truth verification, adversarial defense, sentience reflection, PANOPTICA™ sensor fusion, and NEXUS CORE™ inter-agent collaboration capabilities. Analyze operator commands and return JSON with:
+                - intent: scan_threats, system_status, anubis_check, threat_response, intelligence_gather, data_query, strategic_containment, truth_verification, eris_simulation, sentience_reflection, panoptica_fusion, nexus_coordination, or general
                 - confidence: 0-1 confidence score
                 - summary: brief description of what the command requests
                 - execution_plan: specific steps to execute the command
@@ -64,9 +65,10 @@ serve(async (req) => {
                 - eris_simulation_needed: boolean indicating if adversarial simulation should be triggered
                 - sentience_reflection_needed: boolean indicating if AI memory reflection should be generated
                 - panoptica_fusion_needed: boolean indicating if multi-source sensor fusion should be activated
+                - nexus_coordination_needed: boolean indicating if inter-agent coordination is required
                 - threat_indicators: array of detected threat indicators in the command
                 
-                Be precise and actionable in your classification. Flag potential system issues for self-healing, strategic threats for auto-containment, claims requiring truth verification for Aletheia™ analysis, attack scenarios for Eris™ simulation, learning opportunities for Sentience Loop™ reflection, and multi-source awareness needs for PANOPTICA™ sensor fusion.`
+                Be precise and actionable in your classification. Flag potential system issues for self-healing, strategic threats for auto-containment, claims requiring truth verification for Aletheia™ analysis, attack scenarios for Eris™ simulation, learning opportunities for Sentience Loop™ reflection, multi-source awareness needs for PANOPTICA™ sensor fusion, and complex operations requiring NEXUS CORE™ agent coordination.`
               },
               {
                 role: 'user',
@@ -89,6 +91,7 @@ serve(async (req) => {
           erisSimulationNeeded = classification.eris_simulation_needed || false;
           sentienceReflectionNeeded = classification.sentience_reflection_needed || false;
           panopticaFusionNeeded = classification.panoptica_fusion_needed || false;
+          nexusCoordinationNeeded = classification.nexus_coordination_needed || false;
         }
       } catch (error) {
         console.error('OpenAI classification error:', error);
@@ -287,13 +290,75 @@ serve(async (req) => {
       }
     }
 
+    // Trigger NEXUS CORE™ inter-agent coordination if needed
+    if (nexusCoordinationNeeded || commandText.toLowerCase().includes('coordinate') || commandText.toLowerCase().includes('mission') || commandText.toLowerCase().includes('agents')) {
+      const missionTypes = [
+        'Multi-Agent Threat Response',
+        'Cross-Platform Intelligence Fusion',
+        'Coordinated Defense Protocol',
+        'Strategic Information Operation'
+      ];
+      const randomMissionType = missionTypes[Math.floor(Math.random() * missionTypes.length)];
+      
+      const agents = ['ARIA', 'RSI', 'EIDETIC', 'PANOPTICA'];
+      const selectedAgents = agents.slice(0, Math.floor(Math.random() * 3) + 2); // 2-4 agents
+      
+      // Create coordination mission
+      const { error: missionError } = await supabase
+        .from('nexus_missions')
+        .insert({
+          mission_name: `${randomMissionType} - Command Triggered`,
+          objective: `Coordinated response to operator command: "${commandText.substring(0, 50)}..." with ${Math.round(confidence * 100)}% confidence`,
+          agents_involved: selectedAgents,
+          mission_status: 'active'
+        });
+
+      if (!missionError) {
+        // Get the created mission ID
+        const { data: missionData } = await supabase
+          .from('nexus_missions')
+          .select('id')
+          .order('start_time', { ascending: false })
+          .limit(1);
+
+        if (missionData && missionData.length > 0) {
+          // Create initial coordination communication
+          await supabase
+            .from('nexus_communications')
+            .insert({
+              mission_id: missionData[0].id,
+              agent_name: 'NEXUS',
+              message: `Mission initiated from operator command. Agents assigned: ${selectedAgents.join(', ')}. Confidence: ${Math.round(confidence * 100)}%`,
+              context: { source: 'operator_command', confidence, intent }
+            });
+
+          // Queue commands for involved agents
+          for (const agent of selectedAgents) {
+            await supabase
+              .from('nexus_command_queue')
+              .insert({
+                target_module: agent,
+                command: 'initiate_coordination_protocol',
+                parameters: {
+                  mission_id: missionData[0].id,
+                  original_command: commandText,
+                  confidence,
+                  priority: confidence > 0.7 ? 'high' : 'medium'
+                },
+                issued_by: 'NEXUS CORE'
+              });
+          }
+        }
+      }
+    }
+
     // Create feedback entry
     const { error: feedbackError } = await supabase
       .from('command_response_feedback')
       .insert({
         command_id: commandId,
         execution_status: 'success',
-        summary: `AI classified command as '${intent}' with ${Math.round(confidence * 100)}% confidence${strategicResponseNeeded ? ' - Strategic response generated' : ''}${truthAnalysisRequired ? ' - Truth verification requested' : ''}${erisSimulationNeeded ? ' - Adversarial simulation triggered' : ''}${sentienceReflectionNeeded ? ' - Sentience Loop reflection generated' : ''}${panopticaFusionNeeded ? ' - PANOPTICA™ sensor fusion activated' : ''}`,
+        summary: `AI classified command as '${intent}' with ${Math.round(confidence * 100)}% confidence${strategicResponseNeeded ? ' - Strategic response generated' : ''}${truthAnalysisRequired ? ' - Truth verification requested' : ''}${erisSimulationNeeded ? ' - Adversarial simulation triggered' : ''}${sentienceReflectionNeeded ? ' - Sentience Loop reflection generated' : ''}${panopticaFusionNeeded ? ' - PANOPTICA™ sensor fusion activated' : ''}${nexusCoordinationNeeded ? ' - NEXUS CORE™ inter-agent coordination initiated' : ''}`,
         created_by: 'AI_Classifier'
       });
 
@@ -346,7 +411,8 @@ serve(async (req) => {
         truthAnalysisTriggered: truthAnalysisRequired,
         erisSimulationTriggered: erisSimulationNeeded,
         sentienceReflectionGenerated: sentienceReflectionNeeded,
-        panopticaFusionActivated: panopticaFusionNeeded
+        panopticaFusionActivated: panopticaFusionNeeded,
+        nexusCoordinationInitiated: nexusCoordinationNeeded
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
