@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -20,6 +19,14 @@ export interface SystemHealthReport {
   mock_data_issues: number;
   failed_functions: any[];
   admin_count: number;
+}
+
+export interface SystemBugScanResult {
+  success: boolean;
+  critical_issues: string[];
+  warnings: string[];
+  info: string[];
+  scan_summary: string;
 }
 
 /**
@@ -48,16 +55,13 @@ export class SystemConfigManager {
       // 2. Initialize live status modules
       await this.initializeLiveStatusModules(result);
       
-      // 3. Enable RLS on critical tables
-      await this.enableRLSOnTables(result);
-      
-      // 4. Clean up system configuration duplicates
+      // 3. Clean up system configuration duplicates
       await this.cleanupSystemConfig(result);
       
-      // 5. Initialize monitoring status
+      // 4. Initialize monitoring status
       await this.initializeMonitoringStatus(result);
       
-      // 6. Verify final configuration
+      // 5. Verify final configuration
       await this.verifySystemConfiguration(result);
       
       result.success = result.issues.length === 0;
@@ -70,7 +74,7 @@ export class SystemConfigManager {
         toast.warning('System configuration completed with some issues');
       }
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ System configuration failed:', error);
       result.issues.push(`Configuration failed: ${error.message}`);
       toast.error('System configuration failed');
@@ -78,10 +82,68 @@ export class SystemConfigManager {
     
     return result;
   }
-  
+
   /**
-   * Set live system configuration
+   * Run comprehensive system bug scan
    */
+  static async runSystemBugScan(): Promise<SystemBugScanResult> {
+    const result: SystemBugScanResult = {
+      success: true,
+      critical_issues: [],
+      warnings: [],
+      info: [],
+      scan_summary: ''
+    };
+
+    try {
+      console.log('🐞 Starting A.R.I.A™ system bug scan...');
+
+      // 1. Check for tables with missing RLS
+      await this.checkRLSEnforcement(result);
+
+      // 2. Check admin presence
+      await this.checkAdminPresence(result);
+
+      // 3. Check system configuration
+      await this.checkSystemConfiguration(result);
+
+      // 4. Check live status modules
+      await this.checkLiveStatusModules(result);
+
+      // 5. Check monitoring status
+      await this.checkMonitoringStatus(result);
+
+      // Generate summary
+      const totalIssues = result.critical_issues.length + result.warnings.length;
+      result.scan_summary = `Scan completed: ${result.critical_issues.length} critical issues, ${result.warnings.length} warnings, ${result.info.length} info items`;
+      result.success = result.critical_issues.length === 0;
+
+      console.log('✅ System bug scan completed:', result.scan_summary);
+
+    } catch (error: any) {
+      console.error('❌ System bug scan failed:', error);
+      result.critical_issues.push(`Bug scan failed: ${error.message}`);
+      result.success = false;
+    }
+
+    return result;
+  }
+
+  /**
+   * Run automated admin login system checks
+   */
+  static async runAdminLoginChecks(): Promise<{ config: SystemConfigResult; bugScan: SystemBugScanResult }> {
+    console.log('🚀 Running automated admin login system checks...');
+
+    // Run bug scan first
+    const bugScan = await this.runSystemBugScan();
+    
+    // Then run configuration
+    const config = await this.configureLiveSystem();
+
+    return { config, bugScan };
+  }
+
   private static async setLiveSystemConfig(result: SystemConfigResult): Promise<void> {
     const liveConfigs = [
       { config_key: 'system_mode', config_value: 'live' },
@@ -103,15 +165,12 @@ export class SystemConfigManager {
         } else {
           result.fixes_applied.push(`Set ${config.config_key} = ${config.config_value}`);
         }
-      } catch (error) {
+      } catch (error: any) {
         result.issues.push(`Error setting ${config.config_key}: ${error.message}`);
       }
     }
   }
-  
-  /**
-   * Initialize live status modules
-   */
+
   private static async initializeLiveStatusModules(result: SystemConfigResult): Promise<void> {
     const liveModules = [
       { name: 'Live Threat Scanner', active_threats: 0, system_status: 'LIVE' },
@@ -145,44 +204,12 @@ export class SystemConfigManager {
         } else {
           result.fixes_applied.push(`Initialized live status for ${module.name}`);
         }
-      } catch (error) {
+      } catch (error: any) {
         result.issues.push(`Error initializing ${module.name}: ${error.message}`);
       }
     }
   }
-  
-  /**
-   * Enable RLS on critical tables (if they exist)
-   */
-  private static async enableRLSOnTables(result: SystemConfigResult): Promise<void> {
-    const criticalTables = [
-      'user_roles',
-      'client_entities',
-      'content_alerts',
-      'aria_notifications',
-      'aria_reports'
-    ];
 
-    for (const tableName of criticalTables) {
-      try {
-        // Check if table exists first
-        const { data: tableExists } = await supabase
-          .from(tableName)
-          .select('*')
-          .limit(1);
-
-        if (tableExists !== null) {
-          result.fixes_applied.push(`Verified RLS availability for ${tableName}`);
-        }
-      } catch (error) {
-        result.warnings.push(`Table ${tableName} may not exist or need RLS setup`);
-      }
-    }
-  }
-  
-  /**
-   * Clean up duplicate system configurations
-   */
   private static async cleanupSystemConfig(result: SystemConfigResult): Promise<void> {
     try {
       // Get all system configs
@@ -201,14 +228,11 @@ export class SystemConfigManager {
       } else {
         result.warnings.push('No system configuration found - this may be normal for a new system');
       }
-    } catch (error) {
+    } catch (error: any) {
       result.issues.push(`Error checking system config: ${error.message}`);
     }
   }
-  
-  /**
-   * Initialize monitoring status
-   */
+
   private static async initializeMonitoringStatus(result: SystemConfigResult): Promise<void> {
     try {
       const monitoringStatus = {
@@ -229,14 +253,11 @@ export class SystemConfigManager {
       } else {
         result.fixes_applied.push('Initialized monitoring status');
       }
-    } catch (error) {
+    } catch (error: any) {
       result.issues.push(`Error initializing monitoring status: ${error.message}`);
     }
   }
-  
-  /**
-   * Verify final system configuration
-   */
+
   private static async verifySystemConfiguration(result: SystemConfigResult): Promise<void> {
     try {
       // Check if live mode is properly configured
@@ -277,8 +298,148 @@ export class SystemConfigManager {
         result.warnings.push('No live status modules found');
       }
 
-    } catch (error) {
+    } catch (error: any) {
       result.warnings.push(`Verification incomplete: ${error.message}`);
+    }
+  }
+
+  // New bug scan methods
+  private static async checkRLSEnforcement(result: SystemBugScanResult): Promise<void> {
+    try {
+      const { data: tableCheck, error } = await supabase.rpc('check_rls_compliance');
+      
+      if (error) {
+        result.warnings.push(`Could not check RLS compliance: ${error.message}`);
+        return;
+      }
+
+      if (tableCheck) {
+        const tablesWithoutRLS = tableCheck.filter((table: any) => !table.rls_enabled);
+        if (tablesWithoutRLS.length > 0) {
+          result.warnings.push(`${tablesWithoutRLS.length} tables missing RLS enforcement`);
+        } else {
+          result.info.push('All tables have RLS enforcement enabled');
+        }
+      }
+    } catch (error: any) {
+      result.warnings.push(`RLS check failed: ${error.message}`);
+    }
+  }
+
+  private static async checkAdminPresence(result: SystemBugScanResult): Promise<void> {
+    try {
+      const { data: adminCheck, error } = await supabase
+        .from('user_roles')
+        .select('*')
+        .eq('role', 'admin');
+
+      if (error) {
+        result.critical_issues.push(`Failed to check admin presence: ${error.message}`);
+        return;
+      }
+
+      const adminCount = adminCheck?.length || 0;
+      if (adminCount === 0) {
+        result.critical_issues.push('No admin users found in the system');
+      } else {
+        result.info.push(`${adminCount} admin users configured`);
+      }
+    } catch (error: any) {
+      result.critical_issues.push(`Admin check failed: ${error.message}`);
+    }
+  }
+
+  private static async checkSystemConfiguration(result: SystemBugScanResult): Promise<void> {
+    try {
+      // Check for system_mode
+      const { data: systemMode } = await supabase
+        .from('system_config')
+        .select('config_value')
+        .eq('config_key', 'system_mode')
+        .single();
+
+      if (!systemMode || systemMode.config_value !== 'live') {
+        result.warnings.push('System not configured for live mode');
+      } else {
+        result.info.push('System configured for live mode');
+      }
+
+      // Check for duplicate configs
+      const { data: duplicateCheck, error } = await supabase
+        .from('system_config')
+        .select('config_key')
+        .order('config_key');
+
+      if (!error && duplicateCheck) {
+        const keyMap = new Map();
+        duplicateCheck.forEach(config => {
+          const count = keyMap.get(config.config_key) || 0;
+          keyMap.set(config.config_key, count + 1);
+        });
+
+        const duplicates = Array.from(keyMap.entries()).filter(([key, count]) => count > 1);
+        if (duplicates.length > 0) {
+          result.warnings.push(`${duplicates.length} duplicate configuration keys found`);
+        } else {
+          result.info.push('No duplicate configuration keys');
+        }
+      }
+    } catch (error: any) {
+      result.warnings.push(`System configuration check failed: ${error.message}`);
+    }
+  }
+
+  private static async checkLiveStatusModules(result: SystemBugScanResult): Promise<void> {
+    try {
+      const { data: modules, error } = await supabase
+        .from('live_status')
+        .select('name, system_status, last_threat_seen');
+
+      if (error) {
+        result.warnings.push(`Failed to check live status modules: ${error.message}`);
+        return;
+      }
+
+      if (!modules || modules.length === 0) {
+        result.warnings.push('No live status modules found');
+        return;
+      }
+
+      const outdatedModules = modules.filter(module => 
+        !module.last_threat_seen || 
+        new Date(module.last_threat_seen) < new Date(Date.now() - 24 * 60 * 60 * 1000)
+      );
+
+      if (outdatedModules.length > 0) {
+        result.warnings.push(`${outdatedModules.length} modules have not reported in 24+ hours`);
+      } else {
+        result.info.push(`All ${modules.length} live status modules are current`);
+      }
+    } catch (error: any) {
+      result.warnings.push(`Live status check failed: ${error.message}`);
+    }
+  }
+
+  private static async checkMonitoringStatus(result: SystemBugScanResult): Promise<void> {
+    try {
+      const { data: monitoring, error } = await supabase
+        .from('monitoring_status')
+        .select('*')
+        .eq('id', '1')
+        .single();
+
+      if (error) {
+        result.warnings.push('Monitoring status not initialized');
+        return;
+      }
+
+      if (!monitoring.is_active) {
+        result.warnings.push('Monitoring is not active');
+      } else {
+        result.info.push('Monitoring system is active');
+      }
+    } catch (error: any) {
+      result.warnings.push(`Monitoring status check failed: ${error.message}`);
     }
   }
 

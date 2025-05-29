@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -9,6 +8,7 @@ import { Shield, Lock, Eye, EyeOff, Loader2, AlertTriangle, RotateCcw, Key } fro
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import AdminLoginSystemCheck from '@/components/admin/AdminLoginSystemCheck';
 
 const AdminLoginGateway = () => {
   const [email, setEmail] = useState('');
@@ -18,6 +18,8 @@ const AdminLoginGateway = () => {
   const [loginAttempts, setLoginAttempts] = useState(0);
   const [isLocked, setIsLocked] = useState(false);
   const [lockoutTime, setLockoutTime] = useState<Date | null>(null);
+  const [showSystemCheck, setShowSystemCheck] = useState(false);
+  const [systemCheckComplete, setSystemCheckComplete] = useState(false);
   const { isAuthenticated, isAdmin, signIn, signOut, isLoading: authLoading, forceReset, forceAdminAccess } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
@@ -125,17 +127,37 @@ const AdminLoginGateway = () => {
     console.log('🔍 AdminLoginGateway auth state:', { 
       isAuthenticated, 
       isAdmin, 
-      authLoading 
+      authLoading,
+      showSystemCheck,
+      systemCheckComplete
     });
     
-    if (!authLoading && isAuthenticated && isAdmin) {
+    // If admin is authenticated and system check is complete, redirect
+    if (!authLoading && isAuthenticated && isAdmin && systemCheckComplete) {
       const from = location.state?.from?.pathname || '/admin';
-      console.log('✅ Admin authenticated, redirecting to:', from);
+      console.log('✅ Admin authenticated and system check complete, redirecting to:', from);
       logSecurityEvent('admin_access_granted', true, `Redirecting to: ${from}`);
-      toast.success('Welcome back, admin!');
+      toast.success('Welcome back, admin! System fully operational.');
       navigate(from, { replace: true });
     }
-  }, [isAuthenticated, isAdmin, authLoading, navigate, location.state]);
+    
+    // If admin is authenticated but system check not shown yet, show it
+    if (!authLoading && isAuthenticated && isAdmin && !showSystemCheck && !systemCheckComplete) {
+      console.log('🔧 Admin authenticated, starting system check...');
+      setShowSystemCheck(true);
+    }
+  }, [isAuthenticated, isAdmin, authLoading, navigate, location.state, showSystemCheck, systemCheckComplete]);
+
+  const handleSystemCheckComplete = (success: boolean) => {
+    console.log('🔧 System check completed with success:', success);
+    setSystemCheckComplete(true);
+    
+    if (success) {
+      logSecurityEvent('system_check_passed', true, 'All system checks passed during admin login');
+    } else {
+      logSecurityEvent('system_check_issues', false, 'System check completed with issues during admin login');
+    }
+  };
 
   // Emergency controls
   const handleForceReset = async () => {
@@ -149,6 +171,8 @@ const AdminLoginGateway = () => {
     setLoginAttempts(0);
     setIsLocked(false);
     setLockoutTime(null);
+    setShowSystemCheck(false);
+    setSystemCheckComplete(false);
     localStorage.removeItem('admin_lockout');
     
     await logSecurityEvent('force_reset_completed', true, 'Authentication state reset');
@@ -168,6 +192,17 @@ const AdminLoginGateway = () => {
     await logSecurityEvent('emergency_access_granted', true, 'Emergency admin access granted');
     toast.success('Emergency admin access granted!', { duration: 2000 });
   };
+
+  // Show system check if admin is authenticated
+  if (!authLoading && isAuthenticated && isAdmin && showSystemCheck && !systemCheckComplete) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0A0F2C] via-[#1C1C1E] to-[#0A0F2C] p-4">
+        <div className="max-w-4xl w-full">
+          <AdminLoginSystemCheck onComplete={handleSystemCheckComplete} />
+        </div>
+      </div>
+    );
+  }
 
   // Show loading state while auth is initializing
   if (authLoading) {
@@ -307,7 +342,7 @@ const AdminLoginGateway = () => {
         setLoginAttempts(0);
         localStorage.removeItem('admin_lockout');
         await logSecurityEvent('login_successful', true, `Successful admin authentication for: ${email}`);
-        toast.success('🔐 Authentication successful! Accessing A.R.I.A™ secure systems...');
+        toast.success('🔐 Authentication successful! Initializing A.R.I.A™ systems...');
       }
     } catch (error: any) {
       console.error('❌ Login exception:', error);
@@ -466,6 +501,7 @@ const AdminLoginGateway = () => {
                 <div>🔒 256-bit encrypted sessions • Zero-trust architecture</div>
                 <div>⚡ Auto-expiring tokens • Multi-factor authentication ready</div>
                 <div>📊 Real-time threat monitoring • Advanced intrusion detection</div>
+                <div>🔧 Automated system integrity checks • Live configuration validation</div>
                 {loginAttempts > 0 && (
                   <div className="text-yellow-400 font-bold">
                     ⚠️ Failed attempts: {loginAttempts}/{MAX_ATTEMPTS}
