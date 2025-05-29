@@ -11,14 +11,18 @@ export interface ThreatIngestionItem {
 
 export const addToThreatQueue = async (item: ThreatIngestionItem) => {
   try {
+    // For now, add to scan_results table until new schema is available
     const { data, error } = await supabase
-      .from('threat_ingestion_queue')
+      .from('scan_results')
       .insert({
-        raw_content: item.raw_content,
-        source: item.source,
-        entity_match: item.entity_match,
-        risk_score: item.risk_score,
-        status: 'pending'
+        content: item.raw_content,
+        platform: item.source,
+        severity: item.risk_score && item.risk_score > 70 ? 'high' : 
+                 item.risk_score && item.risk_score > 40 ? 'medium' : 'low',
+        status: 'new',
+        threat_type: 'reputation_risk',
+        sentiment: 0,
+        url: ''
       })
       .select()
       .single();
@@ -37,12 +41,23 @@ export const addToThreatQueue = async (item: ThreatIngestionItem) => {
 export const getQueueStatus = async () => {
   try {
     const { data, error } = await supabase
-      .from('threat_ingestion_queue')
-      .select('status, count(*)')
-      .group('status');
+      .from('scan_results')
+      .select('status')
+      .order('created_at', { ascending: false })
+      .limit(100);
 
     if (error) throw error;
-    return data;
+    
+    // Count by status
+    const statusCounts = data?.reduce((acc: any, item: any) => {
+      acc[item.status] = (acc[item.status] || 0) + 1;
+      return acc;
+    }, {});
+    
+    return Object.entries(statusCounts || {}).map(([status, count]) => ({
+      status,
+      count
+    }));
   } catch (error) {
     console.error('Error fetching queue status:', error);
     return [];
@@ -55,7 +70,7 @@ export const triggerPipelineProcessing = async () => {
     
     if (error) throw error;
     
-    toast.success(`Pipeline processing completed: ${data.processed || 0} items processed`);
+    toast.success(`Pipeline processing completed: ${data?.processed || 0} items processed`);
     return data;
   } catch (error) {
     console.error('Pipeline processing error:', error);
@@ -67,14 +82,10 @@ export const triggerPipelineProcessing = async () => {
 export const getLiveThreats = async (entityId?: string) => {
   try {
     let query = supabase
-      .from('threats')
+      .from('scan_results')
       .select('*')
-      .eq('is_live', true)
-      .order('detected_at', { ascending: false });
-
-    if (entityId) {
-      query = query.eq('entity_id', entityId);
-    }
+      .in('severity', ['high', 'medium'])
+      .order('created_at', { ascending: false });
 
     const { data, error } = await query.limit(50);
 
@@ -88,14 +99,27 @@ export const getLiveThreats = async (entityId?: string) => {
 
 export const getSystemHealth = async () => {
   try {
+    // Check recent scan activity as a health indicator
     const { data, error } = await supabase
-      .from('system_health_checks')
+      .from('scan_results')
       .select('*')
-      .order('check_time', { ascending: false })
+      .order('created_at', { ascending: false })
       .limit(10);
 
     if (error) throw error;
-    return data;
+    
+    // Generate health status based on recent activity
+    const recentActivity = data?.filter(item => 
+      new Date(item.created_at) > new Date(Date.now() - 24 * 60 * 60 * 1000)
+    );
+    
+    return [{
+      id: '1',
+      module: 'scanning',
+      status: recentActivity?.length > 0 ? 'healthy' : 'warning',
+      details: `${recentActivity?.length || 0} scans in last 24 hours`,
+      check_time: new Date().toISOString()
+    }];
   } catch (error) {
     console.error('Error fetching system health:', error);
     return [];
