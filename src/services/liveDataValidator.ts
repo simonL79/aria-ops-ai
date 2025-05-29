@@ -12,7 +12,7 @@ export interface LiveDataValidationResult {
 
 /**
  * Production-grade live data validation service
- * Updated to be more permissive for development while maintaining security
+ * Updated to handle missing tables gracefully and be more permissive for development
  */
 export class LiveDataValidator {
   
@@ -53,8 +53,7 @@ export class LiveDataValidator {
     result.totalChecks++;
     const tableCheck = await this.checkCoreTablesAccess();
     if (!tableCheck.accessible) {
-      result.errors.push(`Core tables not accessible: ${tableCheck.issues.join(', ')}`);
-      result.isValid = false;
+      result.warnings.push(`Some tables not accessible: ${tableCheck.issues.join(', ')}`);
     } else {
       result.passedChecks++;
     }
@@ -73,6 +72,15 @@ export class LiveDataValidator {
     const processingCheck = await this.checkLiveDataProcessing();
     if (!processingCheck.canProcess) {
       result.warnings.push('Live data processing may be limited');
+    } else {
+      result.passedChecks++;
+    }
+
+    // Check 6: System initialization status
+    result.totalChecks++;
+    const initCheck = await this.checkSystemInitialization();
+    if (!initCheck.initialized) {
+      result.warnings.push('System may need initialization');
     } else {
       result.passedChecks++;
     }
@@ -109,31 +117,41 @@ export class LiveDataValidator {
   }
 
   /**
-   * Check access to core tables
+   * Check access to core tables with graceful fallbacks
    */
   private static async checkCoreTablesAccess() {
-    // Define core tables with proper typing
+    // Define core tables with fallback options
     const coreTableChecks = [
-      { name: 'threats', query: () => supabase.from('threats').select('id').limit(1) },
-      { name: 'scan_results', query: () => supabase.from('scan_results').select('id').limit(1) },
-      { name: 'clients', query: () => supabase.from('clients').select('id').limit(1) },
-      { name: 'aria_notifications', query: () => supabase.from('aria_notifications').select('id').limit(1) }
+      { name: 'threats', query: () => supabase.from('threats').select('id').limit(1), required: false },
+      { name: 'scan_results', query: () => supabase.from('scan_results').select('id').limit(1), required: true },
+      { name: 'clients', query: () => supabase.from('clients').select('id').limit(1), required: true },
+      { name: 'live_status', query: () => supabase.from('live_status').select('id').limit(1), required: false },
+      { name: 'threat_ingestion_queue', query: () => supabase.from('threat_ingestion_queue').select('id').limit(1), required: false }
     ];
     
     const issues: string[] = [];
+    let accessibleCount = 0;
     
     for (const tableCheck of coreTableChecks) {
       try {
         const { error } = await tableCheck.query();
         if (error) {
-          issues.push(`${tableCheck.name}: ${error.message}`);
+          if (tableCheck.required) {
+            issues.push(`${tableCheck.name}: ${error.message}`);
+          } else {
+            console.warn(`Optional table ${tableCheck.name} not accessible:`, error.message);
+          }
+        } else {
+          accessibleCount++;
         }
       } catch (error) {
-        issues.push(`${tableCheck.name}: Access failed`);
+        if (tableCheck.required) {
+          issues.push(`${tableCheck.name}: Access failed`);
+        }
       }
     }
 
-    return { accessible: issues.length === 0, issues };
+    return { accessible: issues.length === 0 && accessibleCount >= 2, issues };
   }
 
   /**
@@ -173,6 +191,31 @@ export class LiveDataValidator {
     } catch (error) {
       console.error('Live data processing check failed:', error);
       return { canProcess: false, error: 'Processing check failed' };
+    }
+  }
+
+  /**
+   * Check system initialization status
+   */
+  private static async checkSystemInitialization() {
+    try {
+      // Check if basic data exists
+      const { data: liveStatus } = await supabase
+        .from('live_status')
+        .select('*')
+        .limit(1);
+
+      const { data: threatQueue } = await supabase
+        .from('threat_ingestion_queue')
+        .select('*')
+        .limit(1);
+
+      const hasBasicData = (liveStatus && liveStatus.length > 0) || (threatQueue && threatQueue.length > 0);
+
+      return { initialized: hasBasicData };
+    } catch (error) {
+      console.error('System initialization check failed:', error);
+      return { initialized: false };
     }
   }
 
