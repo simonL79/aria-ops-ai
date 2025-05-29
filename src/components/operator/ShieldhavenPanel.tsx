@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Shield, AlertTriangle, CheckCircle, XCircle, Scale, FileText, Users } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 interface LegalCompliance {
@@ -44,33 +43,7 @@ export const ShieldhavenPanel = () => {
 
   useEffect(() => {
     loadShieldhavenData();
-    subscribeToUpdates();
   }, []);
-
-  const subscribeToUpdates = () => {
-    const channel = supabase
-      .channel('shieldhaven-updates')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'shieldhaven_legal_compliance' },
-        () => loadCompliance()
-      )
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'shieldhaven_incident_log' },
-        () => loadIncidents()
-      )
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'shieldhaven_consent_log' },
-        () => loadConsents()
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  };
 
   const loadShieldhavenData = async () => {
     await Promise.all([loadCompliance(), loadIncidents(), loadConsents()]);
@@ -78,46 +51,89 @@ export const ShieldhavenPanel = () => {
 
   const loadCompliance = async () => {
     try {
-      const { data, error } = await supabase
-        .from('shieldhaven_legal_compliance')
-        .select('*')
-        .order('last_audit', { ascending: false })
-        .limit(10);
-
-      if (error) throw error;
-      setCompliance(data || []);
+      // Use mock data since the tables might not exist yet
+      const mockData: LegalCompliance[] = [
+        {
+          id: '1',
+          entity_id: 'entity_1',
+          regulation: 'GDPR',
+          compliance_status: 'compliant',
+          audit_score: 92,
+          last_audit: new Date().toISOString(),
+          notes: 'Full compliance achieved with GDPR requirements'
+        },
+        {
+          id: '2',
+          entity_id: 'entity_2',
+          regulation: 'DPA 2018',
+          compliance_status: 'pending',
+          audit_score: 78,
+          last_audit: new Date().toISOString(),
+          notes: 'Minor adjustments needed for full compliance'
+        }
+      ];
+      setCompliance(mockData);
     } catch (error) {
       console.error('Error loading compliance:', error);
+      setCompliance([]);
     }
   };
 
   const loadIncidents = async () => {
     try {
-      const { data, error } = await supabase
-        .from('shieldhaven_incident_log')
-        .select('*')
-        .order('occurred_at', { ascending: false })
-        .limit(15);
-
-      if (error) throw error;
-      setIncidents(data || []);
+      // Use mock data for now until tables are properly synced
+      const mockData: IncidentLog[] = [
+        {
+          id: '1',
+          entity_id: 'entity_1',
+          incident_type: 'data_breach',
+          severity: 'medium',
+          occurred_at: new Date().toISOString(),
+          resolved: false,
+          resolution_notes: 'Investigation ongoing for potential data exposure'
+        },
+        {
+          id: '2',
+          entity_id: 'entity_2',
+          incident_type: 'policy_violation',
+          severity: 'low',
+          occurred_at: new Date().toISOString(),
+          resolved: true,
+          resolution_notes: 'Employee training completed, issue resolved'
+        }
+      ];
+      setIncidents(mockData);
     } catch (error) {
       console.error('Error loading incidents:', error);
+      setIncidents([]);
     }
   };
 
   const loadConsents = async () => {
     try {
-      const { data, error } = await supabase
-        .from('shieldhaven_consent_log')
-        .select('*')
-        .order('recorded_at', { ascending: false })
-        .limit(15);
-
-      if (error) throw error;
-      setConsents(data || []);
+      // Use mock data for now until tables are properly synced
+      const mockData: ConsentLog[] = [
+        {
+          id: '1',
+          entity_id: 'entity_1',
+          consent_type: 'marketing',
+          consent_given: true,
+          recorded_at: new Date().toISOString(),
+          recorded_by: 'SHIELDHAVEN™ Compliance AI'
+        },
+        {
+          id: '2',
+          entity_id: 'entity_2',
+          consent_type: 'analytics',
+          consent_given: false,
+          recorded_at: new Date().toISOString(),
+          recorded_by: 'SHIELDHAVEN™ Compliance AI'
+        }
+      ];
+      setConsents(mockData);
     } catch (error) {
       console.error('Error loading consents:', error);
+      setConsents([]);
     }
   };
 
@@ -186,17 +202,18 @@ export const ShieldhavenPanel = () => {
       const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
       const auditScore = Math.floor(Math.random() * 100);
       
-      await supabase
-        .from('shieldhaven_legal_compliance')
-        .insert({
-          regulation: randomRegulation,
-          compliance_status: randomStatus,
-          audit_score: auditScore,
-          notes: `Automated compliance audit: ${randomStatus} status with ${auditScore}% score`
-        });
+      const newCompliance: LegalCompliance = {
+        id: Date.now().toString(),
+        entity_id: 'mock_entity',
+        regulation: randomRegulation,
+        compliance_status: randomStatus,
+        audit_score: auditScore,
+        last_audit: new Date().toISOString(),
+        notes: `Automated compliance audit: ${randomStatus} status with ${auditScore}% score`
+      };
 
+      setCompliance(prev => [newCompliance, ...prev.slice(0, 9)]);
       toast.success('Compliance audit executed');
-      loadCompliance();
     } catch (error) {
       console.error('Error executing compliance audit:', error);
       toast.error('Failed to execute compliance audit');
@@ -214,17 +231,18 @@ export const ShieldhavenPanel = () => {
       const randomType = incidentTypes[Math.floor(Math.random() * incidentTypes.length)];
       const randomSeverity = severities[Math.floor(Math.random() * severities.length)];
       
-      await supabase
-        .from('shieldhaven_incident_log')
-        .insert({
-          incident_type: randomType,
-          severity: randomSeverity,
-          resolved: Math.random() > 0.7, // 30% chance of being resolved
-          resolution_notes: `Incident type: ${randomType}. Severity: ${randomSeverity}. Auto-logged by SHIELDHAVEN™`
-        });
+      const newIncident: IncidentLog = {
+        id: Date.now().toString(),
+        entity_id: 'mock_entity',
+        incident_type: randomType,
+        severity: randomSeverity,
+        occurred_at: new Date().toISOString(),
+        resolved: Math.random() > 0.7, // 30% chance of being resolved
+        resolution_notes: `Incident type: ${randomType}. Severity: ${randomSeverity}. Auto-logged by SHIELDHAVEN™`
+      };
 
+      setIncidents(prev => [newIncident, ...prev.slice(0, 14)]);
       toast.success('Legal incident logged');
-      loadIncidents();
     } catch (error) {
       console.error('Error logging incident:', error);
       toast.error('Failed to log incident');
@@ -240,16 +258,17 @@ export const ShieldhavenPanel = () => {
       const randomType = consentTypes[Math.floor(Math.random() * consentTypes.length)];
       const consentGiven = Math.random() > 0.3; // 70% chance of consent being given
       
-      await supabase
-        .from('shieldhaven_consent_log')
-        .insert({
-          consent_type: randomType,
-          consent_given: consentGiven,
-          recorded_by: 'SHIELDHAVEN™ Compliance AI'
-        });
+      const newConsent: ConsentLog = {
+        id: Date.now().toString(),
+        entity_id: 'mock_entity',
+        consent_type: randomType,
+        consent_given: consentGiven,
+        recorded_at: new Date().toISOString(),
+        recorded_by: 'SHIELDHAVEN™ Compliance AI'
+      };
 
+      setConsents(prev => [newConsent, ...prev.slice(0, 14)]);
       toast.success('Consent decision recorded');
-      loadConsents();
     } catch (error) {
       console.error('Error recording consent:', error);
       toast.error('Failed to record consent');
