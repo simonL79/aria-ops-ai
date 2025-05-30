@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -5,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Copy, Clipboard, Plus } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface BulkArticleImportProps {
   onArticlesAdded: () => void;
@@ -24,7 +26,7 @@ const BulkArticleImport = ({ onArticlesAdded }: BulkArticleImportProps) => {
     }
   };
 
-  const processBulkContent = () => {
+  const processBulkContent = async () => {
     if (!bulkContent.trim()) {
       toast.error('Please paste some content first');
       return;
@@ -73,19 +75,28 @@ const BulkArticleImport = ({ onArticlesAdded }: BulkArticleImportProps) => {
         return;
       }
 
-      // Simulate saving articles (replace with actual save logic)
       console.log('Processing articles:', processedArticles);
       
-      setTimeout(() => {
-        toast.success(`Successfully processed ${processedArticles.length} articles as drafts`);
-        setBulkContent('');
-        onArticlesAdded();
-        setIsProcessing(false);
-      }, 1000);
+      // Save articles to database
+      const { data, error } = await supabase
+        .from('blog_posts')
+        .insert(processedArticles)
+        .select();
+
+      if (error) {
+        console.error('Error saving articles:', error);
+        throw error;
+      }
+
+      console.log('Articles saved successfully:', data);
+      toast.success(`Successfully processed ${processedArticles.length} articles as drafts`);
+      setBulkContent('');
+      onArticlesAdded();
 
     } catch (error) {
       console.error('Error processing bulk content:', error);
-      toast.error('Failed to process articles');
+      toast.error('Failed to process articles. Please try again.');
+    } finally {
       setIsProcessing(false);
     }
   };
