@@ -1,4 +1,5 @@
 
+
 import React from "react";
 import { useAuth } from "@/hooks/useAuth";
 import AdminDashboardWelcome from "@/components/salesFunnel/AdminDashboardWelcome";
@@ -140,7 +141,7 @@ const SalesFunnelPage = () => {
       {/* Trusted Across Industries Section */}
       <section className="py-8 bg-black">
         <div className="container mx-auto px-6 text-center">
-          <h3 className="text-lg text-gray-400 mb-8">Trusted Across Industries</h3>
+          <h3 className="text-xl font-bold text-gray-300 mb-8">Trusted Across Industries</h3>
           <div className="grid grid-cols-5 gap-8 items-center">
             {industries.map((industry, index) => (
               <div key={index} className="text-center">
@@ -170,8 +171,8 @@ const SalesFunnelPage = () => {
           
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Social Media Protection */}
-            <Card className="bg-gray-800 border-gray-700 p-8">
-              <div className="flex items-center mb-6">
+            <Card className="bg-gray-800 border-gray-700 p-8 text-center">
+              <div className="flex items-center justify-center mb-6">
                 <Shield className="w-8 h-8 text-orange-500 mr-3" />
                 <h3 className="text-xl font-bold text-orange-500">Social Media Protection</h3>
               </div>
@@ -180,19 +181,19 @@ const SalesFunnelPage = () => {
               </p>
               <div className="space-y-3 mb-6">
                 <div className="text-sm font-semibold text-white">What We Do</div>
-                <div className="flex items-center text-sm text-gray-300">
+                <div className="flex items-center text-sm text-gray-300 justify-center">
                   <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
                   Monitor threats across X (Twitter), Reddit, TikTok, and Instagram
                 </div>
-                <div className="flex items-center text-sm text-gray-300">
+                <div className="flex items-center text-sm text-gray-300 justify-center">
                   <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
                   Suppress legacy content via GRAVEYARD™ & EIDETIC™
                 </div>
-                <div className="flex items-center text-sm text-gray-300">
+                <div className="flex items-center text-sm text-gray-300 justify-center">
                   <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
                   Counter disinformation campaigns in real time
                 </div>
-                <div className="flex items-center text-sm text-gray-300">
+                <div className="flex items-center text-sm text-gray-300 justify-center">
                   <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
                   Send takedown notices for harassment
                 </div>
@@ -206,8 +207,8 @@ const SalesFunnelPage = () => {
             </Card>
 
             {/* Influencer & Creator */}
-            <Card className="bg-gray-800 border-gray-700 p-8">
-              <div className="flex items-center mb-6">
+            <Card className="bg-gray-800 border-gray-700 p-8 text-center">
+              <div className="flex items-center justify-center mb-6">
                 <Eye className="w-8 h-8 text-orange-500 mr-3" />
                 <h3 className="text-xl font-bold text-orange-500">Influencer & Creator Shield</h3>
               </div>
@@ -216,19 +217,19 @@ const SalesFunnelPage = () => {
               </p>
               <div className="space-y-3 mb-6">
                 <div className="text-sm font-semibold text-white">What We Do</div>
-                <div className="flex items-center text-sm text-gray-300">
+                <div className="flex items-center text-sm text-gray-300 justify-center">
                   <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
                   Real-time crisis monitoring when content goes viral
                 </div>
-                <div className="flex items-center text-sm text-gray-300">
+                <div className="flex items-center text-sm text-gray-300 justify-center">
                   <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
                   Predictive behavior alerts via PRAXIS™
                 </div>
-                <div className="flex items-center text-sm text-gray-300">
+                <div className="flex items-center text-sm text-gray-300 justify-center">
                   <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
                   AI bias analysis on LLMs and search engines
                 </div>
-                <div className="flex items-center text-sm text-gray-300">
+                <div className="flex items-center text-sm text-gray-300 justify-center">
                   <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
                   Automated counter-narratives via RSI™
                 </div>
@@ -242,8 +243,8 @@ const SalesFunnelPage = () => {
             </Card>
 
             {/* Everyday People Protection */}
-            <Card className="bg-gray-800 border-gray-700 p-8">
-              <div className="flex items-center mb-6">
+            <Card className="bg-gray-800 border-gray-700 p-8 text-center">
+              <div className="flex items-center justify-center mb-6">
                 <Users className="w-8 h-8 text-orange-500 mr-3" />
                 <h3 className="text-xl font-bold text-orange-500">Everyday People Protection</h3>
               </div>
@@ -252,19 +253,19 @@ const SalesFunnelPage = () => {
               </p>
               <div className="space-y-3 mb-6">
                 <div className="text-sm font-semibold text-white">What We Do</div>
-                <div className="flex items-center text-sm text-gray-300">
+                <div className="flex items-center text-sm text-gray-300 justify-center">
                   <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
                   Search engine cleanup of harmful results
                 </div>
-                <div className="flex items-center text-sm text-gray-300">
+                <div className="flex items-center text-sm text-gray-300 justify-center">
                   <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
                   Threat detection from forums and dark web
                 </div>
-                <div className="flex items-center text-sm text-gray-300">
+                <div className="flex items-center text-sm text-gray-300 justify-center">
                   <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
                   Alerts when your information resurfaces
                 </div>
-                <div className="flex items-center text-sm text-gray-300">
+                <div className="flex items-center text-sm text-gray-300 justify-center">
                   <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
                   Legal rights enforcement (GDPR, CCPA, DSR)
                 </div>
@@ -456,3 +457,4 @@ const SalesFunnelPage = () => {
 };
 
 export default SalesFunnelPage;
+
