@@ -6,7 +6,7 @@ import MobileNav from './MobileNav';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '../ui/button';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { LogIn, LogOut, Home } from 'lucide-react';
+import { LogIn, LogOut, Home, Menu, X } from 'lucide-react';
 import Logo from '../ui/logo';
 
 interface PublicLayoutProps {
@@ -33,16 +33,16 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-50 w-full bg-black/95 backdrop-blur border-b border-gray-800">
-        <div className="container mx-auto px-6">
-          <div className="flex items-center justify-between py-4">
-            <div className="flex items-center gap-4">
+        <div className="container mx-auto px-4 sm:px-6">
+          <div className="flex items-center justify-between py-3 sm:py-4">
+            <div className="flex items-center gap-2 sm:gap-4">
               <Link to="/">
-                <Logo variant="light" size="xl" />
+                <Logo variant="light" size="lg" className="sm:text-xl" />
               </Link>
               
               {/* Show Back to Home link only if not on home page */}
               {!isHomePage && (
-                <Link to="/" className="flex items-center gap-2 text-orange-500 hover:text-orange-400 transition-colors">
+                <Link to="/" className="hidden sm:flex items-center gap-2 text-orange-500 hover:text-orange-400 transition-colors">
                   <Home className="h-4 w-4" />
                   <span className="text-sm">Back to Home</span>
                 </Link>
@@ -50,17 +50,17 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
             </div>
             
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center space-x-8">
-              <Link to="/blog" className="text-gray-300 hover:text-white transition-colors">
+            <nav className="hidden md:flex items-center space-x-6 lg:space-x-8">
+              <Link to="/blog" className="text-gray-300 hover:text-white transition-colors text-sm lg:text-base">
                 Blog
               </Link>
-              <Link to="/simon-lindsay" className="text-gray-300 hover:text-white transition-colors">
+              <Link to="/simon-lindsay" className="text-gray-300 hover:text-white transition-colors text-sm lg:text-base">
                 About Simon
               </Link>
-              <Link to="/scan" className="text-gray-300 hover:text-white transition-colors">
+              <Link to="/scan" className="text-gray-300 hover:text-white transition-colors text-sm lg:text-base">
                 Get Started
               </Link>
-              <Link to="/pricing" className="text-gray-300 hover:text-white transition-colors">
+              <Link to="/pricing" className="text-gray-300 hover:text-white transition-colors text-sm lg:text-base">
                 Services
               </Link>
               {isAuthenticated ? (
@@ -75,8 +75,8 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
                 </Button>
               ) : (
                 <Link to="/admin/login">
-                  <Button variant="outline" size="sm" className="border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white">
-                    <LogIn className="mr-2 h-4 w-4" />
+                  <Button variant="outline" size="sm" className="border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white text-xs lg:text-sm">
+                    <LogIn className="mr-2 h-3 w-3 lg:h-4 lg:w-4" />
                     Admin Login
                   </Button>
                 </Link>
@@ -85,18 +85,93 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
 
             {/* Mobile Menu Button */}
             <button 
-              className="md:hidden text-gray-300"
+              className="md:hidden text-gray-300 p-2"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              aria-label="Toggle mobile menu"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
+              {isMobileMenuOpen ? (
+                <X className="w-5 h-5" />
+              ) : (
+                <Menu className="w-5 h-5" />
+              )}
             </button>
           </div>
         </div>
+
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden bg-black/98 backdrop-blur border-t border-gray-800">
+            <nav className="container mx-auto px-4 py-4">
+              <div className="flex flex-col space-y-4">
+                {!isHomePage && (
+                  <Link 
+                    to="/" 
+                    className="flex items-center gap-2 text-orange-500 hover:text-orange-400 transition-colors py-2"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Home className="h-4 w-4" />
+                    <span>Back to Home</span>
+                  </Link>
+                )}
+                <Link 
+                  to="/blog" 
+                  className="text-gray-300 hover:text-white transition-colors py-2"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Blog
+                </Link>
+                <Link 
+                  to="/simon-lindsay" 
+                  className="text-gray-300 hover:text-white transition-colors py-2"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  About Simon
+                </Link>
+                <Link 
+                  to="/scan" 
+                  className="text-gray-300 hover:text-white transition-colors py-2"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Get Started
+                </Link>
+                <Link 
+                  to="/pricing" 
+                  className="text-gray-300 hover:text-white transition-colors py-2"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Services
+                </Link>
+                {isAuthenticated ? (
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => {
+                      handleAuthAction();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="text-sm font-medium text-gray-300 hover:text-white justify-start px-0"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign Out
+                  </Button>
+                ) : (
+                  <Link 
+                    to="/admin/login"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Button variant="outline" size="sm" className="border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white w-full justify-start">
+                      <LogIn className="mr-2 h-4 w-4" />
+                      Admin Login
+                    </Button>
+                  </Link>
+                )}
+              </div>
+            </nav>
+          </div>
+        )}
       </header>
       
-      <main className="flex-1">
+      <main className="flex-1 w-full">
         {children}
       </main>
       

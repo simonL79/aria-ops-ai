@@ -7,27 +7,29 @@ import Logo from '@/components/ui/logo';
 
 const HeroSection = () => {
   return (
-    <section className="hero bg-gradient-to-r from-premium-black to-premium-darkGray text-white py-16 relative overflow-hidden">
+    <section className="hero bg-gradient-to-r from-premium-black to-premium-darkGray text-white py-8 sm:py-12 lg:py-16 relative overflow-hidden min-h-[80vh] sm:min-h-screen flex items-center">
       <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1557682250-33bd709cbe85?q=80&w=1000')] bg-cover bg-center opacity-5"></div>
-      <div className="container mx-auto px-6 relative z-10">
-        <div className="flex flex-col items-center justify-center mb-8">
-          <Logo variant="light" size="xl" className="mb-6" />
-          <div className="text-center">
-            <p className="text-lg md:text-xl mb-4 text-blue-200 font-medium">
+      <div className="container mx-auto px-4 sm:px-6 relative z-10 w-full">
+        <div className="flex flex-col items-center justify-center mb-6 sm:mb-8">
+          <Logo variant="light" size="lg" className="mb-4 sm:mb-6 text-2xl sm:text-3xl lg:text-4xl" />
+          <div className="text-center max-w-4xl mx-auto">
+            <p className="text-sm sm:text-lg md:text-xl mb-3 sm:mb-4 text-blue-200 font-medium px-4">
               Your Reputation Is Being Shaped Online
             </p>
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 max-w-4xl mx-auto leading-tight text-shadow-lg">
+            <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 leading-tight text-shadow-lg px-4">
               Monitor. Analyze. <span className="text-white">Command.</span>
             </h1>
           </div>
         </div>
-        <p className="text-xl md:text-2xl mb-10 max-w-2xl mx-auto leading-relaxed text-white text-center">
+        
+        <p className="text-base sm:text-xl md:text-2xl mb-6 sm:mb-8 lg:mb-10 max-w-2xl mx-auto leading-relaxed text-white text-center px-4">
           ARIA is your real-time Reputation NOC — a centralized threat intelligence hub built for rapid digital risk response.
         </p>
-        <div className="flex justify-center w-full">
-          <Button asChild size="lg" className="w-full max-w-md bg-white text-premium-black px-8 py-7 text-lg font-semibold rounded-md shadow-lg hover:bg-gray-200 transition-all duration-300 hover:shadow-xl mx-auto">
+        
+        <div className="flex justify-center w-full px-4">
+          <Button asChild size="lg" className="w-full sm:w-auto sm:max-w-md bg-white text-premium-black px-6 sm:px-8 py-4 sm:py-7 text-base sm:text-lg font-semibold rounded-md shadow-lg hover:bg-gray-200 transition-all duration-300 hover:shadow-xl">
             <Link to="/scan" className="flex items-center justify-center gap-2">
-              Enter Command Center <ArrowRight className="w-5 h-5" />
+              Enter Command Center <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
             </Link>
           </Button>
         </div>
