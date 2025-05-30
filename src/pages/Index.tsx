@@ -93,9 +93,11 @@ const Index = () => {
               <div className="space-y-6">
                 {/* A.R.I.A Logo */}
                 <div className="flex items-center gap-3 mb-8">
-                  <div className="w-12 h-12 bg-gradient-to-r from-amber-400 to-amber-600 rounded-sm flex items-center justify-center">
-                    <div className="w-6 h-6 bg-[#0A0B0D] rounded-sm"></div>
-                  </div>
+                  <img 
+                    src="/lovable-uploads/37370275-bf62-4eab-b0e3-e184ce3fa142.png" 
+                    alt="A.R.I.A Logo" 
+                    className="h-12 w-auto"
+                  />
                   <span className="text-3xl font-bold text-white tracking-tight">A.R.I.A™</span>
                 </div>
                 
@@ -103,7 +105,7 @@ const Index = () => {
                   Elevate Your 
                   <span className="text-amber-400"> Digital</span> Reputation
                 </h1>
-                <p className="text-xl text-gray-300 leading-relaxed max-w-2xl mx-auto">
+                <p className="text-xl text-gray-300 leading-relaxed max-w-2xl">
                   Enterprise-grade reputation intelligence and crisis prevention. 
                   Powered by AI, delivered by experts who understand the stakes.
                 </p>
