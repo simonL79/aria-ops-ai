@@ -9,6 +9,8 @@ import DashboardPage from "./pages/dashboard/DashboardPage";
 import AdminLogin from "./pages/AdminLogin";
 import AriaCommand from "./pages/AriaCommand";
 import ThreatsManagement from "./pages/ThreatsManagement";
+import SalesFunnelPage from "./pages/SalesFunnelPage";
+import PricingPage from "./pages/PricingPage";
 
 const queryClient = new QueryClient();
 
@@ -21,6 +23,8 @@ function App() {
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
+              <Route path="/sales-funnel" element={<SalesFunnelPage />} />
+              <Route path="/pricing" element={<PricingPage />} />
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/admin/login" element={<AdminLogin />} />
               <Route path="/admin" element={<DashboardPage />} />

@@ -26,6 +26,9 @@ const SalesFunnelPage = () => {
             
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-8">
+              <Link to="/" className="text-gray-300 hover:text-white transition-colors">
+                Home
+              </Link>
               <Link to="/blog" className="text-gray-300 hover:text-white transition-colors">
                 Blog
               </Link>
@@ -83,7 +86,7 @@ const SalesFunnelPage = () => {
                   Request Assessment
                 </Button>
               </Link>
-              <Link to="/about">
+              <Link to="/simon-lindsay">
                 <Button variant="outline" className="border-gray-600 text-gray-300 hover:bg-gray-800 px-8 py-3 text-lg rounded-md">
                   Learn More
                 </Button>
@@ -431,18 +434,18 @@ const SalesFunnelPage = () => {
             <div>
               <h4 className="font-semibold text-white mb-4">Services</h4>
               <div className="space-y-2 text-sm text-gray-400">
-                <Link to="/threats" className="block hover:text-white transition-colors">Threat Detection</Link>
-                <Link to="/monitoring" className="block hover:text-white transition-colors">Crisis Management</Link>
-                <Link to="/intelligence" className="block hover:text-white transition-colors">Intelligence Reports</Link>
+                <Link to="/scan" className="block hover:text-white transition-colors">Threat Detection</Link>
+                <Link to="/pricing" className="block hover:text-white transition-colors">Crisis Management</Link>
+                <Link to="/aria-command" className="block hover:text-white transition-colors">Intelligence Reports</Link>
               </div>
             </div>
             
             <div>
               <h4 className="font-semibold text-white mb-4">Company</h4>
               <div className="space-y-2 text-sm text-gray-400">
-                <Link to="/about" className="block hover:text-white transition-colors">About</Link>
+                <Link to="/simon-lindsay" className="block hover:text-white transition-colors">About</Link>
                 <Link to="/blog" className="block hover:text-white transition-colors">Blog</Link>
-                <Link to="/contact" className="block hover:text-white transition-colors">Contact</Link>
+                <Link to="/scan" className="block hover:text-white transition-colors">Contact</Link>
               </div>
             </div>
             
