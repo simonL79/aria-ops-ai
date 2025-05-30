@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -92,27 +91,26 @@ const Index = () => {
             {/* Left Column - Content */}
             <div className="space-y-8">
               <div className="space-y-6">
-                {/* A.R.I.A Logo */}
-                <div className="flex items-center gap-3 mb-8">
+                {/* A.R.I.A Logo - 5x larger and centered */}
+                <div className="flex justify-center mb-8">
                   <img 
                     src="/lovable-uploads/37370275-bf62-4eab-b0e3-e184ce3fa142.png" 
                     alt="A.R.I.A Logo" 
-                    className="h-12 w-auto"
+                    className="h-60 w-auto"
                   />
-                  <span className="text-3xl font-bold text-white tracking-tight">A.R.I.A™</span>
                 </div>
                 
-                <h1 className="text-5xl lg:text-6xl font-bold leading-tight">
+                <h1 className="text-5xl lg:text-6xl font-bold leading-tight text-center">
                   Elevate Your 
                   <span className="text-amber-400"> Digital</span> Reputation
                 </h1>
-                <p className="text-xl text-gray-300 leading-relaxed max-w-2xl">
+                <p className="text-xl text-gray-300 leading-relaxed max-w-2xl mx-auto text-center">
                   Enterprise-grade reputation intelligence and crisis prevention. 
                   Powered by AI, delivered by experts who understand the stakes.
                 </p>
               </div>
               
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button 
                   onClick={handleScanRequest}
                   className="bg-amber-600 hover:bg-amber-500 text-black px-8 py-3 text-lg font-semibold"
@@ -125,6 +123,31 @@ const Index = () => {
                 >
                   Learn More
                 </Button>
+              </div>
+
+              {/* Review Sections */}
+              <div className="mt-8 space-y-6">
+                {/* Trustpilot Reviews */}
+                <div className="text-center">
+                  <p className="text-sm text-gray-300 mb-2">Rated Excellent on Trustpilot</p>
+                  <div className="flex justify-center gap-1 mb-1">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="h-4 w-4 fill-green-500 text-green-500" />
+                    ))}
+                  </div>
+                  <p className="text-xs text-gray-400">Based on 247+ reviews</p>
+                </div>
+                
+                {/* Google Reviews */}
+                <div className="text-center">
+                  <p className="text-sm text-gray-300 mb-2">5.0 Stars on Google Reviews</p>
+                  <div className="flex justify-center gap-1 mb-1">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="h-4 w-4 fill-blue-500 text-blue-500" />
+                    ))}
+                  </div>
+                  <p className="text-xs text-gray-400">Verified business reviews</p>
+                </div>
               </div>
             </div>
 
@@ -308,31 +331,6 @@ const Index = () => {
             <p className="text-xs text-gray-400 mt-4">
               Confidential • Secure • Professional
             </p>
-            
-            {/* Review Sections */}
-            <div className="mt-8 space-y-6">
-              {/* Trustpilot Reviews */}
-              <div className="text-center">
-                <p className="text-sm text-gray-300 mb-2">Rated Excellent on Trustpilot</p>
-                <div className="flex justify-center gap-1 mb-1">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-4 w-4 fill-green-500 text-green-500" />
-                  ))}
-                </div>
-                <p className="text-xs text-gray-400">Based on 247+ reviews</p>
-              </div>
-              
-              {/* Google Reviews */}
-              <div className="text-center">
-                <p className="text-sm text-gray-300 mb-2">5.0 Stars on Google Reviews</p>
-                <div className="flex justify-center gap-1 mb-1">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-4 w-4 fill-blue-500 text-blue-500" />
-                  ))}
-                </div>
-                <p className="text-xs text-gray-400">Verified business reviews</p>
-              </div>
-            </div>
           </Card>
         </div>
       </section>
