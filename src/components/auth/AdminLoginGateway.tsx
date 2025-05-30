@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -196,7 +197,7 @@ const AdminLoginGateway = () => {
   // Show system check if admin is authenticated
   if (!authLoading && isAuthenticated && isAdmin && showSystemCheck && !systemCheckComplete) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0A0F2C] via-[#1C1C1E] to-[#0A0F2C] p-4">
+      <div className="min-h-screen flex items-center justify-center bg-[#0A0B0D] p-4">
         <div className="max-w-4xl w-full">
           <AdminLoginSystemCheck onComplete={handleSystemCheckComplete} />
         </div>
@@ -207,31 +208,32 @@ const AdminLoginGateway = () => {
   // Show loading state while auth is initializing
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0A0F2C] via-[#1C1C1E] to-[#0A0F2C] p-4">
+      <div className="min-h-screen flex items-center justify-center bg-[#0A0B0D] p-4">
         <div className="text-center space-y-8">
           <div className="flex items-center justify-center gap-4 mb-8">
-            <div className="w-16 h-16 bg-gradient-to-r from-[#247CFF] to-[#38C172] rounded-full flex items-center justify-center animate-pulse">
-              <div className="w-8 h-8 bg-white rounded-full"></div>
-            </div>
-            <h1 className="text-5xl font-black text-white font-['Space_Grotesk'] tracking-tight">A.R.I.A™</h1>
+            <img 
+              src="/lovable-uploads/37370275-bf62-4eab-b0e3-e184ce3fa142.png" 
+              alt="A.R.I.A Logo" 
+              className="h-24 w-auto"
+            />
           </div>
-          <div className="animate-spin h-16 w-16 border-4 border-[#247CFF] border-t-transparent rounded-full mx-auto"></div>
+          <div className="animate-spin h-16 w-16 border-4 border-amber-600 border-t-transparent rounded-full mx-auto"></div>
           <div className="text-white space-y-4">
-            <div className="text-2xl font-bold font-['Space_Grotesk'] tracking-wide">INITIALIZING SECURITY PROTOCOLS</div>
-            <div className="text-[#D8DEE9] font-['Inter']">Establishing secure connection to A.R.I.A™ intelligence network...</div>
+            <div className="text-2xl font-bold tracking-wide">INITIALIZING SECURITY PROTOCOLS</div>
+            <div className="text-gray-300">Establishing secure connection to A.R.I.A™ intelligence network...</div>
           </div>
           <div className="space-y-4">
             <Button
               onClick={handleForceReset}
               variant="outline"
-              className="bg-transparent border-[#247CFF] text-[#247CFF] hover:bg-[#247CFF] hover:text-white font-['Space_Grotesk'] tracking-wide"
+              className="bg-transparent border-amber-600 text-amber-400 hover:bg-amber-600 hover:text-black"
             >
               <RotateCcw className="mr-2 h-4 w-4" />
               FORCE SYSTEM RESET
             </Button>
             <Button
               onClick={handleEmergencyAccess}
-              className="bg-gradient-to-r from-[#247CFF] to-[#38C172] hover:from-[#1c63cc] hover:to-[#2d8f5f] text-white font-['Space_Grotesk'] tracking-wide"
+              className="bg-amber-600 hover:bg-amber-500 text-black"
             >
               <Key className="mr-2 h-4 w-4" />
               EMERGENCY OVERRIDE
@@ -245,30 +247,31 @@ const AdminLoginGateway = () => {
   // If authenticated but not admin, show access denied with emergency controls
   if (isAuthenticated && !isAdmin) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0A0F2C] via-[#1C1C1E] to-[#0A0F2C] p-4">
-        <Card className="max-w-lg w-full bg-gradient-to-br from-[#1C1C1E]/90 to-[#0A0F2C]/90 border border-[#247CFF]/30 shadow-2xl backdrop-blur-xl rounded-3xl">
+      <div className="min-h-screen flex items-center justify-center bg-[#0A0B0D] p-4">
+        <Card className="max-w-lg w-full bg-[#1A1B1E] border-gray-800 shadow-2xl">
           <CardContent className="p-12 text-center space-y-8">
             <div className="flex items-center justify-center gap-4 mb-8">
-              <div className="w-16 h-16 bg-gradient-to-r from-[#247CFF] to-[#38C172] rounded-full flex items-center justify-center">
-                <div className="w-8 h-8 bg-white rounded-full"></div>
-              </div>
-              <h1 className="text-4xl font-black text-white font-['Space_Grotesk'] tracking-tight">A.R.I.A™</h1>
+              <img 
+                src="/lovable-uploads/37370275-bf62-4eab-b0e3-e184ce3fa142.png" 
+                alt="A.R.I.A Logo" 
+                className="h-24 w-auto"
+              />
             </div>
-            <div className="text-red-400 text-3xl font-bold font-['Space_Grotesk']">❌ ACCESS DENIED</div>
-            <div className="text-white text-xl font-['Space_Grotesk']">ADMIN CLEARANCE REQUIRED</div>
-            <div className="text-[#D8DEE9] font-['Inter']">
+            <div className="text-red-400 text-3xl font-bold">❌ ACCESS DENIED</div>
+            <div className="text-white text-xl">ADMIN CLEARANCE REQUIRED</div>
+            <div className="text-gray-300">
               This area requires administrative privileges. All access attempts are monitored and logged for security purposes.
             </div>
             <div className="space-y-4">
               <Button 
                 onClick={() => signOut()}
-                className="w-full bg-[#1C1C1E] text-white hover:bg-[#2C2C2E] border border-[#247CFF]/30 font-['Space_Grotesk'] tracking-wide"
+                className="w-full bg-[#111214] text-white hover:bg-gray-700 border border-gray-700"
               >
                 SIGN OUT
               </Button>
               <Button
                 onClick={handleEmergencyAccess}
-                className="w-full bg-gradient-to-r from-[#247CFF] to-[#38C172] hover:from-[#1c63cc] hover:to-[#2d8f5f] text-white font-['Space_Grotesk'] tracking-wide"
+                className="w-full bg-amber-600 hover:bg-amber-500 text-black"
               >
                 <Key className="mr-2 h-4 w-4" />
                 EMERGENCY ADMIN ACCESS
@@ -276,7 +279,7 @@ const AdminLoginGateway = () => {
               <Button
                 onClick={handleForceReset}
                 variant="outline"
-                className="w-full bg-transparent border-[#247CFF] text-[#247CFF] hover:bg-[#247CFF] hover:text-white font-['Space_Grotesk'] tracking-wide"
+                className="w-full bg-transparent border-amber-600 text-amber-400 hover:bg-amber-600 hover:text-black"
               >
                 <RotateCcw className="mr-2 h-4 w-4" />
                 RESET AUTHENTICATION
@@ -362,25 +365,26 @@ const AdminLoginGateway = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0A0F2C] via-[#1C1C1E] to-[#0A0F2C] p-4">
+    <div className="min-h-screen flex items-center justify-center bg-[#0A0B0D] p-4">
       <div className="max-w-lg w-full space-y-8">
         {/* Header */}
         <div className="text-center">
           <div className="flex items-center justify-center gap-4 mb-8">
-            <div className="w-16 h-16 bg-gradient-to-r from-[#247CFF] to-[#38C172] rounded-full flex items-center justify-center">
-              <div className="w-8 h-8 bg-white rounded-full"></div>
-            </div>
-            <h1 className="text-5xl font-black text-white font-['Space_Grotesk'] tracking-tight">A.R.I.A™</h1>
+            <img 
+              src="/lovable-uploads/37370275-bf62-4eab-b0e3-e184ce3fa142.png" 
+              alt="A.R.I.A Logo" 
+              className="h-24 w-auto"
+            />
           </div>
-          <h2 className="text-2xl font-bold text-[#247CFF] font-['Space_Grotesk'] tracking-wide">SECURE ADMIN GATEWAY</h2>
-          <p className="text-[#D8DEE9] font-['Inter'] mt-2">Advanced Reputation Intelligence & Analysis</p>
+          <h2 className="text-2xl font-bold text-amber-400 tracking-wide">SECURE ADMIN GATEWAY</h2>
+          <p className="text-gray-300 mt-2">Advanced Reputation Intelligence & Analysis</p>
         </div>
 
         {/* Security Notice */}
-        <Alert className="border-[#247CFF]/30 bg-[#247CFF]/10 backdrop-blur-sm">
-          <AlertTriangle className="h-5 w-5 text-[#247CFF]" />
-          <AlertDescription className="text-[#D8DEE9] font-['Inter']">
-            <strong className="text-[#247CFF]">RESTRICTED ACCESS:</strong> This is a secure administrative portal. All access attempts are monitored and logged for security purposes.
+        <Alert className="border-amber-600/30 bg-amber-600/10 backdrop-blur-sm">
+          <AlertTriangle className="h-5 w-5 text-amber-400" />
+          <AlertDescription className="text-gray-300">
+            <strong className="text-amber-400">RESTRICTED ACCESS:</strong> This is a secure administrative portal. All access attempts are monitored and logged for security purposes.
             {isLocked && (
               <div className="mt-2 text-red-400 font-bold">
                 🔒 SECURITY LOCKOUT ACTIVE - Time remaining: {getLockoutTimeRemaining()}
@@ -390,13 +394,13 @@ const AdminLoginGateway = () => {
         </Alert>
 
         {/* Login Card */}
-        <Card className="bg-gradient-to-br from-[#1C1C1E]/90 to-[#0A0F2C]/90 border border-[#247CFF]/30 shadow-2xl backdrop-blur-xl rounded-3xl overflow-hidden">
-          <CardHeader className="text-center p-8 border-b border-[#247CFF]/20">
-            <CardTitle className="text-2xl font-bold text-white flex items-center justify-center gap-3 font-['Space_Grotesk'] tracking-wide">
-              <Lock className="h-7 w-7 text-[#247CFF]" />
+        <Card className="bg-[#1A1B1E] border-gray-800 shadow-2xl">
+          <CardHeader className="text-center p-8 border-b border-gray-800">
+            <CardTitle className="text-2xl font-bold text-white flex items-center justify-center gap-3">
+              <Lock className="h-7 w-7 text-amber-400" />
               ADMIN AUTHENTICATION
             </CardTitle>
-            <CardDescription className="text-[#D8DEE9] font-['Inter'] mt-2">
+            <CardDescription className="text-gray-300 mt-2">
               Enter your secure credentials to access the A.R.I.A™ command center
             </CardDescription>
           </CardHeader>
@@ -404,7 +408,7 @@ const AdminLoginGateway = () => {
           <CardContent className="p-8">
             <form onSubmit={handleLogin} className="space-y-6">
               <div>
-                <label htmlFor="email" className="block text-sm font-bold text-[#247CFF] mb-2 font-['Space_Grotesk'] tracking-wide">
+                <label htmlFor="email" className="block text-sm font-bold text-amber-400 mb-2">
                   ADMIN EMAIL
                 </label>
                 <Input
@@ -416,12 +420,12 @@ const AdminLoginGateway = () => {
                   required
                   disabled={isLoading || isLocked}
                   autoComplete="email"
-                  className="bg-[#0A0F2C]/50 border-[#247CFF]/30 text-white placeholder-[#D8DEE9]/40 focus:border-[#247CFF] focus:ring-[#247CFF]/20 h-12 font-['Inter'] rounded-xl"
+                  className="bg-[#0A0B0D] border-gray-700 text-white placeholder-gray-400 focus:border-amber-600 focus:ring-amber-600/20 h-12"
                 />
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-sm font-bold text-[#247CFF] mb-2 font-['Space_Grotesk'] tracking-wide">
+                <label htmlFor="password" className="block text-sm font-bold text-amber-400 mb-2">
                   SECURE PASSWORD
                 </label>
                 <div className="relative">
@@ -434,13 +438,13 @@ const AdminLoginGateway = () => {
                     required
                     disabled={isLoading || isLocked}
                     autoComplete="current-password"
-                    className="bg-[#0A0F2C]/50 border-[#247CFF]/30 text-white placeholder-[#D8DEE9]/40 focus:border-[#247CFF] focus:ring-[#247CFF]/20 h-12 pr-12 font-['Inter'] rounded-xl"
+                    className="bg-[#0A0B0D] border-gray-700 text-white placeholder-gray-400 focus:border-amber-600 focus:ring-amber-600/20 h-12 pr-12"
                   />
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 text-[#D8DEE9]/60 hover:text-[#247CFF] hover:bg-transparent"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 text-gray-400 hover:text-amber-400 hover:bg-transparent"
                     onClick={() => setShowPassword(!showPassword)}
                     disabled={isLoading || isLocked}
                   >
@@ -451,7 +455,7 @@ const AdminLoginGateway = () => {
 
               <Button
                 type="submit"
-                className="w-full bg-gradient-to-r from-[#247CFF] to-[#38C172] hover:from-[#1c63cc] hover:to-[#2d8f5f] text-white font-bold py-4 text-lg rounded-xl shadow-lg hover:shadow-[0_0_25px_rgba(36,124,255,0.3)] transform hover:scale-[1.02] transition-all duration-300 font-['Space_Grotesk'] tracking-wide"
+                className="w-full bg-amber-600 hover:bg-amber-500 text-black font-bold py-4 text-lg shadow-lg hover:shadow-amber-600/25 transform hover:scale-[1.02] transition-all duration-300"
                 disabled={isLoading || isLocked}
               >
                 {isLoading ? (
@@ -474,12 +478,12 @@ const AdminLoginGateway = () => {
             </form>
 
             {/* Emergency Controls */}
-            <div className="mt-6 pt-6 border-t border-[#247CFF]/20 space-y-4">
+            <div className="mt-6 pt-6 border-t border-gray-800 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <Button
                   onClick={handleForceReset}
                   variant="outline"
-                  className="bg-transparent border-[#247CFF] text-[#247CFF] hover:bg-[#247CFF] hover:text-white font-['Space_Grotesk'] tracking-wide text-sm"
+                  className="bg-transparent border-amber-600 text-amber-400 hover:bg-amber-600 hover:text-black text-sm"
                   disabled={isLoading}
                 >
                   <RotateCcw className="mr-2 h-4 w-4" />
@@ -487,7 +491,7 @@ const AdminLoginGateway = () => {
                 </Button>
                 <Button
                   onClick={handleEmergencyAccess}
-                  className="bg-gradient-to-r from-[#38C172] to-[#247CFF] hover:from-[#2d8f5f] hover:to-[#1c63cc] text-white font-['Space_Grotesk'] tracking-wide text-sm"
+                  className="bg-amber-600 hover:bg-amber-500 text-black text-sm"
                   disabled={isLoading}
                 >
                   <Key className="mr-2 h-4 w-4" />
@@ -496,8 +500,8 @@ const AdminLoginGateway = () => {
               </div>
             </div>
 
-            <div className="mt-8 pt-6 border-t border-[#247CFF]/20">
-              <div className="text-xs text-[#D8DEE9]/60 text-center space-y-2 font-['Inter']">
+            <div className="mt-8 pt-6 border-t border-gray-800">
+              <div className="text-xs text-gray-400 text-center space-y-2">
                 <div>🔒 256-bit encrypted sessions • Zero-trust architecture</div>
                 <div>⚡ Auto-expiring tokens • Multi-factor authentication ready</div>
                 <div>📊 Real-time threat monitoring • Advanced intrusion detection</div>
@@ -513,7 +517,7 @@ const AdminLoginGateway = () => {
         </Card>
 
         {/* Footer */}
-        <div className="text-center text-sm text-[#D8DEE9]/60 font-['Inter']">
+        <div className="text-center text-sm text-gray-400">
           A.R.I.A™ Adaptive Reputation Intelligence & Analysis System
         </div>
       </div>

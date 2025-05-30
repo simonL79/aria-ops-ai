@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -49,7 +50,7 @@ const Index = () => {
                 variant="outline"
                 className="border-amber-600 text-amber-400 hover:bg-amber-600 hover:text-black"
               >
-                {isAuthenticated && isAdmin ? 'Dashboard' : 'Client Portal'}
+                {isAuthenticated && isAdmin ? 'Dashboard' : 'Admin Login'}
               </Button>
             </nav>
 
@@ -77,7 +78,7 @@ const Index = () => {
                   variant="outline"
                   className="border-amber-600 text-amber-400 hover:bg-amber-600 hover:text-black w-full"
                 >
-                  {isAuthenticated && isAdmin ? 'Dashboard' : 'Client Portal'}
+                  {isAuthenticated && isAdmin ? 'Dashboard' : 'Admin Login'}
                 </Button>
               </nav>
             </div>
