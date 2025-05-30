@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -93,7 +92,7 @@ const Index = () => {
             <div className="space-y-8">
               <div className="space-y-6">
                 {/* A.R.I.A Logo - 5x larger and centered */}
-                <div className="flex justify-center mb-4">
+                <div className="flex justify-center mb-2">
                   <img 
                     src="/lovable-uploads/37370275-bf62-4eab-b0e3-e184ce3fa142.png" 
                     alt="A.R.I.A Logo" 
