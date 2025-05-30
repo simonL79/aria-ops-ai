@@ -1,3 +1,4 @@
+
 import React from 'react';
 import PublicLayout from "@/components/layout/PublicLayout";
 import { Button } from "@/components/ui/button";
@@ -24,7 +25,7 @@ const PricingPage = () => {
                 <CardHeader>
                   <CardTitle className="text-white">Basic Monitoring</CardTitle>
                   <CardDescription className="text-gray-300">For individuals getting started</CardDescription>
-                  <div className="text-3xl font-bold text-white">£29/mo</div>
+                  <div className="text-3xl font-bold text-white">£97/mo</div>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-3 mb-6">
@@ -57,7 +58,7 @@ const PricingPage = () => {
                 <CardHeader>
                   <CardTitle className="text-white">PRO Monitoring</CardTitle>
                   <CardDescription className="text-gray-300">For professionals and small businesses</CardDescription>
-                  <div className="text-3xl font-bold text-white">£97/mo</div>
+                  <div className="text-3xl font-bold text-white">£297/mo</div>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-3 mb-6">
