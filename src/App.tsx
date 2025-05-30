@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -22,6 +21,7 @@ import Contact from "./pages/Contact";
 import AdminLogin from "./pages/AdminLogin";
 import Authentication from "./pages/Authentication";
 import ThankYouPage from "./pages/ThankYouPage";
+import ContactFormPage from "./pages/ContactFormPage";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +37,7 @@ const App = () => (
           <Route path="/thank-you" element={<ThankYouPage />} />
           <Route path="/pricing" element={<PricingPage />} />
           <Route path="/payment" element={<PaymentPage />} />
+          <Route path="/contact-sales" element={<ContactFormPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/blog" element={<BlogPage />} />
           <Route path="/blog/:slug" element={<BlogPostPage />} />

@@ -110,8 +110,8 @@ const PricingPage = () => {
                       <span className="text-gray-300">Custom reporting</span>
                     </li>
                   </ul>
-                  <Button variant="outline" className="w-full border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white">
-                    Contact Sales
+                  <Button asChild variant="outline" className="w-full border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white">
+                    <Link to="/contact-sales">Contact Sales</Link>
                   </Button>
                 </CardContent>
               </Card>
