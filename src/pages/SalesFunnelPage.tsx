@@ -84,6 +84,111 @@ const SalesFunnelPage = () => {
         </div>
       </section>
 
+      {/* Services Section */}
+      <section className="px-4 py-20 border-t border-gray-800">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-4xl md:text-5xl font-light mb-8 text-center">
+            Reputation Management Services<br />
+            <span className="text-amber-500">– Powered by A.R.I.A™</span>
+          </h2>
+          <p className="text-xl text-gray-300 mb-16 max-w-4xl mx-auto text-center">
+            A.R.I.A™ isn't just for celebrities, CEOs, or global brands. Reputation is personal — and everyone deserves protection. Whether you're facing online abuse, negative press, or algorithmic bias, we've built elite tools for every type of modern digital identity.
+          </p>
+          
+          <div className="grid md:grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
+            {/* Social Media Protection */}
+            <Card className="bg-gray-900 border-gray-800 p-8">
+              <div className="text-3xl mb-4">💬</div>
+              <h3 className="text-2xl font-semibold mb-4 text-white">Social Media Protection</h3>
+              <p className="text-amber-400 mb-4 font-medium">Ideal for: Everyday users, community leaders, students, professionals</p>
+              
+              <div className="mb-6">
+                <h4 className="text-lg font-semibold mb-3 text-white">What We Do:</h4>
+                <ul className="space-y-2 text-gray-300">
+                  <li>• Monitor threats and harmful mentions across platforms like X (Twitter), Reddit, TikTok, and Instagram</li>
+                  <li>• Automatically suppress legacy content and untag past associations (via GRAVEYARD™ & EIDETIC™)</li>
+                  <li>• Detect and counter disinformation campaigns in real time</li>
+                  <li>• Send takedown notices for impersonation, defamation, or harassment</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 className="text-lg font-semibold mb-2 text-white">Why It Matters:</h4>
+                <p className="text-gray-300">Your digital footprint should reflect who you are today — not mistakes, rumors, or misinformation from years ago.</p>
+              </div>
+            </Card>
+
+            {/* Influencer & Creator Shield */}
+            <Card className="bg-gray-900 border-gray-800 p-8">
+              <div className="text-3xl mb-4">📣</div>
+              <h3 className="text-2xl font-semibold mb-4 text-white">Influencer & Creator Reputation Shield</h3>
+              <p className="text-amber-400 mb-4 font-medium">Ideal for: Influencers, streamers, YouTubers, TikTokers, OnlyFans creators, podcasters</p>
+              
+              <div className="mb-6">
+                <h4 className="text-lg font-semibold mb-3 text-white">What We Do:</h4>
+                <ul className="space-y-2 text-gray-300">
+                  <li>• Real-time crisis monitoring when your content goes viral — good or bad</li>
+                  <li>• Predictive behavior alerts (via PRAXIS™) when followers or collaborators might trigger a brand issue</li>
+                  <li>• AI bias analysis on what LLMs and search engines say about you</li>
+                  <li>• Automated counter-narratives (via RSI™) to redirect harmful stories</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 className="text-lg font-semibold mb-2 text-white">Why It Matters:</h4>
+                <p className="text-gray-300">One viral moment shouldn't define your career. A.R.I.A™ helps you stay ahead of cancel culture, hate mobs, and false narratives.</p>
+              </div>
+            </Card>
+
+            {/* Everyday People */}
+            <Card className="bg-gray-900 border-gray-800 p-8">
+              <div className="text-3xl mb-4">🧑‍💼</div>
+              <h3 className="text-2xl font-semibold mb-4 text-white">Reputation Management for Everyday People</h3>
+              <p className="text-amber-400 mb-4 font-medium">Ideal for: Teachers, nurses, founders, job-seekers, private citizens</p>
+              
+              <div className="mb-6">
+                <h4 className="text-lg font-semibold mb-3 text-white">What We Do:</h4>
+                <ul className="space-y-2 text-gray-300">
+                  <li>• Search engine cleanup of outdated or harmful results</li>
+                  <li>• Threat detection from forums, dark web leaks, or local news</li>
+                  <li>• Alerting when your name, address, or image resurfaces</li>
+                  <li>• Automated legal rights enforcement (GDPR, CCPA, DSR)</li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 className="text-lg font-semibold mb-2 text-white">Why It Matters:</h4>
+                <p className="text-gray-300">You don't need to be "famous" to be vulnerable. If you've ever Googled yourself and felt uneasy, we're here for you.</p>
+              </div>
+            </Card>
+          </div>
+
+          {/* Add-On Services */}
+          <Card className="bg-gray-900 border-gray-800 p-8">
+            <div className="text-3xl mb-4">🛡️</div>
+            <h3 className="text-2xl font-semibold mb-6 text-white">Add-On Services</h3>
+            <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <h4 className="text-lg font-semibold mb-2 text-white">Dark Web Leak Monitoring</h4>
+                <p className="text-gray-300">Get notified if your name, photos, or documents appear on black market sites</p>
+              </div>
+              <div>
+                <h4 className="text-lg font-semibold mb-2 text-white">AI Disinfo Watchdog</h4>
+                <p className="text-gray-300">Find out if hostile LLMs (like ChatGPT clones) are referencing you unfairly</p>
+              </div>
+              <div>
+                <h4 className="text-lg font-semibold mb-2 text-white">Family Reputation Package</h4>
+                <p className="text-gray-300">Protect your children or family members across online platforms</p>
+              </div>
+              <div>
+                <h4 className="text-lg font-semibold mb-2 text-white">Full Service Takedowns</h4>
+                <p className="text-gray-300">We do the work — no forms or back-and-forth with platforms</p>
+              </div>
+            </div>
+          </Card>
+        </div>
+      </section>
+
       {/* Testimonials Section */}
       <section className="px-4 py-20 border-t border-gray-800">
         <div className="max-w-6xl mx-auto">
