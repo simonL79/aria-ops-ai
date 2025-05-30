@@ -8,23 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Save, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-
-interface BlogPost {
-  id?: string;
-  title: string;
-  slug: string;
-  description: string;
-  content: string;
-  author: string;
-  date: string;
-  image: string;
-  category: string;
-  status: 'draft' | 'published';
-  meta_title?: string;
-  meta_description?: string;
-  meta_keywords?: string;
-  medium_url?: string;
-}
+import type { BlogPost } from '@/types/blog';
 
 interface BlogPostEditorProps {
   post?: BlogPost | null;

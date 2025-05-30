@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import PublicLayout from "@/components/layout/PublicLayout";
 import { useBlogPosts } from '@/hooks/useBlogPosts';
-import { ArrowLeft, Calendar, User, Tag, Share, Facebook, Twitter, Linkedin, Mail, Rss, FileText, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Calendar, User, Tag, Share, Facebook, Twitter, Linkedin, Mail, FileText, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import BlogCard from '@/components/blog/BlogCard';

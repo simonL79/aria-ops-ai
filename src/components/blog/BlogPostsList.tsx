@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Edit, Trash2, Eye, ArrowUpDown } from 'lucide-react';
@@ -16,17 +15,18 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import type { BlogPost } from '@/types/blog';
 
 type BlogPostListProps = {
-  onEditPost: (post: any) => void;
+  onEditPost: (post: BlogPost) => void;
   filter: 'all' | 'draft' | 'published';
 };
 
 const BlogPostsList = ({ onEditPost, filter = 'all' }: BlogPostListProps) => {
   const navigate = useNavigate();
-  const [blogPosts, setBlogPosts] = useState([]);
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [sortField, setSortField] = useState('date');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   
@@ -45,7 +45,7 @@ const BlogPostsList = ({ onEditPost, filter = 'all' }: BlogPostListProps) => {
         setError(error.message);
       } else {
         console.log('Blog posts fetched:', data);
-        const transformedPosts = (data || []).map(post => ({
+        const transformedPosts: BlogPost[] = (data || []).map(post => ({
           id: post.id,
           title: post.title,
           slug: post.slug,
@@ -55,7 +55,11 @@ const BlogPostsList = ({ onEditPost, filter = 'all' }: BlogPostListProps) => {
           date: post.date,
           image: post.image || '',
           category: post.category,
-          status: post.status as 'draft' | 'published'
+          status: post.status as 'draft' | 'published',
+          meta_title: post.meta_title,
+          meta_description: post.meta_description,
+          meta_keywords: post.meta_keywords,
+          medium_url: post.medium_url
         }));
         setBlogPosts(transformedPosts);
       }
@@ -71,7 +75,7 @@ const BlogPostsList = ({ onEditPost, filter = 'all' }: BlogPostListProps) => {
     fetchBlogPosts();
   }, []);
   
-  const handleSort = (field) => {
+  const handleSort = (field: string) => {
     if (sortField === field) {
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
@@ -107,21 +111,21 @@ const BlogPostsList = ({ onEditPost, filter = 'all' }: BlogPostListProps) => {
       return post.status === filter;
     })
     .sort((a, b) => {
-      const fieldA = sortField === 'date' ? new Date(a.date).getTime() : a[sortField];
-      const fieldB = sortField === 'date' ? new Date(b.date).getTime() : b[sortField];
+      const fieldA = sortField === 'date' ? new Date(a.date).getTime() : a[sortField as keyof BlogPost];
+      const fieldB = sortField === 'date' ? new Date(b.date).getTime() : b[sortField as keyof BlogPost];
       
       if (fieldA < fieldB) return sortDirection === 'asc' ? -1 : 1;
       if (fieldA > fieldB) return sortDirection === 'asc' ? 1 : -1;
       return 0;
     });
   
-  const handleDeletePost = (postId) => {
+  const handleDeletePost = (postId: string) => {
     // In a real app, this would call an API to delete the post
     console.log('Deleting post:', postId);
     toast.success('Post deleted successfully');
   };
   
-  const viewPost = (slug) => {
+  const viewPost = (slug: string) => {
     navigate(`/blog/${slug}`);
   };
   

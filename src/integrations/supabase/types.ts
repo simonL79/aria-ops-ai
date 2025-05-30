@@ -1151,6 +1151,10 @@ export type Database = {
           description: string | null
           id: string
           image: string | null
+          medium_url: string | null
+          meta_description: string | null
+          meta_keywords: string | null
+          meta_title: string | null
           slug: string
           status: string | null
           title: string
@@ -1165,6 +1169,10 @@ export type Database = {
           description?: string | null
           id?: string
           image?: string | null
+          medium_url?: string | null
+          meta_description?: string | null
+          meta_keywords?: string | null
+          meta_title?: string | null
           slug: string
           status?: string | null
           title: string
@@ -1179,6 +1187,10 @@ export type Database = {
           description?: string | null
           id?: string
           image?: string | null
+          medium_url?: string | null
+          meta_description?: string | null
+          meta_keywords?: string | null
+          meta_title?: string | null
           slug?: string
           status?: string | null
           title?: string
