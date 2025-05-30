@@ -1,10 +1,12 @@
+
 import React from "react";
 import { useAuth } from "@/hooks/useAuth";
 import AdminDashboardWelcome from "@/components/salesFunnel/AdminDashboardWelcome";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Logo from "@/components/ui/logo";
-import { Star, Shield, Eye, Users, CheckCircle } from "lucide-react";
+import { Star, Shield, Eye, Users, CheckCircle, LogIn } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const SalesFunnelPage = () => {
   const { isAuthenticated } = useAuth();
@@ -15,12 +17,46 @@ const SalesFunnelPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white">
+      {/* Header */}
+      <header className="sticky top-0 z-50 w-full bg-gray-900/95 backdrop-blur border-b border-gray-800">
+        <div className="container mx-auto px-6">
+          <div className="flex items-center justify-between py-4">
+            <Logo variant="light" size="md" />
+            
+            {/* Desktop Navigation */}
+            <nav className="hidden md:flex items-center space-x-8">
+              <Link to="/blog" className="text-gray-300 hover:text-white transition-colors">
+                Blog
+              </Link>
+              <Link to="/simon-lindsay" className="text-gray-300 hover:text-white transition-colors">
+                About Simon
+              </Link>
+              <Link to="/scan" className="text-gray-300 hover:text-white transition-colors">
+                Get Started
+              </Link>
+              <button className="text-gray-300 hover:text-white transition-colors">
+                Services
+              </button>
+              <Link to="/admin/login">
+                <Button variant="outline" size="sm" className="border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white">
+                  <LogIn className="mr-2 h-4 w-4" />
+                  Admin Login
+                </Button>
+              </Link>
+            </nav>
+
+            {/* Mobile Menu Button */}
+            <button className="md:hidden text-gray-300">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </header>
+
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center bg-gray-900">
-        <div className="absolute top-6 left-6">
-          <Logo variant="light" size="md" />
-        </div>
-        
         <div className="container mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center">
           {/* Left Content */}
           <div className="space-y-8">
