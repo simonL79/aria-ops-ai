@@ -1,10 +1,10 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Search, AlertTriangle, TrendingUp, TrendingDown, Shield, Eye, ExternalLink } from 'lucide-react';
 import ClientSelector from '@/components/admin/ClientSelector';
+import AddEntityDialog from '@/components/dashboard/AddEntityDialog';
 import type { Client } from '@/types/clients';
 
 interface SERPResult {
@@ -106,6 +106,39 @@ const SERPDefensePanel = () => {
     }
   };
 
+  const handleEntitiesLoad = (entities: ClientEntity[]) => {
+    setClientEntities(entities);
+    // Reset selected entity if it's no longer in the list
+    if (selectedEntity && !entities.some(e => e.entity_name === selectedEntity)) {
+      setSelectedEntity('');
+      setSerpResults([]);
+    }
+  };
+
+  const handleEntityAdded = () => {
+    // Reload client entities after adding a new one
+    if (selectedClient) {
+      loadClientEntities(selectedClient.id);
+    }
+  };
+
+  const loadClientEntities = async (clientId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('client_entities')
+        .select('*')
+        .eq('client_id', clientId)
+        .order('entity_name');
+
+      if (error) throw error;
+      const entitiesData = data || [];
+      setClientEntities(entitiesData);
+    } catch (error) {
+      console.error('Error loading client entities:', error);
+      setClientEntities([]);
+    }
+  };
+
   const getSentimentIcon = (sentiment: string) => {
     switch (sentiment) {
       case 'positive': return <TrendingUp className="h-4 w-4 text-green-600" />;
@@ -140,7 +173,7 @@ const SERPDefensePanel = () => {
       <ClientSelector
         selectedClient={selectedClient}
         onClientSelect={setSelectedClient}
-        onEntitiesLoad={setClientEntities}
+        onEntitiesLoad={handleEntitiesLoad}
       />
 
       {selectedClient && (
@@ -155,7 +188,13 @@ const SERPDefensePanel = () => {
             {clientEntities.length > 0 ? (
               <>
                 <div>
-                  <label className="text-sm font-medium mb-2 block">Select Entity to Monitor</label>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-sm font-medium">Select Entity to Monitor</label>
+                    <AddEntityDialog 
+                      clientId={selectedClient.id} 
+                      onEntityAdded={handleEntityAdded}
+                    />
+                  </div>
                   <div className="flex flex-wrap gap-2 mb-4">
                     {clientEntities.map((entity) => (
                       <Button
@@ -192,8 +231,11 @@ const SERPDefensePanel = () => {
               </>
             ) : (
               <div className="text-center py-8 text-gray-500">
-                <p>No entities configured for this client.</p>
-                <p className="text-sm">Add entities to start SERP monitoring.</p>
+                <p className="mb-2">No entities configured for this client.</p>
+                <AddEntityDialog 
+                  clientId={selectedClient.id} 
+                  onEntityAdded={handleEntityAdded}
+                />
               </div>
             )}
           </CardContent>
