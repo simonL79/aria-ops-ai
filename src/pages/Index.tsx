@@ -1,5 +1,6 @@
+
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,7 +22,7 @@ const Index = () => {
 
   const handleScanRequest = (e: React.FormEvent) => {
     e.preventDefault();
-    navigate('/contact');
+    navigate('/scan');
   };
 
   return (
@@ -40,8 +41,8 @@ const Index = () => {
             
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-8">
-              <a href="/blog" className="text-gray-300 hover:text-white transition-colors">Blog</a>
-              <a href="/simon-lindsay" className="text-gray-300 hover:text-white transition-colors">About Simon</a>
+              <Link to="/blog" className="text-gray-300 hover:text-white transition-colors">Blog</Link>
+              <Link to="/simon-lindsay" className="text-gray-300 hover:text-white transition-colors">About Simon</Link>
               <a href="#get-started" className="text-gray-300 hover:text-white transition-colors">Get Started</a>
               <a href="#services" className="text-gray-300 hover:text-white transition-colors">Services</a>
               <Button
@@ -68,8 +69,8 @@ const Index = () => {
           {mobileMenuOpen && (
             <div className="md:hidden border-t border-gray-800/50 py-4">
               <nav className="flex flex-col space-y-4">
-                <a href="/blog" className="text-gray-300 hover:text-white transition-colors">Blog</a>
-                <a href="/simon-lindsay" className="text-gray-300 hover:text-white transition-colors">About Simon</a>
+                <Link to="/blog" className="text-gray-300 hover:text-white transition-colors">Blog</Link>
+                <Link to="/simon-lindsay" className="text-gray-300 hover:text-white transition-colors">About Simon</Link>
                 <a href="#get-started" className="text-gray-300 hover:text-white transition-colors">Get Started</a>
                 <a href="#services" className="text-gray-300 hover:text-white transition-colors">Services</a>
                 <Button
@@ -494,18 +495,18 @@ const Index = () => {
             <div>
               <h4 className="font-semibold mb-4">Company</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="/simon-lindsay" className="hover:text-white transition-colors">About</a></li>
-                <li><a href="/blog" className="hover:text-white transition-colors">Blog</a></li>
-                <li><a href="/contact" className="hover:text-white transition-colors">Contact</a></li>
+                <li><Link to="/simon-lindsay" className="hover:text-white transition-colors">About</Link></li>
+                <li><Link to="/blog" className="hover:text-white transition-colors">Blog</Link></li>
+                <li><Link to="/scan" className="hover:text-white transition-colors">Contact</Link></li>
               </ul>
             </div>
             
             <div>
               <h4 className="font-semibold mb-4">Access</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="/admin/login" className="hover:text-white transition-colors">Admin Login</a></li>
-                <li><a href="/dashboard" className="hover:text-white transition-colors">Dashboard</a></li>
-                <li><a href="/contact" className="hover:text-white transition-colors">Get Started</a></li>
+                <li><Link to="/admin/login" className="hover:text-white transition-colors">Admin Login</Link></li>
+                <li><Link to="/dashboard" className="hover:text-white transition-colors">Dashboard</Link></li>
+                <li><a href="#get-started" className="hover:text-white transition-colors">Get Started</a></li>
               </ul>
             </div>
           </div>
