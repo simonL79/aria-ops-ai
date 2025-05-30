@@ -1,73 +1,70 @@
 
-import { BlogPost } from '@/types/blog';
+import type { BlogPost } from '@/types/blog';
 
 export const ariaPosts: BlogPost[] = [
   {
-    slug: "ai-reputation-influencers",
-    title: "AI & Reputation: What Every Influencer Needs to Know",
-    description: "Simon Lindsay breaks down how A.R.I.A™ uses real-time AI to flag PR risks and protect visibility in an age of cancel culture.",
-    date: "May 22, 2025",
+    slug: "aria-revolutionary-reputation-intelligence",
+    title: "A.R.I.A™: Revolutionary AI-Powered Reputation Intelligence Platform",
+    description: "Discover how A.R.I.A™ is transforming digital reputation management with advanced AI technology and real-time threat detection.",
+    date: "2024-01-15",
     author: "Simon Lindsay",
-    category: "AI Protection",
-    image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&h=400&fit=crop",
+    category: "Technology",
+    status: "published",
+    image: "https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=800&h=400&fit=crop",
     content: `
-# AI & Reputation: What Every Influencer Needs to Know
+      A.R.I.A™ (AI Reputation Intelligence Agent) represents a paradigm shift in how we approach digital reputation management. 
+      Built on cutting-edge artificial intelligence, A.R.I.A™ provides real-time monitoring, predictive analysis, and automated 
+      response capabilities that were previously impossible.
 
-In today's digital landscape, influencers face unprecedented challenges in maintaining their online reputation. A single misstep can trigger a cascade of negative attention that threatens not just individual careers, but entire brand partnerships.
+      ## The Evolution of Reputation Management
 
-## The New Reality of Digital Accountability
+      Traditional reputation management has always been reactive - waiting for problems to surface before addressing them. 
+      A.R.I.A™ changes this fundamental approach by implementing predictive intelligence that identifies potential threats 
+      before they escalate.
 
-The rise of AI-powered monitoring systems has fundamentally changed how reputation risks are detected and managed. Traditional manual monitoring simply can't keep pace with the speed and scale of modern digital conversations.
+      ## Key Features of A.R.I.A™
 
-## How A.R.I.A™ Protects Influencers
+      ### Real-Time Monitoring
+      Our AI systems continuously scan thousands of sources across the internet, social media platforms, news sites, 
+      and even the dark web to identify mentions and potential threats to your reputation.
 
-Our advanced AI system continuously scans over 20 platforms, detecting potential reputation threats before they explode into full-blown crises. From Reddit discussions to Twitter mentions, we provide early warning systems that give influencers the time they need to respond effectively.
+      ### Predictive Analysis
+      Using machine learning algorithms, A.R.I.A™ can predict the likelihood of reputation threats based on historical 
+      data patterns and current digital sentiment.
 
-## Key Benefits for Influencers:
+      ### Automated Response
+      When threats are detected, A.R.I.A™ can automatically initiate response protocols, from content suppression to 
+      stakeholder notifications.
 
-- **Real-time threat detection** across all major platforms
-- **Sentiment analysis** to understand public perception shifts
-- **Crisis prevention** through early intervention
-- **Brand protection** for existing partnerships
+      ## The Technology Behind A.R.I.A™
 
-The influencer economy is worth billions, and reputation is the currency that drives it all. Don't leave yours to chance.
+      A.R.I.A™ leverages advanced natural language processing, sentiment analysis, and machine learning to understand 
+      context and nuance in online content. This allows for more accurate threat assessment and reduces false positives.
     `
   },
   {
-    slug: "digital-mugshots",
-    title: "Digital Mugshots: The True Cost of Old Online Content",
-    description: "Even years-old content can impact your reputation today. Learn how A.R.I.A™ scans and protects you from digital ghosts.",
-    date: "May 20, 2025",
+    slug: "future-of-ai-reputation-management",
+    title: "The Future of AI in Reputation Management",
+    description: "Exploring how artificial intelligence is reshaping the landscape of digital reputation protection and crisis prevention.",
+    date: "2024-01-10",
     author: "Simon Lindsay",
-    category: "Digital Footprint",
-    image: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&h=400&fit=crop",
+    category: "Technology",
+    status: "published",
+    image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&h=400&fit=crop",
     content: `
-# Digital Mugshots: The True Cost of Old Online Content
+      The integration of artificial intelligence in reputation management represents one of the most significant 
+      technological advances in the field. As we move into an increasingly digital future, the traditional methods 
+      of reputation management are becoming obsolete.
 
-Your digital past never truly disappears. Old social media posts, forgotten forum comments, and archived web pages can resurface at the worst possible moments, creating what we call "digital mugshots" – permanent records that can damage your reputation years after they were created.
+      ## Why AI is Essential
 
-## The Persistence Problem
+      The sheer volume of digital content created daily makes manual monitoring impossible. AI provides the scalability 
+      and speed necessary to keep pace with the digital world.
 
-Unlike physical photographs that fade over time, digital content has an alarming permanence. Search engines index and cache content, web archives preserve deleted pages, and screenshot culture means that even "temporary" content can live forever.
+      ## Emerging Trends
 
-## Real-World Impact
-
-We've seen executives lose job opportunities due to decade-old college posts, influencers face brand partnership cancellations over forgotten tweets, and entrepreneurs struggle with investor meetings because of archived blog comments.
-
-## How A.R.I.A™ Addresses Digital Ghosts
-
-Our comprehensive scanning technology doesn't just monitor current mentions – it actively searches for historical content that could pose future risks:
-
-- **Archive scanning** across major web preservation services
-- **Deep search** through forum histories and comment sections
-- **Cross-platform correlation** to identify content patterns
-- **Risk assessment** for historical content impact
-
-## Protection Strategies
-
-The key to managing digital mugshots is proactive identification and strategic response. Sometimes content can be removed through proper channels, other times the best approach is strategic content creation to push negative results down in search rankings.
-
-Don't let your digital past sabotage your digital future.
+      We're seeing the emergence of predictive reputation modeling, automated crisis response systems, and real-time 
+      sentiment analysis that can prevent reputation crises before they begin.
     `
   }
 ];

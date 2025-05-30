@@ -1,55 +1,40 @@
 
-import { BlogPost } from '@/types/blog';
+import type { BlogPost } from '@/types/blog';
 
 export const reputationPosts: BlogPost[] = [
   {
-    slug: "founder-reputation-risks",
-    title: "The Hidden Reputation Risks Every Founder Must Address",
-    description: "From investor scrutiny to competitor research, learn how founders can protect their most valuable asset — their reputation.",
-    date: "May 17, 2025",
+    slug: "digital-reputation-crisis-prevention",
+    title: "Digital Reputation Crisis Prevention: A Strategic Approach",
+    description: "Learn how to prevent reputation crises before they happen with strategic monitoring and early intervention techniques.",
+    date: "2024-01-20",
     author: "Simon Lindsay",
-    category: "Founder Insights",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=400&fit=crop",
+    category: "Strategy",
+    status: "published",
+    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=400&fit=crop",
     content: `
-# The Hidden Reputation Risks Every Founder Must Address
+      In today's hyperconnected world, a reputation crisis can emerge and escalate within hours. The key to effective 
+      reputation management lies not in reaction, but in prevention.
 
-Founders face unique reputation challenges that go far beyond typical personal branding concerns. Your reputation directly impacts investor confidence, customer trust, employee recruitment, and partnership opportunities.
+      ## The Cost of Reactive Management
 
-## The Founder's Dilemma
+      Studies show that companies using reactive reputation management spend 3x more on crisis mitigation compared to 
+      those employing proactive strategies.
 
-Unlike employees who can maintain relative anonymity, founders are the public face of their companies. Every statement, every association, and every past action becomes a reflection of the business itself.
+      ## Prevention Strategies
 
-## Critical Risk Areas for Founders
+      ### Early Warning Systems
+      Implementing AI-powered monitoring that can detect sentiment shifts and potential issues before they become crises.
 
-### Investor Due Diligence
-Venture capitalists and angel investors routinely conduct deep background research on founders. They're not just looking at your business plan – they're investigating your entire digital history.
+      ### Stakeholder Mapping
+      Understanding who your key stakeholders are and how they communicate about your brand online.
 
-### Competitive Intelligence
-Your competitors are actively monitoring your activities, looking for opportunities to gain advantage or discredit your market position.
+      ### Response Protocols
+      Having predetermined response strategies for different types of potential issues.
 
-### Employee and Partner Vetting
-Top talent and strategic partners increasingly research leadership teams before committing to relationships.
+      ## Building Resilience
 
-### Media and Industry Attention
-As your company grows, media attention intensifies. Reporters dig deeper, and any inconsistencies or past issues become magnified.
-
-## Proactive Protection Strategies
-
-### Comprehensive Monitoring
-A.R.I.A™ provides founders with enterprise-grade monitoring that goes beyond basic Google alerts:
-
-- **Deep web scanning** including investor forums and industry discussions
-- **Historical content analysis** to identify potential issues before they surface
-- **Competitive intelligence** to understand how rivals might exploit reputation gaps
-- **Crisis simulation** to prepare response strategies for various scenarios
-
-### Strategic Content Development
-We help founders build positive digital narratives that naturally outrank negative content and demonstrate thought leadership.
-
-### Relationship Mapping
-Understanding who's talking about you and in what context allows for proactive relationship management.
-
-Your reputation as a founder is your company's most valuable asset. Protect it like the strategic resource it is.
+      The most effective reputation management strategies focus on building inherent resilience rather than just 
+      reactive capabilities.
     `
   }
 ];

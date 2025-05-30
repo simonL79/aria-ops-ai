@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -22,7 +21,7 @@ const Index = () => {
 
   const handleScanRequest = (e: React.FormEvent) => {
     e.preventDefault();
-    navigate('/reputation-scan');
+    navigate('/contact');
   };
 
   return (
@@ -369,7 +368,7 @@ const Index = () => {
               <ul className="space-y-2 text-gray-400">
                 <li><a href="/simon-lindsay" className="hover:text-white transition-colors">About</a></li>
                 <li><a href="/blog" className="hover:text-white transition-colors">Blog</a></li>
-                <li><a href="/reputation-scan" className="hover:text-white transition-colors">Get Started</a></li>
+                <li><a href="/contact" className="hover:text-white transition-colors">Contact</a></li>
               </ul>
             </div>
             
