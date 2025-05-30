@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Download, Loader2 } from 'lucide-react';
+import { Download, Loader2, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -12,18 +12,31 @@ const MediumImportButton = () => {
     setIsImporting(true);
     
     try {
+      console.log('Starting Medium import...');
+      
       const { data, error } = await supabase.functions.invoke('import-medium-posts');
       
-      if (error) throw error;
+      if (error) {
+        console.error('Import error:', error);
+        throw error;
+      }
       
-      toast.success(`Successfully imported ${data.posts?.length || 0} Medium articles`);
+      console.log('Import response:', data);
       
-      // Refresh the page to show new posts
-      window.location.reload();
+      if (data.skipped > 0) {
+        toast.success(`Import completed: ${data.posts?.length || 0} new articles imported, ${data.skipped} already existed`);
+      } else {
+        toast.success(`Successfully imported ${data.posts?.length || 0} Medium articles`);
+      }
+      
+      // Refresh the page to show new posts after a short delay
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
       
     } catch (error) {
       console.error('Import error:', error);
-      toast.error('Failed to import Medium articles');
+      toast.error('Failed to import Medium articles. Please try again.');
     } finally {
       setIsImporting(false);
     }
