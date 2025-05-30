@@ -22,6 +22,8 @@ import IntelligenceWorkbench from "./pages/IntelligenceWorkbench";
 import EnhancedIntelligence from "./pages/EnhancedIntelligence";
 import OffensiveOperations from "./pages/OffensiveOperations";
 import BlogPage from "./pages/BlogPage";
+import BlogPostPage from "./pages/BlogPostPage";
+import BlogAdminPage from "./pages/BlogAdminPage";
 import SimonLindsayPage from "./pages/SimonLindsayPage";
 import NotFound from "./pages/NotFound";
 import "./App.css";
@@ -50,6 +52,8 @@ const App = () => (
           <Route path="/clean-launch" element={<NewCoPage />} />
           <Route path="/reputation-scan" element={<ReputationScanPage />} />
           <Route path="/blog" element={<BlogPage />} />
+          <Route path="/blog/:slug" element={<BlogPostPage />} />
+          <Route path="/blog/admin" element={<BlogAdminPage />} />
           <Route path="/simon-lindsay" element={<SimonLindsayPage />} />
           <Route path="/admin/*" element={<AdminDashboard />} />
           <Route path="/anubis-gpt" element={<AnubisGPTCockpit />} />
