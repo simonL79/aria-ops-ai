@@ -14,16 +14,16 @@ const SalesFunnelPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="bg-white shadow-sm px-6 py-4">
+      <header className="bg-white border-b border-gray-100 px-6 py-4">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <Logo variant="default" size="md" />
           <nav className="hidden md:flex items-center space-x-8">
-            <a href="#" className="text-gray-600 hover:text-gray-900">About</a>
-            <a href="#" className="text-gray-600 hover:text-gray-900">Services</a>
-            <a href="#" className="text-gray-600 hover:text-gray-900">Contact</a>
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2">
+            <a href="#" className="text-gray-600 hover:text-gray-900 font-medium">Features</a>
+            <a href="#" className="text-gray-600 hover:text-gray-900 font-medium">Pricing</a>
+            <a href="#" className="text-gray-600 hover:text-gray-900 font-medium">About</a>
+            <Button className="bg-black hover:bg-gray-800 text-white px-6 py-2 rounded-full">
               Get Started
             </Button>
           </nav>
@@ -33,49 +33,56 @@ const SalesFunnelPage = () => {
       {/* Hero Section */}
       <section className="bg-white py-20">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div>
-              <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-                Protect Your
+              <h1 className="text-6xl font-bold text-black mb-8 leading-tight">
+                Build fast,
                 <br />
-                <span className="text-blue-600">Digital</span> Reputation
+                <span className="text-purple-600">ship faster</span>
               </h1>
-              <p className="text-xl text-gray-600 mb-8 leading-relaxed">
-                Advanced AI monitoring and threat detection to safeguard your online presence before damage occurs.
+              <p className="text-xl text-gray-600 mb-10 leading-relaxed max-w-lg">
+                Create beautiful web applications in minutes, not months. Our AI-powered platform handles the complexity so you can focus on what matters.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 mb-12">
-                <Button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg">
-                  Start Free Scan
+                <Button className="bg-black hover:bg-gray-800 text-white px-8 py-4 text-lg rounded-full">
+                  Start building for free
                 </Button>
-                <Button variant="outline" className="border-gray-300 text-gray-700 px-8 py-4 text-lg">
-                  Learn More
+                <Button variant="outline" className="border-gray-300 text-gray-700 px-8 py-4 text-lg rounded-full hover:bg-gray-50">
+                  View demo
                 </Button>
               </div>
               
               {/* Trust Indicators */}
-              <div className="flex items-center space-x-8">
-                <div className="flex items-center space-x-2">
-                  <div className="flex text-yellow-400">
-                    {"★".repeat(5)}
-                  </div>
-                  <span className="text-gray-600 text-sm">5.0 Rating</span>
-                </div>
-                <div className="text-gray-600 text-sm">
-                  <span className="font-semibold">1000+</span> Protected Clients
-                </div>
-                <div className="text-gray-600 text-sm">
-                  <span className="font-semibold">24/7</span> Monitoring
-                </div>
+              <div className="flex items-center space-x-8 text-sm text-gray-500">
+                <div>✓ No credit card required</div>
+                <div>✓ 14-day free trial</div>
+                <div>✓ Cancel anytime</div>
               </div>
             </div>
             
             <div className="relative">
-              <div className="bg-gradient-to-r from-blue-100 to-purple-100 rounded-2xl p-8">
-                <img 
-                  src="/lovable-uploads/54be2a4a-0be1-459c-b307-390e14873c37.png" 
-                  alt="Professional consultation" 
-                  className="w-full h-auto rounded-lg shadow-lg"
-                />
+              <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-3xl p-8 relative overflow-hidden">
+                {/* Dashboard mockup */}
+                <div className="bg-white rounded-2xl shadow-2xl p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <div className="w-3 h-3 bg-red-400 rounded-full"></div>
+                    <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
+                    <div className="w-3 h-3 bg-green-400 rounded-full"></div>
+                  </div>
+                  <div className="space-y-4">
+                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="h-20 bg-purple-100 rounded-lg"></div>
+                      <div className="h-20 bg-blue-100 rounded-lg"></div>
+                    </div>
+                    <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                  </div>
+                </div>
+                
+                {/* Floating elements */}
+                <div className="absolute -top-4 -right-4 w-16 h-16 bg-purple-600 rounded-full opacity-20"></div>
+                <div className="absolute -bottom-4 -left-4 w-12 h-12 bg-blue-600 rounded-full opacity-20"></div>
               </div>
             </div>
           </div>
@@ -83,86 +90,86 @@ const SalesFunnelPage = () => {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-24 bg-gray-50">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              How We Protect Your Reputation
+          <div className="text-center mb-20">
+            <h2 className="text-4xl font-bold text-black mb-6">
+              Everything you need to ship
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Our AI-powered platform monitors, analyzes, and responds to threats across the entire digital landscape.
+              From idea to production in record time. Our platform provides all the tools and infrastructure you need.
             </p>
           </div>
           
           <div className="grid md:grid-cols-3 gap-8">
-            <Card className="bg-white p-8 shadow-sm border border-gray-200">
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-6">
-                <div className="w-6 h-6 bg-blue-600 rounded"></div>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Real-Time Monitoring</h3>
-              <p className="text-gray-600 mb-6">
-                24/7 surveillance across social media, news sites, forums, and review platforms to catch threats early.
-              </p>
-              <ul className="space-y-2 text-sm text-gray-600">
-                <li className="flex items-center">
-                  <span className="w-4 h-4 text-green-500 mr-2">✓</span>
-                  Social media tracking
-                </li>
-                <li className="flex items-center">
-                  <span className="w-4 h-4 text-green-500 mr-2">✓</span>
-                  News monitoring
-                </li>
-                <li className="flex items-center">
-                  <span className="w-4 h-4 text-green-500 mr-2">✓</span>
-                  Review alerts
-                </li>
-              </ul>
-            </Card>
-            
-            <Card className="bg-white p-8 shadow-sm border border-gray-200">
-              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-6">
+            <Card className="bg-white p-8 border-0 shadow-sm hover:shadow-lg transition-shadow">
+              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-6">
                 <div className="w-6 h-6 bg-purple-600 rounded"></div>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">AI Analysis</h3>
+              <h3 className="text-xl font-semibold text-black mb-4">AI-Powered Development</h3>
               <p className="text-gray-600 mb-6">
-                Advanced algorithms assess threat severity and recommend strategic response actions.
+                Write code faster with intelligent suggestions and automated optimizations.
               </p>
               <ul className="space-y-2 text-sm text-gray-600">
                 <li className="flex items-center">
                   <span className="w-4 h-4 text-green-500 mr-2">✓</span>
-                  Sentiment analysis
+                  Smart code completion
                 </li>
                 <li className="flex items-center">
                   <span className="w-4 h-4 text-green-500 mr-2">✓</span>
-                  Risk scoring
+                  Bug detection
                 </li>
                 <li className="flex items-center">
                   <span className="w-4 h-4 text-green-500 mr-2">✓</span>
-                  Impact prediction
+                  Performance optimization
                 </li>
               </ul>
             </Card>
             
-            <Card className="bg-white p-8 shadow-sm border border-gray-200">
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-6">
-                <div className="w-6 h-6 bg-green-600 rounded"></div>
+            <Card className="bg-white p-8 border-0 shadow-sm hover:shadow-lg transition-shadow">
+              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
+                <div className="w-6 h-6 bg-blue-600 rounded"></div>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Rapid Response</h3>
+              <h3 className="text-xl font-semibold text-black mb-4">Instant Deployment</h3>
               <p className="text-gray-600 mb-6">
-                Expert intervention and strategic content placement to neutralize threats quickly.
+                Deploy to production with a single click. No complex configuration required.
               </p>
               <ul className="space-y-2 text-sm text-gray-600">
                 <li className="flex items-center">
                   <span className="w-4 h-4 text-green-500 mr-2">✓</span>
-                  Crisis management
+                  Global CDN
                 </li>
                 <li className="flex items-center">
                   <span className="w-4 h-4 text-green-500 mr-2">✓</span>
-                  Content suppression
+                  Auto-scaling
                 </li>
                 <li className="flex items-center">
                   <span className="w-4 h-4 text-green-500 mr-2">✓</span>
-                  SEO optimization
+                  SSL certificates
+                </li>
+              </ul>
+            </Card>
+            
+            <Card className="bg-white p-8 border-0 shadow-sm hover:shadow-lg transition-shadow">
+              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-6">
+                <div className="w-6 h-6 bg-green-600 rounded"></div>
+              </div>
+              <h3 className="text-xl font-semibold text-black mb-4">Team Collaboration</h3>
+              <p className="text-gray-600 mb-6">
+                Work together seamlessly with real-time collaboration and version control.
+              </p>
+              <ul className="space-y-2 text-sm text-gray-600">
+                <li className="flex items-center">
+                  <span className="w-4 h-4 text-green-500 mr-2">✓</span>
+                  Real-time editing
+                </li>
+                <li className="flex items-center">
+                  <span className="w-4 h-4 text-green-500 mr-2">✓</span>
+                  Comment system
+                </li>
+                <li className="flex items-center">
+                  <span className="w-4 h-4 text-green-500 mr-2">✓</span>
+                  Branch management
                 </li>
               </ul>
             </Card>
@@ -171,115 +178,115 @@ const SalesFunnelPage = () => {
       </section>
 
       {/* Pricing Section */}
-      <section className="py-20 bg-white">
+      <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Choose Your Protection Level
+          <div className="text-center mb-20">
+            <h2 className="text-4xl font-bold text-black mb-6">
+              Simple, transparent pricing
             </h2>
             <p className="text-xl text-gray-600">
-              Scalable solutions for individuals, executives, and enterprises.
+              Choose the plan that fits your needs. All plans include our core features.
             </p>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-8">
-            <Card className="bg-white p-8 border border-gray-200 shadow-sm">
+          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            <Card className="bg-white p-8 border border-gray-200 hover:border-gray-300 transition-colors">
               <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Personal</h3>
-                <div className="text-4xl font-bold text-blue-600 mb-4">£299<span className="text-lg text-gray-500">/month</span></div>
-                <p className="text-gray-600">For individuals and small businesses</p>
+                <h3 className="text-2xl font-bold text-black mb-2">Starter</h3>
+                <div className="text-4xl font-bold text-black mb-4">$0<span className="text-lg text-gray-500">/month</span></div>
+                <p className="text-gray-600">Perfect for side projects</p>
               </div>
-              <ul className="space-y-3 mb-8">
+              <ul className="space-y-4 mb-8">
                 <li className="flex items-center text-gray-600">
                   <span className="w-5 h-5 text-green-500 mr-3">✓</span>
-                  Basic monitoring across 10+ platforms
+                  Up to 3 projects
                 </li>
                 <li className="flex items-center text-gray-600">
                   <span className="w-5 h-5 text-green-500 mr-3">✓</span>
-                  Weekly threat reports
+                  Community support
                 </li>
                 <li className="flex items-center text-gray-600">
                   <span className="w-5 h-5 text-green-500 mr-3">✓</span>
-                  Email alerts for high-risk threats
+                  Basic templates
                 </li>
                 <li className="flex items-center text-gray-600">
                   <span className="w-5 h-5 text-green-500 mr-3">✓</span>
-                  Basic response guidance
+                  Standard deployment
                 </li>
               </ul>
-              <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-                Get Started
+              <Button className="w-full bg-gray-900 hover:bg-black text-white rounded-full">
+                Get started
               </Button>
             </Card>
             
-            <Card className="bg-blue-50 p-8 border-2 border-blue-200 shadow-lg relative">
+            <Card className="bg-purple-50 p-8 border-2 border-purple-200 relative">
               <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                <span className="bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-semibold">
+                <span className="bg-purple-600 text-white px-4 py-1 rounded-full text-sm font-semibold">
                   Most Popular
                 </span>
               </div>
               <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Executive</h3>
-                <div className="text-4xl font-bold text-blue-600 mb-4">£899<span className="text-lg text-gray-500">/month</span></div>
-                <p className="text-gray-600">For executives and public figures</p>
+                <h3 className="text-2xl font-bold text-black mb-2">Pro</h3>
+                <div className="text-4xl font-bold text-black mb-4">$29<span className="text-lg text-gray-500">/month</span></div>
+                <p className="text-gray-600">For growing teams</p>
               </div>
-              <ul className="space-y-3 mb-8">
+              <ul className="space-y-4 mb-8">
                 <li className="flex items-center text-gray-600">
                   <span className="w-5 h-5 text-green-500 mr-3">✓</span>
-                  Comprehensive monitoring across 50+ platforms
+                  Unlimited projects
                 </li>
                 <li className="flex items-center text-gray-600">
                   <span className="w-5 h-5 text-green-500 mr-3">✓</span>
-                  Real-time threat alerts
+                  Priority support
                 </li>
                 <li className="flex items-center text-gray-600">
                   <span className="w-5 h-5 text-green-500 mr-3">✓</span>
-                  Professional response management
+                  Premium templates
                 </li>
                 <li className="flex items-center text-gray-600">
                   <span className="w-5 h-5 text-green-500 mr-3">✓</span>
-                  Crisis intervention support
+                  Advanced deployment
                 </li>
                 <li className="flex items-center text-gray-600">
                   <span className="w-5 h-5 text-green-500 mr-3">✓</span>
-                  Monthly strategy consultations
+                  Team collaboration
                 </li>
               </ul>
-              <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-                Get Started
+              <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white rounded-full">
+                Start free trial
               </Button>
             </Card>
             
-            <Card className="bg-white p-8 border border-gray-200 shadow-sm">
+            <Card className="bg-white p-8 border border-gray-200 hover:border-gray-300 transition-colors">
               <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Enterprise</h3>
-                <div className="text-4xl font-bold text-blue-600 mb-4">Custom</div>
+                <h3 className="text-2xl font-bold text-black mb-2">Enterprise</h3>
+                <div className="text-4xl font-bold text-black mb-4">Custom</div>
                 <p className="text-gray-600">For large organizations</p>
               </div>
-              <ul className="space-y-3 mb-8">
+              <ul className="space-y-4 mb-8">
                 <li className="flex items-center text-gray-600">
                   <span className="w-5 h-5 text-green-500 mr-3">✓</span>
-                  Unlimited platform monitoring
+                  Everything in Pro
                 </li>
                 <li className="flex items-center text-gray-600">
                   <span className="w-5 h-5 text-green-500 mr-3">✓</span>
-                  Dedicated account manager
+                  Dedicated support
                 </li>
                 <li className="flex items-center text-gray-600">
                   <span className="w-5 h-5 text-green-500 mr-3">✓</span>
-                  24/7 response team
+                  Custom integrations
                 </li>
                 <li className="flex items-center text-gray-600">
                   <span className="w-5 h-5 text-green-500 mr-3">✓</span>
-                  Custom integration options
+                  SLA guarantee
                 </li>
                 <li className="flex items-center text-gray-600">
                   <span className="w-5 h-5 text-green-500 mr-3">✓</span>
-                  Advanced analytics dashboard
+                  On-premise deployment
                 </li>
               </ul>
-              <Button variant="outline" className="w-full border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white">
-                Contact Sales
+              <Button variant="outline" className="w-full border-gray-300 text-gray-700 hover:bg-gray-50 rounded-full">
+                Contact sales
               </Button>
             </Card>
           </div>
@@ -287,43 +294,46 @@ const SalesFunnelPage = () => {
       </section>
 
       {/* Testimonials */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-24 bg-gray-50">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Trusted by Leaders Worldwide
+          <div className="text-center mb-20">
+            <h2 className="text-4xl font-bold text-black mb-6">
+              Loved by developers worldwide
             </h2>
+            <p className="text-xl text-gray-600">
+              See what our customers have to say about their experience.
+            </p>
           </div>
           
-          <div className="grid md:grid-cols-2 gap-8">
-            <Card className="bg-white p-8 shadow-sm border border-gray-200">
-              <div className="flex text-yellow-400 mb-4">
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <Card className="bg-white p-8 border-0 shadow-sm">
+              <div className="flex text-yellow-400 mb-6">
                 {"★".repeat(5)}
               </div>
-              <p className="text-gray-700 text-lg mb-6 italic">
-                "The early warning system caught a potential crisis before it could impact our brand. Their response was swift and professional."
+              <p className="text-gray-700 text-lg mb-6 leading-relaxed">
+                "This platform has completely transformed how we build applications. What used to take weeks now takes days."
               </p>
               <div className="flex items-center">
-                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full mr-4"></div>
+                <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full mr-4"></div>
                 <div>
-                  <h4 className="font-semibold text-gray-900">Sarah Chen</h4>
-                  <p className="text-gray-600">Chief Executive Officer, TechCorp</p>
+                  <h4 className="font-semibold text-black">Sarah Johnson</h4>
+                  <p className="text-gray-600">Lead Developer at TechCorp</p>
                 </div>
               </div>
             </Card>
             
-            <Card className="bg-white p-8 shadow-sm border border-gray-200">
-              <div className="flex text-yellow-400 mb-4">
+            <Card className="bg-white p-8 border-0 shadow-sm">
+              <div className="flex text-yellow-400 mb-6">
                 {"★".repeat(5)}
               </div>
-              <p className="text-gray-700 text-lg mb-6 italic">
-                "Their AI monitoring system is incredibly sophisticated. We now have complete visibility into our digital reputation landscape."
+              <p className="text-gray-700 text-lg mb-6 leading-relaxed">
+                "The AI assistance is incredible. It's like having a senior developer pair programming with you 24/7."
               </p>
               <div className="flex items-center">
                 <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-blue-500 rounded-full mr-4"></div>
                 <div>
-                  <h4 className="font-semibold text-gray-900">Michael Rodriguez</h4>
-                  <p className="text-gray-600">Managing Partner, Global Ventures</p>
+                  <h4 className="font-semibold text-black">Michael Chen</h4>
+                  <p className="text-gray-600">Founder at StartupXYZ</p>
                 </div>
               </div>
             </Card>
@@ -332,42 +342,42 @@ const SalesFunnelPage = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-blue-600">
+      <section className="py-24 bg-black text-white">
         <div className="max-w-4xl mx-auto text-center px-6">
-          <h2 className="text-4xl font-bold text-white mb-6">
-            Ready to Protect Your Reputation?
+          <h2 className="text-4xl font-bold mb-6">
+            Ready to ship your next project?
           </h2>
-          <p className="text-xl text-blue-100 mb-8">
-            Get started with a free risk assessment and see what threats are already out there.
+          <p className="text-xl text-gray-300 mb-8">
+            Join thousands of developers who are building faster with our platform.
           </p>
-          <Button className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold">
-            Start Free Assessment
+          <Button className="bg-white text-black hover:bg-gray-100 px-8 py-4 text-lg font-semibold rounded-full">
+            Start building for free
           </Button>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
+      <footer className="bg-white border-t border-gray-100 py-16">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
+          <div className="grid md:grid-cols-4 gap-8 mb-12">
             <div>
-              <Logo variant="light" size="md" className="mb-4" />
-              <p className="text-gray-400">Advanced reputation protection powered by AI</p>
+              <Logo variant="default" size="md" className="mb-4" />
+              <p className="text-gray-600">Build beautiful applications faster than ever before.</p>
             </div>
             
             <div>
-              <h4 className="font-semibold mb-4">Services</h4>
-              <div className="space-y-2 text-gray-400">
-                <div>Reputation Monitoring</div>
-                <div>Crisis Management</div>
-                <div>Threat Analysis</div>
-                <div>Content Strategy</div>
+              <h4 className="font-semibold text-black mb-4">Product</h4>
+              <div className="space-y-2 text-gray-600">
+                <div>Features</div>
+                <div>Pricing</div>
+                <div>Documentation</div>
+                <div>API Reference</div>
               </div>
             </div>
             
             <div>
-              <h4 className="font-semibold mb-4">Company</h4>
-              <div className="space-y-2 text-gray-400">
+              <h4 className="font-semibold text-black mb-4">Company</h4>
+              <div className="space-y-2 text-gray-600">
                 <div>About</div>
                 <div>Blog</div>
                 <div>Careers</div>
@@ -376,18 +386,18 @@ const SalesFunnelPage = () => {
             </div>
             
             <div>
-              <h4 className="font-semibold mb-4">Legal</h4>
-              <div className="space-y-2 text-gray-400">
-                <div>Privacy Policy</div>
-                <div>Terms of Service</div>
-                <div>GDPR Compliance</div>
-                <div>Security</div>
+              <h4 className="font-semibold text-black mb-4">Resources</h4>
+              <div className="space-y-2 text-gray-600">
+                <div>Help Center</div>
+                <div>Community</div>
+                <div>Status</div>
+                <div>Terms</div>
               </div>
             </div>
           </div>
           
-          <div className="text-center text-gray-400 pt-8 border-t border-gray-800">
-            © 2025 A.R.I.A™ — All rights reserved
+          <div className="text-center text-gray-500 pt-8 border-t border-gray-100">
+            © 2025 Company Name — All rights reserved
           </div>
         </div>
       </footer>
