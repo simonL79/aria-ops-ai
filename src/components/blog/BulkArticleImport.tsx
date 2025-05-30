@@ -38,15 +38,22 @@ const BulkArticleImport = ({ onArticlesAdded }: BulkArticleImportProps) => {
       // Split content by double line breaks to separate articles
       const articles = bulkContent.split('\n\n').filter(section => section.trim());
       
+      console.log('Raw articles found:', articles);
+      
       const processedArticles = articles.map((articleText, index) => {
         const lines = articleText.split('\n').filter(line => line.trim());
         
-        if (lines.length < 2) {
-          return null; // Skip if not enough content
+        console.log(`Processing article ${index + 1}:`, lines);
+        
+        // More flexible parsing - just need at least one line for title
+        if (lines.length < 1) {
+          console.log(`Skipping article ${index + 1}: No content`);
+          return null;
         }
 
         const title = lines[0].trim();
-        const content = lines.slice(1).join('\n').trim();
+        // If there's only one line, use it as both title and content
+        const content = lines.length > 1 ? lines.slice(1).join('\n').trim() : title;
         
         // Generate slug from title
         const slug = title
@@ -56,7 +63,7 @@ const BulkArticleImport = ({ onArticlesAdded }: BulkArticleImportProps) => {
           .replace(/-+/g, '-')
           .trim();
 
-        return {
+        const article = {
           title,
           slug: `${slug}-${Date.now()}-${index}`, // Add timestamp to avoid duplicates
           description: content.substring(0, 150) + (content.length > 150 ? '...' : ''),
@@ -67,16 +74,19 @@ const BulkArticleImport = ({ onArticlesAdded }: BulkArticleImportProps) => {
           category: 'Technology',
           status: 'draft' as const
         };
+        
+        console.log(`Article ${index + 1} processed:`, article);
+        return article;
       }).filter(Boolean);
 
+      console.log('Final processed articles:', processedArticles);
+
       if (processedArticles.length === 0) {
-        toast.error('No valid articles found in the pasted content');
+        toast.error('No valid articles found. Please check your format - each article should have at least a title.');
         setIsProcessing(false);
         return;
       }
 
-      console.log('Processing articles:', processedArticles);
-      
       // Save articles to database
       const { data, error } = await supabase
         .from('blog_posts')
