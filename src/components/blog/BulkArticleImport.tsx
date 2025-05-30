@@ -1,10 +1,9 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Copy, Paste, Plus } from 'lucide-react';
+import { Copy, Clipboard, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface BulkArticleImportProps {
@@ -131,7 +130,7 @@ This is the content of the third article.`}
             onClick={handlePasteFromClipboard}
             className="flex items-center gap-2"
           >
-            <Paste className="h-4 w-4" />
+            <Clipboard className="h-4 w-4" />
             Paste from Clipboard
           </Button>
           
