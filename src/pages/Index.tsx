@@ -1,13 +1,11 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Shield, TrendingUp, Eye, Check, ArrowRight, Menu, X } from "lucide-react";
-import HeroSection from "@/components/landing/HeroSection";
-import CapabilitiesGrid from "@/components/landing/CapabilitiesGrid";
-import EnhancedFooter from "@/components/landing/EnhancedFooter";
+import { Shield, TrendingUp, Eye, Check, ArrowRight, Menu, X, Star } from "lucide-react";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -28,31 +26,30 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0A0F2C] overflow-x-hidden">
+    <div className="min-h-screen bg-[#0A0B0D] text-white">
       {/* Navigation Header */}
-      <header className="sticky top-0 z-50 w-full border-b border-[#247CFF]/20 bg-[#0A0F2C]/95 backdrop-blur supports-[backdrop-filter]:bg-[#0A0F2C]/60">
-        <div className="container mx-auto px-4 md:px-6">
+      <header className="sticky top-0 z-50 w-full border-b border-gray-800/50 bg-[#0A0B0D]/95 backdrop-blur supports-[backdrop-filter]:bg-[#0A0B0D]/80">
+        <div className="container mx-auto px-6">
           <div className="flex items-center justify-between py-4">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-[#247CFF] to-[#38C172] rounded-full flex items-center justify-center">
-                <div className="w-4 h-4 bg-white rounded-full"></div>
+              <div className="w-8 h-8 bg-gradient-to-r from-amber-400 to-amber-600 rounded-sm flex items-center justify-center">
+                <div className="w-4 h-4 bg-black rounded-sm"></div>
               </div>
-              <span className="text-lg md:text-xl font-bold text-white font-['Space_Grotesk'] tracking-wide">A.R.I.A™</span>
+              <span className="text-xl font-bold text-white tracking-tight">A.R.I.A™</span>
             </div>
             
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-8">
-              <a href="/about" className="text-[#D8DEE9] hover:text-white transition-colors font-['Inter']">About</a>
-              <a href="/blog" className="text-[#D8DEE9] hover:text-white transition-colors font-['Inter']">Blog</a>
-              <a href="/simon-lindsay" className="text-[#D8DEE9] hover:text-white transition-colors font-['Inter']">Simon Lindsay</a>
-              <a href="/resources" className="text-[#D8DEE9] hover:text-white transition-colors font-['Inter']">Resources</a>
-              <a href="/gdpr-compliance" className="text-[#D8DEE9] hover:text-white transition-colors font-['Inter']">GDPR</a>
+              <a href="/about" className="text-gray-300 hover:text-white transition-colors">About</a>
+              <a href="/services" className="text-gray-300 hover:text-white transition-colors">Services</a>
+              <a href="/insights" className="text-gray-300 hover:text-white transition-colors">Insights</a>
+              <a href="/contact" className="text-gray-300 hover:text-white transition-colors">Contact</a>
               <Button
                 onClick={handleAdminAccess}
                 variant="outline"
-                className="border-[#247CFF] text-[#247CFF] hover:bg-[#247CFF] hover:text-white"
+                className="border-amber-600 text-amber-400 hover:bg-amber-600 hover:text-black"
               >
-                {isAuthenticated && isAdmin ? 'Dashboard' : 'Admin'}
+                {isAuthenticated && isAdmin ? 'Dashboard' : 'Client Portal'}
               </Button>
             </nav>
 
@@ -69,19 +66,18 @@ const Index = () => {
 
           {/* Mobile Navigation */}
           {mobileMenuOpen && (
-            <div className="md:hidden border-t border-[#247CFF]/20 py-4">
+            <div className="md:hidden border-t border-gray-800/50 py-4">
               <nav className="flex flex-col space-y-4">
-                <a href="/about" className="text-[#D8DEE9] hover:text-white transition-colors font-['Inter']">About</a>
-                <a href="/blog" className="text-[#D8DEE9] hover:text-white transition-colors font-['Inter']">Blog</a>
-                <a href="/simon-lindsay" className="text-[#D8DEE9] hover:text-white transition-colors font-['Inter']">Simon Lindsay</a>
-                <a href="/resources" className="text-[#D8DEE9] hover:text-white transition-colors font-['Inter']">Resources</a>
-                <a href="/gdpr-compliance" className="text-[#D8DEE9] hover:text-white transition-colors font-['Inter']">GDPR</a>
+                <a href="/about" className="text-gray-300 hover:text-white transition-colors">About</a>
+                <a href="/services" className="text-gray-300 hover:text-white transition-colors">Services</a>
+                <a href="/insights" className="text-gray-300 hover:text-white transition-colors">Insights</a>
+                <a href="/contact" className="text-gray-300 hover:text-white transition-colors">Contact</a>
                 <Button
                   onClick={handleAdminAccess}
                   variant="outline"
-                  className="border-[#247CFF] text-[#247CFF] hover:bg-[#247CFF] hover:text-white w-full"
+                  className="border-amber-600 text-amber-400 hover:bg-amber-600 hover:text-black w-full"
                 >
-                  {isAuthenticated && isAdmin ? 'Dashboard' : 'Admin'}
+                  {isAuthenticated && isAdmin ? 'Dashboard' : 'Client Portal'}
                 </Button>
               </nav>
             </div>
@@ -90,369 +86,271 @@ const Index = () => {
       </header>
 
       {/* Hero Section */}
-      <HeroSection />
-
-      {/* Capabilities Section */}
-      <CapabilitiesGrid />
-
-      {/* Threat Intelligence Section */}
-      <section className="py-12 md:py-20 px-4 md:px-6 bg-[#0A0F2C]">
-        <div className="container mx-auto max-w-5xl">
-          <h2 className="text-2xl md:text-4xl lg:text-5xl font-black text-center mb-4 text-white font-['Space_Grotesk'] tracking-tight px-4">
-            THREAT INTELLIGENCE THAT MATTERS
-          </h2>
-          <p className="text-base md:text-lg text-[#D8DEE9] text-center mb-12 md:mb-16 font-['Inter'] max-w-3xl mx-auto px-4">
-            Our advanced monitoring systems detect and classify threats across multiple vectors, providing early warning for reputation risks before they escalate.
-          </p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-            {[
-              {
-                title: "SOCIAL MEDIA ATTACKS",
-                description: "Monitor and neutralize coordinated attacks across all social platforms before they gain momentum.",
-                gradient: "from-[#247CFF] to-[#38C172]"
-              },
-              {
-                title: "SEARCH ENGINE MANIPULATION",
-                description: "Detect and counter negative SEO campaigns designed to damage your online reputation.",
-                gradient: "from-[#38C172] to-[#247CFF]"
-              },
-              {
-                title: "CORPORATE ESPIONAGE",
-                description: "Identify threats from competitors, disgruntled employees, and industrial espionage attempts.",
-                gradient: "from-[#247CFF] to-[#1C1C1E]"
-              },
-              {
-                title: "AI MODEL POISONING",
-                description: "Prevent false information from being embedded into AI training data and language models.",
-                gradient: "from-[#1C1C1E] to-[#247CFF]"
-              }
-            ].map((threat, index) => (
-              <Card key={index} className="group p-6 md:p-8 bg-[#1C1C1E] hover:bg-[#1C1C1E]/80 border border-[#38C172]/20 hover:border-[#38C172]/50 shadow-lg hover:shadow-[0_0_25px_rgba(56,193,114,0.2)] transition-all duration-500 transform hover:-translate-y-3 hover:scale-105 rounded-2xl">
-                <div className={`w-12 h-12 md:w-16 md:h-16 mb-4 md:mb-6 rounded-2xl bg-gradient-to-r ${threat.gradient} flex items-center justify-center group-hover:shadow-[0_0_20px_rgba(56,193,114,0.4)] transition-shadow duration-500`}>
-                  <Shield className="h-6 w-6 md:h-8 md:w-8 text-white" />
-                </div>
-                <h3 className="font-bold mb-3 md:mb-4 text-lg md:text-xl text-white group-hover:text-[#38C172] transition-colors font-['Space_Grotesk'] tracking-wide text-center">
-                  {threat.title}
-                </h3>
-                <p className="text-sm md:text-base text-[#D8DEE9] group-hover:text-white transition-colors font-['Inter'] text-center">
-                  {threat.description}
+      <section className="py-20 px-6">
+        <div className="container mx-auto max-w-7xl">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            {/* Left Column - Content */}
+            <div className="space-y-8">
+              <div className="space-y-6">
+                <h1 className="text-5xl lg:text-6xl font-bold leading-tight">
+                  Elevate Your 
+                  <span className="text-amber-400"> Digital</span> Reputation
+                </h1>
+                <p className="text-xl text-gray-300 leading-relaxed max-w-2xl">
+                  Enterprise-grade reputation intelligence and crisis prevention. 
+                  Powered by AI, delivered by experts who understand the stakes.
                 </p>
-              </Card>
-            ))}
+              </div>
+              
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Button 
+                  onClick={handleScanRequest}
+                  className="bg-amber-600 hover:bg-amber-500 text-black px-8 py-3 text-lg font-semibold"
+                >
+                  Request Assessment
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="border-gray-700 text-white hover:bg-gray-800 px-8 py-3 text-lg"
+                >
+                  Learn More
+                </Button>
+              </div>
+            </div>
+
+            {/* Right Column - Professional Image */}
+            <div className="relative">
+              <div className="relative z-10">
+                <img 
+                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&h=600&fit=crop&crop=face" 
+                  alt="Professional consultant"
+                  className="w-full max-w-md mx-auto rounded-lg shadow-2xl"
+                />
+                <div className="absolute -bottom-6 -left-6 bg-amber-600 text-black p-4 rounded-lg shadow-lg">
+                  <div className="flex items-center gap-2">
+                    <Shield className="h-5 w-5" />
+                    <span className="font-semibold">Trusted by Fortune 500</span>
+                  </div>
+                </div>
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-br from-amber-600/20 to-transparent rounded-lg"></div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Client Types Section */}
-      <section className="py-12 md:py-20 px-4 md:px-6 bg-[#D8DEE9]">
-        <div className="container mx-auto max-w-5xl">
-          <h2 className="text-2xl md:text-4xl lg:text-5xl font-black text-center mb-12 md:mb-16 text-[#0A0F2C] font-['Space_Grotesk'] tracking-tight px-4">
-            WHO WE PROTECT
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
+      {/* Trust Indicators */}
+      <section className="py-16 px-6 border-t border-gray-800/50">
+        <div className="container mx-auto max-w-6xl">
+          <p className="text-center text-gray-400 mb-12 text-lg">Trusted by Industry Leaders</p>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-8 items-center opacity-60">
             {[
-              {
-                title: "EXECUTIVES",
-                description: "Founders, CEOs, and public leaders",
-                gradient: "from-[#247CFF] to-[#38C172]"
-              },
-              {
-                title: "CREATORS",
-                description: "Influencers and professionals",
-                gradient: "from-[#38C172] to-[#247CFF]"
-              },
-              {
-                title: "ORGANIZATIONS",
-                description: "Brands, agencies, and legal teams",
-                gradient: "from-[#247CFF] to-[#1C1C1E]"
-              },
-              {
-                title: "INDIVIDUALS",
-                description: "Private people with reputational vulnerabilities",
-                gradient: "from-[#1C1C1E] to-[#247CFF]"
-              }
-            ].map((client, index) => (
-              <Card key={index} className="group p-6 md:p-8 text-center bg-white hover:bg-[#0A0F2C] border-0 shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-3 hover:scale-105 rounded-2xl">
-                <div className={`w-16 h-16 md:w-20 md:h-20 mx-auto mb-4 md:mb-6 rounded-2xl bg-gradient-to-r ${client.gradient} flex items-center justify-center group-hover:shadow-[0_0_20px_rgba(36,124,255,0.3)] transition-shadow duration-500`}>
-                  <div className="w-6 h-6 md:w-8 md:h-8 bg-white rounded-full"></div>
+              { name: "Goldman Sachs", logo: "GS" },
+              { name: "Deloitte", logo: "D" },
+              { name: "Microsoft", logo: "MS" },
+              { name: "HSBC", logo: "H" },
+              { name: "General Motors", logo: "GM" }
+            ].map((company, index) => (
+              <div key={index} className="text-center">
+                <div className="w-16 h-16 mx-auto mb-3 bg-gray-800 rounded-lg flex items-center justify-center text-white font-bold text-lg">
+                  {company.logo}
                 </div>
-                <h3 className="font-bold mb-3 md:mb-4 text-lg md:text-xl text-[#0A0F2C] group-hover:text-white transition-colors font-['Space_Grotesk'] tracking-wide">
-                  {client.title}
-                </h3>
-                <p className="text-sm md:text-base text-[#1C1C1E] group-hover:text-[#D8DEE9] transition-colors font-['Inter']">
-                  {client.description}
-                </p>
-              </Card>
+                <p className="text-sm text-gray-400">{company.name}</p>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
       {/* Services Section */}
-      <section className="py-12 md:py-20 px-4 md:px-6 bg-[#1C1C1E]">
-        <div className="container mx-auto max-w-5xl">
-          <h2 className="text-2xl md:text-4xl lg:text-5xl font-black text-center mb-12 md:mb-16 text-white font-['Space_Grotesk'] tracking-tight px-4">
-            WHAT YOU GET
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-            {[
-              {
-                title: "WEEKLY INTELLIGENCE REPORTS",
-                description: "Summarized risks, shifts in sentiment, and clear next steps.",
-                gradient: "from-[#247CFF] to-[#38C172]"
-              },
-              {
-                title: "INSTANT ALERTS",
-                description: "When something urgent emerges — we notify you directly.",
-                gradient: "from-[#38C172] to-[#247CFF]"
-              },
-              {
-                title: "MEMORY OVERWRITES",
-                description: "We help correct what AI models and search engines \"remember\" about you.",
-                gradient: "from-[#247CFF] to-[#1C1C1E]"
-              },
-              {
-                title: "PRE-CRISIS FORECASTING",
-                description: "Detect reputation risks before they happen, based on tone, behavior, and online chatter.",
-                gradient: "from-[#1C1C1E] to-[#247CFF]"
-              },
-              {
-                title: "ZERO INPUT SCANNING",
-                description: "No keywords needed. We look for everything — even what you didn't know to search for.",
-                gradient: "from-[#247CFF] to-[#38C172]"
-              },
-              {
-                title: "PRIVATE BY DESIGN",
-                description: "GDPR-compliant, no public dashboards, enterprise-grade encryption.",
-                gradient: "from-[#38C172] to-[#247CFF]"
-              }
-            ].map((service, index) => (
-              <Card key={index} className="group p-6 md:p-8 bg-[#0A0F2C] hover:bg-[#0A0F2C]/80 border border-[#247CFF]/20 hover:border-[#247CFF]/50 shadow-lg hover:shadow-[0_0_25px_rgba(36,124,255,0.2)] transition-all duration-500 transform hover:-translate-y-3 hover:scale-105 rounded-2xl">
-                <div className={`w-12 h-12 md:w-16 md:h-16 mb-4 md:mb-6 rounded-2xl bg-gradient-to-r ${service.gradient} flex items-center justify-center group-hover:shadow-[0_0_20px_rgba(36,124,255,0.4)] transition-shadow duration-500`}>
-                  <ArrowRight className="h-6 w-6 md:h-8 md:w-8 text-white" />
-                </div>
-                <h3 className="font-bold mb-3 md:mb-4 text-base md:text-lg text-white group-hover:text-[#247CFF] transition-colors font-['Space_Grotesk'] tracking-wide text-center">
-                  {service.title}
-                </h3>
-                <p className="text-sm md:text-base text-[#D8DEE9] group-hover:text-white transition-colors font-['Inter'] text-center">
-                  {service.description}
-                </p>
-              </Card>
-            ))}
+      <section className="py-20 px-6 bg-[#111214]">
+        <div className="container mx-auto max-w-6xl">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold mb-6">Comprehensive Protection</h2>
+            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+              Our integrated approach combines real-time monitoring, predictive analysis, 
+              and strategic response to safeguard your reputation before threats emerge.
+            </p>
           </div>
-        </div>
-      </section>
 
-      {/* Privacy Section */}
-      <section className="py-12 md:py-20 px-4 md:px-6 bg-[#1C1C1E]">
-        <div className="container mx-auto max-w-4xl">
-          <h2 className="text-2xl md:text-4xl lg:text-5xl font-black text-center mb-8 md:mb-12 text-white font-['Space_Grotesk'] tracking-tight px-4">
-            PRIVATE BY DESIGN
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-            {[
-              {
-                title: "FULLY GDPR-COMPLIANT",
-                description: "Complete data protection compliance",
-                gradient: "from-[#38C172] to-[#247CFF]"
-              },
-              {
-                title: "NO PUBLIC DASHBOARD, EVER",
-                description: "Your data stays completely private",
-                gradient: "from-[#247CFF] to-[#38C172]"
-              },
-              {
-                title: "ENTERPRISE-GRADE ENCRYPTION",
-                description: "Bank-level security for all data",
-                gradient: "from-[#247CFF] to-[#1C1C1E]"
-              },
-              {
-                title: "VERIFIED SECURE OPERATORS",
-                description: "Only trusted personnel handle your information",
-                gradient: "from-[#1C1C1E] to-[#247CFF]"
-              }
-            ].map((feature, index) => (
-              <Card key={index} className="group p-6 md:p-8 bg-[#0A0F2C] hover:bg-[#0A0F2C]/80 border border-[#38C172]/20 hover:border-[#38C172]/50 shadow-lg hover:shadow-[0_0_25px_rgba(56,193,114,0.2)] transition-all duration-500 transform hover:-translate-y-3 hover:scale-105 rounded-2xl">
-                <div className="flex flex-col md:flex-row items-center mb-4 md:mb-6">
-                  <div className={`p-3 md:p-4 rounded-2xl bg-gradient-to-r ${feature.gradient} mb-4 md:mb-0 md:mr-6 group-hover:shadow-[0_0_20px_rgba(56,193,114,0.4)] transition-shadow duration-500`}>
-                    <Check className="h-6 w-6 md:h-8 md:w-8 text-white" />
-                  </div>
-                  <h3 className="font-bold text-lg md:text-xl text-white group-hover:text-[#38C172] transition-colors font-['Space_Grotesk'] tracking-wide text-center md:text-left">
-                    {feature.title}
-                  </h3>
-                </div>
-                <p className="text-sm md:text-base text-[#D8DEE9] group-hover:text-white transition-colors font-['Inter'] text-center">
-                  {feature.description}
-                </p>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Process Section */}
-      <section className="py-12 md:py-20 px-4 md:px-6 bg-[#0A0F2C]">
-        <div className="container mx-auto max-w-5xl">
-          <h2 className="text-2xl md:text-4xl lg:text-5xl font-black text-center mb-12 md:mb-16 text-white font-['Space_Grotesk'] tracking-tight px-4">
-            HOW IT WORKS
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-            {[
-              {
-                step: "1",
-                title: "TELL US WHO TO PROTECT",
-                description: "You specify what (or who) needs monitoring"
-              },
-              {
-                step: "2", 
-                title: "WE SCAN EVERYTHING",
-                description: "Open internet + AI ecosystem monitoring"
-              },
-              {
-                step: "3",
-                title: "YOU RECEIVE REPORTS", 
-                description: "Private, actionable insights + urgent alerts"
-              },
-              {
-                step: "4",
-                title: "WE FIX IT QUIETLY",
-                description: "Prevention and resolution behind the scenes"
-              }
-            ].map((process, index) => (
-              <Card key={index} className="group p-6 md:p-8 text-center bg-[#1C1C1E] hover:bg-[#1C1C1E]/80 border border-[#247CFF]/20 hover:border-[#247CFF]/50 shadow-lg hover:shadow-[0_0_25px_rgba(36,124,255,0.2)] transition-all duration-500 transform hover:-translate-y-3 hover:scale-105 rounded-2xl">
-                <div className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-4 md:mb-6 rounded-full bg-gradient-to-r from-[#247CFF] to-[#38C172] flex items-center justify-center text-white font-black text-xl md:text-2xl font-['Space_Grotesk'] group-hover:shadow-[0_0_20px_rgba(36,124,255,0.4)] transition-shadow duration-500">
-                  {process.step}
-                </div>
-                <h3 className="font-bold mb-3 md:mb-4 text-base md:text-lg text-white group-hover:text-[#247CFF] transition-colors font-['Space_Grotesk'] tracking-wide">
-                  {process.title}
-                </h3>
-                <p className="text-sm md:text-base text-[#D8DEE9] group-hover:text-white transition-colors font-['Inter']">
-                  {process.description}
-                </p>
-              </Card>
-            ))}
-          </div>
-          
-          <div className="text-center mt-12 md:mt-16 space-y-4 px-4">
-            <p className="text-xl md:text-2xl font-bold text-white font-['Space_Grotesk']">NO NEED TO LOG IN.</p>
-            <p className="text-xl md:text-2xl font-bold text-white font-['Space_Grotesk']">NO ALERTS UNLESS IT MATTERS.</p>
-            <p className="text-xl md:text-2xl font-bold text-white font-['Space_Grotesk']">WE HANDLE IT ALL FOR YOU.</p>
-          </div>
-        </div>
-      </section>
-
-      {/* Trust Badges */}
-      <section className="py-8 md:py-12 px-4 md:px-6 bg-[#D8DEE9]">
-        <div className="container mx-auto">
-          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12 text-sm text-[#0A0F2C]">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               {
                 icon: Shield,
-                text: "GDPR COMPLIANT",
-                gradient: "from-[#38C172] to-[#247CFF]"
+                title: "Threat Detection",
+                description: "Advanced AI monitoring across all digital channels to identify potential reputation risks before they escalate.",
+                features: ["Real-time scanning", "Predictive analytics", "24/7 monitoring"]
               },
               {
                 icon: TrendingUp,
-                text: "USED BY AGENCIES & ENTERPRISES",
-                gradient: "from-[#247CFF] to-[#38C172]"
+                title: "Strategic Response",
+                description: "Expert-crafted response strategies tailored to your specific industry and stakeholder ecosystem.",
+                features: ["Crisis management", "Stakeholder communication", "Media relations"]
               },
               {
                 icon: Eye,
-                text: "HUMAN + AI VERIFIED",
-                gradient: "from-[#247CFF] to-[#1C1C1E]"
-              },
-              {
-                icon: Shield,
-                text: "BUILT IN THE UK",
-                gradient: "from-[#1C1C1E] to-[#247CFF]"
+                title: "Intelligence Reporting",
+                description: "Detailed insights and actionable intelligence delivered through secure, executive-level dashboards.",
+                features: ["Executive reports", "Trend analysis", "Competitive intelligence"]
               }
-            ].map((badge, index) => {
-              const IconComponent = badge.icon;
-              return (
-                <div key={index} className="group flex flex-col md:flex-row items-center p-3 md:p-4 rounded-2xl hover:bg-white/50 transition-all duration-300 hover:shadow-lg">
-                  <div className={`p-2 md:p-3 rounded-xl bg-gradient-to-r ${badge.gradient} mb-2 md:mb-0 md:mr-4 group-hover:shadow-[0_0_15px_rgba(36,124,255,0.3)] transition-shadow duration-300`}>
-                    <IconComponent className="h-5 w-5 md:h-6 md:w-6 text-white" />
-                  </div>
-                  <span className="font-bold tracking-wide font-['Space_Grotesk'] text-xs md:text-sm text-center md:text-left">
-                    {badge.text}
-                  </span>
-                </div>
-              );
-            })}
+            ].map((service, index) => (
+              <Card key={index} className="bg-[#1A1B1E] border-gray-800 p-8 hover:border-amber-600/50 transition-colors">
+                <service.icon className="h-12 w-12 text-amber-400 mb-6" />
+                <h3 className="text-xl font-bold mb-4 text-white">{service.title}</h3>
+                <p className="text-gray-300 mb-6">{service.description}</p>
+                <ul className="space-y-2">
+                  {service.features.map((feature, fIndex) => (
+                    <li key={fIndex} className="flex items-center gap-2 text-sm text-gray-400">
+                      <Check className="h-4 w-4 text-amber-400" />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Final CTA Section */}
-      <section className="py-12 md:py-20 px-4 md:px-6 bg-[#0A0F2C]">
-        <div className="container mx-auto max-w-4xl text-center">
-          <h2 className="text-2xl md:text-4xl lg:text-5xl font-black mb-6 md:mb-8 text-white font-['Space_Grotesk'] tracking-tight px-4">
-            READY TO STAY AHEAD OF THE STORY?
-          </h2>
-          <h3 className="text-xl md:text-2xl lg:text-3xl font-bold text-[#247CFF] mb-8 md:mb-12 font-['Space_Grotesk'] tracking-wide px-4">
-            YOUR REPUTATION DESERVES PROTECTION
-          </h3>
-          
-          <div className="space-y-4 md:space-y-6 mb-8 md:mb-12 px-4">
-            <p className="text-lg md:text-xl text-[#D8DEE9] font-['Inter']">Your name shouldn't be left unguarded.</p>
-            <p className="text-lg md:text-xl text-[#D8DEE9] font-['Inter']">Your past shouldn't define your future.</p>
-            <p className="text-lg md:text-xl text-[#D8DEE9] font-['Inter']">Your story shouldn't be written without you.</p>
+      {/* Testimonials */}
+      <section className="py-20 px-6">
+        <div className="container mx-auto max-w-6xl">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold mb-6">What Our Clients Say</h2>
           </div>
 
-          {/* Scan Request Form */}
-          <Card className="max-w-sm md:max-w-md mx-auto p-6 md:p-8 bg-gradient-to-r from-[#1C1C1E]/40 via-[#0A0F2C]/60 to-[#1C1C1E]/40 border border-[#247CFF]/30 rounded-2xl backdrop-blur-sm">
-            <h4 className="text-base md:text-lg font-bold mb-4 md:mb-6 text-[#247CFF] font-['Space_Grotesk'] tracking-wide text-center">
-              REQUEST YOUR FREE A.R.I.A™ SCAN
-            </h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {[
+              {
+                quote: "ARIA's intelligence platform helped us identify and neutralize a coordinated attack before it reached mainstream media. Their proactive approach saved our IPO.",
+                author: "Sarah Chen",
+                role: "Chief Communications Officer",
+                company: "Fortune 500 Technology Company",
+                image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=80&h=80&fit=crop&crop=face"
+              },
+              {
+                quote: "The depth of their analysis and speed of response is unmatched. They don't just monitor - they predict and prevent. Essential for any serious organization.",
+                author: "Michael Rodriguez",
+                role: "Head of Corporate Affairs", 
+                company: "Global Financial Services",
+                image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face"
+              }
+            ].map((testimonial, index) => (
+              <Card key={index} className="bg-[#111214] border-gray-800 p-8">
+                <div className="flex gap-1 mb-4">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="h-5 w-5 fill-amber-400 text-amber-400" />
+                  ))}
+                </div>
+                <blockquote className="text-lg text-gray-300 mb-6 italic">
+                  "{testimonial.quote}"
+                </blockquote>
+                <div className="flex items-center gap-4">
+                  <img 
+                    src={testimonial.image} 
+                    alt={testimonial.author}
+                    className="w-12 h-12 rounded-full"
+                  />
+                  <div>
+                    <p className="font-semibold text-white">{testimonial.author}</p>
+                    <p className="text-sm text-gray-400">{testimonial.role}</p>
+                    <p className="text-sm text-gray-500">{testimonial.company}</p>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 px-6 bg-[#111214]">
+        <div className="container mx-auto max-w-4xl text-center">
+          <h2 className="text-4xl font-bold mb-6">Ready to Secure Your Reputation?</h2>
+          <p className="text-xl text-gray-300 mb-12 max-w-2xl mx-auto">
+            Get a comprehensive assessment of your digital risk profile. 
+            Our experts will identify vulnerabilities and provide a strategic roadmap.
+          </p>
+          
+          <Card className="max-w-md mx-auto bg-[#1A1B1E] border-gray-800 p-8">
+            <h3 className="text-xl font-bold mb-6 text-amber-400">Request Your Assessment</h3>
             <form onSubmit={handleScanRequest} className="space-y-4">
               <Input
-                placeholder="Your Full Name"
-                className="bg-[#1C1C1E] border-[#247CFF]/30 text-white placeholder-[#D8DEE9]/60 focus:border-[#247CFF] font-['Inter'] w-full"
+                placeholder="Full Name"
+                className="bg-[#0A0B0D] border-gray-700 text-white placeholder-gray-400 focus:border-amber-600"
               />
               <Input
                 type="email"
-                placeholder="Your Email Address"
-                className="bg-[#1C1C1E] border-[#247CFF]/30 text-white placeholder-[#D8DEE9]/60 focus:border-[#247CFF] font-['Inter'] w-full"
+                placeholder="Corporate Email"
+                className="bg-[#0A0B0D] border-gray-700 text-white placeholder-gray-400 focus:border-amber-600"
+              />
+              <Input
+                placeholder="Company"
+                className="bg-[#0A0B0D] border-gray-700 text-white placeholder-gray-400 focus:border-amber-600"
               />
               <Button
                 type="submit"
-                className="w-full bg-[#247CFF] hover:bg-[#1c63cc] text-white px-6 py-3 font-bold rounded-xl border-2 border-[#247CFF] hover:border-[#1c63cc] hover:shadow-[0_0_20px_rgba(36,124,255,0.4)] transform hover:scale-105 transition-all duration-300 font-['Space_Grotesk'] tracking-wide uppercase"
+                className="w-full bg-amber-600 hover:bg-amber-500 text-black font-semibold py-3"
               >
-                SCAN ME
+                Get Assessment <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </form>
-            <p className="text-xs text-[#D8DEE9] mt-4 font-['Inter'] text-center">
-              SECURE • CONFIDENTIAL • PROFESSIONAL
+            <p className="text-xs text-gray-400 mt-4">
+              Confidential • Secure • Professional
             </p>
           </Card>
         </div>
       </section>
 
-      {/* Admin Access Section */}
-      <section className="py-12 md:py-16 px-4 md:px-6 bg-[#0A0F2C] border-t border-[#247CFF]/20">
-        <div className="container mx-auto text-center">
-          <div className="max-w-sm md:max-w-md mx-auto">
-            <div className="bg-gradient-to-r from-[#1C1C1E]/40 via-[#0A0F2C]/60 to-[#1C1C1E]/40 border border-[#247CFF]/30 p-6 md:p-8 rounded-2xl backdrop-blur-sm">
-              <h3 className="text-base md:text-lg font-bold mb-4 text-[#247CFF] font-['Space_Grotesk'] tracking-wide">
-                SECURE ADMIN PORTAL
-              </h3>
-              <p className="text-sm text-[#D8DEE9] mb-6 font-['Inter'] text-center">
-                Access the A.R.I.A™ intelligence platform. All access is logged and monitored.
+      {/* Footer */}
+      <footer className="py-12 px-6 border-t border-gray-800/50">
+        <div className="container mx-auto max-w-6xl">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-gradient-to-r from-amber-400 to-amber-600 rounded-sm flex items-center justify-center">
+                  <div className="w-4 h-4 bg-black rounded-sm"></div>
+                </div>
+                <span className="text-xl font-bold">A.R.I.A™</span>
+              </div>
+              <p className="text-gray-400">
+                Advanced Reputation Intelligence & Analysis
               </p>
-              <button
-                onClick={handleAdminAccess}
-                className="w-full bg-[#247CFF] hover:bg-[#1c63cc] text-white px-6 py-3 text-sm font-bold rounded-xl border-2 border-[#247CFF] hover:border-[#1c63cc] hover:shadow-[0_0_20px_rgba(36,124,255,0.4)] transform hover:scale-105 transition-all duration-300 font-['Space_Grotesk'] tracking-wide uppercase"
-              >
-                {isAuthenticated && isAdmin ? 'Enter Dashboard' : 'Admin Access'}
-              </button>
+            </div>
+            
+            <div>
+              <h4 className="font-semibold mb-4">Services</h4>
+              <ul className="space-y-2 text-gray-400">
+                <li><a href="#" className="hover:text-white transition-colors">Threat Detection</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Crisis Management</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Intelligence Reports</a></li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="font-semibold mb-4">Company</h4>
+              <ul className="space-y-2 text-gray-400">
+                <li><a href="#" className="hover:text-white transition-colors">About</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Careers</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Contact</a></li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="font-semibold mb-4">Legal</h4>
+              <ul className="space-y-2 text-gray-400">
+                <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">GDPR Compliance</a></li>
+              </ul>
             </div>
           </div>
+          
+          <div className="border-t border-gray-800/50 mt-12 pt-8 text-center text-gray-400">
+            <p>&copy; 2024 A.R.I.A™. All rights reserved.</p>
+          </div>
         </div>
-      </section>
-
-      {/* Enhanced Footer */}
-      <EnhancedFooter />
+      </footer>
     </div>
   );
 };

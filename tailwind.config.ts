@@ -63,25 +63,37 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Updated premium theme colors using gray, silver, and black
+				// Corporate/Goldman Sachs inspired color palette
+				corporate: {
+					dark: '#0A0B0D', // Primary dark background
+					darkSecondary: '#111214', // Secondary dark background  
+					darkTertiary: '#1A1B1E', // Card backgrounds
+					gray: '#6B7280', // Muted text
+					lightGray: '#9CA3AF', // Secondary text
+					accent: '#F59E0B', // Amber/gold accent
+					accentDark: '#D97706', // Darker amber for hover states
+					border: '#374151', // Border color
+					borderLight: '#4B5563' // Lighter border
+				},
+				// Updated premium theme colors
 				brand: {
-					DEFAULT: '#222222', // dark gray/nearly black
-					light: '#888888', // medium gray
-					dark: '#000000', // pure black
-					accent: '#9F9EA1' // silver gray
+					DEFAULT: '#0A0B0D', // Corporate dark
+					light: '#6B7280', // Corporate gray
+					dark: '#000000', // Pure black
+					accent: '#F59E0B' // Corporate amber
 				},
 				alert: {
-					negative: '#e53e3e', // red for negative content
-					warning: '#dd6b20', // orange for questionable content
-					positive: '#38a169' // green for positive content
+					negative: '#EF4444', // Red for negative content
+					warning: '#F59E0B', // Amber for warnings
+					positive: '#10B981' // Green for positive content
 				},
-				// Premium UI palette
+				// Premium UI palette - corporate theme
 				premium: {
-					black: '#000000',
-					darkGray: '#222222',
-					gray: '#888888',
-					silver: '#9F9EA1',
-					lightSilver: '#C8C8C9'
+					black: '#0A0B0D',
+					darkGray: '#111214',
+					gray: '#6B7280',
+					silver: '#9CA3AF',
+					gold: '#F59E0B'
 				}
 			},
 			borderRadius: {
