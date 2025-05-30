@@ -47,7 +47,22 @@ const ClientSelector = ({ selectedClient, onClientSelect, onEntitiesLoad }: Clie
         .order('name');
 
       if (error) throw error;
-      setClients(data || []);
+      
+      // Map database fields to TypeScript interface
+      const mappedClients: Client[] = (data || []).map(client => ({
+        id: client.id,
+        name: client.name,
+        industry: client.industry,
+        contactName: client.contactname,
+        contactEmail: client.contactemail,
+        website: client.website || '',
+        notes: client.notes || '',
+        keywordTargets: client.keywordtargets || '',
+        created_at: client.created_at,
+        updated_at: client.updated_at
+      }));
+      
+      setClients(mappedClients);
     } catch (error) {
       console.error('Error loading clients:', error);
     } finally {
@@ -119,7 +134,7 @@ const ClientSelector = ({ selectedClient, onClientSelect, onEntitiesLoad }: Clie
             <div className="flex items-center justify-between">
               <div>
                 <h4 className="font-medium">{selectedClient.name}</h4>
-                <p className="text-sm text-gray-600">{selectedClient.contactname} • {selectedClient.contactemail}</p>
+                <p className="text-sm text-gray-600">{selectedClient.contactName} • {selectedClient.contactEmail}</p>
               </div>
               <Badge>{selectedClient.industry}</Badge>
             </div>
@@ -141,10 +156,10 @@ const ClientSelector = ({ selectedClient, onClientSelect, onEntitiesLoad }: Clie
               </div>
             )}
 
-            {selectedClient.keywordtargets && (
+            {selectedClient.keywordTargets && (
               <div>
                 <span className="text-sm font-medium">Keywords: </span>
-                <span className="text-sm text-gray-600">{selectedClient.keywordtargets}</span>
+                <span className="text-sm text-gray-600">{selectedClient.keywordTargets}</span>
               </div>
             )}
           </div>

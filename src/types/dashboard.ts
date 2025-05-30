@@ -163,4 +163,7 @@ export interface DashboardMainContentProps {
   previousScore?: number;
   filteredAlerts?: ContentAlert[];
   onFilterChange?: (filters: { platforms: string[]; severities: string[]; statuses: string[] }) => void;
+  loading?: boolean;
+  error?: string | null;
+  fetchData?: () => Promise<void>;
 }

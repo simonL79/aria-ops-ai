@@ -45,8 +45,8 @@ const DashboardPage = () => {
         />
         <DashboardMainContent
           metrics={metrics}
-          alerts={liveAlerts} // Only pass live alerts
-          classifiedAlerts={liveAlerts} // Only pass live alerts
+          alerts={liveAlerts}
+          classifiedAlerts={liveAlerts}
           sources={sources}
           actions={actions}
           toneStyles={toneStyles}
@@ -59,8 +59,8 @@ const DashboardPage = () => {
           loading={loading}
           error={error}
           fetchData={fetchData}
-          filteredAlerts={liveAlerts} // Only show live alerts
-          onFilterChange={() => {}} // Filter functionality maintained but only for live data
+          filteredAlerts={liveAlerts}
+          onFilterChange={() => {}}
         />
       </div>
     </DashboardLayout>

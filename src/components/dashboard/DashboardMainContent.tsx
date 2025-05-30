@@ -1,3 +1,4 @@
+
 import React from "react";
 import ReputationScore from "@/components/dashboard/ReputationScore";
 import ContentAlerts from "@/components/dashboard/ContentAlerts";
@@ -9,6 +10,7 @@ import SeoSuppressionPipeline from "@/components/dashboard/SeoSuppressionPipelin
 import IntelligenceCollection from "@/components/dashboard/IntelligenceCollection";
 import ContentFilter from "@/components/dashboard/ContentFilter";
 import InfoTooltip from "@/components/dashboard/InfoTooltip";
+import SerpDefense from "@/components/dashboard/SerpDefense";
 import { Button } from "@/components/ui/button";
 import { RefreshCw, AlertTriangle, CheckCircle } from "lucide-react";
 import { DashboardMainContentProps } from "@/types/dashboard";
@@ -32,7 +34,9 @@ const DashboardMainContent = ({
   error, 
   fetchData, 
   filteredAlerts, 
-  onFilterChange 
+  onFilterChange,
+  reputationScore = 75,
+  previousScore = 70
 }: DashboardMainContentProps) => {
   // Filter for LIVE OSINT data only
   const liveAlerts = alerts.filter(alert => 
