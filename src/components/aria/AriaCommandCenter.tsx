@@ -44,7 +44,7 @@ interface ThreatProfile {
 const AriaCommandCenter = () => {
   const [entityName, setEntityName] = useState('');
   const [keywords, setKeywords] = useState('');
-  const [scanMode, setScanMode] = useState<'known' | 'unknown'>('known');
+  const [scanMode, setScanMode] = useState<'standard' | 'recursive' | 'unknown'>('standard');
   const [isScanning, setIsScanning] = useState(false);
   const [scanProgress, setScanProgress] = useState(0);
   const [currentPhase, setCurrentPhase] = useState('');
@@ -117,22 +117,40 @@ const AriaCommandCenter = () => {
         console.log('✅ News scan completed:', newsScan);
       }
 
-      // Phase 4: RSS Feed Processing (Fixed)
-      setCurrentPhase(scanPhases[3]);
+      // Phase 4: RSS Feed Processing OR Recursive AI Scanning
+      setCurrentPhase(scanMode === 'recursive' ? 'A.R.I.A™ Recursive Intelligence Gathering...' : scanPhases[3]);
       setScanProgress(55);
       
-      const { data: rssScan, error: rssError } = await supabase.functions.invoke('rss-scraper', {
-        body: { 
-          entity: entityName,
-          sources: ['bbc', 'guardian', 'telegraph', 'reuters'],
-          scan_type: 'entity_monitoring'
-        }
-      });
+      if (scanMode === 'recursive') {
+        // Use the new recursive AI scanner
+        const { data: recursiveScan, error: recursiveError } = await supabase.functions.invoke('recursive-ai-scanner', {
+          body: { 
+            entity: entityName,
+            keywords: keywords.split(',').map(k => k.trim()).filter(Boolean),
+            maxDepth: 1
+          }
+        });
 
-      if (rssError) {
-        console.warn('RSS scan warning:', rssError);
+        if (recursiveError) {
+          console.warn('Recursive scan warning:', recursiveError);
+        } else {
+          console.log('✅ Recursive AI scan completed:', recursiveScan);
+        }
       } else {
-        console.log('✅ RSS scan completed:', rssScan);
+        // Standard RSS scan
+        const { data: rssScan, error: rssError } = await supabase.functions.invoke('rss-scraper', {
+          body: { 
+            entity: entityName,
+            sources: ['bbc', 'guardian', 'telegraph', 'reuters'],
+            scan_type: 'entity_monitoring'
+          }
+        });
+
+        if (rssError) {
+          console.warn('RSS scan warning:', rssError);
+        } else {
+          console.log('✅ RSS scan completed:', rssScan);
+        }
       }
 
       // Phase 5: Sentiment Analysis
@@ -144,7 +162,7 @@ const AriaCommandCenter = () => {
         .from('scan_results')
         .select('*')
         .or(`content.ilike.%${entityName}%,entity_name.ilike.%${entityName}%`)
-        .in('source_type', ['live_osint', 'osint_intelligence'])
+        .in('source_type', ['live_osint', 'osint_intelligence', 'recursive_osint'])
         .order('created_at', { ascending: false })
         .limit(100); // Increased limit for better analysis
 
@@ -205,7 +223,7 @@ const AriaCommandCenter = () => {
         platforms_affected: platforms,
         threat_types: inferThreatTypes(keywords, liveResults),
         analysis_complete: true,
-        recommendations: generateRecommendations(threatLevel, riskScore, totalMentions)
+        recommendations: generateRecommendations(threatLevel, riskScore, totalMentions, scanMode)
       };
 
       setThreatProfile(profile);
@@ -214,7 +232,7 @@ const AriaCommandCenter = () => {
 
       // Log to ARIA operations
       await supabase.from('aria_ops_log').insert({
-        operation_type: 'live_threat_analysis',
+        operation_type: scanMode === 'recursive' ? 'recursive_threat_analysis' : 'live_threat_analysis',
         module_source: 'command_center',
         operation_data: { 
           entity_name: entityName,
@@ -222,12 +240,13 @@ const AriaCommandCenter = () => {
           risk_score: riskScore,
           total_live_results: totalMentions,
           platforms_found: platforms.length,
-          scan_phases_completed: scanPhases.length
+          scan_phases_completed: scanPhases.length,
+          scan_mode: scanMode
         },
         success: true
       });
 
-      toast.success(`A.R.I.A™ Live OSINT Analysis Complete`, {
+      toast.success(`A.R.I.A™ ${scanMode === 'recursive' ? 'Recursive AI' : 'Live OSINT'} Analysis Complete`, {
         description: `${totalMentions} intelligence items processed across ${platforms.length} platforms`
       });
 
@@ -262,24 +281,36 @@ const AriaCommandCenter = () => {
     return types;
   };
 
-  const generateRecommendations = (level: string, score: number, mentions: number): string[] => {
+  const generateRecommendations = (level: string, score: number, mentions: number, mode: string): string[] => {
     const recs: string[] = [];
     
     if (level === 'critical') {
       recs.push('IMMEDIATE: Deploy RSI™ Counter-Narrative Response');
       recs.push('URGENT: Activate CEREBRA AI Memory Override');
       recs.push('IMMEDIATE: Generate Legal Response Package');
+      if (mode === 'recursive') {
+        recs.push('CRITICAL: Related entity threats require immediate assessment');
+      }
     } else if (level === 'high') {
       recs.push('Deploy RSI™ Sentiment Intervention');
       recs.push('Consider EIDETIC Decay Management');
       recs.push('Enhance Live OSINT Monitoring');
+      if (mode === 'recursive') {
+        recs.push('Monitor related entities for threat escalation');
+      }
     } else if (level === 'moderate') {
       recs.push('Continue Live OSINT Monitoring');
       recs.push('Prepare RSI™ Response Templates');
       recs.push('Monitor Sentiment Trends');
+      if (mode === 'recursive') {
+        recs.push('Track related entity developments');
+      }
     } else {
       recs.push('Maintain Standard Live Monitoring');
       recs.push('Continue ANUBIS Health Checks');
+      if (mode === 'recursive') {
+        recs.push('Periodic related entity assessment');
+      }
     }
 
     return recs;
@@ -315,13 +346,13 @@ const AriaCommandCenter = () => {
             />
           </div>
           <h1 className="text-4xl font-bold tracking-wide text-amber-400">
-            A.R.I.A™ LIVE OSINT INTELLIGENCE
+            A.R.I.A™ RECURSIVE INTELLIGENCE CENTER
           </h1>
           <p className="text-xl text-gray-300">
-            Real-Time Open Source Intelligence Scanner
+            Advanced AI-Driven Open Source Intelligence Scanner
           </p>
           <div className="text-amber-500 font-mono text-lg">
-            "100% Live Data • No APIs Required • Direct OSINT Crawling"
+            "Recursive Entity Discovery • AI-Enhanced Analysis • 100% Live Data"
           </div>
           
           {/* Quick Access to Threats Management */}
@@ -340,17 +371,25 @@ const AriaCommandCenter = () => {
           <CardHeader>
             <CardTitle className="text-amber-400 flex items-center gap-2">
               <Search className="h-5 w-5" />
-              Live OSINT Target Input
+              A.R.I.A™ Intelligence Target Input
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex gap-4 mb-4">
               <Button
-                variant={scanMode === 'known' ? 'default' : 'outline'}
-                onClick={() => setScanMode('known')}
-                className={scanMode === 'known' ? 'bg-amber-600 text-black' : 'border-amber-600 text-amber-400'}
+                variant={scanMode === 'standard' ? 'default' : 'outline'}
+                onClick={() => setScanMode('standard')}
+                className={scanMode === 'standard' ? 'bg-amber-600 text-black' : 'border-amber-600 text-amber-400'}
               >
-                Live Entity Scan
+                Standard OSINT Scan
+              </Button>
+              <Button
+                variant={scanMode === 'recursive' ? 'default' : 'outline'}
+                onClick={() => setScanMode('recursive')}
+                className={scanMode === 'recursive' ? 'bg-amber-600 text-black' : 'border-amber-600 text-amber-400'}
+              >
+                <Brain className="mr-2 h-4 w-4" />
+                Recursive AI Scan
               </Button>
               <Button
                 variant={scanMode === 'unknown' ? 'default' : 'outline'}
@@ -361,7 +400,7 @@ const AriaCommandCenter = () => {
               </Button>
             </div>
 
-            {scanMode === 'known' ? (
+            {scanMode !== 'unknown' ? (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-amber-400 mb-2">
@@ -396,12 +435,16 @@ const AriaCommandCenter = () => {
                     {isScanning ? (
                       <>
                         <Activity className="mr-2 h-4 w-4 animate-spin" />
-                        Live Scanning...
+                        {scanMode === 'recursive' ? 'AI Scanning...' : 'Live Scanning...'}
                       </>
                     ) : (
                       <>
-                        <Shield className="mr-2 h-4 w-4" />
-                        Run Live OSINT Scan
+                        {scanMode === 'recursive' ? (
+                          <Brain className="mr-2 h-4 w-4" />
+                        ) : (
+                          <Shield className="mr-2 h-4 w-4" />
+                        )}
+                        Run {scanMode === 'recursive' ? 'Recursive AI' : 'Live OSINT'} Scan
                       </>
                     )}
                   </Button>
@@ -429,6 +472,19 @@ const AriaCommandCenter = () => {
                     </>
                   )}
                 </Button>
+              </div>
+            )}
+
+            {scanMode === 'recursive' && (
+              <div className="mt-4 p-4 bg-blue-500/10 border border-blue-500/30 rounded">
+                <div className="flex items-center gap-2 mb-2">
+                  <Brain className="h-4 w-4 text-blue-400" />
+                  <span className="text-blue-400 font-medium">Recursive AI Intelligence</span>
+                </div>
+                <p className="text-sm text-gray-300">
+                  Advanced mode that automatically discovers related entities, expands search queries with AI-enhanced threat patterns, 
+                  and performs recursive analysis to map the complete threat landscape. Ideal for comprehensive intelligence gathering.
+                </p>
               </div>
             )}
           </CardContent>

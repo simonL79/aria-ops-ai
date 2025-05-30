@@ -7105,6 +7105,39 @@ export type Database = {
         }
         Relationships: []
       }
+      unified_reports: {
+        Row: {
+          created_at: string | null
+          entity_name: string
+          high_severity_count: number | null
+          id: string
+          related_entities: string[] | null
+          scan_metadata: Json | null
+          summary: string | null
+          threat_count: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          entity_name: string
+          high_severity_count?: number | null
+          id?: string
+          related_entities?: string[] | null
+          scan_metadata?: Json | null
+          summary?: string | null
+          threat_count?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          entity_name?: string
+          high_severity_count?: number | null
+          id?: string
+          related_entities?: string[] | null
+          scan_metadata?: Json | null
+          summary?: string | null
+          threat_count?: number | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
