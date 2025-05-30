@@ -1,9 +1,8 @@
-
 import React from 'react';
 import PublicLayout from "@/components/layout/PublicLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check, Home } from "lucide-react";
+import { Check } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const PricingPage = () => {
@@ -13,12 +12,6 @@ const PricingPage = () => {
         <div className="container mx-auto px-6">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-12">
-              <div className="flex items-center justify-center gap-2 mb-4">
-                <Link to="/" className="flex items-center gap-2 text-orange-500 hover:text-orange-400 transition-colors">
-                  <Home className="h-5 w-5" />
-                  <span className="text-sm">Back to Home</span>
-                </Link>
-              </div>
               <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white">Simple, Transparent Pricing</h1>
               <p className="text-xl text-gray-300">
                 Choose the plan that's right for your reputation monitoring needs

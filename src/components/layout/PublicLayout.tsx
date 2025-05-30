@@ -5,8 +5,8 @@ import Footer from './Footer';
 import MobileNav from './MobileNav';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '../ui/button';
-import { useNavigate, Link } from 'react-router-dom';
-import { LogIn, LogOut } from 'lucide-react';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
+import { LogIn, LogOut, Home } from 'lucide-react';
 import Logo from '../ui/logo';
 
 interface PublicLayoutProps {
@@ -16,6 +16,7 @@ interface PublicLayoutProps {
 const PublicLayout = ({ children }: PublicLayoutProps) => {
   const { isAuthenticated, signOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleAuthAction = async () => {
@@ -26,14 +27,27 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
     }
   };
 
+  // Check if we're on the home page
+  const isHomePage = location.pathname === '/' || location.pathname === '/sales-funnel';
+
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-50 w-full bg-black/95 backdrop-blur border-b border-gray-800">
         <div className="container mx-auto px-6">
           <div className="flex items-center justify-between py-4">
-            <Link to="/">
-              <Logo variant="light" size="xl" />
-            </Link>
+            <div className="flex items-center gap-4">
+              <Link to="/">
+                <Logo variant="light" size="xl" />
+              </Link>
+              
+              {/* Show Back to Home link only if not on home page */}
+              {!isHomePage && (
+                <Link to="/" className="flex items-center gap-2 text-orange-500 hover:text-orange-400 transition-colors">
+                  <Home className="h-4 w-4" />
+                  <span className="text-sm">Back to Home</span>
+                </Link>
+              )}
+            </div>
             
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-8">
