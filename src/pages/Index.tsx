@@ -122,7 +122,7 @@ const Index = () => {
             <div className="relative">
               <div className="relative z-10">
                 <img 
-                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&h=600&fit=crop&crop=face" 
+                  src="/lovable-uploads/e1f0cf1a-a8fe-4efe-8615-fa4f8a7747fe.png" 
                   alt="Professional consultant"
                   className="w-full max-w-md mx-auto rounded-lg shadow-2xl"
                 />
