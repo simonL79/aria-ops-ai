@@ -7429,18 +7429,6 @@ export type Database = {
           },
         ]
       }
-      panoptica_fusion_view: {
-        Row: {
-          detected_at: string | null
-          event_content: string | null
-          relevance_score: number | null
-          risk_level: string | null
-          source_detail: string | null
-          source_type: string | null
-          threat_summary: string | null
-        }
-        Relationships: []
-      }
       praxis_forecast_dashboard: {
         Row: {
           active_signals: number | null
@@ -7506,45 +7494,30 @@ export type Database = {
       verified_live_threats: {
         Row: {
           content: string | null
+          created_at: string | null
           detected_at: string | null
-          freshness_window: string | null
           id: string | null
-          risk_score: number | null
-          source: string | null
-          source_confidence_score: number | null
           status: string | null
           threat_type: string | null
-          verification_method: string | null
-          verified_at: string | null
-          verified_source: boolean | null
+          updated_at: string | null
         }
         Insert: {
           content?: string | null
+          created_at?: string | null
           detected_at?: string | null
-          freshness_window?: string | null
           id?: string | null
-          risk_score?: number | null
-          source?: string | null
-          source_confidence_score?: number | null
           status?: string | null
           threat_type?: string | null
-          verification_method?: string | null
-          verified_at?: string | null
-          verified_source?: boolean | null
+          updated_at?: string | null
         }
         Update: {
           content?: string | null
+          created_at?: string | null
           detected_at?: string | null
-          freshness_window?: string | null
           id?: string | null
-          risk_score?: number | null
-          source?: string | null
-          source_confidence_score?: number | null
           status?: string | null
           threat_type?: string | null
-          verification_method?: string | null
-          verified_at?: string | null
-          verified_source?: boolean | null
+          updated_at?: string | null
         }
         Relationships: []
       }

@@ -1,4 +1,3 @@
-
 import React from "react";
 import ReputationScore from "@/components/dashboard/ReputationScore";
 import ContentAlerts from "@/components/dashboard/ContentAlerts";
@@ -6,7 +5,6 @@ import SourceOverview from "@/components/dashboard/SourceOverview";
 import RecentActions from "@/components/dashboard/RecentActions";
 import DarkWebSurveillance from "@/components/dashboard/DarkWebSurveillance";
 import StrategicResponseEngine from "@/components/dashboard/responseEngine";
-import SerpDefense from "@/components/dashboard/SerpDefense";
 import SeoSuppressionPipeline from "@/components/dashboard/SeoSuppressionPipeline";
 import IntelligenceCollection from "@/components/dashboard/IntelligenceCollection";
 import ContentFilter from "@/components/dashboard/ContentFilter";
@@ -14,29 +12,28 @@ import InfoTooltip from "@/components/dashboard/InfoTooltip";
 import { Button } from "@/components/ui/button";
 import { RefreshCw, AlertTriangle, CheckCircle } from "lucide-react";
 import { DashboardMainContentProps } from "@/types/dashboard";
+import SERPDefensePanel from "@/components/dashboard/SERPDefensePanel";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 const DashboardMainContent = ({
-  reputationScore = 70,
-  previousScore = 65,
-  sources = [],
-  filteredAlerts = [],
-  actions = [],
-  onFilterChange = () => {},
-  metrics = [],
-  alerts = [],
-  classifiedAlerts = [],
-  toneStyles = [],
-  recentActivity = [],
-  seoContent = '',
-  negativeContent = 0,
-  positiveContent = 0,
-  neutralContent = 0,
-  onSimulateNewData = () => {},
-  loading = false,
-  error = null,
-  fetchData = () => {}
-}: DashboardMainContentProps & { loading?: boolean; error?: string | null; fetchData?: () => void }) => {
-
+  metrics, 
+  alerts, 
+  classifiedAlerts, 
+  sources, 
+  actions, 
+  toneStyles, 
+  recentActivity, 
+  seoContent, 
+  negativeContent, 
+  positiveContent, 
+  neutralContent, 
+  onSimulateNewData, 
+  loading, 
+  error, 
+  fetchData, 
+  filteredAlerts, 
+  onFilterChange 
+}: DashboardMainContentProps) => {
   // Filter for LIVE OSINT data only
   const liveAlerts = alerts.filter(alert => 
     alert.sourceType === 'osint_intelligence' || 
@@ -85,103 +82,141 @@ const DashboardMainContent = ({
 
   // Show live data status
   return (
-    <>
-      <div className="mb-4 bg-green-50 border border-green-200 rounded-lg p-4">
-        <div className="flex items-center gap-2">
-          <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
-          <span className="text-sm font-medium text-green-800">
-            A.R.I.A™ Live Intelligence: {liveAlerts.length} live threats • {liveSources.length} OSINT sources • Mock data blocked
-          </span>
-          <Button 
-            size="sm" 
-            variant="outline" 
-            onClick={fetchData}
-            className="ml-auto gap-1 border-green-300 text-green-700 hover:bg-green-100"
-          >
-            <RefreshCw className="h-3 w-3" />
-            Refresh Live Data
-          </Button>
-        </div>
-      </div>
+    <div className="container mx-auto px-6 py-8">
+      <Tabs defaultValue="dashboard" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-7">
+          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+          <TabsTrigger value="threats">Threats</TabsTrigger>
+          <TabsTrigger value="seo">SEO Defense</TabsTrigger>
+          <TabsTrigger value="serp">SERP Defense</TabsTrigger>
+          <TabsTrigger value="monitoring">Monitoring</TabsTrigger>
+          <TabsTrigger value="reports">Reports</TabsTrigger>
+          <TabsTrigger value="settings">Settings</TabsTrigger>
+        </TabsList>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        <div className="lg:col-span-1">
-          <div className="space-y-6">
-            <div className="flex items-center">
-              <ReputationScore score={reputationScore} previousScore={previousScore} />
-              <InfoTooltip text="Reputation score calculated from live OSINT intelligence and sentiment analysis." />
-            </div>
-            <div className="flex items-center">
-              <IntelligenceCollection />
+        <TabsContent value="dashboard" className="space-y-6">
+          <div className="mb-4 bg-green-50 border border-green-200 rounded-lg p-4">
+            <div className="flex items-center gap-2">
+              <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
+              <span className="text-sm font-medium text-green-800">
+                A.R.I.A™ Live Intelligence: {liveAlerts.length} live threats • {liveSources.length} OSINT sources • Mock data blocked
+              </span>
+              <Button 
+                size="sm" 
+                variant="outline" 
+                onClick={fetchData}
+                className="ml-auto gap-1 border-green-300 text-green-700 hover:bg-green-100"
+              >
+                <RefreshCw className="h-3 w-3" />
+                Refresh Live Data
+              </Button>
             </div>
           </div>
-        </div>
-        
-        <div className="lg:col-span-2">
-          <div className="space-y-6">
-            <div className="flex justify-between items-center mb-2">
-              <div className="flex items-center">
-                <h2 className="text-lg font-medium">Live OSINT Threat Intelligence</h2>
-                <InfoTooltip text="AI-detected threats from live OSINT sources requiring attention or action." />
-              </div>
-              <ContentFilter onFilterChange={onFilterChange} />
-            </div>
-            
-            {liveAlerts.length === 0 ? (
-              <div className="p-8 text-center border-2 border-dashed border-gray-200 rounded-lg">
-                <CheckCircle className="h-8 w-8 mx-auto mb-4 text-green-500" />
-                <h3 className="text-lg font-medium text-gray-600 mb-2">No Live Threats Detected</h3>
-                <p className="text-sm text-gray-500 mb-4">
-                  A.R.I.A™ OSINT systems are monitoring. All intelligence sources active.
-                </p>
-                <div className="flex items-center justify-center gap-2 text-xs text-gray-500">
-                  <div className="h-1.5 w-1.5 bg-green-500 rounded-full animate-pulse"></div>
-                  <span>Live monitoring active • Use Operator Console for manual sweeps</span>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <div className="lg:col-span-1">
+              <div className="space-y-6">
+                <div className="flex items-center">
+                  <ReputationScore score={reputationScore} previousScore={previousScore} />
+                  <InfoTooltip text="Reputation score calculated from live OSINT intelligence and sentiment analysis." />
+                </div>
+                <div className="flex items-center">
+                  <IntelligenceCollection />
                 </div>
               </div>
-            ) : (
-              <ContentAlerts alerts={filteredAlerts.length > 0 ? filteredAlerts : liveAlerts} />
-            )}
+            </div>
+            
+            <div className="lg:col-span-2">
+              <div className="space-y-6">
+                <div className="flex justify-between items-center mb-2">
+                  <div className="flex items-center">
+                    <h2 className="text-lg font-medium">Live OSINT Threat Intelligence</h2>
+                    <InfoTooltip text="AI-detected threats from live OSINT sources requiring attention or action." />
+                  </div>
+                  <ContentFilter onFilterChange={onFilterChange} />
+                </div>
+                
+                {liveAlerts.length === 0 ? (
+                  <div className="p-8 text-center border-2 border-dashed border-gray-200 rounded-lg">
+                    <CheckCircle className="h-8 w-8 mx-auto mb-4 text-green-500" />
+                    <h3 className="text-lg font-medium text-gray-600 mb-2">No Live Threats Detected</h3>
+                    <p className="text-sm text-gray-500 mb-4">
+                      A.R.I.A™ OSINT systems are monitoring. All intelligence sources active.
+                    </p>
+                    <div className="flex items-center justify-center gap-2 text-xs text-gray-500">
+                      <div className="h-1.5 w-1.5 bg-green-500 rounded-full animate-pulse"></div>
+                      <span>Live monitoring active • Use Operator Console for manual sweeps</span>
+                    </div>
+                  </div>
+                ) : (
+                  <ContentAlerts alerts={filteredAlerts.length > 0 ? filteredAlerts : liveAlerts} />
+                )}
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        <div className="lg:col-span-1">
-          <SourceOverview sources={liveSources as any} />
-        </div>
-        <div className="lg:col-span-1">
-          <RecentActions actions={liveActions} />
-        </div>
-        <div className="lg:col-span-1">
-          <DarkWebSurveillance />
-        </div>
-      </div>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <div className="lg:col-span-1">
+              <SourceOverview sources={liveSources as any} />
+            </div>
+            <div className="lg:col-span-1">
+              <RecentActions actions={liveActions} />
+            </div>
+            <div className="lg:col-span-1">
+              <DarkWebSurveillance />
+            </div>
+          </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <StrategicResponseEngine />
-        <SerpDefense />
-      </div>
-      
-      <div className="mb-6">
-        <SeoSuppressionPipeline />
-      </div>
-      
-      {/* Live Data Compliance Footer */}
-      <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <CheckCircle className="h-4 w-4 text-blue-600" />
-            <span className="text-sm font-medium text-blue-800">
-              100% Live Data Compliance Achieved
-            </span>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <StrategicResponseEngine />
+            <SerpDefense />
           </div>
-          <div className="text-xs text-blue-600">
-            All components showing live OSINT intelligence only • Mock data blocked
+          
+          <div className="mb-6">
+            <SeoSuppressionPipeline />
           </div>
-        </div>
-      </div>
-    </>
+          
+          {/* Live Data Compliance Footer */}
+          <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4 text-blue-600" />
+                <span className="text-sm font-medium text-blue-800">
+                  100% Live Data Compliance Achieved
+                </span>
+              </div>
+              <div className="text-xs text-blue-600">
+                All components showing live OSINT intelligence only • Mock data blocked
+              </div>
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="threats" className="space-y-6">
+          {/* Threats tab content */}
+        </TabsContent>
+
+        <TabsContent value="seo" className="space-y-6">
+          {/* SEO Defense tab content */}
+        </TabsContent>
+
+        <TabsContent value="serp" className="space-y-6">
+          <SERPDefensePanel />
+        </TabsContent>
+
+        <TabsContent value="monitoring" className="space-y-6">
+          {/* Monitoring tab content */}
+        </TabsContent>
+
+        <TabsContent value="reports" className="space-y-6">
+          {/* Reports tab content */}
+        </TabsContent>
+
+        <TabsContent value="settings" className="space-y-6">
+          {/* Settings tab content */}
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };
 
