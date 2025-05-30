@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -42,8 +43,8 @@ const Index = () => {
             <nav className="hidden md:flex items-center space-x-8">
               <a href="/blog" className="text-gray-300 hover:text-white transition-colors">Blog</a>
               <a href="/simon-lindsay" className="text-gray-300 hover:text-white transition-colors">About Simon</a>
-              <a href="/#get-started" className="text-gray-300 hover:text-white transition-colors">Get Started</a>
-              <a href="/#services" className="text-gray-300 hover:text-white transition-colors">Services</a>
+              <a href="#get-started" className="text-gray-300 hover:text-white transition-colors">Get Started</a>
+              <a href="#services" className="text-gray-300 hover:text-white transition-colors">Services</a>
               <Button
                 onClick={handleAdminAccess}
                 variant="outline"
@@ -70,8 +71,8 @@ const Index = () => {
               <nav className="flex flex-col space-y-4">
                 <a href="/blog" className="text-gray-300 hover:text-white transition-colors">Blog</a>
                 <a href="/simon-lindsay" className="text-gray-300 hover:text-white transition-colors">About Simon</a>
-                <a href="/#get-started" className="text-gray-300 hover:text-white transition-colors">Get Started</a>
-                <a href="/#services" className="text-gray-300 hover:text-white transition-colors">Services</a>
+                <a href="#get-started" className="text-gray-300 hover:text-white transition-colors">Get Started</a>
+                <a href="#services" className="text-gray-300 hover:text-white transition-colors">Services</a>
                 <Button
                   onClick={handleAdminAccess}
                   variant="outline"
@@ -383,7 +384,7 @@ const Index = () => {
           </div>
           
           <div className="border-t border-gray-800/50 mt-12 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 A.R.I.A™. All rights reserved.</p>
+            <p>&copy; 2025 A.R.I.A™. All rights reserved.</p>
           </div>
         </div>
       </footer>
