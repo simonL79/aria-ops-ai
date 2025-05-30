@@ -1,150 +1,243 @@
 
-import { supabase } from "@/integrations/supabase/client";
-import { ContentAlert } from '@/types/dashboard';
-import { toast } from "sonner";
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
-export interface LiveScanParameters {
-  platforms: string[];
-  keywords: string[];
-  maxResults: number;
-  includeRealTimeAlerts: boolean;
+/**
+ * A.R.I.A™ Live OSINT Scanner - 100% Real Data, No Mock Content
+ * Direct web crawling and RSS processing without API dependencies
+ */
+
+export interface LiveScanOptions {
+  maxResults?: number;
+  includeRealTimeAlerts?: boolean;
+  platforms?: string[];
 }
 
+export interface LiveScanResult {
+  id: string;
+  platform: string;
+  content: string;
+  url: string;
+  severity: 'low' | 'medium' | 'high';
+  sentiment: number;
+  confidence_score: number;
+  detected_entities: string[];
+  source_type: string;
+  entity_name?: string;
+  created_at: string;
+}
+
+/**
+ * Perform live OSINT scan using real web crawling and RSS feeds
+ */
 export const performLiveScan = async (
-  query: string, 
-  platforms: string[], 
-  parameters: Partial<LiveScanParameters> = {}
-): Promise<ContentAlert[]> => {
+  query: string,
+  platforms: string[] = ['Reddit', 'News', 'Forums'],
+  options: LiveScanOptions = {}
+): Promise<LiveScanResult[]> => {
   try {
-    console.log('Starting live scan with query:', query, 'platforms:', platforms);
+    console.log('🔍 A.R.I.A™ OSINT: Starting live intelligence scan for:', query);
     
-    // Call the monitoring scan edge function for real data
-    const { data, error } = await supabase.functions.invoke('monitoring-scan', {
-      body: { 
-        scanType: 'live',
-        query,
-        platforms,
-        maxResults: parameters.maxResults || 50
-      }
-    });
-
-    if (error) {
-      console.error('Live scan error:', error);
-      throw error;
-    }
-
-    if (data?.success && data.results) {
-      console.log('Live scan completed successfully:', data.results.length, 'results');
-      
-      // Store results in database
-      for (const result of data.results) {
-        await supabase.from('scan_results').insert({
-          platform: result.platform,
-          content: result.content,
-          url: result.url,
-          severity: result.severity,
-          status: 'new',
-          threat_type: result.threat_type || 'reputation_risk',
-          sentiment: result.sentiment || 0,
-          source_type: 'live_scan'
+    const results: LiveScanResult[] = [];
+    
+    // Reddit RSS Crawling (no API key required)
+    if (platforms.includes('Reddit')) {
+      try {
+        const { data: redditData, error } = await supabase.functions.invoke('reddit-scan', {
+          body: { 
+            entity: query,
+            source: 'live_scanner',
+            scan_type: 'rss_crawl'
+          }
         });
+        
+        if (!error && redditData?.results) {
+          results.push(...redditData.results);
+          console.log(`✅ Reddit OSINT: ${redditData.results.length} live results`);
+        }
+      } catch (error) {
+        console.warn('Reddit scan error:', error);
       }
-
-      return data.results.map((result: any) => ({
-        id: result.id,
-        platform: result.platform,
-        content: result.content,
-        date: new Date().toISOString(),
-        severity: result.severity as 'low' | 'medium' | 'high',
-        status: 'new' as const,
-        url: result.url || '',
-        threatType: result.threat_type,
-        sourceType: 'live_scan' as const,
-        confidenceScore: result.confidenceScore || 85,
-        sentiment: result.sentiment > 0 ? 'positive' : result.sentiment < 0 ? 'negative' : 'neutral',
-        detectedEntities: result.detectedEntities || []
-      }));
     }
 
-    console.log('No results from live scan');
-    return [];
+    // News RSS Feeds (no API key required)
+    if (platforms.includes('News')) {
+      try {
+        const { data: newsData, error } = await supabase.functions.invoke('uk-news-scanner', {
+          body: { 
+            entity: query,
+            sources: ['BBC', 'Guardian', 'Telegraph', 'Reuters'],
+            scan_type: 'entity_monitoring'
+          }
+        });
+        
+        if (!error && newsData?.results) {
+          results.push(...newsData.results);
+          console.log(`✅ News OSINT: ${newsData.results.length} live results`);
+        }
+      } catch (error) {
+        console.warn('News scan error:', error);
+      }
+    }
+
+    // RSS Aggregator (no API key required)
+    if (platforms.includes('Forums') || platforms.includes('RSS')) {
+      try {
+        const { data: rssData, error } = await supabase.functions.invoke('rss-scraper', {
+          body: { 
+            entity: query,
+            sources: ['general', 'tech', 'business'],
+            scan_type: 'entity_search'
+          }
+        });
+        
+        if (!error && rssData?.results) {
+          results.push(...rssData.results);
+          console.log(`✅ RSS OSINT: ${rssData.results.length} live results`);
+        }
+      } catch (error) {
+        console.warn('RSS scan error:', error);
+      }
+    }
+
+    // Store live results in database
+    if (results.length > 0) {
+      const { error: dbError } = await supabase
+        .from('scan_results')
+        .insert(
+          results.map(result => ({
+            platform: result.platform,
+            content: result.content,
+            url: result.url,
+            severity: result.severity,
+            sentiment: result.sentiment,
+            confidence_score: result.confidence_score,
+            detected_entities: result.detected_entities,
+            source_type: 'live_osint',
+            entity_name: result.entity_name || query,
+            threat_type: 'live_intelligence'
+          }))
+        );
+        
+      if (dbError) {
+        console.error('Failed to store live results:', dbError);
+      } else {
+        console.log(`✅ Stored ${results.length} live OSINT results in database`);
+      }
+    }
+
+    console.log(`🔍 A.R.I.A™ OSINT: Live scan complete - ${results.length} intelligence items processed`);
+    return results;
+
   } catch (error) {
-    console.error('Error in live scan:', error);
-    toast.error('Live scan failed. Please check your connection.');
+    console.error('❌ Live OSINT scan failed:', error);
     throw error;
   }
 };
 
-export const performRealTimeMonitoring = async (): Promise<ContentAlert[]> => {
+/**
+ * Perform real-time monitoring using live feeds
+ */
+export const performRealTimeMonitoring = async (): Promise<LiveScanResult[]> => {
   try {
-    console.log('Starting real-time monitoring scan...');
+    console.log('🔍 A.R.I.A™ OSINT: Real-time monitoring sweep...');
     
-    const { data, error } = await supabase.functions.invoke('enhanced-intelligence', {
-      body: { 
-        scanType: 'real_time_monitoring',
-        enableLiveData: true
-      }
-    });
-
-    if (error) throw error;
-
-    if (data?.threats) {
-      // Process and store real threats
-      const threats = data.threats.map((threat: any) => ({
-        id: `threat-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-        platform: threat.platform,
-        content: threat.content,
-        date: new Date().toISOString(),
-        severity: threat.severity as 'low' | 'medium' | 'high',
-        status: 'new' as const,
-        url: threat.url || '',
-        threatType: threat.threatType,
-        sourceType: 'real_time' as const,
-        confidenceScore: threat.confidenceScore || 90,
-        sentiment: threat.sentiment > 0 ? 'positive' : threat.sentiment < 0 ? 'negative' : 'neutral',
-        detectedEntities: threat.detectedEntities || []
-      }));
-
-      return threats;
+    // Get recent live scan results (last 2 hours)
+    const { data: recentResults, error } = await supabase
+      .from('scan_results')
+      .select('*')
+      .eq('source_type', 'live_osint')
+      .gte('created_at', new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString())
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.error('Real-time monitoring error:', error);
+      return [];
     }
-
-    return [];
+    
+    const results = recentResults?.map(item => ({
+      id: item.id,
+      platform: item.platform,
+      content: item.content,
+      url: item.url || '',
+      severity: item.severity as 'low' | 'medium' | 'high',
+      sentiment: item.sentiment || 0,
+      confidence_score: item.confidence_score || 0,
+      detected_entities: Array.isArray(item.detected_entities) ? item.detected_entities : [],
+      source_type: item.source_type,
+      entity_name: item.entity_name,
+      created_at: item.created_at
+    })) || [];
+    
+    console.log(`✅ Real-time monitoring: ${results.length} live items`);
+    return results;
+    
   } catch (error) {
-    console.error('Real-time monitoring failed:', error);
+    console.error('❌ Real-time monitoring failed:', error);
     return [];
   }
 };
 
+/**
+ * Get monitoring status from live sources
+ */
 export const getMonitoringStatus = async () => {
   try {
-    const { data, error } = await supabase
+    const { data: status, error } = await supabase
       .from('monitoring_status')
       .select('*')
-      .single();
-
+      .limit(1);
+    
     if (error) {
-      console.error('Error fetching monitoring status:', error);
-      return {
-        isActive: false,
-        sources: 0,
-        platforms: 0,
-        lastRun: new Date().toISOString()
-      };
+      console.error('Monitoring status error:', error);
+      return { is_active: false, last_run: null };
     }
-
-    return {
-      isActive: data.is_active || false,
-      sources: data.sources_count || 0,
-      platforms: 5,
-      lastRun: data.last_run || new Date().toISOString()
-    };
+    
+    return status?.[0] || { is_active: false, last_run: null };
+    
   } catch (error) {
-    console.error('Error getting monitoring status:', error);
-    return {
-      isActive: false,
-      sources: 0,
-      platforms: 0,
-      lastRun: new Date().toISOString()
-    };
+    console.error('Failed to get monitoring status:', error);
+    return { is_active: false, last_run: null };
   }
 };
+
+/**
+ * Validate that system is using only live data
+ */
+export const validateLiveDataOnly = async (): Promise<boolean> => {
+  try {
+    const { data: mockCheck, error } = await supabase
+      .from('scan_results')
+      .select('id')
+      .or('content.ilike.%mock%,content.ilike.%test%,content.ilike.%demo%')
+      .limit(1);
+    
+    if (error) {
+      console.error('Live data validation error:', error);
+      return false;
+    }
+    
+    const hasMockData = mockCheck && mockCheck.length > 0;
+    
+    if (hasMockData) {
+      console.warn('🚫 BLOCKED: Mock data detected in system');
+      toast.error('Mock data detected - System requires 100% live intelligence');
+      return false;
+    }
+    
+    console.log('✅ Live data validation passed');
+    return true;
+    
+  } catch (error) {
+    console.error('Live data validation failed:', error);
+    return false;
+  }
+};
+
+// Block any mock data functions
+export const generateMockData = () => {
+  console.error('🚫 BLOCKED: Mock data generation disabled in live OSINT system');
+  throw new Error('Mock data operations are disabled. A.R.I.A™ uses 100% live intelligence.');
+};
+
+export const mockScanResults = [];

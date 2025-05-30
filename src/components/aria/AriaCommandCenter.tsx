@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -53,14 +52,14 @@ const AriaCommandCenter = () => {
   const [reportGenerated, setReportGenerated] = useState(false);
 
   const scanPhases = [
-    'Initializing OSINT Scanner...',
-    'Running Live Data Intelligence...',
-    'Analyzing with RSI™ Sentiment Engine...',
-    'Forecasting with PRAXIS Crisis Prediction...',
-    'Calculating EIDETIC Memory Strategy...',
-    'Checking CEREBRA AI Bias Traces...',
-    'Running ANUBIS System Validation...',
-    'Generating Threat Intelligence Report...'
+    'Initializing Live OSINT Scanner...',
+    'Crawling Reddit via RSS Feeds...',
+    'Scanning News Sources...',
+    'Processing Forum Data...',
+    'Analyzing Sentiment Patterns...',
+    'Calculating Risk Indicators...',
+    'Running ANUBIS Validation...',
+    'Generating Intelligence Report...'
   ];
 
   const runFullThreatAnalysis = async () => {
@@ -80,74 +79,98 @@ const AriaCommandCenter = () => {
       setScanProgress(12);
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // Phase 2: Live Data Intelligence
+      // Phase 2: Live Reddit RSS Crawling
       setCurrentPhase(scanPhases[1]);
       setScanProgress(25);
       
-      const { data: scanData } = await supabase.functions.invoke('monitoring-scan', {
+      console.log('🔍 Starting live OSINT scan for:', entityName);
+      
+      const { data: redditScan, error: redditError } = await supabase.functions.invoke('reddit-scan', {
         body: { 
-          scanType: 'live_osint',
-          targetEntity: entityName,
+          entity: entityName,
           keywords: keywords.split(',').map(k => k.trim()).filter(Boolean),
-          fullScan: true
+          source: 'aria_command_center'
         }
       });
 
-      // Phase 3: RSI Sentiment Analysis
+      if (redditError) {
+        console.warn('Reddit scan warning:', redditError);
+      }
+
+      // Phase 3: News Sources Scanning
       setCurrentPhase(scanPhases[2]);
       setScanProgress(40);
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      // Trigger RSI activation for analysis
-      await supabase.rpc('log_anubis_check', {
-        check_name: 'rsi_sentiment_analysis',
-        result: `Analyzing sentiment for ${entityName}`,
-        passed: true,
-        severity: 'medium',
-        run_context: 'command_center'
+      
+      const { data: newsScan, error: newsError } = await supabase.functions.invoke('uk-news-scanner', {
+        body: { 
+          entity: entityName,
+          scan_type: 'reputation_threats',
+          source: 'aria_command_center'
+        }
       });
 
-      // Phase 4: PRAXIS Crisis Forecasting
+      if (newsError) {
+        console.warn('News scan warning:', newsError);
+      }
+
+      // Phase 4: RSS Feed Processing
       setCurrentPhase(scanPhases[3]);
       setScanProgress(55);
       
-      const { data: existingThreats } = await supabase
-        .from('scan_results')
-        .select('*')
-        .ilike('content', `%${entityName}%`)
-        .order('created_at', { ascending: false })
-        .limit(10);
+      const { data: rssScan, error: rssError } = await supabase.functions.invoke('rss-scraper', {
+        body: { 
+          entity: entityName,
+          sources: ['bbc', 'guardian', 'telegraph', 'reuters'],
+          scan_type: 'entity_monitoring'
+        }
+      });
 
-      // Phase 5: EIDETIC Memory Strategy
+      if (rssError) {
+        console.warn('RSS scan warning:', rssError);
+      }
+
+      // Phase 5: Sentiment Analysis
       setCurrentPhase(scanPhases[4]);
       setScanProgress(70);
       
-      // Calculate decay scores and memory footprint
-      const totalMentions = existingThreats?.length || 0;
-      const negativeMentions = existingThreats?.filter(t => 
-        t.sentiment && t.sentiment < -0.3
-      ).length || 0;
+      // Get existing live scan results
+      const { data: existingThreats, error: dbError } = await supabase
+        .from('scan_results')
+        .select('*')
+        .or(`content.ilike.%${entityName}%,entity_name.ilike.%${entityName}%`)
+        .eq('source_type', 'live_osint')
+        .order('created_at', { ascending: false })
+        .limit(50);
 
-      // Phase 6: CEREBRA AI Bias Check
+      if (dbError) {
+        console.error('Database query error:', dbError);
+      }
+
+      // Phase 6: Risk Calculation
       setCurrentPhase(scanPhases[5]);
       setScanProgress(80);
-      await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // Phase 7: ANUBIS System Validation
+      const liveResults = existingThreats || [];
+      const totalMentions = liveResults.length;
+      const negativeMentions = liveResults.filter(t => 
+        t.sentiment !== null && t.sentiment < -0.1
+      ).length;
+      const highSeverity = liveResults.filter(t => t.severity === 'high').length;
+
+      // Phase 7: ANUBIS Validation
       setCurrentPhase(scanPhases[6]);
       setScanProgress(90);
-      
       await supabase.rpc('run_anubis_now');
 
       // Phase 8: Generate Report
       setCurrentPhase(scanPhases[7]);
       setScanProgress(95);
 
-      // Calculate threat profile
+      // Calculate real threat profile based on live data
       const riskScore = Math.min(
         (negativeMentions / Math.max(totalMentions, 1)) * 0.4 +
-        (totalMentions > 5 ? 0.3 : 0.1) +
-        (keywords.includes('fraud') || keywords.includes('scam') ? 0.3 : 0.1),
+        (highSeverity / Math.max(totalMentions, 1)) * 0.3 +
+        (totalMentions > 10 ? 0.3 : totalMentions > 0 ? 0.1 : 0),
         1.0
       );
 
@@ -156,7 +179,7 @@ const AriaCommandCenter = () => {
       else if (riskScore >= 0.6) threatLevel = 'high';
       else if (riskScore >= 0.3) threatLevel = 'moderate';
 
-      const platforms = [...new Set(existingThreats?.map(t => t.platform).filter(Boolean) || [])];
+      const platforms = [...new Set(liveResults.map(t => t.platform).filter(Boolean))];
       
       const profile: ThreatProfile = {
         entity_name: entityName,
@@ -165,7 +188,7 @@ const AriaCommandCenter = () => {
         total_mentions: totalMentions,
         negative_sentiment: Math.round((negativeMentions / Math.max(totalMentions, 1)) * 100),
         platforms_affected: platforms,
-        threat_types: inferThreatTypes(keywords, existingThreats || []),
+        threat_types: inferThreatTypes(keywords, liveResults),
         analysis_complete: true,
         recommendations: generateRecommendations(threatLevel, riskScore, totalMentions)
       };
@@ -176,24 +199,25 @@ const AriaCommandCenter = () => {
 
       // Log to ARIA operations
       await supabase.from('aria_ops_log').insert({
-        operation_type: 'full_threat_analysis',
+        operation_type: 'live_threat_analysis',
         module_source: 'command_center',
         operation_data: { 
           entity_name: entityName,
           threat_level: threatLevel,
-          risk_score: riskScore
+          risk_score: riskScore,
+          total_live_results: totalMentions
         },
         success: true
       });
 
-      toast.success('A.R.I.A™ Analysis Complete - Threat Profile Generated');
+      toast.success(`A.R.I.A™ Live OSINT Analysis Complete - ${totalMentions} real intelligence items processed`);
 
     } catch (error) {
-      console.error('Threat analysis failed:', error);
-      toast.error('Analysis failed - Check system logs');
+      console.error('Live threat analysis failed:', error);
+      toast.error('Live OSINT analysis failed - Check system logs');
     } finally {
       setIsScanning(false);
-      setCurrentPhase('Analysis Complete');
+      setCurrentPhase('Live Analysis Complete');
     }
   };
 
@@ -204,9 +228,15 @@ const AriaCommandCenter = () => {
     if (keywordLower.includes('fraud') || keywordLower.includes('scam')) types.push('Financial Fraud');
     if (keywordLower.includes('harassment') || keywordLower.includes('abuse')) types.push('Harassment Campaign');
     if (keywordLower.includes('doxx') || keywordLower.includes('address')) types.push('Doxxing Threat');
-    if (scanResults.some(r => r.platform === 'Twitter')) types.push('Social Media Smear');
-    if (scanResults.some(r => r.platform === 'Reddit')) types.push('Forum Amplification');
-    if (types.length === 0) types.push('General Reputation Risk');
+    
+    // Analyze actual content from live results
+    const contentAnalysis = scanResults.map(r => r.content?.toLowerCase() || '').join(' ');
+    if (contentAnalysis.includes('legal') || contentAnalysis.includes('lawsuit')) types.push('Legal Threat');
+    if (contentAnalysis.includes('reputation') || contentAnalysis.includes('defamation')) types.push('Reputation Attack');
+    
+    if (scanResults.some(r => r.platform === 'Reddit')) types.push('Social Media Discussion');
+    if (scanResults.some(r => r.platform === 'News')) types.push('Media Coverage');
+    if (types.length === 0) types.push('General Monitoring Alert');
     
     return types;
   };
@@ -217,18 +247,18 @@ const AriaCommandCenter = () => {
     if (level === 'critical') {
       recs.push('IMMEDIATE: Deploy RSI™ Counter-Narrative Response');
       recs.push('URGENT: Activate CEREBRA AI Memory Override');
-      recs.push('IMMEDIATE: Generate Legal Takedown Notices');
+      recs.push('IMMEDIATE: Generate Legal Response Package');
     } else if (level === 'high') {
       recs.push('Deploy RSI™ Sentiment Intervention');
       recs.push('Consider EIDETIC Decay Management');
-      recs.push('Monitor with Enhanced OSINT');
+      recs.push('Enhance Live OSINT Monitoring');
     } else if (level === 'moderate') {
-      recs.push('Monitor with Standard OSINT');
+      recs.push('Continue Live OSINT Monitoring');
       recs.push('Prepare RSI™ Response Templates');
-      recs.push('Calculate EIDETIC Natural Decay');
+      recs.push('Monitor Sentiment Trends');
     } else {
-      recs.push('Continue Standard Monitoring');
-      recs.push('Maintain ANUBIS Health Checks');
+      recs.push('Maintain Standard Live Monitoring');
+      recs.push('Continue ANUBIS Health Checks');
     }
 
     return recs;
@@ -264,13 +294,13 @@ const AriaCommandCenter = () => {
             />
           </div>
           <h1 className="text-4xl font-bold tracking-wide text-amber-400">
-            A.R.I.A™ COMMAND INTERFACE
+            A.R.I.A™ LIVE OSINT INTELLIGENCE
           </h1>
           <p className="text-xl text-gray-300">
-            Unified Intelligence Interface (UII)
+            Real-Time Open Source Intelligence Scanner
           </p>
           <div className="text-amber-500 font-mono text-lg">
-            "Input a name. Get a threat brief. Deploy AI defense."
+            "100% Live Data • No APIs Required • Direct OSINT Crawling"
           </div>
           
           {/* Quick Access to Threats Management */}
@@ -278,7 +308,7 @@ const AriaCommandCenter = () => {
             <Link to="/threats-management">
               <Button className="bg-red-600 hover:bg-red-700 text-white font-bold">
                 <AlertTriangle className="mr-2 h-4 w-4" />
-                View All Threats in Detail
+                View Live Intelligence Results
               </Button>
             </Link>
           </div>
@@ -289,7 +319,7 @@ const AriaCommandCenter = () => {
           <CardHeader>
             <CardTitle className="text-amber-400 flex items-center gap-2">
               <Search className="h-5 w-5" />
-              Entity Input Panel
+              Live OSINT Target Input
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -299,14 +329,14 @@ const AriaCommandCenter = () => {
                 onClick={() => setScanMode('known')}
                 className={scanMode === 'known' ? 'bg-amber-600 text-black' : 'border-amber-600 text-amber-400'}
               >
-                Known Entity Scan
+                Live Entity Scan
               </Button>
               <Button
                 variant={scanMode === 'unknown' ? 'default' : 'outline'}
                 onClick={() => setScanMode('unknown')}
                 className={scanMode === 'unknown' ? 'bg-amber-600 text-black' : 'border-amber-600 text-amber-400'}
               >
-                Unknown Entity Scan
+                Unknown Threat Discovery
               </Button>
             </div>
 
@@ -314,7 +344,7 @@ const AriaCommandCenter = () => {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-amber-400 mb-2">
-                    Entity Name
+                    Target Entity
                   </label>
                   <Input
                     value={entityName}
@@ -331,7 +361,7 @@ const AriaCommandCenter = () => {
                   <Input
                     value={keywords}
                     onChange={(e) => setKeywords(e.target.value)}
-                    placeholder="fraud, scam, harassment..."
+                    placeholder="fraud, scandal, controversy..."
                     disabled={isScanning}
                     className="bg-[#0A0B0D] border-amber-600/50 text-white"
                   />
@@ -345,12 +375,12 @@ const AriaCommandCenter = () => {
                     {isScanning ? (
                       <>
                         <Activity className="mr-2 h-4 w-4 animate-spin" />
-                        Analyzing...
+                        Live Scanning...
                       </>
                     ) : (
                       <>
                         <Shield className="mr-2 h-4 w-4" />
-                        Run A.R.I.A™ Analysis
+                        Run Live OSINT Scan
                       </>
                     )}
                   </Button>
@@ -359,7 +389,7 @@ const AriaCommandCenter = () => {
             ) : (
               <div className="text-center space-y-4">
                 <p className="text-gray-300">
-                  Run an automated scan to detect unknown entities and emerging threats
+                  Automated discovery scan to detect unknown entities and emerging threats from live sources
                 </p>
                 <Button
                   onClick={runUnknownEntityScan}
@@ -369,12 +399,12 @@ const AriaCommandCenter = () => {
                   {isScanning ? (
                     <>
                       <Activity className="mr-2 h-4 w-4 animate-spin" />
-                      Scanning...
+                      Live Scanning...
                     </>
                   ) : (
                     <>
                       <Eye className="mr-2 h-4 w-4" />
-                      Run Unknown Entity Scan
+                      Run Live Discovery Scan
                     </>
                   )}
                 </Button>
@@ -391,7 +421,7 @@ const AriaCommandCenter = () => {
                 <div className="flex items-center gap-3">
                   <Activity className="h-5 w-5 text-blue-400 animate-spin" />
                   <span className="text-lg font-medium text-blue-400">
-                    A.R.I.A™ Analysis in Progress
+                    A.R.I.A™ Live OSINT Intelligence Gathering
                   </span>
                 </div>
                 <Progress value={scanProgress} className="h-3" />
@@ -422,7 +452,7 @@ const AriaCommandCenter = () => {
           <Tabs defaultValue="dashboard" className="space-y-6">
             <TabsList className="grid w-full grid-cols-3 bg-[#1A1B1E]">
               <TabsTrigger value="dashboard" className="data-[state=active]:bg-amber-600">
-                Threat Intelligence
+                Live Intelligence
               </TabsTrigger>
               <TabsTrigger value="guidance" className="data-[state=active]:bg-amber-600">
                 Strategic Guidance

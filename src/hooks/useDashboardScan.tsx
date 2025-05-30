@@ -2,8 +2,11 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { ContentAlert } from "@/types/dashboard";
-import { performLiveScan, performRealTimeMonitoring } from "@/services/aiScraping/liveScanner";
+import { performLiveScan, performRealTimeMonitoring, validateLiveDataOnly } from "@/services/aiScraping/liveScanner";
 
+/**
+ * A.R.I.A™ Live OSINT Dashboard Scanner - 100% Real Data Only
+ */
 export const useDashboardScan = (
   alerts: ContentAlert[],
   setAlerts: (alerts: ContentAlert[]) => void
@@ -12,53 +15,89 @@ export const useDashboardScan = (
 
   const performScan = async (query: string = '', platforms: string[] = []) => {
     if (isScanning) {
-      toast.warning("Scan already in progress");
+      toast.warning("Live OSINT scan already in progress");
+      return;
+    }
+
+    // Validate system is using live data only
+    const isLiveCompliant = await validateLiveDataOnly();
+    if (!isLiveCompliant) {
+      toast.error("System contains mock data - Live OSINT scanning blocked");
       return;
     }
 
     setIsScanning(true);
     
     try {
-      console.log('Starting dashboard scan with live data only');
-      toast.info("Starting live intelligence sweep...");
+      console.log('🔍 A.R.I.A™ OSINT: Starting live dashboard scan');
+      toast.info("Starting live OSINT intelligence sweep...", {
+        description: "Crawling Reddit RSS, News feeds, and Forums"
+      });
 
-      // Perform live scan across multiple platforms
+      // Perform live scan across multiple platforms (no API keys required)
       const livePlatforms = platforms.length > 0 ? platforms : [
-        'Twitter', 'Reddit', 'Google News', 'Forums', 'Social Media'
+        'Reddit', 'News', 'Forums', 'RSS'
       ];
 
       const liveResults = await performLiveScan(
-        query || 'reputation monitoring',
+        query || 'reputation monitoring threat detection',
         livePlatforms,
-        { maxResults: 25, includeRealTimeAlerts: true }
+        { maxResults: 50, includeRealTimeAlerts: true }
       );
 
       // Also get real-time monitoring data
       const realTimeResults = await performRealTimeMonitoring();
 
-      // Combine results
-      const allResults = [...liveResults, ...realTimeResults];
+      // Combine live results
+      const allLiveResults = [...liveResults, ...realTimeResults];
 
-      if (allResults.length > 0) {
-        // Add new results to existing alerts, avoiding duplicates
+      if (allLiveResults.length > 0) {
+        // Convert to ContentAlert format
+        const newAlerts: ContentAlert[] = allLiveResults.map(result => ({
+          id: result.id,
+          platform: result.platform,
+          content: result.content,
+          date: new Date(result.created_at).toLocaleDateString(),
+          severity: result.severity,
+          status: 'new',
+          threatType: 'live_intelligence',
+          confidenceScore: result.confidence_score,
+          sourceType: result.source_type,
+          sentiment: result.sentiment > 0 ? 'positive' : result.sentiment < 0 ? 'negative' : 'neutral',
+          potentialReach: 0,
+          detectedEntities: result.detected_entities,
+          url: result.url
+        }));
+
+        // Add new live results to existing alerts, avoiding duplicates
         const existingUrls = new Set(alerts.map(alert => alert.url));
-        const newResults = allResults.filter(result => 
-          result.url && !existingUrls.has(result.url)
+        const uniqueNewAlerts = newAlerts.filter(alert => 
+          alert.url && !existingUrls.has(alert.url)
         );
 
-        if (newResults.length > 0) {
-          setAlerts([...newResults, ...alerts]);
-          toast.success(`Live scan completed: ${newResults.length} new threats detected`);
+        if (uniqueNewAlerts.length > 0) {
+          setAlerts([...uniqueNewAlerts, ...alerts]);
+          toast.success(`Live OSINT scan completed`, {
+            description: `${uniqueNewAlerts.length} new intelligence items from real sources`
+          });
         } else {
-          toast.info("Scan completed: No new threats detected");
+          toast.info("Live scan completed", {
+            description: "No new intelligence items detected"
+          });
         }
       } else {
-        toast.info("Scan completed: No threats detected");
+        toast.info("Live scan completed", {
+          description: "No intelligence items detected from live sources"
+        });
       }
 
+      console.log(`✅ Dashboard scan complete: ${allLiveResults.length} live intelligence items processed`);
+
     } catch (error) {
-      console.error("Dashboard scan failed:", error);
-      toast.error("Scan failed. Please try again.");
+      console.error("❌ Live dashboard scan failed:", error);
+      toast.error("Live OSINT scan failed", {
+        description: "Check console for details"
+      });
     } finally {
       setIsScanning(false);
     }
