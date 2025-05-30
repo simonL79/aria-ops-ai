@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Terminal, Activity, Shield } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Terminal, Activity, Shield, ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
@@ -32,6 +34,7 @@ interface OperatorResponse {
 
 const OperatorConsole = () => {
   const { user, isAdmin } = useAuth();
+  const navigate = useNavigate();
   const [currentCommand, setCurrentCommand] = useState('');
   const [commandHistory, setCommandHistory] = useState<OperatorCommand[]>([]);
   const [responses, setResponses] = useState<OperatorResponse[]>([]);
@@ -155,6 +158,15 @@ const OperatorConsole = () => {
               </Badge>
             </div>
             <div className="flex items-center gap-4">
+              <Button
+                onClick={() => navigate('/dashboard')}
+                variant="outline"
+                size="sm"
+                className="border-green-500/50 text-green-400 hover:bg-green-500/20 hover:text-green-300"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Return to Dashboard
+              </Button>
               <button
                 onClick={() => setShowFeedback(!showFeedback)}
                 className="text-xs text-green-400 hover:text-green-300"
