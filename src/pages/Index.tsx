@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -164,7 +165,7 @@ const Index = () => {
                 <div className="absolute -bottom-6 -left-6 bg-amber-600 text-black p-4 rounded-lg shadow-lg">
                   <div className="flex items-center gap-2">
                     <Shield className="h-5 w-5" />
-                    <span className="font-semibold">Trusted by Fortune 500</span>
+                    <span className="font-semibold">Trusted to Protect</span>
                   </div>
                 </div>
               </div>
