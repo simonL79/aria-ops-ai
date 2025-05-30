@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useAuth } from "@/hooks/useAuth";
 import AdminDashboardWelcome from "@/components/salesFunnel/AdminDashboardWelcome";
@@ -28,7 +29,7 @@ const SalesFunnelPage = () => {
       <header className="sticky top-0 z-50 w-full bg-black/95 backdrop-blur border-b border-gray-800">
         <div className="container mx-auto px-6">
           <div className="flex items-center justify-between py-4">
-            <Logo variant="light" size="3xl" />
+            <Logo variant="light" size="xl" />
             
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-8">
@@ -143,7 +144,7 @@ const SalesFunnelPage = () => {
           <div className="grid grid-cols-5 gap-8 items-center">
             {industries.map((industry, index) => (
               <div key={index} className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-orange-500/20 to-orange-600/30 rounded-lg mx-auto mb-2 flex items-center justify-center border border-orange-500/30">
+                <div className="w-16 h-16 mx-auto mb-2 flex items-center justify-center">
                   <industry.icon className="w-8 h-8 text-orange-500" />
                 </div>
                 <p className="text-sm text-gray-400">{industry.name}</p>
