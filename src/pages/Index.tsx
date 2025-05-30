@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -92,11 +91,19 @@ const Index = () => {
             {/* Left Column - Content */}
             <div className="space-y-8">
               <div className="space-y-6">
+                {/* A.R.I.A Logo */}
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="w-12 h-12 bg-gradient-to-r from-amber-400 to-amber-600 rounded-sm flex items-center justify-center">
+                    <div className="w-6 h-6 bg-[#0A0B0D] rounded-sm"></div>
+                  </div>
+                  <span className="text-3xl font-bold text-white tracking-tight">A.R.I.A™</span>
+                </div>
+                
                 <h1 className="text-5xl lg:text-6xl font-bold leading-tight">
                   Elevate Your 
                   <span className="text-amber-400"> Digital</span> Reputation
                 </h1>
-                <p className="text-xl text-gray-300 leading-relaxed max-w-2xl">
+                <p className="text-xl text-gray-300 leading-relaxed max-w-2xl mx-auto">
                   Enterprise-grade reputation intelligence and crisis prevention. 
                   Powered by AI, delivered by experts who understand the stakes.
                 </p>
