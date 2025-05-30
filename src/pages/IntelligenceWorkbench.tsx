@@ -1,67 +1,99 @@
 
 import React from 'react';
-import DashboardLayout from '@/components/layout/DashboardLayout';
+import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Brain, Search, Database, Eye } from 'lucide-react';
+import { Brain, Search, Database, Eye, ArrowLeft } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const IntelligenceWorkbench = () => {
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2">
-              <Brain className="h-8 w-8" />
-              Intelligence Workbench
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              Advanced intelligence analysis and research tools
-            </p>
+    <div className="min-h-screen bg-[#0A0B0D] text-white">
+      {/* Header */}
+      <header className="border-b border-gray-800/50">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <Link to="/" className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-gradient-to-r from-amber-400 to-amber-600 rounded-sm flex items-center justify-center">
+                <div className="w-4 h-4 bg-black rounded-sm"></div>
+              </div>
+              <span className="text-xl font-bold text-white tracking-tight">A.R.I.A™</span>
+            </Link>
+            <Link to="/">
+              <Button variant="ghost" className="text-gray-300 hover:text-white">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Home
+              </Button>
+            </Link>
           </div>
         </div>
+      </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Search className="h-5 w-5" />
-                Active Research
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">8</div>
-              <p className="text-xs text-muted-foreground">Ongoing investigations</p>
-            </CardContent>
-          </Card>
+      <div className="container mx-auto px-6 py-12">
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-bold flex items-center gap-3 text-white mb-2">
+                <Brain className="h-10 w-10 text-amber-400" />
+                Intelligence Workbench
+              </h1>
+              <p className="text-xl text-gray-300">
+                Advanced intelligence analysis and research tools
+              </p>
+            </div>
+          </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Database className="h-5 w-5" />
-                Intelligence Sources
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">24</div>
-              <p className="text-xs text-muted-foreground">Active data feeds</p>
-            </CardContent>
-          </Card>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card className="bg-[#111214] border-gray-800 hover:border-amber-600/50 transition-colors">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-white">
+                  <Search className="h-5 w-5 text-amber-400" />
+                  Active Research
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-amber-400">8</div>
+                <p className="text-sm text-gray-400">Ongoing investigations</p>
+              </CardContent>
+            </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Eye className="h-5 w-5" />
-                Surveillance Active
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">12</div>
-              <p className="text-xs text-muted-foreground">Monitoring targets</p>
-            </CardContent>
-          </Card>
+            <Card className="bg-[#111214] border-gray-800 hover:border-amber-600/50 transition-colors">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-white">
+                  <Database className="h-5 w-5 text-amber-400" />
+                  Intelligence Sources
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-amber-400">24</div>
+                <p className="text-sm text-gray-400">Active data feeds</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-[#111214] border-gray-800 hover:border-amber-600/50 transition-colors">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-white">
+                  <Eye className="h-5 w-5 text-amber-400" />
+                  Surveillance Active
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-green-400">12</div>
+                <p className="text-sm text-gray-400">Monitoring targets</p>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
-    </DashboardLayout>
+
+      {/* Footer */}
+      <footer className="py-8 px-6 border-t border-gray-800/50 mt-16">
+        <div className="container mx-auto max-w-6xl">
+          <div className="text-center text-gray-400">
+            <p>&copy; 2024 A.R.I.A™. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
+    </div>
   );
 };
 
