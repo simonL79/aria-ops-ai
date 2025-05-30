@@ -87,21 +87,7 @@ const AdminLoginGateway = () => {
       }
     }
 
-    // Monitor for suspicious activity
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        logSecurityEvent('page_hidden', true, 'Admin login page hidden');
-      } else {
-        logSecurityEvent('page_visible', true, 'Admin login page visible');
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
     logSecurityEvent('page_loaded', true, 'Admin login gateway loaded');
-
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
   }, []);
 
   // Lockout countdown timer
