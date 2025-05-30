@@ -12,6 +12,7 @@ const BlogAdminPanel = () => {
   const [activeTab, setActiveTab] = useState('posts');
   const [isCreatingPost, setIsCreatingPost] = useState(false);
   const [editingPost, setEditingPost] = useState(null);
+  const [refreshKey, setRefreshKey] = useState(0);
   
   const handleEditPost = (post) => {
     setEditingPost(post);
@@ -29,10 +30,13 @@ const BlogAdminPanel = () => {
     setIsCreatingPost(false);
     setEditingPost(null);
     setActiveTab('posts');
+    // Trigger refresh of posts list
+    setRefreshKey(prev => prev + 1);
   };
 
   const handleArticlesAdded = () => {
-    // Refresh the posts list after bulk import
+    // Refresh the posts list and switch to posts tab
+    setRefreshKey(prev => prev + 1);
     setActiveTab('posts');
   };
   
@@ -66,15 +70,15 @@ const BlogAdminPanel = () => {
             </TabsList>
             
             <TabsContent value="posts">
-              <BlogPostsList onEditPost={handleEditPost} filter="all" />
+              <BlogPostsList key={`posts-${refreshKey}`} onEditPost={handleEditPost} filter="all" />
             </TabsContent>
             
             <TabsContent value="drafts">
-              <BlogPostsList onEditPost={handleEditPost} filter="draft" />
+              <BlogPostsList key={`drafts-${refreshKey}`} onEditPost={handleEditPost} filter="draft" />
             </TabsContent>
             
             <TabsContent value="published">
-              <BlogPostsList onEditPost={handleEditPost} filter="published" />
+              <BlogPostsList key={`published-${refreshKey}`} onEditPost={handleEditPost} filter="published" />
             </TabsContent>
 
             <TabsContent value="bulk-import">

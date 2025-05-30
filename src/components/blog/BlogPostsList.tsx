@@ -1,6 +1,5 @@
 
-import React, { useState } from 'react';
-import { useBlogPosts } from '@/hooks/useBlogPosts';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Edit, Trash2, Eye, ArrowUpDown } from 'lucide-react';
 import { toast } from 'sonner';
@@ -16,6 +15,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 
 type BlogPostListProps = {
   onEditPost: (post: any) => void;
@@ -24,16 +24,57 @@ type BlogPostListProps = {
 
 const BlogPostsList = ({ onEditPost, filter = 'all' }: BlogPostListProps) => {
   const navigate = useNavigate();
-  const { blogPosts, loading, error } = useBlogPosts();
+  const [blogPosts, setBlogPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [sortField, setSortField] = useState('date');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   
+  const fetchBlogPosts = async () => {
+    try {
+      setLoading(true);
+      console.log('Fetching blog posts from database...');
+      
+      const { data, error } = await supabase
+        .from('blog_posts')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching blog posts:', error);
+        setError(error.message);
+      } else {
+        console.log('Blog posts fetched:', data);
+        const transformedPosts = (data || []).map(post => ({
+          id: post.id,
+          title: post.title,
+          slug: post.slug,
+          description: post.description || '',
+          content: post.content || '',
+          author: post.author,
+          date: post.date,
+          image: post.image || '',
+          category: post.category,
+          status: post.status as 'draft' | 'published'
+        }));
+        setBlogPosts(transformedPosts);
+      }
+    } catch (err) {
+      console.error('Unexpected error:', err);
+      setError('Failed to fetch blog posts');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBlogPosts();
+  }, []);
+  
   const handleSort = (field) => {
     if (sortField === field) {
-      // Toggle direction if clicking the same field
       setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
-      // New field, default to desc
       setSortField(field);
       setSortDirection('desc');
     }
@@ -52,7 +93,7 @@ const BlogPostsList = ({ onEditPost, filter = 'all' }: BlogPostListProps) => {
     return (
       <div className="text-center py-10 text-red-500">
         <p className="text-lg">Error loading blog posts: {error}</p>
-        <Button onClick={() => window.location.reload()} className="mt-4">
+        <Button onClick={fetchBlogPosts} className="mt-4">
           Try Again
         </Button>
       </div>
