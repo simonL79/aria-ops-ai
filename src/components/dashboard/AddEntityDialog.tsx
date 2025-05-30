@@ -29,24 +29,38 @@ const AddEntityDialog = ({ clientId, onEntityAdded }: AddEntityDialogProps) => {
       return;
     }
 
+    if (!clientId) {
+      toast.error('No client selected');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase
+      console.log('Adding entity:', {
+        client_id: clientId,
+        entity_name: entityName.trim(),
+        entity_type: entityType,
+        alias: alias.trim() || null
+      });
+
+      const { data, error } = await supabase
         .from('client_entities')
         .insert({
           client_id: clientId,
           entity_name: entityName.trim(),
           entity_type: entityType,
           alias: alias.trim() || null
-        });
+        })
+        .select();
 
       if (error) {
         console.error('Error adding entity:', error);
-        toast.error('Failed to add entity');
+        toast.error(`Failed to add entity: ${error.message}`);
         return;
       }
 
+      console.log('Entity added successfully:', data);
       toast.success(`Entity "${entityName}" added successfully`);
       setOpen(false);
       setEntityName('');
