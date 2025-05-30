@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -35,9 +34,8 @@ const Index = () => {
               <img 
                 src="/lovable-uploads/37370275-bf62-4eab-b0e3-e184ce3fa142.png" 
                 alt="A.R.I.A Logo" 
-                className="h-8 w-auto"
+                className="h-24 w-auto"
               />
-              <span className="text-xl font-bold text-white tracking-tight">A.R.I.A™</span>
             </div>
             
             {/* Desktop Navigation */}
@@ -347,9 +345,8 @@ const Index = () => {
                 <img 
                   src="/lovable-uploads/37370275-bf62-4eab-b0e3-e184ce3fa142.png" 
                   alt="A.R.I.A Logo" 
-                  className="h-8 w-auto"
+                  className="h-24 w-auto"
                 />
-                <span className="text-xl font-bold">A.R.I.A™</span>
               </div>
               <p className="text-gray-400">
                 Advanced Reputation Intelligence & Analysis
