@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useAuth } from "@/hooks/useAuth";
 import AdminDashboardWelcome from "@/components/salesFunnel/AdminDashboardWelcome";
@@ -16,9 +15,9 @@ const SalesFunnelPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen bg-black text-white">
       {/* Header */}
-      <header className="sticky top-0 z-50 w-full bg-gray-900/95 backdrop-blur border-b border-gray-800">
+      <header className="sticky top-0 z-50 w-full bg-black/95 backdrop-blur border-b border-gray-800">
         <div className="container mx-auto px-6">
           <div className="flex items-center justify-between py-4">
             <Logo variant="light" size="md" />
@@ -56,7 +55,7 @@ const SalesFunnelPage = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center bg-gray-900">
+      <section className="relative min-h-screen flex items-center justify-center bg-black">
         <div className="container mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center">
           {/* Left Content */}
           <div className="space-y-8">
@@ -139,7 +138,7 @@ const SalesFunnelPage = () => {
       </section>
 
       {/* Services Section */}
-      <section className="py-20 bg-gray-900">
+      <section className="py-20 bg-black">
         <div className="container mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold mb-4">
@@ -262,7 +261,7 @@ const SalesFunnelPage = () => {
       </section>
 
       {/* Add-On Services */}
-      <section className="py-16 bg-gray-900">
+      <section className="py-16 bg-black">
         <div className="container mx-auto px-6">
           <div className="flex items-center mb-8">
             <Shield className="w-6 h-6 text-orange-500 mr-3" />
@@ -342,7 +341,7 @@ const SalesFunnelPage = () => {
       </section>
 
       {/* Final CTA Section */}
-      <section className="py-20 bg-gray-900">
+      <section className="py-20 bg-black">
         <div className="container mx-auto px-6 text-center">
           <h2 className="text-4xl font-bold mb-6">Ready to Secure Your Reputation?</h2>
           <p className="text-gray-300 text-lg mb-8 max-w-2xl mx-auto">
@@ -375,7 +374,7 @@ const SalesFunnelPage = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 border-t border-gray-800 py-12">
+      <footer className="bg-black border-t border-gray-800 py-12">
         <div className="container mx-auto px-6">
           <div className="grid md:grid-cols-4 gap-8">
             <div>
