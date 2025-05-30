@@ -74,7 +74,7 @@ const SalesFunnelPage = () => {
           <div className="relative">
             <div className="relative">
               <img 
-                src="/lovable-uploads/cfe23d87-23ec-49b2-ba9f-5a1aa704fdcd.png" 
+                src="/lovable-uploads/b36d13f8-0edd-4e1b-b360-ea6238533dca.png" 
                 alt="Professional executive portrait"
                 className="w-full max-w-md mx-auto rounded-lg"
               />
