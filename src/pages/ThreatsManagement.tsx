@@ -39,7 +39,7 @@ interface ThreatDetails {
   sentiment: number;
   confidence_score: number;
   potential_reach: number;
-  detected_entities: string[];
+  detected_entities: any; // Changed from string[] to any to handle Json type
   source_type: string;
   entity_name: string;
   source_credibility_score: number;
@@ -93,6 +93,21 @@ const ThreatsManagement = () => {
     } finally {
       setIsLoadingThreats(false);
     }
+  };
+
+  // Helper function to safely parse detected entities
+  const parseDetectedEntities = (entities: any): string[] => {
+    if (!entities) return [];
+    if (Array.isArray(entities)) return entities;
+    if (typeof entities === 'string') {
+      try {
+        const parsed = JSON.parse(entities);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [entities];
+      }
+    }
+    return [];
   };
 
   const filteredThreats = threats.filter(threat => {
@@ -446,11 +461,11 @@ const ThreatsManagement = () => {
                           <span className="text-white">{selectedThreat.ai_detection_confidence || 0}%</span>
                         </div>
                       )}
-                      {selectedThreat.detected_entities && selectedThreat.detected_entities.length > 0 && (
+                      {selectedThreat.detected_entities && parseDetectedEntities(selectedThreat.detected_entities).length > 0 && (
                         <div className="space-y-2">
                           <span className="text-amber-400">Detected Entities:</span>
                           <div className="flex flex-wrap gap-2">
-                            {selectedThreat.detected_entities.map((entity, index) => (
+                            {parseDetectedEntities(selectedThreat.detected_entities).map((entity, index) => (
                               <Badge key={index} variant="outline" className="border-purple-500 text-purple-400">
                                 {entity}
                               </Badge>
