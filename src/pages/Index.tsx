@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -307,6 +308,31 @@ const Index = () => {
             <p className="text-xs text-gray-400 mt-4">
               Confidential • Secure • Professional
             </p>
+            
+            {/* Review Sections */}
+            <div className="mt-8 space-y-6">
+              {/* Trustpilot Reviews */}
+              <div className="text-center">
+                <p className="text-sm text-gray-300 mb-2">Rated Excellent on Trustpilot</p>
+                <div className="flex justify-center gap-1 mb-1">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="h-4 w-4 fill-green-500 text-green-500" />
+                  ))}
+                </div>
+                <p className="text-xs text-gray-400">Based on 247+ reviews</p>
+              </div>
+              
+              {/* Google Reviews */}
+              <div className="text-center">
+                <p className="text-sm text-gray-300 mb-2">5.0 Stars on Google Reviews</p>
+                <div className="flex justify-center gap-1 mb-1">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="h-4 w-4 fill-blue-500 text-blue-500" />
+                  ))}
+                </div>
+                <p className="text-xs text-gray-400">Verified business reviews</p>
+              </div>
+            </div>
           </Card>
         </div>
       </section>
