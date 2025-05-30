@@ -9,6 +9,7 @@ import MonitoringPage from "./pages/MonitoringPage";
 import IntelligencePage from "./pages/dashboard/IntelligencePage";
 import EngagementHubPage from "./pages/EngagementHubPage";
 import OperatorConsole from "./components/operator/OperatorConsole";
+import SalesFunnelPage from "./pages/SalesFunnelPage";
 
 const queryClient = new QueryClient();
 
@@ -18,7 +19,7 @@ const App = () => (
       <Toaster />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<DashboardPage />} />
+          <Route path="/" element={<SalesFunnelPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/threats" element={<ThreatsPage />} />
           <Route path="/monitoring" element={<MonitoringPage />} />
