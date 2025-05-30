@@ -4,6 +4,7 @@ import { Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import PublicLayout from '@/components/layout/PublicLayout';
 import BlogAdminPanel from '@/components/blog/BlogAdminPanel';
+import MediumImportButton from '@/components/blog/MediumImportButton';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Mail, Loader2 } from 'lucide-react';
@@ -75,24 +76,26 @@ const BlogAdminPage = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
           <h1 className="text-3xl font-bold">Blog Administration</h1>
           
-          <Button 
-            variant="outline" 
-            onClick={handleSendMagicLink} 
-            className="mt-4 md:mt-0"
-            disabled={isSending}
-          >
-            {isSending ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Sending...
-              </>
-            ) : (
-              <>
-                <Mail className="mr-2 h-4 w-4" />
-                Send New Magic Link
-              </>
-            )}
-          </Button>
+          <div className="flex gap-3 mt-4 md:mt-0">
+            <MediumImportButton />
+            <Button 
+              variant="outline" 
+              onClick={handleSendMagicLink} 
+              disabled={isSending}
+            >
+              {isSending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <Mail className="mr-2 h-4 w-4" />
+                  Send New Magic Link
+                </>
+              )}
+            </Button>
+          </div>
         </div>
         
         <BlogAdminPanel />
