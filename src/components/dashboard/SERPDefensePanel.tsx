@@ -1,8 +1,10 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Search, AlertTriangle, TrendingUp, TrendingDown, Shield, Eye, ExternalLink } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 import ClientSelector from '@/components/admin/ClientSelector';
 import AddEntityDialog from '@/components/dashboard/AddEntityDialog';
 import type { Client } from '@/types/clients';
