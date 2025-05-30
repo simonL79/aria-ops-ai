@@ -1,69 +1,82 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { LiveDataEnforcer } from '@/services/ariaCore/liveDataEnforcer';
 
-export interface RealScanOptions {
+interface RealScanOptions {
   fullScan?: boolean;
   source?: string;
   targetEntity?: string;
 }
 
+/**
+ * Perform real OSINT scan with strict live data enforcement
+ */
 export const performRealScan = async (options: RealScanOptions = {}) => {
   try {
-    console.log('🔍 Starting A.R.I.A™ OSINT Intelligence Sweep...');
-    
-    toast.info("A.R.I.A™ Intelligence Sweep initiated", {
-      description: "Direct web crawling & OSINT processing active"
-    });
+    // Enforce live data compliance
+    const isCompliant = await LiveDataEnforcer.enforceSystemWideLiveData();
+    if (!isCompliant) {
+      console.warn('🚫 BLOCKED: System not compliant for live data operations');
+      throw new Error('Live data enforcement failed. Mock data operations blocked.');
+    }
 
-    // Call the monitoring scan edge function for real OSINT
+    console.log('🔍 A.R.I.A™ OSINT: Starting real intelligence scan...');
+    console.log('🔍 Options:', options);
+
+    // Call the monitoring-scan edge function for REAL data only
     const { data, error } = await supabase.functions.invoke('monitoring-scan', {
-      body: {
+      body: { 
+        scanType: 'live_osint',
         fullScan: options.fullScan || true,
-        targetEntity: options.targetEntity,
-        source: options.source || 'operator_console'
+        targetEntity: options.targetEntity || null,
+        source: options.source || 'manual',
+        blockMockData: true,
+        enforceLiveOnly: true
       }
     });
 
     if (error) {
-      console.error('A.R.I.A™ Intelligence Sweep failed:', error);
-      toast.error("Intelligence sweep failed", {
-        description: error.message || "Unable to complete OSINT operations"
-      });
-      return [];
+      console.error('❌ Real scan error:', error);
+      throw error;
     }
 
-    if (data?.success) {
-      const resultCount = data.results?.length || 0;
-      const highRisk = data.stats?.high_risk || 0;
-      const mediumRisk = data.stats?.medium_risk || 0;
+    console.log('✅ Real scan completed:', data);
+
+    // Validate results are live data only
+    if (data?.results) {
+      const validatedResults = [];
       
-      if (resultCount > 0) {
-        toast.success("A.R.I.A™ Intelligence Sweep completed", {
-          description: `${resultCount} intelligence items processed (${highRisk} high-risk, ${mediumRisk} medium-risk)`
-        });
+      for (const result of data.results) {
+        // Validate each result is live data
+        const isValidLiveData = await LiveDataEnforcer.validateDataInput(
+          result.content || '', 
+          result.platform || 'unknown'
+        );
         
-        console.log(`✅ A.R.I.A™ OSINT completed: ${resultCount} intelligence items processed`);
-        console.log(`📊 Risk breakdown: ${highRisk} high, ${mediumRisk} medium`);
-        return data.results;
-      } else {
-        toast.info("Intelligence sweep completed", {
-          description: "No relevant intelligence detected in current sweep"
-        });
-        
-        console.log('ℹ️ A.R.I.A™ OSINT completed: No relevant intelligence detected');
-        return [];
+        if (isValidLiveData) {
+          validatedResults.push(result);
+        } else {
+          console.warn('🚫 BLOCKED: Mock data detected and filtered:', result.platform);
+        }
       }
-    } else {
-      console.warn('Intelligence sweep completed but no success flag returned');
-      return [];
+
+      console.log(`✅ Validated ${validatedResults.length}/${data.results.length} results as live data`);
+      return validatedResults;
     }
+
+    return data?.results || [];
 
   } catch (error) {
-    console.error('Error performing A.R.I.A™ Intelligence Sweep:', error);
-    toast.error("Intelligence sweep error", {
-      description: "An error occurred during OSINT operations"
-    });
-    return [];
+    console.error('❌ Real scan failed:', error);
+    throw error;
   }
 };
+
+/**
+ * Block any mock scan operations
+ */
+export const performMockScan = () => {
+  console.warn('🚫 BLOCKED: Mock scan operations are disabled. Use performRealScan() for live intelligence.');
+  throw new Error('Mock data operations blocked by A.R.I.A™ live enforcement system');
+};
+
