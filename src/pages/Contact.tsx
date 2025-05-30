@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
-import { Mail, Phone, MapPin, Clock, Send } from "lucide-react";
+import { Mail, MapPin, Clock, Send } from "lucide-react";
 import { toast } from "sonner";
 
 const Contact = () => {
@@ -110,19 +110,6 @@ const Contact = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="phone" className="block text-sm font-medium mb-2">
-                    Phone Number (Optional)
-                  </label>
-                  <Input
-                    id="phone"
-                    name="phone"
-                    type="tel"
-                    className="bg-[#0A0B0D] border-gray-700 text-white placeholder-gray-400 focus:border-amber-600"
-                    placeholder="+1 (555) 123-4567"
-                  />
-                </div>
-
-                <div>
                   <label htmlFor="message" className="block text-sm font-medium mb-2">
                     How can we help you?
                   </label>
@@ -169,17 +156,8 @@ const Contact = () => {
                     <Mail className="w-6 h-6 text-amber-400 mt-1" />
                     <div>
                       <h3 className="font-semibold mb-1">Email</h3>
-                      <p className="text-gray-300">contact@aria-ai.com</p>
+                      <p className="text-gray-300">simon@ariaops.co.uk</p>
                       <p className="text-sm text-gray-400">For general inquiries</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-4">
-                    <Phone className="w-6 h-6 text-amber-400 mt-1" />
-                    <div>
-                      <h3 className="font-semibold mb-1">Emergency Hotline</h3>
-                      <p className="text-gray-300">+1 (555) ARIA-911</p>
-                      <p className="text-sm text-gray-400">24/7 crisis response</p>
                     </div>
                   </div>
 
