@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useAuth } from "@/hooks/useAuth";
 import AdminDashboardWelcome from "@/components/salesFunnel/AdminDashboardWelcome";
@@ -58,7 +59,7 @@ const SalesFunnelPage = () => {
       <section className="relative min-h-screen flex items-center justify-center bg-black">
         <div className="container mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center">
           {/* Left Content */}
-          <div className="space-y-8 text-center lg:text-left">
+          <div className="space-y-8 text-center">
             {/* A.R.I.A Logo */}
             <div className="flex justify-center">
               <Logo variant="light" size="10x" />
@@ -70,12 +71,12 @@ const SalesFunnelPage = () => {
                 <br />
                 <span className="text-orange-500">Digital Reputation</span>
               </h1>
-              <p className="text-gray-300 text-lg mb-8 max-w-lg mx-auto lg:mx-0">
+              <p className="text-gray-300 text-lg mb-8 max-w-lg mx-auto">
                 Enterprise-grade reputation intelligence and crisis prevention. Powered by AI, delivered by experts who understand the stakes.
               </p>
             </div>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 text-lg font-semibold rounded-md">
                 Request Assessment
               </Button>
@@ -86,7 +87,7 @@ const SalesFunnelPage = () => {
             
             {/* Ratings */}
             <div className="space-y-3">
-              <div className="flex items-center justify-center lg:justify-start space-x-2">
+              <div className="flex items-center justify-center space-x-2">
                 <div className="flex">
                   {[1,2,3,4,5].map((star) => (
                     <Star key={star} className="w-4 h-4 fill-orange-500 text-orange-500" />
@@ -94,9 +95,9 @@ const SalesFunnelPage = () => {
                 </div>
                 <span className="text-sm text-gray-300">Rated Excellent on Trustpilot</span>
               </div>
-              <p className="text-xs text-gray-400 text-center lg:text-left">Based on 247+ reviews</p>
+              <p className="text-xs text-gray-400 text-center">Based on 247+ reviews</p>
               
-              <div className="flex items-center justify-center lg:justify-start space-x-2">
+              <div className="flex items-center justify-center space-x-2">
                 <div className="flex">
                   {[1,2,3,4,5].map((star) => (
                     <Star key={star} className="w-4 h-4 fill-blue-400 text-blue-400" />
@@ -104,7 +105,7 @@ const SalesFunnelPage = () => {
                 </div>
                 <span className="text-sm text-gray-300">5.0 Stars on Google Reviews</span>
               </div>
-              <p className="text-xs text-gray-400 text-center lg:text-left">Verified business reviews</p>
+              <p className="text-xs text-gray-400 text-center">Verified business reviews</p>
             </div>
           </div>
           
