@@ -2,20 +2,20 @@
 import React from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, Edit, Eye, Calendar } from 'lucide-react';
+import { Brain, Search, Database, Eye } from 'lucide-react';
 
-const BlogPage = () => {
+const IntelligenceWorkbench = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">
-              <FileText className="h-8 w-8" />
-              Blog Management
+              <Brain className="h-8 w-8" />
+              Intelligence Workbench
             </h1>
             <p className="text-muted-foreground mt-1">
-              Content creation and publication management
+              Advanced intelligence analysis and research tools
             </p>
           </div>
         </div>
@@ -24,13 +24,26 @@ const BlogPage = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Edit className="h-5 w-5" />
-                Draft Articles
+                <Search className="h-5 w-5" />
+                Active Research
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">12</div>
-              <p className="text-xs text-muted-foreground">Ready for review</p>
+              <div className="text-2xl font-bold">8</div>
+              <p className="text-xs text-muted-foreground">Ongoing investigations</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Database className="h-5 w-5" />
+                Intelligence Sources
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">24</div>
+              <p className="text-xs text-muted-foreground">Active data feeds</p>
             </CardContent>
           </Card>
 
@@ -38,25 +51,12 @@ const BlogPage = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Eye className="h-5 w-5" />
-                Published Posts
+                Surveillance Active
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">87</div>
-              <p className="text-xs text-muted-foreground">Live articles</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-              Scheduled Posts
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">5</div>
-              <p className="text-xs text-muted-foreground">This week</p>
+              <div className="text-2xl font-bold text-green-600">12</div>
+              <p className="text-xs text-muted-foreground">Monitoring targets</p>
             </CardContent>
           </Card>
         </div>
@@ -65,4 +65,4 @@ const BlogPage = () => {
   );
 };
 
-export default BlogPage;
+export default IntelligenceWorkbench;

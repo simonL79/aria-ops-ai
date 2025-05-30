@@ -14,6 +14,14 @@ import AdminLogin from "./pages/AdminLogin";
 import DashboardPage from "./pages/dashboard/DashboardPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import QATestPage from "./pages/QATestPage";
+import Settings from "./pages/Settings";
+import NewCoPage from "./pages/NewCoPage";
+import AiScrapingPage from "./pages/AiScrapingPage";
+import ReputationScanPage from "./pages/ReputationScanPage";
+import IntelligenceWorkbench from "./pages/IntelligenceWorkbench";
+import EnhancedIntelligence from "./pages/EnhancedIntelligence";
+import OffensiveOperations from "./pages/OffensiveOperations";
+import BlogPage from "./pages/BlogPage";
 import NotFound from "./pages/NotFound";
 import "./App.css";
 
@@ -32,6 +40,15 @@ const App = () => (
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/analytics" element={<AnalyticsPage />} />
           <Route path="/qa-test" element={<QATestPage />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/clients" element={<NewCoPage />} />
+          <Route path="/intelligence/workbench" element={<IntelligenceWorkbench />} />
+          <Route path="/intelligence/enhanced" element={<EnhancedIntelligence />} />
+          <Route path="/intelligence/offensive-operations" element={<OffensiveOperations />} />
+          <Route path="/ai-scraping" element={<AiScrapingPage />} />
+          <Route path="/clean-launch" element={<NewCoPage />} />
+          <Route path="/reputation-scan" element={<ReputationScanPage />} />
+          <Route path="/blog" element={<BlogPage />} />
           <Route path="/admin/*" element={<AdminDashboard />} />
           <Route path="/anubis-gpt" element={<AnubisGPTCockpit />} />
           <Route path="/operator-console" element={<OperatorConsole />} />

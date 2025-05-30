@@ -2,20 +2,20 @@
 import React from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, Edit, Eye, Calendar } from 'lucide-react';
+import { Shield, Zap, Target, AlertTriangle } from 'lucide-react';
 
-const BlogPage = () => {
+const EnhancedIntelligence = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">
-              <FileText className="h-8 w-8" />
-              Blog Management
+              <Shield className="h-8 w-8" />
+              Enhanced Intelligence
             </h1>
             <p className="text-muted-foreground mt-1">
-              Content creation and publication management
+              Advanced threat intelligence and predictive analysis
             </p>
           </div>
         </div>
@@ -24,39 +24,39 @@ const BlogPage = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Edit className="h-5 w-5" />
-                Draft Articles
+                <Zap className="h-5 w-5" />
+                Threat Detection
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">12</div>
-              <p className="text-xs text-muted-foreground">Ready for review</p>
+              <div className="text-2xl font-bold text-orange-600">5</div>
+              <p className="text-xs text-muted-foreground">Active threats</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Eye className="h-5 w-5" />
-                Published Posts
+                <Target className="h-5 w-5" />
+                Prediction Accuracy
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">87</div>
-              <p className="text-xs text-muted-foreground">Live articles</p>
+              <div className="text-2xl font-bold text-green-600">94%</div>
+              <p className="text-xs text-muted-foreground">Model performance</p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Calendar className="h-5 w-5" />
-              Scheduled Posts
+                <AlertTriangle className="h-5 w-5" />
+                Risk Assessment
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">5</div>
-              <p className="text-xs text-muted-foreground">This week</p>
+              <div className="text-2xl font-bold text-yellow-600">Medium</div>
+              <p className="text-xs text-muted-foreground">Current risk level</p>
             </CardContent>
           </Card>
         </div>
@@ -65,4 +65,4 @@ const BlogPage = () => {
   );
 };
 
-export default BlogPage;
+export default EnhancedIntelligence;
