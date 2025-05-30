@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Save, X } from 'lucide-react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface BlogPost {
   id?: string;
@@ -41,6 +42,8 @@ const BlogPostEditor = ({ post, onCancel, onSave }: BlogPostEditorProps) => {
     status: 'draft'
   });
 
+  const [isSaving, setIsSaving] = useState(false);
+
   useEffect(() => {
     if (post) {
       setFormData(post);
@@ -68,15 +71,74 @@ const BlogPostEditor = ({ post, onCancel, onSave }: BlogPostEditorProps) => {
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!formData.title || !formData.content) {
       toast.error('Please fill in title and content');
       return;
     }
 
-    console.log('Saving blog post:', formData);
-    toast.success('Blog post saved successfully');
-    onSave();
+    setIsSaving(true);
+
+    try {
+      console.log('Saving blog post:', formData);
+
+      if (post?.id) {
+        // Update existing post
+        const { error } = await supabase
+          .from('blog_posts')
+          .update({
+            title: formData.title,
+            slug: formData.slug,
+            description: formData.description,
+            content: formData.content,
+            author: formData.author,
+            date: formData.date,
+            image: formData.image,
+            category: formData.category,
+            status: formData.status,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', post.id);
+
+        if (error) {
+          console.error('Error updating blog post:', error);
+          toast.error('Failed to update blog post');
+          return;
+        }
+
+        toast.success('Blog post updated successfully');
+      } else {
+        // Create new post
+        const { error } = await supabase
+          .from('blog_posts')
+          .insert({
+            title: formData.title,
+            slug: formData.slug,
+            description: formData.description,
+            content: formData.content,
+            author: formData.author,
+            date: formData.date,
+            image: formData.image,
+            category: formData.category,
+            status: formData.status
+          });
+
+        if (error) {
+          console.error('Error creating blog post:', error);
+          toast.error('Failed to create blog post');
+          return;
+        }
+
+        toast.success('Blog post created successfully');
+      }
+
+      onSave();
+    } catch (error) {
+      console.error('Unexpected error:', error);
+      toast.error('An unexpected error occurred');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -188,9 +250,13 @@ const BlogPostEditor = ({ post, onCancel, onSave }: BlogPostEditorProps) => {
         </div>
 
         <div className="flex gap-2 pt-4">
-          <Button onClick={handleSave} className="bg-blue-600 hover:bg-blue-700">
+          <Button 
+            onClick={handleSave} 
+            className="bg-blue-600 hover:bg-blue-700"
+            disabled={isSaving}
+          >
             <Save className="h-4 w-4 mr-2" />
-            Save Post
+            {isSaving ? 'Saving...' : 'Save Post'}
           </Button>
           <Button variant="outline" onClick={onCancel}>
             <X className="h-4 w-4 mr-2" />
