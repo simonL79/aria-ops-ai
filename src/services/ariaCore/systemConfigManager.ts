@@ -8,8 +8,59 @@ export interface SystemConfigResult {
   warnings: string[];
 }
 
+export interface SystemBugScanResult {
+  success: boolean;
+  critical_issues: string[];
+  warnings: string[];
+  info: string[];
+  scan_completed_at: string;
+}
+
 export class SystemConfigManager {
   
+  /**
+   * Run comprehensive system bug scan with audit logging
+   */
+  static async runSystemBugScan(): Promise<SystemBugScanResult> {
+    const result: SystemBugScanResult = {
+      success: true,
+      critical_issues: [],
+      warnings: [],
+      info: [],
+      scan_completed_at: new Date().toISOString()
+    };
+
+    try {
+      console.log('🔍 Running system bug scan with audit logging...');
+
+      // Check for RLS policy issues
+      await this.checkRLSCompliance(result);
+      
+      // Check for table integrity
+      await this.checkTableIntegrity(result);
+      
+      // Check for function availability
+      await this.checkFunctionAvailability(result);
+      
+      // Check for security configurations
+      await this.checkSecurityConfigurations(result);
+
+      // Log the scan results to audit
+      await this.logBugScanToAudit(result);
+
+      result.success = result.critical_issues.length === 0;
+      
+      console.log(`✅ Bug scan completed. Critical: ${result.critical_issues.length}, Warnings: ${result.warnings.length}`);
+      return result;
+
+    } catch (error) {
+      console.error('❌ Bug scan failed:', error);
+      result.critical_issues.push(`Scan failed: ${error.message}`);
+      result.success = false;
+      return result;
+    }
+  }
+
   /**
    * Configure the system for live operations
    */
@@ -42,6 +93,140 @@ export class SystemConfigManager {
       console.error('❌ System configuration failed:', error);
       result.issues.push(`Configuration failed: ${error.message}`);
       return result;
+    }
+  }
+
+  private static async checkRLSCompliance(result: SystemBugScanResult): Promise<void> {
+    try {
+      const { data: rlsCheck } = await supabase.rpc('check_rls_compliance');
+      
+      if (rlsCheck) {
+        const tablesWithoutRLS = rlsCheck.filter((table: any) => !table.rls_enabled);
+        
+        if (tablesWithoutRLS.length > 0) {
+          result.warnings.push(`${tablesWithoutRLS.length} tables found without RLS enabled`);
+        } else {
+          result.info.push('All tables have RLS properly configured');
+        }
+      }
+    } catch (error) {
+      result.warnings.push(`RLS compliance check failed: ${error.message}`);
+    }
+  }
+
+  private static async checkTableIntegrity(result: SystemBugScanResult): Promise<void> {
+    const criticalTables = [
+      'anubis_creeper_log',
+      'system_config',
+      'user_roles',
+      'scan_results',
+      'threats'
+    ];
+
+    for (const table of criticalTables) {
+      try {
+        const { error } = await supabase
+          .from(table)
+          .select('*')
+          .limit(1);
+
+        if (error) {
+          result.critical_issues.push(`Critical table '${table}' is not accessible: ${error.message}`);
+        } else {
+          result.info.push(`Table '${table}' is accessible`);
+        }
+      } catch (error) {
+        result.critical_issues.push(`Failed to check table '${table}': ${error.message}`);
+      }
+    }
+  }
+
+  private static async checkFunctionAvailability(result: SystemBugScanResult): Promise<void> {
+    const criticalFunctions = [
+      'is_current_user_admin',
+      'validate_aria_on_admin_login',
+      'log_anubis_check'
+    ];
+
+    for (const func of criticalFunctions) {
+      try {
+        const { error } = await supabase.rpc(func);
+        
+        if (error && !error.message.includes('permission denied')) {
+          result.warnings.push(`Function '${func}' may have issues: ${error.message}`);
+        } else {
+          result.info.push(`Function '${func}' is available`);
+        }
+      } catch (error) {
+        result.warnings.push(`Failed to check function '${func}': ${error.message}`);
+      }
+    }
+  }
+
+  private static async checkSecurityConfigurations(result: SystemBugScanResult): Promise<void> {
+    try {
+      const { data: configs } = await supabase
+        .from('system_config')
+        .select('config_key, config_value')
+        .in('config_key', ['system_mode', 'live_enforcement', 'allow_mock_data']);
+
+      if (configs) {
+        const configMap = new Map(configs.map(c => [c.config_key, c.config_value]));
+        
+        if (configMap.get('system_mode') !== 'live') {
+          result.warnings.push('System not in live mode');
+        }
+        
+        if (configMap.get('live_enforcement') !== 'enabled') {
+          result.warnings.push('Live enforcement is disabled');
+        }
+        
+        if (configMap.get('allow_mock_data') === 'enabled') {
+          result.warnings.push('Mock data is allowed in production');
+        }
+        
+        result.info.push('Security configuration check completed');
+      }
+    } catch (error) {
+      result.warnings.push(`Security configuration check failed: ${error.message}`);
+    }
+  }
+
+  private static async logBugScanToAudit(result: SystemBugScanResult): Promise<void> {
+    try {
+      // Log critical issues
+      for (const issue of result.critical_issues) {
+        await supabase.rpc('log_anubis_check', {
+          check_name: 'system_bug_scan',
+          result: issue,
+          passed: false,
+          severity: 'critical',
+          run_context: 'admin_login'
+        });
+      }
+
+      // Log warnings
+      for (const warning of result.warnings) {
+        await supabase.rpc('log_anubis_check', {
+          check_name: 'system_bug_scan',
+          result: warning,
+          passed: false,
+          severity: 'medium',
+          run_context: 'admin_login'
+        });
+      }
+
+      // Log overall scan completion
+      await supabase.rpc('log_anubis_check', {
+        check_name: 'system_bug_scan_completed',
+        result: `Bug scan completed. Critical: ${result.critical_issues.length}, Warnings: ${result.warnings.length}, Info: ${result.info.length}`,
+        passed: result.success,
+        severity: result.success ? 'low' : 'high',
+        run_context: 'admin_login'
+      });
+
+    } catch (error) {
+      console.error('Failed to log bug scan to audit:', error);
     }
   }
 
