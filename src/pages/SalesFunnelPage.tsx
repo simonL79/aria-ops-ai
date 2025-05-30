@@ -1,6 +1,3 @@
-
-
-
 import React from "react";
 import { useAuth } from "@/hooks/useAuth";
 import AdminDashboardWelcome from "@/components/salesFunnel/AdminDashboardWelcome";
@@ -63,8 +60,8 @@ const SalesFunnelPage = () => {
           {/* Left Content */}
           <div className="space-y-8 text-center lg:text-left">
             {/* A.R.I.A Logo */}
-            <div className="flex justify-center lg:justify-start">
-              <Logo variant="light" size="lg" />
+            <div className="flex justify-center">
+              <Logo variant="light" size="10x" />
             </div>
             
             <div>
@@ -450,5 +447,3 @@ const SalesFunnelPage = () => {
 };
 
 export default SalesFunnelPage;
-
-
