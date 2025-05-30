@@ -1,61 +1,35 @@
+
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import DashboardPage from "./pages/dashboard/DashboardPage";
-import ThreatsPage from "./pages/ThreatsPage";
-import MonitoringPage from "./pages/MonitoringPage";
-import IntelligencePage from "./pages/dashboard/IntelligencePage";
-import EngagementHubPage from "./pages/EngagementHubPage";
-import OperatorConsole from "./components/operator/OperatorConsole";
-import SalesFunnelPage from "./pages/SalesFunnelPage";
-import ScanPage from "./pages/ScanPage";
-import PricingPage from "./pages/PricingPage";
-import PaymentPage from "./pages/PaymentPage";
-import AboutPage from "./pages/AboutPage";
-import BlogPage from "./pages/BlogPage";
-import BlogPostPage from "./pages/BlogPostPage";
-import BlogAdminPage from "./pages/BlogAdminPage";
-import SimonLindsayPage from "./pages/SimonLindsayPage";
-import Contact from "./pages/Contact";
+import { AuthProvider } from "@/contexts/AuthContext";
+import Index from "./pages/Index";
+import Dashboard from "./pages/Dashboard";
 import AdminLogin from "./pages/AdminLogin";
-import Authentication from "./pages/Authentication";
-import ThankYouPage from "./pages/ThankYouPage";
-import ContactFormPage from "./pages/ContactFormPage";
+import AriaCommand from "./pages/AriaCommand";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<SalesFunnelPage />} />
-          <Route path="/sales-funnel" element={<SalesFunnelPage />} />
-          <Route path="/scan" element={<ScanPage />} />
-          <Route path="/thank-you" element={<ThankYouPage />} />
-          <Route path="/pricing" element={<PricingPage />} />
-          <Route path="/payment" element={<PaymentPage />} />
-          <Route path="/contact-sales" element={<ContactFormPage />} />
-          <Route path="/about" element={<AboutPage />} />
-          <Route path="/blog" element={<BlogPage />} />
-          <Route path="/blog/:slug" element={<BlogPostPage />} />
-          <Route path="/blog/admin" element={<BlogAdminPage />} />
-          <Route path="/simon-lindsay" element={<SimonLindsayPage />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/auth" element={<Authentication />} />
-          <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/threats" element={<ThreatsPage />} />
-          <Route path="/monitoring" element={<MonitoringPage />} />
-          <Route path="/intelligence" element={<IntelligencePage />} />
-          <Route path="/engagement-hub" element={<EngagementHubPage />} />
-          <Route path="/operator-console" element={<OperatorConsole />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/admin/login" element={<AdminLogin />} />
+              <Route path="/admin" element={<Dashboard />} />
+              <Route path="/aria-command" element={<AriaCommand />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  );
+}
 
 export default App;
