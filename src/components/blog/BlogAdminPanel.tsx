@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import BlogPostEditor from './BlogPostEditor';
 import BlogPostsList from './BlogPostsList';
+import BulkArticleImport from './BulkArticleImport';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 
@@ -27,6 +28,11 @@ const BlogAdminPanel = () => {
   const handleBackToPosts = () => {
     setIsCreatingPost(false);
     setEditingPost(null);
+    setActiveTab('posts');
+  };
+
+  const handleArticlesAdded = () => {
+    // Refresh the posts list after bulk import
     setActiveTab('posts');
   };
   
@@ -56,6 +62,7 @@ const BlogAdminPanel = () => {
               <TabsTrigger value="posts">All Posts</TabsTrigger>
               <TabsTrigger value="drafts">Drafts</TabsTrigger>
               <TabsTrigger value="published">Published</TabsTrigger>
+              <TabsTrigger value="bulk-import">Copy & Paste</TabsTrigger>
             </TabsList>
             
             <TabsContent value="posts">
@@ -68,6 +75,10 @@ const BlogAdminPanel = () => {
             
             <TabsContent value="published">
               <BlogPostsList onEditPost={handleEditPost} filter="published" />
+            </TabsContent>
+
+            <TabsContent value="bulk-import">
+              <BulkArticleImport onArticlesAdded={handleArticlesAdded} />
             </TabsContent>
           </Tabs>
         )}
