@@ -1,46 +1,87 @@
 
+import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
+import { AlertTriangle, ExternalLink, Eye, CheckCircle } from "lucide-react";
 import { ContentAlert } from "@/types/dashboard";
-import AlertItem from "./alerts/AlertItem";
-import AlertSkeleton from "./alerts/AlertSkeleton";
 
 interface ContentAlertsProps {
   alerts: ContentAlert[];
   isLoading?: boolean;
 }
 
-const ContentAlerts = ({ alerts, isLoading = false }: ContentAlertsProps) => {
+const ContentAlerts = ({ alerts, isLoading }: ContentAlertsProps) => {
+  const getSeverityColor = (severity: string) => {
+    switch (severity) {
+      case 'high': return 'bg-red-500/10 text-red-600 border-red-500/20';
+      case 'medium': return 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20';
+      case 'low': return 'bg-blue-500/10 text-blue-600 border-blue-500/20';
+      default: return 'bg-gray-500/10 text-gray-600 border-gray-500/20';
+    }
+  };
+
+  const getSentimentColor = (sentiment: string) => {
+    switch (sentiment) {
+      case 'negative': return 'text-red-600';
+      case 'positive': return 'text-green-600';
+      case 'threatening': return 'text-red-800 font-bold';
+      default: return 'text-gray-600';
+    }
+  };
+
   if (isLoading) {
     return (
       <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg font-medium flex justify-between items-center">
-            <Skeleton className="h-6 w-44" />
-            <Skeleton className="h-5 w-16" />
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5" />
+            Live OSINT Intelligence Feed
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-0">
-          <div className="max-h-96 overflow-y-auto">
-            <AlertSkeleton count={3} />
+        <CardContent>
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="p-4 border rounded-lg animate-pulse">
+                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>
     );
   }
 
-  if (alerts.length === 0) {
+  // Filter for only live OSINT data
+  const liveAlerts = alerts.filter(alert => 
+    alert.sourceType === 'live_osint' || 
+    alert.sourceType === 'live_scan' || 
+    alert.sourceType === 'osint_intelligence' ||
+    alert.platform === 'Reddit' ||
+    alert.platform === 'RSS'
+  );
+
+  if (liveAlerts.length === 0) {
     return (
       <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg font-medium">Recent Content Alerts</CardTitle>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5" />
+            Live OSINT Intelligence Feed
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col items-center justify-center py-8">
-            <p className="text-muted-foreground mb-2">No alerts match your current filters</p>
-            <Button variant="outline" size="sm">Reset Filters</Button>
+          <div className="text-center py-8">
+            <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-600 mb-2">No Live Threats Detected</h3>
+            <p className="text-sm text-gray-500 mb-4">
+              A.R.I.A™ OSINT systems are monitoring. All intelligence sources active.
+            </p>
+            <div className="flex items-center justify-center gap-2 text-xs text-gray-500">
+              <div className="h-1.5 w-1.5 bg-green-500 rounded-full animate-pulse"></div>
+              <span>Live monitoring active • Use Operator Console for manual sweeps</span>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -49,20 +90,94 @@ const ContentAlerts = ({ alerts, isLoading = false }: ContentAlertsProps) => {
 
   return (
     <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg font-medium flex justify-between items-center">
-          <span>Reputation Threat Intelligence</span>
-          <Badge variant="outline" className="font-normal">{alerts.length} active</Badge>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <AlertTriangle className="h-5 w-5" />
+          Live OSINT Intelligence Feed
+          <Badge className="bg-green-100 text-green-800 border-green-300">
+            {liveAlerts.length} Live
+          </Badge>
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-0">
-        <div className="max-h-96 overflow-y-auto">
-          {alerts.map((alert, idx) => (
-            <AlertItem 
-              key={alert.id} 
-              alert={alert} 
-              isLast={idx === alerts.length - 1} 
-            />
+      <CardContent>
+        <div className="space-y-4">
+          {liveAlerts.slice(0, 10).map((alert) => (
+            <div
+              key={alert.id}
+              className="p-4 border rounded-lg hover:shadow-md transition-shadow"
+            >
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className={getSeverityColor(alert.severity)}>
+                    {alert.severity.toUpperCase()}
+                  </Badge>
+                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                    {alert.platform}
+                  </Badge>
+                  {alert.sourceType && (
+                    <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                      LIVE OSINT
+                    </Badge>
+                  )}
+                </div>
+                <span className="text-xs text-gray-500">{alert.date}</span>
+              </div>
+
+              <p className="text-sm text-gray-700 mb-3 line-clamp-3">
+                {alert.content}
+              </p>
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4 text-xs text-gray-500">
+                  {alert.sentiment && (
+                    <span className={`font-medium ${getSentimentColor(alert.sentiment)}`}>
+                      Sentiment: {alert.sentiment}
+                    </span>
+                  )}
+                  {alert.confidenceScore && (
+                    <span>Confidence: {alert.confidenceScore}%</span>
+                  )}
+                  {alert.potentialReach && alert.potentialReach > 0 && (
+                    <span>Reach: {alert.potentialReach.toLocaleString()}</span>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {alert.url && (
+                    <Button size="sm" variant="outline" asChild>
+                      <a href={alert.url} target="_blank" rel="noopener noreferrer">
+                        <ExternalLink className="h-3 w-3 mr-1" />
+                        View Source
+                      </a>
+                    </Button>
+                  )}
+                  <Button size="sm" variant="outline">
+                    <Eye className="h-3 w-3 mr-1" />
+                    Review
+                  </Button>
+                </div>
+              </div>
+
+              {alert.detectedEntities && alert.detectedEntities.length > 0 && (
+                <div className="mt-3 pt-3 border-t">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-medium text-gray-600">Entities:</span>
+                    <div className="flex gap-1 flex-wrap">
+                      {alert.detectedEntities.slice(0, 3).map((entity, index) => (
+                        <Badge key={index} variant="secondary" className="text-xs">
+                          {entity}
+                        </Badge>
+                      ))}
+                      {alert.detectedEntities.length > 3 && (
+                        <Badge variant="secondary" className="text-xs">
+                          +{alert.detectedEntities.length - 3} more
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           ))}
         </div>
       </CardContent>
