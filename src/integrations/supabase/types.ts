@@ -44,6 +44,42 @@ export type Database = {
           },
         ]
       }
+      action_triggers: {
+        Row: {
+          action_type: string | null
+          entity_name: string | null
+          id: string
+          input_context: Json | null
+          module_name: string | null
+          result_log: string | null
+          status: string | null
+          triggered_at: string | null
+          triggered_by: string | null
+        }
+        Insert: {
+          action_type?: string | null
+          entity_name?: string | null
+          id?: string
+          input_context?: Json | null
+          module_name?: string | null
+          result_log?: string | null
+          status?: string | null
+          triggered_at?: string | null
+          triggered_by?: string | null
+        }
+        Update: {
+          action_type?: string | null
+          entity_name?: string | null
+          id?: string
+          input_context?: Json | null
+          module_name?: string | null
+          result_log?: string | null
+          status?: string | null
+          triggered_at?: string | null
+          triggered_by?: string | null
+        }
+        Relationships: []
+      }
       activity_logs: {
         Row: {
           action: string
@@ -997,6 +1033,7 @@ export type Database = {
         Row: {
           created_at: string | null
           entity_id: string | null
+          entity_name: string | null
           error_message: string | null
           execution_time_ms: number | null
           id: string
@@ -1009,6 +1046,7 @@ export type Database = {
         Insert: {
           created_at?: string | null
           entity_id?: string | null
+          entity_name?: string | null
           error_message?: string | null
           execution_time_ms?: number | null
           id?: string
@@ -1021,6 +1059,7 @@ export type Database = {
         Update: {
           created_at?: string | null
           entity_id?: string | null
+          entity_name?: string | null
           error_message?: string | null
           execution_time_ms?: number | null
           id?: string
@@ -2690,6 +2729,33 @@ export type Database = {
         }
         Relationships: []
       }
+      edge_function_deployments: {
+        Row: {
+          deployed_at: string | null
+          deployed_by: string | null
+          deployment_notes: string | null
+          function_name: string
+          id: string
+          source_files: string[] | null
+        }
+        Insert: {
+          deployed_at?: string | null
+          deployed_by?: string | null
+          deployment_notes?: string | null
+          function_name: string
+          id?: string
+          source_files?: string[] | null
+        }
+        Update: {
+          deployed_at?: string | null
+          deployed_by?: string | null
+          deployment_notes?: string | null
+          function_name?: string
+          id?: string
+          source_files?: string[] | null
+        }
+        Relationships: []
+      }
       edge_function_events: {
         Row: {
           event_payload: Json | null
@@ -2714,6 +2780,30 @@ export type Database = {
           id?: string
           result_summary?: string | null
           status?: string
+        }
+        Relationships: []
+      }
+      edge_function_metadata: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          function_name: string
+          id: string
+          module_path: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          function_name: string
+          id?: string
+          module_path: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          function_name?: string
+          id?: string
+          module_path?: string
         }
         Relationships: []
       }
@@ -3046,6 +3136,33 @@ export type Database = {
         }
         Relationships: []
       }
+      entity_graph: {
+        Row: {
+          frequency: number | null
+          id: string
+          last_seen: string | null
+          related_entity: string | null
+          relationship_type: string | null
+          source_entity: string | null
+        }
+        Insert: {
+          frequency?: number | null
+          id?: string
+          last_seen?: string | null
+          related_entity?: string | null
+          relationship_type?: string | null
+          source_entity?: string | null
+        }
+        Update: {
+          frequency?: number | null
+          id?: string
+          last_seen?: string | null
+          related_entity?: string | null
+          relationship_type?: string | null
+          source_entity?: string | null
+        }
+        Relationships: []
+      }
       entity_risk_profiles: {
         Row: {
           entity_name: string
@@ -3375,6 +3492,30 @@ export type Database = {
           status?: string | null
           threat_highlights?: Json | null
           title?: string
+        }
+        Relationships: []
+      }
+      fix_paths: {
+        Row: {
+          created_at: string | null
+          entity_name: string
+          id: string
+          steps: Json | null
+          threat_level: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          entity_name: string
+          id?: string
+          steps?: Json | null
+          threat_level?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          entity_name?: string
+          id?: string
+          steps?: Json | null
+          threat_level?: string | null
         }
         Relationships: []
       }
@@ -4421,6 +4562,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      mission_chain_log: {
+        Row: {
+          action: string
+          entity: string
+          executed_at: string | null
+          id: number
+          log_details: string | null
+          module: string | null
+          status: string | null
+          step_number: number
+          triggered_by: string | null
+        }
+        Insert: {
+          action: string
+          entity: string
+          executed_at?: string | null
+          id?: number
+          log_details?: string | null
+          module?: string | null
+          status?: string | null
+          step_number: number
+          triggered_by?: string | null
+        }
+        Update: {
+          action?: string
+          entity?: string
+          executed_at?: string | null
+          id?: number
+          log_details?: string | null
+          module?: string | null
+          status?: string | null
+          step_number?: number
+          triggered_by?: string | null
+        }
+        Relationships: []
       }
       model_bias_profile: {
         Row: {
@@ -6850,6 +7027,36 @@ export type Database = {
         }
         Relationships: []
       }
+      threat_genomes: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          hash: string
+          id: string
+          known_outcomes: string[] | null
+          match_percent: number | null
+          pattern_name: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          hash: string
+          id?: string
+          known_outcomes?: string[] | null
+          match_percent?: number | null
+          pattern_name: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          hash?: string
+          id?: string
+          known_outcomes?: string[] | null
+          match_percent?: number | null
+          pattern_name?: string
+        }
+        Relationships: []
+      }
       threat_ingestion_queue: {
         Row: {
           created_at: string | null
@@ -6914,6 +7121,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      threat_profiles: {
+        Row: {
+          created_at: string | null
+          entity_name: string
+          fix_plan: string | null
+          id: string
+          match_confidence: number | null
+          negative_sentiment_score: number | null
+          primary_platforms: string[] | null
+          related_entities: string[] | null
+          risk_score: number
+          signature_match: string | null
+          threat_level: string
+          total_mentions: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          entity_name: string
+          fix_plan?: string | null
+          id?: string
+          match_confidence?: number | null
+          negative_sentiment_score?: number | null
+          primary_platforms?: string[] | null
+          related_entities?: string[] | null
+          risk_score: number
+          signature_match?: string | null
+          threat_level: string
+          total_mentions?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          entity_name?: string
+          fix_plan?: string | null
+          id?: string
+          match_confidence?: number | null
+          negative_sentiment_score?: number | null
+          primary_platforms?: string[] | null
+          related_entities?: string[] | null
+          risk_score?: number
+          signature_match?: string | null
+          threat_level?: string
+          total_mentions?: number | null
+        }
+        Relationships: []
       }
       threat_queue: {
         Row: {
@@ -7108,30 +7360,42 @@ export type Database = {
       unified_reports: {
         Row: {
           created_at: string | null
+          csv_url: string | null
           entity_name: string
           high_severity_count: number | null
           id: string
+          markdown_url: string | null
+          pdf_url: string | null
           related_entities: string[] | null
+          report_text: string | null
           scan_metadata: Json | null
           summary: string | null
           threat_count: number | null
         }
         Insert: {
           created_at?: string | null
+          csv_url?: string | null
           entity_name: string
           high_severity_count?: number | null
           id?: string
+          markdown_url?: string | null
+          pdf_url?: string | null
           related_entities?: string[] | null
+          report_text?: string | null
           scan_metadata?: Json | null
           summary?: string | null
           threat_count?: number | null
         }
         Update: {
           created_at?: string | null
+          csv_url?: string | null
           entity_name?: string
           high_severity_count?: number | null
           id?: string
+          markdown_url?: string | null
+          pdf_url?: string | null
           related_entities?: string[] | null
+          report_text?: string | null
           scan_metadata?: Json | null
           summary?: string | null
           threat_count?: number | null
