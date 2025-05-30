@@ -1,10 +1,13 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, ExternalLink, Eye, CheckCircle } from "lucide-react";
+import { AlertTriangle, ExternalLink, Eye, CheckCircle, Ban, MessageSquare } from "lucide-react";
 import { ContentAlert } from "@/types/dashboard";
+import { requestContentRemoval, markAlertAsRead } from "@/services/contentActionService";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 interface ContentAlertsProps {
   alerts: ContentAlert[];
@@ -12,6 +15,9 @@ interface ContentAlertsProps {
 }
 
 const ContentAlerts = ({ alerts, isLoading }: ContentAlertsProps) => {
+  const navigate = useNavigate();
+  const [processingAlerts, setProcessingAlerts] = useState<Set<string>>(new Set());
+
   const getSeverityColor = (severity: string) => {
     switch (severity) {
       case 'high': return 'bg-red-500/10 text-red-600 border-red-500/20';
@@ -27,6 +33,64 @@ const ContentAlerts = ({ alerts, isLoading }: ContentAlertsProps) => {
       case 'positive': return 'text-green-600';
       case 'threatening': return 'text-red-800 font-bold';
       default: return 'text-gray-600';
+    }
+  };
+
+  const handleAnalysis = (alert: ContentAlert) => {
+    // Store the alert in sessionStorage for the Engagement Hub
+    sessionStorage.setItem('selectedAlert', JSON.stringify(alert));
+    
+    // Navigate to Engagement Hub with alert ID
+    navigate(`/engagement-hub?alert=${alert.id}`);
+    
+    toast.info("Opening detailed analysis...", {
+      description: "Redirecting to Engagement Hub for comprehensive threat analysis"
+    });
+  };
+
+  const handleRequestRemoval = async (alert: ContentAlert) => {
+    if (processingAlerts.has(alert.id)) return;
+    
+    setProcessingAlerts(prev => new Set(prev).add(alert.id));
+    
+    try {
+      const success = await requestContentRemoval(alert);
+      if (success) {
+        toast.success("Removal request submitted", {
+          description: "Content has been flagged for removal review"
+        });
+      }
+    } catch (error) {
+      console.error("Failed to request removal:", error);
+      toast.error("Failed to request content removal");
+    } finally {
+      setProcessingAlerts(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(alert.id);
+        return newSet;
+      });
+    }
+  };
+
+  const handleRespond = (alert: ContentAlert) => {
+    // Store the alert for response generation
+    sessionStorage.setItem('selectedAlert', JSON.stringify(alert));
+    
+    // Navigate to Engagement Hub for response generation
+    navigate(`/engagement-hub?alert=${alert.id}&action=respond`);
+    
+    toast.info("Preparing response tools...", {
+      description: "Opening response generation interface"
+    });
+  };
+
+  const handleMarkAsRead = async (alert: ContentAlert) => {
+    try {
+      await markAlertAsRead(alert);
+      toast.success("Alert marked as read");
+    } catch (error) {
+      console.error("Failed to mark as read:", error);
+      toast.error("Failed to mark alert as read");
     }
   };
 
@@ -151,9 +215,33 @@ const ContentAlerts = ({ alerts, isLoading }: ContentAlertsProps) => {
                       </a>
                     </Button>
                   )}
-                  <Button size="sm" variant="outline">
+                  
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => handleAnalysis(alert)}
+                  >
                     <Eye className="h-3 w-3 mr-1" />
-                    Review
+                    Analysis
+                  </Button>
+                  
+                  <Button 
+                    size="sm" 
+                    variant="destructive"
+                    onClick={() => handleRequestRemoval(alert)}
+                    disabled={processingAlerts.has(alert.id)}
+                  >
+                    <Ban className="h-3 w-3 mr-1" />
+                    {processingAlerts.has(alert.id) ? 'Processing...' : 'Request Removal'}
+                  </Button>
+                  
+                  <Button 
+                    size="sm" 
+                    variant="default"
+                    onClick={() => handleRespond(alert)}
+                  >
+                    <MessageSquare className="h-3 w-3 mr-1" />
+                    Respond
                   </Button>
                 </div>
               </div>
