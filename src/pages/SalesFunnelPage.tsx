@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useAuth } from "@/hooks/useAuth";
 import AdminDashboardWelcome from "@/components/salesFunnel/AdminDashboardWelcome";
@@ -69,7 +68,7 @@ const SalesFunnelPage = () => {
               <h1 className="text-5xl lg:text-6xl font-bold leading-tight mb-6">
                 Elevate Your
                 <br />
-                <span className="text-orange-500">Digital Reputation</span>
+                <span className="text-white">Digital Reputation</span>
               </h1>
               <p className="text-gray-300 text-lg mb-8 max-w-lg mx-auto">
                 Enterprise-grade reputation intelligence and crisis prevention. Powered by AI, delivered by experts who understand the stakes.
@@ -90,7 +89,7 @@ const SalesFunnelPage = () => {
               <div className="flex items-center justify-center space-x-2">
                 <div className="flex">
                   {[1,2,3,4,5].map((star) => (
-                    <Star key={star} className="w-4 h-4 fill-orange-500 text-orange-500" />
+                    <Star key={star} className="w-4 h-4 fill-green-500 text-green-500" />
                   ))}
                 </div>
                 <span className="text-sm text-gray-300">Rated Excellent on Trustpilot</span>
