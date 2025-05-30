@@ -30,7 +30,22 @@ const DashboardPage = () => {
   const { selectedClient, clientEntities } = useClientSelection();
   const [filteredAlerts, setFilteredAlerts] = useState(alerts);
 
-  const handleFilterChange = (filtered: any[]) => {
+  const handleFilterChange = (filters: { platforms: string[]; severities: string[]; statuses: string[]; }) => {
+    // Apply filters to alerts array based on the filter criteria
+    let filtered = alerts;
+    
+    if (filters.platforms.length > 0) {
+      filtered = filtered.filter(alert => filters.platforms.includes(alert.platform));
+    }
+    
+    if (filters.severities.length > 0) {
+      filtered = filtered.filter(alert => filters.severities.includes(alert.severity));
+    }
+    
+    if (filters.statuses.length > 0) {
+      filtered = filtered.filter(alert => filters.statuses.includes(alert.status));
+    }
+    
     setFilteredAlerts(filtered);
   };
 
