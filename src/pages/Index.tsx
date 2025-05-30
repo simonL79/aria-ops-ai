@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -317,7 +316,7 @@ const Index = () => {
           </div>
 
           {/* Add-On Services */}
-          <Card className="bg-[#1A1B1E] border-amber-600/30 p-8">
+          <Card className="bg-[#1A1B1E] border-amber-600/30 p-8 mb-12">
             <div className="flex items-center gap-3 mb-6">
               <ShieldCheck className="h-12 w-12 text-amber-400" />
               <h3 className="text-2xl font-bold text-white">🛡️ Add-On Services</h3>
@@ -361,6 +360,22 @@ const Index = () => {
               </div>
             </div>
           </Card>
+
+          {/* CTA Section */}
+          <div className="text-center">
+            <div className="bg-gradient-to-br from-amber-600/20 to-transparent border border-amber-600/30 rounded-2xl p-8 mb-8">
+              <h3 className="text-2xl font-bold text-white mb-4">Ready to Protect Your Digital Reputation?</h3>
+              <p className="text-gray-300 mb-6 max-w-2xl mx-auto">
+                Get a personalized assessment of your digital risk profile. Our experts will identify vulnerabilities and provide a strategic roadmap for protection.
+              </p>
+              <Button
+                onClick={handleScanRequest}
+                className="bg-amber-600 hover:bg-amber-500 text-black px-8 py-3 text-lg font-semibold shadow-lg hover:shadow-amber-600/25 transform hover:scale-105 transition-all duration-300"
+              >
+                Request Your Assessment <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </div>
+          </div>
         </div>
       </section>
 
