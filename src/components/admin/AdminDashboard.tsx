@@ -8,6 +8,7 @@ import SystemHealthDashboard from './SystemHealthDashboard';
 import ThreatIngestWorker from '../intelligence/ThreatIngestWorker';
 import AnubisValidationPanel from '../aria/AnubisValidationPanel';
 import SystemConfigurationTab from './SystemConfigurationTab';
+import AnubisCreeperLogViewer from './AnubisCreeperLogViewer';
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -173,6 +174,9 @@ const AdminDashboard = () => {
 
         <TabsContent value="health">
           <SystemHealthDashboard />
+          <div className="mt-8">
+            <AnubisCreeperLogViewer />
+          </div>
         </TabsContent>
 
         <TabsContent value="anubis">

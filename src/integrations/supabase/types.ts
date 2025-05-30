@@ -585,6 +585,45 @@ export type Database = {
         }
         Relationships: []
       }
+      anubis_creeper_log: {
+        Row: {
+          actual_result: string | null
+          created_at: string | null
+          function_name: string | null
+          id: string
+          issue_description: string | null
+          issue_detected: boolean | null
+          module: string | null
+          severity: string | null
+          simulated_result: string | null
+          suggested_fix: string | null
+        }
+        Insert: {
+          actual_result?: string | null
+          created_at?: string | null
+          function_name?: string | null
+          id?: string
+          issue_description?: string | null
+          issue_detected?: boolean | null
+          module?: string | null
+          severity?: string | null
+          simulated_result?: string | null
+          suggested_fix?: string | null
+        }
+        Update: {
+          actual_result?: string | null
+          created_at?: string | null
+          function_name?: string | null
+          id?: string
+          issue_description?: string | null
+          issue_detected?: boolean | null
+          module?: string | null
+          severity?: string | null
+          simulated_result?: string | null
+          suggested_fix?: string | null
+        }
+        Relationships: []
+      }
       anubis_hotword_events: {
         Row: {
           captured_phrase: string | null
