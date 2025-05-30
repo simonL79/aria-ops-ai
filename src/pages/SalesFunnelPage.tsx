@@ -5,6 +5,7 @@ import AdminDashboardWelcome from "@/components/salesFunnel/AdminDashboardWelcom
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Logo from "@/components/ui/logo";
+import { Star, Shield, Eye, Users, CheckCircle } from "lucide-react";
 
 const SalesFunnelPage = () => {
   const { isAuthenticated } = useAuth();
@@ -14,326 +15,290 @@ const SalesFunnelPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="bg-white border-b border-gray-100 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <Logo variant="default" size="md" />
-          <nav className="hidden md:flex items-center space-x-8">
-            <a href="#" className="text-gray-600 hover:text-gray-900 font-medium">Features</a>
-            <a href="#" className="text-gray-600 hover:text-gray-900 font-medium">Pricing</a>
-            <a href="#" className="text-gray-600 hover:text-gray-900 font-medium">About</a>
-            <Button className="bg-black hover:bg-gray-800 text-white px-6 py-2 rounded-full">
-              Get Started
-            </Button>
-          </nav>
-        </div>
-      </header>
-
+    <div className="min-h-screen bg-gray-900 text-white">
       {/* Hero Section */}
-      <section className="bg-white py-20">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
+      <section className="relative min-h-screen flex items-center justify-center bg-gray-900">
+        <div className="absolute top-6 left-6">
+          <Logo variant="light" size="md" />
+        </div>
+        
+        <div className="container mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center">
+          {/* Left Content */}
+          <div className="space-y-8">
             <div>
-              <h1 className="text-6xl font-bold text-black mb-8 leading-tight">
-                Build fast,
+              <h1 className="text-5xl lg:text-6xl font-bold leading-tight mb-6">
+                Elevate Your
                 <br />
-                <span className="text-purple-600">ship faster</span>
+                <span className="text-orange-500">Digital Reputation</span>
               </h1>
-              <p className="text-xl text-gray-600 mb-10 leading-relaxed max-w-lg">
-                Create beautiful web applications in minutes, not months. Our AI-powered platform handles the complexity so you can focus on what matters.
+              <p className="text-gray-300 text-lg mb-8 max-w-lg">
+                Enterprise-grade reputation intelligence and crisis prevention. Powered by AI, delivered by experts who understand the stakes.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 mb-12">
-                <Button className="bg-black hover:bg-gray-800 text-white px-8 py-4 text-lg rounded-full">
-                  Start building for free
-                </Button>
-                <Button variant="outline" className="border-gray-300 text-gray-700 px-8 py-4 text-lg rounded-full hover:bg-gray-50">
-                  View demo
-                </Button>
-              </div>
-              
-              {/* Trust Indicators */}
-              <div className="flex items-center space-x-8 text-sm text-gray-500">
-                <div>✓ No credit card required</div>
-                <div>✓ 14-day free trial</div>
-                <div>✓ Cancel anytime</div>
-              </div>
             </div>
             
-            <div className="relative">
-              <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-3xl p-8 relative overflow-hidden">
-                {/* Dashboard mockup */}
-                <div className="bg-white rounded-2xl shadow-2xl p-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <div className="w-3 h-3 bg-red-400 rounded-full"></div>
-                    <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
-                    <div className="w-3 h-3 bg-green-400 rounded-full"></div>
-                  </div>
-                  <div className="space-y-4">
-                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="h-20 bg-purple-100 rounded-lg"></div>
-                      <div className="h-20 bg-blue-100 rounded-lg"></div>
-                    </div>
-                    <div className="h-4 bg-gray-200 rounded w-2/3"></div>
-                  </div>
+            <div className="space-y-4">
+              <Button className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 text-lg font-semibold rounded-md">
+                Request Assessment
+              </Button>
+              <Button variant="outline" className="border-gray-600 text-gray-300 hover:bg-gray-800 px-8 py-3 text-lg rounded-md ml-4">
+                Learn More
+              </Button>
+            </div>
+            
+            <div className="text-sm text-gray-400">
+              PARIS • LONDON • SINGAPORE
+            </div>
+            
+            {/* Ratings */}
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2">
+                <div className="flex">
+                  {[1,2,3,4,5].map((star) => (
+                    <Star key={star} className="w-4 h-4 fill-green-400 text-green-400" />
+                  ))}
                 </div>
-                
-                {/* Floating elements */}
-                <div className="absolute -top-4 -right-4 w-16 h-16 bg-purple-600 rounded-full opacity-20"></div>
-                <div className="absolute -bottom-4 -left-4 w-12 h-12 bg-blue-600 rounded-full opacity-20"></div>
+                <span className="text-sm text-gray-300">5.0 Google Rating</span>
               </div>
+              <div className="flex items-center space-x-2">
+                <div className="flex">
+                  {[1,2,3,4,5].map((star) => (
+                    <Star key={star} className="w-4 h-4 fill-blue-400 text-blue-400" />
+                  ))}
+                </div>
+                <span className="text-sm text-gray-300">5.0 Trustpilot Rating</span>
+              </div>
+            </div>
+          </div>
+          
+          {/* Right Content - Professional Portrait */}
+          <div className="relative">
+            <div className="relative">
+              <img 
+                src="/lovable-uploads/cfe23d87-23ec-49b2-ba9f-5a1aa704fdcd.png" 
+                alt="Professional executive portrait"
+                className="w-full max-w-md mx-auto rounded-lg"
+              />
+              <Button className="absolute bottom-4 right-4 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md">
+                Schedule 1:1 Briefing
+              </Button>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-24 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-20">
-            <h2 className="text-4xl font-bold text-black mb-6">
-              Everything you need to ship
+      {/* Trusted Across Industries Section */}
+      <section className="py-16 bg-gray-800">
+        <div className="container mx-auto px-6 text-center">
+          <h3 className="text-lg text-gray-400 mb-8">Trusted Across Industries</h3>
+          <div className="grid grid-cols-5 gap-8 items-center">
+            {['Government Relations', 'Professional Services', 'Private Equity', 'Venture Capital', 'Investment Management'].map((industry, index) => (
+              <div key={index} className="text-center">
+                <div className="w-16 h-16 bg-gray-700 rounded-lg mx-auto mb-2 flex items-center justify-center">
+                  <div className="w-8 h-8 bg-gray-600 rounded"></div>
+                </div>
+                <p className="text-sm text-gray-400">{industry}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Services Section */}
+      <section className="py-20 bg-gray-900">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold mb-4">
+              Reputation Management Services – Powered by A.R.I.A™
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              From idea to production in record time. Our platform provides all the tools and infrastructure you need.
+            <p className="text-gray-300 text-lg max-w-4xl mx-auto">
+              A.R.I.A™ isn't just for celebrities, CEOs, or great brands. Reputation is personal — and everyone 
+              deserves protection. Whether you're facing online abuse, negative press, or algorithmic bias, we've 
+              built elite tools for every type of modern digital identity.
             </p>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-8">
-            <Card className="bg-white p-8 border-0 shadow-sm hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-6">
-                <div className="w-6 h-6 bg-purple-600 rounded"></div>
+          <div className="grid lg:grid-cols-3 gap-8">
+            {/* Social Media Protection */}
+            <Card className="bg-gray-800 border-gray-700 p-8">
+              <div className="flex items-center mb-6">
+                <Shield className="w-8 h-8 text-orange-500 mr-3" />
+                <h3 className="text-xl font-bold text-orange-500">Social Media Protection</h3>
               </div>
-              <h3 className="text-xl font-semibold text-black mb-4">AI-Powered Development</h3>
-              <p className="text-gray-600 mb-6">
-                Write code faster with intelligent suggestions and automated optimizations.
+              <p className="text-gray-300 mb-6">
+                Real-time hunting of threats across every platform and instant defense against abuse.
               </p>
-              <ul className="space-y-2 text-sm text-gray-600">
-                <li className="flex items-center">
-                  <span className="w-4 h-4 text-green-500 mr-2">✓</span>
-                  Smart code completion
-                </li>
-                <li className="flex items-center">
-                  <span className="w-4 h-4 text-green-500 mr-2">✓</span>
-                  Bug detection
-                </li>
-                <li className="flex items-center">
-                  <span className="w-4 h-4 text-green-500 mr-2">✓</span>
-                  Performance optimization
-                </li>
-              </ul>
+              <div className="space-y-3">
+                <div className="flex items-center text-sm text-gray-300">
+                  <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
+                  Monitor threats across Facebook, Twitter, LinkedIn, Instagram, YouTube & TikTok
+                </div>
+                <div className="flex items-center text-sm text-gray-300">
+                  <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
+                  Instant alerts sent to A.R.I.A.™ and yourself for real-time protection
+                </div>
+                <div className="flex items-center text-sm text-gray-300">
+                  <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
+                  GDPR requests combined with algorithmic manipulation
+                </div>
+              </div>
+              <p className="text-xs text-gray-400 mt-6 italic">
+                Imagine having your very best friend watch your back 24/7 online. That's what our tech products is for VIP people.
+              </p>
             </Card>
-            
-            <Card className="bg-white p-8 border-0 shadow-sm hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
-                <div className="w-6 h-6 bg-blue-600 rounded"></div>
+
+            {/* Influencer & Creator */}
+            <Card className="bg-gray-800 border-gray-700 p-8">
+              <div className="flex items-center mb-6">
+                <Eye className="w-8 h-8 text-orange-500 mr-3" />
+                <h3 className="text-xl font-bold text-orange-500">Influencer & Creator</h3>
               </div>
-              <h3 className="text-xl font-semibold text-black mb-4">Instant Deployment</h3>
-              <p className="text-gray-600 mb-6">
-                Deploy to production with a single click. No complex configuration required.
+              <p className="text-gray-300 mb-6">
+                Built for influencer balance. You feel like brands see your profile. You need distance? Instantly.
               </p>
-              <ul className="space-y-2 text-sm text-gray-600">
-                <li className="flex items-center">
-                  <span className="w-4 h-4 text-green-500 mr-2">✓</span>
-                  Global CDN
-                </li>
-                <li className="flex items-center">
-                  <span className="w-4 h-4 text-green-500 mr-2">✓</span>
-                  Auto-scaling
-                </li>
-                <li className="flex items-center">
-                  <span className="w-4 h-4 text-green-500 mr-2">✓</span>
-                  SSL certificates
-                </li>
-              </ul>
+              <div className="space-y-3">
+                <div className="text-sm font-semibold text-white">What We Do</div>
+                <div className="flex items-center text-sm text-gray-300">
+                  <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
+                  Real online business threats that really could and do affect your income
+                </div>
+                <div className="flex items-center text-sm text-gray-300">
+                  <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
+                  Publish industry attack for 'R.A.I.O.™' in the specific medium to create separation
+                </div>
+                <div className="flex items-center text-sm text-gray-300">
+                  <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
+                  Advanced content optimization via SERP and optimization to hide threats from Google
+                </div>
+              </div>
+              <div className="mt-6">
+                <div className="text-sm font-semibold text-white mb-2">Why It Works</div>
+                <p className="text-xs text-gray-400">
+                  Your biggest risk is reputation risk. A.R.I.A. sees it before you understand what's happening. We remove it before it does lasting damage or affecting your bottom line.
+                </p>
+              </div>
             </Card>
-            
-            <Card className="bg-white p-8 border-0 shadow-sm hover:shadow-lg transition-shadow">
-              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-6">
-                <div className="w-6 h-6 bg-green-600 rounded"></div>
+
+            {/* Everyday People Protection */}
+            <Card className="bg-gray-800 border-gray-700 p-8">
+              <div className="flex items-center mb-6">
+                <Users className="w-8 h-8 text-orange-500 mr-3" />
+                <h3 className="text-xl font-bold text-orange-500">Everyday People Protection</h3>
               </div>
-              <h3 className="text-xl font-semibold text-black mb-4">Team Collaboration</h3>
-              <p className="text-gray-600 mb-6">
-                Work together seamlessly with real-time collaboration and version control.
+              <p className="text-gray-300 mb-6">
+                Built for regular people who think they don't matter. But they matter to this technology for VIPs.
               </p>
-              <ul className="space-y-2 text-sm text-gray-600">
-                <li className="flex items-center">
-                  <span className="w-4 h-4 text-green-500 mr-2">✓</span>
-                  Real-time editing
-                </li>
-                <li className="flex items-center">
-                  <span className="w-4 h-4 text-green-500 mr-2">✓</span>
-                  Comment system
-                </li>
-                <li className="flex items-center">
-                  <span className="w-4 h-4 text-green-500 mr-2">✓</span>
-                  Branch management
-                </li>
-              </ul>
+              <div className="space-y-3">
+                <div className="text-sm font-semibold text-white">What We Do</div>
+                <div className="flex items-center text-sm text-gray-300">
+                  <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
+                  Hunt for toxic data in any public record, malice and gossip online
+                </div>
+                <div className="flex items-center text-sm text-gray-300">
+                  <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
+                  Remove them using a mix of GDPR and UK Freedom of Information Act
+                </div>
+                <div className="flex items-center text-sm text-gray-300">
+                  <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
+                  GDPR with AI for simple people to build better life opportunities
+                </div>
+              </div>
+              <div className="mt-6">
+                <div className="text-sm font-semibold text-white mb-2">This Works For</div>
+                <p className="text-xs text-gray-400">
+                  Whether it's their companies' service you have to run, current or potential employee you need to hire, or clients who want to hire you - reputation affects everyone.
+                </p>
+              </div>
             </Card>
           </div>
         </div>
       </section>
 
-      {/* Pricing Section */}
-      <section className="py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-20">
-            <h2 className="text-4xl font-bold text-black mb-6">
-              Simple, transparent pricing
-            </h2>
-            <p className="text-xl text-gray-600">
-              Choose the plan that fits your needs. All plans include our core features.
-            </p>
+      {/* Ready to Get Started CTA */}
+      <section className="py-16 bg-gray-800">
+        <div className="container mx-auto px-6 text-center">
+          <h2 className="text-3xl font-bold mb-4">Ready to Get Started?</h2>
+          <p className="text-gray-300 mb-8">
+            Get a comprehensive assessment of your digital risk profile and strategic roadmap.
+          </p>
+          <Button className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 text-lg font-semibold rounded-md">
+            Request Risk Assessment
+          </Button>
+        </div>
+      </section>
+
+      {/* Add-On Services */}
+      <section className="py-16 bg-gray-900">
+        <div className="container mx-auto px-6">
+          <div className="flex items-center mb-8">
+            <Shield className="w-6 h-6 text-orange-500 mr-3" />
+            <h2 className="text-2xl font-bold text-orange-500">Add-On Services</h2>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <Card className="bg-white p-8 border border-gray-200 hover:border-gray-300 transition-colors">
-              <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold text-black mb-2">Starter</h3>
-                <div className="text-4xl font-bold text-black mb-4">$0<span className="text-lg text-gray-500">/month</span></div>
-                <p className="text-gray-600">Perfect for side projects</p>
-              </div>
-              <ul className="space-y-4 mb-8">
-                <li className="flex items-center text-gray-600">
-                  <span className="w-5 h-5 text-green-500 mr-3">✓</span>
-                  Up to 3 projects
-                </li>
-                <li className="flex items-center text-gray-600">
-                  <span className="w-5 h-5 text-green-500 mr-3">✓</span>
-                  Community support
-                </li>
-                <li className="flex items-center text-gray-600">
-                  <span className="w-5 h-5 text-green-500 mr-3">✓</span>
-                  Basic templates
-                </li>
-                <li className="flex items-center text-gray-600">
-                  <span className="w-5 h-5 text-green-500 mr-3">✓</span>
-                  Standard deployment
-                </li>
-              </ul>
-              <Button className="w-full bg-gray-900 hover:bg-black text-white rounded-full">
-                Get started
-              </Button>
-            </Card>
-            
-            <Card className="bg-purple-50 p-8 border-2 border-purple-200 relative">
-              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                <span className="bg-purple-600 text-white px-4 py-1 rounded-full text-sm font-semibold">
-                  Most Popular
-                </span>
-              </div>
-              <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold text-black mb-2">Pro</h3>
-                <div className="text-4xl font-bold text-black mb-4">$29<span className="text-lg text-gray-500">/month</span></div>
-                <p className="text-gray-600">For growing teams</p>
-              </div>
-              <ul className="space-y-4 mb-8">
-                <li className="flex items-center text-gray-600">
-                  <span className="w-5 h-5 text-green-500 mr-3">✓</span>
-                  Unlimited projects
-                </li>
-                <li className="flex items-center text-gray-600">
-                  <span className="w-5 h-5 text-green-500 mr-3">✓</span>
-                  Priority support
-                </li>
-                <li className="flex items-center text-gray-600">
-                  <span className="w-5 h-5 text-green-500 mr-3">✓</span>
-                  Premium templates
-                </li>
-                <li className="flex items-center text-gray-600">
-                  <span className="w-5 h-5 text-green-500 mr-3">✓</span>
-                  Advanced deployment
-                </li>
-                <li className="flex items-center text-gray-600">
-                  <span className="w-5 h-5 text-green-500 mr-3">✓</span>
-                  Team collaboration
-                </li>
-              </ul>
-              <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white rounded-full">
-                Start free trial
-              </Button>
-            </Card>
-            
-            <Card className="bg-white p-8 border border-gray-200 hover:border-gray-300 transition-colors">
-              <div className="text-center mb-8">
-                <h3 className="text-2xl font-bold text-black mb-2">Enterprise</h3>
-                <div className="text-4xl font-bold text-black mb-4">Custom</div>
-                <p className="text-gray-600">For large organizations</p>
-              </div>
-              <ul className="space-y-4 mb-8">
-                <li className="flex items-center text-gray-600">
-                  <span className="w-5 h-5 text-green-500 mr-3">✓</span>
-                  Everything in Pro
-                </li>
-                <li className="flex items-center text-gray-600">
-                  <span className="w-5 h-5 text-green-500 mr-3">✓</span>
-                  Dedicated support
-                </li>
-                <li className="flex items-center text-gray-600">
-                  <span className="w-5 h-5 text-green-500 mr-3">✓</span>
-                  Custom integrations
-                </li>
-                <li className="flex items-center text-gray-600">
-                  <span className="w-5 h-5 text-green-500 mr-3">✓</span>
-                  SLA guarantee
-                </li>
-                <li className="flex items-center text-gray-600">
-                  <span className="w-5 h-5 text-green-500 mr-3">✓</span>
-                  On-premise deployment
-                </li>
-              </ul>
-              <Button variant="outline" className="w-full border-gray-300 text-gray-700 hover:bg-gray-50 rounded-full">
-                Contact sales
-              </Button>
-            </Card>
+          <div className="grid lg:grid-cols-2 gap-8">
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Dark Web Leak Monitoring</h3>
+              <p className="text-gray-300 text-sm mb-4">
+                Get notified if your name, phone, or email appears to be stolen and now being traded on the dark web.
+              </p>
+              <h3 className="text-lg font-semibold mb-4">AI Diende Monitoring</h3>
+              <p className="text-gray-300 text-sm">
+                True AI-11 model looks after Discord, Reddit and messaging monitoring.
+              </p>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Family Reputation Package</h3>
+              <p className="text-gray-300 text-sm mb-4">
+                Protect your children or family members from online harassment and digital reputation damage.
+              </p>
+              <h3 className="text-lg font-semibold mb-4">Full Service Takedowns</h3>
+              <p className="text-gray-300 text-sm">
+                We do the heavy AI-work of facts and spin your narrative properly.
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Testimonials */}
-      <section className="py-24 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-20">
-            <h2 className="text-4xl font-bold text-black mb-6">
-              Loved by developers worldwide
-            </h2>
-            <p className="text-xl text-gray-600">
-              See what our customers have to say about their experience.
-            </p>
-          </div>
+      <section className="py-20 bg-gray-800">
+        <div className="container mx-auto px-6">
+          <h2 className="text-3xl font-bold text-center mb-12">What Our Clients Say</h2>
           
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <Card className="bg-white p-8 border-0 shadow-sm">
-              <div className="flex text-yellow-400 mb-6">
-                {"★".repeat(5)}
+          <div className="grid lg:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <Card className="bg-gray-900 border-gray-700 p-8">
+              <div className="flex mb-4">
+                {[1,2,3,4,5].map((star) => (
+                  <Star key={star} className="w-4 h-4 fill-orange-500 text-orange-500" />
+                ))}
               </div>
-              <p className="text-gray-700 text-lg mb-6 leading-relaxed">
-                "This platform has completely transformed how we build applications. What used to take weeks now takes days."
+              <p className="text-gray-300 mb-6">
+                "ARIA's intelligence platform helped us identify and orchestrate a coordinated attack before it reached mainstream media. Their proactive approach saved our reputation."
               </p>
               <div className="flex items-center">
-                <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full mr-4"></div>
+                <div className="w-10 h-10 bg-gray-700 rounded-full mr-3"></div>
                 <div>
-                  <h4 className="font-semibold text-black">Sarah Johnson</h4>
-                  <p className="text-gray-600">Lead Developer at TechCorp</p>
+                  <div className="font-semibold">Sarah Chen</div>
+                  <div className="text-sm text-gray-400">Chief Communications Officer</div>
+                  <div className="text-sm text-gray-400">Global Financial Services</div>
                 </div>
               </div>
             </Card>
             
-            <Card className="bg-white p-8 border-0 shadow-sm">
-              <div className="flex text-yellow-400 mb-6">
-                {"★".repeat(5)}
+            <Card className="bg-gray-900 border-gray-700 p-8">
+              <div className="flex mb-4">
+                {[1,2,3,4,5].map((star) => (
+                  <Star key={star} className="w-4 h-4 fill-orange-500 text-orange-500" />
+                ))}
               </div>
-              <p className="text-gray-700 text-lg mb-6 leading-relaxed">
-                "The AI assistance is incredible. It's like having a senior developer pair programming with you 24/7."
+              <p className="text-gray-300 mb-6">
+                "The depth of their analysis and speed of response is unmatched. They don't just monitor - they predict and prevent. Essential for any serious organization."
               </p>
               <div className="flex items-center">
-                <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-blue-500 rounded-full mr-4"></div>
+                <div className="w-10 h-10 bg-gray-700 rounded-full mr-3"></div>
                 <div>
-                  <h4 className="font-semibold text-black">Michael Chen</h4>
-                  <p className="text-gray-600">Founder at StartupXYZ</p>
+                  <div className="font-semibold">Michael Rodriguez</div>
+                  <div className="text-sm text-gray-400">Partner</div>
+                  <div className="text-sm text-gray-400">Top-Tier Investment Fund</div>
                 </div>
               </div>
             </Card>
@@ -341,43 +306,61 @@ const SalesFunnelPage = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-24 bg-black text-white">
-        <div className="max-w-4xl mx-auto text-center px-6">
-          <h2 className="text-4xl font-bold mb-6">
-            Ready to ship your next project?
-          </h2>
-          <p className="text-xl text-gray-300 mb-8">
-            Join thousands of developers who are building faster with our platform.
+      {/* Final CTA Section */}
+      <section className="py-20 bg-gray-900">
+        <div className="container mx-auto px-6 text-center">
+          <h2 className="text-4xl font-bold mb-6">Ready to Secure Your Reputation?</h2>
+          <p className="text-gray-300 text-lg mb-8 max-w-2xl mx-auto">
+            Get a comprehensive assessment of your digital risk profile. Our experts will identify vulnerabilities and provide a strategic roadmap.
           </p>
-          <Button className="bg-white text-black hover:bg-gray-100 px-8 py-4 text-lg font-semibold rounded-full">
-            Start building for free
-          </Button>
+          
+          <div className="max-w-md mx-auto space-y-4">
+            <h3 className="text-xl font-semibold text-orange-500 mb-4">Request Your Assessment</h3>
+            <input 
+              type="text" 
+              placeholder="Full Name" 
+              className="w-full p-3 bg-gray-800 border border-gray-600 rounded-md text-white placeholder-gray-400"
+            />
+            <input 
+              type="email" 
+              placeholder="Corporate Email" 
+              className="w-full p-3 bg-gray-800 border border-gray-600 rounded-md text-white placeholder-gray-400"
+            />
+            <input 
+              type="text" 
+              placeholder="Company" 
+              className="w-full p-3 bg-gray-800 border border-gray-600 rounded-md text-white placeholder-gray-400"
+            />
+            <Button className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 text-lg font-semibold rounded-md">
+              Get Assessment
+            </Button>
+            <p className="text-xs text-gray-400">Results delivered within 48 hours</p>
+          </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-gray-100 py-16">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid md:grid-cols-4 gap-8 mb-12">
+      <footer className="bg-gray-900 border-t border-gray-800 py-12">
+        <div className="container mx-auto px-6">
+          <div className="grid md:grid-cols-4 gap-8">
             <div>
-              <Logo variant="default" size="md" className="mb-4" />
-              <p className="text-gray-600">Build beautiful applications faster than ever before.</p>
+              <Logo variant="light" size="md" className="mb-4" />
+              <p className="text-gray-400 text-sm">Advanced Reputation Intelligence Agent</p>
             </div>
             
             <div>
-              <h4 className="font-semibold text-black mb-4">Product</h4>
-              <div className="space-y-2 text-gray-600">
-                <div>Features</div>
-                <div>Pricing</div>
-                <div>Documentation</div>
-                <div>API Reference</div>
+              <h4 className="font-semibold text-white mb-4">Services</h4>
+              <div className="space-y-2 text-sm text-gray-400">
+                <div>Threat Detection</div>
+                <div>Risk Management</div>
+                <div>Intelligence Reports</div>
+                <div>Crisis Response</div>
               </div>
             </div>
             
             <div>
-              <h4 className="font-semibold text-black mb-4">Company</h4>
-              <div className="space-y-2 text-gray-600">
+              <h4 className="font-semibold text-white mb-4">Company</h4>
+              <div className="space-y-2 text-sm text-gray-400">
                 <div>About</div>
                 <div>Blog</div>
                 <div>Careers</div>
@@ -386,18 +369,18 @@ const SalesFunnelPage = () => {
             </div>
             
             <div>
-              <h4 className="font-semibold text-black mb-4">Resources</h4>
-              <div className="space-y-2 text-gray-600">
-                <div>Help Center</div>
-                <div>Community</div>
-                <div>Status</div>
-                <div>Terms</div>
+              <h4 className="font-semibold text-white mb-4">Access</h4>
+              <div className="space-y-2 text-sm text-gray-400">
+                <div>Admin Login</div>
+                <div>Client Portal</div>
+                <div>API Status</div>
+                <div>Get Started</div>
               </div>
             </div>
           </div>
           
-          <div className="text-center text-gray-500 pt-8 border-t border-gray-100">
-            © 2025 Company Name — All rights reserved
+          <div className="text-center text-gray-500 pt-8 mt-8 border-t border-gray-800">
+            © 2025 A.R.I.A.™ All rights reserved.
           </div>
         </div>
       </footer>
