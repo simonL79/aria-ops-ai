@@ -4,6 +4,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import AuthGuard from "@/components/auth/AuthGuard";
+import AdminGuard from "@/components/auth/AdminGuard";
 import Index from "./pages/Index";
 import DashboardPage from "./pages/dashboard/DashboardPage";
 import AdminLogin from "./pages/AdminLogin";
@@ -13,6 +15,7 @@ import SalesFunnelPage from "./pages/SalesFunnelPage";
 import PricingPage from "./pages/PricingPage";
 import BlogPage from "./pages/BlogPage";
 import SimonLindsayPage from "./pages/SimonLindsayPage";
+import ContactPage from "./pages/ContactPage";
 
 const queryClient = new QueryClient();
 
@@ -29,11 +32,41 @@ function App() {
               <Route path="/simon-lindsay" element={<SimonLindsayPage />} />
               <Route path="/sales-funnel" element={<SalesFunnelPage />} />
               <Route path="/pricing" element={<PricingPage />} />
-              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/contact" element={<ContactPage />} />
+              <Route path="/scan" element={<ContactPage />} />
+              <Route 
+                path="/dashboard" 
+                element={
+                  <AdminGuard>
+                    <DashboardPage />
+                  </AdminGuard>
+                } 
+              />
               <Route path="/admin/login" element={<AdminLogin />} />
-              <Route path="/admin" element={<DashboardPage />} />
-              <Route path="/aria-command" element={<AriaCommand />} />
-              <Route path="/threats-management" element={<ThreatsManagement />} />
+              <Route 
+                path="/admin" 
+                element={
+                  <AdminGuard>
+                    <DashboardPage />
+                  </AdminGuard>
+                } 
+              />
+              <Route 
+                path="/aria-command" 
+                element={
+                  <AdminGuard>
+                    <AriaCommand />
+                  </AdminGuard>
+                } 
+              />
+              <Route 
+                path="/threats-management" 
+                element={
+                  <AdminGuard>
+                    <ThreatsManagement />
+                  </AdminGuard>
+                } 
+              />
             </Routes>
           </BrowserRouter>
         </TooltipProvider>
