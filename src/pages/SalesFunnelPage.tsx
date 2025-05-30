@@ -311,21 +311,21 @@ const SalesFunnelPage = () => {
                 <div>
                   <h3 className="text-lg font-semibold mb-4 text-white">Dark Web Leak Monitoring</h3>
                   <p className="text-gray-300 text-sm mb-4">
-                    Get notified if your name, phone, or email appears to be stolen and now being traded on the dark web.
+                    Get notified if your name, photos, or documents appear on black market sites
                   </p>
-                  <h3 className="text-lg font-semibold mb-4 text-white">AI Diende Monitoring</h3>
+                  <h3 className="text-lg font-semibold mb-4 text-white">AI Disinfo Watchdog</h3>
                   <p className="text-gray-300 text-sm">
-                    True AI-11 model looks after Discord, Reddit and messaging monitoring.
+                    Find out if hostile LLMs (like ChatGPT clones) are referencing you unfairly
                   </p>
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold mb-4 text-white">Family Reputation Package</h3>
                   <p className="text-gray-300 text-sm mb-4">
-                    Protect your children or family members from online harassment and digital reputation damage.
+                    Protect your children or family members across online platforms
                   </p>
                   <h3 className="text-lg font-semibold mb-4 text-white">Full Service Takedowns</h3>
                   <p className="text-gray-300 text-sm">
-                    We do the heavy AI-work of facts and spin your narrative properly.
+                    We do the work — no forms or back-and-forth with platforms
                   </p>
                 </div>
               </div>
