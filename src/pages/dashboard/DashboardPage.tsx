@@ -1,11 +1,16 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useDashboardData } from "@/hooks/useDashboardData";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import DashboardMainContent from "@/components/dashboard/DashboardMainContent";
 import DashboardLayout from "@/components/layout/DashboardLayout";
+import ClientSelector from "@/components/admin/ClientSelector";
+import type { Client } from '@/types/clients';
 
 const DashboardPage = () => {
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [clientEntities, setClientEntities] = useState<any[]>([]);
+  
   const {
     metrics,
     alerts,
@@ -43,6 +48,16 @@ const DashboardPage = () => {
           totalAlerts={liveAlerts.length}
           highSeverityAlerts={highSeverityLiveAlerts}
         />
+        
+        {/* Client Selection Section */}
+        <div className="container mx-auto px-6 py-4">
+          <ClientSelector
+            selectedClient={selectedClient}
+            onClientSelect={setSelectedClient}
+            onEntitiesLoad={setClientEntities}
+          />
+        </div>
+
         <DashboardMainContent
           metrics={metrics}
           alerts={liveAlerts}
@@ -61,6 +76,10 @@ const DashboardPage = () => {
           fetchData={fetchData}
           filteredAlerts={liveAlerts}
           onFilterChange={() => {}}
+          reputationScore={75}
+          previousScore={70}
+          selectedClient={selectedClient}
+          clientEntities={clientEntities}
         />
       </div>
     </DashboardLayout>

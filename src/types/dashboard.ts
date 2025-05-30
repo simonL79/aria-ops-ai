@@ -166,4 +166,6 @@ export interface DashboardMainContentProps {
   loading?: boolean;
   error?: string | null;
   fetchData?: () => Promise<void>;
+  selectedClient?: any;
+  clientEntities?: any[];
 }

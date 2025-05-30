@@ -1,4 +1,3 @@
-
 import React from "react";
 import ReputationScore from "@/components/dashboard/ReputationScore";
 import ContentAlerts from "@/components/dashboard/ContentAlerts";
@@ -10,11 +9,10 @@ import SeoSuppressionPipeline from "@/components/dashboard/SeoSuppressionPipelin
 import IntelligenceCollection from "@/components/dashboard/IntelligenceCollection";
 import ContentFilter from "@/components/dashboard/ContentFilter";
 import InfoTooltip from "@/components/dashboard/InfoTooltip";
-import SerpDefense from "@/components/dashboard/SerpDefense";
+import SERPDefensePanel from "@/components/dashboard/SERPDefensePanel";
 import { Button } from "@/components/ui/button";
 import { RefreshCw, AlertTriangle, CheckCircle } from "lucide-react";
 import { DashboardMainContentProps } from "@/types/dashboard";
-import SERPDefensePanel from "@/components/dashboard/SERPDefensePanel";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 const DashboardMainContent = ({
@@ -36,25 +34,27 @@ const DashboardMainContent = ({
   filteredAlerts, 
   onFilterChange,
   reputationScore = 75,
-  previousScore = 70
+  previousScore = 70,
+  selectedClient,
+  clientEntities
 }: DashboardMainContentProps) => {
   // Filter for LIVE OSINT data only
-  const liveAlerts = alerts.filter(alert => 
+  const liveAlerts = alerts?.filter(alert => 
     alert.sourceType === 'osint_intelligence' || 
     alert.sourceType === 'live_alert' ||
     alert.sourceType === 'live_osint' ||
     alert.sourceType === 'live_scan'
-  );
+  ) || [];
   
-  const liveSources = sources.filter(source => 
+  const liveSources = sources?.filter(source => 
     source.type === 'osint_source' || 
     source.name?.includes('Reddit') || 
     source.name?.includes('RSS')
-  );
+  ) || [];
   
-  const liveActions = actions.filter(action => 
+  const liveActions = actions?.filter(action => 
     action.type === 'urgent' || action.type === 'monitoring' || action.type === 'response'
-  );
+  ) || [];
 
   if (loading) {
     return (
@@ -99,6 +99,18 @@ const DashboardMainContent = ({
         </TabsList>
 
         <TabsContent value="dashboard" className="space-y-6">
+          {/* Client Selection Status */}
+          {selectedClient && (
+            <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex items-center gap-2">
+                <div className="h-2 w-2 bg-blue-500 rounded-full"></div>
+                <span className="text-sm font-medium text-blue-800">
+                  Monitoring for: {selectedClient.name} • {clientEntities?.length || 0} entities tracked
+                </span>
+              </div>
+            </div>
+          )}
+
           <div className="mb-4 bg-green-50 border border-green-200 rounded-lg p-4">
             <div className="flex items-center gap-2">
               <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
@@ -153,7 +165,7 @@ const DashboardMainContent = ({
                     </div>
                   </div>
                 ) : (
-                  <ContentAlerts alerts={filteredAlerts.length > 0 ? filteredAlerts : liveAlerts} />
+                  <ContentAlerts alerts={filteredAlerts && filteredAlerts.length > 0 ? filteredAlerts : liveAlerts} />
                 )}
               </div>
             </div>
@@ -173,7 +185,6 @@ const DashboardMainContent = ({
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             <StrategicResponseEngine />
-            <SerpDefense />
           </div>
           
           <div className="mb-6">
@@ -196,16 +207,16 @@ const DashboardMainContent = ({
           </div>
         </TabsContent>
 
+        <TabsContent value="serp" className="space-y-6">
+          <SERPDefensePanel />
+        </TabsContent>
+
         <TabsContent value="threats" className="space-y-6">
           {/* Threats tab content */}
         </TabsContent>
 
         <TabsContent value="seo" className="space-y-6">
           {/* SEO Defense tab content */}
-        </TabsContent>
-
-        <TabsContent value="serp" className="space-y-6">
-          <SERPDefensePanel />
         </TabsContent>
 
         <TabsContent value="monitoring" className="space-y-6">
