@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ReactNode } from 'react';
 import { 
@@ -31,7 +32,7 @@ import {
   AlertTriangle,
   Shield
 } from 'lucide-react';
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, Link } from "react-router-dom";
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
@@ -75,8 +76,8 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     {
       label: "Dashboard",
       icon: <Home className="h-4 w-4" />,
-      href: "/",
-      active: pathname === "/",
+      href: "/dashboard",
+      active: pathname === "/dashboard",
     },
     {
       label: "Clients",
@@ -165,12 +166,14 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                 {routes.map((route) => (
                   <SidebarMenuItem key={route.href}>
                     <SidebarMenuButton
+                      asChild
                       isActive={route.active}
                       tooltip={route.label}
-                      onClick={() => navigate(route.href)}
                     >
-                      {route.icon}
-                      <span>{route.label}</span>
+                      <Link to={route.href}>
+                        {route.icon}
+                        <span>{route.label}</span>
+                      </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
