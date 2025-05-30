@@ -1,13 +1,12 @@
 
 import React, { useState } from 'react';
-import { TabsContent } from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { qaTestRunner, type QATestSuite } from '@/services/testing/qaTestRunner';
 import { toast } from 'sonner';
 import QATestHeader from './qa/QATestHeader';
 import QAOverviewCards from './qa/QAOverviewCards';
 import QACompliancePanel from './qa/QACompliancePanel';
 import QAResultsTable from './qa/QAResultsTable';
-import QAPhaseFilter from './qa/QAPhaseFilter';
 import QAInitialState from './qa/QAInitialState';
 import QARunningState from './qa/QARunningState';
 import QACriticalIssuesAlert from './qa/QACriticalIssuesAlert';
@@ -78,6 +77,18 @@ const QATestDashboard = () => {
     return testSuite.results.filter(result => result.status === 'fail');
   };
 
+  const getPhases = () => {
+    if (!testSuite) return [];
+    const phases = [...new Set(testSuite.results.map(result => result.phase))];
+    return ['all', ...phases];
+  };
+
+  const getFilteredResults = () => {
+    if (!testSuite) return [];
+    if (selectedPhase === 'all') return testSuite.results;
+    return testSuite.results.filter(result => result.phase === selectedPhase);
+  };
+
   return (
     <div className="space-y-6">
       <QATestHeader 
@@ -91,18 +102,24 @@ const QATestDashboard = () => {
           <QAOverviewCards testSuite={testSuite} />
           <QACompliancePanel testSuite={testSuite} />
 
-          <QAPhaseFilter 
-            results={testSuite.results}
-            selectedPhase={selectedPhase}
-            onPhaseChange={setSelectedPhase}
-          />
+          <Tabs value={selectedPhase} onValueChange={setSelectedPhase} className="space-y-4">
+            <TabsList className="grid w-full grid-cols-auto">
+              {getPhases().map((phase) => (
+                <TabsTrigger key={phase} value={phase} className="capitalize">
+                  {phase === 'all' ? 'All Phases' : phase}
+                </TabsTrigger>
+              ))}
+            </TabsList>
 
-          <TabsContent value={selectedPhase} className="space-y-4">
-            <QAResultsTable 
-              results={testSuite.results}
-              selectedPhase={selectedPhase}
-            />
-          </TabsContent>
+            {getPhases().map((phase) => (
+              <TabsContent key={phase} value={phase} className="space-y-4">
+                <QAResultsTable 
+                  results={getFilteredResults()}
+                  selectedPhase={selectedPhase}
+                />
+              </TabsContent>
+            ))}
+          </Tabs>
 
           <QACriticalIssuesAlert 
             criticalIssues={getCriticalIssues()}
