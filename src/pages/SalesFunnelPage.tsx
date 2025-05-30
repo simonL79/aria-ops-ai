@@ -281,7 +281,7 @@ const SalesFunnelPage = () => {
       </section>
 
       {/* Ready to Get Started CTA */}
-      <section className="py-16 bg-gray-800">
+      <section className="py-16 bg-black">
         <div className="container mx-auto px-6">
           <div className="max-w-6xl mx-auto">
             <Card className="bg-gray-900 border-gray-700 p-8 text-center">
