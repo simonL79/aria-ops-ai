@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Logo from '@/components/ui/logo';
@@ -9,7 +8,7 @@ const Footer = () => {
       <div className="container mx-auto px-6">
         <div className="flex flex-col md:flex-row justify-between items-center mb-6">
           <div className="flex items-center mb-6 md:mb-0">
-            <Logo variant="light" size="lg" />
+            <Logo variant="light" size="xl" />
           </div>
           <div className="flex flex-wrap justify-center gap-6 md:gap-8">
             <Link to="/about" className="text-premium-silver hover:text-white transition-colors">About</Link>
