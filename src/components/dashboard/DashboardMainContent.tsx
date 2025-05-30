@@ -141,7 +141,7 @@ const DashboardMainContent = ({
                   <InfoTooltip text="Reputation score calculated from live OSINT intelligence and sentiment analysis." />
                 </div>
                 <div className="flex items-center">
-                  <IntelligenceCollection />
+                  <IntelligenceCollection onDataRefresh={fetchData} />
                 </div>
               </div>
             </div>

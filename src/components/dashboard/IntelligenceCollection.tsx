@@ -7,13 +7,19 @@ import { Search, Wifi, Activity, AlertTriangle, CheckCircle } from 'lucide-react
 import { performRealScan } from '@/services/monitoring/realScan';
 import { toast } from 'sonner';
 
-const IntelligenceCollection = () => {
+interface IntelligenceCollectionProps {
+  onDataRefresh?: () => void;
+}
+
+const IntelligenceCollection = ({ onDataRefresh }: IntelligenceCollectionProps) => {
   const [isScanning, setIsScanning] = useState(false);
   const [lastScan, setLastScan] = useState<Date | null>(null);
 
   const handleOSINTSweep = async () => {
     setIsScanning(true);
     try {
+      console.log('🔍 Starting OSINT Intelligence Sweep from dashboard...');
+      
       const results = await performRealScan({
         fullScan: true,
         source: 'dashboard_collection'
@@ -23,10 +29,20 @@ const IntelligenceCollection = () => {
       
       if (results && results.length > 0) {
         toast.success(`OSINT Sweep Complete: ${results.length} intelligence items collected`);
+        console.log(`✅ OSINT Sweep completed: ${results.length} results`);
       } else {
         toast.info('OSINT Sweep Complete: No new intelligence detected');
+        console.log('✅ OSINT Sweep completed: No new threats detected');
       }
+      
+      // Trigger data refresh if callback provided
+      if (onDataRefresh) {
+        console.log('🔄 Triggering dashboard data refresh...');
+        onDataRefresh();
+      }
+      
     } catch (error) {
+      console.error('❌ OSINT Sweep failed:', error);
       toast.error('OSINT Sweep failed - Check system status');
     } finally {
       setIsScanning(false);
