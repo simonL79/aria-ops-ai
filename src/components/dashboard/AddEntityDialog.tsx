@@ -44,23 +44,40 @@ const AddEntityDialog = ({ clientId, onEntityAdded }: AddEntityDialogProps) => {
         alias: alias.trim() || null
       });
 
-      const { data, error } = await supabase
-        .from('client_entities')
-        .insert({
-          client_id: clientId,
-          entity_name: entityName.trim(),
-          entity_type: entityType,
-          alias: alias.trim() || null
-        })
-        .select();
+      // Use a direct RPC call to bypass any problematic triggers
+      const { data, error } = await supabase.rpc('insert_client_entity', {
+        p_client_id: clientId,
+        p_entity_name: entityName.trim(),
+        p_entity_type: entityType,
+        p_alias: alias.trim() || null
+      });
 
       if (error) {
-        console.error('Error adding entity:', error);
-        toast.error(`Failed to add entity: ${error.message}`);
-        return;
+        console.error('Error adding entity via RPC:', error);
+        
+        // Fallback to direct insert with minimal data
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from('client_entities')
+          .insert({
+            client_id: clientId,
+            entity_name: entityName.trim(),
+            entity_type: entityType,
+            ...(alias.trim() && { alias: alias.trim() })
+          })
+          .select()
+          .single();
+
+        if (fallbackError) {
+          console.error('Error adding entity:', fallbackError);
+          toast.error(`Failed to add entity: ${fallbackError.message}`);
+          return;
+        }
+
+        console.log('Entity added successfully (fallback):', fallbackData);
+      } else {
+        console.log('Entity added successfully (RPC):', data);
       }
 
-      console.log('Entity added successfully:', data);
       toast.success(`Entity "${entityName}" added successfully`);
       setOpen(false);
       setEntityName('');
