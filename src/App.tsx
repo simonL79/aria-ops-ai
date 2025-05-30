@@ -12,6 +12,7 @@ import OperatorConsole from "./components/operator/OperatorConsole";
 import SalesFunnelPage from "./pages/SalesFunnelPage";
 import ScanPage from "./pages/ScanPage";
 import PricingPage from "./pages/PricingPage";
+import PaymentPage from "./pages/PaymentPage";
 import AboutPage from "./pages/AboutPage";
 import BlogPage from "./pages/BlogPage";
 import BlogPostPage from "./pages/BlogPostPage";
@@ -35,6 +36,7 @@ const App = () => (
           <Route path="/scan" element={<ScanPage />} />
           <Route path="/thank-you" element={<ThankYouPage />} />
           <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/payment" element={<PaymentPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/blog" element={<BlogPage />} />
           <Route path="/blog/:slug" element={<BlogPostPage />} />

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import PublicLayout from "@/components/layout/PublicLayout";
 import { Button } from "@/components/ui/button";
@@ -43,7 +42,7 @@ const PricingPage = () => {
                     </li>
                   </ul>
                   <Button asChild className="w-full bg-orange-500 hover:bg-orange-600 text-white">
-                    <Link to="/auth">Get Started</Link>
+                    <Link to="/payment">Get Started</Link>
                   </Button>
                 </CardContent>
               </Card>
@@ -80,7 +79,7 @@ const PricingPage = () => {
                     </li>
                   </ul>
                   <Button asChild className="w-full bg-orange-500 hover:bg-orange-600 text-white">
-                    <Link to="/auth">Get Started</Link>
+                    <Link to="/payment">Get Started</Link>
                   </Button>
                 </CardContent>
               </Card>
