@@ -68,7 +68,7 @@ const SalesFunnelPage = () => {
               <h1 className="text-5xl lg:text-6xl font-bold leading-tight mb-6">
                 Elevate Your
                 <br />
-                <span className="text-white">Digital Reputation</span>
+                <span className="text-orange-500">Digital</span> <span className="text-white">Reputation</span>
               </h1>
               <p className="text-gray-300 text-lg mb-8 max-w-lg mx-auto">
                 Enterprise-grade reputation intelligence and crisis prevention. Powered by AI, delivered by experts who understand the stakes.
@@ -85,26 +85,26 @@ const SalesFunnelPage = () => {
             </div>
             
             {/* Ratings */}
-            <div className="space-y-3">
-              <div className="flex items-center justify-center space-x-2">
+            <div className="space-y-6">
+              <div className="flex flex-col items-center justify-center space-y-2">
+                <span className="text-sm text-gray-300">Rated Excellent on Trustpilot</span>
                 <div className="flex">
                   {[1,2,3,4,5].map((star) => (
                     <Star key={star} className="w-4 h-4 fill-green-500 text-green-500" />
                   ))}
                 </div>
-                <span className="text-sm text-gray-300">Rated Excellent on Trustpilot</span>
+                <p className="text-xs text-gray-400 text-center">Based on 247+ reviews</p>
               </div>
-              <p className="text-xs text-gray-400 text-center">Based on 247+ reviews</p>
               
-              <div className="flex items-center justify-center space-x-2">
+              <div className="flex flex-col items-center justify-center space-y-2">
+                <span className="text-sm text-gray-300">5.0 Stars on Google Reviews</span>
                 <div className="flex">
                   {[1,2,3,4,5].map((star) => (
                     <Star key={star} className="w-4 h-4 fill-blue-400 text-blue-400" />
                   ))}
                 </div>
-                <span className="text-sm text-gray-300">5.0 Stars on Google Reviews</span>
+                <p className="text-xs text-gray-400 text-center">Verified business reviews</p>
               </div>
-              <p className="text-xs text-gray-400 text-center">Verified business reviews</p>
             </div>
           </div>
           
