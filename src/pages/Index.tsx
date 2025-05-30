@@ -177,20 +177,20 @@ const Index = () => {
       {/* Trust Indicators */}
       <section className="py-16 px-6 border-t border-gray-800/50">
         <div className="container mx-auto max-w-6xl">
-          <p className="text-center text-gray-400 mb-12 text-lg">Trusted by Industry Leaders</p>
+          <p className="text-center text-gray-400 mb-12 text-lg">Trusted Across Industries</p>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-8 items-center opacity-60">
             {[
-              { name: "Goldman Sachs", logo: "GS" },
-              { name: "Deloitte", logo: "D" },
-              { name: "Microsoft", logo: "MS" },
-              { name: "HSBC", logo: "H" },
-              { name: "General Motors", logo: "GM" }
-            ].map((company, index) => (
+              { name: "Investment Banking", logo: "IB" },
+              { name: "Professional Services", logo: "PS" },
+              { name: "Technology", logo: "TC" },
+              { name: "Financial Services", logo: "FS" },
+              { name: "Automotive", logo: "AU" }
+            ].map((industry, index) => (
               <div key={index} className="text-center">
                 <div className="w-16 h-16 mx-auto mb-3 bg-gray-800 rounded-lg flex items-center justify-center text-white font-bold text-lg">
-                  {company.logo}
+                  {industry.logo}
                 </div>
-                <p className="text-sm text-gray-400">{company.name}</p>
+                <p className="text-sm text-gray-400">{industry.name}</p>
               </div>
             ))}
           </div>
@@ -260,15 +260,13 @@ const Index = () => {
                 quote: "ARIA's intelligence platform helped us identify and neutralize a coordinated attack before it reached mainstream media. Their proactive approach saved our IPO.",
                 author: "Sarah Chen",
                 role: "Chief Communications Officer",
-                company: "Fortune 500 Technology Company",
-                image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=80&h=80&fit=crop&crop=face"
+                company: "Fortune 500 Technology Company"
               },
               {
                 quote: "The depth of their analysis and speed of response is unmatched. They don't just monitor - they predict and prevent. Essential for any serious organization.",
                 author: "Michael Rodriguez",
                 role: "Head of Corporate Affairs", 
-                company: "Global Financial Services",
-                image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face"
+                company: "Global Financial Services"
               }
             ].map((testimonial, index) => (
               <Card key={index} className="bg-[#111214] border-gray-800 p-8">
@@ -281,11 +279,9 @@ const Index = () => {
                   "{testimonial.quote}"
                 </blockquote>
                 <div className="flex items-center gap-4">
-                  <img 
-                    src={testimonial.image} 
-                    alt={testimonial.author}
-                    className="w-12 h-12 rounded-full"
-                  />
+                  <div className="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center text-white font-semibold">
+                    {testimonial.author.charAt(0)}
+                  </div>
                   <div>
                     <p className="font-semibold text-white">{testimonial.author}</p>
                     <p className="text-sm text-gray-400">{testimonial.role}</p>
