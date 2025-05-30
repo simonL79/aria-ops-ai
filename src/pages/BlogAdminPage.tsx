@@ -1,11 +1,9 @@
 
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
 import PublicLayout from '@/components/layout/PublicLayout';
 import BlogAdminPanel from '@/components/blog/BlogAdminPanel';
 import MediumImportButton from '@/components/blog/MediumImportButton';
-import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Mail, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -67,11 +65,6 @@ const BlogAdminPage = () => {
   
   return (
     <PublicLayout>
-      <Helmet>
-        <title>Blog Administration - A.R.I.A™</title>
-        <meta name="robots" content="noindex, nofollow" />
-      </Helmet>
-      
       <div className="container mx-auto px-4 py-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
           <h1 className="text-3xl font-bold">Blog Administration</h1>
