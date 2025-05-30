@@ -41,7 +41,7 @@ const QAResultsTable = ({ results, selectedPhase }: QAResultsTableProps) => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-3">
+        <div className="space-y-4">
           {getFilteredResults().map((result, index) => (
             <QAResultItem key={index} result={result} index={index} />
           ))}

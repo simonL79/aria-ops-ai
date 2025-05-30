@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { 
   CheckCircle, 
   XCircle, 
@@ -40,6 +41,17 @@ const QAResultItem = ({ result, index }: QAResultItemProps) => {
     }
   };
 
+  const getButtonVariant = (status: 'pass' | 'fail' | 'warning') => {
+    switch (status) {
+      case 'pass':
+        return 'outline';
+      case 'fail':
+        return 'destructive';
+      case 'warning':
+        return 'secondary';
+    }
+  };
+
   const getDataSourceIcon = (dataSource?: 'live' | 'none') => {
     if (dataSource === 'live') {
       return <Database className="h-3 w-3 text-green-600" />;
@@ -50,48 +62,54 @@ const QAResultItem = ({ result, index }: QAResultItemProps) => {
   };
 
   return (
-    <div key={index} className="flex items-start justify-between p-3 border rounded-lg">
-      <div className="flex items-start gap-3">
-        {getStatusIcon(result.status)}
-        <div className="flex-1">
-          <h4 className="font-medium flex items-center gap-2">
-            {result.testName}
-            {getDataSourceIcon(result.dataSource)}
-            {result.gdprCompliant !== undefined && (
-              <Shield className={`h-3 w-3 ${result.gdprCompliant ? 'text-blue-600' : 'text-red-600'}`} />
-            )}
-          </h4>
-          <p className="text-sm text-muted-foreground mt-1">
-            {result.message}
-          </p>
-          <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
-            <Clock className="h-3 w-3" />
-            {result.timestamp.toLocaleTimeString()}
-            <span>•</span>
-            <span>{result.phase}</span>
-            {result.dataSource && (
-              <>
-                <span>•</span>
-                <span className={result.dataSource === 'live' ? 'text-green-600' : 'text-gray-500'}>
-                  {result.dataSource === 'live' ? 'Live Data' : 'No Data'}
-                </span>
-              </>
-            )}
+    <Button
+      variant={getButtonVariant(result.status)}
+      className="w-full h-auto p-4 justify-start text-left hover:scale-[1.02] transition-all duration-200"
+      asChild
+    >
+      <div className="flex items-start justify-between w-full">
+        <div className="flex items-start gap-3 flex-1">
+          {getStatusIcon(result.status)}
+          <div className="flex-1 min-w-0">
+            <h4 className="font-medium flex items-center gap-2 mb-1">
+              {result.testName}
+              {getDataSourceIcon(result.dataSource)}
+              {result.gdprCompliant !== undefined && (
+                <Shield className={`h-3 w-3 ${result.gdprCompliant ? 'text-blue-600' : 'text-red-600'}`} />
+              )}
+            </h4>
+            <p className="text-sm text-muted-foreground mb-2">
+              {result.message}
+            </p>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Clock className="h-3 w-3" />
+              {result.timestamp.toLocaleTimeString()}
+              <span>•</span>
+              <span>{result.phase}</span>
+              {result.dataSource && (
+                <>
+                  <span>•</span>
+                  <span className={result.dataSource === 'live' ? 'text-green-600' : 'text-gray-500'}>
+                    {result.dataSource === 'live' ? 'Live Data' : 'No Data'}
+                  </span>
+                </>
+              )}
+            </div>
           </div>
         </div>
-      </div>
-      
-      <div className="flex flex-col items-end gap-1">
-        <Badge className={getStatusColor(result.status)}>
-          {result.status}
-        </Badge>
-        {result.gdprCompliant !== undefined && (
-          <Badge variant="outline" className={result.gdprCompliant ? 'text-blue-600' : 'text-red-600'}>
-            {result.gdprCompliant ? 'GDPR ✓' : 'GDPR ✗'}
+        
+        <div className="flex flex-col items-end gap-2 ml-4">
+          <Badge className={getStatusColor(result.status)}>
+            {result.status}
           </Badge>
-        )}
+          {result.gdprCompliant !== undefined && (
+            <Badge variant="outline" className={result.gdprCompliant ? 'text-blue-600 border-blue-200' : 'text-red-600 border-red-200'}>
+              {result.gdprCompliant ? 'GDPR ✓' : 'GDPR ✗'}
+            </Badge>
+          )}
+        </div>
       </div>
-    </div>
+    </Button>
   );
 };
 
