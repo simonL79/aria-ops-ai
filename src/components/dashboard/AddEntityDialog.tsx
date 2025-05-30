@@ -44,14 +44,21 @@ const AddEntityDialog = ({ clientId, onEntityAdded }: AddEntityDialogProps) => {
         alias: alias.trim() || null
       });
 
+      // Use a more explicit insert structure to avoid trigger issues
+      const insertData: any = {
+        client_id: clientId,
+        entity_name: entityName.trim(),
+        entity_type: entityType
+      };
+
+      // Only add alias if it's not empty
+      if (alias.trim()) {
+        insertData.alias = alias.trim();
+      }
+
       const { data, error } = await supabase
         .from('client_entities')
-        .insert({
-          client_id: clientId,
-          entity_name: entityName.trim(),
-          entity_type: entityType,
-          ...(alias.trim() && { alias: alias.trim() })
-        })
+        .insert(insertData)
         .select()
         .single();
 
