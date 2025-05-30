@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -13,9 +14,11 @@ import {
   CheckCircle,
   Activity,
   Brain,
-  Zap
+  Zap,
+  RefreshCw
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface SigmaIntelligencePanelProps {
   entityName?: string;
@@ -58,10 +61,76 @@ const SigmaIntelligencePanel = ({ entityName }: SigmaIntelligencePanelProps) => 
   const [fixPaths, setFixPaths] = useState<FixPath[]>([]);
   const [actionTriggers, setActionTriggers] = useState<ActionTrigger[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isGeneratingLiveData, setIsGeneratingLiveData] = useState(false);
 
   useEffect(() => {
     loadSigmaData();
+    // Auto-refresh every 30 seconds
+    const interval = setInterval(loadSigmaData, 30000);
+    return () => clearInterval(interval);
   }, [entityName]);
+
+  const triggerLiveSigmaScan = async () => {
+    setIsGeneratingLiveData(true);
+    try {
+      console.log('🔍 Triggering live SIGMA scan...');
+      toast.info('A.R.I.A™ SIGMA: Initiating live intelligence scan...', {
+        description: 'Scanning Reddit, News feeds, and Forums for live threats'
+      });
+
+      // Call SIGMA live scanner
+      const { data: sigmaData, error: sigmaError } = await supabase.functions.invoke('sigmalive', {
+        body: { 
+          entity: entityName || 'general_threats',
+          keywords: ['scandal', 'controversy', 'investigation', 'lawsuit'],
+          depth: 3,
+          generateProfile: true
+        }
+      });
+
+      if (sigmaError) {
+        console.error('SIGMA scan error:', sigmaError);
+        toast.error('SIGMA scan failed', { description: sigmaError.message });
+      } else {
+        console.log('✅ SIGMA scan completed:', sigmaData);
+        toast.success('SIGMA scan completed', {
+          description: `${sigmaData.scan_results || 0} live threats analyzed`
+        });
+      }
+
+      // Generate AI fix paths for any threats found
+      if (sigmaData?.threat_profile) {
+        console.log('🔧 Generating AI fix paths...');
+        const { data: fixData, error: fixError } = await supabase.functions.invoke('fixpath-ai', {
+          body: {
+            entity: sigmaData.threat_profile.entity_name,
+            threatLevel: sigmaData.threat_profile.threat_level,
+            riskScore: sigmaData.threat_profile.risk_score,
+            threatContext: `Live SIGMA intelligence detected: ${sigmaData.threat_profile.signature_match}`,
+            generateActions: true
+          }
+        });
+
+        if (fixError) {
+          console.error('Fix path generation error:', fixError);
+        } else {
+          console.log('✅ AI fix paths generated:', fixData);
+          toast.success('AI Fix Paths generated', {
+            description: `${fixData.steps?.length || 0} tactical steps created`
+          });
+        }
+      }
+
+      // Reload data after generating
+      await loadSigmaData();
+      
+    } catch (error) {
+      console.error('Live scan error:', error);
+      toast.error('Live scan failed', { description: 'Check console for details' });
+    } finally {
+      setIsGeneratingLiveData(false);
+    }
+  };
 
   const loadSigmaData = async () => {
     setIsLoading(true);
@@ -89,7 +158,6 @@ const SigmaIntelligencePanel = ({ entityName }: SigmaIntelligencePanelProps) => 
 
       setThreatProfiles(profiles || []);
       
-      // Fix the type conversion for fix paths
       const typedFixPaths = (paths || []).map(path => ({
         ...path,
         steps: Array.isArray(path.steps) ? path.steps : []
@@ -97,6 +165,10 @@ const SigmaIntelligencePanel = ({ entityName }: SigmaIntelligencePanelProps) => 
       setFixPaths(typedFixPaths);
       
       setActionTriggers(triggers || []);
+
+      // Log current data state
+      console.log(`📊 SIGMA Data Loaded: ${profiles?.length || 0} threats, ${paths?.length || 0} fix paths, ${triggers?.length || 0} actions`);
+      
     } catch (error) {
       console.error('Error loading SIGMA data:', error);
     } finally {
@@ -145,7 +217,7 @@ const SigmaIntelligencePanel = ({ entityName }: SigmaIntelligencePanelProps) => 
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
             <div className="bg-[#0A0B0D] p-4 rounded">
               <div className="text-2xl font-bold text-purple-400">{threatProfiles.length}</div>
               <div className="text-sm text-gray-300">Threat Profiles</div>
@@ -163,23 +235,81 @@ const SigmaIntelligencePanel = ({ entityName }: SigmaIntelligencePanelProps) => 
               <div className="text-sm text-gray-300">Actions Pending</div>
             </div>
           </div>
+          
+          {/* Live Data Generation Controls */}
+          <div className="flex gap-4">
+            <Button
+              onClick={triggerLiveSigmaScan}
+              disabled={isGeneratingLiveData}
+              className="bg-purple-600 hover:bg-purple-700 text-white"
+            >
+              {isGeneratingLiveData ? (
+                <>
+                  <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                  Generating Live Intelligence...
+                </>
+              ) : (
+                <>
+                  <Zap className="mr-2 h-4 w-4" />
+                  Generate Live SIGMA Intelligence
+                </>
+              )}
+            </Button>
+            
+            <Button
+              onClick={loadSigmaData}
+              variant="outline"
+              className="border-gray-600 text-gray-300 hover:bg-gray-800"
+            >
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Refresh Data
+            </Button>
+          </div>
         </CardContent>
       </Card>
 
-      {/* Threat Profiles */}
-      <Card className="bg-[#1A1B1E] border-red-600/30">
-        <CardHeader>
-          <CardTitle className="text-red-400 flex items-center gap-2">
-            <Target className="h-5 w-5" />
-            Live Threat Profiles ({threatProfiles.length})
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {threatProfiles.length === 0 ? (
-            <div className="text-center py-8 text-gray-400">
-              No threat profiles generated yet
+      {/* Show message if no data */}
+      {threatProfiles.length === 0 && fixPaths.length === 0 && actionTriggers.length === 0 && (
+        <Card className="bg-[#1A1B1E] border-yellow-600/30">
+          <CardContent className="py-8">
+            <div className="text-center">
+              <Brain className="h-16 w-16 text-yellow-400 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-white mb-2">No Live Intelligence Data Yet</h3>
+              <p className="text-gray-400 mb-4">
+                Click "Generate Live SIGMA Intelligence" to start collecting real-time threat data from Reddit, news feeds, and forums.
+              </p>
+              <Button
+                onClick={triggerLiveSigmaScan}
+                disabled={isGeneratingLiveData}
+                className="bg-purple-600 hover:bg-purple-700 text-white"
+              >
+                {isGeneratingLiveData ? (
+                  <>
+                    <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                    Scanning Live Sources...
+                  </>
+                ) : (
+                  <>
+                    <Zap className="mr-2 h-4 w-4" />
+                    Start Live SIGMA Scan
+                  </>
+                )}
+              </Button>
             </div>
-          ) : (
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Threat Profiles */}
+      {threatProfiles.length > 0 && (
+        <Card className="bg-[#1A1B1E] border-red-600/30">
+          <CardHeader>
+            <CardTitle className="text-red-400 flex items-center gap-2">
+              <Target className="h-5 w-5" />
+              Live Threat Profiles ({threatProfiles.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
             <div className="space-y-4">
               {threatProfiles.map((profile) => (
                 <div key={profile.id} className="bg-[#0A0B0D] p-4 rounded border border-gray-700">
@@ -239,24 +369,20 @@ const SigmaIntelligencePanel = ({ entityName }: SigmaIntelligencePanelProps) => 
                 </div>
               ))}
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
       {/* AI Fix Paths */}
-      <Card className="bg-[#1A1B1E] border-blue-600/30">
-        <CardHeader>
-          <CardTitle className="text-blue-400 flex items-center gap-2">
-            <Wrench className="h-5 w-5" />
-            AI-Generated Fix Paths ({fixPaths.length})
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {fixPaths.length === 0 ? (
-            <div className="text-center py-8 text-gray-400">
-              No AI fix paths generated yet
-            </div>
-          ) : (
+      {fixPaths.length > 0 && (
+        <Card className="bg-[#1A1B1E] border-blue-600/30">
+          <CardHeader>
+            <CardTitle className="text-blue-400 flex items-center gap-2">
+              <Wrench className="h-5 w-5" />
+              AI-Generated Fix Paths ({fixPaths.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
             <div className="space-y-4">
               {fixPaths.map((fixPath) => (
                 <div key={fixPath.id} className="bg-[#0A0B0D] p-4 rounded border border-gray-700">
@@ -302,24 +428,20 @@ const SigmaIntelligencePanel = ({ entityName }: SigmaIntelligencePanelProps) => 
                 </div>
               ))}
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Action Triggers */}
-      <Card className="bg-[#1A1B1E] border-green-600/30">
-        <CardHeader>
-          <CardTitle className="text-green-400 flex items-center gap-2">
-            <Zap className="h-5 w-5" />
-            Action Triggers ({actionTriggers.length})
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {actionTriggers.length === 0 ? (
-            <div className="text-center py-8 text-gray-400">
-              No action triggers created yet
-            </div>
-          ) : (
+      {actionTriggers.length > 0 && (
+        <Card className="bg-[#1A1B1E] border-green-600/30">
+          <CardHeader>
+            <CardTitle className="text-green-400 flex items-center gap-2">
+              <Zap className="h-5 w-5" />
+              Action Triggers ({actionTriggers.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
             <div className="space-y-3">
               {actionTriggers.slice(0, 10).map((trigger) => (
                 <div key={trigger.id} className="bg-[#0A0B0D] p-3 rounded border border-gray-700">
@@ -337,20 +459,9 @@ const SigmaIntelligencePanel = ({ entityName }: SigmaIntelligencePanelProps) => 
                 </div>
               ))}
             </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Refresh Button */}
-      <div className="text-center">
-        <Button
-          onClick={loadSigmaData}
-          className="bg-purple-600 hover:bg-purple-700 text-white"
-        >
-          <Eye className="mr-2 h-4 w-4" />
-          Refresh SIGMA Intelligence
-        </Button>
-      </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
