@@ -1,4 +1,6 @@
+
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import ReputationScore from "@/components/dashboard/ReputationScore";
 import ContentAlerts from "@/components/dashboard/ContentAlerts";
 import SourceOverview from "@/components/dashboard/SourceOverview";
@@ -38,6 +40,8 @@ const DashboardMainContent = ({
   selectedClient,
   clientEntities
 }: DashboardMainContentProps) => {
+  const navigate = useNavigate();
+
   // Filter for LIVE OSINT data only
   const liveAlerts = alerts?.filter(alert => 
     alert.sourceType === 'osint_intelligence' || 
@@ -90,12 +94,12 @@ const DashboardMainContent = ({
       <Tabs defaultValue="dashboard" className="space-y-6">
         <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-          <TabsTrigger value="threats">Threats</TabsTrigger>
-          <TabsTrigger value="seo">SEO Defense</TabsTrigger>
+          <TabsTrigger value="threats" onClick={() => navigate('/threats')}>Threats</TabsTrigger>
+          <TabsTrigger value="seo" onClick={() => navigate('/seo-center')}>SEO Defense</TabsTrigger>
           <TabsTrigger value="serp">SERP Defense</TabsTrigger>
-          <TabsTrigger value="monitoring">Monitoring</TabsTrigger>
-          <TabsTrigger value="reports">Reports</TabsTrigger>
-          <TabsTrigger value="settings">Settings</TabsTrigger>
+          <TabsTrigger value="monitoring" onClick={() => navigate('/monitoring')}>Monitoring</TabsTrigger>
+          <TabsTrigger value="reports" onClick={() => navigate('/reports')}>Reports</TabsTrigger>
+          <TabsTrigger value="settings" onClick={() => navigate('/settings')}>Settings</TabsTrigger>
         </TabsList>
 
         <TabsContent value="dashboard" className="space-y-6">
@@ -209,26 +213,6 @@ const DashboardMainContent = ({
 
         <TabsContent value="serp" className="space-y-6">
           <SERPDefensePanel />
-        </TabsContent>
-
-        <TabsContent value="threats" className="space-y-6">
-          {/* Threats tab content */}
-        </TabsContent>
-
-        <TabsContent value="seo" className="space-y-6">
-          {/* SEO Defense tab content */}
-        </TabsContent>
-
-        <TabsContent value="monitoring" className="space-y-6">
-          {/* Monitoring tab content */}
-        </TabsContent>
-
-        <TabsContent value="reports" className="space-y-6">
-          {/* Reports tab content */}
-        </TabsContent>
-
-        <TabsContent value="settings" className="space-y-6">
-          {/* Settings tab content */}
         </TabsContent>
       </Tabs>
     </div>

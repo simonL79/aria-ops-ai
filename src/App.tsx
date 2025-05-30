@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -28,6 +27,12 @@ import SimonLindsayPage from "./pages/SimonLindsayPage";
 import Contact from "./pages/Contact";
 import ContactInquiries from "./pages/ContactInquiries";
 import NotFound from "./pages/NotFound";
+import SeoCenterPage from "./pages/SeoCenterPage";
+import ReportsPage from "./pages/ReportsPage";
+import Discovery from "./pages/Discovery";
+import EideticPage from "./pages/EideticPage";
+import ThreatsPage from "./pages/ThreatsPage";
+import MonitoringPage from "./pages/MonitoringPage";
 import "./App.css";
 
 const queryClient = new QueryClient();
@@ -59,6 +64,12 @@ const App = () => (
           <Route path="/simon-lindsay" element={<SimonLindsayPage />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/contact-inquiries" element={<ContactInquiries />} />
+          <Route path="/seo-center" element={<SeoCenterPage />} />
+          <Route path="/reports" element={<ReportsPage />} />
+          <Route path="/discovery" element={<Discovery />} />
+          <Route path="/eidetic" element={<EideticPage />} />
+          <Route path="/threats" element={<ThreatsPage />} />
+          <Route path="/monitoring" element={<MonitoringPage />} />
           <Route path="/admin/*" element={<AdminDashboard />} />
           <Route path="/anubis-gpt" element={<AnubisGPTCockpit />} />
           <Route path="/operator-console" element={<OperatorConsole />} />
