@@ -7,6 +7,14 @@ import { supabase } from "@/integrations/supabase/client";
  * All functions fetch real live intelligence data from OSINT sources
  */
 
+// Helper function to convert numeric sentiment to string label
+const getSentimentLabel = (score: number): 'positive' | 'neutral' | 'negative' | 'threatening' => {
+  if (score > 0.2) return 'positive';
+  if (score < -0.4) return 'threatening';
+  if (score < -0.1) return 'negative';
+  return 'neutral';
+};
+
 // Function to fetch real alerts from live OSINT database only
 export const fetchRealAlerts = async (): Promise<ContentAlert[]> => {
   try {
@@ -40,7 +48,7 @@ export const fetchRealAlerts = async (): Promise<ContentAlert[]> => {
       threatType: item.threat_type,
       confidenceScore: item.confidence_score,
       sourceType: item.source_type,
-      sentiment: item.sentiment > 0 ? 'positive' : item.sentiment < 0 ? 'negative' : 'neutral',
+      sentiment: getSentimentLabel(item.sentiment || 0),
       potentialReach: item.potential_reach,
       detectedEntities: Array.isArray(item.detected_entities) ? item.detected_entities.map(String) : [],
       url: item.url

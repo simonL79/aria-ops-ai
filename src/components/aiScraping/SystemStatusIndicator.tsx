@@ -35,9 +35,9 @@ const SystemStatusIndicator = ({ isLive = true }: SystemStatusIndicatorProps) =>
         const aiScanningStatus = await getAiScanningStatus();
         
         setStatsData({
-          platformsMonitored: monitoringStatus?.sourcesCount || monitoringStatus?.sources || 0,
+          platformsMonitored: Number(monitoringStatus?.sourcesCount || monitoringStatus?.sources || 0),
           threatModelsActive: 4, // Simplified for demo - would come from real threat models count
-          activeSources: ('platforms' in aiScanningStatus) ? aiScanningStatus.platforms : 0,
+          activeSources: Number(('platforms' in aiScanningStatus) ? aiScanningStatus.platforms : 0),
           lastScanTime: monitoringStatus?.lastRun ? new Date(monitoringStatus.lastRun).toLocaleTimeString() : 'N/A'
         });
         

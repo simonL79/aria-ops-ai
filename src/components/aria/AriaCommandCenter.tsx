@@ -179,7 +179,12 @@ const AriaCommandCenter = () => {
       else if (riskScore >= 0.6) threatLevel = 'high';
       else if (riskScore >= 0.3) threatLevel = 'moderate';
 
-      const platforms = [...new Set(liveResults.map(t => t.platform).filter(Boolean))];
+      // Safely extract platforms with type filtering
+      const platforms = [...new Set(
+        liveResults
+          .filter((t): t is { platform: string } => typeof t.platform === 'string')
+          .map(t => t.platform)
+      )];
       
       const profile: ThreatProfile = {
         entity_name: entityName,
