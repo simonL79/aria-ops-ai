@@ -1,5 +1,4 @@
 
-
 import React from "react";
 import { useAuth } from "@/hooks/useAuth";
 import AdminDashboardWelcome from "@/components/salesFunnel/AdminDashboardWelcome";
@@ -141,7 +140,7 @@ const SalesFunnelPage = () => {
       {/* Trusted Across Industries Section */}
       <section className="py-8 bg-black">
         <div className="container mx-auto px-6 text-center">
-          <h3 className="text-xl font-bold text-gray-300 mb-8">Trusted Across Industries</h3>
+          <h3 className="text-2xl font-bold text-gray-300 mb-8">Trusted Across Industries</h3>
           <div className="grid grid-cols-5 gap-8 items-center">
             {industries.map((industry, index) => (
               <div key={index} className="text-center">
@@ -176,11 +175,11 @@ const SalesFunnelPage = () => {
                 <Shield className="w-8 h-8 text-orange-500 mr-3" />
                 <h3 className="text-xl font-bold text-orange-500">Social Media Protection</h3>
               </div>
-              <p className="text-gray-300 mb-4">
+              <p className="text-gray-300 mb-4 text-center">
                 <strong>Ideal for:</strong> Everyday users, community leaders, students, professionals
               </p>
               <div className="space-y-3 mb-6">
-                <div className="text-sm font-semibold text-white">What We Do</div>
+                <div className="text-sm font-semibold text-white text-center">What We Do</div>
                 <div className="flex items-center text-sm text-gray-300 justify-center">
                   <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
                   Monitor threats across X (Twitter), Reddit, TikTok, and Instagram
@@ -199,8 +198,8 @@ const SalesFunnelPage = () => {
                 </div>
               </div>
               <div className="bg-gray-900 border border-gray-600 rounded-lg p-4">
-                <div className="text-sm font-semibold text-white mb-2">Why It Matters</div>
-                <p className="text-xs text-gray-400">
+                <div className="text-sm font-semibold text-white mb-2 text-center">Why It Matters</div>
+                <p className="text-xs text-gray-400 text-center">
                   Your digital footprint should reflect who you are today — not mistakes, rumors, or misinformation from years ago.
                 </p>
               </div>
@@ -212,11 +211,11 @@ const SalesFunnelPage = () => {
                 <Eye className="w-8 h-8 text-orange-500 mr-3" />
                 <h3 className="text-xl font-bold text-orange-500">Influencer & Creator Shield</h3>
               </div>
-              <p className="text-gray-300 mb-4">
+              <p className="text-gray-300 mb-4 text-center">
                 <strong>Ideal for:</strong> Influencers, streamers, YouTubers, TikTokers, OnlyFans creators, podcasters
               </p>
               <div className="space-y-3 mb-6">
-                <div className="text-sm font-semibold text-white">What We Do</div>
+                <div className="text-sm font-semibold text-white text-center">What We Do</div>
                 <div className="flex items-center text-sm text-gray-300 justify-center">
                   <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
                   Real-time crisis monitoring when content goes viral
@@ -235,8 +234,8 @@ const SalesFunnelPage = () => {
                 </div>
               </div>
               <div className="bg-gray-900 border border-gray-600 rounded-lg p-4">
-                <div className="text-sm font-semibold text-white mb-2">Why It Matters</div>
-                <p className="text-xs text-gray-400">
+                <div className="text-sm font-semibold text-white mb-2 text-center">Why It Matters</div>
+                <p className="text-xs text-gray-400 text-center">
                   One viral moment shouldn't define your career. A.R.I.A™ helps you stay ahead of cancel culture, hate mobs, and false narratives.
                 </p>
               </div>
@@ -248,11 +247,11 @@ const SalesFunnelPage = () => {
                 <Users className="w-8 h-8 text-orange-500 mr-3" />
                 <h3 className="text-xl font-bold text-orange-500">Everyday People Protection</h3>
               </div>
-              <p className="text-gray-300 mb-4">
+              <p className="text-gray-300 mb-4 text-center">
                 <strong>Ideal for:</strong> Teachers, nurses, founders, job-seekers, private citizens
               </p>
               <div className="space-y-3 mb-6">
-                <div className="text-sm font-semibold text-white">What We Do</div>
+                <div className="text-sm font-semibold text-white text-center">What We Do</div>
                 <div className="flex items-center text-sm text-gray-300 justify-center">
                   <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
                   Search engine cleanup of harmful results
@@ -271,8 +270,8 @@ const SalesFunnelPage = () => {
                 </div>
               </div>
               <div className="bg-gray-900 border border-gray-600 rounded-lg p-4">
-                <div className="text-sm font-semibold text-white mb-2">Why It Matters</div>
-                <p className="text-xs text-gray-400">
+                <div className="text-sm font-semibold text-white mb-2 text-center">Why It Matters</div>
+                <p className="text-xs text-gray-400 text-center">
                   You don't need to be "famous" to be vulnerable. If you've ever Googled yourself and felt uneasy, we're here for you.
                 </p>
               </div>
@@ -283,14 +282,18 @@ const SalesFunnelPage = () => {
 
       {/* Ready to Get Started CTA */}
       <section className="py-16 bg-gray-800">
-        <div className="container mx-auto px-6 text-center">
-          <h2 className="text-3xl font-bold mb-4">Ready to Get Started?</h2>
-          <p className="text-gray-300 mb-8">
-            Get a comprehensive assessment of your digital risk profile and strategic roadmap.
-          </p>
-          <Button className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 text-lg font-semibold rounded-md">
-            Request Risk Assessment
-          </Button>
+        <div className="container mx-auto px-6">
+          <div className="max-w-6xl mx-auto">
+            <Card className="bg-gray-900 border-gray-700 p-8 text-center">
+              <h2 className="text-3xl font-bold mb-4">Ready to Get Started?</h2>
+              <p className="text-gray-300 mb-8">
+                Get a comprehensive assessment of your digital risk profile and strategic roadmap.
+              </p>
+              <Button className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 text-lg font-semibold rounded-md">
+                Request Risk Assessment
+              </Button>
+            </Card>
+          </div>
         </div>
       </section>
 
@@ -457,4 +460,3 @@ const SalesFunnelPage = () => {
 };
 
 export default SalesFunnelPage;
-
