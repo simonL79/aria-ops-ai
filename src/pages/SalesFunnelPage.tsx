@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useAuth } from "@/hooks/useAuth";
 import AdminDashboardWelcome from "@/components/salesFunnel/AdminDashboardWelcome";
@@ -79,6 +78,14 @@ const SalesFunnelPage = () => {
                 Learn More
               </Button>
             </div>
+
+            {/* Trusted to Protect Button */}
+            <div className="pt-4">
+              <Button className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 text-xl font-bold rounded-md flex items-center">
+                <Shield className="mr-3 h-6 w-6" />
+                Trusted to Protect
+              </Button>
+            </div>
             
             {/* Ratings */}
             <div className="space-y-3">
@@ -112,9 +119,6 @@ const SalesFunnelPage = () => {
                 alt="Professional executive portrait"
                 className="w-full max-w-md mx-auto rounded-lg"
               />
-              <Button className="absolute bottom-4 right-4 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md">
-                Schedule 1:1 Briefing
-              </Button>
             </div>
           </div>
         </div>
