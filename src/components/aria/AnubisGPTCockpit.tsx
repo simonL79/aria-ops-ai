@@ -6,13 +6,14 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Shield, Brain, Zap, MessageSquare, Target, Lock, Mic, Send, Volume2, VolumeX } from 'lucide-react';
+import { Shield, Brain, Zap, MessageSquare, Target, Lock, Mic, Send, Volume2, VolumeX, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import VoiceCommandButton from './VoiceCommandButton';
 import { useVoiceCommand } from '@/hooks/useVoiceCommand';
 import { getVoiceLogs, VoiceLogEntry } from '@/services/aria/voiceLogService';
+import { anubisService } from '@/services/aria/anubisService';
 
 interface ChatMessage {
   id: string;
@@ -46,6 +47,7 @@ const AnubisGPTCockpit = () => {
   });
   const [loading, setLoading] = useState(false);
   const [diagnosticsRunning, setDiagnosticsRunning] = useState(false);
+  const [diagnosticsError, setDiagnosticsError] = useState<string | null>(null);
 
   useEffect(() => {
     if (isAdmin) {
@@ -138,22 +140,46 @@ const AnubisGPTCockpit = () => {
 
   const runEnhancedDiagnostics = async () => {
     setDiagnosticsRunning(true);
+    setDiagnosticsError(null);
+    
     try {
+      console.log('🔍 Starting enhanced A.R.I.A™ diagnostics...');
+      
+      // Try the database function first
       const { data, error } = await supabase.rpc('admin_trigger_anubis');
       
       if (error) {
-        console.error('Error running diagnostics:', error);
-        toast.error(error.message.includes('Access denied') 
-          ? 'Access denied: Admin privileges required' 
-          : 'Diagnostics failed');
+        console.error('Database function error:', error);
+        
+        // If database function fails, fall back to service-based diagnostics
+        console.log('⚠️ Database function failed, falling back to service diagnostics...');
+        
+        const fallbackResult = await anubisService.runDiagnostics();
+        
+        if (fallbackResult) {
+          toast.success('A.R.I.A™ diagnostics completed (fallback mode)');
+          setDiagnosticsError(`Database function error: ${error.message}. Used fallback diagnostics.`);
+        } else {
+          throw new Error(`Database function failed: ${error.message}. Fallback diagnostics also failed.`);
+        }
+        
         return;
       }
 
-      toast.success('Enhanced A.R.I.A™ diagnostics completed');
-      console.log('Diagnostics result:', data);
+      toast.success('Enhanced A.R.I.A™ diagnostics completed successfully');
+      console.log('✅ Diagnostics result:', data);
+      
     } catch (error) {
-      console.error('Error in diagnostics:', error);
-      toast.error('Failed to run diagnostics');
+      console.error('Complete diagnostics failure:', error);
+      setDiagnosticsError(error instanceof Error ? error.message : 'Unknown error occurred');
+      
+      if (error instanceof Error && error.message.includes('DELETE requires a WHERE clause')) {
+        toast.error('Database function needs repair - contact system administrator');
+      } else if (error instanceof Error && error.message.includes('Access denied')) {
+        toast.error('Access denied: Admin privileges required');
+      } else {
+        toast.error('Diagnostics system failure - check system logs');
+      }
     } finally {
       setDiagnosticsRunning(false);
     }
@@ -221,12 +247,23 @@ const AnubisGPTCockpit = () => {
             onClick={runEnhancedDiagnostics} 
             disabled={diagnosticsRunning}
             className="flex items-center gap-2"
+            variant={diagnosticsError ? "destructive" : "default"}
           >
             <Zap className={`h-4 w-4 ${diagnosticsRunning ? 'animate-spin' : ''}`} />
-            Run Diagnostics
+            {diagnosticsRunning ? 'Running...' : 'Run Diagnostics'}
           </Button>
         </div>
       </div>
+
+      {/* Diagnostics Error Alert */}
+      {diagnosticsError && (
+        <Alert className="border-amber-500 bg-amber-500/10">
+          <AlertTriangle className="h-4 w-4 text-amber-500" />
+          <AlertDescription className="text-amber-700">
+            <strong>Diagnostics Issue:</strong> {diagnosticsError}
+          </AlertDescription>
+        </Alert>
+      )}
 
       <Tabs defaultValue="chat" className="space-y-4">
         <TabsList>
