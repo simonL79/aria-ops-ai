@@ -1141,6 +1141,51 @@ export type Database = {
           },
         ]
       }
+      blog_posts: {
+        Row: {
+          author: string
+          category: string
+          content: string | null
+          created_at: string
+          date: string
+          description: string | null
+          id: string
+          image: string | null
+          slug: string
+          status: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author?: string
+          category: string
+          content?: string | null
+          created_at?: string
+          date: string
+          description?: string | null
+          id?: string
+          image?: string | null
+          slug: string
+          status?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author?: string
+          category?: string
+          content?: string | null
+          created_at?: string
+          date?: string
+          description?: string | null
+          id?: string
+          image?: string | null
+          slug?: string
+          status?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       cancelation_simulations: {
         Row: {
           auto_recovery_playbook: string | null
