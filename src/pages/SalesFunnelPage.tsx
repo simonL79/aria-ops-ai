@@ -6,6 +6,7 @@ import ScanRequestForm from "@/components/salesFunnel/ScanRequestForm";
 import PageLayout from "@/components/layout/PageLayout";
 import Header from "@/components/layout/Header";
 import HeroSection from "@/components/landing/HeroSection";
+import CapabilitiesGrid from "@/components/landing/CapabilitiesGrid";
 import CapabilitiesSection from "@/components/landing/CapabilitiesSection";
 import ThreatTypesSection from "@/components/landing/ThreatTypesSection";
 import ClientTypesSection from "@/components/landing/ClientTypesSection";
@@ -38,7 +39,7 @@ const SalesFunnelPage = () => {
       <Header />
       <main className="flex-1">
         <HeroSection onScrollToForm={scrollToForm} />
-        <CapabilitiesSection />
+        <CapabilitiesGrid />
         <ThreatTypesSection />
         <ClientTypesSection />
         <ServicesSection />
