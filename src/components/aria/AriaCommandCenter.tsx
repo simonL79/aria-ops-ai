@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
+import { Link } from 'react-router-dom';
 import { 
   Search, 
   Shield, 
@@ -270,6 +271,16 @@ const AriaCommandCenter = () => {
           </p>
           <div className="text-amber-500 font-mono text-lg">
             "Input a name. Get a threat brief. Deploy AI defense."
+          </div>
+          
+          {/* Quick Access to Threats Management */}
+          <div className="flex justify-center mt-4">
+            <Link to="/threats-management">
+              <Button className="bg-red-600 hover:bg-red-700 text-white font-bold">
+                <AlertTriangle className="mr-2 h-4 w-4" />
+                View All Threats in Detail
+              </Button>
+            </Link>
           </div>
         </div>
 
