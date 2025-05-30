@@ -140,7 +140,7 @@ const SalesFunnelPage = () => {
       {/* Trusted Across Industries Section */}
       <section className="py-8 bg-black">
         <div className="container mx-auto px-6 text-center">
-          <h3 className="text-2xl font-bold text-gray-300 mb-8">Trusted Across Industries</h3>
+          <h3 className="text-3xl font-bold text-gray-300 mb-8">Trusted Across Industries</h3>
           <div className="grid grid-cols-5 gap-8 items-center">
             {industries.map((industry, index) => (
               <div key={index} className="text-center">
@@ -300,32 +300,36 @@ const SalesFunnelPage = () => {
       {/* Add-On Services */}
       <section className="py-16 bg-black">
         <div className="container mx-auto px-6">
-          <div className="flex items-center mb-8">
-            <Shield className="w-6 h-6 text-orange-500 mr-3" />
-            <h2 className="text-2xl font-bold text-orange-500">Add-On Services</h2>
-          </div>
-          
-          <div className="grid lg:grid-cols-2 gap-8">
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Dark Web Leak Monitoring</h3>
-              <p className="text-gray-300 text-sm mb-4">
-                Get notified if your name, phone, or email appears to be stolen and now being traded on the dark web.
-              </p>
-              <h3 className="text-lg font-semibold mb-4">AI Diende Monitoring</h3>
-              <p className="text-gray-300 text-sm">
-                True AI-11 model looks after Discord, Reddit and messaging monitoring.
-              </p>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold mb-4">Family Reputation Package</h3>
-              <p className="text-gray-300 text-sm mb-4">
-                Protect your children or family members from online harassment and digital reputation damage.
-              </p>
-              <h3 className="text-lg font-semibold mb-4">Full Service Takedowns</h3>
-              <p className="text-gray-300 text-sm">
-                We do the heavy AI-work of facts and spin your narrative properly.
-              </p>
-            </div>
+          <div className="max-w-6xl mx-auto">
+            <Card className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 border-gray-700 p-8">
+              <div className="flex items-center mb-8">
+                <Shield className="w-6 h-6 text-orange-500 mr-3" />
+                <h2 className="text-2xl font-bold text-orange-500">Add-On Services</h2>
+              </div>
+              
+              <div className="grid lg:grid-cols-2 gap-8">
+                <div>
+                  <h3 className="text-lg font-semibold mb-4 text-white">Dark Web Leak Monitoring</h3>
+                  <p className="text-gray-300 text-sm mb-4">
+                    Get notified if your name, phone, or email appears to be stolen and now being traded on the dark web.
+                  </p>
+                  <h3 className="text-lg font-semibold mb-4 text-white">AI Diende Monitoring</h3>
+                  <p className="text-gray-300 text-sm">
+                    True AI-11 model looks after Discord, Reddit and messaging monitoring.
+                  </p>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold mb-4 text-white">Family Reputation Package</h3>
+                  <p className="text-gray-300 text-sm mb-4">
+                    Protect your children or family members from online harassment and digital reputation damage.
+                  </p>
+                  <h3 className="text-lg font-semibold mb-4 text-white">Full Service Takedowns</h3>
+                  <p className="text-gray-300 text-sm">
+                    We do the heavy AI-work of facts and spin your narrative properly.
+                  </p>
+                </div>
+              </div>
+            </Card>
           </div>
         </div>
       </section>
