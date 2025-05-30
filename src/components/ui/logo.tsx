@@ -11,43 +11,29 @@ interface LogoProps {
 const Logo = ({ variant = 'default', size = 'md', className }: LogoProps) => {
   const logoSize = {
     sm: {
-      container: 'gap-1',
-      logo: 'h-6',
-      subtitle: 'text-[8px] leading-tight'
+      logo: 'h-6'
     },
     md: {
-      container: 'gap-2',
-      logo: 'h-10',
-      subtitle: 'text-[10px] leading-tight'
+      logo: 'h-10'
     },
     lg: {
-      container: 'gap-2.5',
-      logo: 'h-16',
-      subtitle: 'text-xs leading-tight'
+      logo: 'h-16'
     },
     xl: {
-      container: 'gap-3',
-      logo: 'h-32',
-      subtitle: 'text-sm leading-tight'
+      logo: 'h-32'
     },
     '10x': {
-      container: 'gap-4',
-      logo: 'h-80', // approximately 10x the md size
-      subtitle: 'text-lg leading-tight'
+      logo: 'h-80'
     }
   }[size];
-  
-  const textColor = variant === 'light' ? 'text-white' : 'text-premium-silver';
 
   return (
-    <div className={cn('flex flex-col items-center', className)}>
-      <div className={cn('flex items-center', logoSize.container)}>
-        <img 
-          src="/lovable-uploads/37370275-bf62-4eab-b0e3-e184ce3fa142.png" 
-          alt="A.R.I.A Logo" 
-          className={cn(logoSize.logo, 'max-w-full')}
-        />
-      </div>
+    <div className={cn('flex items-center', className)}>
+      <img 
+        src="/lovable-uploads/37370275-bf62-4eab-b0e3-e184ce3fa142.png" 
+        alt="A.R.I.A Logo" 
+        className={cn(logoSize.logo, 'max-w-full')}
+      />
     </div>
   );
 };

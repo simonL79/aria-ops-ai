@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileText, Edit, Eye, Calendar, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { blogPosts } from '@/data/blog';
+import BlogCard from '@/components/blog/BlogCard';
 
 const BlogPage = () => {
   return (
@@ -13,10 +15,11 @@ const BlogPage = () => {
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <Link to="/" className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-amber-400 to-amber-600 rounded-sm flex items-center justify-center">
-                <div className="w-4 h-4 bg-black rounded-sm"></div>
-              </div>
-              <span className="text-xl font-bold text-white tracking-tight">A.R.I.A™</span>
+              <img 
+                src="/lovable-uploads/37370275-bf62-4eab-b0e3-e184ce3fa142.png" 
+                alt="A.R.I.A Logo" 
+                className="h-8 w-auto"
+              />
             </Link>
             <Link to="/">
               <Button variant="ghost" className="text-gray-300 hover:text-white">
@@ -51,7 +54,7 @@ const BlogPage = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-amber-400">12</div>
+                <div className="text-3xl font-bold text-amber-400">{blogPosts.filter(post => post.status === 'draft').length}</div>
                 <p className="text-sm text-gray-400">Ready for review</p>
               </CardContent>
             </Card>
@@ -64,7 +67,7 @@ const BlogPage = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-amber-400">87</div>
+                <div className="text-3xl font-bold text-amber-400">{blogPosts.filter(post => post.status === 'published').length}</div>
                 <p className="text-sm text-gray-400">Live articles</p>
               </CardContent>
             </Card>
@@ -73,34 +76,54 @@ const BlogPage = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-white">
                   <Calendar className="h-5 w-5 text-amber-400" />
-                  Scheduled Posts
+                  Total Posts
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-amber-400">5</div>
-                <p className="text-sm text-gray-400">This week</p>
+                <div className="text-3xl font-bold text-amber-400">{blogPosts.length}</div>
+                <p className="text-sm text-gray-400">All articles</p>
               </CardContent>
             </Card>
           </div>
 
-          {/* Coming Soon Section */}
-          <Card className="bg-[#111214] border-gray-800 mt-12">
-            <CardHeader className="text-center">
-              <CardTitle className="text-2xl text-white">Coming Soon</CardTitle>
-              <CardDescription className="text-gray-400">
-                In-depth articles on reputation management, crisis prevention, and digital intelligence
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="text-center">
-              <p className="text-gray-300 mb-6">
-                Our team of experts is preparing comprehensive insights and case studies to help you 
-                navigate the complex world of digital reputation management.
-              </p>
-              <Button className="bg-amber-600 hover:bg-amber-500 text-black">
-                Subscribe for Updates
-              </Button>
-            </CardContent>
-          </Card>
+          {/* Blog Posts Section */}
+          <div className="mt-12">
+            <h2 className="text-2xl font-bold text-white mb-6">Latest Articles</h2>
+            
+            {blogPosts.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {blogPosts.slice(0, 9).map((post) => (
+                  <BlogCard
+                    key={post.slug}
+                    title={post.title}
+                    description={post.description}
+                    image={post.image}
+                    date={post.date}
+                    category={post.category}
+                    slug={post.slug}
+                  />
+                ))}
+              </div>
+            ) : (
+              <Card className="bg-[#111214] border-gray-800">
+                <CardHeader className="text-center">
+                  <CardTitle className="text-2xl text-white">Coming Soon</CardTitle>
+                  <CardDescription className="text-gray-400">
+                    In-depth articles on reputation management, crisis prevention, and digital intelligence
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="text-center">
+                  <p className="text-gray-300 mb-6">
+                    Our team of experts is preparing comprehensive insights and case studies to help you 
+                    navigate the complex world of digital reputation management.
+                  </p>
+                  <Button className="bg-amber-600 hover:bg-amber-500 text-black">
+                    Subscribe for Updates
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </div>
       </div>
 
@@ -108,7 +131,7 @@ const BlogPage = () => {
       <footer className="py-8 px-6 border-t border-gray-800/50 mt-16">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center text-gray-400">
-            <p>&copy; 2024 A.R.I.A™. All rights reserved.</p>
+            <p>&copy; 2025 A.R.I.A™. All rights reserved.</p>
           </div>
         </div>
       </footer>
