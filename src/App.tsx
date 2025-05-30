@@ -11,6 +11,8 @@ import AriaCommand from "./pages/AriaCommand";
 import ThreatsManagement from "./pages/ThreatsManagement";
 import SalesFunnelPage from "./pages/SalesFunnelPage";
 import PricingPage from "./pages/PricingPage";
+import BlogPage from "./pages/BlogPage";
+import SimonLindsayPage from "./pages/SimonLindsayPage";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +25,8 @@ function App() {
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
+              <Route path="/blog" element={<BlogPage />} />
+              <Route path="/simon-lindsay" element={<SimonLindsayPage />} />
               <Route path="/sales-funnel" element={<SalesFunnelPage />} />
               <Route path="/pricing" element={<PricingPage />} />
               <Route path="/dashboard" element={<DashboardPage />} />
