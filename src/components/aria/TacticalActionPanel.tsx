@@ -6,17 +6,15 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { 
-  MessageSquare, 
-  Clock, 
   Brain, 
+  Activity, 
   Eye, 
   TrendingUp, 
   Settings, 
   FileText, 
   Shield,
-  Play,
-  CheckCircle,
-  AlertTriangle
+  AlertTriangle,
+  CheckCircle
 } from 'lucide-react';
 
 interface ThreatProfile {
@@ -182,7 +180,7 @@ const TacticalActionPanel = ({ threatProfile }: TacticalActionPanelProps) => {
         .from('cancelation_simulations')
         .insert({
           scenario_title: `Crisis Simulation for ${threatProfile.entity_name}`,
-          scenario_type: threatProfile.threat_level === 'critical' ? 'viral_crisis' : 'reputation_risk',
+          scenario_type: 'reputation_risk',
           simulated_impact: {
             escalation_probability: threatProfile.threat_level === 'critical' ? 0.85 : 0.45,
             platforms_affected: threatProfile.platforms_affected,
@@ -280,7 +278,7 @@ const TacticalActionPanel = ({ threatProfile }: TacticalActionPanelProps) => {
       case 'deploying': return <Settings className="h-4 w-4 animate-spin text-blue-400" />;
       case 'active': return <CheckCircle className="h-4 w-4 text-green-400" />;
       case 'completed': return <CheckCircle className="h-4 w-4 text-green-400" />;
-      default: return <Play className="h-4 w-4 text-gray-400" />;
+      default: return <Activity className="h-4 w-4 text-gray-400" />;
     }
   };
 
@@ -297,7 +295,7 @@ const TacticalActionPanel = ({ threatProfile }: TacticalActionPanelProps) => {
     {
       key: 'rsi',
       name: 'RSI™ Counter-Narrative',
-      icon: MessageSquare,
+      icon: Brain,
       description: 'Deploy automated response system',
       action: deployRSI,
       recommended: threatProfile.threat_level === 'critical' || threatProfile.threat_level === 'high'
@@ -305,7 +303,7 @@ const TacticalActionPanel = ({ threatProfile }: TacticalActionPanelProps) => {
     {
       key: 'eidetic',
       name: 'EIDETIC™ Memory Suppression',
-      icon: Clock,
+      icon: Activity,
       description: 'Activate content decay management',
       action: deployEidetic,
       recommended: threatProfile.threat_level !== 'low'
