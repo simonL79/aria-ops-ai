@@ -10,6 +10,13 @@ import IntelligencePage from "./pages/dashboard/IntelligencePage";
 import EngagementHubPage from "./pages/EngagementHubPage";
 import OperatorConsole from "./components/operator/OperatorConsole";
 import SalesFunnelPage from "./pages/SalesFunnelPage";
+import ScanPage from "./pages/ScanPage";
+import PricingPage from "./pages/PricingPage";
+import AboutPage from "./pages/AboutPage";
+import BlogPage from "./pages/BlogPage";
+import SimonLindsayPage from "./pages/SimonLindsayPage";
+import Contact from "./pages/Contact";
+import AdminLogin from "./pages/AdminLogin";
 
 const queryClient = new QueryClient();
 
@@ -21,6 +28,13 @@ const App = () => (
         <Routes>
           <Route path="/" element={<SalesFunnelPage />} />
           <Route path="/sales-funnel" element={<SalesFunnelPage />} />
+          <Route path="/scan" element={<ScanPage />} />
+          <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/blog" element={<BlogPage />} />
+          <Route path="/simon-lindsay" element={<SimonLindsayPage />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/threats" element={<ThreatsPage />} />
           <Route path="/monitoring" element={<MonitoringPage />} />

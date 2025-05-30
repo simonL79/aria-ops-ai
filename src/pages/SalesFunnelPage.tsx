@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useAuth } from "@/hooks/useAuth";
 import AdminDashboardWelcome from "@/components/salesFunnel/AdminDashboardWelcome";
@@ -28,7 +29,9 @@ const SalesFunnelPage = () => {
       <header className="sticky top-0 z-50 w-full bg-black/95 backdrop-blur border-b border-gray-800">
         <div className="container mx-auto px-6">
           <div className="flex items-center justify-between py-4">
-            <Logo variant="light" size="xl" />
+            <Link to="/">
+              <Logo variant="light" size="xl" />
+            </Link>
             
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-8">
@@ -41,9 +44,9 @@ const SalesFunnelPage = () => {
               <Link to="/scan" className="text-gray-300 hover:text-white transition-colors">
                 Get Started
               </Link>
-              <button className="text-gray-300 hover:text-white transition-colors">
+              <Link to="/pricing" className="text-gray-300 hover:text-white transition-colors">
                 Services
-              </button>
+              </Link>
               <Link to="/admin/login">
                 <Button variant="outline" size="sm" className="border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white">
                   <LogIn className="mr-2 h-4 w-4" />
@@ -84,12 +87,16 @@ const SalesFunnelPage = () => {
             </div>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 text-lg font-semibold rounded-md">
-                Request Assessment
-              </Button>
-              <Button variant="outline" className="border-gray-600 text-gray-300 hover:bg-gray-800 px-8 py-3 text-lg rounded-md">
-                Learn More
-              </Button>
+              <Link to="/scan">
+                <Button className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 text-lg font-semibold rounded-md">
+                  Request Assessment
+                </Button>
+              </Link>
+              <Link to="/about">
+                <Button variant="outline" className="border-gray-600 text-gray-300 hover:bg-gray-800 px-8 py-3 text-lg rounded-md">
+                  Learn More
+                </Button>
+              </Link>
             </div>
             
             {/* Ratings */}
@@ -126,10 +133,12 @@ const SalesFunnelPage = () => {
               />
               {/* Trusted to Protect Button - positioned at left bottom edge */}
               <div className="absolute bottom-4 left-0">
-                <Button className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 text-xl font-bold rounded-md flex items-center">
-                  <Shield className="mr-3 h-6 w-6" />
-                  Trusted to Protect
-                </Button>
+                <Link to="/scan">
+                  <Button className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 text-xl font-bold rounded-md flex items-center">
+                    <Shield className="mr-3 h-6 w-6" />
+                    Trusted to Protect
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
@@ -288,9 +297,11 @@ const SalesFunnelPage = () => {
               <p className="text-gray-300 mb-8">
                 Get a comprehensive assessment of your digital risk profile and strategic roadmap.
               </p>
-              <Button className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 text-lg font-semibold rounded-md">
-                Request Risk Assessment
-              </Button>
+              <Link to="/scan">
+                <Button className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 text-lg font-semibold rounded-md">
+                  Request Risk Assessment
+                </Button>
+              </Link>
             </Card>
           </div>
         </div>
@@ -405,9 +416,11 @@ const SalesFunnelPage = () => {
               placeholder="Company" 
               className="w-full p-3 bg-gray-800 border border-gray-600 rounded-md text-white placeholder-gray-400"
             />
-            <Button className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 text-lg font-semibold rounded-md">
-              Get Assessment
-            </Button>
+            <Link to="/scan">
+              <Button className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 text-lg font-semibold rounded-md">
+                Get Assessment
+              </Button>
+            </Link>
             <p className="text-xs text-gray-400">Results delivered within 48 hours</p>
           </div>
         </div>
@@ -418,16 +431,18 @@ const SalesFunnelPage = () => {
         <div className="container mx-auto px-6">
           <div className="grid md:grid-cols-4 gap-8">
             <div>
-              <Logo variant="light" size="md" className="mb-4" />
+              <Link to="/">
+                <Logo variant="light" size="md" className="mb-4" />
+              </Link>
               <p className="text-gray-400 text-sm">Advanced Reputation Intelligence & Analysis</p>
             </div>
             
             <div>
               <h4 className="font-semibold text-white mb-4">Services</h4>
               <div className="space-y-2 text-sm text-gray-400">
-                <div>Threat Detection</div>
-                <div>Crisis Management</div>
-                <div>Intelligence Reports</div>
+                <Link to="/threats" className="block hover:text-white transition-colors">Threat Detection</Link>
+                <Link to="/monitoring" className="block hover:text-white transition-colors">Crisis Management</Link>
+                <Link to="/intelligence" className="block hover:text-white transition-colors">Intelligence Reports</Link>
               </div>
             </div>
             
