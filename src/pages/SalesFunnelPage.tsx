@@ -1,7 +1,4 @@
-
 import React from "react";
-import { useAuth } from "@/hooks/useAuth";
-import AdminDashboardWelcome from "@/components/salesFunnel/AdminDashboardWelcome";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Logo from "@/components/ui/logo";
@@ -9,12 +6,6 @@ import { Star, Shield, Eye, Users, CheckCircle, LogIn, Building, Briefcase, Awar
 import { Link } from "react-router-dom";
 
 const SalesFunnelPage = () => {
-  const { isAuthenticated } = useAuth();
-
-  if (isAuthenticated) {
-    return <AdminDashboardWelcome />;
-  }
-
   const industries = [
     { name: 'Government Relations', icon: Building },
     { name: 'Professional Services', icon: Briefcase },
