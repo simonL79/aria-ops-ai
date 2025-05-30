@@ -15,6 +15,13 @@ const EnhancedFooter = () => {
     }
   };
 
+  const scrollToServices = () => {
+    const servicesElement = document.getElementById('services');
+    if (servicesElement) {
+      servicesElement.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <footer className="bg-[#1C1C1E]/90 backdrop-blur-sm border-t border-[#247CFF]/20 py-12 md:py-16">
       <div className="container mx-auto px-4 md:px-6">
@@ -39,7 +46,7 @@ const EnhancedFooter = () => {
               <li><a href="/about" className="text-[#D8DEE9] hover:text-white transition-colors text-sm font-['Inter']">About</a></li>
               <li><a href="/simon-lindsay" className="text-[#D8DEE9] hover:text-white transition-colors text-sm font-['Inter']">Simon Lindsay</a></li>
               <li><a href="/blog" className="text-[#D8DEE9] hover:text-white transition-colors text-sm font-['Inter']">Blog</a></li>
-              <li><a href="/resources" className="text-[#D8DEE9] hover:text-white transition-colors text-sm font-['Inter']">Resources</a></li>
+              <li><button onClick={scrollToServices} className="text-[#D8DEE9] hover:text-white transition-colors text-sm font-['Inter'] text-left">Services</button></li>
             </ul>
           </div>
 
@@ -47,14 +54,14 @@ const EnhancedFooter = () => {
           <div className="text-center md:text-left">
             <h3 className="text-white font-bold mb-4 font-['Space_Grotesk']">Legal</h3>
             <ul className="space-y-2">
-              <li><a href="/privacy-policy" className="text-[#D8DEE9] hover:text-white transition-colors text-sm font-['Inter']">Privacy Policy</a></li>
-              <li><a href="/disclaimer" className="text-[#D8DEE9] hover:text-white transition-colors text-sm font-['Inter']">Disclaimer</a></li>
-              <li><a href="/gdpr-compliance" className="text-[#D8DEE9] hover:text-white transition-colors text-sm font-['Inter']">GDPR Compliance</a></li>
-              <li><a href="/terms" className="text-[#D8DEE9] hover:text-white transition-colors text-sm font-['Inter']">Terms of Service</a></li>
+              <li><a href="/contact" className="text-[#D8DEE9] hover:text-white transition-colors text-sm font-['Inter']">Contact</a></li>
+              <li><a href="/pricing" className="text-[#D8DEE9] hover:text-white transition-colors text-sm font-['Inter']">Pricing</a></li>
+              <li><span className="text-[#D8DEE9]/60 text-sm font-['Inter']">Privacy Policy</span></li>
+              <li><span className="text-[#D8DEE9]/60 text-sm font-['Inter']">Terms of Service</span></li>
             </ul>
           </div>
 
-          {/* Contact Column */}
+          {/* Access Column */}
           <div className="text-center md:text-left">
             <h3 className="text-white font-bold mb-4 font-['Space_Grotesk']">Get Started</h3>
             <ul className="space-y-2">
