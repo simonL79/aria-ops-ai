@@ -1,11 +1,10 @@
-
 import React from "react";
 import { useAuth } from "@/hooks/useAuth";
 import AdminDashboardWelcome from "@/components/salesFunnel/AdminDashboardWelcome";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Logo from "@/components/ui/logo";
-import { Star, Shield, Eye, Users, CheckCircle, LogIn } from "lucide-react";
+import { Star, Shield, Eye, Users, CheckCircle, LogIn, Building, Briefcase, Award, BadgeCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const SalesFunnelPage = () => {
@@ -14,6 +13,14 @@ const SalesFunnelPage = () => {
   if (isAuthenticated) {
     return <AdminDashboardWelcome />;
   }
+
+  const industries = [
+    { name: 'Government Relations', icon: Building },
+    { name: 'Professional Services', icon: Briefcase },
+    { name: 'Private Equity', icon: Award },
+    { name: 'Venture Capital', icon: BadgeCheck },
+    { name: 'Investment Management', icon: Shield }
+  ];
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -59,7 +66,7 @@ const SalesFunnelPage = () => {
       <section className="relative min-h-screen flex items-center justify-center bg-black">
         <div className="container mx-auto px-6 grid lg:grid-cols-2 gap-12 items-center">
           {/* Left Content */}
-          <div className="space-y-8 text-center">
+          <div className="space-y-6 text-center">
             {/* A.R.I.A Logo */}
             <div className="flex justify-center">
               <Logo variant="light" size="10x" />
@@ -134,12 +141,12 @@ const SalesFunnelPage = () => {
         <div className="container mx-auto px-6 text-center">
           <h3 className="text-lg text-gray-400 mb-8">Trusted Across Industries</h3>
           <div className="grid grid-cols-5 gap-8 items-center">
-            {['Government Relations', 'Professional Services', 'Private Equity', 'Venture Capital', 'Investment Management'].map((industry, index) => (
+            {industries.map((industry, index) => (
               <div key={index} className="text-center">
-                <div className="w-16 h-16 bg-gray-700 rounded-lg mx-auto mb-2 flex items-center justify-center">
-                  <div className="w-8 h-8 bg-gray-600 rounded"></div>
+                <div className="w-16 h-16 bg-gradient-to-br from-orange-500/20 to-orange-600/30 rounded-lg mx-auto mb-2 flex items-center justify-center border border-orange-500/30">
+                  <industry.icon className="w-8 h-8 text-orange-500" />
                 </div>
-                <p className="text-sm text-gray-400">{industry}</p>
+                <p className="text-sm text-gray-400">{industry.name}</p>
               </div>
             ))}
           </div>
