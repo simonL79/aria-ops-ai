@@ -19,6 +19,7 @@ import BlogAdminPage from "./pages/BlogAdminPage";
 import SimonLindsayPage from "./pages/SimonLindsayPage";
 import Contact from "./pages/Contact";
 import AdminLogin from "./pages/AdminLogin";
+import Authentication from "./pages/Authentication";
 import ThankYouPage from "./pages/ThankYouPage";
 
 const queryClient = new QueryClient();
@@ -40,6 +41,7 @@ const App = () => (
           <Route path="/blog/admin" element={<BlogAdminPage />} />
           <Route path="/simon-lindsay" element={<SimonLindsayPage />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/auth" element={<Authentication />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/threats" element={<ThreatsPage />} />
