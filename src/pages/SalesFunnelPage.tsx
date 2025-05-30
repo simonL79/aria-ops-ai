@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useAuth } from "@/hooks/useAuth";
 import AdminDashboardWelcome from "@/components/salesFunnel/AdminDashboardWelcome";
@@ -420,36 +419,33 @@ const SalesFunnelPage = () => {
           <div className="grid md:grid-cols-4 gap-8">
             <div>
               <Logo variant="light" size="md" className="mb-4" />
-              <p className="text-gray-400 text-sm">Advanced Reputation Intelligence Agent</p>
+              <p className="text-gray-400 text-sm">Advanced Reputation Intelligence & Analysis</p>
             </div>
             
             <div>
               <h4 className="font-semibold text-white mb-4">Services</h4>
               <div className="space-y-2 text-sm text-gray-400">
                 <div>Threat Detection</div>
-                <div>Risk Management</div>
+                <div>Crisis Management</div>
                 <div>Intelligence Reports</div>
-                <div>Crisis Response</div>
               </div>
             </div>
             
             <div>
               <h4 className="font-semibold text-white mb-4">Company</h4>
               <div className="space-y-2 text-sm text-gray-400">
-                <div>About</div>
-                <div>Blog</div>
-                <div>Careers</div>
-                <div>Contact</div>
+                <Link to="/about" className="block hover:text-white transition-colors">About</Link>
+                <Link to="/blog" className="block hover:text-white transition-colors">Blog</Link>
+                <Link to="/contact" className="block hover:text-white transition-colors">Contact</Link>
               </div>
             </div>
             
             <div>
               <h4 className="font-semibold text-white mb-4">Access</h4>
               <div className="space-y-2 text-sm text-gray-400">
-                <div>Admin Login</div>
-                <div>Client Portal</div>
-                <div>API Status</div>
-                <div>Get Started</div>
+                <Link to="/admin/login" className="block hover:text-white transition-colors">Admin Login</Link>
+                <Link to="/dashboard" className="block hover:text-white transition-colors">Dashboard</Link>
+                <Link to="/scan" className="block hover:text-white transition-colors">Get Started</Link>
               </div>
             </div>
           </div>
