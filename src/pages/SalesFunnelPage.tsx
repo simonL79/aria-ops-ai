@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useAuth } from "@/hooks/useAuth";
 import AdminDashboardWelcome from "@/components/salesFunnel/AdminDashboardWelcome";
@@ -125,7 +126,7 @@ const SalesFunnelPage = () => {
       </section>
 
       {/* Trusted Across Industries Section */}
-      <section className="py-16 bg-gray-800">
+      <section className="py-16 bg-black">
         <div className="container mx-auto px-6 text-center">
           <h3 className="text-lg text-gray-400 mb-8">Trusted Across Industries</h3>
           <div className="grid grid-cols-5 gap-8 items-center">
