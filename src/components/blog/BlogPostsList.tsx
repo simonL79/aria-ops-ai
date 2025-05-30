@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { blogPosts } from '@/data/blog';
+import { useBlogPosts } from '@/hooks/useBlogPosts';
 import { Button } from '@/components/ui/button';
 import { Edit, Trash2, Eye, ArrowUpDown } from 'lucide-react';
 import { toast } from 'sonner';
@@ -24,6 +24,7 @@ type BlogPostListProps = {
 
 const BlogPostsList = ({ onEditPost, filter = 'all' }: BlogPostListProps) => {
   const navigate = useNavigate();
+  const { blogPosts, loading, error } = useBlogPosts();
   const [sortField, setSortField] = useState('date');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   
@@ -37,6 +38,26 @@ const BlogPostsList = ({ onEditPost, filter = 'all' }: BlogPostListProps) => {
       setSortDirection('desc');
     }
   };
+  
+  if (loading) {
+    return (
+      <div className="text-center py-10">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-amber-400 mx-auto mb-4"></div>
+        <p className="text-lg">Loading blog posts...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-10 text-red-500">
+        <p className="text-lg">Error loading blog posts: {error}</p>
+        <Button onClick={() => window.location.reload()} className="mt-4">
+          Try Again
+        </Button>
+      </div>
+    );
+  }
   
   // Filter and sort posts
   const filteredPosts = blogPosts

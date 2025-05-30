@@ -2,7 +2,7 @@
 import React from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import PublicLayout from "@/components/layout/PublicLayout";
-import { blogPosts } from '@/data/blog';
+import { useBlogPosts } from '@/hooks/useBlogPosts';
 import { ArrowLeft, Calendar, User, Tag, Share, Facebook, Twitter, Linkedin, Mail, Rss } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import BlogCard from '@/components/blog/BlogCard';
@@ -12,7 +12,33 @@ import { toast } from "sonner";
 const BlogPostPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const { blogPosts, loading, error } = useBlogPosts();
   
+  if (loading) {
+    return (
+      <PublicLayout>
+        <div className="container mx-auto px-6 py-16 text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-amber-400 mx-auto mb-4"></div>
+          <p className="text-xl">Loading blog post...</p>
+        </div>
+      </PublicLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <PublicLayout>
+        <div className="container mx-auto px-6 py-16 text-center">
+          <h1 className="text-3xl font-bold mb-4 text-red-600">Error Loading Blog Post</h1>
+          <p className="mb-8">{error}</p>
+          <Button onClick={() => navigate('/blog')}>
+            Return to Blog
+          </Button>
+        </div>
+      </PublicLayout>
+    );
+  }
+
   const post = blogPosts.find(post => post.slug === slug);
   const relatedPosts = blogPosts
     .filter(p => p.slug !== slug && p.category === post?.category)

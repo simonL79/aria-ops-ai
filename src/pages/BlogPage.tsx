@@ -4,10 +4,38 @@ import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileText, Edit, Eye, Calendar, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { blogPosts } from '@/data/blog';
 import BlogCard from '@/components/blog/BlogCard';
+import { useBlogPosts } from '@/hooks/useBlogPosts';
+import Logo from '@/components/ui/logo';
 
 const BlogPage = () => {
+  const { blogPosts, loading, error } = useBlogPosts();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0A0B0D] text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-amber-400 mx-auto mb-4"></div>
+          <p className="text-xl">Loading blog posts...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-[#0A0B0D] text-white flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-red-400 mb-4">Error Loading Blog</h1>
+          <p className="text-gray-300 mb-4">{error}</p>
+          <Button onClick={() => window.location.reload()}>
+            Try Again
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#0A0B0D] text-white">
       {/* Header */}
@@ -15,11 +43,7 @@ const BlogPage = () => {
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <Link to="/" className="flex items-center gap-3">
-              <img 
-                src="/lovable-uploads/37370275-bf62-4eab-b0e3-e184ce3fa142.png" 
-                alt="A.R.I.A Logo" 
-                className="h-8 w-auto"
-              />
+              <Logo size="md" />
             </Link>
             <Link to="/">
               <Button variant="ghost" className="text-gray-300 hover:text-white">
@@ -107,18 +131,18 @@ const BlogPage = () => {
             ) : (
               <Card className="bg-[#111214] border-gray-800">
                 <CardHeader className="text-center">
-                  <CardTitle className="text-2xl text-white">Coming Soon</CardTitle>
+                  <CardTitle className="text-2xl text-white">No Blog Posts Found</CardTitle>
                   <CardDescription className="text-gray-400">
-                    In-depth articles on reputation management, crisis prevention, and digital intelligence
+                    Your blog posts will appear here once they're available in the database.
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="text-center">
                   <p className="text-gray-300 mb-6">
-                    Our team of experts is preparing comprehensive insights and case studies to help you 
-                    navigate the complex world of digital reputation management.
+                    Blog posts are loaded from your database. If you have content that should be showing here,
+                    please check your database connection and blog_posts table.
                   </p>
                   <Button className="bg-amber-600 hover:bg-amber-500 text-black">
-                    Subscribe for Updates
+                    Contact Support
                   </Button>
                 </CardContent>
               </Card>
