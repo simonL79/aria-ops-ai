@@ -79,19 +79,19 @@ const SalesFunnelPage = () => {
           <p className="text-gray-400 mb-8">Trusted Across Industries</p>
           <div className="grid grid-cols-5 gap-8 items-center opacity-60">
             <div className="bg-gray-800 p-4 rounded">
-              <div className="text-gray-400 text-sm">Government Relations</div>
+              <div className="text-gray-400 text-sm">GR</div>
             </div>
             <div className="bg-gray-800 p-4 rounded">
-              <div className="text-gray-400 text-sm">Professional Services</div>
+              <div className="text-gray-400 text-sm">PS</div>
             </div>
             <div className="bg-gray-800 p-4 rounded">
-              <div className="text-gray-400 text-sm">Technology</div>
+              <div className="text-gray-400 text-sm">TC</div>
             </div>
             <div className="bg-gray-800 p-4 rounded">
-              <div className="text-gray-400 text-sm">Financial Services</div>
+              <div className="text-gray-400 text-sm">FS</div>
             </div>
             <div className="bg-gray-800 p-4 rounded">
-              <div className="text-gray-400 text-sm">Healthcare</div>
+              <div className="text-gray-400 text-sm">AH</div>
             </div>
           </div>
         </div>
@@ -112,6 +112,7 @@ const SalesFunnelPage = () => {
               <p className="text-gray-300 text-sm mb-6">Real-time threat scan across all online platforms for celebrity & top executives</p>
               
               <div className="space-y-2 text-sm">
+                <div className="text-white font-semibold mb-2">What We Do</div>
                 <div className="flex items-center text-green-400">
                   <span className="mr-2">✓</span>
                   <span>Monitor direct mentions of the top celebrities</span>
