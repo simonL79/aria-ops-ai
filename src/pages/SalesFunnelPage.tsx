@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useAuth } from "@/hooks/useAuth";
 import AdminDashboardWelcome from "@/components/salesFunnel/AdminDashboardWelcome";
@@ -79,14 +78,6 @@ const SalesFunnelPage = () => {
                 Learn More
               </Button>
             </div>
-
-            {/* Trusted to Protect Button */}
-            <div className="pt-4">
-              <Button className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 text-xl font-bold rounded-md flex items-center">
-                <Shield className="mr-3 h-6 w-6" />
-                Trusted to Protect
-              </Button>
-            </div>
             
             {/* Ratings */}
             <div className="space-y-3">
@@ -112,7 +103,7 @@ const SalesFunnelPage = () => {
             </div>
           </div>
           
-          {/* Right Content - Professional Portrait */}
+          {/* Right Content - Professional Portrait with Trusted to Protect Button */}
           <div className="relative">
             <div className="relative">
               <img 
@@ -120,6 +111,13 @@ const SalesFunnelPage = () => {
                 alt="Professional executive portrait"
                 className="w-full max-w-md mx-auto rounded-lg"
               />
+              {/* Trusted to Protect Button - positioned at left bottom edge */}
+              <div className="absolute bottom-4 left-0">
+                <Button className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 text-xl font-bold rounded-md flex items-center">
+                  <Shield className="mr-3 h-6 w-6" />
+                  Trusted to Protect
+                </Button>
+              </div>
             </div>
           </div>
         </div>
