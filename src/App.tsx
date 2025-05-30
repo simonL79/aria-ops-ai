@@ -26,6 +26,7 @@ import BlogPostPage from "./pages/BlogPostPage";
 import BlogAdminPage from "./pages/BlogAdminPage";
 import SimonLindsayPage from "./pages/SimonLindsayPage";
 import Contact from "./pages/Contact";
+import ContactInquiries from "./pages/ContactInquiries";
 import NotFound from "./pages/NotFound";
 import "./App.css";
 
@@ -57,6 +58,7 @@ const App = () => (
           <Route path="/blog/admin" element={<BlogAdminPage />} />
           <Route path="/simon-lindsay" element={<SimonLindsayPage />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/contact-inquiries" element={<ContactInquiries />} />
           <Route path="/admin/*" element={<AdminDashboard />} />
           <Route path="/anubis-gpt" element={<AnubisGPTCockpit />} />
           <Route path="/operator-console" element={<OperatorConsole />} />

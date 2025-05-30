@@ -4,50 +4,26 @@ project_id = "ssvskbejfacmjemphmry"
 [api]
 enabled = true
 port = 54321
-schemas = ["public", "storage", "graphql_public"]
-
-[db]
-port = 54322
-shadow_port = 54320
-major_version = 15
-
-[realtime]
-enabled = true
-
-[studio]
-enabled = true
-port = 54323
-api_url = "http://localhost"
-
-[inbucket]
-enabled = true
-port = 54324
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
 
 [auth]
 enabled = true
+port = 54322
 site_url = "http://localhost:3000"
+additional_redirect_urls = ["https://lovable.dev"]
+jwt_expiry = 3600
+jwt_secret = "super-secret-jwt-token-with-at-least-32-characters-long"
+password_min_length = 6
 
-[storage]
-enabled = true
+[auth.email]
+enable_signup = true
+double_confirm_changes = true
+enable_confirmations = false
 
 [functions]
-[functions.aria-ingest]
-verify_jwt = false
-[functions.reddit-scan]
-verify_jwt = false
-schedule = "0 * * * *"
-[functions.rss-scraper]
-verify_jwt = false
-schedule = "0 */2 * * *"
-[functions.aria-scraper]
-verify_jwt = false
-schedule = "0 8 * * *"
-[functions.slack-alert]
-verify_jwt = false
-[functions.executive-reports]
-verify_jwt = false
-[functions.aria-hypercore-dispatch]
-verify_jwt = false
-schedule = "*/5 * * * *"
-[functions.anubis-engine]
+enabled = true
+
+[functions.submit-contact]
 verify_jwt = false
