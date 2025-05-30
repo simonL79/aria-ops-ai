@@ -1,4 +1,5 @@
 
+
 import React from "react";
 import { useAuth } from "@/hooks/useAuth";
 import AdminDashboardWelcome from "@/components/salesFunnel/AdminDashboardWelcome";
@@ -234,28 +235,32 @@ const SalesFunnelPage = () => {
                 <Users className="w-8 h-8 text-orange-500 mr-3" />
                 <h3 className="text-xl font-bold text-orange-500">Everyday People Protection</h3>
               </div>
-              <p className="text-gray-300 mb-6">
-                Built for regular people who think they don't matter. But they matter to this technology for VIPs.
+              <p className="text-gray-300 mb-4">
+                <strong>Ideal for:</strong> Teachers, nurses, founders, job-seekers, private citizens
               </p>
-              <div className="space-y-3">
+              <div className="space-y-3 mb-6">
                 <div className="text-sm font-semibold text-white">What We Do</div>
                 <div className="flex items-center text-sm text-gray-300">
                   <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
-                  Hunt for toxic data in any public record, malice and gossip online
+                  Search engine cleanup of harmful results
                 </div>
                 <div className="flex items-center text-sm text-gray-300">
                   <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
-                  Remove them using a mix of GDPR and UK Freedom of Information Act
+                  Threat detection from forums and dark web
                 </div>
                 <div className="flex items-center text-sm text-gray-300">
                   <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
-                  GDPR with AI for simple people to build better life opportunities
+                  Alerts when your information resurfaces
+                </div>
+                <div className="flex items-center text-sm text-gray-300">
+                  <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
+                  Legal rights enforcement (GDPR, CCPA, DSR)
                 </div>
               </div>
               <div className="mt-6">
-                <div className="text-sm font-semibold text-white mb-2">This Works For</div>
+                <div className="text-sm font-semibold text-white mb-2">Why It Matters</div>
                 <p className="text-xs text-gray-400">
-                  Whether it's their companies' service you have to run, current or potential employee you need to hire, or clients who want to hire you - reputation affects everyone.
+                  You don't need to be "famous" to be vulnerable. If you've ever Googled yourself and felt uneasy, we're here for you.
                 </p>
               </div>
             </Card>
@@ -439,3 +444,4 @@ const SalesFunnelPage = () => {
 };
 
 export default SalesFunnelPage;
+
