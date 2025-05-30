@@ -90,42 +90,12 @@ const QATestDashboard = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 max-w-7xl mx-auto">
       <QATestHeader 
         onRunTests={runQATests} 
         isRunning={running}
         onReset={resetResults}
       />
-
-      {testSuite && (
-        <>
-          <QAOverviewCards testSuite={testSuite} />
-          <QACompliancePanel testSuite={testSuite} />
-
-          <Tabs value={selectedPhase} onValueChange={setSelectedPhase} className="space-y-4">
-            <TabsList className="grid w-full grid-cols-auto">
-              {getPhases().map((phase) => (
-                <TabsTrigger key={phase} value={phase} className="capitalize">
-                  {phase === 'all' ? 'All Phases' : phase}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-
-            {getPhases().map((phase) => (
-              <TabsContent key={phase} value={phase} className="space-y-4">
-                <QAResultsTable 
-                  results={getFilteredResults()}
-                  selectedPhase={selectedPhase}
-                />
-              </TabsContent>
-            ))}
-          </Tabs>
-
-          <QACriticalIssuesAlert 
-            criticalIssues={getCriticalIssues()}
-          />
-        </>
-      )}
 
       {!testSuite && !running && (
         <QAInitialState />
@@ -137,6 +107,39 @@ const QATestDashboard = () => {
           currentPhase="Running comprehensive tests..."
           estimatedTime={Math.max(30 - Math.floor(progress / 3), 5)}
         />
+      )}
+
+      {testSuite && (
+        <div className="space-y-8">
+          <QAOverviewCards testSuite={testSuite} />
+          
+          <QACompliancePanel testSuite={testSuite} />
+
+          <QACriticalIssuesAlert 
+            criticalIssues={getCriticalIssues()}
+          />
+
+          <div className="w-full">
+            <Tabs value={selectedPhase} onValueChange={setSelectedPhase} className="w-full">
+              <TabsList className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 w-full mb-6">
+                {getPhases().map((phase) => (
+                  <TabsTrigger key={phase} value={phase} className="text-xs px-2">
+                    {phase === 'all' ? 'All Phases' : phase.replace('Phase ', 'P')}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+
+              {getPhases().map((phase) => (
+                <TabsContent key={phase} value={phase} className="mt-6">
+                  <QAResultsTable 
+                    results={getFilteredResults()}
+                    selectedPhase={selectedPhase}
+                  />
+                </TabsContent>
+              ))}
+            </Tabs>
+          </div>
+        </div>
       )}
     </div>
   );
