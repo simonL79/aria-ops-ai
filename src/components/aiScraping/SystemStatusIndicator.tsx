@@ -5,7 +5,7 @@ import { Separator } from "@/components/ui/separator";
 import { Wifi, Clock, Shield, Server, AlertCircle, UserCheck } from "lucide-react";
 import { useState, useEffect } from "react";
 import { getMonitoringStatus } from "@/services/monitoring";
-import { getMonitoringStatus as getAiScanningStatus } from "@/services/aiScraping/mockScanner";
+import { getMonitoringStatus as getAiScanningStatus } from "@/services/aiScraping/liveScanner";
 import { useAuth } from "@/hooks/useAuth";
 import { useRbac } from "@/hooks/useRbac";
 
@@ -35,9 +35,9 @@ const SystemStatusIndicator = ({ isLive = true }: SystemStatusIndicatorProps) =>
         const aiScanningStatus = await getAiScanningStatus();
         
         setStatsData({
-          platformsMonitored: monitoringStatus?.sources || 0,
+          platformsMonitored: monitoringStatus?.sourcesCount || monitoringStatus?.sources || 0,
           threatModelsActive: 4, // Simplified for demo - would come from real threat models count
-          activeSources: aiScanningStatus?.platforms || 0,
+          activeSources: ('platforms' in aiScanningStatus) ? aiScanningStatus.platforms : 0,
           lastScanTime: monitoringStatus?.lastRun ? new Date(monitoringStatus.lastRun).toLocaleTimeString() : 'N/A'
         });
         

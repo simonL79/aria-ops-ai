@@ -163,7 +163,8 @@ export const performRealTimeMonitoring = async (): Promise<LiveScanResult[]> => 
       severity: item.severity as 'low' | 'medium' | 'high',
       sentiment: item.sentiment || 0,
       confidence_score: item.confidence_score || 0,
-      detected_entities: Array.isArray(item.detected_entities) ? item.detected_entities : [],
+      detected_entities: Array.isArray(item.detected_entities) ? 
+        item.detected_entities.map(entity => String(entity)) : [],
       source_type: item.source_type,
       entity_name: item.entity_name,
       created_at: item.created_at

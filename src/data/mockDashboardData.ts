@@ -187,7 +187,7 @@ export const fetchRealMetrics = async (): Promise<MetricValue[]> => {
         icon: "trending-up", 
         color: "blue", 
         delta: 0, 
-        deltaType: "increase" 
+        deltaType: "increase" as const
       },
       { 
         id: "2", 
@@ -197,7 +197,7 @@ export const fetchRealMetrics = async (): Promise<MetricValue[]> => {
         icon: "trending-down", 
         color: "red", 
         delta: 0, 
-        deltaType: "increase" 
+        deltaType: "increase" as const
       },
       { 
         id: "3", 
@@ -207,7 +207,7 @@ export const fetchRealMetrics = async (): Promise<MetricValue[]> => {
         icon: "trending-up", 
         color: "green", 
         delta: 0, 
-        deltaType: "increase" 
+        deltaType: "increase" as const
       },
       { 
         id: "4", 
@@ -217,7 +217,7 @@ export const fetchRealMetrics = async (): Promise<MetricValue[]> => {
         icon: "trending-down", 
         color: "yellow", 
         delta: 0, 
-        deltaType: "increase" 
+        deltaType: "increase" as const
       }
     ];
     
@@ -228,10 +228,10 @@ export const fetchRealMetrics = async (): Promise<MetricValue[]> => {
     console.error('Error fetching live metrics:', error);
     // Return zeros instead of mock data - NEVER MOCK
     return [
-      { id: "1", title: "Live Mentions", value: 0, change: 0, icon: "trending-up", color: "blue", delta: 0, deltaType: "increase" },
-      { id: "2", title: "Negative Sentiment", value: 0, change: 0, icon: "trending-down", color: "red", delta: 0, deltaType: "increase" },
-      { id: "3", title: "Active OSINT Sources", value: 0, change: 0, icon: "trending-up", color: "green", delta: 0, deltaType: "increase" },
-      { id: "4", title: "Live Threat Level", value: 0, change: 0, icon: "trending-down", color: "yellow", delta: 0, deltaType: "increase" }
+      { id: "1", title: "Live Mentions", value: 0, change: 0, icon: "trending-up", color: "blue", delta: 0, deltaType: "increase" as const },
+      { id: "2", title: "Negative Sentiment", value: 0, change: 0, icon: "trending-down", color: "red", delta: 0, deltaType: "increase" as const },
+      { id: "3", title: "Active OSINT Sources", value: 0, change: 0, icon: "trending-up", color: "green", delta: 0, deltaType: "increase" as const },
+      { id: "4", title: "Live Threat Level", value: 0, change: 0, icon: "trending-down", color: "yellow", delta: 0, deltaType: "increase" as const }
     ];
   }
 };
