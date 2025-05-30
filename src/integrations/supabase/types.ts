@@ -6143,6 +6143,7 @@ export type Database = {
           contact_status_updated_by: string | null
           content: string
           created_at: string | null
+          detected_at: string | null
           detected_entities: Json | null
           entity_name: string | null
           freshness_window: string | null
@@ -6185,6 +6186,7 @@ export type Database = {
           contact_status_updated_by?: string | null
           content: string
           created_at?: string | null
+          detected_at?: string | null
           detected_entities?: Json | null
           entity_name?: string | null
           freshness_window?: string | null
@@ -6227,6 +6229,7 @@ export type Database = {
           contact_status_updated_by?: string | null
           content?: string
           created_at?: string | null
+          detected_at?: string | null
           detected_entities?: Json | null
           entity_name?: string | null
           freshness_window?: string | null
@@ -7773,6 +7776,7 @@ export type Database = {
           contact_status_updated_by: string | null
           content: string
           created_at: string | null
+          detected_at: string | null
           detected_entities: Json | null
           entity_name: string | null
           freshness_window: string | null

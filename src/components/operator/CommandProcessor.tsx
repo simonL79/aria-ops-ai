@@ -40,12 +40,26 @@ export const useCommandProcessor = () => {
 
     try {
       if (cmd.includes('scan') || cmd.includes('intelligence') || cmd.includes('osint')) {
-        // Trigger A.R.I.A™ OSINT Intelligence Sweep
+        // Extract target entity from command
+        const words = command.split(' ');
+        const targetEntity = words.slice(-2).join(' '); // Get last 2 words as target
+        
+        console.log(`[OPERATOR] Executing real OSINT scan for: ${targetEntity}`);
+        
+        // Trigger A.R.I.A™ OSINT Intelligence Sweep with actual scan
         const results = await performRealScan({ 
           fullScan: true,
-          source: 'operator_console'
+          source: 'operator_console',
+          targetEntity: targetEntity
         });
-        response = `A.R.I.A™ OSINT Intelligence Sweep completed. Processed ${results.length} intelligence items from live Reddit API and RSS feeds.`;
+        
+        const resultCount = Array.isArray(results) ? results.length : 0;
+        const highRisk = Array.isArray(results) ? results.filter(r => r.severity === 'high').length : 0;
+        const mediumRisk = Array.isArray(results) ? results.filter(r => r.severity === 'medium').length : 0;
+        
+        response = `A.R.I.A™ OSINT Intelligence Sweep completed for "${targetEntity}". Processed ${resultCount} intelligence items from live Reddit API and RSS feeds. Risk breakdown: ${highRisk} high-risk, ${mediumRisk} medium-risk items detected.`;
+        
+        console.log(`[OPERATOR] Scan completed: ${resultCount} results, ${highRisk} high-risk`);
       }
       else if (cmd.includes('anubis status')) {
         const { data } = await supabase.from('anubis_state').select('*');
@@ -110,33 +124,40 @@ export const useCommandProcessor = () => {
     if (!command.trim()) return false;
 
     try {
-      // Insert command directly into operator_command_log
+      // Insert command into database
       const { data: commandData, error: commandError } = await supabase
         .from('operator_command_log')
         .insert({
-          user_id: user?.id,
           command_text: command,
           intent: determineIntent(command),
           target: extractTarget(command),
           priority: determinePriority(command),
-          response_type: 'manual'
+          response_type: 'real_execution'
         })
         .select()
         .single();
 
-      if (commandError) throw commandError;
+      if (commandError) {
+        console.error('Error logging command:', commandError);
+        return false;
+      }
 
-      // Generate response based on command
+      // Execute the actual command
       const response = await executeCommand(command);
 
-      // Insert response
-      await supabase
+      // Log the response
+      const { error: responseError } = await supabase
         .from('operator_response_log')
         .insert({
           command_id: commandData.id,
           response_text: response,
-          processed_by: 'A.R.I.A™ OSINT Console'
+          processed_by: 'A.R.I.A™ OSINT'
         });
+
+      if (responseError) {
+        console.error('Error logging response:', responseError);
+        return false;
+      }
 
       return true;
     } catch (error) {
@@ -145,5 +166,7 @@ export const useCommandProcessor = () => {
     }
   };
 
-  return { processCommand };
+  return {
+    processCommand
+  };
 };
