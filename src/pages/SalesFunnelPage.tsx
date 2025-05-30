@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useAuth } from "@/hooks/useAuth";
 import AdminDashboardWelcome from "@/components/salesFunnel/AdminDashboardWelcome";
@@ -74,7 +73,7 @@ const SalesFunnelPage = () => {
           <div className="relative">
             <div className="relative">
               <img 
-                src="/lovable-uploads/b36d13f8-0edd-4e1b-b360-ea6238533dca.png" 
+                src="/lovable-uploads/25cdb440-ad52-4fdf-a3a0-24ef40720b24.png" 
                 alt="Professional executive portrait"
                 className="w-full max-w-md mx-auto rounded-lg"
               />
