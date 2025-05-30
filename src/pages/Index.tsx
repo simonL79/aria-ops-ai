@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -31,9 +32,11 @@ const Index = () => {
         <div className="container mx-auto px-6">
           <div className="flex items-center justify-between py-4">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-amber-400 to-amber-600 rounded-sm flex items-center justify-center">
-                <div className="w-4 h-4 bg-black rounded-sm"></div>
-              </div>
+              <img 
+                src="/lovable-uploads/37370275-bf62-4eab-b0e3-e184ce3fa142.png" 
+                alt="A.R.I.A Logo" 
+                className="h-8 w-auto"
+              />
               <span className="text-xl font-bold text-white tracking-tight">A.R.I.A™</span>
             </div>
             
@@ -341,9 +344,11 @@ const Index = () => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="space-y-4">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-gradient-to-r from-amber-400 to-amber-600 rounded-sm flex items-center justify-center">
-                  <div className="w-4 h-4 bg-black rounded-sm"></div>
-                </div>
+                <img 
+                  src="/lovable-uploads/37370275-bf62-4eab-b0e3-e184ce3fa142.png" 
+                  alt="A.R.I.A Logo" 
+                  className="h-8 w-auto"
+                />
                 <span className="text-xl font-bold">A.R.I.A™</span>
               </div>
               <p className="text-gray-400">
