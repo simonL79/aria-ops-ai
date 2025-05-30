@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -56,12 +55,13 @@ interface ActionTrigger {
   triggered_at: string;
 }
 
-const SigmaIntelligencePanel = ({ entityName }: SigmaIntelligencePanelProps) => {
+const SigmaIntelligencePanel = ({ entityName = "general_threats" }: SigmaIntelligencePanelProps) => {
   const [threatProfiles, setThreatProfiles] = useState<ThreatProfile[]>([]);
   const [fixPaths, setFixPaths] = useState<FixPath[]>([]);
   const [actionTriggers, setActionTriggers] = useState<ActionTrigger[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isGeneratingLiveData, setIsGeneratingLiveData] = useState(false);
+  const [scanProgress, setScanProgress] = useState(0);
 
   useEffect(() => {
     loadSigmaData();
@@ -72,61 +72,86 @@ const SigmaIntelligencePanel = ({ entityName }: SigmaIntelligencePanelProps) => 
 
   const triggerLiveSigmaScan = async () => {
     setIsGeneratingLiveData(true);
+    setScanProgress(0);
+    
     try {
-      console.log('🔍 Triggering live SIGMA scan...');
+      console.log('🔍 Triggering live SIGMA scan for:', entityName);
+      
+      // Progress update
+      setScanProgress(20);
       toast.info('A.R.I.A™ SIGMA: Initiating live intelligence scan...', {
         description: 'Scanning Reddit, News feeds, and Forums for live threats'
       });
 
-      // Call SIGMA live scanner
+      // Call SIGMA live scanner with better error handling
       const { data: sigmaData, error: sigmaError } = await supabase.functions.invoke('sigmalive', {
         body: { 
-          entity: entityName || 'general_threats',
-          keywords: ['scandal', 'controversy', 'investigation', 'lawsuit'],
+          entity: entityName,
+          keywords: ['scandal', 'controversy', 'investigation', 'lawsuit', 'fraud', 'crisis'],
           depth: 3,
           generateProfile: true
         }
       });
 
+      setScanProgress(60);
+
       if (sigmaError) {
         console.error('SIGMA scan error:', sigmaError);
-        toast.error('SIGMA scan failed', { description: sigmaError.message });
+        toast.error('SIGMA scan encountered issues', { 
+          description: `Some sources failed: ${sigmaError.message}. Continuing with available data.` 
+        });
       } else {
         console.log('✅ SIGMA scan completed:', sigmaData);
         toast.success('SIGMA scan completed', {
-          description: `${sigmaData.scan_results || 0} live threats analyzed`
+          description: `${sigmaData?.scan_results || 0} live threats analyzed`
         });
       }
 
-      // Generate AI fix paths for any threats found
-      if (sigmaData?.threat_profile) {
+      setScanProgress(80);
+
+      // Generate AI fix paths if threats were found
+      if (sigmaData?.threat_profile || (sigmaData?.results && sigmaData.results.length > 0)) {
         console.log('🔧 Generating AI fix paths...');
+        
+        const threatData = sigmaData.threat_profile || {
+          entity_name: entityName,
+          threat_level: 'moderate',
+          risk_score: 0.5
+        };
+
         const { data: fixData, error: fixError } = await supabase.functions.invoke('fixpath-ai', {
           body: {
-            entity: sigmaData.threat_profile.entity_name,
-            threatLevel: sigmaData.threat_profile.threat_level,
-            riskScore: sigmaData.threat_profile.risk_score,
-            threatContext: `Live SIGMA intelligence detected: ${sigmaData.threat_profile.signature_match}`,
+            entity: threatData.entity_name,
+            threatLevel: threatData.threat_level,
+            riskScore: threatData.risk_score,
+            threatContext: `Live SIGMA intelligence detected: ${threatData.signature_match || 'Multiple sources'}`,
             generateActions: true
           }
         });
 
         if (fixError) {
           console.error('Fix path generation error:', fixError);
+          toast.warning('Fix path generation had issues', { description: fixError.message });
         } else {
           console.log('✅ AI fix paths generated:', fixData);
           toast.success('AI Fix Paths generated', {
-            description: `${fixData.steps?.length || 0} tactical steps created`
+            description: `${fixData?.steps?.length || 0} tactical steps created`
           });
         }
       }
 
-      // Reload data after generating
-      await loadSigmaData();
+      setScanProgress(100);
+      
+      // Force refresh data after scan
+      setTimeout(() => {
+        loadSigmaData();
+        setScanProgress(0);
+      }, 1000);
       
     } catch (error) {
       console.error('Live scan error:', error);
-      toast.error('Live scan failed', { description: 'Check console for details' });
+      toast.error('Live scan failed', { description: 'Network error - check console for details' });
+      setScanProgress(0);
     } finally {
       setIsGeneratingLiveData(false);
     }
@@ -135,26 +160,34 @@ const SigmaIntelligencePanel = ({ entityName }: SigmaIntelligencePanelProps) => 
   const loadSigmaData = async () => {
     setIsLoading(true);
     try {
-      // Load threat profiles
-      let profilesQuery = supabase.from('threat_profiles').select('*').order('created_at', { ascending: false });
-      if (entityName) {
-        profilesQuery = profilesQuery.eq('entity_name', entityName);
-      }
-      const { data: profiles } = await profilesQuery.limit(10);
+      // Load threat profiles with better filtering
+      const { data: profiles } = await supabase
+        .from('threat_profiles')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(10);
 
       // Load fix paths
-      let fixPathsQuery = supabase.from('fix_paths').select('*').order('created_at', { ascending: false });
-      if (entityName) {
-        fixPathsQuery = fixPathsQuery.eq('entity_name', entityName);
-      }
-      const { data: paths } = await fixPathsQuery.limit(10);
+      const { data: paths } = await supabase
+        .from('fix_paths')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(10);
 
       // Load action triggers
-      let triggersQuery = supabase.from('action_triggers').select('*').order('triggered_at', { ascending: false });
-      if (entityName) {
-        triggersQuery = triggersQuery.eq('entity_name', entityName);
-      }
-      const { data: triggers } = await triggersQuery.limit(20);
+      const { data: triggers } = await supabase
+        .from('action_triggers')
+        .select('*')
+        .order('triggered_at', { ascending: false })
+        .limit(20);
+
+      // Load recent scan results as backup data
+      const { data: scanResults } = await supabase
+        .from('scan_results')
+        .select('*')
+        .eq('source_type', 'sigma_live')
+        .order('created_at', { ascending: false })
+        .limit(5);
 
       setThreatProfiles(profiles || []);
       
@@ -167,10 +200,11 @@ const SigmaIntelligencePanel = ({ entityName }: SigmaIntelligencePanelProps) => 
       setActionTriggers(triggers || []);
 
       // Log current data state
-      console.log(`📊 SIGMA Data Loaded: ${profiles?.length || 0} threats, ${paths?.length || 0} fix paths, ${triggers?.length || 0} actions`);
+      console.log(`📊 SIGMA Data Loaded: ${profiles?.length || 0} threats, ${paths?.length || 0} fix paths, ${triggers?.length || 0} actions, ${scanResults?.length || 0} scan results`);
       
     } catch (error) {
       console.error('Error loading SIGMA data:', error);
+      toast.error('Failed to load SIGMA data', { description: 'Check console for details' });
     } finally {
       setIsLoading(false);
     }
@@ -195,7 +229,7 @@ const SigmaIntelligencePanel = ({ entityName }: SigmaIntelligencePanelProps) => 
     }
   };
 
-  if (isLoading) {
+  if (isLoading && !isGeneratingLiveData) {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-center py-8">
@@ -214,6 +248,9 @@ const SigmaIntelligencePanel = ({ entityName }: SigmaIntelligencePanelProps) => 
           <CardTitle className="text-purple-400 flex items-center gap-2">
             <Cpu className="h-5 w-5" />
             A.R.I.A™ SIGMA Intelligence Overview
+            <Badge variant="outline" className="ml-2">
+              Target: {entityName}
+            </Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -235,6 +272,17 @@ const SigmaIntelligencePanel = ({ entityName }: SigmaIntelligencePanelProps) => 
               <div className="text-sm text-gray-300">Actions Pending</div>
             </div>
           </div>
+          
+          {/* Progress bar for live scanning */}
+          {isGeneratingLiveData && scanProgress > 0 && (
+            <div className="mb-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-purple-400">Live Intelligence Scan Progress</span>
+                <span className="text-sm text-gray-400">{scanProgress}%</span>
+              </div>
+              <Progress value={scanProgress} className="h-2" />
+            </div>
+          )}
           
           {/* Live Data Generation Controls */}
           <div className="flex gap-4">
@@ -260,6 +308,7 @@ const SigmaIntelligencePanel = ({ entityName }: SigmaIntelligencePanelProps) => 
               onClick={loadSigmaData}
               variant="outline"
               className="border-gray-600 text-gray-300 hover:bg-gray-800"
+              disabled={isGeneratingLiveData}
             >
               <RefreshCw className="mr-2 h-4 w-4" />
               Refresh Data
@@ -269,14 +318,14 @@ const SigmaIntelligencePanel = ({ entityName }: SigmaIntelligencePanelProps) => 
       </Card>
 
       {/* Show message if no data */}
-      {threatProfiles.length === 0 && fixPaths.length === 0 && actionTriggers.length === 0 && (
+      {threatProfiles.length === 0 && fixPaths.length === 0 && actionTriggers.length === 0 && !isGeneratingLiveData && (
         <Card className="bg-[#1A1B1E] border-yellow-600/30">
           <CardContent className="py-8">
             <div className="text-center">
               <Brain className="h-16 w-16 text-yellow-400 mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-white mb-2">No Live Intelligence Data Yet</h3>
               <p className="text-gray-400 mb-4">
-                Click "Generate Live SIGMA Intelligence" to start collecting real-time threat data from Reddit, news feeds, and forums.
+                Click "Generate Live SIGMA Intelligence" to start collecting real-time threat data from Reddit, news feeds, and forums for: <strong>{entityName}</strong>
               </p>
               <Button
                 onClick={triggerLiveSigmaScan}
