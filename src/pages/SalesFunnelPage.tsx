@@ -28,7 +28,7 @@ const SalesFunnelPage = () => {
       <header className="sticky top-0 z-50 w-full bg-black/95 backdrop-blur border-b border-gray-800">
         <div className="container mx-auto px-6">
           <div className="flex items-center justify-between py-4">
-            <Logo variant="light" size="xl" />
+            <Logo variant="light" size="3xl" />
             
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-8">
@@ -196,7 +196,7 @@ const SalesFunnelPage = () => {
                   Send takedown notices for harassment
                 </div>
               </div>
-              <div className="mt-6">
+              <div className="bg-gray-900 border border-gray-600 rounded-lg p-4">
                 <div className="text-sm font-semibold text-white mb-2">Why It Matters</div>
                 <p className="text-xs text-gray-400">
                   Your digital footprint should reflect who you are today — not mistakes, rumors, or misinformation from years ago.
@@ -232,7 +232,7 @@ const SalesFunnelPage = () => {
                   Automated counter-narratives via RSI™
                 </div>
               </div>
-              <div className="mt-6">
+              <div className="bg-gray-900 border border-gray-600 rounded-lg p-4">
                 <div className="text-sm font-semibold text-white mb-2">Why It Matters</div>
                 <p className="text-xs text-gray-400">
                   One viral moment shouldn't define your career. A.R.I.A™ helps you stay ahead of cancel culture, hate mobs, and false narratives.
@@ -268,7 +268,7 @@ const SalesFunnelPage = () => {
                   Legal rights enforcement (GDPR, CCPA, DSR)
                 </div>
               </div>
-              <div className="mt-6">
+              <div className="bg-gray-900 border border-gray-600 rounded-lg p-4">
                 <div className="text-sm font-semibold text-white mb-2">Why It Matters</div>
                 <p className="text-xs text-gray-400">
                   You don't need to be "famous" to be vulnerable. If you've ever Googled yourself and felt uneasy, we're here for you.
