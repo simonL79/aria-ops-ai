@@ -18,6 +18,7 @@ import BlogPostPage from "./pages/BlogPostPage";
 import SimonLindsayPage from "./pages/SimonLindsayPage";
 import Contact from "./pages/Contact";
 import AdminLogin from "./pages/AdminLogin";
+import ThankYouPage from "./pages/ThankYouPage";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/" element={<SalesFunnelPage />} />
           <Route path="/sales-funnel" element={<SalesFunnelPage />} />
           <Route path="/scan" element={<ScanPage />} />
+          <Route path="/thank-you" element={<ThankYouPage />} />
           <Route path="/pricing" element={<PricingPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/blog" element={<BlogPage />} />
