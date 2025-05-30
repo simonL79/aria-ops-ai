@@ -1,10 +1,10 @@
-
 import React from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import PublicLayout from "@/components/layout/PublicLayout";
 import { useBlogPosts } from '@/hooks/useBlogPosts';
-import { ArrowLeft, Calendar, User, Tag, Share, Facebook, Twitter, Linkedin, Mail, Rss } from 'lucide-react';
+import { ArrowLeft, Calendar, User, Tag, Share, Facebook, Twitter, Linkedin, Mail, Rss, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import BlogCard from '@/components/blog/BlogCard';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
@@ -87,16 +87,26 @@ const BlogPostPage = () => {
     );
   }
   
+  const isWhitePaper = post.category === "White Paper" || post.title.includes("[WHITE PAPER]");
+  
   return (
     <PublicLayout>
       <div className="bg-white min-h-screen">
         {/* Hero section with cover image */}
         <div 
-          className="w-full h-[40vh] bg-center bg-cover"
+          className={`w-full h-[40vh] bg-center bg-cover ${isWhitePaper ? 'border-b-4 border-amber-400' : ''}`}
           style={{ backgroundImage: `url(${post.image})` }}
         >
-          <div className="w-full h-full bg-black/50 flex items-center justify-center">
+          <div className={`w-full h-full ${isWhitePaper ? 'bg-amber-900/50' : 'bg-black/50'} flex items-center justify-center`}>
             <div className="container px-6 max-w-4xl text-center text-white">
+              {isWhitePaper && (
+                <div className="mb-4">
+                  <Badge variant="secondary" className="bg-amber-400 text-black font-bold text-sm px-4 py-2">
+                    <FileText className="h-4 w-4 mr-2" />
+                    OFFICIAL WHITE PAPER & DECLARATION
+                  </Badge>
+                </div>
+              )}
               <h1 className="text-4xl md:text-5xl font-bold mb-4">{post.title}</h1>
               <div className="flex items-center justify-center text-sm gap-4">
                 <div className="flex items-center">
@@ -124,6 +134,20 @@ const BlogPostPage = () => {
               Back to all articles
             </Link>
             
+            {isWhitePaper && (
+              <div className="mb-8 p-6 bg-amber-50 border border-amber-200 rounded-lg">
+                <h3 className="text-lg font-bold text-amber-800 mb-2 flex items-center">
+                  <FileText className="h-5 w-5 mr-2" />
+                  Official White Paper Declaration
+                </h3>
+                <p className="text-amber-700">
+                  This document serves as both a technical white paper and an official declaration 
+                  regarding the Eidetic memory system. Timestamp recorded for historical reference 
+                  and intellectual property documentation.
+                </p>
+              </div>
+            )}
+            
             {/* Social sharing buttons */}
             <div className="flex items-center gap-2 mb-8">
               <span className="text-gray-500 text-sm">Share:</span>
@@ -144,7 +168,7 @@ const BlogPostPage = () => {
               </Button>
             </div>
             
-            <div className="prose prose-lg max-w-none">
+            <div className={`prose prose-lg max-w-none ${isWhitePaper ? 'prose-amber' : ''}`}>
               {post.content}
             </div>
             

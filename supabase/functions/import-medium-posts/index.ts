@@ -75,14 +75,20 @@ serve(async (req) => {
         status: "published"
       },
       {
-        title: "Eidetic: Advanced Memory Systems for Digital Reputation",
+        title: "Eidetic: Advanced Memory Systems for Digital Reputation [WHITE PAPER]",
         slug: "eidetic-advanced-memory-systems-digital-reputation",
-        description: "Exploring the cutting-edge memory systems that power A.R.I.A™'s reputation intelligence",
-        content: "Deep dive into the Eidetic memory system and its role in reputation management.",
+        description: "DECLARATION & WHITE PAPER: Exploring the cutting-edge memory systems that power A.R.I.A™'s reputation intelligence - Timestamp: " + new Date().toISOString(),
+        content: `DECLARATION TIMESTAMP: ${new Date().toISOString()}
+
+This white paper serves as both a technical declaration and comprehensive overview of the Eidetic memory system and its revolutionary role in digital reputation management.
+
+Deep dive into the Eidetic memory system and its role in reputation management. This document establishes the foundational principles and technical architecture that powers A.R.I.A™'s advanced memory capabilities.
+
+As of this timestamp, we declare the Eidetic system as a cornerstone technology in the future of digital reputation intelligence.`,
         author: "Simon Lindsay",
-        date: "2024-02-10",
+        date: new Date().toISOString().split('T')[0],
         image: "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=800&h=400&fit=crop",
-        category: "Technology",
+        category: "White Paper",
         status: "published"
       }
     ]
