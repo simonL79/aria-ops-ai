@@ -1,5 +1,3 @@
-
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -487,11 +485,11 @@ const Index = () => {
             </div>
             
             <div>
-              <h4 className="font-semibold mb-4">Legal</h4>
+              <h4 className="font-semibold mb-4">Access</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="/admin/login" className="hover:text-white transition-colors">Client Login</a></li>
+                <li><a href="/admin/login" className="hover:text-white transition-colors">Admin Login</a></li>
                 <li><a href="/dashboard" className="hover:text-white transition-colors">Dashboard</a></li>
-                <li><a href="/auth" className="hover:text-white transition-colors">Authentication</a></li>
+                <li><a href="/contact" className="hover:text-white transition-colors">Get Started</a></li>
               </ul>
             </div>
           </div>
@@ -506,4 +504,3 @@ const Index = () => {
 };
 
 export default Index;
-
