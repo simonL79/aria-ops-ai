@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import ReputationScore from "@/components/dashboard/ReputationScore";
@@ -12,6 +11,7 @@ import IntelligenceCollection from "@/components/dashboard/IntelligenceCollectio
 import ContentFilter from "@/components/dashboard/ContentFilter";
 import InfoTooltip from "@/components/dashboard/InfoTooltip";
 import SERPDefensePanel from "@/components/dashboard/SERPDefensePanel";
+import EntitySummaryPanel from "@/components/dashboard/EntitySummaryPanel";
 import { Button } from "@/components/ui/button";
 import { RefreshCw, AlertTriangle, CheckCircle } from "lucide-react";
 import { DashboardMainContentProps } from "@/types/dashboard";
@@ -144,7 +144,7 @@ const DashboardMainContent = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
             <div className="lg:col-span-1">
               <div className="space-y-6">
                 <div className="flex items-center">
@@ -167,12 +167,16 @@ const DashboardMainContent = ({
                   <ContentFilter onFilterChange={onFilterChange} />
                 </div>
                 
-                {/* ALWAYS SHOW CONTENT ALERTS - this is where your 15 threats should appear */}
+                {/* ALWAYS SHOW CONTENT ALERTS - this is where your threats should appear */}
                 <ContentAlerts 
                   alerts={filteredAlerts && filteredAlerts.length > 0 ? filteredAlerts : displayAlerts} 
                   isLoading={loading}
                 />
               </div>
+            </div>
+
+            <div className="lg:col-span-1">
+              <EntitySummaryPanel alerts={displayAlerts} />
             </div>
           </div>
           

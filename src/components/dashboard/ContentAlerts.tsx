@@ -1,11 +1,11 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, ExternalLink, Eye, CheckCircle, Ban, MessageSquare } from "lucide-react";
+import { AlertTriangle, ExternalLink, Eye, CheckCircle, Ban, MessageSquare, User, Building, AtSign, Mail, Globe } from "lucide-react";
 import { ContentAlert } from "@/types/dashboard";
 import { requestContentRemoval, markAlertAsRead } from "@/services/contentActionService";
+import { EntityExtractor, ExtractedEntity } from "@/services/entityExtraction/entityExtractor";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 
@@ -33,6 +33,28 @@ const ContentAlerts = ({ alerts, isLoading }: ContentAlertsProps) => {
       case 'positive': return 'text-green-600';
       case 'threatening': return 'text-red-800 font-bold';
       default: return 'text-gray-600';
+    }
+  };
+
+  const getEntityIcon = (type: ExtractedEntity['type']) => {
+    switch (type) {
+      case 'person': return <User className="h-3 w-3" />;
+      case 'company': return <Building className="h-3 w-3" />;
+      case 'social_handle': return <AtSign className="h-3 w-3" />;
+      case 'email': return <Mail className="h-3 w-3" />;
+      case 'website': return <Globe className="h-3 w-3" />;
+      default: return <User className="h-3 w-3" />;
+    }
+  };
+
+  const getEntityColor = (type: ExtractedEntity['type']) => {
+    switch (type) {
+      case 'person': return 'bg-blue-50 text-blue-700 border-blue-200';
+      case 'company': return 'bg-green-50 text-green-700 border-green-200';
+      case 'social_handle': return 'bg-purple-50 text-purple-700 border-purple-200';
+      case 'email': return 'bg-orange-50 text-orange-700 border-orange-200';
+      case 'website': return 'bg-gray-50 text-gray-700 border-gray-200';
+      default: return 'bg-gray-50 text-gray-700 border-gray-200';
     }
   };
 
@@ -117,14 +139,16 @@ const ContentAlerts = ({ alerts, isLoading }: ContentAlertsProps) => {
     );
   }
 
-  // Filter for only live OSINT data
-  const liveAlerts = alerts.filter(alert => 
-    alert.sourceType === 'live_osint' || 
-    alert.sourceType === 'live_scan' || 
-    alert.sourceType === 'osint_intelligence' ||
-    alert.platform === 'Reddit' ||
-    alert.platform === 'RSS'
-  );
+  // Filter for only live OSINT data and process entities
+  const liveAlerts = alerts
+    .filter(alert => 
+      alert.sourceType === 'live_osint' || 
+      alert.sourceType === 'live_scan' || 
+      alert.sourceType === 'osint_intelligence' ||
+      alert.platform === 'Reddit' ||
+      alert.platform === 'RSS'
+    )
+    .map(alert => EntityExtractor.processAlert(alert));
 
   if (liveAlerts.length === 0) {
     return (
@@ -191,6 +215,32 @@ const ContentAlerts = ({ alerts, isLoading }: ContentAlertsProps) => {
                 {alert.content}
               </p>
 
+              {/* Enhanced Entity Display */}
+              {alert.extractedEntities && alert.extractedEntities.length > 0 && (
+                <div className="mb-3 p-3 bg-gray-50 rounded-lg border">
+                  <h4 className="text-xs font-medium text-gray-600 mb-2">Detected Entities:</h4>
+                  <div className="grid grid-cols-1 gap-2">
+                    {alert.extractedEntities.slice(0, 6).map((entity, index) => (
+                      <div key={index} className="flex items-center gap-2">
+                        <Badge variant="outline" className={`text-xs ${getEntityColor(entity.type)}`}>
+                          <div className="flex items-center gap-1">
+                            {getEntityIcon(entity.type)}
+                            <span className="capitalize">{entity.type.replace('_', ' ')}</span>
+                          </div>
+                        </Badge>
+                        <span className="text-sm font-medium">{entity.name}</span>
+                        <span className="text-xs text-gray-500">({Math.round(entity.confidence * 100)}%)</span>
+                      </div>
+                    ))}
+                    {alert.extractedEntities.length > 6 && (
+                      <div className="text-xs text-gray-500">
+                        +{alert.extractedEntities.length - 6} more entities detected
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4 text-xs text-gray-500">
                   {alert.sentiment && (
@@ -245,26 +295,6 @@ const ContentAlerts = ({ alerts, isLoading }: ContentAlertsProps) => {
                   </Button>
                 </div>
               </div>
-
-              {alert.detectedEntities && alert.detectedEntities.length > 0 && (
-                <div className="mt-3 pt-3 border-t">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-medium text-gray-600">Entities:</span>
-                    <div className="flex gap-1 flex-wrap">
-                      {alert.detectedEntities.slice(0, 3).map((entity, index) => (
-                        <Badge key={index} variant="secondary" className="text-xs">
-                          {entity}
-                        </Badge>
-                      ))}
-                      {alert.detectedEntities.length > 3 && (
-                        <Badge variant="secondary" className="text-xs">
-                          +{alert.detectedEntities.length - 3} more
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           ))}
         </div>
