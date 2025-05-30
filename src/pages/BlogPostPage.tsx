@@ -1,8 +1,10 @@
+
 import React from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import PublicLayout from "@/components/layout/PublicLayout";
 import { useBlogPosts } from '@/hooks/useBlogPosts';
-import { ArrowLeft, Calendar, User, Tag, Share, Facebook, Twitter, Linkedin, Mail, Rss, FileText } from 'lucide-react';
+import { ArrowLeft, Calendar, User, Tag, Share, Facebook, Twitter, Linkedin, Mail, Rss, FileText, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import BlogCard from '@/components/blog/BlogCard';
@@ -89,152 +91,197 @@ const BlogPostPage = () => {
   
   const isWhitePaper = post.category === "White Paper" || post.title.includes("[WHITE PAPER]");
   
+  // SEO meta data
+  const metaTitle = post.meta_title || post.title;
+  const metaDescription = post.meta_description || post.description || `${post.title} - A.R.I.A™ Blog`;
+  const metaKeywords = post.meta_keywords || `${post.category}, A.R.I.A, reputation management, AI`;
+  const canonicalUrl = `${window.location.origin}/blog/${post.slug}`;
+  
   return (
-    <PublicLayout>
-      <div className="bg-white min-h-screen">
-        {/* Hero section with cover image */}
-        <div 
-          className={`w-full h-[40vh] bg-center bg-cover ${isWhitePaper ? 'border-b-4 border-amber-400' : ''}`}
-          style={{ backgroundImage: `url(${post.image})` }}
-        >
-          <div className={`w-full h-full ${isWhitePaper ? 'bg-amber-900/50' : 'bg-black/50'} flex items-center justify-center`}>
-            <div className="container px-6 max-w-4xl text-center text-white">
-              {isWhitePaper && (
-                <div className="mb-4">
-                  <Badge variant="secondary" className="bg-amber-400 text-black font-bold text-sm px-4 py-2">
-                    <FileText className="h-4 w-4 mr-2" />
-                    OFFICIAL WHITE PAPER & DECLARATION
-                  </Badge>
-                </div>
-              )}
-              <h1 className="text-4xl md:text-5xl font-bold mb-4">{post.title}</h1>
-              <div className="flex items-center justify-center text-sm gap-4">
-                <div className="flex items-center">
-                  <Calendar className="h-4 w-4 mr-1" />
-                  {post.date}
-                </div>
-                <div className="flex items-center">
-                  <User className="h-4 w-4 mr-1" />
-                  {post.author}
-                </div>
-                <div className="flex items-center">
-                  <Tag className="h-4 w-4 mr-1" />
-                  {post.category}
+    <>
+      <Helmet>
+        <title>{metaTitle}</title>
+        <meta name="description" content={metaDescription} />
+        <meta name="keywords" content={metaKeywords} />
+        <meta property="og:title" content={metaTitle} />
+        <meta property="og:description" content={metaDescription} />
+        <meta property="og:image" content={post.image} />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:type" content="article" />
+        <meta property="article:author" content={post.author} />
+        <meta property="article:published_time" content={post.date} />
+        <meta property="article:section" content={post.category} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={metaTitle} />
+        <meta name="twitter:description" content={metaDescription} />
+        <meta name="twitter:image" content={post.image} />
+        <link rel="canonical" href={canonicalUrl} />
+      </Helmet>
+      
+      <PublicLayout>
+        <div className="bg-white min-h-screen">
+          {/* Hero section with cover image */}
+          <div 
+            className={`w-full h-[40vh] bg-center bg-cover ${isWhitePaper ? 'border-b-4 border-amber-400' : ''}`}
+            style={{ backgroundImage: `url(${post.image})` }}
+          >
+            <div className={`w-full h-full ${isWhitePaper ? 'bg-amber-900/50' : 'bg-black/50'} flex items-center justify-center`}>
+              <div className="container px-6 max-w-4xl text-center text-white">
+                {isWhitePaper && (
+                  <div className="mb-4">
+                    <Badge variant="secondary" className="bg-amber-400 text-black font-bold text-sm px-4 py-2">
+                      <FileText className="h-4 w-4 mr-2" />
+                      OFFICIAL WHITE PAPER & DECLARATION
+                    </Badge>
+                  </div>
+                )}
+                <h1 className="text-4xl md:text-5xl font-bold mb-4">{post.title}</h1>
+                <div className="flex items-center justify-center text-sm gap-4">
+                  <div className="flex items-center">
+                    <Calendar className="h-4 w-4 mr-1" />
+                    {post.date}
+                  </div>
+                  <div className="flex items-center">
+                    <User className="h-4 w-4 mr-1" />
+                    {post.author}
+                  </div>
+                  <div className="flex items-center">
+                    <Tag className="h-4 w-4 mr-1" />
+                    {post.category}
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-        
-        {/* Blog content */}
-        <div className="container mx-auto px-6 py-12">
-          <div className="max-w-3xl mx-auto">
-            <Link to="/blog" className="flex items-center text-blue-600 mb-8">
-              <ArrowLeft className="h-4 w-4 mr-1" />
-              Back to all articles
-            </Link>
-            
-            {isWhitePaper && (
-              <div className="mb-8 p-6 bg-amber-50 border border-amber-200 rounded-lg">
-                <h3 className="text-lg font-bold text-amber-800 mb-2 flex items-center">
-                  <FileText className="h-5 w-5 mr-2" />
-                  Official White Paper Declaration
-                </h3>
-                <p className="text-amber-700">
-                  This document serves as both a technical white paper and an official declaration 
-                  regarding the Eidetic memory system. Timestamp recorded for historical reference 
-                  and intellectual property documentation.
-                </p>
-              </div>
-            )}
-            
-            {/* Social sharing buttons */}
-            <div className="flex items-center gap-2 mb-8">
-              <span className="text-gray-500 text-sm">Share:</span>
-              <Button variant="outline" size="icon" onClick={() => handleShare("facebook")} title="Share on Facebook">
-                <Facebook className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="icon" onClick={() => handleShare("twitter")} title="Share on Twitter">
-                <Twitter className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="icon" onClick={() => handleShare("linkedin")} title="Share on LinkedIn">
-                <Linkedin className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="icon" onClick={() => handleShare("email")} title="Share via Email">
-                <Mail className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="icon" onClick={() => handleShare("copy")} title="Copy link">
-                <Share className="h-4 w-4" />
-              </Button>
-            </div>
-            
-            <div className={`prose prose-lg max-w-none ${isWhitePaper ? 'prose-amber' : ''}`}>
-              {post.content}
-            </div>
-            
-            {/* Author info with headshot */}
-            <div className="mt-12 pt-8 border-t border-gray-200 flex gap-6">
-              <Avatar className="h-20 w-20">
-                <AvatarImage src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2071&q=80" alt="Simon Lindsay" />
-                <AvatarFallback>SL</AvatarFallback>
-              </Avatar>
-              <div>
-                <h3 className="text-xl font-bold mb-2">About Simon Lindsay</h3>
-                <p className="text-gray-600">
-                  Simon Lindsay is the founder of A.R.I.A™ and a pioneer in applying artificial intelligence to reputation management. 
-                  With over 15 years of experience in digital risk mitigation, Simon has protected the online presence of 
-                  Fortune 500 executives, celebrities, and high-profile entrepreneurs.
-                </p>
-              </div>
-            </div>
-            
-            {/* Email subscription form */}
-            <div className="mt-12 pt-8 border-t border-gray-200 bg-gray-50 p-6 rounded-lg">
-              <h3 className="text-xl font-bold mb-2">Subscribe to Our Newsletter</h3>
-              <p className="text-gray-600 mb-4">
-                Get the latest insights on AI-powered digital protection delivered to your inbox.
-              </p>
-              <form className="flex gap-2 flex-col sm:flex-row" onSubmit={(e) => {
-                e.preventDefault();
-                toast.success("Thank you for subscribing!");
-                const form = e.target as HTMLFormElement;
-                form.reset();
-              }}>
-                <input 
-                  type="email" 
-                  placeholder="Enter your email" 
-                  className="border border-gray-300 px-4 py-2 rounded flex-grow"
-                  required
-                />
-                <Button type="submit">Subscribe</Button>
-              </form>
             </div>
           </div>
           
-          {/* Related posts */}
-          {relatedPosts.length > 0 && (
-            <div className="mt-16 pt-8 border-t border-gray-200">
-              <div className="max-w-7xl mx-auto">
-                <h2 className="text-2xl font-bold mb-8">Related Articles</h2>
-                <div className="grid md:grid-cols-3 gap-8">
-                  {relatedPosts.map((post) => (
-                    <BlogCard
-                      key={post.slug}
-                      title={post.title}
-                      description={post.description}
-                      image={post.image}
-                      date={post.date}
-                      category={post.category}
-                      slug={post.slug}
-                    />
-                  ))}
+          {/* Blog content */}
+          <div className="container mx-auto px-6 py-12">
+            <div className="max-w-3xl mx-auto">
+              <Link to="/blog" className="flex items-center text-blue-600 mb-8">
+                <ArrowLeft className="h-4 w-4 mr-1" />
+                Back to all articles
+              </Link>
+              
+              {/* Medium Article Backlink */}
+              {post.medium_url && (
+                <div className="mb-8 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <ExternalLink className="h-4 w-4" />
+                    <span>Originally published on Medium:</span>
+                    <a 
+                      href={post.medium_url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-800 font-medium"
+                    >
+                      Read on Medium
+                    </a>
+                  </div>
+                </div>
+              )}
+              
+              {isWhitePaper && (
+                <div className="mb-8 p-6 bg-amber-50 border border-amber-200 rounded-lg">
+                  <h3 className="text-lg font-bold text-amber-800 mb-2 flex items-center">
+                    <FileText className="h-5 w-5 mr-2" />
+                    Official White Paper Declaration
+                  </h3>
+                  <p className="text-amber-700">
+                    This document serves as both a technical white paper and an official declaration 
+                    regarding the Eidetic memory system. Timestamp recorded for historical reference 
+                    and intellectual property documentation.
+                  </p>
+                </div>
+              )}
+              
+              {/* Social sharing buttons */}
+              <div className="flex items-center gap-2 mb-8">
+                <span className="text-gray-500 text-sm">Share:</span>
+                <Button variant="outline" size="icon" onClick={() => handleShare("facebook")} title="Share on Facebook">
+                  <Facebook className="h-4 w-4" />
+                </Button>
+                <Button variant="outline" size="icon" onClick={() => handleShare("twitter")} title="Share on Twitter">
+                  <Twitter className="h-4 w-4" />
+                </Button>
+                <Button variant="outline" size="icon" onClick={() => handleShare("linkedin")} title="Share on LinkedIn">
+                  <Linkedin className="h-4 w-4" />
+                </Button>
+                <Button variant="outline" size="icon" onClick={() => handleShare("email")} title="Share via Email">
+                  <Mail className="h-4 w-4" />
+                </Button>
+                <Button variant="outline" size="icon" onClick={() => handleShare("copy")} title="Copy link">
+                  <Share className="h-4 w-4" />
+                </Button>
+              </div>
+              
+              <div className={`prose prose-lg max-w-none ${isWhitePaper ? 'prose-amber' : ''}`}>
+                {post.content}
+              </div>
+              
+              {/* Author info with headshot */}
+              <div className="mt-12 pt-8 border-t border-gray-200 flex gap-6">
+                <Avatar className="h-20 w-20">
+                  <AvatarImage src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2071&q=80" alt="Simon Lindsay" />
+                  <AvatarFallback>SL</AvatarFallback>
+                </Avatar>
+                <div>
+                  <h3 className="text-xl font-bold mb-2">About Simon Lindsay</h3>
+                  <p className="text-gray-600">
+                    Simon Lindsay is the founder of A.R.I.A™ and a pioneer in applying artificial intelligence to reputation management. 
+                    With over 15 years of experience in digital risk mitigation, Simon has protected the online presence of 
+                    Fortune 500 executives, celebrities, and high-profile entrepreneurs.
+                  </p>
                 </div>
               </div>
+              
+              {/* Email subscription form */}
+              <div className="mt-12 pt-8 border-t border-gray-200 bg-gray-50 p-6 rounded-lg">
+                <h3 className="text-xl font-bold mb-2">Subscribe to Our Newsletter</h3>
+                <p className="text-gray-600 mb-4">
+                  Get the latest insights on AI-powered digital protection delivered to your inbox.
+                </p>
+                <form className="flex gap-2 flex-col sm:flex-row" onSubmit={(e) => {
+                  e.preventDefault();
+                  toast.success("Thank you for subscribing!");
+                  const form = e.target as HTMLFormElement;
+                  form.reset();
+                }}>
+                  <input 
+                    type="email" 
+                    placeholder="Enter your email" 
+                    className="border border-gray-300 px-4 py-2 rounded flex-grow"
+                    required
+                  />
+                  <Button type="submit">Subscribe</Button>
+                </form>
+              </div>
             </div>
-          )}
+            
+            {/* Related posts */}
+            {relatedPosts.length > 0 && (
+              <div className="mt-16 pt-8 border-t border-gray-200">
+                <div className="max-w-7xl mx-auto">
+                  <h2 className="text-2xl font-bold mb-8">Related Articles</h2>
+                  <div className="grid md:grid-cols-3 gap-8">
+                    {relatedPosts.map((post) => (
+                      <BlogCard
+                        key={post.slug}
+                        title={post.title}
+                        description={post.description}
+                        image={post.image}
+                        date={post.date}
+                        category={post.category}
+                        slug={post.slug}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-    </PublicLayout>
+      </PublicLayout>
+    </>
   );
 };
 

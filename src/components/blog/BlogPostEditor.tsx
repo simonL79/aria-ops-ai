@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,6 +20,10 @@ interface BlogPost {
   image: string;
   category: string;
   status: 'draft' | 'published';
+  meta_title?: string;
+  meta_description?: string;
+  meta_keywords?: string;
+  medium_url?: string;
 }
 
 interface BlogPostEditorProps {
@@ -39,7 +42,11 @@ const BlogPostEditor = ({ post, onCancel, onSave }: BlogPostEditorProps) => {
     date: new Date().toISOString().split('T')[0],
     image: 'https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=800&h=400&fit=crop',
     category: 'Technology',
-    status: 'draft'
+    status: 'draft',
+    meta_title: '',
+    meta_description: '',
+    meta_keywords: '',
+    medium_url: ''
   });
 
   const [isSaving, setIsSaving] = useState(false);
@@ -66,7 +73,9 @@ const BlogPostEditor = ({ post, onCancel, onSave }: BlogPostEditorProps) => {
         .trim();
       setFormData(prev => ({
         ...prev,
-        slug
+        slug,
+        meta_title: value || prev.meta_title, // Auto-fill meta title if empty
+        meta_description: prev.meta_description || `${value.substring(0, 150)}...` // Auto-fill meta description if empty
       }));
     }
   };
@@ -96,6 +105,10 @@ const BlogPostEditor = ({ post, onCancel, onSave }: BlogPostEditorProps) => {
             image: formData.image,
             category: formData.category,
             status: formData.status,
+            meta_title: formData.meta_title,
+            meta_description: formData.meta_description,
+            meta_keywords: formData.meta_keywords,
+            medium_url: formData.medium_url,
             updated_at: new Date().toISOString()
           })
           .eq('id', post.id);
@@ -120,7 +133,11 @@ const BlogPostEditor = ({ post, onCancel, onSave }: BlogPostEditorProps) => {
             date: formData.date,
             image: formData.image,
             category: formData.category,
-            status: formData.status
+            status: formData.status,
+            meta_title: formData.meta_title,
+            meta_description: formData.meta_description,
+            meta_keywords: formData.meta_keywords,
+            medium_url: formData.medium_url
           });
 
         if (error) {
@@ -196,6 +213,65 @@ const BlogPostEditor = ({ post, onCancel, onSave }: BlogPostEditorProps) => {
             placeholder="Write your blog post content here..."
             rows={10}
           />
+        </div>
+
+        {/* SEO Meta Tags Section */}
+        <div className="border-t pt-6">
+          <h3 className="text-lg font-semibold mb-4">SEO Meta Tags</h3>
+          
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="meta_title">Meta Title</Label>
+              <Input
+                id="meta_title"
+                value={formData.meta_title || ''}
+                onChange={(e) => handleInputChange('meta_title', e.target.value)}
+                placeholder="SEO title (leave empty to use post title)"
+                maxLength={60}
+              />
+              <p className="text-xs text-gray-500 mt-1">Recommended: 50-60 characters</p>
+            </div>
+            
+            <div>
+              <Label htmlFor="meta_description">Meta Description</Label>
+              <Textarea
+                id="meta_description"
+                value={formData.meta_description || ''}
+                onChange={(e) => handleInputChange('meta_description', e.target.value)}
+                placeholder="SEO meta description"
+                rows={2}
+                maxLength={160}
+              />
+              <p className="text-xs text-gray-500 mt-1">Recommended: 150-160 characters</p>
+            </div>
+            
+            <div>
+              <Label htmlFor="meta_keywords">Meta Keywords</Label>
+              <Input
+                id="meta_keywords"
+                value={formData.meta_keywords || ''}
+                onChange={(e) => handleInputChange('meta_keywords', e.target.value)}
+                placeholder="keyword1, keyword2, keyword3"
+              />
+              <p className="text-xs text-gray-500 mt-1">Separate keywords with commas</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Medium Article Link Section */}
+        <div className="border-t pt-6">
+          <h3 className="text-lg font-semibold mb-4">Medium Article Link</h3>
+          
+          <div>
+            <Label htmlFor="medium_url">Medium Article URL</Label>
+            <Input
+              id="medium_url"
+              value={formData.medium_url || ''}
+              onChange={(e) => handleInputChange('medium_url', e.target.value)}
+              placeholder="https://medium.com/@username/article-title"
+            />
+            <p className="text-xs text-gray-500 mt-1">Link to the original Medium article</p>
+          </div>
         </div>
 
         <div className="grid grid-cols-3 gap-4">
