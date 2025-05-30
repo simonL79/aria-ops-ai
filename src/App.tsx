@@ -19,14 +19,14 @@ const App = () => (
       <Toaster />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<DashboardPage />} />
+          <Route path="/" element={<SalesFunnelPage />} />
+          <Route path="/sales-funnel" element={<SalesFunnelPage />} />
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/threats" element={<ThreatsPage />} />
           <Route path="/monitoring" element={<MonitoringPage />} />
           <Route path="/intelligence" element={<IntelligencePage />} />
           <Route path="/engagement-hub" element={<EngagementHubPage />} />
           <Route path="/operator-console" element={<OperatorConsole />} />
-          <Route path="/sales-funnel" element={<SalesFunnelPage />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
