@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useAuth } from "@/hooks/useAuth";
 import AdminDashboardWelcome from "@/components/salesFunnel/AdminDashboardWelcome";
@@ -162,26 +161,34 @@ const SalesFunnelPage = () => {
                 <Shield className="w-8 h-8 text-orange-500 mr-3" />
                 <h3 className="text-xl font-bold text-orange-500">Social Media Protection</h3>
               </div>
-              <p className="text-gray-300 mb-6">
-                Real-time hunting of threats across every platform and instant defense against abuse.
+              <p className="text-gray-300 mb-4">
+                <strong>Ideal for:</strong> Everyday users, community leaders, students, professionals
               </p>
-              <div className="space-y-3">
+              <div className="space-y-3 mb-6">
+                <div className="text-sm font-semibold text-white">What We Do</div>
                 <div className="flex items-center text-sm text-gray-300">
                   <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
-                  Monitor threats across Facebook, Twitter, LinkedIn, Instagram, YouTube & TikTok
+                  Monitor threats across X (Twitter), Reddit, TikTok, and Instagram
                 </div>
                 <div className="flex items-center text-sm text-gray-300">
                   <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
-                  Instant alerts sent to A.R.I.A.™ and yourself for real-time protection
+                  Suppress legacy content via GRAVEYARD™ & EIDETIC™
                 </div>
                 <div className="flex items-center text-sm text-gray-300">
                   <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
-                  GDPR requests combined with algorithmic manipulation
+                  Counter disinformation campaigns in real time
+                </div>
+                <div className="flex items-center text-sm text-gray-300">
+                  <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
+                  Send takedown notices for harassment
                 </div>
               </div>
-              <p className="text-xs text-gray-400 mt-6 italic">
-                Imagine having your very best friend watch your back 24/7 online. That's what our tech products is for VIP people.
-              </p>
+              <div className="mt-6">
+                <div className="text-sm font-semibold text-white mb-2">Why It Matters</div>
+                <p className="text-xs text-gray-400">
+                  Your digital footprint should reflect who you are today — not mistakes, rumors, or misinformation from years ago.
+                </p>
+              </div>
             </Card>
 
             {/* Influencer & Creator */}
