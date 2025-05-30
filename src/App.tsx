@@ -12,6 +12,7 @@ import OperatorConsole from "./pages/OperatorConsole";
 import Authentication from "./pages/Authentication";
 import AdminLogin from "./pages/AdminLogin";
 import DashboardPage from "./pages/dashboard/DashboardPage";
+import AnalyticsPage from "./pages/AnalyticsPage";
 import QATestPage from "./pages/QATestPage";
 import NotFound from "./pages/NotFound";
 import "./App.css";
@@ -29,6 +30,7 @@ const App = () => (
           <Route path="/auth" element={<Authentication />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/analytics" element={<AnalyticsPage />} />
           <Route path="/qa-test" element={<QATestPage />} />
           <Route path="/admin/*" element={<AdminDashboard />} />
           <Route path="/anubis-gpt" element={<AnubisGPTCockpit />} />
