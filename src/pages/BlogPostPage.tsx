@@ -5,37 +5,86 @@ import PublicLayout from "@/components/layout/PublicLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, User, ArrowLeft } from "lucide-react";
+import { useBlogPosts } from "@/hooks/useBlogPosts";
 
 const BlogPostPage = () => {
   const { slug } = useParams();
+  const { blogPosts, loading, error } = useBlogPosts();
 
-  // Mock blog post data - in a real app, this would come from an API
-  const blogPost = {
-    title: "The Future of Digital Reputation Management",
-    content: `
-      <p>In today's interconnected digital landscape, your online reputation can make or break your personal and professional success. As we advance into 2024, artificial intelligence is revolutionizing how we approach reputation management, shifting from reactive damage control to proactive threat prevention.</p>
-      
-      <h2>The Evolution of Reputation Management</h2>
-      <p>Traditional reputation management was largely reactive - waiting for negative content to appear before taking action. This approach left individuals and organizations vulnerable to significant damage before any remediation could begin.</p>
-      
-      <h2>AI-Powered Proactive Protection</h2>
-      <p>Modern AI systems like A.R.I.A™ can monitor millions of data points across the digital ecosystem, identifying potential threats before they materialize into crisis situations. This proactive approach represents a fundamental shift in how we think about reputation protection.</p>
-      
-      <h2>Key Benefits of AI-Driven Systems</h2>
-      <ul>
-        <li>Real-time monitoring across multiple platforms and sources</li>
-        <li>Predictive analytics to identify emerging threats</li>
-        <li>Automated response systems for immediate threat neutralization</li>
-        <li>Comprehensive risk assessment and strategic planning</li>
-      </ul>
-      
-      <h2>The Future Landscape</h2>
-      <p>As AI technology continues to evolve, we can expect even more sophisticated reputation intelligence systems that not only protect but actively enhance online presence and credibility.</p>
-    `,
-    date: "December 15, 2024",
-    author: "Simon Lindsay",
-    category: "Technology",
-    readTime: "5 min read"
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black text-white">
+        <PublicLayout>
+          <div className="py-16">
+            <div className="container mx-auto px-6">
+              <div className="max-w-3xl mx-auto">
+                <div className="text-center py-10">
+                  <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-orange-500 mx-auto mb-4"></div>
+                  <p className="text-lg text-gray-300">Loading blog post...</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </PublicLayout>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-black text-white">
+        <PublicLayout>
+          <div className="py-16">
+            <div className="container mx-auto px-6">
+              <div className="max-w-3xl mx-auto">
+                <div className="text-center py-10 text-red-500">
+                  <p className="text-lg">Error loading blog post: {error}</p>
+                  <Button asChild variant="ghost" className="mt-4 text-orange-500 hover:text-orange-400">
+                    <Link to="/blog">← Back to Blog</Link>
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </PublicLayout>
+      </div>
+    );
+  }
+
+  const blogPost = blogPosts.find(post => post.slug === slug);
+
+  if (!blogPost) {
+    return (
+      <div className="min-h-screen bg-black text-white">
+        <PublicLayout>
+          <div className="py-16">
+            <div className="container mx-auto px-6">
+              <div className="max-w-3xl mx-auto">
+                <div className="text-center py-10">
+                  <h1 className="text-3xl font-bold mb-4 text-white">Blog Post Not Found</h1>
+                  <p className="text-gray-300 mb-6">The blog post you're looking for doesn't exist.</p>
+                  <Button asChild variant="ghost" className="text-orange-500 hover:text-orange-400">
+                    <Link to="/blog">← Back to Blog</Link>
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </PublicLayout>
+      </div>
+    );
+  }
+
+  // Convert markdown-style content to HTML
+  const formatContent = (content: string) => {
+    return content
+      .replace(/## (.*?)$/gm, '<h2 class="text-2xl font-bold mt-8 mb-4 text-white">$1</h2>')
+      .replace(/### (.*?)$/gm, '<h3 class="text-xl font-semibold mt-6 mb-3 text-orange-500">$1</h3>')
+      .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-white">$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
+      .replace(/\n\n/g, '</p><p class="mb-4">')
+      .replace(/^/, '<p class="mb-4">')
+      .replace(/$/, '</p>');
   };
 
   return (
@@ -68,14 +117,13 @@ const BlogPostPage = () => {
                       <User className="h-4 w-4" />
                       {blogPost.author}
                     </div>
-                    <span>{blogPost.readTime}</span>
                   </div>
                 </header>
 
                 <div className="prose prose-invert prose-lg max-w-none">
                   <div 
                     className="text-gray-300 leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: blogPost.content }}
+                    dangerouslySetInnerHTML={{ __html: formatContent(blogPost.content || '') }}
                   />
                 </div>
 
