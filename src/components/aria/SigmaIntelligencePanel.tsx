@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -89,7 +88,14 @@ const SigmaIntelligencePanel = ({ entityName }: SigmaIntelligencePanelProps) => 
       const { data: triggers } = await triggersQuery.limit(20);
 
       setThreatProfiles(profiles || []);
-      setFixPaths(paths || []);
+      
+      // Fix the type conversion for fix paths
+      const typedFixPaths = (paths || []).map(path => ({
+        ...path,
+        steps: Array.isArray(path.steps) ? path.steps : []
+      }));
+      setFixPaths(typedFixPaths);
+      
       setActionTriggers(triggers || []);
     } catch (error) {
       console.error('Error loading SIGMA data:', error);
