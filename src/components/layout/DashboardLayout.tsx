@@ -30,7 +30,10 @@ import {
   FileText,
   TrendingUp,
   AlertTriangle,
-  Shield
+  Shield,
+  Terminal,
+  Zap,
+  TestTube
 } from 'lucide-react';
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { useAuth } from '@/hooks/useAuth';
@@ -122,6 +125,18 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       active: pathname === "/clean-launch",
     },
     {
+      label: "Anubis GPT Cockpit",
+      icon: <Brain className="h-4 w-4" />,
+      href: "/anubis-gpt",
+      active: pathname === "/anubis-gpt",
+    },
+    {
+      label: "Operator Console",
+      icon: <Terminal className="h-4 w-4" />,
+      href: "/operator-console",
+      active: pathname === "/operator-console",
+    },
+    {
       label: "Blog",
       icon: <FileText className="h-4 w-4" />,
       href: "/blog",
@@ -134,16 +149,16 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       active: pathname === "/reputation-scan",
     },
     {
+      label: "QA Testing",
+      icon: <TestTube className="h-4 w-4" />,
+      href: "/qa-test",
+      active: pathname === "/qa-test",
+    },
+    {
       label: "Admin",
       icon: <Shield className="h-4 w-4" />,
       href: "/admin",
       active: pathname === "/admin",
-    },
-    {
-      label: "QA Testing",
-      icon: <AlertTriangle className="h-4 w-4" />,
-      href: "/qa-test",
-      active: pathname === "/qa-test",
     }
   ];
 
