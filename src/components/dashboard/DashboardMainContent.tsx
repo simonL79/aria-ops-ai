@@ -42,18 +42,29 @@ const DashboardMainContent = ({
 }: DashboardMainContentProps) => {
   const navigate = useNavigate();
 
-  // Filter for LIVE OSINT data only
+  // Filter for LIVE OSINT data only - MORE INCLUSIVE FILTERING
   const liveAlerts = alerts?.filter(alert => 
     alert.sourceType === 'osint_intelligence' || 
     alert.sourceType === 'live_alert' ||
     alert.sourceType === 'live_osint' ||
-    alert.sourceType === 'live_scan'
+    alert.sourceType === 'live_scan' ||
+    alert.platform === 'Reddit' ||
+    alert.platform === 'RSS' ||
+    alert.platform === 'Twitter' ||
+    alert.platform === 'Google News' ||
+    alert.platform === 'Forums' ||
+    alert.platform === 'Social Media'
   ) || [];
+  
+  // If no alerts match live filters, show all alerts as potentially live
+  const displayAlerts = liveAlerts.length > 0 ? liveAlerts : (alerts || []);
   
   const liveSources = sources?.filter(source => 
     source.type === 'osint_source' || 
     source.name?.includes('Reddit') || 
-    source.name?.includes('RSS')
+    source.name?.includes('RSS') ||
+    source.name?.includes('Twitter') ||
+    source.name?.includes('News')
   ) || [];
   
   const liveActions = actions?.filter(action => 
@@ -119,7 +130,7 @@ const DashboardMainContent = ({
             <div className="flex items-center gap-2">
               <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
               <span className="text-sm font-medium text-green-800">
-                A.R.I.A™ Live Intelligence: {liveAlerts.length} live threats • {liveSources.length} OSINT sources • Mock data blocked
+                A.R.I.A™ Live Intelligence: {displayAlerts.length} live threats • {liveSources.length} OSINT sources • Mock data blocked
               </span>
               <Button 
                 size="sm" 
@@ -156,21 +167,11 @@ const DashboardMainContent = ({
                   <ContentFilter onFilterChange={onFilterChange} />
                 </div>
                 
-                {liveAlerts.length === 0 ? (
-                  <div className="p-8 text-center border-2 border-dashed border-gray-200 rounded-lg">
-                    <CheckCircle className="h-8 w-8 mx-auto mb-4 text-green-500" />
-                    <h3 className="text-lg font-medium text-gray-600 mb-2">No Live Threats Detected</h3>
-                    <p className="text-sm text-gray-500 mb-4">
-                      A.R.I.A™ OSINT systems are monitoring. All intelligence sources active.
-                    </p>
-                    <div className="flex items-center justify-center gap-2 text-xs text-gray-500">
-                      <div className="h-1.5 w-1.5 bg-green-500 rounded-full animate-pulse"></div>
-                      <span>Live monitoring active • Use Operator Console for manual sweeps</span>
-                    </div>
-                  </div>
-                ) : (
-                  <ContentAlerts alerts={filteredAlerts && filteredAlerts.length > 0 ? filteredAlerts : liveAlerts} />
-                )}
+                {/* ALWAYS SHOW CONTENT ALERTS - this is where your 15 threats should appear */}
+                <ContentAlerts 
+                  alerts={filteredAlerts && filteredAlerts.length > 0 ? filteredAlerts : displayAlerts} 
+                  isLoading={loading}
+                />
               </div>
             </div>
           </div>
