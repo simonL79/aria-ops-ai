@@ -47,6 +47,17 @@ export class LiveDataEnforcer {
    */
   private static async initializeLiveSystemConfig(): Promise<void> {
     try {
+      // First check if system_config table exists and has proper constraints
+      const { data: existingConfigs, error: selectError } = await supabase
+        .from('system_config')
+        .select('config_key, config_value')
+        .limit(1);
+
+      if (selectError) {
+        console.warn('System config table not accessible:', selectError.message);
+        return;
+      }
+
       const liveConfigs = [
         { key: 'allow_mock_data', value: 'disabled' },
         { key: 'system_mode', value: 'live' },
@@ -58,15 +69,26 @@ export class LiveDataEnforcer {
       
       for (const config of liveConfigs) {
         try {
-          const { error } = await supabase
+          // Try insert first, then update if exists
+          const { error: insertError } = await supabase
             .from('system_config')
-            .upsert({
+            .insert({
               config_key: config.key,
               config_value: config.value
-            }, { onConflict: 'config_key' });
+            });
           
-          if (error) {
-            console.warn(`Could not set config ${config.key}:`, error.message);
+          if (insertError && insertError.message.includes('duplicate key')) {
+            // Update existing record
+            const { error: updateError } = await supabase
+              .from('system_config')
+              .update({ config_value: config.value })
+              .eq('config_key', config.key);
+            
+            if (updateError) {
+              console.warn(`Could not update config ${config.key}:`, updateError.message);
+            }
+          } else if (insertError) {
+            console.warn(`Could not insert config ${config.key}:`, insertError.message);
           }
         } catch (configError) {
           console.warn(`Failed to set config ${config.key}:`, configError);
