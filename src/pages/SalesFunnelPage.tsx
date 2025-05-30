@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useAuth } from "@/hooks/useAuth";
 import AdminDashboardWelcome from "@/components/salesFunnel/AdminDashboardWelcome";
@@ -79,28 +80,27 @@ const SalesFunnelPage = () => {
               </Button>
             </div>
             
-            <div className="text-sm text-gray-400">
-              PARIS • LONDON • SINGAPORE
-            </div>
-            
             {/* Ratings */}
             <div className="space-y-3">
               <div className="flex items-center space-x-2">
                 <div className="flex">
                   {[1,2,3,4,5].map((star) => (
-                    <Star key={star} className="w-4 h-4 fill-green-400 text-green-400" />
+                    <Star key={star} className="w-4 h-4 fill-orange-500 text-orange-500" />
                   ))}
                 </div>
-                <span className="text-sm text-gray-300">5.0 Google Rating</span>
+                <span className="text-sm text-gray-300">Rated Excellent on Trustpilot</span>
               </div>
+              <p className="text-xs text-gray-400">Based on 247+ reviews</p>
+              
               <div className="flex items-center space-x-2">
                 <div className="flex">
                   {[1,2,3,4,5].map((star) => (
                     <Star key={star} className="w-4 h-4 fill-blue-400 text-blue-400" />
                   ))}
                 </div>
-                <span className="text-sm text-gray-300">5.0 Trustpilot Rating</span>
+                <span className="text-sm text-gray-300">5.0 Stars on Google Reviews</span>
               </div>
+              <p className="text-xs text-gray-400">Verified business reviews</p>
             </div>
           </div>
           
