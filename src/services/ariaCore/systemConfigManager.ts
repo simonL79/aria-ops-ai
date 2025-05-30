@@ -115,28 +115,30 @@ export class SystemConfigManager {
   }
 
   private static async checkTableIntegrity(result: SystemBugScanResult): Promise<void> {
+    // Use type assertions for table names to avoid TypeScript strict typing issues
     const criticalTables = [
       'anubis_creeper_log',
       'system_config',
       'user_roles',
       'scan_results',
       'threats'
-    ];
+    ] as const;
 
-    for (const table of criticalTables) {
+    for (const tableName of criticalTables) {
       try {
+        // Use type assertion to handle strict typing
         const { error } = await supabase
-          .from(table)
+          .from(tableName as any)
           .select('*')
           .limit(1);
 
         if (error) {
-          result.critical_issues.push(`Critical table '${table}' is not accessible: ${error.message}`);
+          result.critical_issues.push(`Critical table '${tableName}' is not accessible: ${error.message}`);
         } else {
-          result.info.push(`Table '${table}' is accessible`);
+          result.info.push(`Table '${tableName}' is accessible`);
         }
       } catch (error) {
-        result.critical_issues.push(`Failed to check table '${table}': ${error.message}`);
+        result.critical_issues.push(`Failed to check table '${tableName}': ${error.message}`);
       }
     }
   }
@@ -146,19 +148,20 @@ export class SystemConfigManager {
       'is_current_user_admin',
       'validate_aria_on_admin_login',
       'log_anubis_check'
-    ];
+    ] as const;
 
-    for (const func of criticalFunctions) {
+    for (const funcName of criticalFunctions) {
       try {
-        const { error } = await supabase.rpc(func);
+        // Use type assertion for function names
+        const { error } = await supabase.rpc(funcName as any);
         
         if (error && !error.message.includes('permission denied')) {
-          result.warnings.push(`Function '${func}' may have issues: ${error.message}`);
+          result.warnings.push(`Function '${funcName}' may have issues: ${error.message}`);
         } else {
-          result.info.push(`Function '${func}' is available`);
+          result.info.push(`Function '${funcName}' is available`);
         }
       } catch (error) {
-        result.warnings.push(`Failed to check function '${func}': ${error.message}`);
+        result.warnings.push(`Failed to check function '${funcName}': ${error.message}`);
       }
     }
   }
