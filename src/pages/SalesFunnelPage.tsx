@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useAuth } from "@/hooks/useAuth";
 import AdminDashboardWelcome from "@/components/salesFunnel/AdminDashboardWelcome";
@@ -195,30 +196,34 @@ const SalesFunnelPage = () => {
             <Card className="bg-gray-800 border-gray-700 p-8">
               <div className="flex items-center mb-6">
                 <Eye className="w-8 h-8 text-orange-500 mr-3" />
-                <h3 className="text-xl font-bold text-orange-500">Influencer & Creator</h3>
+                <h3 className="text-xl font-bold text-orange-500">Influencer & Creator Shield</h3>
               </div>
-              <p className="text-gray-300 mb-6">
-                Built for influencer balance. You feel like brands see your profile. You need distance? Instantly.
+              <p className="text-gray-300 mb-4">
+                <strong>Ideal for:</strong> Influencers, streamers, YouTubers, TikTokers, OnlyFans creators, podcasters
               </p>
-              <div className="space-y-3">
+              <div className="space-y-3 mb-6">
                 <div className="text-sm font-semibold text-white">What We Do</div>
                 <div className="flex items-center text-sm text-gray-300">
                   <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
-                  Real online business threats that really could and do affect your income
+                  Real-time crisis monitoring when content goes viral
                 </div>
                 <div className="flex items-center text-sm text-gray-300">
                   <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
-                  Publish industry attack for 'R.A.I.O.™' in the specific medium to create separation
+                  Predictive behavior alerts via PRAXIS™
                 </div>
                 <div className="flex items-center text-sm text-gray-300">
                   <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
-                  Advanced content optimization via SERP and optimization to hide threats from Google
+                  AI bias analysis on LLMs and search engines
+                </div>
+                <div className="flex items-center text-sm text-gray-300">
+                  <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
+                  Automated counter-narratives via RSI™
                 </div>
               </div>
               <div className="mt-6">
-                <div className="text-sm font-semibold text-white mb-2">Why It Works</div>
+                <div className="text-sm font-semibold text-white mb-2">Why It Matters</div>
                 <p className="text-xs text-gray-400">
-                  Your biggest risk is reputation risk. A.R.I.A. sees it before you understand what's happening. We remove it before it does lasting damage or affecting your bottom line.
+                  One viral moment shouldn't define your career. A.R.I.A™ helps you stay ahead of cancel culture, hate mobs, and false narratives.
                 </p>
               </div>
             </Card>
