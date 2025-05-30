@@ -1,5 +1,5 @@
 
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.192.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
 
 const corsHeaders = {
@@ -13,99 +13,102 @@ serve(async (req) => {
   }
 
   try {
+    const { entity, scan_type = 'reputation_threats', source = 'news' } = await req.json();
+    
+    console.log('[UK-NEWS-SCANNER] Starting RSS-based news scan for:', entity);
+
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const { sources, scan_type } = await req.json();
-    
-    console.log('UK News Scanner started with sources:', sources);
-    console.log('Scan type:', scan_type);
-
-    // Sample UK news threats for demonstration
-    const sampleThreats = [
-      {
-        platform: 'BBC News',
-        content: 'Major data breach affects UK financial services company, customers advised to change passwords immediately',
-        url: 'https://bbc.co.uk/news/business-sample',
-        severity: 'high',
-        threat_type: 'data_breach',
-        risk_entity_name: 'UK Financial Services Ltd',
-        risk_entity_type: 'company',
-        sentiment: -0.8,
-        source_type: 'news'
-      },
-      {
-        platform: 'The Guardian',
-        content: 'Investigation reveals poor working conditions at major UK retailer, employees speak out about treatment',
-        url: 'https://theguardian.com/business/sample',
-        severity: 'medium',
-        threat_type: 'reputation_risk',
-        risk_entity_name: 'UK Retail Chain',
-        risk_entity_type: 'company',
-        sentiment: -0.6,
-        source_type: 'news'
-      },
-      {
-        platform: 'Sky News',
-        content: 'Tech startup CEO faces criticism over controversial social media comments about industry practices',
-        url: 'https://news.sky.com/story/sample',
-        severity: 'medium',
-        threat_type: 'social_media_risk',
-        risk_entity_name: 'John Smith',
-        risk_entity_type: 'person',
-        sentiment: -0.5,
-        source_type: 'news'
-      }
+    const sources = [
+      { name: 'BBC News', url: 'https://feeds.bbci.co.uk/news/rss.xml' },
+      { name: 'The Guardian UK', url: 'https://www.theguardian.com/uk/rss' },
+      { name: 'The Telegraph', url: 'https://www.telegraph.co.uk/news/rss.xml' },
+      { name: 'Reuters UK', url: 'https://feeds.reuters.com/reuters/UKTopNews' },
+      { name: 'Independent UK', url: 'https://www.independent.co.uk/news/uk/rss' }
     ];
 
-    let insertedCount = 0;
+    const results: any[] = [];
 
-    // Insert threats into scan_results table
-    for (const threat of sampleThreats) {
+    for (const source of sources) {
       try {
-        const { data, error } = await supabase
-          .from('scan_results')
-          .insert({
-            platform: threat.platform,
-            content: threat.content,
-            url: threat.url,
-            severity: threat.severity,
-            threat_type: threat.threat_type,
-            risk_entity_name: threat.risk_entity_name,
-            risk_entity_type: threat.risk_entity_type,
-            sentiment: threat.sentiment,
-            source_type: threat.source_type,
-            status: 'new'
-          });
-
-        if (error) {
-          console.error('Error inserting threat:', error);
-        } else {
-          insertedCount++;
-          console.log('Inserted threat:', threat.risk_entity_name);
+        console.log('[UK-NEWS-SCANNER] Scanning:', source.name);
+        
+        const res = await fetch(source.url, {
+          headers: {
+            'User-Agent': 'ARIA-OSINT/1.0'
+          }
+        });
+        
+        if (!res.ok) {
+          console.warn('[UK-NEWS-SCANNER] Failed to fetch', source.name, ':', res.status);
+          continue;
         }
-      } catch (insertError) {
-        console.error('Insert error:', insertError);
+
+        const xml = await res.text();
+        const items = [...xml.matchAll(/<item>(.*?)<\/item>/gs)];
+        
+        console.log('[UK-NEWS-SCANNER]', source.name, 'found', items.length, 'items');
+
+        for (const item of items) {
+          const content = item[1].toLowerCase();
+          if (!content.includes(entity.toLowerCase())) continue;
+
+          const title = item[1].match(/<title[^>]*>(.*?)<\/title>/)?.[1]?.replace(/<!\[CDATA\[(.*?)\]\]>/g, '$1') || '';
+          const link = item[1].match(/<link>(.*?)<\/link>/)?.[1] || '';
+          const description = item[1].match(/<description[^>]*>(.*?)<\/description>/)?.[1]?.replace(/<!\[CDATA\[(.*?)\]\]>/g, '$1') || '';
+          const pubDate = item[1].match(/<pubDate>(.*?)<\/pubDate>/)?.[1] || '';
+
+          // Calculate severity based on threat keywords
+          const threatKeywords = ['scandal', 'controversy', 'investigation', 'allegation', 'lawsuit', 'fraud', 'crisis'];
+          const hasThreatKeywords = threatKeywords.some(keyword => content.includes(keyword));
+          
+          results.push({
+            platform: source.name,
+            content: title,
+            url: link,
+            severity: hasThreatKeywords ? 'high' : 'medium',
+            sentiment: hasThreatKeywords ? -0.6 : -0.2,
+            confidence_score: 0.9,
+            detected_entities: [entity],
+            source_type: source,
+            entity_name: entity,
+            created_at: pubDate ? new Date(pubDate).toISOString() : new Date().toISOString(),
+          });
+        }
+      } catch (error) {
+        console.error('[UK-NEWS-SCANNER] Error processing', source.name, ':', error);
       }
     }
 
-    console.log(`UK News Scanner completed. Inserted ${insertedCount} threats.`);
+    console.log('[UK-NEWS-SCANNER] Total results found:', results.length);
 
-    return new Response(JSON.stringify({
+    if (results.length > 0) {
+      const { error } = await supabase.from('scan_results').insert(results);
+      if (error) {
+        console.error('[UK-NEWS-SCANNER] Database insert error:', error);
+      } else {
+        console.log('[UK-NEWS-SCANNER] Successfully inserted', results.length, 'entries');
+      }
+    }
+
+    return new Response(JSON.stringify({ 
       success: true,
-      message: 'UK News scan completed',
-      threats_found: insertedCount,
-      sources_scanned: sources?.length || 4,
-      scan_type: scan_type
+      inserted: results.length, 
+      results: results,
+      sources_scanned: sources.length,
+      scan_type: scan_type,
+      message: `UK News RSS scan completed: ${results.length} items found`
     }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 200,
     });
 
   } catch (error) {
-    console.error('UK News Scanner error:', error);
+    console.error('[UK-NEWS-SCANNER] Error:', error);
     return new Response(JSON.stringify({
-      error: 'UK News Scanner failed',
+      error: 'UK News RSS scan failed',
       details: error.message
     }), {
       status: 500,
