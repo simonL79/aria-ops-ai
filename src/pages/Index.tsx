@@ -21,7 +21,7 @@ const Index = () => {
 
   const handleScanRequest = (e: React.FormEvent) => {
     e.preventDefault();
-    navigate('/scan');
+    navigate('/reputation-scan');
   };
 
   return (
@@ -40,10 +40,10 @@ const Index = () => {
             
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-8">
-              <a href="/about" className="text-gray-300 hover:text-white transition-colors">About</a>
-              <a href="/services" className="text-gray-300 hover:text-white transition-colors">Services</a>
-              <a href="/insights" className="text-gray-300 hover:text-white transition-colors">Insights</a>
-              <a href="/contact" className="text-gray-300 hover:text-white transition-colors">Contact</a>
+              <a href="/blog" className="text-gray-300 hover:text-white transition-colors">Blog</a>
+              <a href="/simon-lindsay" className="text-gray-300 hover:text-white transition-colors">About Simon</a>
+              <a href="/#get-started" className="text-gray-300 hover:text-white transition-colors">Get Started</a>
+              <a href="/#services" className="text-gray-300 hover:text-white transition-colors">Services</a>
               <Button
                 onClick={handleAdminAccess}
                 variant="outline"
@@ -68,10 +68,10 @@ const Index = () => {
           {mobileMenuOpen && (
             <div className="md:hidden border-t border-gray-800/50 py-4">
               <nav className="flex flex-col space-y-4">
-                <a href="/about" className="text-gray-300 hover:text-white transition-colors">About</a>
-                <a href="/services" className="text-gray-300 hover:text-white transition-colors">Services</a>
-                <a href="/insights" className="text-gray-300 hover:text-white transition-colors">Insights</a>
-                <a href="/contact" className="text-gray-300 hover:text-white transition-colors">Contact</a>
+                <a href="/blog" className="text-gray-300 hover:text-white transition-colors">Blog</a>
+                <a href="/simon-lindsay" className="text-gray-300 hover:text-white transition-colors">About Simon</a>
+                <a href="/#get-started" className="text-gray-300 hover:text-white transition-colors">Get Started</a>
+                <a href="/#services" className="text-gray-300 hover:text-white transition-colors">Services</a>
                 <Button
                   onClick={handleAdminAccess}
                   variant="outline"
@@ -121,6 +121,7 @@ const Index = () => {
                 <Button 
                   variant="outline" 
                   className="border-gray-700 text-white hover:bg-gray-800 px-8 py-3 text-lg"
+                  onClick={() => document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' })}
                 >
                   Learn More
                 </Button>
@@ -197,7 +198,7 @@ const Index = () => {
       </section>
 
       {/* Services Section */}
-      <section className="py-20 px-6 bg-[#111214]">
+      <section id="services" className="py-20 px-6 bg-[#111214]">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold mb-6">Comprehensive Protection</h2>
@@ -298,7 +299,7 @@ const Index = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-6 bg-[#111214]">
+      <section id="get-started" className="py-20 px-6 bg-[#111214]">
         <div className="container mx-auto max-w-4xl text-center">
           <h2 className="text-4xl font-bold mb-6">Ready to Secure Your Reputation?</h2>
           <p className="text-xl text-gray-300 mb-12 max-w-2xl mx-auto">
@@ -356,27 +357,27 @@ const Index = () => {
             <div>
               <h4 className="font-semibold mb-4">Services</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">Threat Detection</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Crisis Management</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Intelligence Reports</a></li>
+                <li><a href="#services" className="hover:text-white transition-colors">Threat Detection</a></li>
+                <li><a href="#services" className="hover:text-white transition-colors">Crisis Management</a></li>
+                <li><a href="#services" className="hover:text-white transition-colors">Intelligence Reports</a></li>
               </ul>
             </div>
             
             <div>
               <h4 className="font-semibold mb-4">Company</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">About</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Careers</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Contact</a></li>
+                <li><a href="/simon-lindsay" className="hover:text-white transition-colors">About</a></li>
+                <li><a href="/blog" className="hover:text-white transition-colors">Blog</a></li>
+                <li><a href="/reputation-scan" className="hover:text-white transition-colors">Get Started</a></li>
               </ul>
             </div>
             
             <div>
               <h4 className="font-semibold mb-4">Legal</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">GDPR Compliance</a></li>
+                <li><a href="/admin/login" className="hover:text-white transition-colors">Client Login</a></li>
+                <li><a href="/dashboard" className="hover:text-white transition-colors">Dashboard</a></li>
+                <li><a href="/auth" className="hover:text-white transition-colors">Authentication</a></li>
               </ul>
             </div>
           </div>
