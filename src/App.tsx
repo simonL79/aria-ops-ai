@@ -14,6 +14,7 @@ import ScanPage from "./pages/ScanPage";
 import PricingPage from "./pages/PricingPage";
 import AboutPage from "./pages/AboutPage";
 import BlogPage from "./pages/BlogPage";
+import BlogPostPage from "./pages/BlogPostPage";
 import SimonLindsayPage from "./pages/SimonLindsayPage";
 import Contact from "./pages/Contact";
 import AdminLogin from "./pages/AdminLogin";
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/pricing" element={<PricingPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/blog" element={<BlogPage />} />
+          <Route path="/blog/:slug" element={<BlogPostPage />} />
           <Route path="/simon-lindsay" element={<SimonLindsayPage />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/admin/login" element={<AdminLogin />} />
