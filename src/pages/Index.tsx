@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -43,8 +42,8 @@ const Index = () => {
             <nav className="hidden md:flex items-center space-x-8">
               <Link to="/blog" className="text-gray-300 hover:text-white transition-colors">Blog</Link>
               <Link to="/simon-lindsay" className="text-gray-300 hover:text-white transition-colors">About Simon</Link>
-              <a href="#get-started" className="text-gray-300 hover:text-white transition-colors">Get Started</a>
-              <a href="#services" className="text-gray-300 hover:text-white transition-colors">Services</a>
+              <Link to="/scan" className="text-gray-300 hover:text-white transition-colors">Get Started</Link>
+              <Link to="/pricing" className="text-gray-300 hover:text-white transition-colors">Services</Link>
               <Button
                 onClick={handleAdminAccess}
                 variant="outline"
@@ -71,8 +70,8 @@ const Index = () => {
               <nav className="flex flex-col space-y-4">
                 <Link to="/blog" className="text-gray-300 hover:text-white transition-colors">Blog</Link>
                 <Link to="/simon-lindsay" className="text-gray-300 hover:text-white transition-colors">About Simon</Link>
-                <a href="#get-started" className="text-gray-300 hover:text-white transition-colors">Get Started</a>
-                <a href="#services" className="text-gray-300 hover:text-white transition-colors">Services</a>
+                <Link to="/scan" className="text-gray-300 hover:text-white transition-colors">Get Started</Link>
+                <Link to="/pricing" className="text-gray-300 hover:text-white transition-colors">Services</Link>
                 <Button
                   onClick={handleAdminAccess}
                   variant="outline"
@@ -119,13 +118,14 @@ const Index = () => {
                 >
                   Request Assessment
                 </Button>
-                <Button 
-                  variant="outline" 
-                  className="border-gray-700 text-white hover:bg-gray-800 px-8 py-3 text-lg"
-                  onClick={() => document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' })}
-                >
-                  Learn More
-                </Button>
+                <Link to="/pricing">
+                  <Button 
+                    variant="outline" 
+                    className="border-gray-700 text-white hover:bg-gray-800 px-8 py-3 text-lg w-full"
+                  >
+                    Learn More
+                  </Button>
+                </Link>
               </div>
 
               {/* Review Sections */}
@@ -486,9 +486,9 @@ const Index = () => {
             <div>
               <h4 className="font-semibold mb-4">Services</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="#services" className="hover:text-white transition-colors">Threat Detection</a></li>
-                <li><a href="#services" className="hover:text-white transition-colors">Crisis Management</a></li>
-                <li><a href="#services" className="hover:text-white transition-colors">Intelligence Reports</a></li>
+                <li><Link to="/pricing" className="hover:text-white transition-colors">Threat Detection</Link></li>
+                <li><Link to="/pricing" className="hover:text-white transition-colors">Crisis Management</Link></li>
+                <li><Link to="/pricing" className="hover:text-white transition-colors">Intelligence Reports</Link></li>
               </ul>
             </div>
             
@@ -506,7 +506,7 @@ const Index = () => {
               <ul className="space-y-2 text-gray-400">
                 <li><Link to="/admin/login" className="hover:text-white transition-colors">Admin Login</Link></li>
                 <li><Link to="/dashboard" className="hover:text-white transition-colors">Dashboard</Link></li>
-                <li><a href="#get-started" className="hover:text-white transition-colors">Get Started</a></li>
+                <li><Link to="/scan" className="hover:text-white transition-colors">Get Started</Link></li>
               </ul>
             </div>
           </div>
