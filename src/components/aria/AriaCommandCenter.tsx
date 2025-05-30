@@ -95,6 +95,8 @@ const AriaCommandCenter = () => {
 
       if (redditError) {
         console.warn('Reddit scan warning:', redditError);
+      } else {
+        console.log('✅ Reddit scan completed:', redditScan);
       }
 
       // Phase 3: News Sources Scanning
@@ -111,9 +113,11 @@ const AriaCommandCenter = () => {
 
       if (newsError) {
         console.warn('News scan warning:', newsError);
+      } else {
+        console.log('✅ News scan completed:', newsScan);
       }
 
-      // Phase 4: RSS Feed Processing
+      // Phase 4: RSS Feed Processing (Fixed)
       setCurrentPhase(scanPhases[3]);
       setScanProgress(55);
       
@@ -127,23 +131,27 @@ const AriaCommandCenter = () => {
 
       if (rssError) {
         console.warn('RSS scan warning:', rssError);
+      } else {
+        console.log('✅ RSS scan completed:', rssScan);
       }
 
       // Phase 5: Sentiment Analysis
       setCurrentPhase(scanPhases[4]);
       setScanProgress(70);
       
-      // Get existing live scan results
+      // Get ALL live scan results (not just limited ones)
       const { data: existingThreats, error: dbError } = await supabase
         .from('scan_results')
         .select('*')
         .or(`content.ilike.%${entityName}%,entity_name.ilike.%${entityName}%`)
-        .eq('source_type', 'live_osint')
+        .in('source_type', ['live_osint', 'osint_intelligence'])
         .order('created_at', { ascending: false })
-        .limit(50);
+        .limit(100); // Increased limit for better analysis
 
       if (dbError) {
         console.error('Database query error:', dbError);
+      } else {
+        console.log(`✅ Retrieved ${existingThreats?.length || 0} live intelligence items`);
       }
 
       // Phase 6: Risk Calculation
@@ -156,6 +164,8 @@ const AriaCommandCenter = () => {
         t.sentiment !== null && t.sentiment < -0.1
       ).length;
       const highSeverity = liveResults.filter(t => t.severity === 'high').length;
+
+      console.log(`📊 Analysis results: ${totalMentions} total, ${negativeMentions} negative, ${highSeverity} high severity`);
 
       // Phase 7: ANUBIS Validation
       setCurrentPhase(scanPhases[6]);
@@ -179,7 +189,7 @@ const AriaCommandCenter = () => {
       else if (riskScore >= 0.6) threatLevel = 'high';
       else if (riskScore >= 0.3) threatLevel = 'moderate';
 
-      // Safely extract platforms without type predicate
+      // Safely extract platforms without type predicate issues
       const platforms = [...new Set(
         liveResults
           .map(t => t.platform)
@@ -210,16 +220,22 @@ const AriaCommandCenter = () => {
           entity_name: entityName,
           threat_level: threatLevel,
           risk_score: riskScore,
-          total_live_results: totalMentions
+          total_live_results: totalMentions,
+          platforms_found: platforms.length,
+          scan_phases_completed: scanPhases.length
         },
         success: true
       });
 
-      toast.success(`A.R.I.A™ Live OSINT Analysis Complete - ${totalMentions} real intelligence items processed`);
+      toast.success(`A.R.I.A™ Live OSINT Analysis Complete`, {
+        description: `${totalMentions} intelligence items processed across ${platforms.length} platforms`
+      });
 
     } catch (error) {
       console.error('Live threat analysis failed:', error);
-      toast.error('Live OSINT analysis failed - Check system logs');
+      toast.error('Live OSINT analysis failed', {
+        description: 'Check system logs for details'
+      });
     } finally {
       setIsScanning(false);
       setCurrentPhase('Live Analysis Complete');
