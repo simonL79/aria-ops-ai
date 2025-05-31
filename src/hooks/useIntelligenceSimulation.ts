@@ -1,10 +1,11 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
+import { performRealScan } from '@/services/monitoring/realScan';
 
 /**
  * Hook for live OSINT intelligence operations - NO SIMULATIONS ALLOWED
+ * Uses consolidated real scanning logic
  */
 export const useIntelligenceSimulation = (options?: {
   duration?: number;
@@ -25,48 +26,19 @@ export const useIntelligenceSimulation = (options?: {
     try {
       console.log('🔍 A.R.I.A™ OSINT: Executing live intelligence operation');
       
-      // Execute multiple live intelligence functions in parallel
-      const scanPromises = [
-        supabase.functions.invoke('reddit-scan', {
-          body: { 
-            scanType: 'live_osint',
-            enableLiveData: true,
-            blockMockData: true
-          }
-        }),
-        supabase.functions.invoke('uk-news-scanner', {
-          body: { 
-            scanType: 'live_osint',
-            enableLiveData: true,
-            blockMockData: true
-          }
-        }),
-        supabase.functions.invoke('enhanced-intelligence', {
-          body: { 
-            scanType: 'live_osint',
-            enableLiveData: true,
-            blockMockData: true
-          }
-        }),
-        supabase.functions.invoke('monitoring-scan', {
-          body: { 
-            scanType: 'live_osint',
-            enableLiveData: true,
-            blockMockData: true
-          }
-        })
-      ];
+      // Execute consolidated live intelligence scanning
+      const results = await performRealScan({
+        fullScan: true,
+        source: 'intelligence_operation'
+      });
 
-      const results = await Promise.allSettled(scanPromises);
-      const successfulScans = results.filter(result => result.status === 'fulfilled').length;
-
-      if (successfulScans > 0) {
+      if (results.length > 0) {
         setTimeout(() => {
           setIsExecuting(false);
           
           toast.success(options?.successMessage || "Live OSINT operation complete", {
             id: toastId,
-            description: `${successfulScans}/4 live intelligence modules executed successfully`
+            description: `${results.length} live intelligence items processed successfully`
           });
           
           if (options?.onComplete) {
@@ -74,7 +46,7 @@ export const useIntelligenceSimulation = (options?: {
           }
         }, options?.duration || 2500);
       } else {
-        throw new Error('All live intelligence modules failed');
+        throw new Error('No live intelligence data available');
       }
       
     } catch (error) {

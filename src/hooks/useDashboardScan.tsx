@@ -2,10 +2,11 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { ContentAlert } from "@/types/dashboard";
-import { supabase } from "@/integrations/supabase/client";
+import { performRealScan } from "@/services/monitoring/realScan";
 
 /**
  * A.R.I.A™ Live OSINT Dashboard Scanner - 100% Real Data Only
+ * Uses consolidated scanning logic
  */
 export const useDashboardScan = (
   alerts: ContentAlert[],
@@ -27,77 +28,30 @@ export const useDashboardScan = (
         description: "Crawling live Reddit RSS, News feeds, and Forums - NO MOCK DATA"
       });
 
-      // Execute multiple live scanning functions
-      const scanFunctions = [
-        'reddit-scan',
-        'uk-news-scanner', 
-        'enhanced-intelligence',
-        'discovery-scanner',
-        'monitoring-scan'
-      ];
-
-      const scanPromises = scanFunctions.map(func => 
-        supabase.functions.invoke(func, {
-          body: { 
-            scanType: 'live_osint',
-            enableLiveData: true,
-            blockMockData: true,
-            enforceLiveOnly: true,
-            query: query || 'threat intelligence'
-          }
-        })
-      );
-
-      const results = await Promise.allSettled(scanPromises);
+      // Use consolidated real scanning
+      const liveResults = await performRealScan({
+        fullScan: true,
+        targetEntity: query || null,
+        source: 'dashboard_scan'
+      });
       
-      // Count successful scans
-      const successfulScans = results.filter(result => result.status === 'fulfilled').length;
-      
-      console.log(`🔍 A.R.I.A™ OSINT: ${successfulScans}/${scanFunctions.length} live modules executed`);
+      console.log(`🔍 A.R.I.A™ OSINT: ${liveResults.length} live intelligence items processed`);
 
-      // Get latest live scan results from database
-      const { data: liveResults, error } = await supabase
-        .from('scan_results')
-        .select('*')
-        .eq('source_type', 'live_osint')
-        .gte('created_at', new Date(Date.now() - 10 * 60 * 1000).toISOString()) // Last 10 minutes
-        .order('created_at', { ascending: false })
-        .limit(50);
-
-      if (error) {
-        console.error('❌ Error fetching live scan results:', error);
-      }
-
-      if (liveResults && liveResults.length > 0) {
-        // Validate all results are live data only
-        const validatedResults = liveResults.filter(result => {
-          const content = (result.content || '').toLowerCase();
-          const hasMockIndicators = ['mock', 'test', 'demo', 'sample'].some(keyword => 
-            content.includes(keyword)
-          );
-          
-          if (hasMockIndicators) {
-            console.warn('🚫 BLOCKED: Mock data detected and filtered:', result.platform);
-            return false;
-          }
-          return true;
-        });
-
+      if (liveResults.length > 0) {
         // Convert to ContentAlert format with proper typing
-        const newAlerts: ContentAlert[] = validatedResults.map(result => ({
+        const newAlerts: ContentAlert[] = liveResults.map(result => ({
           id: result.id,
           platform: result.platform,
           content: result.content,
-          date: new Date(result.created_at).toLocaleDateString(),
-          severity: (['high', 'medium', 'low'].includes(result.severity) ? result.severity : 'low') as 'high' | 'medium' | 'low',
+          date: new Date().toLocaleDateString(),
+          severity: result.severity,
           status: 'new' as const,
           threatType: 'live_intelligence',
           confidenceScore: result.confidence_score,
           sourceType: 'live_osint',
           sentiment: result.sentiment > 0 ? 'positive' : result.sentiment < 0 ? 'negative' : 'neutral',
-          potentialReach: result.potential_reach || 0,
-          detectedEntities: Array.isArray(result.detected_entities) ? 
-            result.detected_entities.map(String) : [],
+          potentialReach: result.potential_reach,
+          detectedEntities: result.detected_entities,
           url: result.url
         }));
 
@@ -118,15 +72,9 @@ export const useDashboardScan = (
           });
         }
       } else {
-        if (successfulScans > 0) {
-          toast.info(`Live scan completed: ${successfulScans}/${scanFunctions.length} modules executed`, {
-            description: "No new intelligence items detected from live sources"
-          });
-        } else {
-          toast.warning("Live scan failed", {
-            description: "All live intelligence modules failed to execute"
-          });
-        }
+        toast.info("Live scan completed", {
+          description: "No new intelligence items detected from live sources"
+        });
       }
 
       console.log('✅ A.R.I.A™ OSINT: Live dashboard scan completed - 100% live data verified');

@@ -1,17 +1,18 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { LiveDataEnforcer } from '@/services/ariaCore/liveDataEnforcer';
+import type { ScanOptions, LiveScanResult } from '@/types/scan';
 
-interface RealScanOptions {
-  fullScan?: boolean;
-  source?: string;
-  targetEntity?: string | null;
-}
+/**
+ * CONSOLIDATED LIVE OSINT SCANNING - SINGLE SOURCE OF TRUTH
+ * NO MOCK DATA - 100% LIVE INTELLIGENCE ONLY
+ */
 
 /**
  * Perform real OSINT scan with strict live data enforcement
+ * This is the ONLY scanning function - all others are permanently blocked
  */
-export const performRealScan = async (options: RealScanOptions = {}) => {
+export const performRealScan = async (options: ScanOptions = {}): Promise<LiveScanResult[]> => {
   try {
     // Enforce live data compliance
     const isCompliant = await LiveDataEnforcer.enforceSystemWideLiveData();
@@ -32,7 +33,7 @@ export const performRealScan = async (options: RealScanOptions = {}) => {
       'monitoring-scan'
     ];
 
-    const results = [];
+    const results: LiveScanResult[] = [];
     
     for (const func of scanFunctions) {
       try {
@@ -56,7 +57,24 @@ export const performRealScan = async (options: RealScanOptions = {}) => {
             );
             
             if (isValidLiveData) {
-              results.push(result);
+              results.push({
+                id: result.id || `live-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+                platform: result.platform,
+                content: result.content,
+                url: result.url || '',
+                severity: (result.severity as 'low' | 'medium' | 'high') || 'low',
+                status: (result.status as 'new' | 'read' | 'actioned' | 'resolved') || 'new',
+                threat_type: result.threat_type || 'live_intelligence',
+                sentiment: result.sentiment || 0,
+                confidence_score: result.confidence_score || 75,
+                potential_reach: result.potential_reach || 0,
+                detected_entities: result.detected_entities || [],
+                source_type: 'live_osint',
+                entity_name: result.entity_name || 'unknown',
+                source_credibility_score: result.source_credibility_score || 75,
+                media_is_ai_generated: result.media_is_ai_generated || false,
+                ai_detection_confidence: result.ai_detection_confidence || 0
+              });
             } else {
               console.warn('🚫 BLOCKED: Mock data detected and filtered:', result.platform);
             }
@@ -77,9 +95,47 @@ export const performRealScan = async (options: RealScanOptions = {}) => {
 };
 
 /**
- * Block any mock scan operations - completely disabled
+ * Get live threat score for entity
  */
-export const performMockScan = () => {
+export const getLiveThreatScore = async (entityId: string): Promise<number> => {
+  try {
+    const results = await performRealScan({ targetEntity: entityId, fullScan: false });
+    
+    if (results.length === 0) return 0;
+    
+    // Calculate threat score based on severity and confidence
+    const threatScore = results.reduce((score, result) => {
+      let severityWeight = 1;
+      if (result.severity === 'medium') severityWeight = 2;
+      if (result.severity === 'high') severityWeight = 3;
+      
+      return score + (severityWeight * (result.confidence_score / 100));
+    }, 0);
+    
+    return Math.min(threatScore / results.length, 100);
+  } catch (error) {
+    console.error('Error calculating live threat score:', error);
+    return 0;
+  }
+};
+
+/**
+ * Perform real-time monitoring scan
+ */
+export const performRealTimeMonitoring = async (): Promise<LiveScanResult[]> => {
+  console.log('🔍 A.R.I.A™ OSINT: Real-time monitoring - live data only');
+  return await performRealScan({ fullScan: true, source: 'real_time_monitoring' });
+};
+
+/**
+ * PERMANENTLY BLOCK ALL MOCK OPERATIONS
+ */
+export const performMockScan = (): never => {
   console.error('🚫 BLOCKED: Mock scan operations are permanently disabled. Use performRealScan() for live intelligence.');
   throw new Error('Mock data operations blocked by A.R.I.A™ live enforcement system');
+};
+
+export const generateMockData = (): never => {
+  console.error('🚫 BLOCKED: Mock data generation permanently disabled');
+  throw new Error('Mock data generation is permanently disabled. A.R.I.A™ uses 100% live intelligence.');
 };
