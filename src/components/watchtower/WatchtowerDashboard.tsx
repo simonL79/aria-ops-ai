@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Satellite, Search, Users, Mail, TrendingUp, Target, AlertTriangle, Play, Pause } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import LocalInferencePanel from './LocalInferencePanel';
 
 interface WatchtowerCandidate {
   id: string;
