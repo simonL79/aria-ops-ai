@@ -7,12 +7,8 @@ import LiveDataGuard from "@/components/dashboard/LiveDataGuard";
 import ResponsiveLayout from "@/components/layout/ResponsiveLayout";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { useClientSelection } from "@/hooks/useClientSelection";
-import { usePerformanceMonitor } from "@/hooks/usePerformanceMonitor";
 
 const DashboardPage = () => {
-  // Performance monitoring
-  const { measureRenderTime } = usePerformanceMonitor('DashboardPage');
-
   const {
     metrics,
     alerts,
@@ -27,8 +23,6 @@ const DashboardPage = () => {
   const [filteredAlerts, setFilteredAlerts] = useState(alerts);
 
   const handleFilterChange = (filters: { platforms: string[]; severities: string[]; statuses: string[]; }) => {
-    const endMeasure = measureRenderTime('filterChange');
-    
     let filtered = alerts;
     
     if (filters.platforms.length > 0) {
@@ -44,7 +38,6 @@ const DashboardPage = () => {
     }
     
     setFilteredAlerts(filtered);
-    endMeasure();
   };
 
   return (

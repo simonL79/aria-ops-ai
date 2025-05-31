@@ -1,20 +1,8 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { 
-  Shield, 
-  Zap, 
-  Activity, 
-  FileText, 
-  Play, 
-  Scan,
-  Target,
-  AlertTriangle
-} from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
+import { Card, CardContent } from '@/components/ui/card';
+import { Shield, Zap, FileText, Activity, Play, Search } from 'lucide-react';
 
 interface CriticalActionButtonsProps {
   onLiveThreatScan?: () => void;
@@ -29,154 +17,77 @@ interface CriticalActionButtonsProps {
 }
 
 const CriticalActionButtons: React.FC<CriticalActionButtonsProps> = ({
-  onLiveThreatScan,
-  onLiveIntelligenceSweep,
-  onGuardianToggle,
-  onGenerateReport,
-  onActivateRealTime,
-  onRunManualScan,
+  onLiveThreatScan = () => {},
+  onLiveIntelligenceSweep = () => {},
+  onGuardianToggle = () => {},
+  onGenerateReport = () => {},
+  onActivateRealTime = () => {},
+  onRunManualScan = () => {},
   isScanning = false,
   isGuardianActive = false,
   isRealTimeActive = false
 }) => {
-  const navigate = useNavigate();
-
-  const handleLiveThreatScan = () => {
-    if (onLiveThreatScan) {
-      onLiveThreatScan();
-    } else {
-      toast.info('Initiating Live Threat Scan...');
-      // Default implementation
-      console.log('Live Threat Scan executed');
-    }
-  };
-
-  const handleLiveIntelligenceSweep = () => {
-    if (onLiveIntelligenceSweep) {
-      onLiveIntelligenceSweep();
-    } else {
-      toast.info('Starting Live Intelligence Sweep...');
-      // Default implementation
-      console.log('Live Intelligence Sweep executed');
-    }
-  };
-
-  const handleGuardianToggle = () => {
-    if (onGuardianToggle) {
-      onGuardianToggle();
-    } else {
-      const newState = !isGuardianActive;
-      toast.success(`Guardian Mode ${newState ? 'Activated' : 'Deactivated'}`);
-      console.log(`Guardian Mode ${newState ? 'activated' : 'deactivated'}`);
-    }
-  };
-
-  const handleGenerateReport = () => {
-    if (onGenerateReport) {
-      onGenerateReport();
-    } else {
-      toast.info('Generating Executive Report...');
-      navigate('/reports/executive');
-    }
-  };
-
-  const handleActivateRealTime = () => {
-    if (onActivateRealTime) {
-      onActivateRealTime();
-    } else {
-      const newState = !isRealTimeActive;
-      toast.success(`Real-Time Monitoring ${newState ? 'Activated' : 'Deactivated'}`);
-      console.log(`Real-Time Monitoring ${newState ? 'activated' : 'deactivated'}`);
-    }
-  };
-
-  const handleRunManualScan = () => {
-    if (onRunManualScan) {
-      onRunManualScan();
-    } else {
-      toast.info('Running Manual Scan...');
-      console.log('Manual Scan executed');
-    }
-  };
-
   return (
-    <Card className="corporate-card">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 corporate-heading">
-          <Target className="h-5 w-5 text-corporate-accent" />
-          Critical Operations
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {/* Live Threat Scan */}
+    <Card className="corporate-card mb-6">
+      <CardContent className="p-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
           <Button
-            onClick={handleLiveThreatScan}
+            onClick={onLiveThreatScan}
             disabled={isScanning}
-            className="w-full bg-red-600 hover:bg-red-700 text-white flex items-center gap-2"
-            data-testid="live-threat-scan-button"
+            className="bg-red-600 hover:bg-red-700 text-white text-xs sm:text-sm px-2 sm:px-3 py-2 h-auto flex flex-col items-center gap-1"
           >
-            <Scan className="h-4 w-4" />
-            {isScanning ? 'Scanning...' : 'Live Threat Scan'}
+            <Search className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="text-center leading-tight">Live Threat Scan</span>
           </Button>
 
-          {/* Live Intelligence Sweep */}
           <Button
-            onClick={handleLiveIntelligenceSweep}
+            onClick={onLiveIntelligenceSweep}
             disabled={isScanning}
-            className="w-full bg-corporate-accent hover:bg-corporate-accentDark text-black flex items-center gap-2"
-            data-testid="live-intelligence-sweep-button"
+            className="bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm px-2 sm:px-3 py-2 h-auto flex flex-col items-center gap-1"
           >
-            <Zap className="h-4 w-4" />
-            Live Intelligence Sweep
+            <Activity className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="text-center leading-tight">Live Intelligence Sweep</span>
           </Button>
 
-          {/* Guardian Mode */}
           <Button
-            onClick={handleGuardianToggle}
-            variant={isGuardianActive ? "destructive" : "default"}
-            className="w-full flex items-center gap-2"
-            data-testid="guardian-button"
+            onClick={onGuardianToggle}
+            className={`text-white text-xs sm:text-sm px-2 sm:px-3 py-2 h-auto flex flex-col items-center gap-1 ${
+              isGuardianActive 
+                ? 'bg-green-600 hover:bg-green-700' 
+                : 'bg-gray-600 hover:bg-gray-700'
+            }`}
           >
-            <Shield className="h-4 w-4" />
-            Guardian {isGuardianActive ? 'ON' : 'OFF'}
-            {isGuardianActive && (
-              <Badge className="bg-green-500 text-white ml-1">ACTIVE</Badge>
-            )}
+            <Shield className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="text-center leading-tight">Guardian</span>
           </Button>
 
-          {/* Generate Report */}
           <Button
-            onClick={handleGenerateReport}
-            variant="outline"
-            className="w-full border-corporate-border text-corporate-lightGray hover:bg-corporate-darkSecondary flex items-center gap-2"
-            data-testid="generate-report-button"
+            onClick={onGenerateReport}
+            className="bg-corporate-accent hover:bg-corporate-accentDark text-black text-xs sm:text-sm px-2 sm:px-3 py-2 h-auto flex flex-col items-center gap-1"
           >
-            <FileText className="h-4 w-4" />
-            Generate Report
+            <FileText className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="text-center leading-tight">Generate Report</span>
           </Button>
 
-          {/* Activate Real-Time */}
           <Button
-            onClick={handleActivateRealTime}
-            variant={isRealTimeActive ? "destructive" : "default"}
-            className="w-full flex items-center gap-2"
-            data-testid="activate-real-time-button"
+            onClick={onActivateRealTime}
+            className={`text-white text-xs sm:text-sm px-2 sm:px-3 py-2 h-auto flex flex-col items-center gap-1 ${
+              isRealTimeActive 
+                ? 'bg-corporate-accent hover:bg-corporate-accentDark text-black' 
+                : 'bg-purple-600 hover:bg-purple-700'
+            }`}
           >
-            <Activity className="h-4 w-4" />
-            {isRealTimeActive ? 'Stop Real-Time' : 'Activate Real-Time'}
+            <Zap className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="text-center leading-tight">Activate Real-Time</span>
           </Button>
 
-          {/* Run Manual Scan */}
           <Button
-            onClick={handleRunManualScan}
-            variant="outline"
+            onClick={onRunManualScan}
             disabled={isScanning}
-            className="w-full border-corporate-border text-corporate-lightGray hover:bg-corporate-darkSecondary flex items-center gap-2"
-            data-testid="run-manual-scan-button"
+            className="bg-orange-600 hover:bg-orange-700 text-white text-xs sm:text-sm px-2 sm:px-3 py-2 h-auto flex flex-col items-center gap-1"
           >
-            <AlertTriangle className="h-4 w-4" />
-            {isScanning ? 'Scanning...' : 'Run Manual Scan'}
+            <Play className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="text-center leading-tight">Run Manual Scan</span>
           </Button>
         </div>
       </CardContent>
