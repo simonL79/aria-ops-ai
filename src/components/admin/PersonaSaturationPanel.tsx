@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,6 +20,7 @@ interface SaturationCampaign {
   deploymentsSuccessful: number;
   serpPenetration: number;
   estimatedImpact: string;
+  createdAt?: string;
 }
 
 const PersonaSaturationPanel = () => {
@@ -31,7 +32,50 @@ const PersonaSaturationPanel = () => {
   const [deploymentTargets, setDeploymentTargets] = useState(['github-pages']);
   const [isExecuting, setIsExecuting] = useState(false);
   const [currentCampaign, setCurrentCampaign] = useState<SaturationCampaign | null>(null);
-  const [campaigns] = useState<SaturationCampaign[]>([]);
+  const [campaigns, setCampaigns] = useState<SaturationCampaign[]>([]);
+  const [loadingCampaigns, setLoadingCampaigns] = useState(false);
+
+  // Fetch campaign history from database
+  const fetchCampaigns = async () => {
+    setLoadingCampaigns(true);
+    try {
+      const { data, error } = await supabase
+        .from('persona_saturation_campaigns')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching campaigns:', error);
+        return;
+      }
+
+      if (data) {
+        const formattedCampaigns = data.map(campaign => ({
+          id: campaign.id,
+          entityName: campaign.entity_name,
+          status: 'completed' as const,
+          progress: 100,
+          contentGenerated: campaign.campaign_data?.contentGenerated || 0,
+          deploymentsSuccessful: campaign.campaign_data?.deploymentsSuccessful || 0,
+          serpPenetration: (campaign.campaign_data?.serpPenetration || 0) * 100,
+          estimatedImpact: `${campaign.campaign_data?.deploymentsSuccessful || 0} articles deployed`,
+          createdAt: campaign.created_at
+        }));
+        setCampaigns(formattedCampaigns);
+      }
+    } catch (error) {
+      console.error('Error fetching campaigns:', error);
+    } finally {
+      setLoadingCampaigns(false);
+    }
+  };
+
+  // Fetch campaigns when component mounts or when switching to campaigns tab
+  useEffect(() => {
+    if (activeTab === 'campaigns') {
+      fetchCampaigns();
+    }
+  }, [activeTab]);
 
   const executePersonaSaturation = async () => {
     if (!entityName.trim() || !targetKeywords.trim()) {
@@ -108,6 +152,11 @@ const PersonaSaturationPanel = () => {
 
       toast.success(`Persona Saturation deployed: ${data.campaign.contentGenerated} pieces across ${data.campaign.deployments.successful} platforms`);
       
+      // Refresh campaigns list if we're on that tab
+      if (activeTab === 'campaigns') {
+        fetchCampaigns();
+      }
+      
     } catch (error: any) {
       clearInterval(progressInterval);
       console.error('Persona Saturation error:', error);
@@ -163,10 +212,11 @@ const PersonaSaturationPanel = () => {
       </CardHeader>
       <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="deploy">Deploy Campaign</TabsTrigger>
             <TabsTrigger value="monitor">Monitor Progress</TabsTrigger>
             <TabsTrigger value="campaigns">Campaign History</TabsTrigger>
+            <TabsTrigger value="reports">Article Reports</TabsTrigger>
           </TabsList>
 
           <TabsContent value="deploy" className="space-y-4">
@@ -352,16 +402,26 @@ const PersonaSaturationPanel = () => {
           </TabsContent>
 
           <TabsContent value="campaigns">
-            {campaigns.length > 0 ? (
+            {loadingCampaigns ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+                <p className="mt-2 text-gray-500">Loading campaigns...</p>
+              </div>
+            ) : campaigns.length > 0 ? (
               <div className="space-y-3">
                 {campaigns.map(campaign => (
-                  <div key={campaign.id} className="p-3 border rounded-lg">
+                  <div key={campaign.id} className="p-4 border rounded-lg">
                     <div className="flex justify-between items-start mb-2">
                       <div>
                         <div className="font-medium">{campaign.entityName}</div>
                         <div className="text-sm text-gray-500">
                           {campaign.contentGenerated} articles, {campaign.deploymentsSuccessful} deployments
                         </div>
+                        {campaign.createdAt && (
+                          <div className="text-xs text-gray-400">
+                            {new Date(campaign.createdAt).toLocaleDateString()}
+                          </div>
+                        )}
                       </div>
                       <Badge className={getStatusColor(campaign.status)}>
                         {campaign.status}
@@ -379,6 +439,10 @@ const PersonaSaturationPanel = () => {
                 <p>No campaigns yet. Deploy your first persona saturation campaign.</p>
               </div>
             )}
+          </TabsContent>
+
+          <TabsContent value="reports">
+            <PersonaSaturationReports />
           </TabsContent>
         </Tabs>
       </CardContent>
