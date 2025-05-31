@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -86,17 +85,15 @@ const PlatformSelector = ({ selectedPlatforms, onPlatformToggle, deploymentTier 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {platforms.map((platform) => {
                 const isSelected = selectedPlatforms.includes(platform.id);
-                const isDisabled = !platform.enabled;
+                const isDisabled = false; // All platforms are now enabled
                 const platformLimit = calculatePlatformLimit(platform);
                 
                 return (
                   <div
                     key={platform.id}
                     className={`p-3 border rounded-lg transition-all ${
-                      isSelected && !isDisabled
+                      isSelected
                         ? 'border-blue-500 bg-blue-50' 
-                        : isDisabled
-                        ? 'border-gray-200 bg-gray-50 opacity-60'
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
@@ -113,16 +110,14 @@ const PlatformSelector = ({ selectedPlatforms, onPlatformToggle, deploymentTier 
                       <div className="flex-1 min-w-0">
                         <label
                           htmlFor={platform.id}
-                          className={`text-sm font-medium cursor-pointer ${
-                            isDisabled ? 'text-gray-400' : ''
-                          }`}
+                          className="text-sm font-medium cursor-pointer"
                         >
                           {platform.name}
                         </label>
                         
                         <div className="flex items-center gap-2 mt-1">
                           <Badge 
-                            variant={isDisabled ? "outline" : "secondary"} 
+                            variant="secondary" 
                             className="text-xs"
                           >
                             {platformLimit} articles max
@@ -134,11 +129,9 @@ const PlatformSelector = ({ selectedPlatforms, onPlatformToggle, deploymentTier 
                             </Badge>
                           )}
                           
-                          {isDisabled && (
-                            <Badge variant="outline" className="text-xs text-orange-600">
-                              Coming Soon
-                            </Badge>
-                          )}
+                          <Badge variant="default" className="text-xs text-green-600">
+                            Available
+                          </Badge>
                         </div>
                         
                         <p className="text-xs text-muted-foreground mt-1">

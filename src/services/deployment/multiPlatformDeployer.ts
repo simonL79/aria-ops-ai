@@ -12,20 +12,20 @@ export interface DeploymentPlatform {
 export const DEPLOYMENT_PLATFORMS: DeploymentPlatform[] = [
   // Core SEO Hosting
   { id: 'github-pages', name: 'GitHub Pages', category: 'core_seo', enabled: true, requiresAuth: true, maxArticles: 500, delayMs: 750 },
-  { id: 'medium', name: 'Medium', category: 'core_seo', enabled: false, requiresAuth: true, maxArticles: 100, delayMs: 2000 },
-  { id: 'wordpress', name: 'WordPress.com', category: 'core_seo', enabled: false, requiresAuth: true, maxArticles: 100, delayMs: 1500 },
-  { id: 'blogger', name: 'Blogger', category: 'core_seo', enabled: false, requiresAuth: true, maxArticles: 100, delayMs: 1500 },
+  { id: 'medium', name: 'Medium', category: 'core_seo', enabled: true, requiresAuth: true, maxArticles: 100, delayMs: 2000 },
+  { id: 'wordpress', name: 'WordPress.com', category: 'core_seo', enabled: true, requiresAuth: true, maxArticles: 100, delayMs: 1500 },
+  { id: 'blogger', name: 'Blogger', category: 'core_seo', enabled: true, requiresAuth: true, maxArticles: 100, delayMs: 1500 },
   
   // Amplifiers
-  { id: 'reddit', name: 'Reddit', category: 'amplifier', enabled: false, requiresAuth: true, maxArticles: 50, delayMs: 5000 },
-  { id: 'quora', name: 'Quora', category: 'amplifier', enabled: false, requiresAuth: true, maxArticles: 75, delayMs: 3000 },
-  { id: 'tumblr', name: 'Tumblr', category: 'amplifier', enabled: false, requiresAuth: true, maxArticles: 100, delayMs: 2000 },
-  { id: 'linkedin', name: 'LinkedIn Articles', category: 'amplifier', enabled: false, requiresAuth: true, maxArticles: 25, delayMs: 4000 },
+  { id: 'reddit', name: 'Reddit', category: 'amplifier', enabled: true, requiresAuth: true, maxArticles: 50, delayMs: 5000 },
+  { id: 'quora', name: 'Quora', category: 'amplifier', enabled: true, requiresAuth: true, maxArticles: 75, delayMs: 3000 },
+  { id: 'tumblr', name: 'Tumblr', category: 'amplifier', enabled: true, requiresAuth: true, maxArticles: 100, delayMs: 2000 },
+  { id: 'linkedin', name: 'LinkedIn Articles', category: 'amplifier', enabled: true, requiresAuth: true, maxArticles: 25, delayMs: 4000 },
   
   // Backlink Boosters
-  { id: 'notion', name: 'Notion Public Pages', category: 'backlink_booster', enabled: false, requiresAuth: true, maxArticles: 200, delayMs: 1000 },
-  { id: 'google-sites', name: 'Google Sites', category: 'backlink_booster', enabled: false, requiresAuth: true, maxArticles: 200, delayMs: 1500 },
-  { id: 'substack', name: 'Substack', category: 'backlink_booster', enabled: false, requiresAuth: true, maxArticles: 150, delayMs: 2500 },
+  { id: 'notion', name: 'Notion Public Pages', category: 'backlink_booster', enabled: true, requiresAuth: true, maxArticles: 200, delayMs: 1000 },
+  { id: 'google-sites', name: 'Google Sites', category: 'backlink_booster', enabled: true, requiresAuth: true, maxArticles: 200, delayMs: 1500 },
+  { id: 'substack', name: 'Substack', category: 'backlink_booster', enabled: true, requiresAuth: true, maxArticles: 150, delayMs: 2500 },
   { id: 'telegraph', name: 'Telegraph.ph', category: 'backlink_booster', enabled: true, requiresAuth: false, maxArticles: 300, delayMs: 500 }
 ];
 

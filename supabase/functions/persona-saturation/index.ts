@@ -30,16 +30,16 @@ const DEPLOYMENT_DELAYS = {
 
 const PLATFORM_CONFIG = {
   'github-pages': { enabled: true, maxArticles: 500, delayMs: 750 },
-  'medium': { enabled: false, maxArticles: 100, delayMs: 2000 },
-  'wordpress': { enabled: false, maxArticles: 100, delayMs: 1500 },
-  'blogger': { enabled: false, maxArticles: 100, delayMs: 1500 },
-  'reddit': { enabled: false, maxArticles: 50, delayMs: 5000 },
-  'quora': { enabled: false, maxArticles: 75, delayMs: 3000 },
-  'tumblr': { enabled: false, maxArticles: 100, delayMs: 2000 },
-  'linkedin': { enabled: false, maxArticles: 25, delayMs: 4000 },
-  'notion': { enabled: false, maxArticles: 200, delayMs: 1000 },
-  'google-sites': { enabled: false, maxArticles: 200, delayMs: 1500 },
-  'substack': { enabled: false, maxArticles: 150, delayMs: 2500 },
+  'medium': { enabled: true, maxArticles: 100, delayMs: 2000 },
+  'wordpress': { enabled: true, maxArticles: 100, delayMs: 1500 },
+  'blogger': { enabled: true, maxArticles: 100, delayMs: 1500 },
+  'reddit': { enabled: true, maxArticles: 50, delayMs: 5000 },
+  'quora': { enabled: true, maxArticles: 75, delayMs: 3000 },
+  'tumblr': { enabled: true, maxArticles: 100, delayMs: 2000 },
+  'linkedin': { enabled: true, maxArticles: 25, delayMs: 4000 },
+  'notion': { enabled: true, maxArticles: 200, delayMs: 1000 },
+  'google-sites': { enabled: true, maxArticles: 200, delayMs: 1500 },
+  'substack': { enabled: true, maxArticles: 150, delayMs: 2500 },
   'telegraph': { enabled: true, maxArticles: 300, delayMs: 500 }
 };
 
