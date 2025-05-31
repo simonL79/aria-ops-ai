@@ -50,7 +50,13 @@ export class SentinelService {
         .order('discovered_at', { ascending: false });
 
       if (error) throw error;
-      return data || [];
+      return (data || []).map(item => ({
+        ...item,
+        threat_type: item.threat_type as SentinelThreatDiscovery['threat_type'],
+        severity_level: item.severity_level as SentinelThreatDiscovery['severity_level'],
+        discovery_method: item.discovery_method as SentinelThreatDiscovery['discovery_method'],
+        status: item.status as SentinelThreatDiscovery['status']
+      }));
     } catch (error) {
       console.error('[SENTINEL] Error fetching client threats:', error);
       throw error;
@@ -69,7 +75,11 @@ export class SentinelService {
         .order('plan_type');
 
       if (error) throw error;
-      return data || [];
+      return (data || []).map(item => ({
+        ...item,
+        plan_type: item.plan_type as SentinelResponsePlan['plan_type'],
+        specific_actions: Array.isArray(item.specific_actions) ? item.specific_actions : []
+      }));
     } catch (error) {
       console.error('[SENTINEL] Error fetching response plans:', error);
       throw error;
@@ -134,7 +144,11 @@ export class SentinelService {
       console.log(`[SENTINEL] ${plan.plan_type.toUpperCase()} response plan executed for threat`);
       toast.success(`${plan.plan_type.toUpperCase()} response plan activated`);
       
-      return missionLog;
+      return {
+        ...missionLog,
+        action_details: typeof missionLog.action_details === 'object' ? missionLog.action_details as Record<string, any> : {},
+        execution_status: missionLog.execution_status as SentinelMissionLog['execution_status']
+      };
     } catch (error) {
       console.error('[SENTINEL] Error executing response plan:', error);
       throw error;
@@ -147,7 +161,7 @@ export class SentinelService {
   private static async completeExecution(missionLogId: string, planType: string): Promise<void> {
     try {
       const effectiveness = planType === 'nuclear' ? 0.95 : planType === 'hard' ? 0.80 : 0.65;
-      const resultMessages = {
+      const resultMessages: Record<string, string> = {
         soft: 'Monitoring activated, positive content amplified, initial engagement completed',
         hard: 'Counter-narrative deployed, platform reports filed, influencer outreach initiated',
         nuclear: 'Legal proceedings initiated, media campaign launched, executive escalation completed'
@@ -180,7 +194,11 @@ export class SentinelService {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data || [];
+      return (data || []).map(item => ({
+        ...item,
+        protection_level: item.protection_level as SentinelClient['protection_level'],
+        status: item.status as SentinelClient['status']
+      }));
     } catch (error) {
       console.error('[SENTINEL] Error fetching clients:', error);
       throw error;
@@ -199,7 +217,11 @@ export class SentinelService {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data || [];
+      return (data || []).map(item => ({
+        ...item,
+        action_details: typeof item.action_details === 'object' ? item.action_details as Record<string, any> : {},
+        execution_status: item.execution_status as SentinelMissionLog['execution_status']
+      }));
     } catch (error) {
       console.error('[SENTINEL] Error fetching mission logs:', error);
       throw error;
@@ -249,7 +271,11 @@ export class SentinelService {
         .eq('client_id', clientId);
 
       if (error) throw error;
-      return data || [];
+      return (data || []).map(item => ({
+        ...item,
+        alert_threshold: item.alert_threshold as SentinelGuardianRegistry['alert_threshold'],
+        status: item.status as SentinelGuardianRegistry['status']
+      }));
     } catch (error) {
       console.error('[SENTINEL] Error fetching guardian status:', error);
       throw error;

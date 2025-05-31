@@ -137,7 +137,7 @@ export const ResponsePlansPanel = ({ client }: ResponsePlansPanelProps) => {
                 onClick={() => setSelectedThreat(threat)}
               >
                 <div className="flex items-center gap-2 mb-1">
-                  <Badge className={getSeverityColor(threat.severity_level)} size="sm">
+                  <Badge className={getSeverityColor(threat.severity_level)}>
                     {threat.severity_level}
                   </Badge>
                 </div>
