@@ -1,134 +1,140 @@
-
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import ComprehensiveQADashboard from '@/components/qa/ComprehensiveQADashboard';
-import CriticalActionButtons from '@/components/dashboard/CriticalActionButtons';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Shield, CheckCircle, AlertTriangle, TrendingUp, Monitor, Zap } from 'lucide-react';
 import { toast } from 'sonner';
+import { Skeleton } from '@/components/ui/skeleton';
 
-const QATestingPage = () => {
+// Lazy load heavy components
+const ComprehensiveQADashboard = lazy(() => import('@/components/qa/ComprehensiveQADashboard'));
+const CriticalActionButtons = lazy(() => import('@/components/dashboard/CriticalActionButtons'));
+
+const QATestingPage = React.memo(() => {
   // Critical action button handlers for QA testing
-  const handleLiveThreatScan = () => {
+  const handleLiveThreatScan = React.useCallback(() => {
     toast.info('🔍 QA Test: Live Threat Scan initiated');
-  };
+  }, []);
 
-  const handleLiveIntelligenceSweep = () => {
+  const handleLiveIntelligenceSweep = React.useCallback(() => {
     toast.info('🔍 QA Test: Live Intelligence Sweep initiated');
-  };
+  }, []);
 
-  const handleGuardianToggle = () => {
+  const handleGuardianToggle = React.useCallback(() => {
     toast.info('🛡️ QA Test: Guardian Mode toggled');
-  };
+  }, []);
 
-  const handleGenerateReport = () => {
+  const handleGenerateReport = React.useCallback(() => {
     toast.info('📊 QA Test: Report generation initiated');
-  };
+  }, []);
 
-  const handleActivateRealTime = () => {
+  const handleActivateRealTime = React.useCallback(() => {
     toast.info('📡 QA Test: Real-Time monitoring toggled');
-  };
+  }, []);
 
-  const handleRunManualScan = () => {
+  const handleRunManualScan = React.useCallback(() => {
     toast.info('🔄 QA Test: Manual scan initiated');
-  };
+  }, []);
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 p-6 bg-corporate-dark min-h-screen">
+      <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 lg:p-6 bg-corporate-dark min-h-screen">
         {/* Critical Action Buttons - Required for QA Testing */}
-        <CriticalActionButtons
-          onLiveThreatScan={handleLiveThreatScan}
-          onLiveIntelligenceSweep={handleLiveIntelligenceSweep}
-          onGuardianToggle={handleGuardianToggle}
-          onGenerateReport={handleGenerateReport}
-          onActivateRealTime={handleActivateRealTime}
-          onRunManualScan={handleRunManualScan}
-          isScanning={false}
-          isGuardianActive={true}
-          isRealTimeActive={false}
-        />
+        <Suspense fallback={<Skeleton className="h-16 w-full bg-corporate-darkSecondary" />}>
+          <CriticalActionButtons
+            onLiveThreatScan={handleLiveThreatScan}
+            onLiveIntelligenceSweep={handleLiveIntelligenceSweep}
+            onGuardianToggle={handleGuardianToggle}
+            onGenerateReport={handleGenerateReport}
+            onActivateRealTime={handleActivateRealTime}
+            onRunManualScan={handleRunManualScan}
+            isScanning={false}
+            isGuardianActive={true}
+            isRealTimeActive={false}
+          />
+        </Suspense>
 
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2 corporate-heading">
-              <Shield className="h-8 w-8 text-corporate-accent" />
+            <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2 corporate-heading">
+              <Shield className="h-6 w-6 sm:h-8 sm:w-8 text-corporate-accent" />
               A.R.I.A™ Comprehensive QA Master Plan
             </h1>
-            <p className="corporate-subtext mt-1">
+            <p className="corporate-subtext mt-1 text-sm sm:text-base">
               Complete Quality Assurance & System Validation for Genesis Sentinel
             </p>
           </div>
           
-          <div className="flex items-center gap-2">
-            <Badge variant="secondary" className="flex items-center gap-1 bg-corporate-darkSecondary text-corporate-lightGray border-corporate-border">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="secondary" className="flex items-center gap-1 bg-corporate-darkSecondary text-corporate-lightGray border-corporate-border text-xs sm:text-sm">
               <CheckCircle className="h-3 w-3" />
               Production Ready
             </Badge>
-            <Badge className="bg-corporate-accent text-black hover:bg-corporate-accentDark">
+            <Badge className="bg-corporate-accent text-black hover:bg-corporate-accentDark text-xs sm:text-sm">
               QA Certified
             </Badge>
           </div>
         </div>
 
         {/* QA Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
           <Card className="corporate-card">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm flex items-center gap-1 corporate-heading">
-                <Monitor className="h-4 w-4 text-corporate-accent" />
+              <CardTitle className="text-xs sm:text-sm flex items-center gap-1 corporate-heading">
+                <Monitor className="h-3 w-3 sm:h-4 sm:w-4 text-corporate-accent" />
                 UI & Navigation
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">4 Tests</div>
+              <div className="text-xl sm:text-2xl font-bold text-white">4 Tests</div>
               <p className="text-xs corporate-subtext">Interface validation</p>
             </CardContent>
           </Card>
 
           <Card className="corporate-card">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm flex items-center gap-1 corporate-heading">
-                <Zap className="h-4 w-4 text-corporate-accent" />
+              <CardTitle className="text-xs sm:text-sm flex items-center gap-1 corporate-heading">
+                <Zap className="h-3 w-3 sm:h-4 sm:w-4 text-corporate-accent" />
                 Functional
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">5 Tests</div>
+              <div className="text-xl sm:text-2xl font-bold text-white">5 Tests</div>
               <p className="text-xs corporate-subtext">Core features</p>
             </CardContent>
           </Card>
 
-          <Card className="corporate-card">
+          <Card className="corporate-card sm:col-span-2 lg:col-span-1">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm flex items-center gap-1 corporate-heading">
-                <Shield className="h-4 w-4 text-corporate-accent" />
+              <CardTitle className="text-xs sm:text-sm flex items-center gap-1 corporate-heading">
+                <Shield className="h-3 w-3 sm:h-4 sm:w-4 text-corporate-accent" />
                 Security
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">4 Tests</div>
+              <div className="text-xl sm:text-2xl font-bold text-white">4 Tests</div>
               <p className="text-xs corporate-subtext">Security validation</p>
             </CardContent>
           </Card>
         </div>
 
         {/* Main QA Dashboard */}
-        <ComprehensiveQADashboard />
+        <Suspense fallback={<Skeleton className="h-96 w-full bg-corporate-darkSecondary" />}>
+          <ComprehensiveQADashboard />
+        </Suspense>
 
         {/* QA Process Overview */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           <Card className="corporate-card">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 corporate-heading">
-                <CheckCircle className="h-5 w-5 text-corporate-accent" />
+              <CardTitle className="flex items-center gap-2 corporate-heading text-sm sm:text-base">
+                <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-corporate-accent" />
                 QA Testing Categories
               </CardTitle>
               <CardDescription className="corporate-subtext">Comprehensive testing approach</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3 text-sm text-corporate-lightGray">
+              <div className="space-y-3 text-xs sm:text-sm text-corporate-lightGray">
                 <div className="flex items-center gap-2">
                   <Monitor className="h-4 w-4 text-corporate-accent" />
                   <span className="font-medium">UI & Navigation Testing</span>
@@ -164,14 +170,14 @@ const QATestingPage = () => {
 
           <Card className="corporate-card">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 corporate-heading">
-                <AlertTriangle className="h-5 w-5 text-corporate-accent" />
+              <CardTitle className="flex items-center gap-2 corporate-heading text-sm sm:text-base">
+                <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-corporate-accent" />
                 Quality Assurance Process
               </CardTitle>
               <CardDescription className="corporate-subtext">Systematic validation approach</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3 text-sm text-corporate-lightGray">
+              <div className="space-y-3 text-xs sm:text-sm text-corporate-lightGray">
                 <div>
                   <div className="font-medium text-white">1. Automated Test Execution</div>
                   <p className="text-xs corporate-subtext">Comprehensive test suite runs all categories automatically</p>
@@ -204,13 +210,13 @@ const QATestingPage = () => {
         {/* Deployment Readiness */}
         <Card className="border-corporate-accent bg-corporate-darkSecondary">
           <CardHeader>
-            <CardTitle className="text-corporate-accent flex items-center gap-2">
-              <Shield className="h-5 w-5" />
+            <CardTitle className="text-corporate-accent flex items-center gap-2 text-sm sm:text-base">
+              <Shield className="h-4 w-4 sm:h-5 sm:w-5" />
               Deployment Readiness Criteria
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-corporate-lightGray space-y-2 text-sm">
+            <div className="text-corporate-lightGray space-y-2 text-xs sm:text-sm">
               <p><strong className="text-white">✓ All Critical Tests Pass:</strong> No critical defects detected</p>
               <p><strong className="text-white">✓ Security Validation:</strong> All security tests must pass</p>
               <p><strong className="text-white">✓ Performance Benchmarks:</strong> Load times under 3 seconds</p>
@@ -223,6 +229,8 @@ const QATestingPage = () => {
       </div>
     </DashboardLayout>
   );
-};
+});
+
+QATestingPage.displayName = 'QATestingPage';
 
 export default QATestingPage;
