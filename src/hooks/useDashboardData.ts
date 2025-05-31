@@ -74,41 +74,66 @@ export const useDashboardData = () => {
     try {
       console.log('🔍 Fetching live OSINT alerts...');
       
-      const { data, error } = await supabase
+      // First try the new SIGMA scan results
+      const { data: sigmaData, error: sigmaError } = await supabase
+        .from('sigma_scan_results')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(25);
+
+      // Also get traditional scan results
+      const { data: traditionalData, error: traditionalError } = await supabase
         .from('scan_results')
         .select('*')
         .in('source_type', ['live_osint', 'live_scan', 'osint_intelligence'])
         .order('created_at', { ascending: false })
-        .limit(50);
-      
-      if (error) {
-        console.error('Error fetching live alerts:', error);
-        return [];
+        .limit(25);
+
+      const allResults: ContentAlert[] = [];
+
+      // Process SIGMA results
+      if (sigmaData && !sigmaError) {
+        const sigmaAlerts = sigmaData.map(item => ({
+          id: item.id,
+          platform: item.platform || 'SIGMA',
+          content: item.content || '',
+          date: new Date(item.created_at).toLocaleDateString(),
+          severity: (item.severity === 'moderate' ? 'medium' : item.severity) as 'low' | 'medium' | 'high',
+          status: 'new' as const,
+          threatType: 'sigma_intelligence',
+          confidenceScore: Math.round((item.confidence_score || 0.75) * 100),
+          sourceType: item.source_type || 'sigma_osint',
+          sentiment: item.sentiment > 0 ? 'positive' : item.sentiment < 0 ? 'negative' : 'neutral',
+          potentialReach: 0,
+          detectedEntities: item.detected_entities || [],
+          url: item.url || ''
+        }));
+        allResults.push(...sigmaAlerts);
       }
-      
-      if (!data || data.length === 0) {
-        console.log('📊 No live OSINT alerts found');
-        return [];
+
+      // Process traditional results
+      if (traditionalData && !traditionalError) {
+        const traditionalAlerts = traditionalData.map(item => ({
+          id: item.id,
+          platform: item.platform || 'Unknown',
+          content: item.content || '',
+          date: new Date(item.created_at).toLocaleDateString(),
+          severity: (item.severity as 'high' | 'medium' | 'low') || 'low',
+          status: (item.status as ContentAlert['status']) || 'new',
+          threatType: item.threat_type || 'reputation_risk',
+          confidenceScore: item.confidence_score || 75,
+          sourceType: item.source_type || 'live_osint',
+          sentiment: item.sentiment > 0 ? 'positive' : item.sentiment < 0 ? 'negative' : 'neutral',
+          potentialReach: item.potential_reach || 0,
+          detectedEntities: Array.isArray(item.detected_entities) ? 
+            item.detected_entities.map(String) : [],
+          url: item.url || ''
+        }));
+        allResults.push(...traditionalAlerts);
       }
-      
-      console.log(`📊 Found ${data.length} live OSINT alerts`);
-      
-      return data.map(item => ({
-        id: item.id,
-        platform: item.platform || 'Unknown',
-        content: item.content || '',
-        date: new Date(item.created_at).toLocaleDateString(),
-        severity: (item.severity as 'high' | 'medium' | 'low') || 'low',
-        status: (item.status as ContentAlert['status']) || 'new',
-        threatType: item.threat_type || 'reputation_risk',
-        confidenceScore: item.confidence_score || 75,
-        sourceType: item.source_type || 'live_osint',
-        sentiment: item.sentiment > 0 ? 'positive' : item.sentiment < 0 ? 'negative' : 'neutral',
-        potentialReach: item.potential_reach || 0,
-        detectedEntities: Array.isArray(item.detected_entities) ? 
-          item.detected_entities.map(String) : [],
-        url: item.url || ''
-      }));
+
+      console.log(`📊 Found ${allResults.length} live intelligence alerts`);
+      return allResults;
     } catch (error) {
       console.error('Error in fetchLiveAlerts:', error);
       return [];
@@ -128,10 +153,24 @@ export const useDashboardData = () => {
       }
       
       if (!data || data.length === 0) {
-        // Return default live sources if none configured
+        // Return default live sources including SIGMA
         return [
           {
             id: '1',
+            name: 'A.R.I.A™ SIGMA',
+            type: 'sigma_intelligence',
+            status: 'good',
+            lastUpdate: new Date().toLocaleDateString(),
+            metrics: { total: 0, positive: 0, negative: 0, neutral: 0 },
+            positiveRatio: 0,
+            total: 0,
+            active: true,
+            lastUpdated: new Date().toLocaleDateString(),
+            mentionCount: 0,
+            sentiment: 0
+          },
+          {
+            id: '2',
             name: 'Reddit OSINT',
             type: 'osint_source',
             status: 'good',
@@ -145,7 +184,7 @@ export const useDashboardData = () => {
             sentiment: 0
           },
           {
-            id: '2', 
+            id: '3', 
             name: 'RSS Intelligence',
             type: 'osint_source',
             status: 'good',
@@ -221,8 +260,9 @@ export const useDashboardData = () => {
 
   const fetchLiveMetrics = async (): Promise<MetricValue[]> => {
     try {
-      // Get real counts from live data
-      const [alertsData, sourcesData] = await Promise.all([
+      // Get real counts from live data including SIGMA
+      const [sigmaData, alertsData, sourcesData] = await Promise.all([
+        supabase.from('sigma_scan_results').select('*'),
         supabase
           .from('scan_results')
           .select('*')
@@ -233,18 +273,24 @@ export const useDashboardData = () => {
           .eq('active', true)
       ]);
 
-      const totalMentions = alertsData.data?.length || 0;
-      const negativeSentiment = alertsData.data?.filter(item => item.sentiment && item.sentiment < 0).length || 0;
-      const activeSources = Math.max(sourcesData.data?.length || 0, 2); // At least Reddit + RSS
+      const sigmaCount = sigmaData.data?.length || 0;
+      const traditionalCount = alertsData.data?.length || 0;
+      const totalMentions = sigmaCount + traditionalCount;
+      
+      const sigmaNegative = sigmaData.data?.filter(item => item.sentiment && item.sentiment < 0).length || 0;
+      const traditionalNegative = alertsData.data?.filter(item => item.sentiment && item.sentiment < 0).length || 0;
+      const negativeSentiment = sigmaNegative + traditionalNegative;
+      
+      const activeSources = Math.max(sourcesData.data?.length || 0, 3); // At least SIGMA + Reddit + RSS
       const threatLevel = totalMentions > 0 ? Math.round((negativeSentiment / totalMentions) * 100) : 0;
 
       return [
         { 
           id: "1", 
-          title: "Live Intelligence", 
-          value: totalMentions, 
+          title: "SIGMA Intelligence", 
+          value: sigmaCount, 
           change: 0, 
-          icon: "trending-up", 
+          icon: "shield", 
           color: "blue", 
           delta: 0, 
           deltaType: "increase" 
@@ -261,7 +307,7 @@ export const useDashboardData = () => {
         },
         { 
           id: "3", 
-          title: "OSINT Sources", 
+          title: "Live Sources", 
           value: activeSources, 
           change: 0, 
           icon: "trending-up", 
@@ -274,7 +320,7 @@ export const useDashboardData = () => {
           title: "Threat Level", 
           value: threatLevel, 
           change: 0, 
-          icon: "trending-down", 
+          icon: "alert-triangle", 
           color: "yellow", 
           delta: 0, 
           deltaType: "increase" 
@@ -283,10 +329,10 @@ export const useDashboardData = () => {
     } catch (error) {
       console.error('Error fetching live metrics:', error);
       return [
-        { id: "1", title: "Live Intelligence", value: 0, change: 0, icon: "trending-up", color: "blue", delta: 0, deltaType: "increase" },
+        { id: "1", title: "SIGMA Intelligence", value: 0, change: 0, icon: "shield", color: "blue", delta: 0, deltaType: "increase" },
         { id: "2", title: "Negative Signals", value: 0, change: 0, icon: "trending-down", color: "red", delta: 0, deltaType: "increase" },
-        { id: "3", title: "OSINT Sources", value: 2, change: 0, icon: "trending-up", color: "green", delta: 0, deltaType: "increase" },
-        { id: "4", title: "Threat Level", value: 0, change: 0, icon: "trending-down", color: "yellow", delta: 0, deltaType: "increase" }
+        { id: "3", title: "Live Sources", value: 3, change: 0, icon: "trending-up", color: "green", delta: 0, deltaType: "increase" },
+        { id: "4", title: "Threat Level", value: 0, change: 0, icon: "alert-triangle", color: "yellow", delta: 0, deltaType: "increase" }
       ];
     }
   };
@@ -296,7 +342,7 @@ export const useDashboardData = () => {
     setError(null);
     
     try {
-      console.log('🔄 Fetching live dashboard data...');
+      console.log('🔄 Fetching live dashboard data with SIGMA integration...');
       
       const [liveAlerts, liveSources, liveActions, liveMetrics] = await Promise.all([
         fetchLiveAlerts(),
@@ -367,6 +413,20 @@ async function fetchLiveSources(): Promise<ContentSource[]> {
       return [
         {
           id: '1',
+          name: 'A.R.I.A™ SIGMA',
+          type: 'sigma_intelligence',
+          status: 'good',
+          lastUpdate: new Date().toLocaleDateString(),
+          metrics: { total: 0, positive: 0, negative: 0, neutral: 0 },
+          positiveRatio: 0,
+          total: 0,
+          active: true,
+          lastUpdated: new Date().toLocaleDateString(),
+          mentionCount: 0,
+          sentiment: 0
+        },
+        {
+          id: '2',
           name: 'Reddit OSINT',
           type: 'osint_source',
           status: 'good',
@@ -380,7 +440,7 @@ async function fetchLiveSources(): Promise<ContentSource[]> {
           sentiment: 0
         },
         {
-          id: '2', 
+          id: '3', 
           name: 'RSS Intelligence',
           type: 'osint_source',
           status: 'good',
@@ -456,7 +516,8 @@ async function fetchLiveActions(): Promise<ContentAction[]> {
 
 async function fetchLiveMetrics(): Promise<MetricValue[]> {
   try {
-    const [alertsData, sourcesData] = await Promise.all([
+    const [sigmaData, alertsData, sourcesData] = await Promise.all([
+      supabase.from('sigma_scan_results').select('*'),
       supabase
         .from('scan_results')
         .select('*')
@@ -467,18 +528,24 @@ async function fetchLiveMetrics(): Promise<MetricValue[]> {
         .eq('active', true)
     ]);
 
-    const totalMentions = alertsData.data?.length || 0;
-    const negativeSentiment = alertsData.data?.filter(item => item.sentiment && item.sentiment < 0).length || 0;
-    const activeSources = Math.max(sourcesData.data?.length || 0, 2);
+    const sigmaCount = sigmaData.data?.length || 0;
+    const traditionalCount = alertsData.data?.length || 0;
+    const totalMentions = sigmaCount + traditionalCount;
+    
+    const sigmaNegative = sigmaData.data?.filter(item => item.sentiment && item.sentiment < 0).length || 0;
+    const traditionalNegative = alertsData.data?.filter(item => item.sentiment && item.sentiment < 0).length || 0;
+    const negativeSentiment = sigmaNegative + traditionalNegative;
+    
+    const activeSources = Math.max(sourcesData.data?.length || 0, 3); // At least SIGMA + Reddit + RSS
     const threatLevel = totalMentions > 0 ? Math.round((negativeSentiment / totalMentions) * 100) : 0;
 
     return [
       { 
         id: "1", 
-        title: "Live Intelligence", 
-        value: totalMentions, 
+        title: "SIGMA Intelligence", 
+        value: sigmaCount, 
         change: 0, 
-        icon: "trending-up", 
+        icon: "shield", 
         color: "blue", 
         delta: 0, 
         deltaType: "increase" 
@@ -495,7 +562,7 @@ async function fetchLiveMetrics(): Promise<MetricValue[]> {
       },
       { 
         id: "3", 
-        title: "OSINT Sources", 
+        title: "Live Sources", 
         value: activeSources, 
         change: 0, 
         icon: "trending-up", 
@@ -508,7 +575,7 @@ async function fetchLiveMetrics(): Promise<MetricValue[]> {
         title: "Threat Level", 
         value: threatLevel, 
         change: 0, 
-        icon: "trending-down", 
+        icon: "alert-triangle", 
         color: "yellow", 
         delta: 0, 
         deltaType: "increase" 
@@ -517,10 +584,10 @@ async function fetchLiveMetrics(): Promise<MetricValue[]> {
   } catch (error) {
     console.error('Error fetching live metrics:', error);
     return [
-      { id: "1", title: "Live Intelligence", value: 0, change: 0, icon: "trending-up", color: "blue", delta: 0, deltaType: "increase" },
+      { id: "1", title: "SIGMA Intelligence", value: 0, change: 0, icon: "shield", color: "blue", delta: 0, deltaType: "increase" },
       { id: "2", title: "Negative Signals", value: 0, change: 0, icon: "trending-down", color: "red", delta: 0, deltaType: "increase" },
-      { id: "3", title: "OSINT Sources", value: 2, change: 0, icon: "trending-up", color: "green", delta: 0, deltaType: "increase" },
-      { id: "4", title: "Threat Level", value: 0, change: 0, icon: "trending-down", color: "yellow", delta: 0, deltaType: "increase" }
+      { id: "3", title: "Live Sources", value: 3, change: 0, icon: "trending-up", color: "green", delta: 0, deltaType: "increase" },
+      { id: "4", title: "Threat Level", value: 0, change: 0, icon: "alert-triangle", color: "yellow", delta: 0, deltaType: "increase" }
     ];
   }
 }

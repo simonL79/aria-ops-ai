@@ -6766,6 +6766,48 @@ export type Database = {
         }
         Relationships: []
       }
+      sigma_scan_results: {
+        Row: {
+          confidence_score: number | null
+          content: string | null
+          created_at: string | null
+          detected_entities: string[] | null
+          entity_name: string
+          id: string
+          platform: string | null
+          sentiment: number | null
+          severity: string | null
+          source_type: string | null
+          url: string | null
+        }
+        Insert: {
+          confidence_score?: number | null
+          content?: string | null
+          created_at?: string | null
+          detected_entities?: string[] | null
+          entity_name: string
+          id?: string
+          platform?: string | null
+          sentiment?: number | null
+          severity?: string | null
+          source_type?: string | null
+          url?: string | null
+        }
+        Update: {
+          confidence_score?: number | null
+          content?: string | null
+          created_at?: string | null
+          detected_entities?: string[] | null
+          entity_name?: string
+          id?: string
+          platform?: string | null
+          sentiment?: number | null
+          severity?: string | null
+          source_type?: string | null
+          url?: string | null
+        }
+        Relationships: []
+      }
       sovra_action_log: {
         Row: {
           action_type: string | null

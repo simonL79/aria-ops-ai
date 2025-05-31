@@ -3,76 +3,44 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "@/hooks/useAuth";
-import AuthGuard from "@/components/auth/AuthGuard";
-import AdminGuard from "@/components/auth/AdminGuard";
+import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
+import AdminLogin from "./pages/admin/AdminLogin";
 import DashboardPage from "./pages/dashboard/DashboardPage";
-import AdminLogin from "./pages/AdminLogin";
-import AriaCommand from "./pages/AriaCommand";
-import ThreatsManagement from "./pages/ThreatsManagement";
-import SalesFunnelPage from "./pages/SalesFunnelPage";
-import PricingPage from "./pages/PricingPage";
-import BlogPage from "./pages/BlogPage";
-import SimonLindsayPage from "./pages/SimonLindsayPage";
-import ContactPage from "./pages/ContactPage";
-import ContactFormPage from "./pages/ContactFormPage";
+import MonitoringPage from "./pages/dashboard/MonitoringPage";
+import IntelligencePage from "./pages/dashboard/IntelligencePage";
+import AnalyticsPage from "./pages/dashboard/AnalyticsPage";
+import SettingsPage from "./pages/dashboard/SettingsPage";
+import MentionsPage from "./pages/dashboard/MentionsPage";
+import OperatorConsole from "./components/operator/OperatorConsole";
+import CommandCenterPage from "./pages/dashboard/CommandCenterPage";
+import SigmaPage from "./pages/dashboard/SigmaPage";
 
 const queryClient = new QueryClient();
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <TooltipProvider>
+      <TooltipProvider>
+        <AuthProvider>
           <Toaster />
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
-              <Route path="/blog" element={<BlogPage />} />
-              <Route path="/simon-lindsay" element={<SimonLindsayPage />} />
-              <Route path="/sales-funnel" element={<SalesFunnelPage />} />
-              <Route path="/pricing" element={<PricingPage />} />
-              <Route path="/contact" element={<ContactPage />} />
-              <Route path="/contact-sales" element={<ContactFormPage />} />
-              <Route path="/scan" element={<ContactPage />} />
-              <Route 
-                path="/dashboard" 
-                element={
-                  <AdminGuard>
-                    <DashboardPage />
-                  </AdminGuard>
-                } 
-              />
               <Route path="/admin/login" element={<AdminLogin />} />
-              <Route 
-                path="/admin" 
-                element={
-                  <AdminGuard>
-                    <DashboardPage />
-                  </AdminGuard>
-                } 
-              />
-              <Route 
-                path="/aria-command" 
-                element={
-                  <AdminGuard>
-                    <AriaCommand />
-                  </AdminGuard>
-                } 
-              />
-              <Route 
-                path="/threats-management" 
-                element={
-                  <AdminGuard>
-                    <ThreatsManagement />
-                  </AdminGuard>
-                } 
-              />
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/dashboard/sigma" element={<SigmaPage />} />
+              <Route path="/dashboard/monitoring" element={<MonitoringPage />} />
+              <Route path="/dashboard/intelligence" element={<IntelligencePage />} />
+              <Route path="/dashboard/analytics" element={<AnalyticsPage />} />
+              <Route path="/dashboard/mentions" element={<MentionsPage />} />
+              <Route path="/dashboard/command-center" element={<CommandCenterPage />} />
+              <Route path="/dashboard/operator-console" element={<OperatorConsole />} />
+              <Route path="/dashboard/settings" element={<SettingsPage />} />
             </Routes>
           </BrowserRouter>
-        </TooltipProvider>
-      </AuthProvider>
+        </AuthProvider>
+      </TooltipProvider>
     </QueryClientProvider>
   );
 }
