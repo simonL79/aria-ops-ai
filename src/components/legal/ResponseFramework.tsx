@@ -119,48 +119,60 @@ const ResponseFramework = () => {
         <p className="text-sm text-corporate-lightGray">Choose appropriate escalation level based on threat severity</p>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="space-y-4">
           {responseOptions.map((option) => (
-            <Card key={option.id} className={`border ${getResponseColor(option.type)} transition-all hover:scale-105`}>
+            <Card key={option.id} className={`border ${getResponseColor(option.type)} transition-all hover:scale-[1.02] cursor-pointer`}>
               <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2 text-lg">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
                     {getResponseIcon(option.type)}
-                    {option.title}
-                  </CardTitle>
+                    <div>
+                      <CardTitle className="text-lg text-white flex items-center gap-2">
+                        {option.title}
+                      </CardTitle>
+                      <p className="text-sm text-corporate-lightGray mt-1">{option.description}</p>
+                    </div>
+                  </div>
                   <Badge className={getBadgeColor(option.type)}>
                     {option.type.toUpperCase()}
                   </Badge>
                 </div>
-                <p className="text-sm text-corporate-lightGray">{option.description}</p>
               </CardHeader>
               <CardContent className="pt-0 space-y-4">
-                <div className="space-y-2">
-                  <h4 className="text-sm font-medium text-white">Actions:</h4>
-                  <ul className="text-xs text-corporate-lightGray space-y-1">
+                <div className="space-y-3">
+                  <h4 className="text-sm font-medium text-white">Key Actions:</h4>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
                     {option.actions.map((action, index) => (
-                      <li key={index} className="flex items-center gap-2">
-                        <div className="h-1 w-1 bg-corporate-accent rounded-full" />
-                        {action}
-                      </li>
+                      <div key={index} className="flex items-start gap-2 text-sm text-corporate-lightGray">
+                        <div className="h-1.5 w-1.5 bg-corporate-accent rounded-full mt-2 flex-shrink-0" />
+                        <span>{action}</span>
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 </div>
                 
-                <div className="flex justify-between text-xs text-corporate-lightGray">
-                  <span>Timeline: {option.timeline}</span>
-                  <span>Cost: {option.cost}</span>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-corporate-border">
+                  <div className="flex flex-col sm:flex-row gap-4 text-sm text-corporate-lightGray">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">Timeline:</span>
+                      <span>{option.timeline}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">Cost:</span>
+                      <span>{option.cost}</span>
+                    </div>
+                  </div>
+                  
+                  <Button 
+                    onClick={() => executeResponse(option.id)} 
+                    disabled={isExecuting}
+                    className="min-w-[120px]"
+                    variant={selectedResponse === option.id ? "default" : "outline"}
+                  >
+                    <Zap className="h-4 w-4 mr-2" />
+                    {isExecuting ? 'Executing...' : selectedResponse === option.id ? 'Active' : 'Execute'}
+                  </Button>
                 </div>
-                
-                <Button 
-                  onClick={() => executeResponse(option.id)} 
-                  disabled={isExecuting}
-                  className="w-full"
-                  variant={selectedResponse === option.id ? "default" : "outline"}
-                >
-                  <Zap className="h-4 w-4 mr-2" />
-                  {isExecuting ? 'Executing...' : selectedResponse === option.id ? 'Active' : 'Execute'}
-                </Button>
               </CardContent>
             </Card>
           ))}
