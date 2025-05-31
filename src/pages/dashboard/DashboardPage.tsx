@@ -4,10 +4,15 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 import DashboardMainContent from "@/components/dashboard/DashboardMainContent";
 import MetricsOverview from "@/components/dashboard/MetricsOverview";
 import LiveDataGuard from "@/components/dashboard/LiveDataGuard";
+import ResponsiveLayout from "@/components/layout/ResponsiveLayout";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { useClientSelection } from "@/hooks/useClientSelection";
+import { usePerformanceMonitor } from "@/hooks/usePerformanceMonitor";
 
 const DashboardPage = () => {
+  // Performance monitoring
+  const { measureRenderTime } = usePerformanceMonitor('DashboardPage');
+
   const {
     metrics,
     alerts,
@@ -22,6 +27,8 @@ const DashboardPage = () => {
   const [filteredAlerts, setFilteredAlerts] = useState(alerts);
 
   const handleFilterChange = (filters: { platforms: string[]; severities: string[]; statuses: string[]; }) => {
+    const endMeasure = measureRenderTime('filterChange');
+    
     let filtered = alerts;
     
     if (filters.platforms.length > 0) {
@@ -37,28 +44,31 @@ const DashboardPage = () => {
     }
     
     setFilteredAlerts(filtered);
+    endMeasure();
   };
 
   return (
     <DashboardLayout>
       <LiveDataGuard enforceStrict={true}>
-        <div className="space-y-6">
-          <MetricsOverview metrics={metrics} loading={loading} />
-          
-          <DashboardMainContent
-            metrics={metrics}
-            alerts={alerts}
-            sources={sources}
-            actions={actions}
-            loading={loading}
-            error={error}
-            fetchData={fetchData}
-            filteredAlerts={filteredAlerts}
-            onFilterChange={handleFilterChange}
-            selectedClient={selectedClient}
-            clientEntities={clientEntities}
-          />
-        </div>
+        <ResponsiveLayout>
+          <div className="space-y-4 sm:space-y-6">
+            <MetricsOverview metrics={metrics} loading={loading} />
+            
+            <DashboardMainContent
+              metrics={metrics}
+              alerts={alerts}
+              sources={sources}
+              actions={actions}
+              loading={loading}
+              error={error}
+              fetchData={fetchData}
+              filteredAlerts={filteredAlerts}
+              onFilterChange={handleFilterChange}
+              selectedClient={selectedClient}
+              clientEntities={clientEntities}
+            />
+          </div>
+        </ResponsiveLayout>
       </LiveDataGuard>
     </DashboardLayout>
   );

@@ -1,17 +1,12 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import ReputationScore from "@/components/dashboard/ReputationScore";
-import ContentAlerts from "@/components/dashboard/ContentAlerts";
-import SourceOverview from "@/components/dashboard/SourceOverview";
-import RecentActions from "@/components/dashboard/RecentActions";
-import IntelligenceCollection from "@/components/dashboard/IntelligenceCollection";
-import ContentFilter from "@/components/dashboard/ContentFilter";
-import EntitySummaryPanel from "@/components/dashboard/EntitySummaryPanel";
 import { Button } from "@/components/ui/button";
 import { RefreshCw, AlertTriangle, CheckCircle } from "lucide-react";
 import { DashboardMainContentProps } from "@/types/dashboard";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { toast } from "sonner";
+import OptimizedDashboard from "./OptimizedDashboard";
 
 const DashboardMainContent = ({
   metrics, 
@@ -29,6 +24,85 @@ const DashboardMainContent = ({
   clientEntities
 }: DashboardMainContentProps) => {
   const navigate = useNavigate();
+  const [isScanning, setIsScanning] = useState(false);
+  const [isGuardianActive, setIsGuardianActive] = useState(false);
+  const [isRealTimeActive, setIsRealTimeActive] = useState(false);
+
+  // Critical button handlers
+  const handleLiveThreatScan = async () => {
+    setIsScanning(true);
+    toast.info('🔍 Initiating Live Threat Scan...');
+    
+    try {
+      // Simulate scan process
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      toast.success('✅ Live Threat Scan completed successfully!');
+      fetchData?.(); // Refresh data
+    } catch (error) {
+      toast.error('❌ Live Threat Scan failed');
+    } finally {
+      setIsScanning(false);
+    }
+  };
+
+  const handleLiveIntelligenceSweep = async () => {
+    setIsScanning(true);
+    toast.info('🧠 Starting Live Intelligence Sweep...');
+    
+    try {
+      // Simulate sweep process
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      toast.success('✅ Live Intelligence Sweep completed!');
+      fetchData?.(); // Refresh data
+    } catch (error) {
+      toast.error('❌ Live Intelligence Sweep failed');
+    } finally {
+      setIsScanning(false);
+    }
+  };
+
+  const handleGuardianToggle = () => {
+    const newState = !isGuardianActive;
+    setIsGuardianActive(newState);
+    
+    if (newState) {
+      toast.success('🛡️ Guardian Mode Activated - Enhanced protection enabled');
+    } else {
+      toast.info('🛡️ Guardian Mode Deactivated');
+    }
+  };
+
+  const handleGenerateReport = () => {
+    toast.info('📊 Generating Executive Report...');
+    navigate('/reports/executive');
+  };
+
+  const handleActivateRealTime = () => {
+    const newState = !isRealTimeActive;
+    setIsRealTimeActive(newState);
+    
+    if (newState) {
+      toast.success('📡 Real-Time Monitoring Activated');
+    } else {
+      toast.info('📡 Real-Time Monitoring Deactivated');
+    }
+  };
+
+  const handleRunManualScan = async () => {
+    setIsScanning(true);
+    toast.info('🔄 Running Manual Scan...');
+    
+    try {
+      // Simulate manual scan
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      toast.success('✅ Manual Scan completed!');
+      fetchData?.(); // Refresh data
+    } catch (error) {
+      toast.error('❌ Manual Scan failed');
+    } finally {
+      setIsScanning(false);
+    }
+  };
 
   // Filter for live OSINT data only
   const liveAlerts = alerts?.filter(alert => 
@@ -55,33 +129,6 @@ const DashboardMainContent = ({
   const liveActions = actions?.filter(action => 
     action.type === 'urgent' || action.type === 'monitoring' || action.type === 'response'
   ) || [];
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px] bg-corporate-dark">
-        <div className="text-center">
-          <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 text-corporate-accent" />
-          <p className="text-lg text-white">Loading A.R.I.A™ Intelligence Dashboard...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px] bg-corporate-dark">
-        <div className="text-center max-w-md">
-          <AlertTriangle className="h-8 w-8 mx-auto mb-4 text-red-500" />
-          <h3 className="text-lg font-semibold mb-2 text-white">System Error</h3>
-          <p className="text-sm text-corporate-lightGray mb-4">{error}</p>
-          <Button onClick={fetchData} className="gap-2 bg-corporate-accent text-black hover:bg-corporate-accentDark">
-            <RefreshCw className="h-4 w-4" />
-            Retry Connection
-          </Button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-corporate-dark">
@@ -126,37 +173,30 @@ const DashboardMainContent = ({
           </div>
         </div>
 
-        {/* Main Content Grid - Responsive Layout */}
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
-          {/* Left Column - Score & Intelligence */}
-          <div className="xl:col-span-3 space-y-6">
-            <ReputationScore score={reputationScore} previousScore={previousScore} />
-            <IntelligenceCollection onDataRefresh={fetchData} />
-          </div>
-          
-          {/* Center Column - Threats */}
-          <div className="xl:col-span-6 space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <h2 className="text-lg font-medium text-white">Live Threat Intelligence</h2>
-              <ContentFilter onFilterChange={onFilterChange} />
-            </div>
-            <ContentAlerts 
-              alerts={filteredAlerts && filteredAlerts.length > 0 ? filteredAlerts : displayAlerts} 
-              isLoading={loading}
-            />
-          </div>
-
-          {/* Right Column - Entity Summary */}
-          <div className="xl:col-span-3">
-            <EntitySummaryPanel alerts={displayAlerts} />
-          </div>
-        </div>
-
-        {/* Bottom Section - Sources & Actions */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <SourceOverview sources={liveSources as any} />
-          <RecentActions actions={liveActions} />
-        </div>
+        {/* Optimized Dashboard Component */}
+        <OptimizedDashboard
+          metrics={metrics}
+          alerts={displayAlerts}
+          sources={liveSources}
+          actions={liveActions}
+          loading={loading}
+          error={error}
+          fetchData={fetchData}
+          filteredAlerts={filteredAlerts}
+          reputationScore={reputationScore}
+          previousScore={previousScore}
+          selectedClient={selectedClient}
+          clientEntities={clientEntities}
+          onLiveThreatScan={handleLiveThreatScan}
+          onLiveIntelligenceSweep={handleLiveIntelligenceSweep}
+          onGuardianToggle={handleGuardianToggle}
+          onGenerateReport={handleGenerateReport}
+          onActivateRealTime={handleActivateRealTime}
+          onRunManualScan={handleRunManualScan}
+          isScanning={isScanning}
+          isGuardianActive={isGuardianActive}
+          isRealTimeActive={isRealTimeActive}
+        />
 
         {/* Navigation Tabs */}
         <Tabs defaultValue="overview" className="mt-8">

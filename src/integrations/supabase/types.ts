@@ -114,6 +114,45 @@ export type Database = {
         }
         Relationships: []
       }
+      anubis_feedback_memory: {
+        Row: {
+          action_result: string | null
+          created_at: string | null
+          entity_id: string
+          feedback_score: number | null
+          id: string
+          notes: string | null
+          operator_action: string | null
+          source_module: string
+          threat_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          action_result?: string | null
+          created_at?: string | null
+          entity_id: string
+          feedback_score?: number | null
+          id?: string
+          notes?: string | null
+          operator_action?: string | null
+          source_module: string
+          threat_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          action_result?: string | null
+          created_at?: string | null
+          entity_id?: string
+          feedback_score?: number | null
+          id?: string
+          notes?: string | null
+          operator_action?: string | null
+          source_module?: string
+          threat_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       anubis_mission_chain: {
         Row: {
           action_type: string | null
@@ -207,6 +246,33 @@ export type Database = {
           pattern_summary?: string | null
           previous_outcome?: string | null
           recommended_response?: string | null
+        }
+        Relationships: []
+      }
+      anubis_playbook_suggestions: {
+        Row: {
+          created_at: string | null
+          effectiveness_score: number | null
+          from_feedback_ids: string[] | null
+          id: string
+          matched_pattern: string | null
+          suggested_playbook: Json | null
+        }
+        Insert: {
+          created_at?: string | null
+          effectiveness_score?: number | null
+          from_feedback_ids?: string[] | null
+          id?: string
+          matched_pattern?: string | null
+          suggested_playbook?: Json | null
+        }
+        Update: {
+          created_at?: string | null
+          effectiveness_score?: number | null
+          from_feedback_ids?: string[] | null
+          id?: string
+          matched_pattern?: string | null
+          suggested_playbook?: Json | null
         }
         Relationships: []
       }
