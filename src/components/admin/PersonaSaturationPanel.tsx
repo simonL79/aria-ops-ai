@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -23,6 +24,13 @@ interface SaturationCampaign {
   createdAt?: string;
 }
 
+interface DatabaseCampaign {
+  id: string;
+  entity_name: string;
+  campaign_data: any;
+  created_at: string;
+}
+
 const PersonaSaturationPanel = () => {
   const [activeTab, setActiveTab] = useState('deploy');
   const [entityName, setEntityName] = useState('');
@@ -40,7 +48,7 @@ const PersonaSaturationPanel = () => {
     setLoadingCampaigns(true);
     try {
       const { data, error } = await supabase
-        .from('persona_saturation_campaigns')
+        .from('persona_saturation_campaigns' as any)
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -50,7 +58,7 @@ const PersonaSaturationPanel = () => {
       }
 
       if (data) {
-        const formattedCampaigns = data.map(campaign => ({
+        const formattedCampaigns = (data as DatabaseCampaign[]).map(campaign => ({
           id: campaign.id,
           entityName: campaign.entity_name,
           status: 'completed' as const,

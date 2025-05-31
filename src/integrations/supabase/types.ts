@@ -5214,6 +5214,30 @@ export type Database = {
         }
         Relationships: []
       }
+      persona_saturation_campaigns: {
+        Row: {
+          campaign_data: Json
+          created_at: string
+          entity_name: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          campaign_data?: Json
+          created_at?: string
+          entity_name: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          campaign_data?: Json
+          created_at?: string
+          entity_name?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       praxis_crisis_simulations: {
         Row: {
           archetype_id: string | null
