@@ -19,6 +19,7 @@ import ContactPage from "./pages/ContactPage";
 import SentinelPage from "./pages/admin/SentinelPage";
 import SentinelOperatorPage from "./pages/admin/SentinelOperatorPage";
 import WatchtowerPage from "./pages/admin/WatchtowerPage";
+import PersonaSaturationPage from "./pages/admin/PersonaSaturationPage";
 
 const queryClient = new QueryClient();
 
@@ -66,6 +67,14 @@ function App() {
                 element={
                   <AdminGuard>
                     <WatchtowerPage />
+                  </AdminGuard>
+                } 
+              />
+              <Route 
+                path="/admin/persona-saturation" 
+                element={
+                  <AdminGuard>
+                    <PersonaSaturationPage />
                   </AdminGuard>
                 } 
               />
