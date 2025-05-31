@@ -2,14 +2,54 @@
 import React from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import ComprehensiveQADashboard from '@/components/qa/ComprehensiveQADashboard';
+import CriticalActionButtons from '@/components/dashboard/CriticalActionButtons';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Shield, CheckCircle, AlertTriangle, TrendingUp, Monitor, Zap } from 'lucide-react';
+import { toast } from 'sonner';
 
 const QATestingPage = () => {
+  // Critical action button handlers for QA testing
+  const handleLiveThreatScan = () => {
+    toast.info('🔍 QA Test: Live Threat Scan initiated');
+  };
+
+  const handleLiveIntelligenceSweep = () => {
+    toast.info('🔍 QA Test: Live Intelligence Sweep initiated');
+  };
+
+  const handleGuardianToggle = () => {
+    toast.info('🛡️ QA Test: Guardian Mode toggled');
+  };
+
+  const handleGenerateReport = () => {
+    toast.info('📊 QA Test: Report generation initiated');
+  };
+
+  const handleActivateRealTime = () => {
+    toast.info('📡 QA Test: Real-Time monitoring toggled');
+  };
+
+  const handleRunManualScan = () => {
+    toast.info('🔄 QA Test: Manual scan initiated');
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6 p-6 bg-corporate-dark min-h-screen">
+        {/* Critical Action Buttons - Required for QA Testing */}
+        <CriticalActionButtons
+          onLiveThreatScan={handleLiveThreatScan}
+          onLiveIntelligenceSweep={handleLiveIntelligenceSweep}
+          onGuardianToggle={handleGuardianToggle}
+          onGenerateReport={handleGenerateReport}
+          onActivateRealTime={handleActivateRealTime}
+          onRunManualScan={handleRunManualScan}
+          isScanning={false}
+          isGuardianActive={true}
+          isRealTimeActive={false}
+        />
+
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2 corporate-heading">
