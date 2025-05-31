@@ -16,12 +16,6 @@ interface PersonaSaturationRequest {
   realDeployment?: boolean;
 }
 
-interface GitHubRepo {
-  name: string;
-  html_url: string;
-  clone_url: string;
-}
-
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -34,6 +28,7 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
+    const requestBody = await req.json();
     const { 
       entityName, 
       targetKeywords, 
@@ -41,7 +36,7 @@ serve(async (req) => {
       deploymentTargets, 
       saturationMode,
       realDeployment = false 
-    }: PersonaSaturationRequest = await req.json();
+    }: PersonaSaturationRequest = requestBody;
 
     console.log(`🚀 Starting Enhanced Persona Saturation Campaign: {
   entityName: "${entityName}",
@@ -51,24 +46,42 @@ serve(async (req) => {
 
     const githubToken = Deno.env.get('GITHUB_TOKEN');
     if (!githubToken) {
-      throw new Error('GitHub token not configured');
+      console.error('GitHub token not configured');
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: 'GitHub token not configured. Please set GITHUB_TOKEN in edge function secrets.' 
+        }),
+        { 
+          status: 500,
+          headers: { 
+            ...corsHeaders, 
+            'Content-Type': 'application/json' 
+          } 
+        }
+      );
     }
 
     // Get GitHub username
-    const userResponse = await fetch('https://api.github.com/user', {
-      headers: {
-        'Authorization': `token ${githubToken}`,
-        'User-Agent': 'ARIA-Persona-Saturation'
+    let githubUsername = 'default-user';
+    try {
+      const userResponse = await fetch('https://api.github.com/user', {
+        headers: {
+          'Authorization': `token ${githubToken}`,
+          'User-Agent': 'ARIA-Persona-Saturation'
+        }
+      });
+
+      if (userResponse.ok) {
+        const githubUser = await userResponse.json();
+        githubUsername = githubUser.login;
+        console.log(`✅ Using GitHub username: ${githubUsername}`);
+      } else {
+        console.warn('Could not get GitHub user info, using default');
       }
-    });
-
-    if (!userResponse.ok) {
-      throw new Error('Failed to get GitHub user info');
+    } catch (error) {
+      console.warn('GitHub user fetch failed:', error);
     }
-
-    const githubUser = await userResponse.json();
-    const githubUsername = githubUser.login;
-    console.log(`✅ Using GitHub username: ${githubUsername}`);
 
     const deploymentUrls: string[] = [];
     const contentTemplates = [
@@ -92,14 +105,18 @@ serve(async (req) => {
       // Generate article content
       const articleContent = await generateArticleContent(entityName, targetKeywords, template, saturationMode);
       
-      if (realDeployment) {
-        // Create GitHub repository
-        const repoName = `${entityName.toLowerCase().replace(/\s+/g, '-')}-${template}-${Date.now()}`;
-        const deployUrl = await deployToGitHub(githubToken, githubUsername, repoName, articleContent, entityName);
-        
-        if (deployUrl) {
-          deploymentUrls.push(deployUrl);
-          console.log(`✅ Deployed article ${i}/${contentCount}: ${deployUrl}`);
+      if (realDeployment && githubToken) {
+        try {
+          // Create GitHub repository
+          const repoName = `${entityName.toLowerCase().replace(/\s+/g, '-')}-${template}-${Date.now()}`;
+          const deployUrl = await deployToGitHub(githubToken, githubUsername, repoName, articleContent, entityName);
+          
+          if (deployUrl) {
+            deploymentUrls.push(deployUrl);
+            console.log(`✅ Deployed article ${i}/${contentCount}: ${deployUrl}`);
+          }
+        } catch (error) {
+          console.error(`❌ Deployment failed for article ${i}:`, error.message);
         }
       } else {
         // Simulation mode
@@ -139,7 +156,7 @@ serve(async (req) => {
       JSON.stringify({
         success: true,
         campaign: campaignData,
-        estimatedSERPImpact: `${deploymentUrls.length} live articles deployed with ${(campaignData.serpPenetration * 100).toFixed(1)}% SERP penetration`
+        estimatedSERPImpact: `${deploymentUrls.length} articles deployed with ${(campaignData.serpPenetration * 100).toFixed(1)}% SERP penetration`
       }),
       { 
         headers: { 
@@ -154,7 +171,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: false, 
-        error: error.message 
+        error: error.message || 'Unknown error occurred'
       }),
       { 
         status: 500,
@@ -263,10 +280,16 @@ async function deployToGitHub(
     });
 
     if (!createRepoResponse.ok) {
-      throw new Error(`Failed to create repository: ${createRepoResponse.statusText}`);
+      const errorText = await createRepoResponse.text();
+      throw new Error(`Failed to create repository: ${createRepoResponse.statusText} - ${errorText}`);
     }
 
     console.log(`✅ Created repository: ${repoName}`);
+
+    // Encode content to base64 properly
+    const encoder = new TextEncoder();
+    const data = encoder.encode(content);
+    const base64Content = btoa(String.fromCharCode(...data));
 
     // Create index.html file
     const createFileResponse = await fetch(`https://api.github.com/repos/${username}/${repoName}/contents/index.html`, {
@@ -278,12 +301,13 @@ async function deployToGitHub(
       },
       body: JSON.stringify({
         message: `Add professional profile for ${entityName}`,
-        content: btoa(content)
+        content: base64Content
       })
     });
 
     if (!createFileResponse.ok) {
-      throw new Error(`Failed to create file: ${createFileResponse.statusText}`);
+      const errorText = await createFileResponse.text();
+      throw new Error(`Failed to create file: ${createFileResponse.statusText} - ${errorText}`);
     }
 
     // Enable GitHub Pages
@@ -311,6 +335,6 @@ async function deployToGitHub(
 
   } catch (error) {
     console.error(`Failed to deploy to GitHub:`, error);
-    return null;
+    throw error;
   }
 }
