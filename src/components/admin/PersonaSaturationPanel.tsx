@@ -9,6 +9,7 @@ import { Progress } from '@/components/ui/progress';
 import { Rocket, Target, Globe, TrendingUp, Shield, Zap, AlertTriangle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import PersonaSaturationReports from './PersonaSaturationReports';
 
 interface SaturationCampaign {
   id: string;
