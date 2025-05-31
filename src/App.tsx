@@ -1,4 +1,3 @@
-
 import React, { Suspense } from 'react';
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -17,6 +16,7 @@ const IntelligenceCorePage = React.lazy(() => import("./pages/admin/Intelligence
 const PersonaSaturationPage = React.lazy(() => import("./pages/admin/PersonaSaturationPage"));
 const LegalOpsPage = React.lazy(() => import("./pages/admin/LegalOpsPage"));
 const ClientsPage = React.lazy(() => import("./pages/admin/ClientsPage"));
+const GenesisSentinelPage = React.lazy(() => import("./pages/admin/GenesisSentinelPage"));
 
 // Create a client
 const queryClient = new QueryClient({
@@ -61,6 +61,7 @@ function App() {
               <Route path="/admin/persona-saturation" element={<PersonaSaturationPage />} />
               <Route path="/admin/legal-ops" element={<LegalOpsPage />} />
               <Route path="/admin/clients" element={<ClientsPage />} />
+              <Route path="/admin/genesis-sentinel" element={<GenesisSentinelPage />} />
             </Routes>
           </Suspense>
         </BrowserRouter>
