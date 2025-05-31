@@ -29,6 +29,13 @@ import {
   Upload,
   Users,
   ChevronsLeft,
+  Shield,
+  Users as UsersIcon,
+  Rocket,
+  Eye,
+  AlertTriangle,
+  Settings,
+  Terminal,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -53,6 +60,16 @@ const navigationItems = [
     href: "/dashboard/aria-ingest",
     icon: Upload,
   },
+];
+
+const adminMenuItems = [
+  { icon: Shield, label: 'System Health', href: '/admin' },
+  { icon: UsersIcon, label: 'Clients', href: '/admin/clients' },
+  { icon: Rocket, label: 'Persona Saturation', href: '/admin/persona-saturation' },
+  { icon: Eye, label: 'Genesis Sentinel', href: '/admin/genesis-sentinel' },
+  { icon: AlertTriangle, label: 'QA Testing', href: '/admin/qa' },
+  { icon: Settings, label: 'System Config', href: '/admin/system' },
+  { icon: Terminal, label: 'Ghost Protocol', href: '/admin/operator' }
 ];
 
 const DashboardNavigation = () => {

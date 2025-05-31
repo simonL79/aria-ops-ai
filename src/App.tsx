@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -20,6 +19,7 @@ import SentinelPage from "./pages/admin/SentinelPage";
 import SentinelOperatorPage from "./pages/admin/SentinelOperatorPage";
 import WatchtowerPage from "./pages/admin/WatchtowerPage";
 import PersonaSaturationPage from "./pages/admin/PersonaSaturationPage";
+import GenesisSentinelPage from './pages/admin/GenesisSentinelPage';
 
 const queryClient = new QueryClient();
 
@@ -30,80 +30,89 @@ function App() {
         <TooltipProvider>
           <Toaster />
           <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/blog" element={<BlogPage />} />
-              <Route path="/simon-lindsay" element={<SimonLindsayPage />} />
-              <Route path="/sales-funnel" element={<SalesFunnelPage />} />
-              <Route path="/pricing" element={<PricingPage />} />
-              <Route path="/contact" element={<ContactPage />} />
-              <Route path="/scan" element={<ContactPage />} />
-              <Route 
-                path="/dashboard" 
-                element={
-                  <AdminGuard>
-                    <DashboardPage />
-                  </AdminGuard>
-                } 
-              />
-              <Route 
-                path="/admin/sentinel" 
-                element={
-                  <AdminGuard>
-                    <SentinelPage />
-                  </AdminGuard>
-                } 
-              />
-              <Route 
-                path="/admin/sentinel-command" 
-                element={
-                  <AdminGuard>
-                    <SentinelOperatorPage />
-                  </AdminGuard>
-                } 
-              />
-              <Route 
-                path="/admin/watchtower" 
-                element={
-                  <AdminGuard>
-                    <WatchtowerPage />
-                  </AdminGuard>
-                } 
-              />
-              <Route 
-                path="/admin/persona-saturation" 
-                element={
-                  <AdminGuard>
-                    <PersonaSaturationPage />
-                  </AdminGuard>
-                } 
-              />
-              <Route path="/admin/login" element={<AdminLogin />} />
-              <Route 
-                path="/admin" 
-                element={
-                  <AdminGuard>
-                    <DashboardPage />
-                  </AdminGuard>
-                } 
-              />
-              <Route 
-                path="/aria-command" 
-                element={
-                  <AdminGuard>
-                    <AriaCommand />
-                  </AdminGuard>
-                } 
-              />
-              <Route 
-                path="/threats-management" 
-                element={
-                  <AdminGuard>
-                    <ThreatsManagement />
-                  </AdminGuard>
-                } 
-              />
-            </Routes>
+            <div className="min-h-screen">
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/blog" element={<BlogPage />} />
+                <Route path="/simon-lindsay" element={<SimonLindsayPage />} />
+                <Route path="/sales-funnel" element={<SalesFunnelPage />} />
+                <Route path="/pricing" element={<PricingPage />} />
+                <Route path="/contact" element={<ContactPage />} />
+                <Route path="/scan" element={<ContactPage />} />
+                <Route 
+                  path="/dashboard" 
+                  element={
+                    <AdminGuard>
+                      <DashboardPage />
+                    </AdminGuard>
+                  } 
+                />
+                <Route 
+                  path="/admin/sentinel" 
+                  element={
+                    <AdminGuard>
+                      <SentinelPage />
+                    </AdminGuard>
+                  } 
+                />
+                <Route 
+                  path="/admin/sentinel-command" 
+                  element={
+                    <AdminGuard>
+                      <SentinelOperatorPage />
+                    </AdminGuard>
+                  } 
+                />
+                <Route 
+                  path="/admin/watchtower" 
+                  element={
+                    <AdminGuard>
+                      <WatchtowerPage />
+                    </AdminGuard>
+                  } 
+                />
+                <Route 
+                  path="/admin/persona-saturation" 
+                  element={
+                    <AdminGuard>
+                      <PersonaSaturationPage />
+                    </AdminGuard>
+                  } 
+                />
+                <Route path="/admin/login" element={<AdminLogin />} />
+                <Route 
+                  path="/admin" 
+                  element={
+                    <AdminGuard>
+                      <DashboardPage />
+                    </AdminGuard>
+                  } 
+                />
+                <Route 
+                  path="/aria-command" 
+                  element={
+                    <AdminGuard>
+                      <AriaCommand />
+                    </AdminGuard>
+                  } 
+                />
+                <Route 
+                  path="/threats-management" 
+                  element={
+                    <AdminGuard>
+                      <ThreatsManagement />
+                    </AdminGuard>
+                  } 
+                />
+                <Route path="/admin/genesis-sentinel" element={
+                  <ProtectedRoute>
+                    <AdminGuard>
+                      <GenesisSentinelPage />
+                    </AdminGuard>
+                  </ProtectedRoute>
+                } />
+              </Routes>
+            </div>
           </BrowserRouter>
         </TooltipProvider>
       </AuthProvider>
