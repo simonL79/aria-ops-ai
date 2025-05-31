@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { AnubisSecurityService } from '@/services/aria/anubisSecurityService';
-import { anubisService } from '@/services/aria/anubisService';
+import { AnubisService } from '@/services/aria/anubisService';
 import { multilingualThreatService } from '@/services/aria/multilingualThreatService';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -20,7 +20,7 @@ export const useAnubisControl = () => {
     setStatus('🧠 Running comprehensive diagnostics...');
 
     try {
-      const result = await anubisService.runDiagnostics();
+      const result = await AnubisService.runDiagnostics();
       if (result) {
         setStatus(`✅ Diagnostic completed. Status: ${result.overall_status}`);
         toast.success('System diagnostics completed successfully');

@@ -129,6 +129,17 @@ export class AnubisService {
       
       const diagnosticResults = await this.runSystemChecks();
       
+      // Convert AnubisSystemStatus to AnubisState
+      const moduleStatus: AnubisState[] = diagnosticResults.map(result => ({
+        id: result.id,
+        module: result.module,
+        status: result.status === 'critical' ? 'error' : result.status,
+        last_checked: result.last_checked,
+        issue_summary: result.issue_summary,
+        record_count: result.record_count,
+        anomaly_detected: result.anomaly_detected
+      }));
+      
       const report: AnubisSystemReport = {
         session_id: sessionId,
         overall_status: this.determineOverallStatus(diagnosticResults),
@@ -136,7 +147,7 @@ export class AnubisService {
         issues_found: diagnosticResults.filter(r => r.status !== 'healthy').length,
         recommendations: this.generateRecommendations(diagnosticResults),
         generated_at: startTime,
-        module_status: diagnosticResults
+        module_status: moduleStatus
       };
       
       await this.logDiagnosticSession(report);

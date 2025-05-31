@@ -149,7 +149,7 @@ export const useDashboardData = () => {
         description: item.description,
         priority: item.priority,
         status: item.status,
-        type: 'manual_review' as const,
+        type: 'urgent' as const, // Map to valid type
         platform: 'system' as const,
         timestamp: item.created_at
       }));

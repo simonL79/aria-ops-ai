@@ -1,341 +1,330 @@
-import { useState, useEffect } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Shield, Activity, AlertTriangle, CheckCircle, XCircle, RefreshCw, Eye, Clock, Brain, Zap, Scale, Target, MessageSquare } from 'lucide-react';
-import { anubisService, AnubisState, LLMThreatMonitor, GraveyardSimulation, LegalEscalation } from '@/services/aria/anubisService';
-import AnubisGPTCockpit from './AnubisGPTCockpit';
+import { RefreshCw, Shield, Brain, AlertTriangle, Eye, Scale } from 'lucide-react';
+import { 
+  AnubisService, 
+  AnubisSystemStatus, 
+  AnubisLogEntry, 
+  LLMThreatMonitor, 
+  GraveyardSimulation, 
+  LegalEscalation,
+  AnubisSystemReport 
+} from '@/services/aria/anubisService';
+import { toast } from 'sonner';
 
 const EnhancedAnubisMonitor = () => {
-  const [systemStatus, setSystemStatus] = useState<AnubisState[]>([]);
-  const [llmThreats, setLLMThreats] = useState<LLMThreatMonitor[]>([]);
+  const [systemStatus, setSystemStatus] = useState<AnubisSystemStatus[]>([]);
+  const [llmThreats, setLlmThreats] = useState<LLMThreatMonitor[]>([]);
   const [graveyardSims, setGraveyardSims] = useState<GraveyardSimulation[]>([]);
   const [legalEscalations, setLegalEscalations] = useState<LegalEscalation[]>([]);
-  const [systemLogs, setSystemLogs] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  const [systemLogs, setSystemLogs] = useState<AnubisLogEntry[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRunningDiagnostics, setIsRunningDiagnostics] = useState(false);
+
+  useEffect(() => {
+    loadAllData();
+  }, []);
 
   const loadAllData = async () => {
-    setLoading(true);
     try {
-      const [status, threats, sims, legal, logs] = await Promise.all([
-        anubisService.getSystemStatus(),
-        anubisService.getLLMThreats(),
-        anubisService.getGraveyardSimulations(),
-        anubisService.getLegalEscalations(),
-        anubisService.getSystemLogs()
+      const [status, threats, simulations, escalations, logs] = await Promise.all([
+        AnubisService.getSystemStatus(),
+        AnubisService.getLLMThreats(),
+        AnubisService.getGraveyardSimulations(),
+        AnubisService.getLegalEscalations(),
+        AnubisService.getSystemLogs(20)
       ]);
       
       setSystemStatus(status);
-      setLLMThreats(threats);
-      setGraveyardSims(sims);
-      setLegalEscalations(legal);
+      setLlmThreats(threats);
+      setGraveyardSims(simulations);
+      setLegalEscalations(escalations);
       setSystemLogs(logs);
-      setLastUpdate(new Date());
+    } catch (error) {
+      console.error('Failed to load enhanced Anubis data:', error);
+      toast.error('Failed to load system data');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   const runEnhancedDiagnostics = async () => {
-    setLoading(true);
+    setIsRunningDiagnostics(true);
     try {
-      await anubisService.runEnhancedDiagnostics();
-      await loadAllData();
+      const result = await AnubisService.runEnhancedDiagnostics();
+      toast.success(`Enhanced diagnostics completed: ${result.overall_status}`);
+      loadAllData();
+    } catch (error) {
+      console.error('Enhanced diagnostics failed:', error);
+      toast.error('Enhanced diagnostics failed');
     } finally {
-      setLoading(false);
+      setIsRunningDiagnostics(false);
     }
   };
-
-  useEffect(() => {
-    loadAllData();
-    const interval = setInterval(loadAllData, 5 * 60 * 1000);
-    return () => clearInterval(interval);
-  }, []);
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'healthy': return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case 'healthy': return <Shield className="h-4 w-4 text-green-500" />;
       case 'warning': return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
-      case 'error': return <XCircle className="h-4 w-4 text-red-500" />;
-      default: return <Activity className="h-4 w-4 text-gray-500" />;
+      case 'critical': return <AlertTriangle className="h-4 w-4 text-red-500" />;
+      case 'offline': return <Eye className="h-4 w-4 text-gray-500" />;
+      default: return <Brain className="h-4 w-4 text-gray-400" />;
     }
   };
 
-  const getThreatTypeColor = (type: string) => {
-    switch (type) {
-      case 'threatening': return 'destructive';
-      case 'false_claim': return 'secondary';
-      case 'attack': return 'destructive';
-      default: return 'outline';
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'healthy': return 'bg-green-100 text-green-800';
+      case 'warning': return 'bg-yellow-100 text-yellow-800';
+      case 'critical': return 'bg-red-100 text-red-800';
+      case 'offline': return 'bg-gray-100 text-gray-800';
+      default: return 'bg-gray-100 text-gray-600';
     }
   };
 
-  const overallStatus = systemStatus.length > 0 
-    ? systemStatus.some(s => s.status === 'error') ? 'critical'
-      : systemStatus.some(s => s.status === 'warning') ? 'warning' 
-      : 'healthy'
-    : 'healthy';
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex items-center justify-center">
+            <RefreshCw className="h-6 w-6 animate-spin" />
+            <span className="ml-2">Loading enhanced Anubis system data...</span>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold flex items-center gap-2">
-            <Shield className="h-6 w-6 text-purple-600" />
-            A.R.I.A™ Enhanced Anubis Monitor
-          </h2>
-          <p className="text-muted-foreground">Sovereign-grade system monitoring with LLM counterintel</p>
-        </div>
-        <div className="flex gap-2">
-          <Button onClick={runEnhancedDiagnostics} disabled={loading}>
-            <Zap className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-            Enhanced Diagnostics
-          </Button>
-          <Button onClick={loadAllData} variant="outline" disabled={loading}>
-            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-            Refresh All
-          </Button>
-        </div>
-      </div>
+      {/* Header Controls */}
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-xl flex items-center gap-2">
+              <Brain className="h-6 w-6" />
+              Enhanced Anubis Intelligence Monitor
+            </CardTitle>
+            <div className="flex gap-2">
+              <Button
+                onClick={loadAllData}
+                variant="outline"
+                size="sm"
+                disabled={isLoading}
+              >
+                <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+                Refresh All
+              </Button>
+              <Button
+                onClick={runEnhancedDiagnostics}
+                variant="default"
+                size="sm"
+                disabled={isRunningDiagnostics}
+              >
+                <Brain className={`h-4 w-4 mr-2 ${isRunningDiagnostics ? 'animate-pulse' : ''}`} />
+                Enhanced Diagnostics
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+      </Card>
 
-      {/* Enhanced Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">System Status</CardTitle>
-            {getStatusIcon(overallStatus)}
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold capitalize">{overallStatus}</div>
-            <p className="text-xs text-muted-foreground">{systemStatus.length} modules</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">LLM Threats</CardTitle>
-            <Brain className="h-4 w-4 text-red-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{llmThreats.length}</div>
-            <p className="text-xs text-muted-foreground">
-              {llmThreats.filter(t => t.mention_type !== 'neutral').length} hostile
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Graveyard Ops</CardTitle>
-            <Target className="h-4 w-4 text-orange-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{graveyardSims.length}</div>
-            <p className="text-xs text-muted-foreground">
-              {graveyardSims.filter(s => s.suppression_status === 'pending').length} pending
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Legal Queue</CardTitle>
-            <Scale className="h-4 w-4 text-blue-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{legalEscalations.length}</div>
-            <p className="text-xs text-muted-foreground">
-              {legalEscalations.filter(l => l.delivery_status === 'pending').length} queued
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">System Logs</CardTitle>
-            <Activity className="h-4 w-4 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{systemLogs.length}</div>
-            <p className="text-xs text-muted-foreground">Recent activity</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Tabs defaultValue="modules" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="modules">Core Modules</TabsTrigger>
-          <TabsTrigger value="gpt-cockpit" className="flex items-center gap-1">
-            <MessageSquare className="h-3 w-3" />
-            GPT Cockpit
-          </TabsTrigger>
-          <TabsTrigger value="llm">LLM Intel</TabsTrigger>
-          <TabsTrigger value="graveyard">Graveyard Ops</TabsTrigger>
-          <TabsTrigger value="legal">Legal Node</TabsTrigger>
+      {/* Tabbed Content */}
+      <Tabs defaultValue="overview" className="w-full">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="llm-threats">LLM Threats</TabsTrigger>
+          <TabsTrigger value="graveyard">Graveyard</TabsTrigger>
+          <TabsTrigger value="legal">Legal</TabsTrigger>
           <TabsTrigger value="logs">System Logs</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="modules" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>A.R.I.A™ Module Health Status</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {systemStatus.map((module) => (
-                  <div key={module.id} className="border rounded-lg p-4 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div className="font-medium">{module.module}</div>
-                      <Badge variant={module.status === 'healthy' ? 'default' : module.status === 'warning' ? 'secondary' : 'destructive'}>
-                        {getStatusIcon(module.status)}
-                        <span className="ml-1 capitalize">{module.status}</span>
-                      </Badge>
+        <TabsContent value="overview">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {systemStatus.map((status) => (
+              <Card key={status.id}>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      {getStatusIcon(status.status)}
+                      <span className="font-medium">
+                        {AnubisService.getModuleName(status.module)}
+                      </span>
                     </div>
-                    <div className="text-sm text-muted-foreground">
-                      {anubisService.getModuleName(module.module)}
-                    </div>
-                    {module.anomaly_detected && (
-                      <div className="text-sm text-red-600">{module.issue_summary}</div>
-                    )}
-                    <div className="text-xs text-muted-foreground flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      Last checked: {new Date(module.last_checked).toLocaleTimeString()}
-                    </div>
+                    <Badge className={getStatusColor(status.status)}>
+                      {status.status}
+                    </Badge>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                  
+                  {status.issue_summary && (
+                    <p className="text-sm text-gray-600 mb-2">{status.issue_summary}</p>
+                  )}
+                  
+                  <div className="flex justify-between text-xs text-gray-500">
+                    <span>Last: {new Date(status.last_checked).toLocaleTimeString()}</span>
+                    {status.record_count !== undefined && (
+                      <span>Records: {status.record_count}</span>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </TabsContent>
 
-        <TabsContent value="gpt-cockpit">
-          <AnubisGPTCockpit />
-        </TabsContent>
-
-        <TabsContent value="llm" className="space-y-4">
+        <TabsContent value="llm-threats">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Brain className="h-5 w-5" />
-                LLM Threat Intelligence
+                LLM Threat Monitor
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {llmThreats.map((threat) => (
-                  <div key={threat.id} className="border rounded-lg p-4 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium">{threat.entity_name}</span>
-                      <Badge variant={getThreatTypeColor(threat.mention_type)}>
-                        {threat.mention_type.replace('_', ' ').toUpperCase()}
-                      </Badge>
-                    </div>
-                    {threat.model_detected && (
-                      <div className="text-sm text-muted-foreground">Model: {threat.model_detected}</div>
-                    )}
-                    <div className="text-sm">Vector Score: {threat.vector_score.toFixed(3)}</div>
-                    {threat.captured_response && (
-                      <div className="text-sm bg-muted p-2 rounded">{threat.captured_response}</div>
-                    )}
-                    <div className="text-xs text-muted-foreground">
-                      {new Date(threat.recorded_at).toLocaleString()}
-                    </div>
+                {llmThreats.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    No LLM threats detected
                   </div>
-                ))}
+                ) : (
+                  llmThreats.map((threat) => (
+                    <div key={threat.id} className="p-4 border rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-medium">{threat.entity_name}</span>
+                        <Badge className="bg-purple-100 text-purple-800">
+                          {threat.mention_type}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-2">
+                        Vector Score: {Math.round(threat.vector_score * 100)}%
+                      </p>
+                      {threat.captured_response && (
+                        <p className="text-xs text-gray-500 line-clamp-2">
+                          {threat.captured_response}
+                        </p>
+                      )}
+                      <div className="text-xs text-gray-400 mt-2">
+                        {new Date(threat.recorded_at).toLocaleString()}
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="graveyard" className="space-y-4">
+        <TabsContent value="graveyard">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Target className="h-5 w-5" />
-                Graveyard Operations
+                <Eye className="h-5 w-5" />
+                Graveyard Simulations
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {graveyardSims.map((sim) => (
-                  <div key={sim.id} className="border rounded-lg p-4 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium">{sim.leak_title || 'Classified Operation'}</span>
-                      <Badge variant={sim.suppression_status === 'pending' ? 'secondary' : 'default'}>
-                        {sim.suppression_status.toUpperCase()}
-                      </Badge>
-                    </div>
-                    {sim.expected_trigger_module && (
-                      <div className="text-sm text-muted-foreground">
-                        Target: {sim.expected_trigger_module}
-                      </div>
-                    )}
-                    <div className="text-xs text-muted-foreground">
-                      Injected: {new Date(sim.injected_at).toLocaleString()}
-                    </div>
+                {graveyardSims.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    No graveyard simulations active
                   </div>
-                ))}
+                ) : (
+                  graveyardSims.map((sim) => (
+                    <div key={sim.id} className="p-4 border rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-medium">{sim.leak_title || 'Unnamed Simulation'}</span>
+                        <Badge className="bg-orange-100 text-orange-800">
+                          {sim.suppression_status}
+                        </Badge>
+                      </div>
+                      {sim.expected_trigger_module && (
+                        <p className="text-sm text-gray-600 mb-2">
+                          Expected Trigger: {sim.expected_trigger_module}
+                        </p>
+                      )}
+                      <div className="text-xs text-gray-400">
+                        Injected: {new Date(sim.injected_at).toLocaleString()}
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="legal" className="space-y-4">
+        <TabsContent value="legal">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Scale className="h-5 w-5" />
-                Legal Escalation Queue
+                Legal Escalations
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {legalEscalations.map((legal) => (
-                  <div key={legal.id} className="border rounded-lg p-4 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium">{legal.violation_type || 'Legal Matter'}</span>
-                      <Badge variant={legal.delivery_status === 'pending' ? 'secondary' : legal.delivery_status === 'error' ? 'destructive' : 'default'}>
-                        {legal.delivery_status.toUpperCase()}
-                      </Badge>
-                    </div>
-                    {legal.jurisdiction && (
-                      <div className="text-sm text-muted-foreground">Jurisdiction: {legal.jurisdiction}</div>
-                    )}
-                    <div className="text-sm flex items-center gap-2">
-                      <span>Auto-generated: {legal.auto_generated ? 'Yes' : 'No'}</span>
-                      {legal.law_firm_contact && <span>• Contact: {legal.law_firm_contact}</span>}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      Created: {new Date(legal.created_at).toLocaleString()}
-                    </div>
+                {legalEscalations.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    No legal escalations pending
                   </div>
-                ))}
+                ) : (
+                  legalEscalations.map((escalation) => (
+                    <div key={escalation.id} className="p-4 border rounded-lg">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-medium">{escalation.violation_type || 'Unknown Violation'}</span>
+                        <Badge className="bg-red-100 text-red-800">
+                          {escalation.delivery_status}
+                        </Badge>
+                      </div>
+                      {escalation.jurisdiction && (
+                        <p className="text-sm text-gray-600 mb-2">
+                          Jurisdiction: {escalation.jurisdiction}
+                        </p>
+                      )}
+                      {escalation.law_firm_contact && (
+                        <p className="text-sm text-gray-600 mb-2">
+                          Contact: {escalation.law_firm_contact}
+                        </p>
+                      )}
+                      <div className="flex justify-between text-xs text-gray-400">
+                        <span>{new Date(escalation.created_at).toLocaleString()}</span>
+                        <span>{escalation.auto_generated ? 'Auto-Generated' : 'Manual'}</span>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="logs" className="space-y-4">
+        <TabsContent value="logs">
           <Card>
             <CardHeader>
-              <CardTitle>Enhanced System Diagnostic Logs</CardTitle>
+              <CardTitle>System Activity Logs</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
+              <div className="space-y-2 max-h-96 overflow-y-auto">
                 {systemLogs.map((log) => (
-                  <div key={log.id} className="border rounded p-3 text-sm">
-                    <div className="flex items-center justify-between">
-                      <div className="font-medium">{log.module} - {log.check_type}</div>
-                      <Badge variant="outline">{log.result_status}</Badge>
+                  <div key={log.id} className="p-3 border rounded-lg">
+                    <div className="flex items-center justify-between mb-1">
+                      <Badge className={`text-xs ${
+                        log.level === 'error' ? 'bg-red-100 text-red-800' :
+                        log.level === 'warning' ? 'bg-yellow-100 text-yellow-800' :
+                        log.level === 'info' ? 'bg-blue-100 text-blue-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {log.level}
+                      </Badge>
+                      <span className="text-xs text-gray-500">
+                        {new Date(log.timestamp).toLocaleString()}
+                      </span>
                     </div>
-                    <div className="text-muted-foreground mt-1">{log.details}</div>
-                    <div className="text-xs text-muted-foreground mt-1">
-                      {new Date(log.checked_at).toLocaleString()}
-                    </div>
+                    <p className="text-sm">{log.message}</p>
                   </div>
                 ))}
               </div>
@@ -343,12 +332,6 @@ const EnhancedAnubisMonitor = () => {
           </Card>
         </TabsContent>
       </Tabs>
-
-      {lastUpdate && (
-        <div className="text-xs text-muted-foreground text-center">
-          Last updated: {lastUpdate.toLocaleString()}
-        </div>
-      )}
     </div>
   );
 };
