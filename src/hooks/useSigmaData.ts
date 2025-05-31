@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -56,7 +55,23 @@ export const useSigmaData = () => {
         .limit(50);
 
       if (error) throw error;
-      setSigmaResults(data || []);
+      
+      // Type-safe mapping with proper casting
+      const typedResults: SigmaResult[] = (data || []).map(result => ({
+        id: result.id,
+        entity_name: result.entity_name,
+        platform: result.platform || 'Unknown',
+        content: result.content || '',
+        url: result.url,
+        sentiment: result.sentiment || 0,
+        severity: (['low', 'moderate', 'high', 'critical'].includes(result.severity) ? result.severity : 'low') as 'low' | 'moderate' | 'high' | 'critical',
+        confidence_score: result.confidence_score || 0,
+        detected_entities: result.detected_entities || [],
+        source_type: result.source_type || 'live_osint',
+        created_at: result.created_at
+      }));
+      
+      setSigmaResults(typedResults);
     } catch (err) {
       console.error('Error fetching SIGMA results:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch SIGMA results');
@@ -72,7 +87,24 @@ export const useSigmaData = () => {
         .limit(20);
 
       if (error) throw error;
-      setThreatProfiles(data || []);
+      
+      // Type-safe mapping with proper casting
+      const typedProfiles: ThreatProfile[] = (data || []).map(profile => ({
+        id: profile.id,
+        entity_name: profile.entity_name,
+        threat_level: (['low', 'moderate', 'high', 'critical'].includes(profile.threat_level) ? profile.threat_level : 'low') as 'low' | 'moderate' | 'high' | 'critical',
+        risk_score: profile.risk_score || 0,
+        signature_match: profile.signature_match,
+        match_confidence: profile.match_confidence,
+        primary_platforms: profile.primary_platforms || [],
+        total_mentions: profile.total_mentions || 0,
+        negative_sentiment_score: profile.negative_sentiment_score || 0,
+        related_entities: profile.related_entities || [],
+        fix_plan: profile.fix_plan,
+        created_at: profile.created_at
+      }));
+      
+      setThreatProfiles(typedProfiles);
     } catch (err) {
       console.error('Error fetching threat profiles:', err);
     }

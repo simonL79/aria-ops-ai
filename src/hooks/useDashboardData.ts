@@ -1,72 +1,13 @@
 import { useState, useEffect } from 'react';
+import { ContentAlert, ContentSource, ContentAction, MetricValue } from '@/types/dashboard';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-export interface MetricValue {
-  id: string;
-  title: string;
-  value: number;
-  change: number;
-  icon: string;
-  color: string;
-  delta: number;
-  deltaType: 'increase' | 'decrease';
-}
-
-export interface ContentAlert {
-  id: string;
-  content: string;
-  platform: string;
-  severity: 'low' | 'medium' | 'high';
-  status: 'new' | 'read' | 'actioned' | 'resolved' | 'dismissed' | 'reviewing';
-  date: string;
-  url?: string;
-  sourceType?: string;
-  detectedEntities?: string[];
-  category?: string;
-  recommendation?: string;
-  threatType?: string;
-  confidenceScore?: number;
-  sentiment?: 'positive' | 'negative' | 'neutral';
-  potentialReach?: number;
-}
-
-export interface ContentSource {
-  id: string;
-  name: string;
-  type: string;
-  status: 'critical' | 'good' | 'warning';
-  lastUpdate: string;
-  metrics: {
-    total: number;
-    positive: number;
-    negative: number;
-    neutral: number;
-  };
-  positiveRatio: number;
-  total: number;
-  active: boolean;
-  lastUpdated: string;
-  mentionCount: number;
-  sentiment: number;
-}
-
-export interface ContentAction {
-  id: string;
-  type: 'urgent' | 'monitoring' | 'response';
-  description: string;
-  timestamp: string;
-  status: 'pending' | 'completed' | 'failed';
-  platform: string;
-  action: string;
-  date: string;
-}
-
 export const useDashboardData = () => {
-  const [metrics, setMetrics] = useState<MetricValue[]>([]);
   const [alerts, setAlerts] = useState<ContentAlert[]>([]);
   const [sources, setSources] = useState<ContentSource[]>([]);
   const [actions, setActions] = useState<ContentAction[]>([]);
+  const [metrics, setMetrics] = useState<MetricValue[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -98,12 +39,12 @@ export const useDashboardData = () => {
           platform: item.platform || 'SIGMA',
           content: item.content || '',
           date: new Date(item.created_at).toLocaleDateString(),
-          severity: (item.severity === 'moderate' ? 'medium' : item.severity) as 'low' | 'medium' | 'high',
+          severity: (item.severity === 'critical' ? 'high' : item.severity === 'moderate' ? 'medium' : item.severity) as 'low' | 'medium' | 'high',
           status: 'new' as const,
           threatType: 'sigma_intelligence',
           confidenceScore: Math.round((item.confidence_score || 0.75) * 100),
           sourceType: item.source_type || 'sigma_osint',
-          sentiment: item.sentiment > 0 ? 'positive' : item.sentiment < 0 ? 'negative' : 'neutral',
+          sentiment: (item.sentiment > 0 ? 'positive' : item.sentiment < 0 ? 'negative' : 'neutral') as 'positive' | 'negative' | 'neutral',
           potentialReach: 0,
           detectedEntities: item.detected_entities || [],
           url: item.url || ''
@@ -118,12 +59,12 @@ export const useDashboardData = () => {
           platform: item.platform || 'Unknown',
           content: item.content || '',
           date: new Date(item.created_at).toLocaleDateString(),
-          severity: (item.severity as 'high' | 'medium' | 'low') || 'low',
+          severity: (item.severity === 'critical' ? 'high' : item.severity === 'moderate' ? 'medium' : item.severity) as 'low' | 'medium' | 'high',
           status: (item.status as ContentAlert['status']) || 'new',
           threatType: item.threat_type || 'reputation_risk',
           confidenceScore: item.confidence_score || 75,
           sourceType: item.source_type || 'live_osint',
-          sentiment: item.sentiment > 0 ? 'positive' : item.sentiment < 0 ? 'negative' : 'neutral',
+          sentiment: (item.sentiment > 0 ? 'positive' : item.sentiment < 0 ? 'negative' : 'neutral') as 'positive' | 'negative' | 'neutral',
           potentialReach: item.potential_reach || 0,
           detectedEntities: Array.isArray(item.detected_entities) ? 
             item.detected_entities.map(String) : [],
