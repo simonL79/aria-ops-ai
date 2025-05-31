@@ -1,6 +1,7 @@
 
 import React from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import WatchtowerDashboard from '@/components/watchtower/WatchtowerDashboard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Satellite, Target, TrendingUp, Users, AlertTriangle, Zap } from 'lucide-react';
@@ -87,46 +88,8 @@ const WatchtowerPage = () => {
           </Card>
         </div>
 
-        {/* Main Services */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="corporate-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 corporate-heading">
-                <Satellite className="h-5 w-5 text-corporate-accent" />
-                Threat Discovery Engine
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3 text-sm text-corporate-lightGray">
-                <div>• RSS/News feed monitoring for unprotected entities</div>
-                <div>• Automatic threat severity assessment</div>
-                <div>• Entity relationship mapping</div>
-                <div>• Real-time vulnerability scoring</div>
-                <div>• Competitor intelligence gathering</div>
-                <div>• Market opportunity identification</div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="corporate-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 corporate-heading">
-                <Target className="h-5 w-5 text-corporate-accent" />
-                Intelligent Outreach
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3 text-sm text-corporate-lightGray">
-                <div>• Personalized threat briefs</div>
-                <div>• Automated contact discovery</div>
-                <div>• Multi-channel outreach campaigns</div>
-                <div>• Response tracking & follow-up</div>
-                <div>• Conversion pipeline management</div>
-                <div>• ROI analytics & optimization</div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Main Dashboard */}
+        <WatchtowerDashboard />
 
         {/* Value Proposition */}
         <Card className="border-corporate-accent bg-corporate-darkSecondary">
