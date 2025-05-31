@@ -1,13 +1,11 @@
-
 import { useState, useEffect } from 'react';
-import { performComprehensiveScan } from '@/services/monitoring/monitoringScanService';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 export interface MetricValue {
   id: string;
   title: string;
-  value: number; // Changed to only number to match dashboard types
+  value: number;
   change: number;
   icon: string;
   color: string;
@@ -20,7 +18,7 @@ export interface ContentAlert {
   content: string;
   platform: string;
   severity: 'low' | 'medium' | 'high';
-  status: 'new' | 'read' | 'actioned' | 'resolved';
+  status: 'new' | 'read' | 'actioned' | 'resolved' | 'dismissed' | 'reviewing';
   date: string;
   url?: string;
   sourceType?: string;
@@ -72,165 +70,457 @@ export const useDashboardData = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const fetchLiveAlerts = async (): Promise<ContentAlert[]> => {
+    try {
+      console.log('🔍 Fetching live OSINT alerts...');
+      
+      const { data, error } = await supabase
+        .from('scan_results')
+        .select('*')
+        .in('source_type', ['live_osint', 'live_scan', 'osint_intelligence'])
+        .order('created_at', { ascending: false })
+        .limit(50);
+      
+      if (error) {
+        console.error('Error fetching live alerts:', error);
+        return [];
+      }
+      
+      if (!data || data.length === 0) {
+        console.log('📊 No live OSINT alerts found');
+        return [];
+      }
+      
+      console.log(`📊 Found ${data.length} live OSINT alerts`);
+      
+      return data.map(item => ({
+        id: item.id,
+        platform: item.platform || 'Unknown',
+        content: item.content || '',
+        date: new Date(item.created_at).toLocaleDateString(),
+        severity: (item.severity as 'high' | 'medium' | 'low') || 'low',
+        status: (item.status as ContentAlert['status']) || 'new',
+        threatType: item.threat_type || 'reputation_risk',
+        confidenceScore: item.confidence_score || 75,
+        sourceType: item.source_type || 'live_osint',
+        sentiment: item.sentiment > 0 ? 'positive' : item.sentiment < 0 ? 'negative' : 'neutral',
+        potentialReach: item.potential_reach || 0,
+        detectedEntities: Array.isArray(item.detected_entities) ? 
+          item.detected_entities.map(String) : [],
+        url: item.url || ''
+      }));
+    } catch (error) {
+      console.error('Error in fetchLiveAlerts:', error);
+      return [];
+    }
+  };
+
+  const fetchLiveSources = async (): Promise<ContentSource[]> => {
+    try {
+      const { data, error } = await supabase
+        .from('monitored_platforms')
+        .select('*')
+        .eq('active', true);
+      
+      if (error) {
+        console.error('Error fetching sources:', error);
+        return [];
+      }
+      
+      if (!data || data.length === 0) {
+        // Return default live sources if none configured
+        return [
+          {
+            id: '1',
+            name: 'Reddit OSINT',
+            type: 'osint_source',
+            status: 'good',
+            lastUpdate: new Date().toLocaleDateString(),
+            metrics: { total: 0, positive: 0, negative: 0, neutral: 0 },
+            positiveRatio: 0,
+            total: 0,
+            active: true,
+            lastUpdated: new Date().toLocaleDateString(),
+            mentionCount: 0,
+            sentiment: 0
+          },
+          {
+            id: '2', 
+            name: 'RSS Intelligence',
+            type: 'osint_source',
+            status: 'good',
+            lastUpdate: new Date().toLocaleDateString(),
+            metrics: { total: 0, positive: 0, negative: 0, neutral: 0 },
+            positiveRatio: 0,
+            total: 0,
+            active: true,
+            lastUpdated: new Date().toLocaleDateString(),
+            mentionCount: 0,
+            sentiment: 0
+          }
+        ];
+      }
+      
+      return data.map(item => ({
+        id: item.id,
+        name: item.name,
+        type: 'osint_source',
+        status: item.status as "critical" | "good" | "warning",
+        lastUpdate: new Date(item.last_updated).toLocaleDateString(),
+        metrics: {
+          total: item.total || 0,
+          positive: Math.floor((item.positive_ratio || 0) * (item.total || 0) / 100),
+          negative: Math.floor((100 - (item.positive_ratio || 0)) * (item.total || 0) / 100),
+          neutral: 0
+        },
+        positiveRatio: item.positive_ratio || 0,
+        total: item.total || 0,
+        active: item.active,
+        lastUpdated: new Date(item.last_updated).toLocaleDateString(),
+        mentionCount: item.mention_count || 0,
+        sentiment: item.sentiment || 0
+      }));
+    } catch (error) {
+      console.error('Error in fetchLiveSources:', error);
+      return [];
+    }
+  };
+
+  const fetchLiveActions = async (): Promise<ContentAction[]> => {
+    try {
+      const { data, error } = await supabase
+        .from('content_actions')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(20);
+      
+      if (error) {
+        console.error('Error fetching actions:', error);
+        return [];
+      }
+      
+      if (!data || data.length === 0) {
+        return [];
+      }
+      
+      return data.map(item => ({
+        id: item.id,
+        type: (item.type as "urgent" | "monitoring" | "response") || 'monitoring',
+        description: item.description,
+        timestamp: new Date(item.created_at).toLocaleDateString(),
+        status: (item.status as "pending" | "completed" | "failed") || 'pending',
+        platform: item.platform,
+        action: item.action,
+        date: new Date(item.created_at).toLocaleDateString()
+      }));
+    } catch (error) {
+      console.error('Error in fetchLiveActions:', error);
+      return [];
+    }
+  };
+
+  const fetchLiveMetrics = async (): Promise<MetricValue[]> => {
+    try {
+      // Get real counts from live data
+      const [alertsData, sourcesData] = await Promise.all([
+        supabase
+          .from('scan_results')
+          .select('*')
+          .in('source_type', ['live_osint', 'live_scan', 'osint_intelligence']),
+        supabase
+          .from('monitored_platforms')
+          .select('*')
+          .eq('active', true)
+      ]);
+
+      const totalMentions = alertsData.data?.length || 0;
+      const negativeSentiment = alertsData.data?.filter(item => item.sentiment && item.sentiment < 0).length || 0;
+      const activeSources = Math.max(sourcesData.data?.length || 0, 2); // At least Reddit + RSS
+      const threatLevel = totalMentions > 0 ? Math.round((negativeSentiment / totalMentions) * 100) : 0;
+
+      return [
+        { 
+          id: "1", 
+          title: "Live Intelligence", 
+          value: totalMentions, 
+          change: 0, 
+          icon: "trending-up", 
+          color: "blue", 
+          delta: 0, 
+          deltaType: "increase" 
+        },
+        { 
+          id: "2", 
+          title: "Negative Signals", 
+          value: negativeSentiment, 
+          change: 0, 
+          icon: "trending-down", 
+          color: "red", 
+          delta: 0, 
+          deltaType: "increase" 
+        },
+        { 
+          id: "3", 
+          title: "OSINT Sources", 
+          value: activeSources, 
+          change: 0, 
+          icon: "trending-up", 
+          color: "green", 
+          delta: 0, 
+          deltaType: "increase" 
+        },
+        { 
+          id: "4", 
+          title: "Threat Level", 
+          value: threatLevel, 
+          change: 0, 
+          icon: "trending-down", 
+          color: "yellow", 
+          delta: 0, 
+          deltaType: "increase" 
+        }
+      ];
+    } catch (error) {
+      console.error('Error fetching live metrics:', error);
+      return [
+        { id: "1", title: "Live Intelligence", value: 0, change: 0, icon: "trending-up", color: "blue", delta: 0, deltaType: "increase" },
+        { id: "2", title: "Negative Signals", value: 0, change: 0, icon: "trending-down", color: "red", delta: 0, deltaType: "increase" },
+        { id: "3", title: "OSINT Sources", value: 2, change: 0, icon: "trending-up", color: "green", delta: 0, deltaType: "increase" },
+        { id: "4", title: "Threat Level", value: 0, change: 0, icon: "trending-down", color: "yellow", delta: 0, deltaType: "increase" }
+      ];
+    }
+  };
+
   const fetchData = async () => {
     setLoading(true);
     setError(null);
     
     try {
-      console.log('🚀 Fetching A.R.I.A™ intelligence data...');
+      console.log('🔄 Fetching live dashboard data...');
       
-      // Perform comprehensive scan
-      const scanResults = await performComprehensiveScan();
-      
-      // Convert scan results to alerts
-      const convertedAlerts: ContentAlert[] = scanResults.map(result => ({
-        id: result.id,
-        content: result.content,
-        platform: result.platform,
-        severity: result.severity,
-        status: result.status,
-        date: new Date(result.created_at).toLocaleDateString(),
-        url: result.url,
-        sourceType: result.source_type || 'osint_intelligence',
-        detectedEntities: Array.isArray(result.detected_entities) ? 
-          result.detected_entities.map(entity => String(entity)) : [],
-        category: result.severity === 'high' ? 'Critical' : 
-                 result.severity === 'medium' ? 'Warning' : 'Neutral',
-        recommendation: result.severity === 'high' ? 'Immediate action required' :
-                       result.severity === 'medium' ? 'Monitor closely' : 'Standard monitoring',
-        threatType: 'live_intelligence',
-        confidenceScore: result.confidence_score || 75,
-        sentiment: 'neutral',
-        potentialReach: 0
-      }));
-      
-      setAlerts(convertedAlerts);
-      
-      // Generate metrics from results
-      const threatCount = scanResults.filter(r => r.severity === 'high').length;
-      const mediumThreats = scanResults.filter(r => r.severity === 'medium').length;
-      const totalAlerts = scanResults.length;
-      const liveDataCount = scanResults.filter(r => 
-        r.source_type === 'live_intelligence' || r.source_type === 'osint_intelligence'
-      ).length;
-      
-      const newMetrics: MetricValue[] = [
-        {
-          id: 'threats',
-          title: 'Active Threats',
-          value: threatCount, // Now always a number
-          change: 0,
-          icon: 'alert-triangle',
-          color: threatCount > 0 ? 'red' : 'green',
-          delta: 0,
-          deltaType: 'increase'
-        },
-        {
-          id: 'monitoring',
-          title: 'Sources Monitored',
-          value: 12, // Changed from '12+' to number
-          change: 0,
-          icon: 'search',
-          color: 'blue',
-          delta: 0,
-          deltaType: 'increase'
-        },
-        {
-          id: 'alerts',
-          title: 'Total Alerts',
-          value: totalAlerts,
-          change: 0,
-          icon: 'shield',
-          color: totalAlerts > 5 ? 'yellow' : 'green',
-          delta: 0,
-          deltaType: 'increase'
-        },
-        {
-          id: 'live_data',
-          title: 'Live Intelligence',
-          value: liveDataCount,
-          change: 0,
-          icon: 'trending-up',
-          color: 'green',
-          delta: 0,
-          deltaType: 'increase'
-        }
-      ];
-      
-      setMetrics(newMetrics);
-      
-      // Set default sources
-      setSources([
-        {
-          id: '1',
-          name: 'Reddit OSINT',
-          type: 'osint_source',
-          status: 'good',
-          lastUpdate: new Date().toLocaleDateString(),
-          metrics: { total: totalAlerts, positive: 0, negative: 0, neutral: totalAlerts },
-          positiveRatio: 0,
-          total: totalAlerts,
-          active: true,
-          lastUpdated: new Date().toLocaleDateString(),
-          mentionCount: totalAlerts,
-          sentiment: 0
-        }
+      const [liveAlerts, liveSources, liveActions, liveMetrics] = await Promise.all([
+        fetchLiveAlerts(),
+        fetchLiveSources(), 
+        fetchLiveActions(),
+        fetchLiveMetrics()
       ]);
 
-      // Set default actions
-      setActions([]);
+      setAlerts(liveAlerts);
+      setSources(liveSources);
+      setActions(liveActions);
+      setMetrics(liveMetrics);
       
-      console.log(`✅ Dashboard data loaded: ${totalAlerts} alerts, ${threatCount} threats`);
+      console.log(`✅ Dashboard data loaded: ${liveAlerts.length} alerts, ${liveSources.length} sources`);
       
     } catch (err) {
-      console.error('❌ Dashboard data fetch error:', err);
-      setError('Failed to load intelligence data. System may be initializing.');
-      
-      // Set minimal fallback data
-      setMetrics([
-        { 
-          id: 'status', 
-          title: 'System Status', 
-          value: 0, // Changed to number
-          change: 0,
-          icon: 'alert', 
-          color: 'yellow',
-          delta: 0,
-          deltaType: 'increase'
-        }
-      ]);
-      setAlerts([]);
-      setSources([]);
-      setActions([]);
-      
+      console.error('Error fetching dashboard data:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch dashboard data');
+      toast.error('Failed to fetch live dashboard data');
     } finally {
       setLoading(false);
     }
   };
+
+  // Calculate content counts from alerts
+  const negativeContent = alerts.filter(alert => alert.sentiment === 'negative').length;
+  const positiveContent = alerts.filter(alert => alert.sentiment === 'positive').length;
+  const neutralContent = alerts.filter(alert => alert.sentiment === 'neutral').length;
 
   const simulateNewData = () => {
     console.log('Simulate new data called');
     fetchData();
   };
 
-  // Auto-refresh every 2 minutes
   useEffect(() => {
     fetchData();
-    
-    const interval = setInterval(fetchData, 120000); // 2 minutes
-    
-    return () => clearInterval(interval);
   }, []);
 
   return {
-    metrics,
     alerts,
     sources,
-    actions,
+    actions, 
+    metrics,
     loading,
     error,
     fetchData,
     simulateNewData,
-    setAlerts
+    setAlerts,
+    negativeContent,
+    positiveContent,
+    neutralContent
   };
 };
+
+async function fetchLiveSources(): Promise<ContentSource[]> {
+  try {
+    const { data, error } = await supabase
+      .from('monitored_platforms')
+      .select('*')
+      .eq('active', true);
+    
+    if (error) {
+      console.error('Error fetching sources:', error);
+      return [];
+    }
+    
+    if (!data || data.length === 0) {
+      return [
+        {
+          id: '1',
+          name: 'Reddit OSINT',
+          type: 'osint_source',
+          status: 'good',
+          lastUpdate: new Date().toLocaleDateString(),
+          metrics: { total: 0, positive: 0, negative: 0, neutral: 0 },
+          positiveRatio: 0,
+          total: 0,
+          active: true,
+          lastUpdated: new Date().toLocaleDateString(),
+          mentionCount: 0,
+          sentiment: 0
+        },
+        {
+          id: '2', 
+          name: 'RSS Intelligence',
+          type: 'osint_source',
+          status: 'good',
+          lastUpdate: new Date().toLocaleDateString(),
+          metrics: { total: 0, positive: 0, negative: 0, neutral: 0 },
+          positiveRatio: 0,
+          total: 0,
+          active: true,
+          lastUpdated: new Date().toLocaleDateString(),
+          mentionCount: 0,
+          sentiment: 0
+        }
+      ];
+    }
+    
+    return data.map(item => ({
+      id: item.id,
+      name: item.name,
+      type: 'osint_source',
+      status: item.status as "critical" | "good" | "warning",
+      lastUpdate: new Date(item.last_updated).toLocaleDateString(),
+      metrics: {
+        total: item.total || 0,
+        positive: Math.floor((item.positive_ratio || 0) * (item.total || 0) / 100),
+        negative: Math.floor((100 - (item.positive_ratio || 0)) * (item.total || 0) / 100),
+        neutral: 0
+      },
+      positiveRatio: item.positive_ratio || 0,
+      total: item.total || 0,
+      active: item.active,
+      lastUpdated: new Date(item.last_updated).toLocaleDateString(),
+      mentionCount: item.mention_count || 0,
+      sentiment: item.sentiment || 0
+    }));
+  } catch (error) {
+    console.error('Error in fetchLiveSources:', error);
+    return [];
+  }
+}
+
+async function fetchLiveActions(): Promise<ContentAction[]> {
+  try {
+    const { data, error } = await supabase
+      .from('content_actions')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(20);
+    
+    if (error) {
+      console.error('Error fetching actions:', error);
+      return [];
+    }
+    
+    if (!data || data.length === 0) {
+      return [];
+    }
+    
+    return data.map(item => ({
+      id: item.id,
+      type: (item.type as "urgent" | "monitoring" | "response") || 'monitoring',
+      description: item.description,
+      timestamp: new Date(item.created_at).toLocaleDateString(),
+      status: (item.status as "pending" | "completed" | "failed") || 'pending',
+      platform: item.platform,
+      action: item.action,
+      date: new Date(item.created_at).toLocaleDateString()
+    }));
+  } catch (error) {
+    console.error('Error in fetchLiveActions:', error);
+    return [];
+  }
+}
+
+async function fetchLiveMetrics(): Promise<MetricValue[]> {
+  try {
+    const [alertsData, sourcesData] = await Promise.all([
+      supabase
+        .from('scan_results')
+        .select('*')
+        .in('source_type', ['live_osint', 'live_scan', 'osint_intelligence']),
+      supabase
+        .from('monitored_platforms')
+        .select('*')
+        .eq('active', true)
+    ]);
+
+    const totalMentions = alertsData.data?.length || 0;
+    const negativeSentiment = alertsData.data?.filter(item => item.sentiment && item.sentiment < 0).length || 0;
+    const activeSources = Math.max(sourcesData.data?.length || 0, 2);
+    const threatLevel = totalMentions > 0 ? Math.round((negativeSentiment / totalMentions) * 100) : 0;
+
+    return [
+      { 
+        id: "1", 
+        title: "Live Intelligence", 
+        value: totalMentions, 
+        change: 0, 
+        icon: "trending-up", 
+        color: "blue", 
+        delta: 0, 
+        deltaType: "increase" 
+      },
+      { 
+        id: "2", 
+        title: "Negative Signals", 
+        value: negativeSentiment, 
+        change: 0, 
+        icon: "trending-down", 
+        color: "red", 
+        delta: 0, 
+        deltaType: "increase" 
+      },
+      { 
+        id: "3", 
+        title: "OSINT Sources", 
+        value: activeSources, 
+        change: 0, 
+        icon: "trending-up", 
+        color: "green", 
+        delta: 0, 
+        deltaType: "increase" 
+      },
+      { 
+        id: "4", 
+        title: "Threat Level", 
+        value: threatLevel, 
+        change: 0, 
+        icon: "trending-down", 
+        color: "yellow", 
+        delta: 0, 
+        deltaType: "increase" 
+      }
+    ];
+  } catch (error) {
+    console.error('Error fetching live metrics:', error);
+    return [
+      { id: "1", title: "Live Intelligence", value: 0, change: 0, icon: "trending-up", color: "blue", delta: 0, deltaType: "increase" },
+      { id: "2", title: "Negative Signals", value: 0, change: 0, icon: "trending-down", color: "red", delta: 0, deltaType: "increase" },
+      { id: "3", title: "OSINT Sources", value: 2, change: 0, icon: "trending-up", color: "green", delta: 0, deltaType: "increase" },
+      { id: "4", title: "Threat Level", value: 0, change: 0, icon: "trending-down", color: "yellow", delta: 0, deltaType: "increase" }
+    ];
+  }
+}

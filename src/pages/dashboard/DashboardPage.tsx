@@ -6,9 +6,9 @@ import DashboardMainContent from '@/components/dashboard/DashboardMainContent';
 import { useDashboardData } from '@/hooks/useDashboardData';
 import { useAuth } from '@/hooks/useAuth';
 import { useDashboardScan } from '@/hooks/useDashboardScan';
-import { ContentAlert } from '@/types/dashboard';
 import { performComprehensiveScan } from '@/services/monitoring/monitoringScanService';
 import { toast } from 'sonner';
+import type { ContentAlert } from '@/hooks/useDashboardData';
 
 const DashboardPage = () => {
   const navigate = useNavigate();
@@ -25,10 +25,15 @@ const DashboardPage = () => {
     loading,
     error,
     fetchData,
-    setAlerts
+    setAlerts,
+    negativeContent,
+    positiveContent,
+    neutralContent
   } = useDashboardData();
 
-  const { isScanning, performScan } = useDashboardScan(alerts, setAlerts);
+  const { isScanning, performScan } = useDashboardScan(alerts, (newAlerts: ContentAlert[]) => {
+    setAlerts(newAlerts);
+  });
 
   useEffect(() => {
     if (!user) {
@@ -43,7 +48,7 @@ const DashboardPage = () => {
       toast.info("Starting live intelligence scan...");
       const results = await performComprehensiveScan();
       if (results.length > 0) {
-        fetchData(); // Refresh dashboard data
+        fetchData();
         toast.success(`Scan complete: ${results.length} intelligence items found`);
       } else {
         toast.info("No new intelligence detected");
@@ -68,16 +73,10 @@ const DashboardPage = () => {
     setFilteredAlerts(filtered);
   };
 
-  // Convert metrics to match dashboard types
   const convertedMetrics = metrics.map(metric => ({
     ...metric,
     value: typeof metric.value === 'string' ? 0 : metric.value
   }));
-
-  // Calculate content arrays from alerts
-  const negativeContent = alerts.filter(alert => alert.sentiment === 'negative');
-  const positiveContent = alerts.filter(alert => alert.sentiment === 'positive');  
-  const neutralContent = alerts.filter(alert => alert.sentiment === 'neutral');
 
   if (!user) {
     return null;
@@ -94,9 +93,9 @@ const DashboardPage = () => {
         toneStyles={[]}
         recentActivity={[]}
         seoContent={[]}
-        negativeContent={negativeContent.length}
-        positiveContent={positiveContent.length}
-        neutralContent={neutralContent.length}
+        negativeContent={negativeContent}
+        positiveContent={positiveContent}
+        neutralContent={neutralContent}
         onSimulateNewData={handleSimulateNewData}
         loading={loading}
         error={error}
