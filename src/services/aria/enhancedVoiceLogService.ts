@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { anubisSecurityService } from './anubisSecurityService';
+import { AnubisSecurityService } from './anubisSecurityService';
 
 export interface EnhancedVoiceLogEntry {
   id: string;
@@ -25,28 +25,35 @@ export const enhancedVoiceLogService = {
   }): Promise<boolean> {
     try {
       // Check for hotword detection
-      const hotwordDetected = anubisSecurityService.detectHotword(entry.transcript, entry.user_id);
+      const hotwordDetected = AnubisSecurityService.detectHotword(entry.transcript, entry.user_id);
       
       // Analyze for AI attacks if this is user input
       let securityFlagged = false;
       let attackVector = '';
       
       if (entry.source === 'mic') {
-        const analysis = anubisSecurityService.analyzePromptForAttacks(entry.transcript, 'voice_input');
+        const analysis = AnubisSecurityService.analyzePromptForAttacks(entry.transcript, 'voice_input');
         securityFlagged = analysis.isAttack;
         attackVector = analysis.attackVector || '';
       }
 
-      // Log to the original voice log table
+      // Log to activity_logs table since anubis_voice_log doesn't exist
       const { error: voiceLogError } = await supabase
-        .from('anubis_voice_log')
+        .from('activity_logs')
         .insert({
-          user_id: entry.user_id,
-          transcript: entry.transcript,
-          response: entry.response,
-          source: entry.source,
-          processed: !!entry.response,
-          response_time: entry.response ? new Date().toISOString() : null
+          action: 'voice_interaction',
+          details: JSON.stringify({
+            transcript: entry.transcript,
+            response: entry.response,
+            source: entry.source,
+            processed: !!entry.response,
+            response_time: entry.response ? new Date().toISOString() : null,
+            hotword_detected: hotwordDetected,
+            security_flagged: securityFlagged,
+            attack_vector: attackVector
+          }),
+          entity_type: 'voice_log',
+          user_id: entry.user_id
         });
 
       if (voiceLogError) {
@@ -56,7 +63,7 @@ export const enhancedVoiceLogService = {
 
       // Log security events if detected
       if (securityFlagged) {
-        await anubisSecurityService.queueSlackEvent({
+        await AnubisSecurityService.queueSlackEvent({
           channel: '#security-alerts',
           event_type: 'voice_attack_detected',
           payload: {
@@ -78,9 +85,10 @@ export const enhancedVoiceLogService = {
   async getEnhancedVoiceLogs(limit = 50): Promise<EnhancedVoiceLogEntry[]> {
     try {
       const { data, error } = await supabase
-        .from('anubis_voice_log')
+        .from('activity_logs')
         .select('*')
-        .order('timestamp', { ascending: false })
+        .eq('action', 'voice_interaction')
+        .order('created_at', { ascending: false })
         .limit(limit);
 
       if (error) {
@@ -88,29 +96,23 @@ export const enhancedVoiceLogService = {
         return [];
       }
 
-      // Enhance with security information
-      const enhancedLogs = await Promise.all(
-        (data || []).map(async (log) => {
-          // Check if hotword was detected for this transcript
-          const hotwordEvents = await anubisSecurityService.getHotwordEvents(log.user_id, 10);
-          const hotwordDetected = hotwordEvents.some(
-            event => event.captured_phrase === log.transcript && event.triggered
-          );
-
-          // Check if security flagged
-          const attackLogs = await anubisSecurityService.getAIAttackLogs(10);
-          const securityEvent = attackLogs.find(
-            attack => attack.prompt.includes(log.transcript.substring(0, 50))
-          );
-
-          return {
-            ...log,
-            hotword_detected: hotwordDetected,
-            security_flagged: !!securityEvent,
-            attack_vector: securityEvent?.attack_vector
-          };
-        })
-      );
+      // Transform activity logs to voice log entries
+      const enhancedLogs = (data || []).map((log) => {
+        const details = typeof log.details === 'string' ? JSON.parse(log.details) : log.details;
+        return {
+          id: log.id,
+          user_id: log.user_id || '',
+          transcript: details.transcript || '',
+          timestamp: log.created_at,
+          source: details.source || 'unknown',
+          processed: details.processed || false,
+          response: details.response,
+          response_time: details.response_time,
+          hotword_detected: details.hotword_detected || false,
+          security_flagged: details.security_flagged || false,
+          attack_vector: details.attack_vector
+        };
+      });
 
       return enhancedLogs;
     } catch (error) {
