@@ -30,7 +30,7 @@ const DashboardMainContent = ({
 }: DashboardMainContentProps) => {
   const navigate = useNavigate();
 
-  // Filter for live OSINT data
+  // Filter for live OSINT data only
   const liveAlerts = alerts?.filter(alert => 
     alert.sourceType === 'osint_intelligence' || 
     alert.sourceType === 'live_alert' ||
@@ -58,10 +58,10 @@ const DashboardMainContent = ({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex items-center justify-center min-h-[400px] bg-corporate-dark">
         <div className="text-center">
-          <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-500" />
-          <p className="text-lg">Loading A.R.I.A™ Intelligence Dashboard...</p>
+          <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 text-corporate-accent" />
+          <p className="text-lg text-white">Loading A.R.I.A™ Intelligence Dashboard...</p>
         </div>
       </div>
     );
@@ -69,12 +69,12 @@ const DashboardMainContent = ({
 
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex items-center justify-center min-h-[400px] bg-corporate-dark">
         <div className="text-center max-w-md">
           <AlertTriangle className="h-8 w-8 mx-auto mb-4 text-red-500" />
-          <h3 className="text-lg font-semibold mb-2">System Error</h3>
-          <p className="text-sm text-gray-600 mb-4">{error}</p>
-          <Button onClick={fetchData} className="gap-2">
+          <h3 className="text-lg font-semibold mb-2 text-white">System Error</h3>
+          <p className="text-sm text-corporate-lightGray mb-4">{error}</p>
+          <Button onClick={fetchData} className="gap-2 bg-corporate-accent text-black hover:bg-corporate-accentDark">
             <RefreshCw className="h-4 w-4" />
             Retry Connection
           </Button>
@@ -84,94 +84,119 @@ const DashboardMainContent = ({
   }
 
   return (
-    <div className="container mx-auto px-6 py-8 space-y-6">
-      {/* Header with System Status */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">A.R.I.A™ Intelligence Dashboard</h1>
-          <p className="text-muted-foreground">Advanced Reputation Intelligence Assistant</p>
+    <div className="min-h-screen bg-corporate-dark">
+      <div className="container mx-auto px-4 py-6 space-y-6 max-w-7xl">
+        {/* Header with System Status */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl lg:text-3xl font-bold text-white">A.R.I.A™ Intelligence Dashboard</h1>
+            <p className="text-corporate-lightGray">Advanced Reputation Intelligence Assistant</p>
+          </div>
+          <Button 
+            variant="outline" 
+            onClick={fetchData}
+            className="gap-2 border-corporate-border text-corporate-lightGray hover:bg-corporate-darkSecondary hover:text-white w-fit"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Refresh Data
+          </Button>
         </div>
-        <Button 
-          variant="outline" 
-          onClick={fetchData}
-          className="gap-2"
-        >
-          <RefreshCw className="h-4 w-4" />
-          Refresh Data
-        </Button>
-      </div>
 
-      {/* Client Status Bar */}
-      {selectedClient && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <div className="flex items-center gap-2">
-            <div className="h-2 w-2 bg-blue-500 rounded-full animate-pulse"></div>
-            <span className="text-sm font-medium text-blue-800">
-              Active Client: {selectedClient.name} • {clientEntities?.length || 0} entities monitored
-            </span>
+        {/* Client Status Bar */}
+        {selectedClient && (
+          <div className="bg-corporate-darkSecondary border border-corporate-border rounded-lg p-4">
+            <div className="flex items-center gap-2">
+              <div className="h-2 w-2 bg-corporate-accent rounded-full animate-pulse"></div>
+              <span className="text-sm font-medium text-white">
+                Active Client: {selectedClient.name} • {clientEntities?.length || 0} entities monitored
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Live Status Indicator */}
+        <div className="bg-corporate-darkSecondary border border-green-600 rounded-lg p-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-green-400" />
+              <span className="text-sm font-medium text-green-400">
+                Live Intelligence Active: {displayAlerts.length} threats detected • {liveSources.length} sources monitored
+              </span>
+            </div>
           </div>
         </div>
-      )}
 
-      {/* Live Status Indicator */}
-      <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <CheckCircle className="h-4 w-4 text-green-600" />
-            <span className="text-sm font-medium text-green-800">
-              Live Intelligence Active: {displayAlerts.length} threats detected • {liveSources.length} sources monitored
-            </span>
+        {/* Main Content Grid - Responsive Layout */}
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+          {/* Left Column - Score & Intelligence */}
+          <div className="xl:col-span-3 space-y-6">
+            <ReputationScore score={reputationScore} previousScore={previousScore} />
+            <IntelligenceCollection onDataRefresh={fetchData} />
+          </div>
+          
+          {/* Center Column - Threats */}
+          <div className="xl:col-span-6 space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <h2 className="text-lg font-medium text-white">Live Threat Intelligence</h2>
+              <ContentFilter onFilterChange={onFilterChange} />
+            </div>
+            <ContentAlerts 
+              alerts={filteredAlerts && filteredAlerts.length > 0 ? filteredAlerts : displayAlerts} 
+              isLoading={loading}
+            />
+          </div>
+
+          {/* Right Column - Entity Summary */}
+          <div className="xl:col-span-3">
+            <EntitySummaryPanel alerts={displayAlerts} />
           </div>
         </div>
-      </div>
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Left Column - Score & Intelligence */}
-        <div className="lg:col-span-1 space-y-6">
-          <ReputationScore score={reputationScore} previousScore={previousScore} />
-          <IntelligenceCollection onDataRefresh={fetchData} />
-        </div>
-        
-        {/* Center Column - Threats */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="flex justify-between items-center">
-            <h2 className="text-lg font-medium">Live Threat Intelligence</h2>
-            <ContentFilter onFilterChange={onFilterChange} />
-          </div>
-          <ContentAlerts 
-            alerts={filteredAlerts && filteredAlerts.length > 0 ? filteredAlerts : displayAlerts} 
-            isLoading={loading}
-          />
+        {/* Bottom Section - Sources & Actions */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <SourceOverview sources={liveSources as any} />
+          <RecentActions actions={liveActions} />
         </div>
 
-        {/* Right Column - Entity Summary */}
-        <div className="lg:col-span-1">
-          <EntitySummaryPanel alerts={displayAlerts} />
-        </div>
+        {/* Navigation Tabs */}
+        <Tabs defaultValue="overview" className="mt-8">
+          <TabsList className="grid w-full grid-cols-4 bg-corporate-darkSecondary border border-corporate-border">
+            <TabsTrigger 
+              value="overview"
+              className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray"
+            >
+              Overview
+            </TabsTrigger>
+            <TabsTrigger 
+              value="genesis" 
+              onClick={() => navigate('/admin/genesis-sentinel')}
+              className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray"
+            >
+              Genesis Sentinel
+            </TabsTrigger>
+            <TabsTrigger 
+              value="clients" 
+              onClick={() => navigate('/admin/clients')}
+              className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray"
+            >
+              Clients
+            </TabsTrigger>
+            <TabsTrigger 
+              value="settings" 
+              onClick={() => navigate('/admin/settings')}
+              className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray"
+            >
+              Settings
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="overview" className="mt-4">
+            <div className="text-center text-corporate-lightGray py-8">
+              <p>Use the navigation above to access specific modules</p>
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
-
-      {/* Bottom Section - Sources & Actions */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <SourceOverview sources={liveSources as any} />
-        <RecentActions actions={liveActions} />
-      </div>
-
-      {/* Navigation Tabs */}
-      <Tabs defaultValue="overview" className="mt-8">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="genesis" onClick={() => navigate('/admin/genesis-sentinel')}>Genesis Sentinel</TabsTrigger>
-          <TabsTrigger value="clients" onClick={() => navigate('/admin/clients')}>Clients</TabsTrigger>
-          <TabsTrigger value="settings" onClick={() => navigate('/admin/settings')}>Settings</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="overview" className="mt-4">
-          <div className="text-center text-muted-foreground py-8">
-            <p>Use the navigation above to access specific modules</p>
-          </div>
-        </TabsContent>
-      </Tabs>
     </div>
   );
 };
