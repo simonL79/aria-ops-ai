@@ -83,17 +83,17 @@ const CampaignConfiguration = ({
   return (
     <div className="space-y-6">
       {/* Live Deployment Notice */}
-      <Alert className="border-green-200 bg-green-50">
-        <Github className="h-4 w-4" />
-        <AlertDescription className="text-green-800">
-          <strong>Multi-Platform Live Deployment:</strong> Articles will be deployed across selected platforms with permanent URLs and SEO optimization.
+      <Alert className="border-corporate-accent bg-corporate-darkSecondary">
+        <Github className="h-4 w-4 text-corporate-accent" />
+        <AlertDescription className="text-corporate-lightGray">
+          <strong className="text-corporate-accent">Multi-Platform Live Deployment:</strong> Articles will be deployed across selected platforms with permanent URLs and SEO optimization.
         </AlertDescription>
       </Alert>
 
       {/* Deployment Tier Selection */}
-      <Card>
+      <Card className="corporate-card">
         <CardHeader>
-          <CardTitle>Deployment Tier Selection</CardTitle>
+          <CardTitle className="corporate-heading">Deployment Tier Selection</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -102,19 +102,21 @@ const CampaignConfiguration = ({
                 key={key}
                 className={`p-4 border rounded-lg cursor-pointer transition-all ${
                   deploymentTier === key 
-                    ? 'border-blue-500 bg-blue-50' 
-                    : 'border-gray-200 hover:border-gray-300'
+                    ? 'border-corporate-accent bg-corporate-darkSecondary shadow-lg' 
+                    : 'border-corporate-border bg-corporate-darkTertiary hover:border-corporate-accent hover:shadow-md'
                 }`}
                 onClick={() => handleTierChange(key as DeploymentTier)}
               >
                 <div className="flex items-center gap-2 mb-2">
-                  {key === 'basic' && <Zap className="h-4 w-4 text-green-600" />}
-                  {key === 'pro' && <Rocket className="h-4 w-4 text-blue-600" />}
-                  {key === 'enterprise' && <Crown className="h-4 w-4 text-purple-600" />}
-                  <h3 className="font-semibold">{tier.label}</h3>
+                  {key === 'basic' && <Zap className="h-4 w-4 text-corporate-accent" />}
+                  {key === 'pro' && <Rocket className="h-4 w-4 text-corporate-accent" />}
+                  {key === 'enterprise' && <Crown className="h-4 w-4 text-corporate-accent" />}
+                  <h3 className="font-semibold text-white">{tier.label}</h3>
                 </div>
-                <p className="text-sm text-muted-foreground mb-2">{tier.description}</p>
-                <Badge variant="outline">Up to {tier.max} articles</Badge>
+                <p className="text-sm text-corporate-lightGray mb-2">{tier.description}</p>
+                <Badge variant="outline" className="border-corporate-accent text-corporate-accent">
+                  Up to {tier.max} articles
+                </Badge>
               </div>
             ))}
           </div>
@@ -130,46 +132,46 @@ const CampaignConfiguration = ({
 
       {/* Configuration Form */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
+        <Card className="corporate-card">
           <CardHeader>
-            <CardTitle>Target Configuration</CardTitle>
+            <CardTitle className="corporate-heading">Target Configuration</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label htmlFor="entityName">Entity/Person Name</Label>
+              <Label htmlFor="entityName" className="text-corporate-lightGray">Entity/Person Name</Label>
               <Input
                 id="entityName"
                 value={entityName}
                 onChange={(e) => setEntityName(e.target.value)}
                 placeholder="e.g., John Smith, Acme Corp"
-                className="mt-1"
+                className="mt-1 bg-corporate-darkTertiary border-corporate-border text-white placeholder-corporate-gray"
               />
             </div>
 
             <div>
-              <Label htmlFor="keywords">Target Keywords</Label>
+              <Label htmlFor="keywords" className="text-corporate-lightGray">Target Keywords</Label>
               <Textarea
                 id="keywords"
                 value={targetKeywords}
                 onChange={(e) => setTargetKeywords(e.target.value)}
                 placeholder="e.g., CEO, entrepreneur, technology leader, innovation"
-                className="mt-1"
+                className="mt-1 bg-corporate-darkTertiary border-corporate-border text-white placeholder-corporate-gray"
                 rows={3}
               />
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-corporate-gray mt-1">
                 Separate keywords with commas
               </p>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="corporate-card">
           <CardHeader>
-            <CardTitle>Campaign Settings</CardTitle>
+            <CardTitle className="corporate-heading">Campaign Settings</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label htmlFor="contentCount">Number of Articles</Label>
+              <Label htmlFor="contentCount" className="text-corporate-lightGray">Number of Articles</Label>
               <div className="flex items-center space-x-2 mt-1">
                 <Input
                   id="contentCount"
@@ -178,13 +180,13 @@ const CampaignConfiguration = ({
                   max={maxArticles}
                   value={contentCount}
                   onChange={(e) => handleContentCountChange(parseInt(e.target.value) || 1)}
-                  className="w-24"
+                  className="w-24 bg-corporate-darkTertiary border-corporate-border text-white"
                 />
-                <Badge variant="outline" className="text-xs">
+                <Badge variant="outline" className="text-xs border-corporate-accent text-corporate-accent">
                   Max {maxArticles} articles ({DEPLOYMENT_TIERS[deploymentTier].label})
                 </Badge>
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-corporate-gray mt-1">
                 {deploymentTier === 'enterprise' ? 
                   'Full-scale multi-platform deployment with intelligent distribution' :
                   deploymentTier === 'pro' ?
@@ -195,28 +197,28 @@ const CampaignConfiguration = ({
             </div>
 
             <div>
-              <Label htmlFor="saturationMode">Campaign Intensity</Label>
+              <Label htmlFor="saturationMode" className="text-corporate-lightGray">Campaign Intensity</Label>
               <Select value={saturationMode} onValueChange={setSaturationMode}>
-                <SelectTrigger className="mt-1">
+                <SelectTrigger className="mt-1 bg-corporate-darkTertiary border-corporate-border text-white">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="defensive">
+                <SelectContent className="bg-corporate-darkTertiary border-corporate-border">
+                  <SelectItem value="defensive" className="text-white hover:bg-corporate-darkSecondary">
                     <div className="flex flex-col">
                       <span>Defensive</span>
-                      <span className="text-xs text-muted-foreground">Conservative content approach</span>
+                      <span className="text-xs text-corporate-gray">Conservative content approach</span>
                     </div>
                   </SelectItem>
-                  <SelectItem value="aggressive">
+                  <SelectItem value="aggressive" className="text-white hover:bg-corporate-darkSecondary">
                     <div className="flex flex-col">
                       <span>Aggressive</span>
-                      <span className="text-xs text-muted-foreground">Strong positive positioning</span>
+                      <span className="text-xs text-corporate-gray">Strong positive positioning</span>
                     </div>
                   </SelectItem>
-                  <SelectItem value="nuclear">
+                  <SelectItem value="nuclear" className="text-white hover:bg-corporate-darkSecondary">
                     <div className="flex flex-col">
                       <span>Nuclear</span>
-                      <span className="text-xs text-muted-foreground">Maximum impact content</span>
+                      <span className="text-xs text-corporate-gray">Maximum impact content</span>
                     </div>
                   </SelectItem>
                 </SelectContent>
@@ -227,10 +229,10 @@ const CampaignConfiguration = ({
       </div>
 
       {/* Deployment Info */}
-      <Alert>
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>
-          <strong>Multi-Platform Deployment:</strong> {contentCount} articles across {deploymentTargets.length || 1} platform(s). 
+      <Alert className="border-corporate-accent bg-corporate-darkSecondary">
+        <AlertCircle className="h-4 w-4 text-corporate-accent" />
+        <AlertDescription className="text-corporate-lightGray">
+          <strong className="text-corporate-accent">Multi-Platform Deployment:</strong> {contentCount} articles across {deploymentTargets.length || 1} platform(s). 
           Estimated time: {getEstimatedTime()} minutes with intelligent distribution and rate limiting.
           {deploymentTier === 'enterprise' && ' Enterprise mode includes advanced load balancing and distributed deployment.'}
         </AlertDescription>
@@ -242,7 +244,7 @@ const CampaignConfiguration = ({
           onClick={() => onExecute()}
           disabled={isExecuting || !entityName.trim() || !targetKeywords.trim() || deploymentTargets.length === 0}
           size="lg"
-          className="min-w-48"
+          className="min-w-48 bg-corporate-accent text-black hover:bg-corporate-accentDark font-semibold"
         >
           <Rocket className="h-4 w-4 mr-2" />
           {isExecuting ? 'Deploying Across Platforms...' : `Deploy ${contentCount} Articles (${deploymentTargets.length} Platform${deploymentTargets.length !== 1 ? 's' : ''})`}
