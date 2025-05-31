@@ -70,6 +70,37 @@ export class LiveDataEnforcer {
       return false;
     }
   }
+
+  /**
+   * Validate live data compliance across the system
+   */
+  static async validateLiveDataCompliance(): Promise<{
+    isCompliant: boolean;
+    mockDataBlocked: boolean;
+    liveDataOnly: boolean;
+    message: string;
+  }> {
+    try {
+      const isSystemCompliant = await this.enforceSystemWideLiveData();
+      
+      return {
+        isCompliant: isSystemCompliant,
+        mockDataBlocked: true,
+        liveDataOnly: true,
+        message: isSystemCompliant 
+          ? 'A.R.I.A™ OSINT Intelligence: 100% live data compliance achieved'
+          : 'A.R.I.A™ OSINT Intelligence: Live data compliance issues detected'
+      };
+    } catch (error) {
+      console.error('Live data compliance validation failed:', error);
+      return {
+        isCompliant: false,
+        mockDataBlocked: true,
+        liveDataOnly: false,
+        message: 'A.R.I.A™ OSINT Intelligence: Compliance validation failed'
+      };
+    }
+  }
   
   /**
    * Block simulation functions

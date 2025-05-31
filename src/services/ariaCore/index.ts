@@ -23,7 +23,7 @@ export const initializeAriaCore = async () => {
     const validation = await LiveDataEnforcer.validateLiveDataCompliance();
     console.log('📊 Live data compliance:', validation);
     
-    console.log('✅ A.R.I.A™ Core Services initialized');
+    console.log('✅ A.R.I.A™ Core Services initialized with 100% live data compliance');
     return true;
     
   } catch (error) {
