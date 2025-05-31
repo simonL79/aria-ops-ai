@@ -70,7 +70,7 @@ const AdminLoginGateway = ({ onComplete }: AdminLoginGatewayProps) => {
         return;
       }
 
-      if (result?.user) {
+      if (result?.data?.user) {
         await logAdminAction('login_success', `Successful admin login for ${email}`);
         toast.success('Admin access granted');
         onComplete(true);

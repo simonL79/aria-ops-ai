@@ -21,7 +21,11 @@ import {
   Settings, 
   LogOut,
   FileText,
-  Mail
+  Mail,
+  Satellite,
+  Brain,
+  Globe,
+  Scale
 } from 'lucide-react';
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { useAuth } from '@/hooks/useAuth';
@@ -75,6 +79,30 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       icon: <Shield className="h-4 w-4" />,
       href: "/admin/genesis-sentinel",
       active: pathname === "/admin/genesis-sentinel",
+    },
+    {
+      label: "Watchtower",
+      icon: <Satellite className="h-4 w-4" />,
+      href: "/admin/watchtower",
+      active: pathname === "/admin/watchtower",
+    },
+    {
+      label: "Intelligence Core",
+      icon: <Brain className="h-4 w-4" />,
+      href: "/admin/intelligence-core",
+      active: pathname === "/admin/intelligence-core",
+    },
+    {
+      label: "Persona Saturation",
+      icon: <Globe className="h-4 w-4" />,
+      href: "/admin/persona-saturation",
+      active: pathname === "/admin/persona-saturation",
+    },
+    {
+      label: "Legal + Tactical Ops",
+      icon: <Scale className="h-4 w-4" />,
+      href: "/admin/legal-ops",
+      active: pathname === "/admin/legal-ops",
     },
     {
       label: "Clients",

@@ -14,6 +14,10 @@ import ContactPage from "./pages/ContactPage";
 import GenesisSentinelPage from './pages/admin/GenesisSentinelPage';
 import ClientsPage from './pages/admin/ClientsPage';
 import SettingsPage from './pages/admin/SettingsPage';
+import WatchtowerPage from './pages/admin/WatchtowerPage';
+import IntelligenceCorePage from './pages/admin/IntelligenceCorePage';
+import PersonaSaturationPage from './pages/admin/PersonaSaturationPage';
+import LegalOpsPage from './pages/admin/LegalOpsPage';
 
 const queryClient = new QueryClient();
 
@@ -44,6 +48,38 @@ function App() {
                   element={
                     <AdminGuard>
                       <GenesisSentinelPage />
+                    </AdminGuard>
+                  } 
+                />
+                <Route 
+                  path="/admin/watchtower" 
+                  element={
+                    <AdminGuard>
+                      <WatchtowerPage />
+                    </AdminGuard>
+                  } 
+                />
+                <Route 
+                  path="/admin/intelligence-core" 
+                  element={
+                    <AdminGuard>
+                      <IntelligenceCorePage />
+                    </AdminGuard>
+                  } 
+                />
+                <Route 
+                  path="/admin/persona-saturation" 
+                  element={
+                    <AdminGuard>
+                      <PersonaSaturationPage />
+                    </AdminGuard>
+                  } 
+                />
+                <Route 
+                  path="/admin/legal-ops" 
+                  element={
+                    <AdminGuard>
+                      <LegalOpsPage />
                     </AdminGuard>
                   } 
                 />
