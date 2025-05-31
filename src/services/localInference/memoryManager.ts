@@ -134,14 +134,13 @@ export const analyzeThreatPatterns = async (
       lastSeen: new Date().toISOString()
     };
 
-    // Store pattern in database for trend analysis
-    await supabase.from('anubis_threat_patterns').insert({
+    // Store pattern in existing anubis_pattern_log table
+    await supabase.from('anubis_pattern_log').insert({
       entity_name: pattern.entityName,
-      pattern_id: pattern.patternId,
-      threat_type: pattern.threatType,
-      indicators: pattern.indicators,
-      severity_score: pattern.severity,
-      frequency_count: pattern.frequency
+      pattern_fingerprint: pattern.patternId,
+      pattern_summary: `${pattern.threatType}: ${pattern.indicators.join(', ')}`,
+      confidence_score: pattern.severity,
+      recommended_response: `Detected ${pattern.threatType} pattern with ${pattern.frequency} occurrences`
     });
 
     return pattern;
@@ -188,14 +187,13 @@ export const mapEntityRelationships = async (
       }
     }
 
-    // Store relationships for future reference
+    // Store relationships in entity_graph table (existing table)
     for (const rel of relationships) {
-      await supabase.from('anubis_entity_relationships').insert({
-        entity_a: rel.entityA,
-        entity_b: rel.entityB,
+      await supabase.from('entity_graph').insert({
+        source_entity: rel.entityA,
+        related_entity: rel.entityB,
         relationship_type: rel.relationshipType,
-        strength_score: rel.strength,
-        context_summary: rel.context
+        frequency: Math.round(rel.strength * 10) // Convert strength to frequency
       });
     }
 
@@ -219,22 +217,25 @@ export const getEntityContext = async (entityName: string): Promise<{
     const [memories, patterns, relationships, riskProfile] = await Promise.all([
       recallEntityMemories(entityName, 'threat context', 10),
       
+      // Get patterns from anubis_pattern_log
       supabase
-        .from('anubis_threat_patterns')
+        .from('anubis_pattern_log')
         .select('*')
         .eq('entity_name', entityName)
-        .order('created_at', { ascending: false })
+        .order('first_detected', { ascending: false })
         .limit(5)
         .then(({ data }) => data || []),
       
+      // Get relationships from entity_graph
       supabase
-        .from('anubis_entity_relationships')
+        .from('entity_graph')
         .select('*')
-        .or(`entity_a.eq.${entityName},entity_b.eq.${entityName}`)
-        .order('strength_score', { ascending: false })
+        .or(`source_entity.eq.${entityName},related_entity.eq.${entityName}`)
+        .order('frequency', { ascending: false })
         .limit(10)
         .then(({ data }) => data || []),
       
+      // Get risk profile from entity_risk_profiles
       supabase
         .from('entity_risk_profiles')
         .select('*')
@@ -246,20 +247,20 @@ export const getEntityContext = async (entityName: string): Promise<{
     return {
       memories,
       patterns: patterns.map(p => ({
-        patternId: p.pattern_id,
-        entityName: p.entity_name,
-        threatType: p.threat_type,
-        indicators: p.indicators || [],
-        severity: p.severity_score || 0,
-        frequency: p.frequency_count || 0,
-        lastSeen: p.created_at
+        patternId: p.pattern_fingerprint || '',
+        entityName: p.entity_name || '',
+        threatType: p.pattern_summary || 'unknown',
+        indicators: p.pattern_summary ? [p.pattern_summary] : [],
+        severity: p.confidence_score || 0,
+        frequency: 1,
+        lastSeen: p.first_detected || new Date().toISOString()
       })),
       relationships: relationships.map(r => ({
-        entityA: r.entity_a,
-        entityB: r.entity_b,
-        relationshipType: r.relationship_type,
-        strength: r.strength_score,
-        context: r.context_summary
+        entityA: r.source_entity || '',
+        entityB: r.related_entity || '',
+        relationshipType: r.relationship_type || 'unknown',
+        strength: (r.frequency || 1) / 10, // Convert frequency back to strength
+        context: `Related entities discovered through pattern analysis`
       })),
       riskProfile
     };
