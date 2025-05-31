@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { AlertCircle, Rocket, Github, Crown, Zap } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import PlatformSelector from './PlatformSelector';
 
 interface CampaignConfigurationProps {
   entityName: string;
@@ -29,8 +30,8 @@ type DeploymentTier = 'basic' | 'pro' | 'enterprise';
 
 const DEPLOYMENT_TIERS = {
   basic: { max: 10, label: 'Basic', description: 'Safe deployment mode' },
-  pro: { max: 100, label: 'Pro', description: 'Staggered single-repo deploy' },
-  enterprise: { max: 500, label: 'Enterprise', description: 'Multi-repo distributed deployment' }
+  pro: { max: 100, label: 'Pro', description: 'Multi-platform deployment' },
+  enterprise: { max: 500, label: 'Enterprise', description: 'Full-scale distributed deployment' }
 };
 
 const CampaignConfiguration = ({
@@ -63,9 +64,19 @@ const CampaignConfiguration = ({
     }
   };
 
+  const handlePlatformToggle = (platformId: string, enabled: boolean) => {
+    if (enabled) {
+      setDeploymentTargets([...deploymentTargets, platformId]);
+    } else {
+      setDeploymentTargets(deploymentTargets.filter(p => p !== platformId));
+    }
+  };
+
   const getEstimatedTime = () => {
+    const platformCount = deploymentTargets.length || 1;
+    const articlesPerPlatform = Math.ceil(contentCount / platformCount);
     const baseDelayMs = 750;
-    const estimatedMinutes = Math.ceil((contentCount * baseDelayMs) / 60000);
+    const estimatedMinutes = Math.ceil((articlesPerPlatform * baseDelayMs * platformCount) / 60000);
     return estimatedMinutes;
   };
 
@@ -75,7 +86,7 @@ const CampaignConfiguration = ({
       <Alert className="border-green-200 bg-green-50">
         <Github className="h-4 w-4" />
         <AlertDescription className="text-green-800">
-          <strong>Live GitHub Pages Deployment:</strong> All articles will be deployed to real GitHub Pages websites with permanent URLs.
+          <strong>Multi-Platform Live Deployment:</strong> Articles will be deployed across selected platforms with permanent URLs and SEO optimization.
         </AlertDescription>
       </Alert>
 
@@ -109,6 +120,13 @@ const CampaignConfiguration = ({
           </div>
         </CardContent>
       </Card>
+
+      {/* Platform Selection */}
+      <PlatformSelector
+        selectedPlatforms={deploymentTargets}
+        onPlatformToggle={handlePlatformToggle}
+        deploymentTier={deploymentTier}
+      />
 
       {/* Configuration Form */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -168,10 +186,10 @@ const CampaignConfiguration = ({
               </div>
               <p className="text-xs text-muted-foreground mt-1">
                 {deploymentTier === 'enterprise' ? 
-                  'Multi-repository distributed deployment with smart load balancing' :
+                  'Full-scale multi-platform deployment with intelligent distribution' :
                   deploymentTier === 'pro' ?
-                  'Staggered deployment with 750ms intervals for optimal performance' :
-                  'Safe deployment mode with rate limiting protection'
+                  'Multi-platform deployment with optimized scheduling' :
+                  'Safe deployment with basic platform support'
                 }
               </p>
             </div>
@@ -208,54 +226,13 @@ const CampaignConfiguration = ({
         </Card>
       </div>
 
-      {/* Deployment Platform */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Deployment Strategy</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <Badge className="bg-gray-900 text-white">
-                <Github className="h-3 w-3 mr-1" />
-                GitHub Pages
-              </Badge>
-              <span className="text-sm text-muted-foreground">
-                {deploymentTier === 'enterprise' ? 'Multi-repository deployment' : 'Single repository deployment'}
-              </span>
-            </div>
-            
-            {deploymentTier === 'enterprise' && (
-              <div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
-                <p className="text-sm text-purple-800">
-                  <Crown className="inline h-4 w-4 mr-1" />
-                  Enterprise deployment will distribute articles across multiple repositories for maximum scale and reliability.
-                </p>
-              </div>
-            )}
-            
-            <div className="text-xs text-muted-foreground">
-              <p>Deployment features:</p>
-              <ul className="list-disc list-inside ml-2 space-y-1">
-                <li>SEO-optimized metadata and structure</li>
-                <li>Unique content titles and descriptions</li>
-                <li>Auto-indexing via search engines</li>
-                <li>Real-time deployment logging</li>
-                {deploymentTier !== 'basic' && <li>Advanced rate limiting protection</li>}
-                {deploymentTier === 'enterprise' && <li>Smart load balancing across repositories</li>}
-              </ul>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Deployment Info */}
       <Alert>
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          <strong>Deployment Info:</strong> Articles deployed with {deploymentTier === 'basic' ? '1-second' : '750ms'} intervals. 
-          Estimated deployment time: {getEstimatedTime()} minutes for {contentCount} articles.
-          {deploymentTier === 'enterprise' && ' Enterprise mode includes distributed deployment across multiple repositories.'}
+          <strong>Multi-Platform Deployment:</strong> {contentCount} articles across {deploymentTargets.length || 1} platform(s). 
+          Estimated time: {getEstimatedTime()} minutes with intelligent distribution and rate limiting.
+          {deploymentTier === 'enterprise' && ' Enterprise mode includes advanced load balancing and distributed deployment.'}
         </AlertDescription>
       </Alert>
 
@@ -263,12 +240,12 @@ const CampaignConfiguration = ({
       <div className="flex justify-center">
         <Button
           onClick={() => onExecute()}
-          disabled={isExecuting || !entityName.trim() || !targetKeywords.trim()}
+          disabled={isExecuting || !entityName.trim() || !targetKeywords.trim() || deploymentTargets.length === 0}
           size="lg"
           className="min-w-48"
         >
           <Rocket className="h-4 w-4 mr-2" />
-          {isExecuting ? 'Deploying Live Articles...' : `Deploy ${contentCount} Live Articles (${DEPLOYMENT_TIERS[deploymentTier].label})`}
+          {isExecuting ? 'Deploying Across Platforms...' : `Deploy ${contentCount} Articles (${deploymentTargets.length} Platform${deploymentTargets.length !== 1 ? 's' : ''})`}
         </Button>
       </div>
     </div>

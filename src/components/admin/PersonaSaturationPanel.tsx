@@ -83,6 +83,11 @@ const PersonaSaturationPanel = () => {
       return;
     }
 
+    if (deploymentTargets.length === 0) {
+      toast.error('Please select at least one deployment platform');
+      return;
+    }
+
     setIsExecuting(true);
     
     const campaign: SaturationCampaign = {
@@ -117,7 +122,7 @@ const PersonaSaturationPanel = () => {
     try {
       const keywords = targetKeywords.split(',').map(k => k.trim()).filter(k => k.length > 0);
       
-      console.log(`🚀 Deploying ${contentCount} articles using ${deploymentTier} tier...`);
+      console.log(`🚀 Deploying ${contentCount} articles across ${deploymentTargets.length} platforms using ${deploymentTier} tier...`);
       
       const { data, error } = await supabase.functions.invoke('persona-saturation', {
         body: {
@@ -153,11 +158,11 @@ const PersonaSaturationPanel = () => {
         estimatedImpact: data.estimatedSERPImpact
       } : null);
 
-      toast.success(`🎯 ${deploymentTier.toUpperCase()} Deployment Complete! ${data.campaign.deployments.successful}/${contentCount} articles now live`);
+      toast.success(`🎯 Multi-Platform Deployment Complete! ${data.campaign.deployments.successful}/${contentCount} articles deployed across ${deploymentTargets.length} platforms`);
       
-      // Show deployment URLs
+      // Show platform-specific deployment URLs
       if (data.campaign.deployments.urls && data.campaign.deployments.urls.length > 0) {
-        toast.success(`🌐 ${data.campaign.deployments.urls.length} live websites created using ${deploymentTier} tier strategy.`);
+        toast.success(`🌐 ${data.campaign.deployments.urls.length} live articles created using ${deploymentTier} tier strategy.`);
       }
       
       // Refresh campaigns list if we're on that tab
@@ -167,7 +172,7 @@ const PersonaSaturationPanel = () => {
       
     } catch (error: any) {
       clearInterval(progressInterval);
-      console.error('Persona Saturation error:', error);
+      console.error('Multi-Platform Deployment error:', error);
       
       setCurrentCampaign(prev => prev ? { 
         ...prev, 
@@ -177,7 +182,7 @@ const PersonaSaturationPanel = () => {
       } : null);
       
       const errorMessage = error.message || 'Unknown error occurred';
-      toast.error(`❌ Deployment failed: ${errorMessage}`);
+      toast.error(`❌ Multi-Platform Deployment failed: ${errorMessage}`);
       
       if (errorMessage.includes('GitHub token')) {
         toast.error('⚠️ GitHub token missing. Please configure GITHUB_TOKEN in edge function secrets.');
@@ -192,10 +197,10 @@ const PersonaSaturationPanel = () => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Rocket className="h-5 w-5" />
-          A.R.I.A™ Scaled Article Deployment
+          A.R.I.A™ Multi-Platform Article Deployment
         </CardTitle>
         <p className="text-sm text-muted-foreground">
-          Deploy SEO-optimized articles using tiered scaling strategies with automated deployment
+          Deploy SEO-optimized articles across multiple platforms using tiered scaling strategies
         </p>
       </CardHeader>
       <CardContent>
