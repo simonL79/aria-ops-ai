@@ -4,9 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Mail, Phone, MapPin, ArrowLeft } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Mail, Phone, MapPin, Star } from 'lucide-react';
 import { toast } from 'sonner';
+import PublicHeader from '@/components/layout/PublicHeader';
+import PublicFooter from '@/components/layout/PublicFooter';
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({
@@ -31,26 +32,7 @@ const ContactPage = () => {
 
   return (
     <div className="min-h-screen bg-[#0A0B0D] text-white">
-      {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b border-gray-800/50 bg-[#0A0B0D]/95 backdrop-blur">
-        <div className="container mx-auto px-6">
-          <div className="flex items-center justify-between py-4">
-            <Link to="/" className="flex items-center gap-3">
-              <ArrowLeft className="h-5 w-5" />
-              <img 
-                src="/lovable-uploads/37370275-bf62-4eab-b0e3-e184ce3fa142.png" 
-                alt="A.R.I.A Logo" 
-                className="h-12 w-auto"
-              />
-            </Link>
-            <Link to="/">
-              <Button variant="outline" className="border-amber-600 text-amber-400 hover:bg-amber-600 hover:text-black">
-                Back to Home
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </header>
+      <PublicHeader showBackButton={true} />
 
       {/* Main Content */}
       <div className="container mx-auto px-6 py-20">
@@ -66,7 +48,7 @@ const ContactPage = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Contact Form */}
-            <Card className="bg-[#1A1B1E] border-gray-800">
+            <Card className="bg-[#1A1B1E] border-gray-800 hover:border-amber-600/50 transition-colors">
               <CardHeader>
                 <CardTitle className="text-2xl text-amber-400">Request Assessment</CardTitle>
                 <p className="text-gray-300">Fill out the form below and we'll get back to you within 24 hours.</p>
@@ -136,7 +118,7 @@ const ContactPage = () => {
 
                   <Button
                     type="submit"
-                    className="w-full bg-amber-600 hover:bg-amber-500 text-black font-semibold py-3"
+                    className="w-full bg-amber-600 hover:bg-amber-500 text-black font-semibold py-3 transform hover:scale-105 transition-all duration-200"
                   >
                     Send Message
                   </Button>
@@ -146,7 +128,7 @@ const ContactPage = () => {
 
             {/* Contact Information */}
             <div className="space-y-8">
-              <Card className="bg-[#1A1B1E] border-gray-800 p-8">
+              <Card className="bg-[#1A1B1E] border-gray-800 p-8 hover:border-amber-600/50 transition-colors">
                 <div className="flex items-center gap-4 mb-4">
                   <Mail className="h-8 w-8 text-amber-400" />
                   <div>
@@ -156,7 +138,7 @@ const ContactPage = () => {
                 </div>
               </Card>
 
-              <Card className="bg-[#1A1B1E] border-gray-800 p-8">
+              <Card className="bg-[#1A1B1E] border-gray-800 p-8 hover:border-amber-600/50 transition-colors">
                 <div className="flex items-center gap-4 mb-4">
                   <Phone className="h-8 w-8 text-amber-400" />
                   <div>
@@ -166,7 +148,7 @@ const ContactPage = () => {
                 </div>
               </Card>
 
-              <Card className="bg-[#1A1B1E] border-gray-800 p-8">
+              <Card className="bg-[#1A1B1E] border-gray-800 p-8 hover:border-amber-600/50 transition-colors">
                 <div className="flex items-center gap-4 mb-4">
                   <MapPin className="h-8 w-8 text-amber-400" />
                   <div>
@@ -197,19 +179,33 @@ const ContactPage = () => {
                   </li>
                 </ul>
               </Card>
+
+              {/* Testimonial Card */}
+              <Card className="bg-[#1A1B1E] border-gray-800 p-8">
+                <div className="flex gap-1 mb-4">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="h-5 w-5 fill-amber-400 text-amber-400" />
+                  ))}
+                </div>
+                <blockquote className="text-gray-300 mb-4 italic">
+                  "A.R.I.A's intelligence platform helped us identify and neutralize a coordinated attack before it reached mainstream media. Essential for any serious organization."
+                </blockquote>
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-white font-semibold">
+                    S
+                  </div>
+                  <div>
+                    <p className="font-semibold text-white">Sarah Chen</p>
+                    <p className="text-sm text-gray-400">Chief Communications Officer</p>
+                  </div>
+                </div>
+              </Card>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Footer */}
-      <footer className="py-12 px-6 border-t border-gray-800/50">
-        <div className="container mx-auto max-w-6xl text-center">
-          <p className="text-gray-400">
-            &copy; 2025 A.R.I.A™ — Advanced Reputation Intelligence & Analysis. All rights reserved.
-          </p>
-        </div>
-      </footer>
+      <PublicFooter />
     </div>
   );
 };
