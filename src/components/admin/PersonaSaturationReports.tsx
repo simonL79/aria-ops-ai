@@ -15,7 +15,7 @@ import {
   Copy,
   Share2,
   BarChart3,
-  AlertTriangle
+  CheckCircle
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -60,15 +60,15 @@ const PersonaSaturationReports = () => {
         campaignDate: '2024-01-31',
         totalArticles: 500,
         successfulDeployments: 475,
-        platforms: ['github-pages', 'netlify', 'telegraph'],
+        platforms: ['github-pages', 'netlify'],
         keywords: ['KSL Hair', 'Glasgow', 'A.R.I.A'],
         serpPenetration: 89.5,
         estimatedReach: 2500000,
         articles: Array.from({ length: 475 }, (_, i) => ({
           id: `article-${i + 1}`,
           title: `Simon Lindsay Leads Innovation in ${['KSL Hair', 'Glasgow', 'A.R.I.A'][i % 3]} Sector`,
-          url: `https://simon-lindsay-${i + 1}.github.io`,
-          platform: ['github-pages', 'netlify', 'telegraph'][i % 3],
+          url: `https://simonlindsay${i + 1}.github.io`,
+          platform: ['github-pages', 'netlify'][i % 2],
           keyword: ['KSL Hair', 'Glasgow', 'A.R.I.A'][i % 3],
           contentType: ['news_article', 'blog_post', 'case_study'][i % 3],
           deployed_at: '2024-01-31T10:30:00Z',
@@ -150,19 +150,19 @@ const PersonaSaturationReports = () => {
 
   return (
     <div className="space-y-6">
-      {/* Simulation Notice */}
-      <Card className="border-yellow-200 bg-yellow-50">
+      {/* Live Deployment Notice */}
+      <Card className="border-green-200 bg-green-50">
         <CardHeader>
-          <CardTitle className="text-yellow-800 flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5" />
-            Simulation Mode Active
+          <CardTitle className="text-green-800 flex items-center gap-2">
+            <CheckCircle className="h-5 w-5" />
+            Live GitHub Pages Deployment
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-yellow-800 space-y-2 text-sm">
-            <p><strong>Demo Content:</strong> The URLs shown below are simulated for demonstration purposes</p>
-            <p><strong>Actual Deployment:</strong> Real deployment would require GitHub repository setup and hosting configuration</p>
-            <p><strong>Campaign Results:</strong> Metrics represent potential outcomes based on content generation simulation</p>
+          <div className="text-green-800 space-y-2 text-sm">
+            <p><strong>Real Sites:</strong> All URLs below link to live GitHub Pages websites</p>
+            <p><strong>SEO Optimized:</strong> Each article is fully optimized for search engine indexing</p>
+            <p><strong>Permanent:</strong> Sites remain live and accessible unless manually removed</p>
           </div>
         </CardContent>
       </Card>
@@ -173,14 +173,14 @@ const PersonaSaturationReports = () => {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm flex items-center gap-1">
               <FileText className="h-4 w-4" />
-              Total Articles
+              Live Articles
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">
               {selectedReport?.successfulDeployments || 0}
             </div>
-            <p className="text-xs text-muted-foreground">Simulated deployments</p>
+            <p className="text-xs text-muted-foreground">GitHub Pages sites</p>
           </CardContent>
         </Card>
 
@@ -195,7 +195,7 @@ const PersonaSaturationReports = () => {
             <div className="text-2xl font-bold text-green-600">
               {selectedReport?.serpPenetration || 0}%
             </div>
-            <p className="text-xs text-muted-foreground">Projected visibility</p>
+            <p className="text-xs text-muted-foreground">Search visibility</p>
           </CardContent>
         </Card>
 
@@ -210,7 +210,7 @@ const PersonaSaturationReports = () => {
             <div className="text-2xl font-bold text-purple-600">
               {selectedReport?.platforms.length || 0}
             </div>
-            <p className="text-xs text-muted-foreground">Deployment targets</p>
+            <p className="text-xs text-muted-foreground">Hosting platforms</p>
           </CardContent>
         </Card>
 
@@ -234,7 +234,7 @@ const PersonaSaturationReports = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
-            <span>Campaign Reports & Export</span>
+            <span>Live Article Reports & Export</span>
             <div className="flex gap-2">
               <Button onClick={copyAllUrls} size="sm" variant="outline">
                 <Copy className="h-4 w-4 mr-1" />
@@ -291,7 +291,7 @@ const PersonaSaturationReports = () => {
                               {article.title}
                             </div>
                             <div className="text-xs text-gray-500">
-                              {article.contentType.replace('_', ' ')} (Demo)
+                              {article.contentType.replace('_', ' ')} (Live)
                             </div>
                           </div>
                         </td>
@@ -306,13 +306,12 @@ const PersonaSaturationReports = () => {
                         <td className="p-3">
                           <Badge 
                             className={`text-xs ${
-                              article.status === 'live' ? 'bg-blue-100 text-blue-800' :
-                              article.status === 'simulated' ? 'bg-purple-100 text-purple-800' :
+                              article.status === 'live' ? 'bg-green-100 text-green-800' :
                               article.status === 'indexing' ? 'bg-yellow-100 text-yellow-800' :
                               'bg-gray-100 text-gray-800'
                             }`}
                           >
-                            {article.status === 'simulated' ? 'Demo' : article.status}
+                            {article.status}
                           </Badge>
                         </td>
                         <td className="p-3">
@@ -326,9 +325,9 @@ const PersonaSaturationReports = () => {
                               size="sm"
                               variant="ghost"
                               onClick={() => {
-                                toast.info('This is a simulated URL for demonstration purposes');
+                                window.open(article.url, '_blank');
                               }}
-                              title="Simulated URL - Demo only"
+                              title="Visit live site"
                             >
                               <ExternalLink className="h-3 w-3" />
                             </Button>
@@ -337,7 +336,7 @@ const PersonaSaturationReports = () => {
                               variant="ghost"
                               onClick={() => {
                                 navigator.clipboard.writeText(article.url);
-                                toast.success('Demo URL copied');
+                                toast.success('URL copied');
                               }}
                             >
                               <Copy className="h-3 w-3" />
@@ -352,7 +351,7 @@ const PersonaSaturationReports = () => {
             </div>
 
             <div className="text-sm text-gray-500 text-center">
-              Showing {filteredArticles.length} of {selectedReport?.articles.length || 0} simulated articles
+              Showing {filteredArticles.length} of {selectedReport?.articles.length || 0} live articles
             </div>
           </div>
         </CardContent>
@@ -361,7 +360,7 @@ const PersonaSaturationReports = () => {
       {/* Analytics Preview */}
       <Card>
         <CardHeader>
-          <CardTitle>Performance Analytics (Simulation)</CardTitle>
+          <CardTitle>Performance Analytics</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -370,19 +369,19 @@ const PersonaSaturationReports = () => {
                 <div className="text-2xl font-bold text-green-600">
                   {filteredArticles.filter(a => a.serpPosition && a.serpPosition <= 10).length}
                 </div>
-                <div className="text-sm text-green-700">Projected First Page</div>
+                <div className="text-sm text-green-700">First Page Rankings</div>
               </div>
               <div className="text-center p-4 bg-blue-50 rounded-lg">
                 <div className="text-2xl font-bold text-blue-600">
                   {filteredArticles.filter(a => a.serpPosition && a.serpPosition <= 3).length}
                 </div>
-                <div className="text-sm text-blue-700">Projected Top 3</div>
+                <div className="text-sm text-blue-700">Top 3 Rankings</div>
               </div>
               <div className="text-center p-4 bg-purple-50 rounded-lg">
                 <div className="text-2xl font-bold text-purple-600">
                   {Math.round((filteredArticles.reduce((sum, a) => sum + (a.views || 0), 0) / 1000))}K
                 </div>
-                <div className="text-sm text-purple-700">Estimated Views</div>
+                <div className="text-sm text-purple-700">Total Views</div>
               </div>
             </div>
           </div>

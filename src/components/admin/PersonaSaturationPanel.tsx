@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -48,7 +47,7 @@ const PersonaSaturationPanel = () => {
     setLoadingCampaigns(true);
     try {
       const { data, error } = await supabase
-        .from('persona_saturation_campaigns' as any)
+        .from('persona_saturation_campaigns')
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -58,7 +57,7 @@ const PersonaSaturationPanel = () => {
       }
 
       if (data) {
-        const formattedCampaigns = (data as DatabaseCampaign[]).map(campaign => ({
+        const formattedCampaigns = data.map((campaign: any) => ({
           id: campaign.id,
           entityName: campaign.entity_name,
           status: 'completed' as const,
@@ -132,7 +131,8 @@ const PersonaSaturationPanel = () => {
           targetKeywords: keywords,
           contentCount,
           deploymentTargets,
-          saturationMode
+          saturationMode,
+          realDeployment: true // Enable real GitHub deployment
         }
       });
 
@@ -158,7 +158,7 @@ const PersonaSaturationPanel = () => {
         estimatedImpact: data.estimatedSERPImpact
       } : null);
 
-      toast.success(`Persona Saturation deployed: ${data.campaign.contentGenerated} pieces across ${data.campaign.deployments.successful} platforms`);
+      toast.success(`Persona Saturation deployed: ${data.campaign.contentGenerated} pieces across ${data.campaign.deployments.successful} live GitHub Pages sites`);
       
       // Refresh campaigns list if we're on that tab
       if (activeTab === 'campaigns') {
@@ -215,7 +215,7 @@ const PersonaSaturationPanel = () => {
           A.R.I.A™ Persona Saturation Deployment
         </CardTitle>
         <p className="text-sm text-muted-foreground">
-          Deploy 50-1000+ positive articles across free hosting platforms to dominate search results
+          Deploy 50-1000+ positive articles across live GitHub Pages sites to dominate search results
         </p>
       </CardHeader>
       <CardContent>
@@ -284,8 +284,6 @@ const PersonaSaturationPanel = () => {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                 {[
                   { id: 'github-pages', name: 'GitHub Pages', icon: Globe },
-                  { id: 'telegra-ph', name: 'Telegraph', icon: Zap },
-                  { id: 'medium', name: 'Medium', icon: Target },
                   { id: 'netlify', name: 'Netlify', icon: TrendingUp }
                 ].map(platform => {
                   const Icon = platform.icon;
@@ -312,13 +310,13 @@ const PersonaSaturationPanel = () => {
               </div>
             </div>
 
-            <div className="flex items-center justify-between p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <div className="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-lg">
               <div className="flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5 text-yellow-600" />
+                <Globe className="h-5 w-5 text-green-600" />
                 <div>
-                  <h4 className="font-medium text-yellow-800">Free Deployment Strategy</h4>
-                  <p className="text-sm text-yellow-700">
-                    Using only free platforms: GitHub Pages, Netlify, Telegraph. No hosting costs.
+                  <h4 className="font-medium text-green-800">Live GitHub Deployment</h4>
+                  <p className="text-sm text-green-700">
+                    Creating real GitHub repositories with live GitHub Pages sites. All articles will be publicly accessible.
                   </p>
                 </div>
               </div>
@@ -336,12 +334,12 @@ const PersonaSaturationPanel = () => {
               {isExecuting ? (
                 <>
                   <Shield className="h-4 w-4 mr-2 animate-spin" />
-                  Deploying Persona Saturation...
+                  Creating Live GitHub Pages Sites...
                 </>
               ) : (
                 <>
                   <Rocket className="h-4 w-4 mr-2" />
-                  Deploy {contentCount} Articles Across {deploymentTargets.length} Platforms
+                  Deploy {contentCount} Live Articles to GitHub Pages
                 </>
               )}
             </Button>
@@ -372,7 +370,7 @@ const PersonaSaturationPanel = () => {
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-green-600">{currentCampaign.deploymentsSuccessful}</div>
-                    <div className="text-xs text-muted-foreground">Deployments</div>
+                    <div className="text-xs text-muted-foreground">Live Sites</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-purple-600">{currentCampaign.serpPenetration.toFixed(1)}%</div>
@@ -423,7 +421,7 @@ const PersonaSaturationPanel = () => {
                       <div>
                         <div className="font-medium">{campaign.entityName}</div>
                         <div className="text-sm text-gray-500">
-                          {campaign.contentGenerated} articles, {campaign.deploymentsSuccessful} deployments
+                          {campaign.contentGenerated} articles, {campaign.deploymentsSuccessful} live deployments
                         </div>
                         {campaign.createdAt && (
                           <div className="text-xs text-gray-400">
