@@ -20,7 +20,11 @@ export const usePerformanceMonitor = (componentName: string): PerformanceMeasure
     return () => {
       const endTime = performance.now();
       const duration = endTime - startTime;
-      console.log(`${componentName} - ${operationName}: ${duration}ms`);
+      
+      // Only log if duration is significant to avoid spam
+      if (duration > 10) {
+        console.log(`${componentName} - ${operationName}: ${duration.toFixed(2)}ms`);
+      }
     };
   }, [componentName]);
 

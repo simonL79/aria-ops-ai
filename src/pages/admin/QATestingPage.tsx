@@ -8,12 +8,12 @@ import { Shield, CheckCircle, AlertTriangle, TrendingUp, Monitor, Zap } from 'lu
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 
-// Optimized imports
+// Optimized imports with proper error boundaries
 const ComprehensiveQADashboard = lazy(() => import('@/components/qa/ComprehensiveQADashboard'));
 const CriticalActionButtons = lazy(() => import('@/components/dashboard/CriticalActionButtons'));
 const PerformanceMonitor = lazy(() => import('@/components/admin/qa/PerformanceMonitor'));
 
-// Responsive overview cards
+// Optimized overview cards with React.memo
 const QAOverviewCards = React.memo(() => (
   <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
     <Card className="corporate-card responsive-card">
@@ -57,7 +57,10 @@ const QAOverviewCards = React.memo(() => (
   </div>
 ));
 
+QAOverviewCards.displayName = 'QAOverviewCards';
+
 const QATestingPage = React.memo(() => {
+  // Memoized action handlers to prevent re-renders
   const actionHandlers = React.useMemo(() => ({
     handleLiveThreatScan: () => toast.info('🔍 QA Test: Live Threat Scan initiated'),
     handleLiveIntelligenceSweep: () => toast.info('🔍 QA Test: Live Intelligence Sweep initiated'),
