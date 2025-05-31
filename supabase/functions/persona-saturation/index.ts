@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -13,7 +12,6 @@ interface PersonaSaturationRequest {
   contentCount: number;
   deploymentTargets: string[];
   saturationMode: 'defensive' | 'aggressive' | 'nuclear';
-  realDeployment?: boolean;
 }
 
 serve(async (req) => {
@@ -34,11 +32,10 @@ serve(async (req) => {
       targetKeywords, 
       contentCount, 
       deploymentTargets, 
-      saturationMode,
-      realDeployment = false 
+      saturationMode
     }: PersonaSaturationRequest = requestBody;
 
-    console.log(`🚀 Starting Persona Saturation Campaign: ${entityName} (${contentCount} articles)`);
+    console.log(`🚀 Starting Live Article Deployment: ${entityName} (${contentCount} articles)`);
 
     const githubToken = Deno.env.get('GITHUB_TOKEN');
     if (!githubToken) {
@@ -56,6 +53,14 @@ serve(async (req) => {
           } 
         }
       );
+    }
+
+    // Enforce maximum of 10 articles
+    const maxArticles = 10;
+    const articleCount = Math.min(contentCount, maxArticles);
+    
+    if (contentCount > maxArticles) {
+      console.warn(`Content count ${contentCount} exceeds maximum ${maxArticles}, clamping to ${maxArticles}`);
     }
 
     // Get GitHub username
@@ -93,49 +98,42 @@ serve(async (req) => {
       'industry-recognition'
     ];
 
-    // Limit content count to prevent rate limiting
-    const maxArticles = realDeployment ? Math.min(contentCount, 10) : contentCount;
-    console.log(`📝 Generating ${maxArticles} articles (${realDeployment ? 'real' : 'simulation'} mode)`);
+    console.log(`📝 Deploying ${articleCount} live articles to GitHub Pages...`);
 
-    // Generate and deploy articles with rate limiting
-    for (let i = 1; i <= maxArticles; i++) {
+    // Deploy articles with rate limiting
+    for (let i = 1; i <= articleCount; i++) {
       const template = contentTemplates[(i - 1) % contentTemplates.length];
-      console.log(`📝 Processing article ${i}/${maxArticles}: ${template}`);
+      console.log(`📝 Processing article ${i}/${articleCount}: ${template}`);
 
-      // Generate article content
-      const articleContent = await generateArticleContent(entityName, targetKeywords, template, saturationMode);
-      
-      if (realDeployment && githubToken) {
-        try {
-          // Create GitHub repository with rate limiting
-          const repoName = `${entityName.toLowerCase().replace(/\s+/g, '-')}-${template}-${Date.now()}`;
-          const deployUrl = await deployToGitHub(githubToken, githubUsername, repoName, articleContent, entityName);
-          
-          if (deployUrl) {
-            deploymentUrls.push(deployUrl);
-            console.log(`✅ Deployed article ${i}/${maxArticles}: ${deployUrl}`);
-          }
-
-          // Add delay to prevent rate limiting (1 second between deployments)
-          if (i < maxArticles) {
-            await new Promise(resolve => setTimeout(resolve, 1000));
-          }
-        } catch (error) {
-          console.error(`❌ Deployment failed for article ${i}:`, error.message);
-          // Continue with next article instead of failing completely
+      try {
+        // Generate article content
+        const articleContent = await generateArticleContent(entityName, targetKeywords, template, saturationMode);
+        
+        // Create GitHub repository with rate limiting
+        const repoName = `${entityName.toLowerCase().replace(/\s+/g, '-')}-${template}-${Date.now()}`;
+        const deployUrl = await deployToGitHub(githubToken, githubUsername, repoName, articleContent, entityName);
+        
+        if (deployUrl) {
+          deploymentUrls.push(deployUrl);
+          console.log(`✅ Deployed article ${i}/${articleCount}: ${deployUrl}`);
         }
-      } else {
-        // Simulation mode
-        deploymentUrls.push(`https://${githubUsername}.github.io/${entityName.toLowerCase().replace(/\s+/g, '-')}-${template}-${i}`);
+
+        // Add delay to prevent rate limiting (1 second between deployments)
+        if (i < articleCount) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      } catch (error) {
+        console.error(`❌ Deployment failed for article ${i}:`, error.message);
+        // Continue with next article instead of failing completely
       }
     }
 
     // Store campaign in database
     const campaignData = {
-      contentGenerated: maxArticles,
+      contentGenerated: articleCount,
       deploymentsSuccessful: deploymentUrls.length,
       serpPenetration: Math.random() * 0.3 + 0.7, // 70-100%
-      estimatedReach: maxArticles * 5000,
+      estimatedReach: articleCount * 5000,
       deployments: {
         successful: deploymentUrls.length,
         urls: deploymentUrls
@@ -158,9 +156,7 @@ serve(async (req) => {
       console.error('Error saving campaign:', campaignError);
     }
 
-    const successMessage = realDeployment 
-      ? `${deploymentUrls.length} articles deployed successfully to GitHub Pages`
-      : `${deploymentUrls.length} articles simulated with ${(campaignData.serpPenetration * 100).toFixed(1)}% SERP penetration`;
+    const successMessage = `${deploymentUrls.length} articles successfully deployed to live GitHub Pages websites`;
 
     return new Response(
       JSON.stringify({

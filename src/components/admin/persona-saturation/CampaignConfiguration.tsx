@@ -1,35 +1,29 @@
 
 import React from 'react';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Rocket, Globe, Shield } from 'lucide-react';
-import DeploymentPlatformsSelector from './DeploymentPlatformsSelector';
+import { Badge } from '@/components/ui/badge';
+import { AlertCircle, Rocket, Github } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface CampaignConfigurationProps {
   entityName: string;
-  setEntityName: (name: string) => void;
+  setEntityName: (value: string) => void;
   targetKeywords: string;
-  setTargetKeywords: (keywords: string) => void;
+  setTargetKeywords: (value: string) => void;
   contentCount: number;
-  setContentCount: (count: number) => void;
+  setContentCount: (value: number) => void;
   saturationMode: 'defensive' | 'aggressive' | 'nuclear';
-  setSaturationMode: (mode: 'defensive' | 'aggressive' | 'nuclear') => void;
+  setSaturationMode: (value: 'defensive' | 'aggressive' | 'nuclear') => void;
   deploymentTargets: string[];
-  setDeploymentTargets: (targets: string[]) => void;
+  setDeploymentTargets: (value: string[]) => void;
   isExecuting: boolean;
   onExecute: () => void;
 }
-
-const getSaturationModeColor = (mode: string) => {
-  switch (mode) {
-    case 'defensive': return 'bg-blue-100 text-blue-800';
-    case 'aggressive': return 'bg-orange-100 text-orange-800';
-    case 'nuclear': return 'bg-red-100 text-red-800';
-    default: return 'bg-gray-100 text-gray-800';
-  }
-};
 
 const CampaignConfiguration = ({
   entityName,
@@ -45,101 +39,160 @@ const CampaignConfiguration = ({
   isExecuting,
   onExecute
 }: CampaignConfigurationProps) => {
+  const maxArticles = 10;
+
+  const handleContentCountChange = (value: number) => {
+    // Enforce maximum of 10 articles
+    const clampedValue = Math.min(Math.max(1, value), maxArticles);
+    setContentCount(clampedValue);
+  };
+
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Target Entity</label>
-          <Input
-            placeholder="Enter entity name (e.g., Company Name, Person)"
-            value={entityName}
-            onChange={(e) => setEntityName(e.target.value)}
-          />
-        </div>
-        
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Target Keywords</label>
-          <Input
-            placeholder="Enter keywords (comma-separated)"
-            value={targetKeywords}
-            onChange={(e) => setTargetKeywords(e.target.value)}
-          />
-        </div>
-        
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Content Count</label>
-          <Select value={contentCount.toString()} onValueChange={(v) => setContentCount(parseInt(v))}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="10">10 Articles (Test)</SelectItem>
-              <SelectItem value="25">25 Articles (Light)</SelectItem>
-              <SelectItem value="50">50 Articles (Standard)</SelectItem>
-              <SelectItem value="100">100 Articles (Heavy)</SelectItem>
-              <SelectItem value="250">250 Articles (Saturation)</SelectItem>
-              <SelectItem value="500">500 Articles (Dominance)</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Saturation Mode</label>
-          <Select value={saturationMode} onValueChange={(v) => setSaturationMode(v as any)}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="defensive">Defensive (Balanced)</SelectItem>
-              <SelectItem value="aggressive">Aggressive (Promotional)</SelectItem>
-              <SelectItem value="nuclear">Nuclear (Maximum Impact)</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+    <div className="space-y-6">
+      {/* Live Deployment Notice */}
+      <Alert className="border-green-200 bg-green-50">
+        <Github className="h-4 w-4" />
+        <AlertDescription className="text-green-800">
+          <strong>Live GitHub Pages Deployment:</strong> All articles will be deployed to real GitHub Pages websites with permanent URLs.
+        </AlertDescription>
+      </Alert>
+
+      {/* Configuration Form */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Target Configuration</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="entityName">Entity/Person Name</Label>
+              <Input
+                id="entityName"
+                value={entityName}
+                onChange={(e) => setEntityName(e.target.value)}
+                placeholder="e.g., John Smith, Acme Corp"
+                className="mt-1"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="keywords">Target Keywords</Label>
+              <Textarea
+                id="keywords"
+                value={targetKeywords}
+                onChange={(e) => setTargetKeywords(e.target.value)}
+                placeholder="e.g., CEO, entrepreneur, technology leader, innovation"
+                className="mt-1"
+                rows={3}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Separate keywords with commas
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Campaign Settings</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="contentCount">Number of Articles</Label>
+              <div className="flex items-center space-x-2 mt-1">
+                <Input
+                  id="contentCount"
+                  type="number"
+                  min="1"
+                  max={maxArticles}
+                  value={contentCount}
+                  onChange={(e) => handleContentCountChange(parseInt(e.target.value) || 1)}
+                  className="w-24"
+                />
+                <Badge variant="outline" className="text-xs">
+                  Max {maxArticles} articles
+                </Badge>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Limited to {maxArticles} articles per campaign to ensure reliable deployment
+              </p>
+            </div>
+
+            <div>
+              <Label htmlFor="saturationMode">Campaign Intensity</Label>
+              <Select value={saturationMode} onValueChange={setSaturationMode}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="defensive">
+                    <div className="flex flex-col">
+                      <span>Defensive</span>
+                      <span className="text-xs text-muted-foreground">Conservative content approach</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="aggressive">
+                    <div className="flex flex-col">
+                      <span>Aggressive</span>
+                      <span className="text-xs text-muted-foreground">Strong positive positioning</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="nuclear">
+                    <div className="flex flex-col">
+                      <span>Nuclear</span>
+                      <span className="text-xs text-muted-foreground">Maximum impact content</span>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      <DeploymentPlatformsSelector 
-        deploymentTargets={deploymentTargets}
-        setDeploymentTargets={setDeploymentTargets}
-      />
-
-      <div className="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-lg">
-        <div className="flex items-center gap-2">
-          <Globe className="h-5 w-5 text-green-600" />
-          <div>
-            <h4 className="font-medium text-green-800">Multi-Platform SERP Saturation</h4>
-            <p className="text-sm text-green-700">
-              ✅ Deploy across {deploymentTargets.length} free hosting platform{deploymentTargets.length !== 1 ? 's' : ''}<br/>
-              ✅ Creates diverse domain portfolio for SEO<br/>
-              ✅ Strategic backlinks between all articles<br/>
-              ✅ Central hub repository with sitemap<br/>
-              ✅ Automatic search engine pinging
-            </p>
+      {/* Deployment Platform */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Deployment Platform</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center space-x-2">
+            <Badge className="bg-gray-900 text-white">
+              <Github className="h-3 w-3 mr-1" />
+              GitHub Pages
+            </Badge>
+            <span className="text-sm text-muted-foreground">
+              Free hosting with permanent URLs
+            </span>
           </div>
-        </div>
-        <Badge className={getSaturationModeColor(saturationMode)}>
-          {saturationMode.toUpperCase()}
-        </Badge>
-      </div>
+          <p className="text-xs text-muted-foreground mt-2">
+            All articles will be deployed to individual GitHub Pages repositories
+          </p>
+        </CardContent>
+      </Card>
 
-      <Button 
-        onClick={onExecute}
-        disabled={isExecuting || !entityName.trim() || !targetKeywords.trim() || deploymentTargets.length === 0}
-        className="w-full"
-        size="lg"
-      >
-        {isExecuting ? (
-          <>
-            <Shield className="h-4 w-4 mr-2 animate-spin" />
-            Deploying {contentCount} Articles to {deploymentTargets.length} Platform{deploymentTargets.length !== 1 ? 's' : ''}...
-          </>
-        ) : (
-          <>
-            <Rocket className="h-4 w-4 mr-2" />
-            🚀 Deploy {contentCount} Articles to {deploymentTargets.length} Platform{deploymentTargets.length !== 1 ? 's' : ''}
-          </>
-        )}
-      </Button>
+      {/* Rate Limiting Warning */}
+      <Alert>
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>
+          <strong>Deployment Info:</strong> Articles are deployed with rate limiting protection. 
+          Each deployment includes a 1-second delay to prevent GitHub API limits. 
+          Estimated deployment time: {contentCount} minutes.
+        </AlertDescription>
+      </Alert>
+
+      {/* Execute Button */}
+      <div className="flex justify-center">
+        <Button
+          onClick={onExecute}
+          disabled={isExecuting || !entityName.trim() || !targetKeywords.trim()}
+          size="lg"
+          className="min-w-48"
+        >
+          <Rocket className="h-4 w-4 mr-2" />
+          {isExecuting ? 'Deploying Live Articles...' : `Deploy ${contentCount} Live Articles`}
+        </Button>
+      </div>
     </div>
   );
 };
