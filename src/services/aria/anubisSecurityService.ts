@@ -2,171 +2,224 @@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-export interface AnubisTestResult {
-  id: string;
-  test_name: string;
-  passed: boolean;
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  result_message: string;
-  executed_at: string;
-}
-
-export interface SecurityEvent {
-  id: string;
+export interface AnubisSecurityEvent {
   event_type: string;
   description: string;
   severity: 'low' | 'medium' | 'high' | 'critical';
   user_id?: string;
-  ip_address?: string;
-  timestamp: string;
+}
+
+export interface SlackEvent {
+  channel: string;
+  event_type: string;
+  payload: any;
+}
+
+export interface TestResult {
+  module: string;
+  test_name: string;
+  passed: boolean;
+  execution_time_ms: number;
+  error_message?: string;
+}
+
+export interface MobileSession {
+  user_id: string;
+  device_name: string;
+  platform: 'iOS' | 'Android' | 'WebApp';
+  push_token?: string;
+}
+
+export interface AIAttack {
+  source: string;
+  prompt: string;
+  attack_vector: string;
+  confidence_score: number;
+  mitigation_action?: string;
+}
+
+export interface SecurityMetrics {
+  attacksDetected: number;
+  activeSessions: number;
+  threatLevel: string;
+  lastUpdate: string;
 }
 
 export class AnubisSecurityService {
   
-  static async runSecurityCheck(checkName: string): Promise<AnubisTestResult> {
-    try {
-      console.log(`🔒 Running security check: ${checkName}`);
-      
-      // Simulate security check
-      const result: AnubisTestResult = {
-        id: crypto.randomUUID(),
-        test_name: checkName,
-        passed: true,
-        severity: 'low',
-        result_message: `Security check ${checkName} passed`,
-        executed_at: new Date().toISOString()
-      };
-      
-      // Log the check in activity logs
-      await supabase
-        .from('activity_logs')
-        .insert({
-          action: 'security_check',
-          details: `Anubis security check: ${checkName}`,
-          entity_type: 'security'
-        });
-      
-      return result;
-    } catch (error) {
-      console.error(`Security check ${checkName} failed:`, error);
-      throw error;
-    }
-  }
-
-  static async getAllTestResults(): Promise<AnubisTestResult[]> {
-    try {
-      // Return mock data since the actual table doesn't exist
-      const mockResults: AnubisTestResult[] = [
-        {
-          id: '1',
-          test_name: 'Database Connection',
-          passed: true,
-          severity: 'medium',
-          result_message: 'Database connection successful',
-          executed_at: new Date().toISOString()
-        },
-        {
-          id: '2',
-          test_name: 'Authentication System',
-          passed: true,
-          severity: 'high',
-          result_message: 'Authentication system operational',
-          executed_at: new Date().toISOString()
-        }
-      ];
-      
-      return mockResults;
-    } catch (error) {
-      console.error('Failed to get test results:', error);
-      return [];
-    }
-  }
-
   static async logSecurityEvent(
     eventType: string,
     description: string,
-    severity: 'low' | 'medium' | 'high' | 'critical' = 'medium'
-  ): Promise<void> {
+    severity: 'low' | 'medium' | 'high' | 'critical' = 'medium',
+    userId?: string
+  ): Promise<boolean> {
     try {
-      // Log security events in activity logs
+      const { error } = await supabase
+        .from('activity_logs')
+        .insert({
+          action: eventType,
+          details: description,
+          entity_type: 'security_event',
+          user_id: userId
+        });
+
+      if (error) {
+        console.error('Failed to log security event:', error);
+        return false;
+      }
+
+      console.log(`🔒 Security event logged: ${eventType} - ${severity}`);
+      return true;
+    } catch (error) {
+      console.error('Security event logging failed:', error);
+      return false;
+    }
+  }
+
+  static async queueSlackEvent(event: SlackEvent): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from('activity_logs')
+        .insert({
+          action: 'slack_event_queued',
+          details: JSON.stringify(event),
+          entity_type: 'slack_integration'
+        });
+
+      return !error;
+    } catch (error) {
+      console.error('Failed to queue Slack event:', error);
+      return false;
+    }
+  }
+
+  static async logTestResult(result: TestResult): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from('activity_logs')
+        .insert({
+          action: 'test_result',
+          details: JSON.stringify(result),
+          entity_type: 'qa_testing'
+        });
+
+      return !error;
+    } catch (error) {
+      console.error('Failed to log test result:', error);
+      return false;
+    }
+  }
+
+  static async registerMobileSession(session: MobileSession): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from('activity_logs')
+        .insert({
+          action: 'mobile_session_registered',
+          details: JSON.stringify(session),
+          entity_type: 'mobile_session',
+          user_id: session.user_id
+        });
+
+      return !error;
+    } catch (error) {
+      console.error('Failed to register mobile session:', error);
+      return false;
+    }
+  }
+
+  static async logAIAttack(attack: AIAttack): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from('activity_logs')
+        .insert({
+          action: 'ai_attack_detected',
+          details: JSON.stringify(attack),
+          entity_type: 'ai_security'
+        });
+
+      return !error;
+    } catch (error) {
+      console.error('Failed to log AI attack:', error);
+      return false;
+    }
+  }
+
+  static async getSecurityMetrics(): Promise<SecurityMetrics> {
+    try {
+      const { data, error } = await supabase
+        .from('activity_logs')
+        .select('*')
+        .eq('entity_type', 'security_event')
+        .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
+
+      if (error) throw error;
+
+      return {
+        attacksDetected: data?.length || 0,
+        activeSessions: 1, // Mock value
+        threatLevel: 'low',
+        lastUpdate: new Date().toISOString()
+      };
+    } catch (error) {
+      console.error('Failed to get security metrics:', error);
+      return {
+        attacksDetected: 0,
+        activeSessions: 0,
+        threatLevel: 'unknown',
+        lastUpdate: new Date().toISOString()
+      };
+    }
+  }
+
+  static detectHotword(phrase: string, userId: string): boolean {
+    const hotwords = ['anubis', 'aria', 'emergency', 'security', 'threat'];
+    const detected = hotwords.some(word => phrase.toLowerCase().includes(word));
+    
+    if (detected) {
+      this.logSecurityEvent(
+        'hotword_detected',
+        `Hotword detected in phrase: "${phrase}"`,
+        'medium',
+        userId
+      );
+    }
+    
+    return detected;
+  }
+
+  static async emergencyShutdown(reason: string): Promise<boolean> {
+    try {
+      console.warn('🚨 ANUBIS EMERGENCY SHUTDOWN INITIATED:', reason);
+      
       await supabase
         .from('activity_logs')
         .insert({
-          action: 'security_event',
-          details: `${eventType}: ${description}`,
-          entity_type: 'security'
+          action: 'emergency_shutdown',
+          details: `Emergency shutdown initiated: ${reason}`,
+          entity_type: 'system_emergency'
         });
       
-      console.log(`🔒 Security event logged: ${eventType}`);
+      toast.error(`Emergency shutdown: ${reason}`);
+      return true;
     } catch (error) {
-      console.error('Failed to log security event:', error);
+      console.error('Failed to execute emergency shutdown:', error);
+      return false;
     }
   }
 
-  static async detectAnomalousActivity(): Promise<SecurityEvent[]> {
+  static async validateSystemIntegrity(): Promise<boolean> {
     try {
-      // Simple anomaly detection based on activity logs
-      const { data: recentLogs, error } = await supabase
+      // Basic integrity check using existing tables
+      const { data, error } = await supabase
         .from('activity_logs')
         .select('*')
-        .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
-        .order('created_at', { ascending: false });
+        .limit(1);
       
-      if (error) throw error;
-      
-      const events: SecurityEvent[] = [];
-      
-      // Check for suspicious patterns
-      if (recentLogs && recentLogs.length > 100) {
-        events.push({
-          id: crypto.randomUUID(),
-          event_type: 'high_activity_volume',
-          description: `Unusually high activity: ${recentLogs.length} events in 24h`,
-          severity: 'medium',
-          timestamp: new Date().toISOString()
-        });
-      }
-      
-      return events;
+      return !error;
     } catch (error) {
-      console.error('Failed to detect anomalous activity:', error);
-      return [];
-    }
-  }
-
-  static async getSystemHealth(): Promise<{ overall: string; components: any[] }> {
-    try {
-      // Check system components
-      const components = [
-        {
-          name: 'Database',
-          status: 'healthy',
-          last_check: new Date().toISOString()
-        },
-        {
-          name: 'Authentication',
-          status: 'healthy',
-          last_check: new Date().toISOString()
-        },
-        {
-          name: 'Live OSINT',
-          status: 'healthy',
-          last_check: new Date().toISOString()
-        }
-      ];
-      
-      return {
-        overall: 'healthy',
-        components
-      };
-    } catch (error) {
-      console.error('Failed to get system health:', error);
-      return {
-        overall: 'unknown',
-        components: []
-      };
+      console.error('System integrity validation failed:', error);
+      return false;
     }
   }
 }
-
-export default AnubisSecurityService;

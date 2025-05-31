@@ -18,6 +18,16 @@ interface DashboardSource {
   status: string;
 }
 
+// ActionItem interface to match the API response
+interface ActionItem {
+  id: string;
+  title: string;
+  description: string;
+  priority: 'high' | 'medium' | 'low';
+  status: 'pending' | 'in_progress' | 'completed';
+  created_at: string;
+}
+
 export const useDashboardData = () => {
   const [contentAlerts, setContentAlerts] = useState<ContentAlert[]>([]);
   const [actionItems, setActionItems] = useState<ContentAction[]>([]);
@@ -131,7 +141,20 @@ export const useDashboardData = () => {
   const loadActionItems = async () => {
     try {
       const items = await fetchActionItems();
-      setActionItems(items);
+      
+      // Convert ActionItem[] to ContentAction[]
+      const contentActions: ContentAction[] = items.map((item: ActionItem) => ({
+        id: item.id,
+        title: item.title,
+        description: item.description,
+        priority: item.priority,
+        status: item.status,
+        type: 'manual_review' as const,
+        platform: 'system' as const,
+        timestamp: item.created_at
+      }));
+      
+      setActionItems(contentActions);
     } catch (error) {
       console.error('Error loading action items:', error);
     }

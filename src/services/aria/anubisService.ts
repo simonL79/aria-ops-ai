@@ -1,7 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { AnubisSecurityService } from './anubisSecurityService';
 
 export interface AnubisSystemStatus {
   id: string;
@@ -31,6 +30,64 @@ export interface AnubisReport {
   generated_at: string;
 }
 
+// Additional interfaces for enhanced monitoring
+export interface AnubisState {
+  id: string;
+  module: string;
+  status: 'healthy' | 'warning' | 'error' | 'offline';
+  last_checked: string;
+  issue_summary?: string;
+  record_count?: number;
+  anomaly_detected?: boolean;
+}
+
+export interface LLMThreatMonitor {
+  id: string;
+  entity_name: string;
+  mention_type: string;
+  model_detected?: string;
+  vector_score: number;
+  captured_response?: string;
+  recorded_at: string;
+}
+
+export interface GraveyardSimulation {
+  id: string;
+  leak_title?: string;
+  expected_trigger_module?: string;
+  suppression_status: string;
+  injected_at: string;
+}
+
+export interface LegalEscalation {
+  id: string;
+  violation_type?: string;
+  jurisdiction?: string;
+  delivery_status: string;
+  auto_generated: boolean;
+  law_firm_contact?: string;
+  created_at: string;
+}
+
+export interface AnubisSystemReport {
+  session_id: string;
+  overall_status: 'healthy' | 'degraded' | 'critical';
+  modules_checked: number;
+  issues_found: number;
+  recommendations: string[];
+  generated_at: string;
+  module_status: AnubisState[];
+}
+
+export const ARIA_MODULES = {
+  'Database': 'Core Database Operations',
+  'ThreatScanning': 'Threat Detection Engine',
+  'EntityManagement': 'Entity Management System',
+  'Notifications': 'Notification System',
+  'Authentication': 'User Authentication',
+  'Monitoring': 'Live Monitoring System'
+};
+
 export class AnubisService {
   
   static async runDiagnostics(): Promise<AnubisReport> {
@@ -59,6 +116,35 @@ export class AnubisService {
       return report;
     } catch (error) {
       console.error('❌ Anubis: Diagnostic failed:', error);
+      throw error;
+    }
+  }
+
+  static async runEnhancedDiagnostics(): Promise<AnubisSystemReport> {
+    try {
+      console.log('🔬 Anubis: Starting enhanced system diagnostics...');
+      
+      const sessionId = crypto.randomUUID();
+      const startTime = new Date().toISOString();
+      
+      const diagnosticResults = await this.runSystemChecks();
+      
+      const report: AnubisSystemReport = {
+        session_id: sessionId,
+        overall_status: this.determineOverallStatus(diagnosticResults),
+        modules_checked: diagnosticResults.length,
+        issues_found: diagnosticResults.filter(r => r.status !== 'healthy').length,
+        recommendations: this.generateRecommendations(diagnosticResults),
+        generated_at: startTime,
+        module_status: diagnosticResults
+      };
+      
+      await this.logDiagnosticSession(report);
+      
+      console.log('✅ Anubis: Enhanced diagnostics completed');
+      return report;
+    } catch (error) {
+      console.error('❌ Anubis: Enhanced diagnostic failed:', error);
       throw error;
     }
   }
@@ -160,7 +246,7 @@ export class AnubisService {
     return recommendations;
   }
 
-  private static async logDiagnosticSession(report: AnubisReport): Promise<void> {
+  private static async logDiagnosticSession(report: AnubisReport | AnubisSystemReport): Promise<void> {
     try {
       await supabase
         .from('activity_logs')
@@ -206,6 +292,80 @@ export class AnubisService {
       console.error('Failed to get system logs:', error);
       return [];
     }
+  }
+
+  static async getSystemHealth(): Promise<any[]> {
+    try {
+      const health = await this.runSystemChecks();
+      return health.map(item => ({
+        component: item.module,
+        status: item.status,
+        lastCheck: item.last_checked,
+        message: item.issue_summary || 'Operating normally'
+      }));
+    } catch (error) {
+      console.error('Failed to get system health:', error);
+      return [];
+    }
+  }
+
+  static async getLLMThreats(): Promise<LLMThreatMonitor[]> {
+    try {
+      // Use scan_results as mock LLM threat data
+      const { data, error } = await supabase
+        .from('scan_results')
+        .select('*')
+        .eq('threat_type', 'llm_threat')
+        .limit(10);
+
+      if (error) throw error;
+
+      return (data || []).map(item => ({
+        id: item.id,
+        entity_name: item.detected_entities?.[0] || 'Unknown Entity',
+        mention_type: item.severity || 'neutral',
+        vector_score: item.confidence_score / 100 || 0.5,
+        captured_response: item.content,
+        recorded_at: item.created_at
+      }));
+    } catch (error) {
+      console.error('Failed to get LLM threats:', error);
+      return [];
+    }
+  }
+
+  static async getGraveyardSimulations(): Promise<GraveyardSimulation[]> {
+    try {
+      // Use graveyard_simulations table if it exists, otherwise return mock data
+      const { data, error } = await supabase
+        .from('graveyard_simulations')
+        .select('*')
+        .limit(10);
+
+      if (error) {
+        // Return mock data if table doesn't exist
+        return [];
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error('Failed to get graveyard simulations:', error);
+      return [];
+    }
+  }
+
+  static async getLegalEscalations(): Promise<LegalEscalation[]> {
+    try {
+      // Return mock legal escalation data
+      return [];
+    } catch (error) {
+      console.error('Failed to get legal escalations:', error);
+      return [];
+    }
+  }
+
+  static getModuleName(module: string): string {
+    return ARIA_MODULES[module as keyof typeof ARIA_MODULES] || module;
   }
 
   static async emergencyShutdown(reason: string): Promise<boolean> {
