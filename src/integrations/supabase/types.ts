@@ -5218,22 +5218,28 @@ export type Database = {
         Row: {
           campaign_data: Json
           created_at: string
+          deployment_targets: string[] | null
           entity_name: string
           id: string
+          saturation_mode: string | null
           updated_at: string
         }
         Insert: {
           campaign_data?: Json
           created_at?: string
+          deployment_targets?: string[] | null
           entity_name: string
           id?: string
+          saturation_mode?: string | null
           updated_at?: string
         }
         Update: {
           campaign_data?: Json
           created_at?: string
+          deployment_targets?: string[] | null
           entity_name?: string
           id?: string
+          saturation_mode?: string | null
           updated_at?: string
         }
         Relationships: []

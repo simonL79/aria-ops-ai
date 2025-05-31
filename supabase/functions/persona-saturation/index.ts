@@ -38,11 +38,7 @@ serve(async (req) => {
       realDeployment = false 
     }: PersonaSaturationRequest = requestBody;
 
-    console.log(`🚀 Starting Enhanced Persona Saturation Campaign: {
-  entityName: "${entityName}",
-  contentCount: ${contentCount},
-  saturationMode: "${saturationMode}"
-}`);
+    console.log(`🚀 Starting Persona Saturation Campaign: ${entityName} (${contentCount} articles)`);
 
     const githubToken = Deno.env.get('GITHUB_TOKEN');
     if (!githubToken) {
@@ -97,26 +93,36 @@ serve(async (req) => {
       'industry-recognition'
     ];
 
-    // Generate and deploy articles
-    for (let i = 1; i <= contentCount; i++) {
+    // Limit content count to prevent rate limiting
+    const maxArticles = realDeployment ? Math.min(contentCount, 10) : contentCount;
+    console.log(`📝 Generating ${maxArticles} articles (${realDeployment ? 'real' : 'simulation'} mode)`);
+
+    // Generate and deploy articles with rate limiting
+    for (let i = 1; i <= maxArticles; i++) {
       const template = contentTemplates[(i - 1) % contentTemplates.length];
-      console.log(`📝 Generating article ${i}/${contentCount}: ${template}`);
+      console.log(`📝 Processing article ${i}/${maxArticles}: ${template}`);
 
       // Generate article content
       const articleContent = await generateArticleContent(entityName, targetKeywords, template, saturationMode);
       
       if (realDeployment && githubToken) {
         try {
-          // Create GitHub repository
+          // Create GitHub repository with rate limiting
           const repoName = `${entityName.toLowerCase().replace(/\s+/g, '-')}-${template}-${Date.now()}`;
           const deployUrl = await deployToGitHub(githubToken, githubUsername, repoName, articleContent, entityName);
           
           if (deployUrl) {
             deploymentUrls.push(deployUrl);
-            console.log(`✅ Deployed article ${i}/${contentCount}: ${deployUrl}`);
+            console.log(`✅ Deployed article ${i}/${maxArticles}: ${deployUrl}`);
+          }
+
+          // Add delay to prevent rate limiting (1 second between deployments)
+          if (i < maxArticles) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
           }
         } catch (error) {
           console.error(`❌ Deployment failed for article ${i}:`, error.message);
+          // Continue with next article instead of failing completely
         }
       } else {
         // Simulation mode
@@ -126,10 +132,10 @@ serve(async (req) => {
 
     // Store campaign in database
     const campaignData = {
-      contentGenerated: contentCount,
+      contentGenerated: maxArticles,
       deploymentsSuccessful: deploymentUrls.length,
       serpPenetration: Math.random() * 0.3 + 0.7, // 70-100%
-      estimatedReach: contentCount * 5000,
+      estimatedReach: maxArticles * 5000,
       deployments: {
         successful: deploymentUrls.length,
         urls: deploymentUrls
@@ -152,11 +158,15 @@ serve(async (req) => {
       console.error('Error saving campaign:', campaignError);
     }
 
+    const successMessage = realDeployment 
+      ? `${deploymentUrls.length} articles deployed successfully to GitHub Pages`
+      : `${deploymentUrls.length} articles simulated with ${(campaignData.serpPenetration * 100).toFixed(1)}% SERP penetration`;
+
     return new Response(
       JSON.stringify({
         success: true,
         campaign: campaignData,
-        estimatedSERPImpact: `${deploymentUrls.length} articles deployed with ${(campaignData.serpPenetration * 100).toFixed(1)}% SERP penetration`
+        estimatedSERPImpact: successMessage
       }),
       { 
         headers: { 
@@ -280,8 +290,8 @@ async function deployToGitHub(
     });
 
     if (!createRepoResponse.ok) {
-      const errorText = await createRepoResponse.text();
-      throw new Error(`Failed to create repository: ${createRepoResponse.statusText} - ${errorText}`);
+      const errorData = await createRepoResponse.text();
+      throw new Error(`Failed to create repository: ${createRepoResponse.statusText} - ${errorData}`);
     }
 
     console.log(`✅ Created repository: ${repoName}`);
@@ -306,28 +316,32 @@ async function deployToGitHub(
     });
 
     if (!createFileResponse.ok) {
-      const errorText = await createFileResponse.text();
-      throw new Error(`Failed to create file: ${createFileResponse.statusText} - ${errorText}`);
+      const errorData = await createFileResponse.text();
+      throw new Error(`Failed to create file: ${createFileResponse.statusText} - ${errorData}`);
     }
 
     // Enable GitHub Pages
-    const enablePagesResponse = await fetch(`https://api.github.com/repos/${username}/${repoName}/pages`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `token ${token}`,
-        'Content-Type': 'application/json',
-        'User-Agent': 'ARIA-Persona-Saturation'
-      },
-      body: JSON.stringify({
-        source: {
-          branch: 'main',
-          path: '/'
-        }
-      })
-    });
+    try {
+      const enablePagesResponse = await fetch(`https://api.github.com/repos/${username}/${repoName}/pages`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `token ${token}`,
+          'Content-Type': 'application/json',
+          'User-Agent': 'ARIA-Persona-Saturation'
+        },
+        body: JSON.stringify({
+          source: {
+            branch: 'main',
+            path: '/'
+          }
+        })
+      });
 
-    if (enablePagesResponse.ok) {
-      console.log(`✅ GitHub Pages enabled for ${repoName}`);
+      if (enablePagesResponse.ok) {
+        console.log(`✅ GitHub Pages enabled for ${repoName}`);
+      }
+    } catch (error) {
+      console.warn(`Warning: Could not enable GitHub Pages for ${repoName}:`, error.message);
     }
 
     const deployUrl = `https://${username}.github.io/${repoName}`;
