@@ -27,7 +27,7 @@ const AdminLoginGateway = ({ onComplete }: AdminLoginGatewayProps) => {
 
   const checkSystemStatus = async () => {
     try {
-      // Check if we can connect to the database
+      // Check if we can connect to the database using existing tables
       const { data, error } = await supabase
         .from('activity_logs')
         .select('id')
@@ -62,16 +62,16 @@ const AdminLoginGateway = ({ onComplete }: AdminLoginGatewayProps) => {
     setIsLoading(true);
 
     try {
-      const { data, error } = await signIn(email, password);
+      const result = await signIn(email, password);
       
-      if (error) {
-        await logAdminAction('login_failed', `Failed login attempt for ${email}: ${error.message}`);
-        toast.error('Login failed: ' + error.message);
+      if (result?.error) {
+        await logAdminAction('login_failed', `Failed login attempt for ${email}: ${result.error.message}`);
+        toast.error('Login failed: ' + result.error.message);
         onComplete(false);
         return;
       }
 
-      if (data?.user) {
+      if (result?.data?.user) {
         await logAdminAction('login_success', `Successful admin login for ${email}`);
         toast.success('Admin access granted');
         onComplete(true);
