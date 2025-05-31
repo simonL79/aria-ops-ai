@@ -14,7 +14,8 @@ import {
   TrendingUp,
   Copy,
   Share2,
-  BarChart3
+  BarChart3,
+  AlertTriangle
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -149,6 +150,23 @@ const PersonaSaturationReports = () => {
 
   return (
     <div className="space-y-6">
+      {/* Simulation Notice */}
+      <Card className="border-yellow-200 bg-yellow-50">
+        <CardHeader>
+          <CardTitle className="text-yellow-800 flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5" />
+            Simulation Mode Active
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-yellow-800 space-y-2 text-sm">
+            <p><strong>Demo Content:</strong> The URLs shown below are simulated for demonstration purposes</p>
+            <p><strong>Actual Deployment:</strong> Real deployment would require GitHub repository setup and hosting configuration</p>
+            <p><strong>Campaign Results:</strong> Metrics represent potential outcomes based on content generation simulation</p>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Campaign Overview */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
@@ -162,7 +180,7 @@ const PersonaSaturationReports = () => {
             <div className="text-2xl font-bold text-blue-600">
               {selectedReport?.successfulDeployments || 0}
             </div>
-            <p className="text-xs text-muted-foreground">Successfully deployed</p>
+            <p className="text-xs text-muted-foreground">Simulated deployments</p>
           </CardContent>
         </Card>
 
@@ -177,7 +195,7 @@ const PersonaSaturationReports = () => {
             <div className="text-2xl font-bold text-green-600">
               {selectedReport?.serpPenetration || 0}%
             </div>
-            <p className="text-xs text-muted-foreground">Search visibility</p>
+            <p className="text-xs text-muted-foreground">Projected visibility</p>
           </CardContent>
         </Card>
 
@@ -273,7 +291,7 @@ const PersonaSaturationReports = () => {
                               {article.title}
                             </div>
                             <div className="text-xs text-gray-500">
-                              {article.contentType.replace('_', ' ')}
+                              {article.contentType.replace('_', ' ')} (Demo)
                             </div>
                           </div>
                         </td>
@@ -288,12 +306,13 @@ const PersonaSaturationReports = () => {
                         <td className="p-3">
                           <Badge 
                             className={`text-xs ${
-                              article.status === 'live' ? 'bg-green-100 text-green-800' :
+                              article.status === 'live' ? 'bg-blue-100 text-blue-800' :
+                              article.status === 'simulated' ? 'bg-purple-100 text-purple-800' :
                               article.status === 'indexing' ? 'bg-yellow-100 text-yellow-800' :
                               'bg-gray-100 text-gray-800'
                             }`}
                           >
-                            {article.status}
+                            {article.status === 'simulated' ? 'Demo' : article.status}
                           </Badge>
                         </td>
                         <td className="p-3">
@@ -306,7 +325,10 @@ const PersonaSaturationReports = () => {
                             <Button
                               size="sm"
                               variant="ghost"
-                              onClick={() => window.open(article.url, '_blank')}
+                              onClick={() => {
+                                toast.info('This is a simulated URL for demonstration purposes');
+                              }}
+                              title="Simulated URL - Demo only"
                             >
                               <ExternalLink className="h-3 w-3" />
                             </Button>
@@ -315,7 +337,7 @@ const PersonaSaturationReports = () => {
                               variant="ghost"
                               onClick={() => {
                                 navigator.clipboard.writeText(article.url);
-                                toast.success('URL copied');
+                                toast.success('Demo URL copied');
                               }}
                             >
                               <Copy className="h-3 w-3" />
@@ -330,7 +352,7 @@ const PersonaSaturationReports = () => {
             </div>
 
             <div className="text-sm text-gray-500 text-center">
-              Showing {filteredArticles.length} of {selectedReport?.articles.length || 0} articles
+              Showing {filteredArticles.length} of {selectedReport?.articles.length || 0} simulated articles
             </div>
           </div>
         </CardContent>
@@ -339,7 +361,7 @@ const PersonaSaturationReports = () => {
       {/* Analytics Preview */}
       <Card>
         <CardHeader>
-          <CardTitle>Performance Analytics</CardTitle>
+          <CardTitle>Performance Analytics (Simulation)</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -348,19 +370,19 @@ const PersonaSaturationReports = () => {
                 <div className="text-2xl font-bold text-green-600">
                   {filteredArticles.filter(a => a.serpPosition && a.serpPosition <= 10).length}
                 </div>
-                <div className="text-sm text-green-700">First Page Results</div>
+                <div className="text-sm text-green-700">Projected First Page</div>
               </div>
               <div className="text-center p-4 bg-blue-50 rounded-lg">
                 <div className="text-2xl font-bold text-blue-600">
                   {filteredArticles.filter(a => a.serpPosition && a.serpPosition <= 3).length}
                 </div>
-                <div className="text-sm text-blue-700">Top 3 Positions</div>
+                <div className="text-sm text-blue-700">Projected Top 3</div>
               </div>
               <div className="text-center p-4 bg-purple-50 rounded-lg">
                 <div className="text-2xl font-bold text-purple-600">
                   {Math.round((filteredArticles.reduce((sum, a) => sum + (a.views || 0), 0) / 1000))}K
                 </div>
-                <div className="text-sm text-purple-700">Total Views</div>
+                <div className="text-sm text-purple-700">Estimated Views</div>
               </div>
             </div>
           </div>

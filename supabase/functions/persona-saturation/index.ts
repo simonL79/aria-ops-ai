@@ -89,15 +89,16 @@ serve(async (req) => {
       failed: contentPieces.length - successfulDeployments,
       deployments: contentPieces.slice(0, successfulDeployments).map((piece, index) => ({
         platform: deploymentTargets[index % deploymentTargets.length] || 'github-pages',
-        url: generateArticleUrl(entityName, piece, index),
+        url: generateSimulatedUrl(entityName, piece, index),
         contentId: piece.id,
         title: piece.title,
         keyword: piece.keyword,
         contentType: piece.type,
         deployed_at: new Date().toISOString(),
-        status: 'live',
+        status: 'simulated',
         serpPosition: Math.floor(Math.random() * 100) + 1,
-        estimatedViews: Math.floor(Math.random() * 1000) + 50
+        estimatedViews: Math.floor(Math.random() * 1000) + 50,
+        note: 'Simulated deployment - URLs are demonstration only'
       }))
     };
 
@@ -111,7 +112,7 @@ serve(async (req) => {
         keyword,
         query: `${entityName} ${keyword}`,
         resultsFound: Math.min(10, Math.floor(successfulDeployments / targetKeywords.length) + Math.floor(Math.random() * 3)),
-        topResult: `https://${entityName.toLowerCase().replace(/\s+/g, '-')}.github.io/${keyword.replace(/\s+/g, '-')}`
+        topResult: `Simulated: ${entityName.toLowerCase().replace(/\s+/g, '-')}-${keyword.replace(/\s+/g, '-')}.demo`
       }))
     };
 
@@ -128,7 +129,8 @@ serve(async (req) => {
           mode: saturationMode,
           keywords: targetKeywords,
           requestedCount: contentCount,
-          actualCount: actualContentCount
+          actualCount: actualContentCount,
+          note: 'Simulated deployment for demonstration'
         },
         success: true
       });
@@ -146,7 +148,8 @@ serve(async (req) => {
           serpPenetration: serpResults.penetrationRate,
           mode: saturationMode,
           keywords: targetKeywords,
-          articles: deploymentResults.deployments
+          articles: deploymentResults.deployments,
+          note: 'Simulated deployment - URLs are for demonstration purposes only'
         },
         created_at: new Date().toISOString()
       });
@@ -165,16 +168,18 @@ serve(async (req) => {
       },
       estimatedSERPImpact: calculateSERPImpact(deploymentResults, actualContentCount),
       nextSteps: [
-        'Content deployed across multiple platforms',
-        `${successfulDeployments} sites created and configured`,
-        'SEO optimization applied to all content',
-        'SERP monitoring activated',
-        'Expected visibility improvement: 48-72 hours'
-      ]
+        'Content simulation completed across multiple platforms',
+        `${successfulDeployments} simulated sites created and configured`,
+        'SEO optimization applied to all content templates',
+        'SERP monitoring activated for simulation',
+        'Expected visibility improvement: 48-72 hours (simulated)',
+        'Note: URLs are simulated for demonstration - actual deployment requires GitHub setup'
+      ],
+      note: 'This is a simulation of the persona saturation process. Actual deployment would require proper GitHub repository setup and hosting configuration.'
     };
 
-    console.log('✅ Persona Saturation completed successfully');
-    console.log(`Generated ${contentPieces.length} articles, deployed ${successfulDeployments}`);
+    console.log('✅ Persona Saturation simulation completed successfully');
+    console.log(`Generated ${contentPieces.length} articles, simulated ${successfulDeployments} deployments`);
 
     return new Response(
       JSON.stringify(response),
@@ -286,17 +291,22 @@ function generateHTML(title: string, entityName: string, keyword: string, mode: 
         .meta { color: #666; font-size: 0.9em; margin-bottom: 20px; }
         .content { margin-top: 20px; }
         p { margin-bottom: 15px; }
+        .simulation-notice { background: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; margin: 20px 0; border-radius: 5px; }
     </style>
 </head>
 <body>
+    <div class="simulation-notice">
+        <strong>Demo Content:</strong> This is a simulated article for demonstration purposes.
+    </div>
     <article>
         <h1>${title}</h1>
-        <div class="meta">Published: ${new Date().toLocaleDateString()} | Professional Analysis</div>
+        <div class="meta">Published: ${new Date().toLocaleDateString()} | Professional Analysis (Simulated)</div>
         <div class="content">
             <p>${entityName} has established itself as a leading authority in the ${keyword} sector, demonstrating ${intensity} expertise and innovative approaches.</p>
             <p>Through careful analysis of industry trends and market dynamics, ${entityName} continues to set benchmarks for excellence in ${keyword} practices.</p>
             <p>The ${intensity} track record of ${entityName} in ${keyword} reflects a commitment to quality, innovation, and professional standards that benefit the entire industry.</p>
             <p>Industry experts consistently recognize ${entityName} for its contributions to ${keyword} advancement and thought leadership.</p>
+            <p><em>Note: This is demonstration content created for persona saturation simulation purposes.</em></p>
         </div>
     </article>
 </body>
@@ -304,37 +314,37 @@ function generateHTML(title: string, entityName: string, keyword: string, mode: 
 }
 
 function generateSEOData(entityName: string, keyword: string, title: string): any {
-  const description = `${entityName} demonstrates professional excellence in ${keyword}. Comprehensive analysis and industry insights.`;
-  const keywords = [entityName, keyword, 'industry leader', 'expertise', 'professional'].join(', ');
+  const description = `${entityName} demonstrates professional excellence in ${keyword}. Comprehensive analysis and industry insights. (Demonstration content)`;
+  const keywords = [entityName, keyword, 'industry leader', 'expertise', 'professional', 'demo'].join(', ');
   
   return { 
     description, 
     keywords, 
-    schemaMarkup: `<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"${title}","about":"${entityName}","keywords":"${keywords}","datePublished":"${new Date().toISOString()}"}</script>`
+    schemaMarkup: `<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"${title}","about":"${entityName}","keywords":"${keywords}","datePublished":"${new Date().toISOString()}","isPartOf":"Demo Content"}</script>`
   };
 }
 
 function calculateSERPImpact(deploymentResults: any, contentCount: number): string {
   const successRate = deploymentResults.successful / Math.max(deploymentResults.successful + deploymentResults.failed, 1);
   
-  if (successRate > 0.8 && deploymentResults.successful > 400) return '90-95% SERP improvement expected';
-  if (successRate > 0.8 && deploymentResults.successful > 200) return '85-95% SERP improvement expected';
-  if (successRate > 0.8) return '75-85% SERP improvement expected';
-  if (successRate > 0.6) return '65-80% SERP improvement expected';
-  if (successRate > 0.4) return '45-65% SERP improvement expected';
-  return '25-45% SERP improvement expected';
+  if (successRate > 0.8 && deploymentResults.successful > 400) return '90-95% SERP improvement expected (simulated)';
+  if (successRate > 0.8 && deploymentResults.successful > 200) return '85-95% SERP improvement expected (simulated)';
+  if (successRate > 0.8) return '75-85% SERP improvement expected (simulated)';
+  if (successRate > 0.6) return '65-80% SERP improvement expected (simulated)';
+  if (successRate > 0.4) return '45-65% SERP improvement expected (simulated)';
+  return '25-45% SERP improvement expected (simulated)';
 }
 
-function generateArticleUrl(entityName: string, piece: any, index: number): string {
+function generateSimulatedUrl(entityName: string, piece: any, index: number): string {
   const cleanEntityName = entityName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
   const cleanKeyword = piece.keyword.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
   
-  // Generate different URL patterns for different platforms
+  // Generate realistic but clearly simulated URL patterns
   const platforms = [
-    `https://${cleanEntityName}-${cleanKeyword}-${index + 1}.github.io`,
-    `https://${cleanEntityName}-${index + 1}.netlify.app/${cleanKeyword}`,
-    `https://telegra.ph/${cleanEntityName}-${cleanKeyword}-${Date.now()}`,
-    `https://${cleanEntityName}-articles.vercel.app/${cleanKeyword}-${index + 1}`
+    `https://demo.aria-persona-sim.com/${cleanEntityName}/${cleanKeyword}-${index + 1}`,
+    `https://simulation.persona-saturation.demo/${cleanEntityName}-${index + 1}`,
+    `https://${cleanEntityName}-${cleanKeyword}.aria-demo.site`,
+    `https://persona-sim.aria.systems/${cleanEntityName}/${cleanKeyword}-${Date.now()}`
   ];
   
   return platforms[index % platforms.length];
