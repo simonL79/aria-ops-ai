@@ -142,14 +142,15 @@ export const useDashboardData = () => {
     try {
       const items = await fetchActionItems();
       
-      // Convert ActionItem[] to ContentAction[]
+      // Convert ActionItem[] to ContentAction[] with correct status mapping
       const contentActions: ContentAction[] = items.map((item: ActionItem) => ({
         id: item.id,
         title: item.title,
         description: item.description,
         priority: item.priority,
-        status: item.status,
-        type: 'urgent' as const, // Map to valid type
+        status: item.status === 'in_progress' ? 'pending' : 
+                item.status === 'completed' ? 'completed' : 'failed',
+        type: 'urgent' as const,
         platform: 'system' as const,
         timestamp: item.created_at
       }));

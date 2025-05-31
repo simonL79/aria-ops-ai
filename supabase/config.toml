@@ -1,10 +1,10 @@
 
-project_id = "gqllutqjnwqavxtffdhd"
+project_id = "ssvskbejfacmjemphmry"
 
 [api]
 enabled = true
 port = 54321
-schemas = ["public", "storage", "graphql_public"]
+schemas = ["public", "graphql_public"]
 extra_search_path = ["public", "extensions"]
 max_rows = 1000
 
@@ -23,175 +23,26 @@ pop3_port = 54326
 
 [storage]
 enabled = true
-port = 54325
+port = 54327
 file_size_limit = "50MiB"
 
 [auth]
 enabled = true
-port = 54326
-site_url = "https://reputationmgmt.lovableproject.com"
-additional_redirect_urls = ["https://reputationmgmt.lovableproject.com"]
+port = 54328
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["https://localhost:3000"]
+jwt_expiry = 3600
+refresh_token_rotation_enabled = true
+security_update_password_require_reauthentication = true
 
-[auth.email]
-enable_signup = true
-double_confirm_changes = true
-enable_confirmations = false
-
-[functions.persona-saturation]
+[functions.anubis-memory-store]
 verify_jwt = false
 
-[functions.monitoring-scan]
+[functions.anubis-memory-recall]
 verify_jwt = false
 
-[functions.enhanced-intelligence]
+[functions.anubis-pattern-store]
 verify_jwt = false
 
-[functions.discovery-scanner]
-verify_jwt = false
-
-[functions.google-search-crawler]
-verify_jwt = false
-
-[functions.generate-response]
-verify_jwt = false
-
-[functions.executive-reports]
-verify_jwt = false
-
-[functions.health-check]
-verify_jwt = false
-
-[functions.aria-ingest]
-verify_jwt = false
-
-[functions.entity-recognition]
-verify_jwt = false
-
-[functions.threat-classification]
-verify_jwt = false
-
-[functions.evidence-report-generator]
-verify_jwt = false
-
-[functions.contact-discovery]
-verify_jwt = false
-
-[functions.headless-scraper]
-verify_jwt = false
-
-[functions.companies-house-scan]
-verify_jwt = false
-
-[functions.reddit-scan]
-verify_jwt = false
-
-[functions.reputation-scan]
-verify_jwt = false
-
-[functions.rss-scraper]
-verify_jwt = false
-
-[functions.generate-outreach]
-verify_jwt = false
-
-[functions.send-influencer-email]
-verify_jwt = false
-
-[functions.send-outreach-email]
-verify_jwt = false
-
-[functions.process-voice-command]
-verify_jwt = false
-
-[functions.aria-scraper]
-verify_jwt = false
-
-[functions.recursive-ai-scanner]
-verify_jwt = false
-
-[functions.radar-news-scan]
-verify_jwt = false
-
-[functions.founder-reputation-scan]
-verify_jwt = false
-
-[functions.rsi-threat-simulator]
-verify_jwt = false
-
-[functions.intelligence-workbench]
-verify_jwt = false
-
-[functions.offensive-operations]
-verify_jwt = false
-
-[functions.anubis-engine]
-verify_jwt = false
-
-[functions.anubis-validator]
-verify_jwt = false
-
-[functions.aria-hypercore-dispatch]
-verify_jwt = false
-
-[functions.creeper-agent]
-verify_jwt = false
-
-[functions.process-threat-ingestion]
-verify_jwt = false
-
-[functions.scrape-and-enrich-threat]
-verify_jwt = false
-
-[functions.column_exists]
-verify_jwt = false
-
-[functions.execute-batch-strikes]
-verify_jwt = false
-
-[functions.execute-response]
-verify_jwt = false
-
-[functions.fixpath-ai]
-verify_jwt = false
-
-[functions.import-medium-posts]
-verify_jwt = false
-
-[functions.get-prospect-entities]
-verify_jwt = false
-
-[functions.send-influencer-dm]
-verify_jwt = false
-
-[functions.companies-house-daily-import]
-verify_jwt = false
-
-[functions.companies-house-scanner]
-verify_jwt = false
-
-[functions.create-checkout]
-verify_jwt = false
-
-[functions.email-digest]
-verify_jwt = false
-
-[functions.generate-rss]
-verify_jwt = false
-
-[functions.serp-monitor]
-verify_jwt = false
-
-[functions.sigmalive]
-verify_jwt = false
-
-[functions.slack-alert]
-verify_jwt = false
-
-[functions.submit-contact]
-verify_jwt = false
-
-[functions.system-health-monitor]
-verify_jwt = false
-
-[functions.zero-day-scanner]
+[functions.anubis-escalation-check]
 verify_jwt = false
