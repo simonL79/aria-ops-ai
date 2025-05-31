@@ -120,7 +120,7 @@ class EmergencyStrikeService {
     }
   }
 
-  async cancelThreat(threatId: string, reason: string): Promise<boolean> => {
+  async cancelThreat(threatId: string, reason: string): Promise<boolean> {
     try {
       console.log('Cancelling threat (simulated):', { threatId, reason });
       toast.success('Threat cancelled successfully (simulated)');
@@ -132,7 +132,7 @@ class EmergencyStrikeService {
     }
   }
 
-  async getEmergencyThreats(): Promise<EmergencyThreat[]> => {
+  async getEmergencyThreats(): Promise<EmergencyThreat[]> {
     try {
       // Return empty array for now since table doesn't exist yet
       console.log('Emergency threats not available - table not yet created');
@@ -143,7 +143,7 @@ class EmergencyStrikeService {
     }
   }
 
-  async getStrikePlans(threatId?: string): Promise<StrikePlan[]> => {
+  async getStrikePlans(threatId?: string): Promise<StrikePlan[]> {
     try {
       // Return empty array for now since table doesn't exist yet
       console.log('Strike plans not available - table not yet created');
@@ -154,7 +154,7 @@ class EmergencyStrikeService {
     }
   }
 
-  async getAdminDecisions(): Promise<AdminDecision[]> => {
+  async getAdminDecisions(): Promise<AdminDecision[]> {
     try {
       // Return empty array for now since table doesn't exist yet
       console.log('Admin decisions not available - table not yet created');
@@ -165,7 +165,7 @@ class EmergencyStrikeService {
     }
   }
 
-  async getActionLogs(): Promise<ActionLog[]> => {
+  async getActionLogs(): Promise<ActionLog[]> {
     try {
       // Return empty array for now since table doesn't exist yet
       console.log('Action logs not available - table not yet created');
@@ -177,7 +177,7 @@ class EmergencyStrikeService {
   }
 
   // Emergency simulation for testing
-  async simulateEmergencyThreat(): Promise<void> => {
+  async simulateEmergencyThreat(): Promise<void> {
     const emergencyThreats = [
       {
         description: 'High-volume coordinated deepfake campaign targeting executive reputation',
