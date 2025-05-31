@@ -9,50 +9,62 @@ import { Shield, Search, AlertTriangle, TrendingUp, Users, Globe, Target, Brain,
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-interface ThreatData {
+interface GenesisEntity {
   id: string;
-  entity_name: string;
-  threat_content: string;
-  platform: string;
-  severity: string;
-  confidence_score: number;
+  full_name: string;
+  aliases: string[];
+  primary_industry: string;
+  risk_profile: string;
+  discovery_source: string;
   created_at: string;
+  is_guarded: boolean;
+}
+
+interface ThreatReport {
+  id: string;
+  entity_id: string;
+  threat_summary: string;
+  threat_level: string;
+  sentiment_score: number;
+  evidence_links: string[];
+  report_generated_at: string;
 }
 
 const GenesisSentinelPanel = () => {
   const [activeTab, setActiveTab] = useState('discovery');
   const [targetEntity, setTargetEntity] = useState('');
   const [isScanning, setIsScanning] = useState(false);
-  const [threats, setThreats] = useState<ThreatData[]>([]);
-  const [scanResults, setScanResults] = useState<any[]>([]);
+  const [entities, setEntities] = useState<GenesisEntity[]>([]);
+  const [threatReports, setThreatReports] = useState<ThreatReport[]>([]);
 
   useEffect(() => {
-    loadExistingThreats();
+    loadGenesisData();
   }, []);
 
-  const loadExistingThreats = async () => {
+  const loadGenesisData = async () => {
     try {
-      const { data, error } = await supabase
-        .from('scan_results')
+      // Load entities
+      const { data: entitiesData, error: entitiesError } = await supabase
+        .from('genesis_entities')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(10);
 
-      if (error) throw error;
+      if (entitiesError) throw entitiesError;
+      setEntities(entitiesData || []);
 
-      const threatData: ThreatData[] = (data || []).map(item => ({
-        id: item.id,
-        entity_name: targetEntity || 'Unknown Entity',
-        threat_content: item.content || 'Threat content',
-        platform: item.platform || 'Unknown',
-        severity: item.severity || 'medium',
-        confidence_score: item.confidence_score || 75,
-        created_at: item.created_at
-      }));
+      // Load threat reports
+      const { data: reportsData, error: reportsError } = await supabase
+        .from('genesis_threat_reports')
+        .select('*')
+        .order('report_generated_at', { ascending: false })
+        .limit(10);
 
-      setThreats(threatData);
+      if (reportsError) throw reportsError;
+      setThreatReports(reportsData || []);
+
     } catch (error) {
-      console.error('Error loading threats:', error);
+      console.error('Error loading Genesis data:', error);
     }
   };
 
@@ -64,35 +76,71 @@ const GenesisSentinelPanel = () => {
 
     setIsScanning(true);
     try {
-      // Log the discovery action
-      await supabase.from('activity_logs').insert({
-        action: 'genesis_discovery_scan',
-        details: `Entity discovery scan initiated for: ${targetEntity}`,
-        entity_type: 'genesis_sentinel'
-      });
+      // Create or find entity
+      let entityId: string;
+      const { data: existingEntity } = await supabase
+        .from('genesis_entities')
+        .select('id')
+        .eq('full_name', targetEntity)
+        .single();
 
-      // Simulate scanning process
+      if (existingEntity) {
+        entityId = existingEntity.id;
+      } else {
+        const { data: newEntity, error: entityError } = await supabase
+          .from('genesis_entities')
+          .insert({
+            full_name: targetEntity,
+            discovery_source: 'manual_discovery',
+            risk_profile: 'unknown'
+          })
+          .select()
+          .single();
+
+        if (entityError) throw entityError;
+        entityId = newEntity.id;
+      }
+
+      // Simulate discovery process - in production this would call actual OSINT APIs
       await new Promise(resolve => setTimeout(resolve, 3000));
 
-      // Get recent scan results
-      const { data, error } = await supabase
+      // Get recent scan results that might relate to this entity
+      const { data: scanResults, error: scanError } = await supabase
         .from('scan_results')
         .select('*')
+        .ilike('content', `%${targetEntity}%`)
         .order('created_at', { ascending: false })
         .limit(5);
 
-      if (error) throw error;
+      if (scanError) throw scanError;
 
-      setScanResults(data || []);
-      toast.success(`Genesis Sentinel scan completed for ${targetEntity}`);
+      // Create threat reports from scan results
+      if (scanResults && scanResults.length > 0) {
+        for (const result of scanResults) {
+          await supabase
+            .from('genesis_threat_reports')
+            .insert({
+              entity_id: entityId,
+              threat_summary: `Threat detected: ${result.content?.substring(0, 200)}...`,
+              threat_level: result.severity || 'low',
+              sentiment_score: result.sentiment || 0,
+              evidence_links: [result.url || ''].filter(Boolean)
+            });
+        }
+      }
+
+      toast.success(`Genesis Sentinel discovery completed for ${targetEntity}`);
       
-      // Create threat notification
+      // Create notification
       await supabase.from('aria_notifications').insert({
         event_type: 'genesis_discovery',
         entity_name: targetEntity,
-        summary: `Genesis Sentinel discovered ${data?.length || 0} potential threats`,
+        summary: `Genesis Sentinel discovered ${scanResults?.length || 0} potential threats`,
         priority: 'high'
       });
+
+      // Reload data
+      await loadGenesisData();
 
     } catch (error) {
       console.error('Error running Genesis discovery:', error);
@@ -104,6 +152,16 @@ const GenesisSentinelPanel = () => {
 
   const generateResponsePlan = async (threatId: string, responseType: 'soft' | 'hard' | 'nuclear') => {
     try {
+      const threat = threatReports.find(t => t.id === threatId);
+      if (!threat) return;
+
+      await supabase.from('genesis_response_log').insert({
+        entity_id: threat.entity_id,
+        response_type: responseType,
+        action_summary: `${responseType.toUpperCase()} response plan generated for threat: ${threat.threat_summary.substring(0, 100)}`,
+        deployed_by: 'genesis_sentinel'
+      });
+
       await supabase.from('activity_logs').insert({
         action: 'response_plan_generated',
         details: `${responseType} response plan generated for threat ${threatId}`,
@@ -118,13 +176,13 @@ const GenesisSentinelPanel = () => {
   };
 
   return (
-    <Card className="corporate-card">
+    <Card className="bg-corporate-darkTertiary border-corporate-border">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 corporate-heading">
-          <Shield className="h-5 w-5 text-corporate-accent" />
+        <CardTitle className="flex items-center gap-2 text-corporate-accent">
+          <Shield className="h-5 w-5" />
           Genesis Sentinel Early Warning System
         </CardTitle>
-        <p className="text-sm corporate-subtext">
+        <p className="text-sm text-corporate-lightGray">
           Proactive intelligence platform for threat detection and prospect identification
         </p>
       </CardHeader>
@@ -159,7 +217,7 @@ const GenesisSentinelPanel = () => {
                 placeholder="Enter target entity (person, company, brand)"
                 value={targetEntity}
                 onChange={(e) => setTargetEntity(e.target.value)}
-                className="flex-1"
+                className="flex-1 bg-corporate-darkSecondary border-corporate-border text-white"
               />
               <Button
                 onClick={runGenesisDiscovery}
@@ -171,48 +229,52 @@ const GenesisSentinelPanel = () => {
               </Button>
             </div>
 
-            {scanResults.length > 0 && (
+            {threatReports.length > 0 && (
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-white">Discovery Results</h3>
-                {scanResults.map((result) => (
-                  <Card key={result.id} className="bg-corporate-darkSecondary border-corporate-border">
+                <h3 className="text-lg font-semibold text-white">Recent Threat Reports</h3>
+                {threatReports.map((report) => (
+                  <Card key={report.id} className="bg-corporate-darkSecondary border-corporate-border">
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
-                            <Badge className="bg-corporate-accent text-black">
-                              {result.platform || 'Unknown'}
+                            <Badge className={`${
+                              report.threat_level === 'critical' ? 'bg-red-600' :
+                              report.threat_level === 'high' ? 'bg-orange-600' :
+                              report.threat_level === 'moderate' ? 'bg-yellow-600' :
+                              'bg-blue-600'
+                            } text-white`}>
+                              {report.threat_level?.toUpperCase()}
                             </Badge>
-                            <Badge variant={result.severity === 'high' ? 'destructive' : 'secondary'}>
-                              {result.severity || 'medium'}
+                            <Badge variant="outline" className="border-corporate-border text-corporate-lightGray">
+                              Sentiment: {(report.sentiment_score * 100).toFixed(0)}%
                             </Badge>
                           </div>
                           <p className="text-corporate-lightGray text-sm mb-2">
-                            {result.content || 'Threat content not available'}
+                            {report.threat_summary}
                           </p>
                           <p className="text-xs text-corporate-subtext">
-                            Confidence: {result.confidence_score || 75}% | 
-                            Found: {new Date(result.created_at).toLocaleString()}
+                            Generated: {new Date(report.report_generated_at).toLocaleString()}
                           </p>
                         </div>
                         <div className="flex flex-col gap-2">
                           <Button
                             size="sm"
-                            onClick={() => generateResponsePlan(result.id, 'soft')}
+                            onClick={() => generateResponsePlan(report.id, 'soft')}
                             className="bg-green-600 hover:bg-green-700 text-xs"
                           >
                             Soft Response
                           </Button>
                           <Button
                             size="sm"
-                            onClick={() => generateResponsePlan(result.id, 'hard')}
+                            onClick={() => generateResponsePlan(report.id, 'hard')}
                             className="bg-yellow-600 hover:bg-yellow-700 text-xs"
                           >
                             Hard Response
                           </Button>
                           <Button
                             size="sm"
-                            onClick={() => generateResponsePlan(result.id, 'nuclear')}
+                            onClick={() => generateResponsePlan(report.id, 'nuclear')}
                             className="bg-red-600 hover:bg-red-700 text-xs"
                           >
                             Nuclear Response
@@ -236,7 +298,7 @@ const GenesisSentinelPanel = () => {
                       <TrendingUp className="h-4 w-4 text-corporate-accent" />
                       <span className="text-white font-medium">Threat Trending</span>
                     </div>
-                    <p className="text-2xl font-bold text-corporate-accent">{threats.length}</p>
+                    <p className="text-2xl font-bold text-corporate-accent">{threatReports.length}</p>
                     <p className="text-xs text-corporate-subtext">Active threats monitored</p>
                   </CardContent>
                 </Card>
@@ -247,7 +309,7 @@ const GenesisSentinelPanel = () => {
                       <span className="text-white font-medium">High Risk</span>
                     </div>
                     <p className="text-2xl font-bold text-yellow-400">
-                      {threats.filter(t => t.severity === 'high').length}
+                      {threatReports.filter(t => ['high', 'critical'].includes(t.threat_level)).length}
                     </p>
                     <p className="text-xs text-corporate-subtext">Require immediate attention</p>
                   </CardContent>

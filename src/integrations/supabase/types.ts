@@ -1607,6 +1607,229 @@ export type Database = {
           },
         ]
       }
+      genesis_articles: {
+        Row: {
+          article_title: string
+          article_url: string
+          entity_id: string | null
+          id: string
+          is_live: boolean
+          platform: string
+          published_at: string | null
+          verified_live: boolean | null
+        }
+        Insert: {
+          article_title: string
+          article_url: string
+          entity_id?: string | null
+          id?: string
+          is_live?: boolean
+          platform: string
+          published_at?: string | null
+          verified_live?: boolean | null
+        }
+        Update: {
+          article_title?: string
+          article_url?: string
+          entity_id?: string | null
+          id?: string
+          is_live?: boolean
+          platform?: string
+          published_at?: string | null
+          verified_live?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "genesis_articles_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "genesis_entities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      genesis_entities: {
+        Row: {
+          aliases: string[] | null
+          created_at: string | null
+          discovery_source: string | null
+          full_name: string
+          id: string
+          is_guarded: boolean | null
+          primary_industry: string | null
+          risk_profile: string | null
+        }
+        Insert: {
+          aliases?: string[] | null
+          created_at?: string | null
+          discovery_source?: string | null
+          full_name: string
+          id?: string
+          is_guarded?: boolean | null
+          primary_industry?: string | null
+          risk_profile?: string | null
+        }
+        Update: {
+          aliases?: string[] | null
+          created_at?: string | null
+          discovery_source?: string | null
+          full_name?: string
+          id?: string
+          is_guarded?: boolean | null
+          primary_industry?: string | null
+          risk_profile?: string | null
+        }
+        Relationships: []
+      }
+      genesis_guardian_log: {
+        Row: {
+          check_type: string | null
+          entity_id: string | null
+          escalation_level: string | null
+          findings: string | null
+          id: string
+          triggered_at: string | null
+        }
+        Insert: {
+          check_type?: string | null
+          entity_id?: string | null
+          escalation_level?: string | null
+          findings?: string | null
+          id?: string
+          triggered_at?: string | null
+        }
+        Update: {
+          check_type?: string | null
+          entity_id?: string | null
+          escalation_level?: string | null
+          findings?: string | null
+          id?: string
+          triggered_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "genesis_guardian_log_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "genesis_entities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      genesis_legal_documents: {
+        Row: {
+          document_text: string
+          document_type: string | null
+          entity_id: string | null
+          generated_at: string | null
+          id: string
+          pdf_url: string | null
+        }
+        Insert: {
+          document_text: string
+          document_type?: string | null
+          entity_id?: string | null
+          generated_at?: string | null
+          id?: string
+          pdf_url?: string | null
+        }
+        Update: {
+          document_text?: string
+          document_type?: string | null
+          entity_id?: string | null
+          generated_at?: string | null
+          id?: string
+          pdf_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "genesis_legal_documents_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "genesis_entities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      genesis_response_log: {
+        Row: {
+          action_summary: string
+          deployed_at: string | null
+          deployed_by: string | null
+          entity_id: string | null
+          id: string
+          outcome: string | null
+          response_type: string | null
+        }
+        Insert: {
+          action_summary: string
+          deployed_at?: string | null
+          deployed_by?: string | null
+          entity_id?: string | null
+          id?: string
+          outcome?: string | null
+          response_type?: string | null
+        }
+        Update: {
+          action_summary?: string
+          deployed_at?: string | null
+          deployed_by?: string | null
+          entity_id?: string | null
+          id?: string
+          outcome?: string | null
+          response_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "genesis_response_log_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "genesis_entities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      genesis_threat_reports: {
+        Row: {
+          entity_id: string | null
+          evidence_links: string[]
+          id: string
+          is_live: boolean
+          report_generated_at: string | null
+          sentiment_score: number | null
+          threat_level: string | null
+          threat_summary: string
+        }
+        Insert: {
+          entity_id?: string | null
+          evidence_links: string[]
+          id?: string
+          is_live?: boolean
+          report_generated_at?: string | null
+          sentiment_score?: number | null
+          threat_level?: string | null
+          threat_summary: string
+        }
+        Update: {
+          entity_id?: string | null
+          evidence_links?: string[]
+          id?: string
+          is_live?: boolean
+          report_generated_at?: string | null
+          sentiment_score?: number | null
+          threat_level?: string | null
+          threat_summary?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "genesis_threat_reports_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "genesis_entities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       graveyard_legacy_posts: {
         Row: {
           content_snippet: string | null
