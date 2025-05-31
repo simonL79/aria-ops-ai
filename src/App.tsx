@@ -16,6 +16,8 @@ import PricingPage from "./pages/PricingPage";
 import BlogPage from "./pages/BlogPage";
 import SimonLindsayPage from "./pages/SimonLindsayPage";
 import ContactPage from "./pages/ContactPage";
+import SentinelPage from "./pages/admin/SentinelPage";
+import WatchtowerPage from "./pages/admin/WatchtowerPage";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +41,22 @@ function App() {
                 element={
                   <AdminGuard>
                     <DashboardPage />
+                  </AdminGuard>
+                } 
+              />
+              <Route 
+                path="/admin/sentinel" 
+                element={
+                  <AdminGuard>
+                    <SentinelPage />
+                  </AdminGuard>
+                } 
+              />
+              <Route 
+                path="/admin/watchtower" 
+                element={
+                  <AdminGuard>
+                    <WatchtowerPage />
                   </AdminGuard>
                 } 
               />
