@@ -1,3 +1,4 @@
+
 import React from 'react';
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import LiveDataGuard from "@/components/dashboard/LiveDataGuard";
@@ -9,7 +10,7 @@ import { useDashboardData } from "@/hooks/useDashboardData";
 const ThreatsPage = () => {
   const { alerts, loading } = useDashboardData();
   
-  // Filter for only live OSINT threats
+  // Filter for only live OSINT threats using the correct property
   const liveThreats = alerts.filter(alert => 
     alert.sourceType === 'live_osint' || 
     alert.sourceType === 'osint_intelligence' ||

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { anubisSecurityService } from '@/services/aria/anubisSecurityService';
+import { AnubisSecurityService } from '@/services/aria/anubisSecurityService';
 import { anubisService } from '@/services/aria/anubisService';
 import { multilingualThreatService } from '@/services/aria/multilingualThreatService';
 import { useAuth } from '@/hooks/useAuth';
@@ -44,11 +44,11 @@ export const useAnubisControl = () => {
     }
 
     try {
-      const success = await anubisSecurityService.logHotwordEvent({
-        user_id: user.id,
-        captured_phrase: phrase,
-        triggered
-      });
+      const success = await AnubisSecurityService.logSecurityEvent(
+        'hotword_detected',
+        `Hotword phrase: "${phrase}" - Triggered: ${triggered}`,
+        'medium'
+      );
 
       if (success) {
         setStatus(`🎤 Hotword logged: "${phrase}"`);
@@ -65,7 +65,7 @@ export const useAnubisControl = () => {
 
   const logSlackEvent = async (channel: string, eventType: string, payload: any) => {
     try {
-      const success = await anubisSecurityService.queueSlackEvent({
+      const success = await AnubisSecurityService.queueSlackEvent({
         channel,
         event_type: eventType,
         payload
@@ -92,7 +92,7 @@ export const useAnubisControl = () => {
     errorMessage?: string
   ) => {
     try {
-      const success = await anubisSecurityService.logTestResult({
+      const success = await AnubisSecurityService.logTestResult({
         module,
         test_name: testName,
         passed,
@@ -124,7 +124,7 @@ export const useAnubisControl = () => {
     }
 
     try {
-      const success = await anubisSecurityService.registerMobileSession({
+      const success = await AnubisSecurityService.registerMobileSession({
         user_id: user.id,
         device_name: deviceName,
         platform,
@@ -152,7 +152,7 @@ export const useAnubisControl = () => {
     mitigationAction?: string
   ) => {
     try {
-      const success = await anubisSecurityService.logAIAttack({
+      const success = await AnubisSecurityService.logAIAttack({
         source,
         prompt,
         attack_vector: attackVector,
@@ -175,7 +175,7 @@ export const useAnubisControl = () => {
 
   const getSecurityMetrics = async () => {
     try {
-      const metrics = await anubisSecurityService.getSecurityMetrics();
+      const metrics = await AnubisSecurityService.getSecurityMetrics();
       setStatus(`📈 Security metrics: ${metrics.attacksDetected} attacks, ${metrics.activeSessions} sessions`);
       return metrics;
     } catch (error) {

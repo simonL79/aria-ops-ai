@@ -2,19 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { fetchActionItems } from '@/services/api/dashboardApiService';
-
-interface ContentAlert {
-  id: string;
-  title: string;
-  content: string;
-  platform: string;
-  severity: string;
-  timestamp: string;
-  status: string;
-  sentiment?: string;
-  url?: string;
-  date: string;
-}
+import type { ContentAlert, ContentSource, ContentAction, MetricValue } from '@/types/dashboard';
 
 interface DashboardMetrics {
   totalThreats: number;
@@ -32,14 +20,9 @@ interface DashboardSource {
 
 export const useDashboardData = () => {
   const [contentAlerts, setContentAlerts] = useState<ContentAlert[]>([]);
-  const [actionItems, setActionItems] = useState<any[]>([]);
-  const [metrics, setMetrics] = useState<DashboardMetrics>({
-    totalThreats: 0,
-    highRiskThreats: 0,
-    activeSources: 0,
-    resolutionRate: 0
-  });
-  const [sources, setSources] = useState<DashboardSource[]>([]);
+  const [actionItems, setActionItems] = useState<ContentAction[]>([]);
+  const [metrics, setMetrics] = useState<MetricValue[]>([]);
+  const [sources, setSources] = useState<ContentSource[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -78,17 +61,21 @@ export const useDashboardData = () => {
 
       if (error) throw error;
 
-      const alerts = (data || []).map(item => ({
+      const alerts: ContentAlert[] = (data || []).map(item => ({
         id: item.id,
-        title: `Threat detected: ${item.platform || 'Unknown'}`,
-        content: item.content || 'Threat content',
         platform: item.platform || 'Unknown',
-        severity: item.severity || 'medium',
-        timestamp: item.created_at,
-        status: item.status || 'new',
-        sentiment: item.sentiment ? (item.sentiment > 0 ? 'positive' : item.sentiment < 0 ? 'negative' : 'neutral') : 'neutral',
+        content: item.content || 'Threat content',
+        date: new Date(item.created_at).toLocaleDateString(),
+        severity: (['high', 'medium', 'low'].includes(item.severity) ? item.severity : 'low') as 'high' | 'medium' | 'low',
+        status: (['new', 'read', 'dismissed', 'actioned', 'reviewing', 'resolved'].includes(item.status) ? item.status : 'new') as ContentAlert['status'],
         url: item.url || '',
-        date: item.created_at
+        sourceType: item.source_type || 'scan_result',
+        threatType: item.threat_type || 'reputation_risk',
+        confidenceScore: item.confidence_score || 75,
+        sentiment: item.sentiment > 0 ? 'positive' : item.sentiment < 0 ? 'negative' : 'neutral',
+        potentialReach: item.potential_reach || 0,
+        detectedEntities: Array.isArray(item.detected_entities) ? 
+          item.detected_entities.map(String) : []
       }));
 
       setContentAlerts(alerts);
@@ -99,12 +86,43 @@ export const useDashboardData = () => {
       const resolvedThreats = alerts.filter(alert => alert.status === 'resolved').length;
       const resolutionRate = totalThreats > 0 ? Math.round((resolvedThreats / totalThreats) * 100) : 0;
       
-      setMetrics({
-        totalThreats,
-        highRiskThreats,
-        activeSources: sources.length,
-        resolutionRate
-      });
+      // Convert DashboardMetrics to MetricValue array
+      const metricsArray: MetricValue[] = [
+        { 
+          id: "1", 
+          title: "Total Threats", 
+          value: totalThreats, 
+          change: 0, 
+          icon: "trending-up", 
+          color: "blue" 
+        },
+        { 
+          id: "2", 
+          title: "High Risk", 
+          value: highRiskThreats, 
+          change: 0, 
+          icon: "trending-down", 
+          color: "red" 
+        },
+        { 
+          id: "3", 
+          title: "Active Sources", 
+          value: sources.length, 
+          change: 0, 
+          icon: "trending-up", 
+          color: "green" 
+        },
+        { 
+          id: "4", 
+          title: "Resolution Rate", 
+          value: resolutionRate, 
+          change: 0, 
+          icon: "trending-up", 
+          color: "yellow" 
+        }
+      ];
+      
+      setMetrics(metricsArray);
     } catch (error) {
       console.error('Error loading content alerts:', error);
     }
@@ -122,11 +140,39 @@ export const useDashboardData = () => {
   const loadSources = async () => {
     try {
       // Mock sources data since we don't have a sources table
-      const mockSources = [
-        { id: '1', name: 'Reddit OSINT', type: 'osint_source', status: 'active' },
-        { id: '2', name: 'News Feeds', type: 'news_source', status: 'active' },
-        { id: '3', name: 'Forum Scanner', type: 'forum_source', status: 'active' },
-        { id: '4', name: 'RSS Monitor', type: 'rss_source', status: 'active' }
+      const mockSources: ContentSource[] = [
+        { 
+          id: '1', 
+          name: 'Reddit OSINT', 
+          type: 'osint_source', 
+          status: 'good',
+          lastUpdate: new Date().toLocaleDateString(),
+          metrics: { total: 0, positive: 0, negative: 0, neutral: 0 }
+        },
+        { 
+          id: '2', 
+          name: 'News Feeds', 
+          type: 'news_source', 
+          status: 'good',
+          lastUpdate: new Date().toLocaleDateString(),
+          metrics: { total: 0, positive: 0, negative: 0, neutral: 0 }
+        },
+        { 
+          id: '3', 
+          name: 'Forum Scanner', 
+          type: 'forum_source', 
+          status: 'good',
+          lastUpdate: new Date().toLocaleDateString(),
+          metrics: { total: 0, positive: 0, negative: 0, neutral: 0 }
+        },
+        { 
+          id: '4', 
+          name: 'RSS Monitor', 
+          type: 'rss_source', 
+          status: 'good',
+          lastUpdate: new Date().toLocaleDateString(),
+          metrics: { total: 0, positive: 0, negative: 0, neutral: 0 }
+        }
       ];
       setSources(mockSources);
     } catch (error) {
