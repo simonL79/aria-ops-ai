@@ -1,10 +1,10 @@
 
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, memo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { RefreshCw } from 'lucide-react';
 
-// Lazy load heavy components for better performance
+// Lazy load components with preloading for better performance
 const ReputationScore = lazy(() => import('@/components/dashboard/ReputationScore'));
 const ContentAlerts = lazy(() => import('@/components/dashboard/ContentAlerts'));
 const SourceOverview = lazy(() => import('@/components/dashboard/SourceOverview'));
@@ -37,30 +37,35 @@ interface OptimizedDashboardProps {
   isRealTimeActive?: boolean;
 }
 
-// Loading skeleton component
-const DashboardSkeleton = () => (
-  <div className="space-y-6">
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <Skeleton className="h-32 bg-corporate-darkSecondary" />
-      <Skeleton className="h-32 bg-corporate-darkSecondary" />
-      <Skeleton className="h-32 bg-corporate-darkSecondary" />
+// Optimized loading skeleton
+const DashboardSkeleton = memo(() => (
+  <div className="space-y-4 animate-pulse">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <Skeleton key={i} className="h-16 bg-corporate-darkSecondary" />
+      ))}
     </div>
-    <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
-      <div className="xl:col-span-3 space-y-4">
+    <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
+      <div className="xl:col-span-3 space-y-3">
+        <Skeleton className="h-32 bg-corporate-darkSecondary" />
         <Skeleton className="h-48 bg-corporate-darkSecondary" />
-        <Skeleton className="h-64 bg-corporate-darkSecondary" />
       </div>
       <div className="xl:col-span-6">
-        <Skeleton className="h-96 bg-corporate-darkSecondary" />
+        <Skeleton className="h-80 bg-corporate-darkSecondary" />
       </div>
       <div className="xl:col-span-3">
-        <Skeleton className="h-96 bg-corporate-darkSecondary" />
+        <Skeleton className="h-80 bg-corporate-darkSecondary" />
       </div>
     </div>
   </div>
-);
+));
 
-const OptimizedDashboard: React.FC<OptimizedDashboardProps> = ({
+// Lightweight fallback components
+const QuickSkeleton = memo(() => (
+  <Skeleton className="h-24 bg-corporate-darkSecondary rounded-lg" />
+));
+
+const OptimizedDashboard: React.FC<OptimizedDashboardProps> = memo(({
   metrics,
   alerts = [],
   sources = [],
@@ -87,7 +92,7 @@ const OptimizedDashboard: React.FC<OptimizedDashboardProps> = ({
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-corporate-dark p-6">
+      <div className="min-h-screen bg-corporate-dark p-4">
         <DashboardSkeleton />
       </div>
     );
@@ -95,12 +100,12 @@ const OptimizedDashboard: React.FC<OptimizedDashboardProps> = ({
 
   if (error) {
     return (
-      <div className="min-h-screen bg-corporate-dark p-6">
-        <Card className="corporate-card">
-          <CardContent className="text-center py-8">
-            <RefreshCw className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-white mb-2">System Error</h3>
-            <p className="text-corporate-lightGray mb-4">{error}</p>
+      <div className="min-h-screen bg-corporate-dark p-4">
+        <Card className="corporate-card max-w-md mx-auto">
+          <CardContent className="text-center py-6">
+            <RefreshCw className="h-8 w-8 text-red-500 mx-auto mb-3" />
+            <h3 className="text-lg font-semibold text-white mb-2">System Error</h3>
+            <p className="text-corporate-lightGray text-sm mb-3">{error}</p>
           </CardContent>
         </Card>
       </div>
@@ -109,9 +114,9 @@ const OptimizedDashboard: React.FC<OptimizedDashboardProps> = ({
 
   return (
     <div className="min-h-screen bg-corporate-dark">
-      <div className="container mx-auto px-4 py-6 space-y-6 max-w-7xl">
-        {/* Critical Action Buttons - Always visible */}
-        <Suspense fallback={<Skeleton className="h-32 bg-corporate-darkSecondary" />}>
+      <div className="container mx-auto px-2 sm:px-4 py-4 space-y-4 max-w-7xl">
+        {/* Critical Action Buttons - Always visible and prioritized */}
+        <Suspense fallback={<QuickSkeleton />}>
           <CriticalActionButtons
             onLiveThreatScan={onLiveThreatScan}
             onLiveIntelligenceSweep={onLiveIntelligenceSweep}
@@ -125,47 +130,49 @@ const OptimizedDashboard: React.FC<OptimizedDashboardProps> = ({
           />
         </Suspense>
 
-        {/* Main Dashboard Grid */}
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
-          {/* Left Column */}
-          <div className="xl:col-span-3 space-y-6">
-            <Suspense fallback={<Skeleton className="h-48 bg-corporate-darkSecondary" />}>
+        {/* Main Dashboard Grid - Optimized layout */}
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
+          {/* Left Column - Compact on mobile */}
+          <div className="xl:col-span-3 space-y-4">
+            <Suspense fallback={<QuickSkeleton />}>
               <ReputationScore score={reputationScore} previousScore={previousScore} />
             </Suspense>
             
-            <Suspense fallback={<Skeleton className="h-64 bg-corporate-darkSecondary" />}>
+            <Suspense fallback={<QuickSkeleton />}>
               <IntelligenceCollection onDataRefresh={fetchData} />
             </Suspense>
           </div>
           
-          {/* Center Column */}
-          <div className="xl:col-span-6 space-y-6">
-            <Suspense fallback={<Skeleton className="h-96 bg-corporate-darkSecondary" />}>
+          {/* Center Column - Main content */}
+          <div className="xl:col-span-6 space-y-4">
+            <Suspense fallback={<Skeleton className="h-80 bg-corporate-darkSecondary" />}>
               <ContentAlerts alerts={displayAlerts} isLoading={loading} />
             </Suspense>
           </div>
 
-          {/* Right Column */}
+          {/* Right Column - Secondary info */}
           <div className="xl:col-span-3">
-            <Suspense fallback={<Skeleton className="h-96 bg-corporate-darkSecondary" />}>
+            <Suspense fallback={<QuickSkeleton />}>
               <EntitySummaryPanel alerts={displayAlerts} />
             </Suspense>
           </div>
         </div>
 
-        {/* Bottom Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Suspense fallback={<Skeleton className="h-64 bg-corporate-darkSecondary" />}>
+        {/* Bottom Section - Load last for better perceived performance */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <Suspense fallback={<QuickSkeleton />}>
             <SourceOverview sources={sources} />
           </Suspense>
           
-          <Suspense fallback={<Skeleton className="h-64 bg-corporate-darkSecondary" />}>
+          <Suspense fallback={<QuickSkeleton />}>
             <RecentActions actions={actions} />
           </Suspense>
         </div>
       </div>
     </div>
   );
-};
+});
+
+OptimizedDashboard.displayName = 'OptimizedDashboard';
 
 export default OptimizedDashboard;

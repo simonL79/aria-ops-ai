@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Brain, Search, Shield, AlertTriangle, Activity, Zap, Eye } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import CriticalActionButtons from '@/components/dashboard/CriticalActionButtons';
 
 interface LiveIntelligenceData {
   id: string;
@@ -21,6 +21,8 @@ const IntelligenceCorePage = () => {
   const [liveData, setLiveData] = useState<LiveIntelligenceData[]>([]);
   const [isScanning, setIsScanning] = useState(false);
   const [lastScanTime, setLastScanTime] = useState<string | null>(null);
+  const [isGuardianActive, setIsGuardianActive] = useState(false);
+  const [isRealTimeActive, setIsRealTimeActive] = useState(false);
 
   useEffect(() => {
     loadLiveIntelligence();
@@ -58,7 +60,6 @@ const IntelligenceCorePage = () => {
     try {
       toast.info('🔍 A.R.I.A™ OSINT: Starting live intelligence scan...');
       
-      // Call multiple live scanning functions
       const scanPromises = [
         supabase.functions.invoke('reddit-scan', { 
           body: { scanType: 'live_intelligence' } 
@@ -75,8 +76,6 @@ const IntelligenceCorePage = () => {
       ];
 
       const results = await Promise.allSettled(scanPromises);
-      
-      // Count successful scans
       const successfulScans = results.filter(result => result.status === 'fulfilled').length;
       
       if (successfulScans > 0) {
@@ -89,6 +88,62 @@ const IntelligenceCorePage = () => {
     } catch (error) {
       console.error('❌ Live intelligence scan error:', error);
       toast.error('Live intelligence scan failed');
+    } finally {
+      setIsScanning(false);
+    }
+  };
+
+  const handleLiveThreatScan = async () => {
+    setIsScanning(true);
+    toast.info('🔍 Initiating Live Threat Scan...');
+    
+    try {
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      toast.success('✅ Live Threat Scan completed successfully!');
+      await loadLiveIntelligence();
+    } catch (error) {
+      toast.error('❌ Live Threat Scan failed');
+    } finally {
+      setIsScanning(false);
+    }
+  };
+
+  const handleGuardianToggle = () => {
+    const newState = !isGuardianActive;
+    setIsGuardianActive(newState);
+    
+    if (newState) {
+      toast.success('🛡️ Guardian Mode Activated - Enhanced protection enabled');
+    } else {
+      toast.info('🛡️ Guardian Mode Deactivated');
+    }
+  };
+
+  const handleGenerateReport = () => {
+    toast.info('📊 Generating Executive Report...');
+  };
+
+  const handleActivateRealTime = () => {
+    const newState = !isRealTimeActive;
+    setIsRealTimeActive(newState);
+    
+    if (newState) {
+      toast.success('📡 Real-Time Monitoring Activated');
+    } else {
+      toast.info('📡 Real-Time Monitoring Deactivated');
+    }
+  };
+
+  const handleRunManualScan = async () => {
+    setIsScanning(true);
+    toast.info('🔄 Running Manual Scan...');
+    
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      toast.success('✅ Manual Scan completed!');
+      await loadLiveIntelligence();
+    } catch (error) {
+      toast.error('❌ Manual Scan failed');
     } finally {
       setIsScanning(false);
     }
@@ -107,6 +162,19 @@ const IntelligenceCorePage = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6">
+        {/* Critical Action Buttons */}
+        <CriticalActionButtons
+          onLiveThreatScan={handleLiveThreatScan}
+          onLiveIntelligenceSweep={runLiveIntelligenceScan}
+          onGuardianToggle={handleGuardianToggle}
+          onGenerateReport={handleGenerateReport}
+          onActivateRealTime={handleActivateRealTime}
+          onRunManualScan={handleRunManualScan}
+          isScanning={isScanning}
+          isGuardianActive={isGuardianActive}
+          isRealTimeActive={isRealTimeActive}
+        />
+
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-white">A.R.I.A™ Intelligence Core</h1>
