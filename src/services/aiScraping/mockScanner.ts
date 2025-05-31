@@ -15,8 +15,8 @@ export const generateMockData = () => {
   throw new Error('Mock data generation is permanently disabled. A.R.I.A™ uses 100% live intelligence.');
 };
 
-// All scan operations redirect to live intelligence
-export const performRealScan = performRealScan;
+// Export the real scan function (imported from realScan module)
+export { performRealScan };
 
 // Empty mock data arrays - no mock content allowed
 export const mockScanResults = [];
