@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import type {
@@ -8,7 +7,8 @@ import type {
   SentinelMissionLog,
   SentinelGuardianRegistry,
   ThreatDiscoveryResult,
-  ResponsePlanGeneration
+  ResponsePlanGeneration,
+  ResponseAction
 } from '@/types/sentinel';
 
 export class SentinelService {
@@ -78,11 +78,51 @@ export class SentinelService {
       return (data || []).map(item => ({
         ...item,
         plan_type: item.plan_type as SentinelResponsePlan['plan_type'],
-        specific_actions: Array.isArray(item.specific_actions) ? item.specific_actions : []
+        specific_actions: this.parseSpecificActions(item.specific_actions)
       }));
     } catch (error) {
       console.error('[SENTINEL] Error fetching response plans:', error);
       throw error;
+    }
+  }
+
+  /**
+   * Helper method to parse specific_actions from database
+   */
+  private static parseSpecificActions(actions: any): ResponseAction[] {
+    if (!actions) return [];
+    
+    try {
+      // If it's already an array of objects, return it
+      if (Array.isArray(actions)) {
+        return actions.map(action => {
+          if (typeof action === 'object' && action !== null) {
+            return {
+              type: action.type || 'unknown',
+              description: action.description || '',
+              priority: action.priority || 'medium',
+              estimated_time: action.estimated_time,
+              resources_needed: action.resources_needed
+            } as ResponseAction;
+          }
+          return {
+            type: 'unknown',
+            description: String(action),
+            priority: 'medium'
+          } as ResponseAction;
+        });
+      }
+      
+      // If it's a string, try to parse it as JSON
+      if (typeof actions === 'string') {
+        const parsed = JSON.parse(actions);
+        return this.parseSpecificActions(parsed);
+      }
+      
+      return [];
+    } catch (error) {
+      console.error('Error parsing specific_actions:', error);
+      return [];
     }
   }
 
