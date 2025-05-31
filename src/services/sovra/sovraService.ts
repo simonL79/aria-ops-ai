@@ -20,13 +20,20 @@ export interface AIAction {
 class SovraService {
   async addThreatEvent(threat: ThreatEvent): Promise<string | null> {
     try {
-      const { data, error } = await supabase.rpc('api_add_threat_event', {
-        p_type: threat.type,
-        p_identity: threat.identity,
-        p_platform: threat.platform,
-        p_payload: threat.payload,
-        p_score: threat.score
-      });
+      // Use activity_logs to simulate threat queue since the database functions don't exist yet
+      const { data, error } = await supabase.from('activity_logs').insert({
+        action: 'sovra_threat_event',
+        details: JSON.stringify({
+          threat_type: threat.type,
+          identity: threat.identity,
+          platform: threat.platform,
+          payload: threat.payload,
+          score: threat.score,
+          status: 'pending'
+        }),
+        entity_type: 'threat_queue',
+        entity_id: crypto.randomUUID()
+      }).select().single();
 
       if (error) {
         console.error('Error adding threat event:', error);
@@ -34,9 +41,9 @@ class SovraService {
         return null;
       }
 
-      console.log('Threat event added successfully:', data);
+      console.log('Threat event added successfully:', data.id);
       toast.success('Threat event added to queue');
-      return data;
+      return data.id;
     } catch (error) {
       console.error('Error in addThreatEvent:', error);
       toast.error('Failed to add threat event');
@@ -46,12 +53,19 @@ class SovraService {
 
   async addAIAction(action: AIAction): Promise<string | null> {
     try {
-      const { data, error } = await supabase.rpc('api_add_ai_action', {
-        p_threat_id: action.threatId,
-        p_action_type: action.actionType,
-        p_action_detail: action.actionDetail,
-        p_confidence: action.confidence
-      });
+      // Use activity_logs to simulate action matrix
+      const { data, error } = await supabase.from('activity_logs').insert({
+        action: 'sovra_ai_action',
+        details: JSON.stringify({
+          threat_id: action.threatId,
+          action_type: action.actionType,
+          action_detail: action.actionDetail,
+          confidence: action.confidence,
+          status: 'pending'
+        }),
+        entity_type: 'action_matrix',
+        entity_id: action.threatId
+      }).select().single();
 
       if (error) {
         console.error('Error adding AI action:', error);
@@ -59,8 +73,8 @@ class SovraService {
         return null;
       }
 
-      console.log('AI action added successfully:', data);
-      return data;
+      console.log('AI action added successfully:', data.id);
+      return data.id;
     } catch (error) {
       console.error('Error in addAIAction:', error);
       toast.error('Failed to add AI action');
@@ -74,11 +88,18 @@ class SovraService {
     comment: string
   ): Promise<boolean> {
     try {
-      const { data, error } = await supabase.rpc('api_admin_approve_threat', {
-        p_threat_id: threatId,
-        p_approved: approved,
-        p_comment: comment
-      });
+      // Use activity_logs to simulate admin signals
+      const { data, error } = await supabase.from('activity_logs').insert({
+        action: 'sovra_admin_decision',
+        details: JSON.stringify({
+          threat_id: threatId,
+          approved: approved,
+          comment: comment,
+          reviewed_at: new Date().toISOString()
+        }),
+        entity_type: 'admin_signals',
+        entity_id: threatId
+      }).select().single();
 
       if (error) {
         console.error('Error processing threat decision:', error);
@@ -86,7 +107,8 @@ class SovraService {
         return false;
       }
 
-      toast.success(data || `Threat ${approved ? 'approved' : 'rejected'} successfully`);
+      const message = approved ? 'Threat approved successfully' : 'Threat rejected successfully';
+      toast.success(message);
       return true;
     } catch (error) {
       console.error('Error in approveOrRejectThreat:', error);
@@ -97,17 +119,32 @@ class SovraService {
 
   async getThreatQueue() {
     try {
+      // Get simulated threat queue from activity_logs
       const { data, error } = await supabase
-        .from('threat_queue')
+        .from('activity_logs')
         .select('*')
-        .order('detected_at', { ascending: false });
+        .eq('entity_type', 'threat_queue')
+        .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error fetching threat queue:', error);
         return [];
       }
 
-      return data || [];
+      // Transform activity logs to threat queue format
+      return (data || []).map(item => {
+        const details = typeof item.details === 'string' ? JSON.parse(item.details) : item.details;
+        return {
+          id: item.id,
+          threat_type: details.threat_type || 'unknown',
+          identity: details.identity || 'unknown',
+          platform: details.platform || 'unknown',
+          payload: details.payload || '',
+          score: details.score || 0,
+          status: details.status || 'pending',
+          detected_at: item.created_at
+        };
+      });
     } catch (error) {
       console.error('Error in getThreatQueue:', error);
       return [];
@@ -116,9 +153,11 @@ class SovraService {
 
   async getActionMatrix() {
     try {
+      // Get simulated action matrix from activity_logs
       const { data, error } = await supabase
-        .from('action_matrix')
+        .from('activity_logs')
         .select('*')
+        .eq('entity_type', 'action_matrix')
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -126,7 +165,19 @@ class SovraService {
         return [];
       }
 
-      return data || [];
+      // Transform activity logs to action matrix format
+      return (data || []).map(item => {
+        const details = typeof item.details === 'string' ? JSON.parse(item.details) : item.details;
+        return {
+          id: item.id,
+          threat_id: details.threat_id || item.entity_id,
+          action_type: details.action_type || 'unknown',
+          action_detail: details.action_detail || '',
+          confidence: details.confidence || 0,
+          status: details.status || 'pending',
+          created_at: item.created_at
+        };
+      });
     } catch (error) {
       console.error('Error in getActionMatrix:', error);
       return [];
@@ -135,17 +186,30 @@ class SovraService {
 
   async getAdminSignals() {
     try {
+      // Get simulated admin signals from activity_logs
       const { data, error } = await supabase
-        .from('admin_signals')
+        .from('activity_logs')
         .select('*')
-        .order('reviewed_at', { ascending: false });
+        .eq('entity_type', 'admin_signals')
+        .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error fetching admin signals:', error);
         return [];
       }
 
-      return data || [];
+      // Transform activity logs to admin signals format
+      return (data || []).map(item => {
+        const details = typeof item.details === 'string' ? JSON.parse(item.details) : item.details;
+        return {
+          id: item.id,
+          threat_id: details.threat_id || item.entity_id,
+          approved: details.approved || false,
+          comment: details.comment || '',
+          reviewed_at: details.reviewed_at || item.created_at,
+          reviewed_by: item.user_id
+        };
+      });
     } catch (error) {
       console.error('Error in getAdminSignals:', error);
       return [];
@@ -154,17 +218,30 @@ class SovraService {
 
   async getExecutionLog() {
     try {
+      // Get simulated execution log from activity_logs
       const { data, error } = await supabase
-        .from('sovra_action_log')
+        .from('activity_logs')
         .select('*')
-        .order('executed_at', { ascending: false });
+        .eq('action', 'sovra_execution')
+        .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error fetching execution log:', error);
         return [];
       }
 
-      return data || [];
+      // Transform activity logs to execution log format
+      return (data || []).map(item => {
+        const details = typeof item.details === 'string' ? JSON.parse(item.details) : item.details;
+        return {
+          id: item.id,
+          threat_id: details.threat_id || item.entity_id,
+          action_type: details.action_type || 'unknown',
+          result: details.result || 'executed',
+          executed_at: item.created_at,
+          executed_by: item.user_id
+        };
+      });
     } catch (error) {
       console.error('Error in getExecutionLog:', error);
       return [];
