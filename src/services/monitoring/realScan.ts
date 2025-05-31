@@ -5,7 +5,7 @@ import { LiveDataEnforcer } from '@/services/ariaCore/liveDataEnforcer';
 interface RealScanOptions {
   fullScan?: boolean;
   source?: string;
-  targetEntity?: string;
+  targetEntity?: string | null;
 }
 
 /**
@@ -77,9 +77,9 @@ export const performRealScan = async (options: RealScanOptions = {}) => {
 };
 
 /**
- * Block any mock scan operations
+ * Block any mock scan operations - completely disabled
  */
 export const performMockScan = () => {
-  console.warn('🚫 BLOCKED: Mock scan operations are disabled. Use performRealScan() for live intelligence.');
+  console.error('🚫 BLOCKED: Mock scan operations are permanently disabled. Use performRealScan() for live intelligence.');
   throw new Error('Mock data operations blocked by A.R.I.A™ live enforcement system');
 };

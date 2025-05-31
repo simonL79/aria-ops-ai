@@ -101,7 +101,7 @@ export const runMonitoringScan = async (targetEntity?: string): Promise<ScanResu
   }
 };
 
-// Block any mock scan functions
+// Block any mock scan functions completely
 export const runMockScan = () => {
   console.error('🚫 BLOCKED: Mock scanning permanently disabled in A.R.I.A™ live system');
   throw new Error('Mock scanning is permanently disabled. A.R.I.A™ uses 100% live intelligence.');

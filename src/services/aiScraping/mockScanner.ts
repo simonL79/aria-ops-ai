@@ -2,9 +2,7 @@
 // A.R.I.A™ OSINT INTELLIGENCE - 100% LIVE DATA COMPLIANCE
 // ALL MOCK DATA PERMANENTLY DISABLED - LIVE OSINT INTELLIGENCE ONLY
 
-import { performRealScan } from '../monitoring/realScan';
-
-// Block all mock functions - redirect to live scanning only
+// Block all mock functions - no redirects, just blocks
 export const performMockScan = () => {
   console.error('🚫 BLOCKED: Mock scanning permanently disabled in A.R.I.A™ live system');
   throw new Error('Mock data operations are permanently disabled. A.R.I.A™ uses 100% live OSINT intelligence.');
@@ -14,9 +12,6 @@ export const generateMockData = () => {
   console.error('🚫 BLOCKED: Mock data generation permanently disabled');
   throw new Error('Mock data generation is permanently disabled. A.R.I.A™ uses 100% live intelligence.');
 };
-
-// Export the real scan function (imported from realScan module)
-export { performRealScan };
 
 // Empty mock data arrays - no mock content allowed
 export const mockScanResults = [];
@@ -49,5 +44,7 @@ export const getMonitoringStatus = async () => {
 
 export const performRealTimeMonitoring = async () => {
   console.log('🔍 A.R.I.A™ OSINT: Real-time monitoring - live data only');
+  // Import here to avoid circular dependency
+  const { performRealScan } = await import('../monitoring/realScan');
   return await performRealScan({ fullScan: true, source: 'real_time_monitoring' });
 };
