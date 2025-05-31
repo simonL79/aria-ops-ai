@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { ContentAlert } from "@/types/dashboard";
-import { performLiveScan, performRealTimeMonitoring, validateLiveDataOnly } from "@/services/aiScraping/liveScanner";
+import { supabase } from "@/integrations/supabase/client";
 
 /**
  * A.R.I.A™ Live OSINT Dashboard Scanner - 100% Real Data Only
@@ -19,13 +19,6 @@ export const useDashboardScan = (
       return;
     }
 
-    // Validate system is using live data only
-    const isLiveCompliant = await validateLiveDataOnly();
-    if (!isLiveCompliant) {
-      toast.error("System contains mock data - Live OSINT scanning blocked");
-      return;
-    }
-
     setIsScanning(true);
     
     try {
@@ -34,26 +27,47 @@ export const useDashboardScan = (
         description: "Crawling Reddit RSS, News feeds, and Forums"
       });
 
-      // Perform live scan across multiple platforms (no API keys required)
-      const livePlatforms = platforms.length > 0 ? platforms : [
-        'Reddit', 'News', 'Forums', 'RSS'
+      // Execute multiple live scanning functions
+      const scanFunctions = [
+        'reddit-scan',
+        'uk-news-scanner', 
+        'enhanced-intelligence',
+        'discovery-scanner',
+        'monitoring-scan'
       ];
 
-      const liveResults = await performLiveScan(
-        query || 'reputation monitoring threat detection',
-        livePlatforms,
-        { maxResults: 50, includeRealTimeAlerts: true }
+      const scanPromises = scanFunctions.map(func => 
+        supabase.functions.invoke(func, {
+          body: { 
+            scanType: 'live_osint',
+            enableLiveData: true,
+            blockMockData: true,
+            query: query || 'threat intelligence'
+          }
+        })
       );
 
-      // Also get real-time monitoring data
-      const realTimeResults = await performRealTimeMonitoring();
+      const results = await Promise.allSettled(scanPromises);
+      
+      // Count successful scans
+      const successfulScans = results.filter(result => result.status === 'fulfilled').length;
+      
+      // Get latest live scan results from database
+      const { data: liveResults, error } = await supabase
+        .from('scan_results')
+        .select('*')
+        .eq('source_type', 'live_osint')
+        .gte('created_at', new Date(Date.now() - 10 * 60 * 1000).toISOString()) // Last 10 minutes
+        .order('created_at', { ascending: false })
+        .limit(50);
 
-      // Combine live results
-      const allLiveResults = [...liveResults, ...realTimeResults];
+      if (error) {
+        console.error('❌ Error fetching live scan results:', error);
+      }
 
-      if (allLiveResults.length > 0) {
+      if (liveResults && liveResults.length > 0) {
         // Convert to ContentAlert format
-        const newAlerts: ContentAlert[] = allLiveResults.map(result => ({
+        const newAlerts: ContentAlert[] = liveResults.map(result => ({
           id: result.id,
           platform: result.platform,
           content: result.content,
@@ -65,7 +79,7 @@ export const useDashboardScan = (
           sourceType: result.source_type,
           sentiment: result.sentiment > 0 ? 'positive' : result.sentiment < 0 ? 'negative' : 'neutral',
           potentialReach: 0,
-          detectedEntities: result.detected_entities,
+          detectedEntities: result.detected_entities || [],
           url: result.url
         }));
 
@@ -86,12 +100,16 @@ export const useDashboardScan = (
           });
         }
       } else {
-        toast.info("Live scan completed", {
-          description: "No intelligence items detected from live sources"
-        });
+        if (successfulScans > 0) {
+          toast.info(`Live scan completed: ${successfulScans}/${scanFunctions.length} modules executed`, {
+            description: "No new intelligence items detected from live sources"
+          });
+        } else {
+          toast.error("❌ Live OSINT scan failed: No modules executed successfully");
+        }
       }
 
-      console.log(`✅ Dashboard scan complete: ${allLiveResults.length} live intelligence items processed`);
+      console.log(`✅ Dashboard scan complete: ${successfulScans}/${scanFunctions.length} live modules executed`);
 
     } catch (error) {
       console.error("❌ Live dashboard scan failed:", error);

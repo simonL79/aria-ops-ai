@@ -48,22 +48,23 @@ export const useDiscoveryScanning = () => {
     clientLinkedThreats: 0
   });
 
-  // Load existing threats from scan_results table
+  // Load existing live threats from scan_results table
   useEffect(() => {
-    loadExistingThreats();
+    loadLiveThreats();
   }, []);
 
-  const loadExistingThreats = async () => {
+  const loadLiveThreats = async () => {
     try {
       const { data: scanResults, error } = await supabase
         .from('scan_results')
         .select('*')
+        .eq('source_type', 'live_osint')
         .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()) // Last 7 days
         .order('created_at', { ascending: false })
         .limit(50);
 
       if (error) {
-        console.error('Error loading scan results:', error);
+        console.error('❌ Error loading live scan results:', error);
         return;
       }
 
@@ -84,7 +85,7 @@ export const useDiscoveryScanning = () => {
         status: item.status === 'resolved' ? 'resolved' : 'active',
         clientLinked: item.client_linked || false,
         linkedClientId: item.linked_client_id,
-        linkedClientName: item.linked_client_id, // Using linked_client_id since linked_client_name doesn't exist
+        linkedClientName: item.linked_client_id,
         matchType: item.client_linked ? 'linked' : undefined,
         matchConfidence: item.confidence_score || undefined
       }));
@@ -99,8 +100,10 @@ export const useDiscoveryScanning = () => {
         clientLinkedThreats: threats.filter(t => t.clientLinked).length
       });
 
+      console.log(`✅ Loaded ${threats.length} live threats from OSINT sources`);
+
     } catch (error) {
-      console.error('Error loading existing threats:', error);
+      console.error('❌ Error loading live threats:', error);
     }
   };
 
@@ -109,48 +112,51 @@ export const useDiscoveryScanning = () => {
     setScanProgress(0);
     
     try {
-      toast.info('Starting real-time discovery scan...');
+      toast.info('🔍 A.R.I.A™ OSINT: Starting live discovery scan...');
       
       // Progress updates
       const progressInterval = setInterval(() => {
         setScanProgress(prev => Math.min(prev + 15, 85));
       }, 1000);
 
-      // Call the updated discovery scanner
-      console.log('Calling Discovery Scanner...');
-      const { data: discoveryData, error: discoveryError } = await supabase.functions.invoke('discovery-scanner', {
-        body: { scanType: 'zero-input' }
-      });
+      // Execute live discovery scanning functions
+      const liveScanFunctions = [
+        'discovery-scanner',
+        'enhanced-intelligence',
+        'reddit-scan',
+        'uk-news-scanner',
+        'monitoring-scan'
+      ];
 
-      if (discoveryError) {
-        console.error('Discovery Scanner error:', discoveryError);
-      } else {
-        console.log('Discovery Scanner result:', discoveryData);
-      }
+      console.log('🔍 Executing live discovery scans...');
+      const scanPromises = liveScanFunctions.map(func => 
+        supabase.functions.invoke(func, {
+          body: { 
+            scanType: 'live_osint',
+            enableLiveData: true,
+            blockMockData: true
+          }
+        })
+      );
 
-      // Call Enhanced Intelligence function for additional data
-      console.log('Calling Enhanced Intelligence...');
-      const { data: intelligenceData, error: intelligenceError } = await supabase.functions.invoke('enhanced-intelligence', {
-        body: { scan_depth: 'comprehensive' }
-      });
-
-      if (intelligenceError) {
-        console.error('Enhanced Intelligence error:', intelligenceError);
-      } else {
-        console.log('Enhanced Intelligence result:', intelligenceData);
-      }
+      const results = await Promise.allSettled(scanPromises);
+      const successfulScans = results.filter(result => result.status === 'fulfilled').length;
 
       clearInterval(progressInterval);
       setScanProgress(100);
 
-      // Reload threats from database to get latest data
-      await loadExistingThreats();
+      // Reload live threats from database to get latest data
+      await loadLiveThreats();
       
-      toast.success('Discovery scan completed successfully!');
+      if (successfulScans > 0) {
+        toast.success(`✅ Live discovery scan completed: ${successfulScans}/${liveScanFunctions.length} OSINT modules executed`);
+      } else {
+        toast.error('❌ Live discovery scan failed: No OSINT modules executed successfully');
+      }
       
     } catch (error) {
-      console.error('Discovery scan error:', error);
-      toast.error('Discovery scan encountered an error. Please try again.');
+      console.error('❌ Discovery scan error:', error);
+      toast.error('Live discovery scan encountered an error. Please try again.');
     } finally {
       setIsScanning(false);
       setScanProgress(0);
@@ -160,7 +166,7 @@ export const useDiscoveryScanning = () => {
   const stopDiscoveryScan = () => {
     setIsScanning(false);
     setScanProgress(0);
-    toast.info('Discovery scan stopped');
+    toast.info('Live discovery scan stopped');
   };
 
   return {
@@ -170,6 +176,6 @@ export const useDiscoveryScanning = () => {
     scanStats,
     startDiscoveryScan,
     stopDiscoveryScan,
-    loadExistingThreats
+    loadExistingThreats: loadLiveThreats
   };
 };

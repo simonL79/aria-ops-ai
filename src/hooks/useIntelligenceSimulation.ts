@@ -1,9 +1,10 @@
 
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 /**
- * Hook to manage intelligence simulations with consistent UI behavior
+ * Hook to manage live OSINT intelligence operations - NO SIMULATIONS
  */
 export const useIntelligenceSimulation = (options?: {
   duration?: number;
@@ -11,31 +12,38 @@ export const useIntelligenceSimulation = (options?: {
   description?: string;
   onComplete?: () => void;
 }) => {
-  const [isSimulating, setIsSimulating] = useState(false);
+  const [isExecuting, setIsExecuting] = useState(false);
   
-  const runSimulation = () => {
-    if (isSimulating) return;
+  const runLiveOperation = async () => {
+    if (isExecuting) return;
     
-    // Show loading toast
-    setIsSimulating(true);
-    const toastId = toast.loading("Running simulation", {
-      description: options?.description || "Analyzing data and generating insights..."
+    setIsExecuting(true);
+    const toastId = toast.loading("Executing live OSINT operation", {
+      description: options?.description || "Running live intelligence gathering from real sources..."
     });
     
-    // This hook now just manages the UI state for simulations
-    // The actual simulation logic is handled by the caller
-    // (which will call into the appropriate services)
-    
-    // Use a timeout to ensure the UI has time to update
-    setTimeout(() => {
-      // Complete simulation UI after the duration
+    try {
+      // Execute live intelligence gathering
+      const { data, error } = await supabase.functions.invoke('enhanced-intelligence', {
+        body: { 
+          scanType: 'live_osint',
+          enableLiveData: true,
+          blockMockData: true
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      // Complete operation
       setTimeout(() => {
-        setIsSimulating(false);
+        setIsExecuting(false);
         
         // Update toast to success
-        toast.success(options?.successMessage || "Simulation complete", {
+        toast.success(options?.successMessage || "Live operation complete", {
           id: toastId,
-          description: "Intelligence data has been updated with new information."
+          description: "Live intelligence data has been collected from real sources."
         });
         
         // Run completion callback if provided
@@ -43,11 +51,19 @@ export const useIntelligenceSimulation = (options?: {
           options.onComplete();
         }
       }, options?.duration || 2500);
-    }, 0);
+      
+    } catch (error) {
+      setIsExecuting(false);
+      toast.error("Live operation failed", {
+        id: toastId,
+        description: "Error executing live OSINT operation"
+      });
+      console.error('Live operation error:', error);
+    }
   };
   
   return {
-    isSimulating,
-    runSimulation
+    isSimulating: isExecuting, // Keep same interface for compatibility
+    runSimulation: runLiveOperation // But execute live operations instead
   };
 };

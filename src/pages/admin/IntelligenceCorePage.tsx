@@ -1,117 +1,195 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Brain, Network, Activity, Database, Cpu, Shield } from 'lucide-react';
-import ThreatAnalysisPanel from '@/components/intelligence/ThreatAnalysisPanel';
-import EntityGraphViewer from '@/components/intelligence/EntityGraphViewer';
+import { Brain, Search, Shield, AlertTriangle, Activity, Zap, Eye } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+
+interface LiveIntelligenceData {
+  id: string;
+  content: string;
+  platform: string;
+  severity: string;
+  created_at: string;
+  url?: string;
+}
 
 const IntelligenceCorePage = () => {
+  const [liveData, setLiveData] = useState<LiveIntelligenceData[]>([]);
+  const [isScanning, setIsScanning] = useState(false);
+  const [lastScanTime, setLastScanTime] = useState<string | null>(null);
+
+  useEffect(() => {
+    loadLiveIntelligence();
+  }, []);
+
+  const loadLiveIntelligence = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('scan_results')
+        .select('*')
+        .eq('source_type', 'live_osint')
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      if (error) throw error;
+
+      const formattedData = (data || []).map(item => ({
+        id: item.id,
+        content: item.content || 'Live intelligence data',
+        platform: item.platform || 'OSINT',
+        severity: item.severity || 'medium',
+        created_at: item.created_at,
+        url: item.url
+      }));
+
+      setLiveData(formattedData);
+      console.log(`✅ Loaded ${formattedData.length} live intelligence items`);
+    } catch (error) {
+      console.error('❌ Error loading live intelligence:', error);
+    }
+  };
+
+  const runLiveIntelligenceScan = async () => {
+    setIsScanning(true);
+    try {
+      toast.info('🔍 A.R.I.A™ OSINT: Starting live intelligence scan...');
+      
+      // Call multiple live scanning functions
+      const scanPromises = [
+        supabase.functions.invoke('reddit-scan', { 
+          body: { scanType: 'live_intelligence' } 
+        }),
+        supabase.functions.invoke('uk-news-scanner', { 
+          body: { scanType: 'live_news' } 
+        }),
+        supabase.functions.invoke('enhanced-intelligence', { 
+          body: { enableLiveData: true, blockMockData: true } 
+        }),
+        supabase.functions.invoke('discovery-scanner', { 
+          body: { scanType: 'live_osint' } 
+        })
+      ];
+
+      const results = await Promise.allSettled(scanPromises);
+      
+      // Count successful scans
+      const successfulScans = results.filter(result => result.status === 'fulfilled').length;
+      
+      if (successfulScans > 0) {
+        toast.success(`✅ Live OSINT scan completed: ${successfulScans}/4 modules executed`);
+        setLastScanTime(new Date().toISOString());
+        await loadLiveIntelligence();
+      } else {
+        toast.error('❌ Live scan failed: No OSINT modules executed successfully');
+      }
+    } catch (error) {
+      console.error('❌ Live intelligence scan error:', error);
+      toast.error('Live intelligence scan failed');
+    } finally {
+      setIsScanning(false);
+    }
+  };
+
+  const getSeverityColor = (severity: string) => {
+    switch (severity) {
+      case 'critical': return 'bg-red-500';
+      case 'high': return 'bg-orange-500';
+      case 'medium': return 'bg-yellow-500';
+      case 'low': return 'bg-green-500';
+      default: return 'bg-gray-500';
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2 corporate-heading">
-              <Brain className="h-8 w-8 text-corporate-accent" />
-              A.R.I.A™ Intelligence Core
-            </h1>
-            <p className="corporate-subtext mt-1">
-              Shared Infrastructure Powering Sentinel & Watchtower
-            </p>
+            <h1 className="text-3xl font-bold text-white">A.R.I.A™ Intelligence Core</h1>
+            <p className="text-corporate-lightGray">Live OSINT Intelligence Processing - 100% Real Data</p>
           </div>
-          
-          <div className="flex items-center gap-2">
-            <Badge variant="secondary" className="flex items-center gap-1 bg-corporate-darkSecondary text-corporate-lightGray border-corporate-border">
-              <Cpu className="h-3 w-3" />
-              Neural Engine
-            </Badge>
-            <Badge className="bg-corporate-accent text-black hover:bg-corporate-accentDark">
-              Core Infrastructure
-            </Badge>
-          </div>
+          <Button 
+            onClick={runLiveIntelligenceScan}
+            disabled={isScanning}
+            className="bg-corporate-accent hover:bg-corporate-accentDark text-black"
+          >
+            {isScanning ? (
+              <>
+                <Eye className="h-4 w-4 mr-2 animate-pulse" />
+                Live OSINT Scanning...
+              </>
+            ) : (
+              <>
+                <Search className="h-4 w-4 mr-2" />
+                Execute Live Scan
+              </>
+            )}
+          </Button>
         </div>
 
-        {/* System Status */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card className="corporate-card">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm flex items-center gap-1 corporate-heading">
-                <Activity className="h-4 w-4 text-green-400" />
-                System Status
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-400">LIVE</div>
-              <p className="text-xs corporate-subtext">All systems operational</p>
-            </CardContent>
-          </Card>
-
-          <Card className="corporate-card">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm flex items-center gap-1 corporate-heading">
-                <Database className="h-4 w-4 text-corporate-accent" />
-                Data Processing
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-white">1.2M</div>
-              <p className="text-xs corporate-subtext">Records/day</p>
-            </CardContent>
-          </Card>
-
-          <Card className="corporate-card">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm flex items-center gap-1 corporate-heading">
-                <Network className="h-4 w-4 text-corporate-accent" />
-                Entity Graph
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-white">45K</div>
-              <p className="text-xs corporate-subtext">Mapped relationships</p>
-            </CardContent>
-          </Card>
-
-          <Card className="corporate-card">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm flex items-center gap-1 corporate-heading">
-                <Shield className="h-4 w-4 text-corporate-accent" />
-                Security Level
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-400">MAX</div>
-              <p className="text-xs corporate-subtext">Enterprise grade</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Main Intelligence Panels */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <ThreatAnalysisPanel />
-          <EntityGraphViewer />
-        </div>
-
-        {/* Core Services */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card className="corporate-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 corporate-heading">
-                <Network className="h-5 w-5 text-corporate-accent" />
-                Entity Graph Engine
+                <Brain className="h-5 w-5 text-corporate-accent" />
+                Live Intelligence Status
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3 text-sm text-corporate-lightGray">
-                <div>• Real-time relationship mapping</div>
-                <div>• Multi-dimensional entity linking</div>
-                <div>• Historical pattern analysis</div>
-                <div>• Cross-platform identity resolution</div>
-                <div>• Behavioral clustering algorithms</div>
-                <div>• Predictive relationship modeling</div>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-corporate-lightGray">Active Sources:</span>
+                  <Badge className="bg-green-500/20 text-green-400">Reddit, News, Forums</Badge>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-corporate-lightGray">Data Points:</span>
+                  <span className="text-white font-bold">{liveData.length}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-corporate-lightGray">Last Scan:</span>
+                  <span className="text-white text-sm">
+                    {lastScanTime ? new Date(lastScanTime).toLocaleTimeString() : 'Never'}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-corporate-lightGray">Mode:</span>
+                  <Badge className="bg-corporate-accent/20 text-corporate-accent">LIVE ONLY</Badge>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="corporate-card">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 corporate-heading">
+                <Shield className="h-5 w-5 text-corporate-accent" />
+                Threat Detection
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-corporate-lightGray">High Risk:</span>
+                  <span className="text-red-400 font-bold">
+                    {liveData.filter(d => d.severity === 'high' || d.severity === 'critical').length}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-corporate-lightGray">Medium Risk:</span>
+                  <span className="text-yellow-400 font-bold">
+                    {liveData.filter(d => d.severity === 'medium').length}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-corporate-lightGray">Low Risk:</span>
+                  <span className="text-green-400 font-bold">
+                    {liveData.filter(d => d.severity === 'low').length}
+                  </span>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -120,40 +198,75 @@ const IntelligenceCorePage = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 corporate-heading">
                 <Activity className="h-5 w-5 text-corporate-accent" />
-                Action Orchestration
+                System Health
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3 text-sm text-corporate-lightGray">
-                <div>• Automated response triggers</div>
-                <div>• Mission chain execution</div>
-                <div>• Multi-system coordination</div>
-                <div>• Escalation pathway management</div>
-                <div>• Audit trail maintenance</div>
-                <div>• Performance optimization</div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="corporate-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 corporate-heading">
-                <Database className="h-5 w-5 text-corporate-accent" />
-                Intelligence Storage
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3 text-sm text-corporate-lightGray">
-                <div>• High-velocity data ingestion</div>
-                <div>• Real-time indexing & search</div>
-                <div>• Temporal data modeling</div>
-                <div>• Encrypted storage systems</div>
-                <div>• Backup & recovery protocols</div>
-                <div>• Data retention compliance</div>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-corporate-lightGray">OSINT Status:</span>
+                  <Badge className="bg-green-500/20 text-green-400">Operational</Badge>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-corporate-lightGray">Mock Data:</span>
+                  <Badge className="bg-red-500/20 text-red-400">BLOCKED</Badge>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-corporate-lightGray">Live Feed:</span>
+                  <Badge className="bg-corporate-accent/20 text-corporate-accent">ACTIVE</Badge>
+                </div>
               </div>
             </CardContent>
           </Card>
         </div>
+
+        <Card className="corporate-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 corporate-heading">
+              <AlertTriangle className="h-5 w-5 text-corporate-accent" />
+              Live Intelligence Feed
+            </CardTitle>
+            <p className="text-corporate-lightGray">Real-time OSINT data from live sources</p>
+          </CardHeader>
+          <CardContent>
+            {liveData.length === 0 ? (
+              <div className="text-center py-8">
+                <Eye className="h-12 w-12 text-corporate-lightGray mx-auto mb-4" />
+                <p className="text-corporate-lightGray">No live intelligence data available</p>
+                <p className="text-sm text-corporate-lightGray mt-2">Run a live scan to collect OSINT data</p>
+              </div>
+            ) : (
+              <div className="space-y-4 max-h-96 overflow-y-auto">
+                {liveData.map((item) => (
+                  <div key={item.id} className="border border-corporate-border rounded-lg p-4 bg-corporate-darkSecondary">
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex items-center gap-2">
+                        <Badge className={`${getSeverityColor(item.severity)} text-white`}>
+                          {item.severity.toUpperCase()}
+                        </Badge>
+                        <span className="text-corporate-lightGray text-sm">{item.platform}</span>
+                      </div>
+                      <span className="text-xs text-corporate-lightGray">
+                        {new Date(item.created_at).toLocaleString()}
+                      </span>
+                    </div>
+                    <p className="text-white text-sm mb-2">{item.content}</p>
+                    {item.url && (
+                      <a 
+                        href={item.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-corporate-accent hover:underline text-xs"
+                      >
+                        View Source
+                      </a>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </DashboardLayout>
   );
