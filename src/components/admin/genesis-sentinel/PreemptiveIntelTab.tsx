@@ -180,7 +180,7 @@ const PreemptiveIntelTab = () => {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
                       <h3 className="font-semibold text-white">{result.entityName}</h3>
-                      <Badge className={getStatusColor(result.status)} size="sm">
+                      <Badge className={getStatusColor(result.status)}>
                         {getStatusIcon(result.status)}
                         <span className="ml-1 capitalize">{result.status}</span>
                       </Badge>

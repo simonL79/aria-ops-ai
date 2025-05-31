@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -104,13 +105,14 @@ function App() {
                     </AdminGuard>
                   } 
                 />
-                <Route path="/admin/genesis-sentinel" element={
-                  <ProtectedRoute>
+                <Route 
+                  path="/admin/genesis-sentinel" 
+                  element={
                     <AdminGuard>
                       <GenesisSentinelPage />
                     </AdminGuard>
-                  </ProtectedRoute>
-                } />
+                  } 
+                />
               </Routes>
             </div>
           </BrowserRouter>
