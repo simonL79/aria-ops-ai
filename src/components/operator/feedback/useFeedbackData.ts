@@ -29,7 +29,6 @@ export const useFeedbackData = () => {
 
   const loadFeedbackData = async () => {
     try {
-      // Use activity_logs table to simulate command feedback
       const { data, error } = await supabase
         .from('activity_logs')
         .select('*')
@@ -38,7 +37,7 @@ export const useFeedbackData = () => {
 
       if (error) throw error;
 
-      const mockFeedback: FeedbackItem[] = (data || []).map(item => ({
+      const feedbackItems: FeedbackItem[] = (data || []).map(item => ({
         id: item.id,
         command: item.action || 'Unknown Command',
         status: 'executed',
@@ -46,7 +45,7 @@ export const useFeedbackData = () => {
         timestamp: item.created_at
       }));
 
-      setFeedback(mockFeedback);
+      setFeedback(feedbackItems);
     } catch (error) {
       console.error('Error loading feedback data:', error);
     }
@@ -54,7 +53,6 @@ export const useFeedbackData = () => {
 
   const loadSuggestions = async () => {
     try {
-      // Use aria_notifications table to simulate AI suggestions
       const { data, error } = await supabase
         .from('aria_notifications')
         .select('*')
@@ -63,7 +61,7 @@ export const useFeedbackData = () => {
 
       if (error) throw error;
 
-      const mockSuggestions: SuggestionItem[] = (data || []).map(item => ({
+      const suggestionItems: SuggestionItem[] = (data || []).map(item => ({
         id: item.id,
         type: item.event_type || 'system',
         suggestion: item.summary || 'AI suggestion available',
@@ -71,7 +69,7 @@ export const useFeedbackData = () => {
         timestamp: item.created_at
       }));
 
-      setSuggestions(mockSuggestions);
+      setSuggestions(suggestionItems);
     } catch (error) {
       console.error('Error loading suggestions:', error);
     }

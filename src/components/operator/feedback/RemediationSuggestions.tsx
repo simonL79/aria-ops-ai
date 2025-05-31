@@ -1,17 +1,15 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Lightbulb } from 'lucide-react';
-import { toast } from 'sonner';
+import { Badge } from '@/components/ui/badge';
+import { Lightbulb, AlertTriangle, Info } from 'lucide-react';
 
 interface RemediationSuggestion {
   id: string;
-  command_id: string;
+  type: string;
   suggestion: string;
-  rationale: string;
-  proposed_by: string;
-  created_at: string;
+  priority: string;
+  timestamp: string;
 }
 
 interface RemediationSuggestionsProps {
@@ -19,40 +17,64 @@ interface RemediationSuggestionsProps {
 }
 
 export const RemediationSuggestions = ({ suggestions }: RemediationSuggestionsProps) => {
-  const applySuggestion = async (suggestion: RemediationSuggestion) => {
-    toast.info(`Applied suggestion: ${suggestion.suggestion}`);
+  const getPriorityIcon = (priority: string) => {
+    switch (priority) {
+      case 'high':
+      case 'critical':
+        return <AlertTriangle className="h-4 w-4 text-red-500" />;
+      case 'medium':
+        return <Lightbulb className="h-4 w-4 text-yellow-500" />;
+      default:
+        return <Info className="h-4 w-4 text-blue-500" />;
+    }
   };
 
-  if (suggestions.length === 0) {
-    return null;
-  }
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'high':
+      case 'critical':
+        return 'bg-red-100 text-red-800';
+      case 'medium':
+        return 'bg-yellow-100 text-yellow-800';
+      default:
+        return 'bg-blue-100 text-blue-800';
+    }
+  };
 
   return (
-    <Card className="bg-black border-yellow-500/30">
+    <Card className="bg-gray-900 border-gray-700">
       <CardHeader>
-        <CardTitle className="text-yellow-400 text-sm flex items-center gap-2">
-          <Lightbulb className="h-4 w-4" />
+        <CardTitle className="flex items-center gap-2 text-purple-400">
+          <Lightbulb className="h-5 w-5" />
           AI Remediation Suggestions
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-2 max-h-40 overflow-y-auto">
-        {suggestions.map((suggestion) => (
-          <div key={suggestion.id} className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded">
-            <div className="text-sm text-yellow-200 mb-2">{suggestion.suggestion}</div>
-            <div className="text-xs text-yellow-400/70 mb-2">{suggestion.rationale}</div>
-            <div className="flex justify-between items-center">
-              <span className="text-xs text-gray-500">by {suggestion.proposed_by}</span>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => applySuggestion(suggestion)}
-                className="text-xs bg-yellow-600 hover:bg-yellow-700"
-              >
-                Apply
-              </Button>
+      <CardContent>
+        <div className="space-y-3 max-h-64 overflow-y-auto">
+          {suggestions.length > 0 ? (
+            suggestions.map((suggestion) => (
+              <div key={suggestion.id} className="p-3 bg-gray-800 rounded border border-gray-700">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-medium text-white">{suggestion.type}</span>
+                  <div className="flex items-center gap-2">
+                    {getPriorityIcon(suggestion.priority)}
+                    <Badge variant="secondary" className={getPriorityColor(suggestion.priority)}>
+                      {suggestion.priority}
+                    </Badge>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-400 mb-1">{suggestion.suggestion}</p>
+                <div className="text-xs text-gray-500">
+                  {new Date(suggestion.timestamp).toLocaleString()}
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="text-center text-gray-500 py-4">
+              No AI suggestions available
             </div>
-          </div>
-        ))}
+          )}
+        </div>
       </CardContent>
     </Card>
   );

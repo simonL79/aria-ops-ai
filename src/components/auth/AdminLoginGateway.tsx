@@ -27,7 +27,6 @@ const AdminLoginGateway = ({ onComplete }: AdminLoginGatewayProps) => {
 
   const checkSystemStatus = async () => {
     try {
-      // Check if we can connect to the database using existing tables
       const { data, error } = await supabase
         .from('activity_logs')
         .select('id')
@@ -71,7 +70,7 @@ const AdminLoginGateway = ({ onComplete }: AdminLoginGatewayProps) => {
         return;
       }
 
-      if (result?.data?.user) {
+      if (result?.user) {
         await logAdminAction('login_success', `Successful admin login for ${email}`);
         toast.success('Admin access granted');
         onComplete(true);
@@ -98,7 +97,6 @@ const AdminLoginGateway = ({ onComplete }: AdminLoginGatewayProps) => {
             <p className="text-slate-400 mt-2">Secure Administrative Access</p>
           </div>
           
-          {/* System Status */}
           <div className="flex items-center justify-center gap-2">
             <div className={`w-2 h-2 rounded-full ${
               systemStatus === 'operational' ? 'bg-green-500' :
@@ -139,7 +137,7 @@ const AdminLoginGateway = ({ onComplete }: AdminLoginGatewayProps) => {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-white"
                 >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 w-4" />}
                 </button>
               </div>
             </div>

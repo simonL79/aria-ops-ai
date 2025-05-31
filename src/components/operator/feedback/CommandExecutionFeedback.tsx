@@ -2,16 +2,14 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Activity, CheckCircle, XCircle, AlertCircle, Clock } from 'lucide-react';
+import { CheckCircle, XCircle, Clock } from 'lucide-react';
 
 interface CommandFeedback {
   id: string;
-  command_id: string;
-  execution_status: string;
-  summary: string;
-  error_message?: string;
-  evaluated_at: string;
-  created_by: string;
+  command: string;
+  status: string;
+  message: string;
+  timestamp: string;
 }
 
 interface CommandExecutionFeedbackProps {
@@ -21,64 +19,60 @@ interface CommandExecutionFeedbackProps {
 export const CommandExecutionFeedback = ({ feedback }: CommandExecutionFeedbackProps) => {
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'success':
-        return <CheckCircle className="h-4 w-4 text-green-400" />;
-      case 'fail':
-        return <XCircle className="h-4 w-4 text-red-400" />;
-      case 'partial':
-        return <AlertCircle className="h-4 w-4 text-yellow-400" />;
-      case 'pending':
-        return <Clock className="h-4 w-4 text-blue-400 animate-spin" />;
+      case 'completed':
+        return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case 'failed':
+        return <XCircle className="h-4 w-4 text-red-500" />;
       default:
-        return <Clock className="h-4 w-4 text-gray-400" />;
+        return <Clock className="h-4 w-4 text-yellow-500" />;
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'success':
-        return 'bg-green-500/20 text-green-400 border-green-500/50';
-      case 'fail':
-        return 'bg-red-500/20 text-red-400 border-red-500/50';
-      case 'partial':
-        return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50';
-      case 'pending':
-        return 'bg-blue-500/20 text-blue-400 border-blue-500/50';
+      case 'completed':
+        return 'bg-green-100 text-green-800';
+      case 'failed':
+        return 'bg-red-100 text-red-800';
       default:
-        return 'bg-gray-500/20 text-gray-400 border-gray-500/50';
+        return 'bg-yellow-100 text-yellow-800';
     }
   };
 
   return (
-    <Card className="bg-black border-green-500/30">
+    <Card className="bg-gray-900 border-gray-700">
       <CardHeader>
-        <CardTitle className="text-green-400 text-sm flex items-center gap-2">
-          <Activity className="h-4 w-4" />
+        <CardTitle className="flex items-center gap-2 text-blue-400">
+          <CheckCircle className="h-5 w-5" />
           Command Execution Feedback
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-2 max-h-48 overflow-y-auto">
-        {feedback.length === 0 ? (
-          <div className="text-gray-500 text-sm">No feedback data available</div>
-        ) : (
-          feedback.map((item) => (
-            <div key={item.id} className="flex items-center gap-3 p-2 bg-gray-900/50 rounded">
-              {getStatusIcon(item.execution_status)}
-              <div className="flex-1">
-                <div className="text-sm text-white">{item.summary}</div>
-                {item.error_message && (
-                  <div className="text-xs text-red-400 mt-1">{item.error_message}</div>
-                )}
+      <CardContent>
+        <div className="space-y-3 max-h-64 overflow-y-auto">
+          {feedback.length > 0 ? (
+            feedback.map((item) => (
+              <div key={item.id} className="p-3 bg-gray-800 rounded border border-gray-700">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-medium text-white">{item.command}</span>
+                  <div className="flex items-center gap-2">
+                    {getStatusIcon(item.status)}
+                    <Badge variant="secondary" className={getStatusColor(item.status)}>
+                      {item.status}
+                    </Badge>
+                  </div>
+                </div>
+                <p className="text-sm text-gray-400 mb-1">{item.message}</p>
                 <div className="text-xs text-gray-500">
-                  {new Date(item.evaluated_at).toLocaleTimeString()} by {item.created_by}
+                  {new Date(item.timestamp).toLocaleString()}
                 </div>
               </div>
-              <Badge className={getStatusColor(item.execution_status)}>
-                {item.execution_status}
-              </Badge>
+            ))
+          ) : (
+            <div className="text-center text-gray-500 py-4">
+              No command feedback available
             </div>
-          ))
-        )}
+          )}
+        </div>
       </CardContent>
     </Card>
   );
