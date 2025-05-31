@@ -18,6 +18,7 @@ import DashboardPage from "./pages/dashboard/DashboardPage";
 import MentionsPage from "./pages/dashboard/MentionsPage";
 import MonitoringPage from "./pages/dashboard/MonitoringPage";
 import SentinelPage from "./pages/dashboard/SentinelPage";
+import AnubisGPTCockpitPage from "./pages/AnubisGPTCockpitPage";
 import Discovery from "./pages/Discovery";
 import EideticPage from "./pages/EideticPage";
 import ExecutiveReportsPage from "./pages/ExecutiveReportsPage";
@@ -66,6 +67,11 @@ const App = () => (
             } />
             
             {/* Additional protected pages */}
+            <Route path="/anubis-gpt" element={
+              <AdminGuard>
+                <AnubisGPTCockpitPage />
+              </AdminGuard>
+            } />
             <Route path="/discovery" element={
               <AdminGuard>
                 <Discovery />
