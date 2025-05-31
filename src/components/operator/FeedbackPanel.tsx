@@ -1,7 +1,7 @@
 
 import React from 'react';
-import LuminoscorePanel from './LuminoscorePanel';
-import CitadelPanel from './CitadelPanel';
+import { LuminoscorePanel } from './LuminoscorePanel';
+import { CitadelPanel } from './CitadelPanel';
 import { SentinelgridPanel } from "./SentinelgridPanel";
 import { ZeuslinkPanel } from "./ZeuslinkPanel";
 import { PerimetrixPanel } from "./PerimetrixPanel";

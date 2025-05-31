@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 export interface AnubisActivityLog {
@@ -27,3 +28,10 @@ export const logAnubisActivity = async (activity: AnubisActivityLog) => {
     throw error;
   }
 };
+
+// Default export to match import expectations
+export const anubisIntegrationService = {
+  logActivity: logAnubisActivity
+};
+
+export default anubisIntegrationService;

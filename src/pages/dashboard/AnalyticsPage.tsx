@@ -8,11 +8,13 @@ const AnalyticsPage = () => {
   const {
     alerts,
     sources,
-    negativeContent,
-    positiveContent,
-    neutralContent,
     loading,
   } = useDashboardData();
+
+  // Calculate content sentiment distribution
+  const negativeContent = alerts.filter(alert => alert.sentiment === 'negative').length;
+  const positiveContent = alerts.filter(alert => alert.sentiment === 'positive').length;
+  const neutralContent = alerts.filter(alert => alert.sentiment === 'neutral').length;
 
   if (loading) {
     return <div>Loading analytics...</div>;

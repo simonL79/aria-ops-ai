@@ -11,11 +11,13 @@ const CommandCenterPage = () => {
   const {
     alerts,
     sources,
-    negativeContent,
     loading,
     error,
     fetchData,
   } = useDashboardData();
+
+  // Calculate metrics from available data
+  const negativeContent = alerts.filter(alert => alert.sentiment === 'negative').length;
 
   // Filter for live OSINT data only
   const liveAlerts = alerts.filter(alert => 
