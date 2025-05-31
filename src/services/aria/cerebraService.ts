@@ -77,17 +77,9 @@ export interface CerebraInfluenceSummary {
 
 export const getModelBiasProfiles = async (): Promise<ModelBiasProfile[]> => {
   try {
-    const { data, error } = await supabase
-      .from('model_bias_profile')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error('Error fetching model bias profiles:', error);
-      return [];
-    }
-
-    return data || [];
+    // Return empty array for now since table doesn't exist yet
+    console.log('Model bias profiles not available - table not yet created');
+    return [];
   } catch (error) {
     console.error('Error in getModelBiasProfiles:', error);
     return [];
@@ -98,17 +90,8 @@ export const createModelBiasProfile = async (
   profile: Omit<Partial<ModelBiasProfile>, 'id' | 'created_at' | 'last_verified'> & { entity_name: string }
 ): Promise<boolean> => {
   try {
-    const { error } = await supabase
-      .from('model_bias_profile')
-      .insert([profile]);
-
-    if (error) {
-      console.error('Error creating model bias profile:', error);
-      toast.error('Failed to create bias profile');
-      return false;
-    }
-
-    toast.success('Model bias profile created successfully');
+    console.log('Creating model bias profile (simulated):', profile);
+    toast.success('Model bias profile created successfully (simulated)');
     return true;
   } catch (error) {
     console.error('Error in createModelBiasProfile:', error);
@@ -119,17 +102,9 @@ export const createModelBiasProfile = async (
 
 export const getCerebraOverridePackets = async (): Promise<CerebraOverridePacket[]> => {
   try {
-    const { data, error } = await supabase
-      .from('cerebra_override_packets')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error('Error fetching override packets:', error);
-      return [];
-    }
-
-    return data || [];
+    // Return empty array for now since table doesn't exist yet
+    console.log('Cerebra override packets not available - table not yet created');
+    return [];
   } catch (error) {
     console.error('Error in getCerebraOverridePackets:', error);
     return [];
@@ -140,17 +115,8 @@ export const createOverridePacket = async (
   packet: Omit<Partial<CerebraOverridePacket>, 'id' | 'created_at'> & { entity_name: string }
 ): Promise<boolean> => {
   try {
-    const { error } = await supabase
-      .from('cerebra_override_packets')
-      .insert([packet]);
-
-    if (error) {
-      console.error('Error creating override packet:', error);
-      toast.error('Failed to create override packet');
-      return false;
-    }
-
-    toast.success('Override packet created successfully');
+    console.log('Creating override packet (simulated):', packet);
+    toast.success('Override packet created successfully (simulated)');
     return true;
   } catch (error) {
     console.error('Error in createOverridePacket:', error);
@@ -161,21 +127,8 @@ export const createOverridePacket = async (
 
 export const deployOverridePacket = async (packetId: string): Promise<boolean> => {
   try {
-    const { error } = await supabase
-      .from('cerebra_override_packets')
-      .update({ 
-        status: 'deployed',
-        deployed_at: new Date().toISOString()
-      })
-      .eq('id', packetId);
-
-    if (error) {
-      console.error('Error deploying override packet:', error);
-      toast.error('Failed to deploy override packet');
-      return false;
-    }
-
-    toast.success('Override packet deployed successfully');
+    console.log('Deploying override packet (simulated):', packetId);
+    toast.success('Override packet deployed successfully (simulated)');
     return true;
   } catch (error) {
     console.error('Error in deployOverridePacket:', error);
@@ -186,17 +139,9 @@ export const deployOverridePacket = async (packetId: string): Promise<boolean> =
 
 export const getAIInfluenceMap = async (): Promise<AIInfluenceMap[]> => {
   try {
-    const { data, error } = await supabase
-      .from('ai_influence_map')
-      .select('*')
-      .order('captured_at', { ascending: false });
-
-    if (error) {
-      console.error('Error fetching AI influence map:', error);
-      return [];
-    }
-
-    return data || [];
+    // Return empty array for now since table doesn't exist yet
+    console.log('AI influence map not available - table not yet created');
+    return [];
   } catch (error) {
     console.error('Error in getAIInfluenceMap:', error);
     return [];
@@ -205,16 +150,9 @@ export const getAIInfluenceMap = async (): Promise<AIInfluenceMap[]> => {
 
 export const getCerebraBiasDashboard = async (): Promise<CerebraBiasDashboard[]> => {
   try {
-    const { data, error } = await supabase
-      .from('cerebra_bias_dashboard')
-      .select('*');
-
-    if (error) {
-      console.error('Error fetching CEREBRA bias dashboard:', error);
-      return [];
-    }
-
-    return data || [];
+    // Return empty array for now since view doesn't exist yet
+    console.log('CEREBRA bias dashboard not available - view not yet created');
+    return [];
   } catch (error) {
     console.error('Error in getCerebraBiasDashboard:', error);
     return [];
@@ -223,16 +161,9 @@ export const getCerebraBiasDashboard = async (): Promise<CerebraBiasDashboard[]>
 
 export const getCerebraInfluenceSummary = async (): Promise<CerebraInfluenceSummary[]> => {
   try {
-    const { data, error } = await supabase
-      .from('cerebra_influence_summary')
-      .select('*');
-
-    if (error) {
-      console.error('Error fetching CEREBRA influence summary:', error);
-      return [];
-    }
-
-    return data || [];
+    // Return empty array for now since view doesn't exist yet
+    console.log('CEREBRA influence summary not available - view not yet created');
+    return [];
   } catch (error) {
     console.error('Error in getCerebraInfluenceSummary:', error);
     return [];
@@ -241,15 +172,8 @@ export const getCerebraInfluenceSummary = async (): Promise<CerebraInfluenceSumm
 
 export const refreshCerebraViews = async (): Promise<boolean> => {
   try {
-    const { error } = await supabase.rpc('refresh_cerebra_views');
-
-    if (error) {
-      console.error('Error refreshing CEREBRA views:', error);
-      toast.error('Failed to refresh CEREBRA views');
-      return false;
-    }
-
-    toast.success('CEREBRA views refreshed successfully');
+    console.log('Refreshing CEREBRA views (simulated)');
+    toast.success('CEREBRA views refreshed successfully (simulated)');
     return true;
   } catch (error) {
     console.error('Error in refreshCerebraViews:', error);

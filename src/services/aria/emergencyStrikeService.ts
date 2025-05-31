@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { enhancedEmergencyConnector } from './enhancedEmergencyConnector';
@@ -49,32 +50,23 @@ class EmergencyStrikeService {
     riskLevel: 'high' | 'critical'
   ): Promise<string | null> {
     try {
-      const { data, error } = await supabase.rpc('ex_add_threat', {
-        p_desc: description,
-        p_type: type,
-        p_url: url,
-        p_risk: riskLevel
-      });
-
-      if (error) {
-        console.error('Error adding emergency threat:', error);
-        toast.error('Failed to add emergency threat');
-        return null;
-      }
-
-      console.log('Emergency threat added:', data);
-      toast.error(`🚨 EMERGENCY THREAT DETECTED: ${type.toUpperCase()}`);
+      console.log('Adding emergency threat (simulated):', { description, type, url, riskLevel });
       
-      // Log to Anubis
+      // Generate a mock threat ID
+      const mockThreatId = `threat_${Date.now()}`;
+      
+      toast.error(`🚨 EMERGENCY THREAT DETECTED: ${type.toUpperCase()} (simulated)`);
+      
+      // Log to Anubis (simulated)
       await enhancedEmergencyConnector.logThreatDetected({
-        id: data,
+        id: mockThreatId,
         threat_type: type,
         threat_description: description,
         origin_url: url,
         risk_level: riskLevel
       });
       
-      return data;
+      return mockThreatId;
     } catch (error) {
       console.error('Error in addEmergencyThreat:', error);
       toast.error('Failed to add emergency threat');
@@ -88,25 +80,17 @@ class EmergencyStrikeService {
     actionDetail: string
   ): Promise<string | null> {
     try {
-      const { data, error } = await supabase.rpc('ex_add_strike_plan', {
-        p_threat_id: threatId,
-        p_action_type: actionType,
-        p_action_detail: actionDetail
-      });
-
-      if (error) {
-        console.error('Error adding strike plan:', error);
-        toast.error('Failed to add strike plan');
-        return null;
-      }
-
-      console.log('Strike plan added:', data);
-      toast.success('Strike plan added to emergency queue');
+      console.log('Adding strike plan (simulated):', { threatId, actionType, actionDetail });
       
-      // Log to Anubis
-      await enhancedEmergencyConnector.logStrikePlanned(threatId, data, actionType);
+      // Generate a mock plan ID
+      const mockPlanId = `plan_${Date.now()}`;
+
+      toast.success('Strike plan added to emergency queue (simulated)');
       
-      return data;
+      // Log to Anubis (simulated)
+      await enhancedEmergencyConnector.logStrikePlanned(threatId, mockPlanId, actionType);
+      
+      return mockPlanId;
     } catch (error) {
       console.error('Error in addStrikePlan:', error);
       toast.error('Failed to add strike plan');
@@ -120,23 +104,13 @@ class EmergencyStrikeService {
     reason: string
   ): Promise<boolean> {
     try {
-      const { data, error } = await supabase.rpc('ex_admin_confirm_strike', {
-        p_threat_id: threatId,
-        p_admin: adminId,
-        p_reason: reason
-      });
+      console.log('Confirming strike (simulated):', { threatId, adminId, reason });
 
-      if (error) {
-        console.error('Error confirming strike:', error);
-        toast.error('Failed to confirm strike execution');
-        return false;
-      }
-
-      toast.success(data || 'Emergency strike executed successfully');
+      toast.success('Emergency strike executed successfully (simulated)');
       
-      // Log to Anubis
+      // Log to Anubis (simulated)
       await enhancedEmergencyConnector.logAdminConfirmation(threatId, adminId, reason);
-      await enhancedEmergencyConnector.logStrikeExecuted(threatId, data || 'Strike confirmed', adminId);
+      await enhancedEmergencyConnector.logStrikeExecuted(threatId, 'Strike confirmed (simulated)', adminId);
       
       return true;
     } catch (error) {
@@ -146,20 +120,10 @@ class EmergencyStrikeService {
     }
   }
 
-  async cancelThreat(threatId: string, reason: string): Promise<boolean> {
+  async cancelThreat(threatId: string, reason: string): Promise<boolean> => {
     try {
-      const { data, error } = await supabase.rpc('ex_cancel_threat', {
-        p_threat_id: threatId,
-        p_reason: reason
-      });
-
-      if (error) {
-        console.error('Error cancelling threat:', error);
-        toast.error('Failed to cancel threat');
-        return false;
-      }
-
-      toast.success(data || 'Threat cancelled successfully');
+      console.log('Cancelling threat (simulated):', { threatId, reason });
+      toast.success('Threat cancelled successfully (simulated)');
       return true;
     } catch (error) {
       console.error('Error in cancelThreat:', error);
@@ -168,82 +132,44 @@ class EmergencyStrikeService {
     }
   }
 
-  async getEmergencyThreats(): Promise<EmergencyThreat[]> {
+  async getEmergencyThreats(): Promise<EmergencyThreat[]> => {
     try {
-      const { data, error } = await supabase
-        .from('ex_threat_queue')
-        .select('*')
-        .order('detected_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching emergency threats:', error);
-        return [];
-      }
-
-      return (data || []) as EmergencyThreat[];
+      // Return empty array for now since table doesn't exist yet
+      console.log('Emergency threats not available - table not yet created');
+      return [];
     } catch (error) {
       console.error('Error in getEmergencyThreats:', error);
       return [];
     }
   }
 
-  async getStrikePlans(threatId?: string): Promise<StrikePlan[]> {
+  async getStrikePlans(threatId?: string): Promise<StrikePlan[]> => {
     try {
-      let query = supabase
-        .from('ex_strike_plan')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (threatId) {
-        query = query.eq('threat_id', threatId);
-      }
-
-      const { data, error } = await query;
-
-      if (error) {
-        console.error('Error fetching strike plans:', error);
-        return [];
-      }
-
-      return (data || []) as StrikePlan[];
+      // Return empty array for now since table doesn't exist yet
+      console.log('Strike plans not available - table not yet created');
+      return [];
     } catch (error) {
       console.error('Error in getStrikePlans:', error);
       return [];
     }
   }
 
-  async getAdminDecisions(): Promise<AdminDecision[]> {
+  async getAdminDecisions(): Promise<AdminDecision[]> => {
     try {
-      const { data, error } = await supabase
-        .from('ex_admin_decisions')
-        .select('*')
-        .order('reviewed_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching admin decisions:', error);
-        return [];
-      }
-
-      return data || [];
+      // Return empty array for now since table doesn't exist yet
+      console.log('Admin decisions not available - table not yet created');
+      return [];
     } catch (error) {
       console.error('Error in getAdminDecisions:', error);
       return [];
     }
   }
 
-  async getActionLogs(): Promise<ActionLog[]> {
+  async getActionLogs(): Promise<ActionLog[]> => {
     try {
-      const { data, error } = await supabase
-        .from('ex_action_log')
-        .select('*')
-        .order('executed_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching action logs:', error);
-        return [];
-      }
-
-      return data || [];
+      // Return empty array for now since table doesn't exist yet
+      console.log('Action logs not available - table not yet created');
+      return [];
     } catch (error) {
       console.error('Error in getActionLogs:', error);
       return [];
@@ -251,7 +177,7 @@ class EmergencyStrikeService {
   }
 
   // Emergency simulation for testing
-  async simulateEmergencyThreat(): Promise<void> {
+  async simulateEmergencyThreat(): Promise<void> => {
     const emergencyThreats = [
       {
         description: 'High-volume coordinated deepfake campaign targeting executive reputation',
@@ -304,7 +230,7 @@ class EmergencyStrikeService {
       }
     }
 
-    toast.error('🚨 EMERGENCY SIMULATION COMPLETE - Check A.R.I.A/EX™ Dashboard');
+    toast.error('🚨 EMERGENCY SIMULATION COMPLETE - Check A.R.I.A/EX™ Dashboard (simulated)');
   }
 }
 
