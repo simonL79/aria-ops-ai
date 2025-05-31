@@ -1,8 +1,9 @@
 
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import ResponsiveLayout from '@/components/layout/ResponsiveLayout';
 import { Skeleton } from '@/components/ui/skeleton';
+import { qaTestRunner, QATestSuite } from '@/services/testing/qaTestRunner';
 
 // Lazy load components for better performance
 const CriticalActionButtons = lazy(() => import('@/components/dashboard/CriticalActionButtons'));
@@ -17,6 +18,26 @@ import QAProcessCards from '@/components/admin/qa/QAProcessCards';
 import QADeploymentCriteria from '@/components/admin/qa/QADeploymentCriteria';
 
 const QATestingPage = React.memo(() => {
+  const [testSuite, setTestSuite] = useState<QATestSuite | null>(null);
+  const [isRunningTests, setIsRunningTests] = useState(false);
+
+  // Run initial QA tests on component mount
+  useEffect(() => {
+    const runInitialTests = async () => {
+      setIsRunningTests(true);
+      try {
+        const results = await qaTestRunner.runFullQASuite();
+        setTestSuite(results);
+      } catch (error) {
+        console.error('Failed to run QA tests:', error);
+      } finally {
+        setIsRunningTests(false);
+      }
+    };
+
+    runInitialTests();
+  }, []);
+
   // Enhanced validation for live data only
   const actionHandlers = React.useMemo(() => ({
     handleLiveThreatScan: () => {
@@ -51,7 +72,7 @@ const QATestingPage = React.memo(() => {
             onGenerateReport={actionHandlers.handleGenerateReport}
             onActivateRealTime={actionHandlers.handleActivateRealTime}
             onRunManualScan={actionHandlers.handleRunManualScan}
-            isScanning={false}
+            isScanning={isRunningTests}
             isGuardianActive={true}
             isRealTimeActive={false}
           />
@@ -63,7 +84,7 @@ const QATestingPage = React.memo(() => {
         {/* Performance monitor and overview */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6 w-full">
           <div className="lg:col-span-3 w-full min-w-0">
-            <QAOverviewCards />
+            <QAOverviewCards testSuite={testSuite} />
           </div>
           <div className="lg:col-span-1 w-full min-w-0">
             <Suspense fallback={<Skeleton className="h-32 sm:h-40 bg-corporate-darkSecondary rounded" />}>
