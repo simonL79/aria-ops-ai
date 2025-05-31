@@ -26,9 +26,10 @@ const PersonaSaturationPanel = () => {
   const [activeTab, setActiveTab] = useState('deploy');
   const [entityName, setEntityName] = useState('');
   const [targetKeywords, setTargetKeywords] = useState('');
-  const [contentCount, setContentCount] = useState(50);
+  const [contentCount, setContentCount] = useState(10);
   const [saturationMode, setSaturationMode] = useState<'defensive' | 'aggressive' | 'nuclear'>('defensive');
   const [deploymentTargets, setDeploymentTargets] = useState(['github-pages']);
+  const [deploymentTier, setDeploymentTier] = useState<'basic' | 'pro' | 'enterprise'>('basic');
   const [isExecuting, setIsExecuting] = useState(false);
   const [currentCampaign, setCurrentCampaign] = useState<SaturationCampaign | null>(null);
   const [campaigns, setCampaigns] = useState<SaturationCampaign[]>([]);
@@ -116,7 +117,7 @@ const PersonaSaturationPanel = () => {
     try {
       const keywords = targetKeywords.split(',').map(k => k.trim()).filter(k => k.length > 0);
       
-      console.log('🚀 Deploying live articles to GitHub Pages...');
+      console.log(`🚀 Deploying ${contentCount} articles using ${deploymentTier} tier...`);
       
       const { data, error } = await supabase.functions.invoke('persona-saturation', {
         body: {
@@ -125,7 +126,8 @@ const PersonaSaturationPanel = () => {
           contentCount,
           deploymentTargets,
           saturationMode,
-          realDeployment: true // Enable real GitHub deployment
+          deploymentTier,
+          realDeployment: true
         }
       });
 
@@ -147,15 +149,15 @@ const PersonaSaturationPanel = () => {
         progress: 100,
         contentGenerated: data.campaign.contentGenerated,
         deploymentsSuccessful: data.campaign.deployments.successful,
-        serpPenetration: (data.campaign.serpAnalysis.penetrationRate || 0) * 100,
+        serpPenetration: (data.campaign.serpPenetration || 0) * 100,
         estimatedImpact: data.estimatedSERPImpact
       } : null);
 
-      toast.success(`🎯 Live Deployment Complete! ${data.campaign.deployments.successful}/${contentCount} articles now live on GitHub Pages`);
+      toast.success(`🎯 ${deploymentTier.toUpperCase()} Deployment Complete! ${data.campaign.deployments.successful}/${contentCount} articles now live`);
       
       // Show deployment URLs
       if (data.campaign.deployments.urls && data.campaign.deployments.urls.length > 0) {
-        toast.success(`🌐 ${data.campaign.deployments.urls.length} live websites created. Check Reports tab for all URLs.`);
+        toast.success(`🌐 ${data.campaign.deployments.urls.length} live websites created using ${deploymentTier} tier strategy.`);
       }
       
       // Refresh campaigns list if we're on that tab
@@ -190,10 +192,10 @@ const PersonaSaturationPanel = () => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Rocket className="h-5 w-5" />
-          A.R.I.A™ Live Article Deployment
+          A.R.I.A™ Scaled Article Deployment
         </CardTitle>
         <p className="text-sm text-muted-foreground">
-          Deploy SEO-optimized articles to live GitHub Pages sites with automated indexing
+          Deploy SEO-optimized articles using tiered scaling strategies with automated deployment
         </p>
       </CardHeader>
       <CardContent>

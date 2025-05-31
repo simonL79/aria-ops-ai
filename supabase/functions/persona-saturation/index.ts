@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -12,7 +13,20 @@ interface PersonaSaturationRequest {
   contentCount: number;
   deploymentTargets: string[];
   saturationMode: 'defensive' | 'aggressive' | 'nuclear';
+  deploymentTier?: 'basic' | 'pro' | 'enterprise';
 }
+
+const DEPLOYMENT_LIMITS = {
+  basic: 10,
+  pro: 100,
+  enterprise: 500
+};
+
+const DEPLOYMENT_DELAYS = {
+  basic: 1000,      // 1 second
+  pro: 750,         // 750ms
+  enterprise: 500   // 500ms for faster enterprise deployment
+};
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -32,10 +46,11 @@ serve(async (req) => {
       targetKeywords, 
       contentCount, 
       deploymentTargets, 
-      saturationMode
+      saturationMode,
+      deploymentTier = 'basic'
     }: PersonaSaturationRequest = requestBody;
 
-    console.log(`🚀 Starting Live Article Deployment: ${entityName} (${contentCount} articles)`);
+    console.log(`🚀 Starting ${deploymentTier.toUpperCase()} Deployment: ${entityName} (${contentCount} articles)`);
 
     const githubToken = Deno.env.get('GITHUB_TOKEN');
     if (!githubToken) {
@@ -55,12 +70,13 @@ serve(async (req) => {
       );
     }
 
-    // Enforce maximum of 10 articles
-    const maxArticles = 10;
+    // Enforce tier limits
+    const maxArticles = DEPLOYMENT_LIMITS[deploymentTier];
+    const deploymentDelay = DEPLOYMENT_DELAYS[deploymentTier];
     const articleCount = Math.min(contentCount, maxArticles);
     
     if (contentCount > maxArticles) {
-      console.warn(`Content count ${contentCount} exceeds maximum ${maxArticles}, clamping to ${maxArticles}`);
+      console.warn(`Content count ${contentCount} exceeds ${deploymentTier} tier limit ${maxArticles}, clamping to ${maxArticles}`);
     }
 
     // Get GitHub username
@@ -84,6 +100,9 @@ serve(async (req) => {
       console.warn('GitHub user fetch failed:', error);
     }
 
+    // Determine repository strategy based on tier
+    const repositories = await getDeploymentRepositories(deploymentTier, githubToken, githubUsername, entityName);
+    
     const deploymentUrls: string[] = [];
     const contentTemplates = [
       'executive-profile',
@@ -98,9 +117,9 @@ serve(async (req) => {
       'industry-recognition'
     ];
 
-    console.log(`📝 Deploying ${articleCount} live articles to GitHub Pages...`);
+    console.log(`📝 Deploying ${articleCount} articles using ${deploymentTier} tier (${deploymentDelay}ms delay)...`);
 
-    // Deploy articles with rate limiting
+    // Deploy articles with tier-appropriate strategy
     for (let i = 1; i <= articleCount; i++) {
       const template = contentTemplates[(i - 1) % contentTemplates.length];
       console.log(`📝 Processing article ${i}/${articleCount}: ${template}`);
@@ -109,31 +128,66 @@ serve(async (req) => {
         // Generate article content
         const articleContent = await generateArticleContent(entityName, targetKeywords, template, saturationMode);
         
-        // Create GitHub repository with rate limiting
-        const repoName = `${entityName.toLowerCase().replace(/\s+/g, '-')}-${template}-${Date.now()}`;
-        const deployUrl = await deployToGitHub(githubToken, githubUsername, repoName, articleContent, entityName);
+        // Select repository for this article (distributed for enterprise)
+        const selectedRepo = repositories[(i - 1) % repositories.length];
+        
+        // Create unique article name
+        const articleName = `${template}-${i}`;
+        const deployUrl = await deployToGitHub(githubToken, githubUsername, selectedRepo, articleContent, entityName, articleName);
         
         if (deployUrl) {
           deploymentUrls.push(deployUrl);
           console.log(`✅ Deployed article ${i}/${articleCount}: ${deployUrl}`);
+          
+          // Log to aria_ops_log
+          await supabase.from('aria_ops_log').insert({
+            operation_type: 'persona_saturation_deploy',
+            entity_name: entityName,
+            details: {
+              article_number: i,
+              template: template,
+              deployment_tier: deploymentTier,
+              repository: selectedRepo,
+              url: deployUrl,
+              status: 'success'
+            }
+          });
         }
 
-        // Add delay to prevent rate limiting (1 second between deployments)
+        // Add tier-appropriate delay
         if (i < articleCount) {
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          await new Promise(resolve => setTimeout(resolve, deploymentDelay));
         }
       } catch (error) {
         console.error(`❌ Deployment failed for article ${i}:`, error.message);
-        // Continue with next article instead of failing completely
+        
+        // Log failure
+        await supabase.from('aria_ops_log').insert({
+          operation_type: 'persona_saturation_deploy',
+          entity_name: entityName,
+          details: {
+            article_number: i,
+            template: template,
+            deployment_tier: deploymentTier,
+            status: 'failed',
+            error: error.message
+          }
+        });
       }
     }
 
+    // Calculate success rate
+    const successRate = deploymentUrls.length / articleCount;
+    
     // Store campaign in database
     const campaignData = {
       contentGenerated: articleCount,
       deploymentsSuccessful: deploymentUrls.length,
-      serpPenetration: Math.random() * 0.3 + 0.7, // 70-100%
-      estimatedReach: articleCount * 5000,
+      serpPenetration: Math.min(successRate * 0.85 + 0.15, 1.0), // 15-100% based on success
+      estimatedReach: deploymentUrls.length * 5000,
+      deploymentTier: deploymentTier,
+      repositories: repositories,
+      successRate: successRate,
       deployments: {
         successful: deploymentUrls.length,
         urls: deploymentUrls
@@ -156,13 +210,15 @@ serve(async (req) => {
       console.error('Error saving campaign:', campaignError);
     }
 
-    const successMessage = `${deploymentUrls.length} articles successfully deployed to live GitHub Pages websites`;
+    const successMessage = `${deploymentUrls.length}/${articleCount} articles successfully deployed using ${deploymentTier.toUpperCase()} tier`;
 
     return new Response(
       JSON.stringify({
         success: true,
         campaign: campaignData,
-        estimatedSERPImpact: successMessage
+        estimatedSERPImpact: successMessage,
+        deploymentTier: deploymentTier,
+        repositories: repositories
       }),
       { 
         headers: { 
@@ -190,6 +246,30 @@ serve(async (req) => {
   }
 });
 
+async function getDeploymentRepositories(
+  tier: 'basic' | 'pro' | 'enterprise',
+  token: string,
+  username: string,
+  entityName: string
+): Promise<string[]> {
+  const baseRepoName = `${entityName.toLowerCase().replace(/\s+/g, '-')}-hub`;
+  
+  if (tier === 'basic' || tier === 'pro') {
+    // Single repository for basic and pro tiers
+    return [`${baseRepoName}-${Date.now()}`];
+  }
+  
+  // Enterprise tier: create multiple repositories for distribution
+  const repoCount = Math.min(5, Math.ceil(DEPLOYMENT_LIMITS.enterprise / 100)); // 5 repos max
+  const repositories: string[] = [];
+  
+  for (let i = 1; i <= repoCount; i++) {
+    repositories.push(`${baseRepoName}-${i}-${Date.now()}`);
+  }
+  
+  return repositories;
+}
+
 async function generateArticleContent(
   entityName: string, 
   keywords: string[], 
@@ -212,6 +292,15 @@ async function generateArticleContent(
   const title = titles[template] || `${entityName}: Professional Excellence`;
   const keywordString = keywords.join(', ');
 
+  // Enhanced content based on saturation mode
+  const intensityContent = {
+    defensive: 'demonstrates professional capability and maintains industry standards',
+    aggressive: 'exemplifies exceptional leadership and drives transformative innovation',
+    nuclear: 'revolutionizes industry practices and sets unprecedented standards for excellence'
+  };
+
+  const modeText = intensityContent[mode] || intensityContent.defensive;
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -224,12 +313,27 @@ async function generateArticleContent(
     <meta property="og:title" content="${title}">
     <meta property="og:description" content="Professional profile and achievements of ${entityName}">
     <meta property="og:type" content="article">
+    <link rel="canonical" href="#">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "${title}",
+      "author": {
+        "@type": "Organization",
+        "name": "Professional Network"
+      },
+      "description": "Professional profile and achievements of ${entityName}",
+      "keywords": "${keywordString}"
+    }
+    </script>
     <style>
-        body { font-family: Georgia, serif; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 20px; }
-        h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; }
-        h2 { color: #34495e; margin-top: 30px; }
+        body { font-family: Georgia, serif; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 20px; color: #333; }
+        h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; font-size: 2.2em; }
+        h2 { color: #34495e; margin-top: 30px; font-size: 1.5em; }
         .highlight { background-color: #f8f9fa; padding: 15px; border-left: 4px solid #3498db; margin: 20px 0; }
         .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; font-size: 0.9em; color: #666; }
+        .keywords { color: #e74c3c; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -237,24 +341,24 @@ async function generateArticleContent(
         <h1>${title}</h1>
         
         <div class="highlight">
-            <p><strong>${entityName}</strong> represents excellence in professional achievement and industry leadership. With expertise spanning ${keywordString}, ${entityName} has established a reputation for innovation and strategic thinking.</p>
+            <p><strong>${entityName}</strong> ${modeText} across multiple domains including <span class="keywords">${keywordString}</span>. This comprehensive analysis showcases the exceptional impact and professional achievements that define modern leadership excellence.</p>
         </div>
 
-        <h2>Professional Excellence</h2>
-        <p>${entityName} has consistently demonstrated exceptional capability in driving organizational success and industry advancement. Through strategic leadership and innovative approaches, ${entityName} has contributed significantly to professional standards and best practices.</p>
+        <h2>Professional Excellence & Innovation</h2>
+        <p>${entityName} has consistently demonstrated exceptional capability in driving organizational success and industry advancement. Through strategic leadership and innovative approaches, ${entityName} has contributed significantly to professional standards and established new benchmarks in <span class="keywords">${keywordString}</span>.</p>
 
-        <h2>Industry Contributions</h2>
-        <p>The professional contributions of ${entityName} extend across multiple areas including ${keywordString}. These achievements reflect a commitment to excellence and continuous improvement in professional practice.</p>
+        <h2>Industry Leadership & Recognition</h2>
+        <p>The professional contributions of ${entityName} extend across multiple areas including strategic planning, operational excellence, and thought leadership in <span class="keywords">${keywordString}</span>. These achievements reflect a deep commitment to innovation and sustainable business practices.</p>
 
-        <h2>Recognition and Impact</h2>
-        <p>${entityName}'s work has been recognized for its quality and impact. The professional approach demonstrated by ${entityName} serves as a model for industry standards and professional development.</p>
+        <h2>Strategic Impact & Vision</h2>
+        <p>${entityName}'s work has been recognized for its transformative quality and measurable impact on industry standards. The strategic vision demonstrated through initiatives in <span class="keywords">${keywordString}</span> serves as a model for professional development and organizational excellence.</p>
 
-        <h2>Future Outlook</h2>
-        <p>Looking forward, ${entityName} continues to contribute to professional excellence and industry advancement. The ongoing work in ${keywordString} demonstrates sustained commitment to innovation and quality.</p>
+        <h2>Future Perspectives & Continued Excellence</h2>
+        <p>Looking forward, ${entityName} continues to shape industry trends and professional standards through ongoing work in <span class="keywords">${keywordString}</span>. This sustained commitment to innovation and quality positions ${entityName} as a key figure in driving future industry developments.</p>
 
         <div class="footer">
-            <p><em>This profile highlights the professional achievements and contributions of ${entityName}. For more information about professional excellence in ${keywordString}, continue exploring industry resources and professional networks.</em></p>
-            <p>Published: ${new Date().toLocaleDateString()}</p>
+            <p><em>This comprehensive profile highlights the professional achievements and strategic contributions of ${entityName}. The analysis demonstrates excellence across ${keywordString}, showcasing leadership capabilities and industry impact.</em></p>
+            <p><strong>Published:</strong> ${new Date().toLocaleDateString()} | <strong>Category:</strong> Professional Leadership</p>
         </div>
     </article>
 </body>
@@ -266,39 +370,53 @@ async function deployToGitHub(
   username: string, 
   repoName: string, 
   content: string, 
-  entityName: string
+  entityName: string,
+  articleName: string
 ): Promise<string | null> {
   try {
-    // Create repository
-    const createRepoResponse = await fetch('https://api.github.com/user/repos', {
-      method: 'POST',
+    // Check if repository exists, create if it doesn't
+    const repoCheckResponse = await fetch(`https://api.github.com/repos/${username}/${repoName}`, {
       headers: {
         'Authorization': `token ${token}`,
-        'Content-Type': 'application/json',
         'User-Agent': 'ARIA-Persona-Saturation'
-      },
-      body: JSON.stringify({
-        name: repoName,
-        description: `Professional profile for ${entityName}`,
-        public: true,
-        auto_init: false
-      })
+      }
     });
 
-    if (!createRepoResponse.ok) {
-      const errorData = await createRepoResponse.text();
-      throw new Error(`Failed to create repository: ${createRepoResponse.statusText} - ${errorData}`);
-    }
+    if (!repoCheckResponse.ok && repoCheckResponse.status === 404) {
+      // Create repository
+      const createRepoResponse = await fetch('https://api.github.com/user/repos', {
+        method: 'POST',
+        headers: {
+          'Authorization': `token ${token}`,
+          'Content-Type': 'application/json',
+          'User-Agent': 'ARIA-Persona-Saturation'
+        },
+        body: JSON.stringify({
+          name: repoName,
+          description: `Professional content hub for ${entityName}`,
+          public: true,
+          auto_init: false
+        })
+      });
 
-    console.log(`✅ Created repository: ${repoName}`);
+      if (!createRepoResponse.ok) {
+        const errorData = await createRepoResponse.text();
+        throw new Error(`Failed to create repository: ${createRepoResponse.statusText} - ${errorData}`);
+      }
+
+      console.log(`✅ Created repository: ${repoName}`);
+    }
 
     // Encode content to base64 properly
     const encoder = new TextEncoder();
     const data = encoder.encode(content);
     const base64Content = btoa(String.fromCharCode(...data));
 
-    // Create index.html file
-    const createFileResponse = await fetch(`https://api.github.com/repos/${username}/${repoName}/contents/index.html`, {
+    // Create unique file path for this article
+    const filePath = `${articleName}/index.html`;
+
+    // Create file
+    const createFileResponse = await fetch(`https://api.github.com/repos/${username}/${repoName}/contents/${filePath}`, {
       method: 'PUT',
       headers: {
         'Authorization': `token ${token}`,
@@ -306,7 +424,7 @@ async function deployToGitHub(
         'User-Agent': 'ARIA-Persona-Saturation'
       },
       body: JSON.stringify({
-        message: `Add professional profile for ${entityName}`,
+        message: `Add ${articleName} for ${entityName}`,
         content: base64Content
       })
     });
@@ -316,7 +434,7 @@ async function deployToGitHub(
       throw new Error(`Failed to create file: ${createFileResponse.statusText} - ${errorData}`);
     }
 
-    // Enable GitHub Pages
+    // Enable GitHub Pages if needed
     try {
       const enablePagesResponse = await fetch(`https://api.github.com/repos/${username}/${repoName}/pages`, {
         method: 'POST',
@@ -340,7 +458,7 @@ async function deployToGitHub(
       console.warn(`Warning: Could not enable GitHub Pages for ${repoName}:`, error.message);
     }
 
-    const deployUrl = `https://${username}.github.io/${repoName}`;
+    const deployUrl = `https://${username}.github.io/${repoName}/${articleName}`;
     return deployUrl;
 
   } catch (error) {
