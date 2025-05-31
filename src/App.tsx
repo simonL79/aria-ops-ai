@@ -17,6 +17,7 @@ const PersonaSaturationPage = React.lazy(() => import("./pages/admin/PersonaSatu
 const LegalOpsPage = React.lazy(() => import("./pages/admin/LegalOpsPage"));
 const ClientsPage = React.lazy(() => import("./pages/admin/ClientsPage"));
 const GenesisSentinelPage = React.lazy(() => import("./pages/admin/GenesisSentinelPage"));
+const WatchtowerPage = React.lazy(() => import("./pages/admin/WatchtowerPage"));
 
 // Create a client
 const queryClient = new QueryClient({
@@ -62,6 +63,7 @@ function App() {
               <Route path="/admin/legal-ops" element={<LegalOpsPage />} />
               <Route path="/admin/clients" element={<ClientsPage />} />
               <Route path="/admin/genesis-sentinel" element={<GenesisSentinelPage />} />
+              <Route path="/admin/watchtower" element={<WatchtowerPage />} />
             </Routes>
           </Suspense>
         </BrowserRouter>
