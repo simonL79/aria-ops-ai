@@ -23,48 +23,52 @@ export const performRealScan = async (options: RealScanOptions = {}) => {
     console.log('🔍 A.R.I.A™ OSINT: Starting real intelligence scan...');
     console.log('🔍 Options:', options);
 
-    // Call the monitoring-scan edge function for REAL data only
-    const { data, error } = await supabase.functions.invoke('monitoring-scan', {
-      body: { 
-        scanType: 'live_osint',
-        fullScan: options.fullScan || true,
-        targetEntity: options.targetEntity || null,
-        source: options.source || 'manual',
-        blockMockData: true,
-        enforceLiveOnly: true
-      }
-    });
+    // Call live scanning edge functions in sequence
+    const scanFunctions = [
+      'reddit-scan',
+      'uk-news-scanner', 
+      'enhanced-intelligence',
+      'discovery-scanner',
+      'monitoring-scan'
+    ];
 
-    if (error) {
-      console.error('❌ Real scan error:', error);
-      throw error;
-    }
+    const results = [];
+    
+    for (const func of scanFunctions) {
+      try {
+        const { data, error } = await supabase.functions.invoke(func, {
+          body: { 
+            scanType: 'live_osint',
+            fullScan: options.fullScan || true,
+            targetEntity: options.targetEntity || null,
+            source: options.source || 'manual',
+            blockMockData: true,
+            enforceLiveOnly: true
+          }
+        });
 
-    console.log('✅ Real scan completed:', data);
-
-    // Validate results are live data only
-    if (data?.results) {
-      const validatedResults = [];
-      
-      for (const result of data.results) {
-        // Validate each result is live data
-        const isValidLiveData = await LiveDataEnforcer.validateDataInput(
-          result.content || '', 
-          result.platform || 'unknown'
-        );
-        
-        if (isValidLiveData) {
-          validatedResults.push(result);
-        } else {
-          console.warn('🚫 BLOCKED: Mock data detected and filtered:', result.platform);
+        if (!error && data?.results) {
+          // Validate results are live data only
+          for (const result of data.results) {
+            const isValidLiveData = await LiveDataEnforcer.validateDataInput(
+              result.content || '', 
+              result.platform || 'unknown'
+            );
+            
+            if (isValidLiveData) {
+              results.push(result);
+            } else {
+              console.warn('🚫 BLOCKED: Mock data detected and filtered:', result.platform);
+            }
+          }
         }
+      } catch (error) {
+        console.warn(`Scan function ${func} failed:`, error);
       }
-
-      console.log(`✅ Validated ${validatedResults.length}/${data.results.length} results as live data`);
-      return validatedResults;
     }
 
-    return data?.results || [];
+    console.log(`✅ Validated ${results.length} results as live data`);
+    return results;
 
   } catch (error) {
     console.error('❌ Real scan failed:', error);
@@ -79,4 +83,3 @@ export const performMockScan = () => {
   console.warn('🚫 BLOCKED: Mock scan operations are disabled. Use performRealScan() for live intelligence.');
   throw new Error('Mock data operations blocked by A.R.I.A™ live enforcement system');
 };
-

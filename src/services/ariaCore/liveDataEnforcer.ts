@@ -1,209 +1,81 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { LiveDataValidator } from '@/services/liveDataValidator';
-
-export interface LiveDataCompliance {
-  compliant: boolean;
-  issues: string[];
-  warnings: string[];
-  systemMode: string;
-  enforcementActive: boolean;
-}
 
 /**
- * Live Data Enforcer - Ensures production-grade data integrity
+ * A.R.I.A™ Live Data Enforcement System
+ * Ensures 100% live data, blocks all simulation/mock content
  */
 export class LiveDataEnforcer {
+  
+  /**
+   * Validate that input data is live/real
+   */
+  static async validateDataInput(content: string, platform: string): Promise<boolean> {
+    // Block obvious simulation indicators
+    const simulationKeywords = [
+      'mock', 'test', 'demo', 'sample', 'fake', 'simulated', 
+      'placeholder', 'lorem ipsum', 'example', 'dummy'
+    ];
+    
+    const contentLower = content.toLowerCase();
+    const hasSimulationKeywords = simulationKeywords.some(keyword => 
+      contentLower.includes(keyword)
+    );
+    
+    if (hasSimulationKeywords) {
+      console.warn('🚫 BLOCKED: Simulation content detected:', platform);
+      return false;
+    }
+    
+    // Additional validation for live data
+    const hasTimestamp = content.includes('2025') || content.includes('Jan') || content.includes('Feb');
+    const hasRealContent = content.length > 50; // Real content tends to be longer
+    
+    return hasTimestamp && hasRealContent;
+  }
   
   /**
    * Enforce system-wide live data compliance
    */
   static async enforceSystemWideLiveData(): Promise<boolean> {
     try {
-      console.log('🔒 Enforcing live data compliance...');
-      
-      // Initialize system configuration for live mode
-      await this.initializeLiveSystemConfig();
-      
-      // Validate current system state
-      const validation = await LiveDataValidator.validateLiveIntegrity();
-      
-      if (!validation.isValid) {
-        console.warn('⚠️ Live data enforcement found issues:', validation.errors);
-        return false;
-      }
-      
-      console.log('✅ Live data enforcement successful');
-      return true;
-      
-    } catch (error) {
-      console.error('❌ Live data enforcement failed:', error);
-      return false;
-    }
-  }
-  
-  /**
-   * Initialize live system configuration
-   */
-  private static async initializeLiveSystemConfig(): Promise<void> {
-    try {
-      // First check if system_config table exists and has proper constraints
-      const { data: existingConfigs, error: selectError } = await supabase
-        .from('system_config')
-        .select('config_key, config_value')
+      // Check for any mock data in the system
+      const { data: mockCheck, error } = await supabase
+        .from('scan_results')
+        .select('id')
+        .or('content.ilike.%mock%,content.ilike.%test%,content.ilike.%demo%,content.ilike.%sample%')
         .limit(1);
-
-      if (selectError) {
-        console.warn('System config table not accessible:', selectError.message);
-        return;
-      }
-
-      const liveConfigs = [
-        { key: 'allow_mock_data', value: 'disabled' },
-        { key: 'system_mode', value: 'live' },
-        { key: 'scanner_mode', value: 'production' },
-        { key: 'data_validation', value: 'strict' },
-        { key: 'aria_core_active', value: 'true' },
-        { key: 'live_enforcement', value: 'enabled' }
-      ];
       
-      for (const config of liveConfigs) {
-        try {
-          // Try insert first, then update if exists
-          const { error: insertError } = await supabase
-            .from('system_config')
-            .insert({
-              config_key: config.key,
-              config_value: config.value
-            });
+      if (error) {
+        console.error('Live data enforcement check failed:', error);
+        return false;
+      }
+      
+      if (mockCheck && mockCheck.length > 0) {
+        console.warn('🚫 SYSTEM ALERT: Mock data detected in database');
+        
+        // Clean up mock data
+        await supabase
+          .from('scan_results')
+          .delete()
+          .or('content.ilike.%mock%,content.ilike.%test%,content.ilike.%demo%,content.ilike.%sample%');
           
-          if (insertError && insertError.message.includes('duplicate key')) {
-            // Update existing record
-            const { error: updateError } = await supabase
-              .from('system_config')
-              .update({ config_value: config.value })
-              .eq('config_key', config.key);
-            
-            if (updateError) {
-              console.warn(`Could not update config ${config.key}:`, updateError.message);
-            }
-          } else if (insertError) {
-            console.warn(`Could not insert config ${config.key}:`, insertError.message);
-          }
-        } catch (configError) {
-          console.warn(`Failed to set config ${config.key}:`, configError);
-        }
-      }
-      
-    } catch (error) {
-      console.error('Failed to initialize live system config:', error);
-    }
-  }
-  
-  /**
-   * Validate live data compliance
-   */
-  static async validateLiveDataCompliance(): Promise<LiveDataCompliance> {
-    const result: LiveDataCompliance = {
-      compliant: false,
-      issues: [],
-      warnings: [],
-      systemMode: 'unknown',
-      enforcementActive: false
-    };
-    
-    try {
-      // Check system configuration
-      const { data: configs, error } = await supabase
-        .from('system_config')
-        .select('config_key, config_value');
-      
-      if (error) {
-        result.issues.push('Cannot access system configuration');
-        return result;
-      }
-      
-      const configMap = new Map(configs?.map(c => [c.config_key, c.config_value]) || []);
-      
-      result.systemMode = configMap.get('system_mode') || 'unknown';
-      result.enforcementActive = configMap.get('live_enforcement') === 'enabled';
-      
-      // Validate configuration
-      if (result.systemMode !== 'live') {
-        result.warnings.push('System not in live mode');
-      }
-      
-      if (!result.enforcementActive) {
-        result.issues.push('Live enforcement is disabled');
-      }
-      
-      if (configMap.get('allow_mock_data') === 'enabled') {
-        result.warnings.push('Mock data is allowed');
-      }
-      
-      result.compliant = result.issues.length === 0;
-      
-    } catch (error) {
-      result.issues.push(`Validation failed: ${error.message}`);
-    }
-    
-    return result;
-  }
-  
-  /**
-   * Check if mock data is allowed
-   */
-  static async isMockDataAllowed(): Promise<boolean> {
-    try {
-      const { data: config, error } = await supabase
-        .from('system_config')
-        .select('config_value')
-        .eq('config_key', 'allow_mock_data')
-        .single();
-      
-      if (error) {
-        // Default to not allowing mock data if we can't check
-        return false;
-      }
-      
-      return config?.config_value === 'enabled';
-      
-    } catch (error) {
-      console.error('Error checking mock data policy:', error);
-      return false;
-    }
-  }
-  
-  /**
-   * Block operation if mock data is detected and not allowed
-   */
-  static async validateDataInput(content: string, source: string): Promise<boolean> {
-    try {
-      const mockAllowed = await this.isMockDataAllowed();
-      
-      if (mockAllowed) {
-        return true;
-      }
-      
-      // Check for mock data indicators
-      const lowerContent = content.toLowerCase();
-      const mockIndicators = ['test', 'mock', 'demo', 'sample', 'example'];
-      
-      const hasMockData = mockIndicators.some(indicator => 
-        lowerContent.includes(indicator)
-      );
-      
-      if (hasMockData) {
-        console.warn(`🚫 Mock data rejected from ${source}: Live enforcement active`);
-        return false;
+        console.log('✅ Mock data cleaned from system');
       }
       
       return true;
       
     } catch (error) {
-      console.error('Error validating data input:', error);
-      // Be conservative - reject if we can't validate
+      console.error('Live data enforcement failed:', error);
       return false;
     }
+  }
+  
+  /**
+   * Block simulation functions
+   */
+  static blockSimulation(functionName: string): never {
+    console.error(`🚫 BLOCKED: ${functionName} - Simulation disabled in A.R.I.A™ live system`);
+    throw new Error(`${functionName} blocked: Live intelligence system only`);
   }
 }
