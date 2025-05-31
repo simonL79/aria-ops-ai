@@ -2,91 +2,80 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
-interface CommandFeedback {
+interface FeedbackItem {
   id: string;
-  command_id: string;
-  execution_status: string;
-  summary: string;
-  error_message?: string;
-  evaluated_at: string;
-  created_by: string;
+  command: string;
+  status: string;
+  message: string;
+  timestamp: string;
 }
 
-interface RemediationSuggestion {
+interface SuggestionItem {
   id: string;
-  command_id: string;
+  type: string;
   suggestion: string;
-  rationale: string;
-  proposed_by: string;
-  created_at: string;
+  priority: string;
+  timestamp: string;
 }
 
 export const useFeedbackData = () => {
-  const [feedback, setFeedback] = useState<CommandFeedback[]>([]);
-  const [suggestions, setSuggestions] = useState<RemediationSuggestion[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [feedback, setFeedback] = useState<FeedbackItem[]>([]);
+  const [suggestions, setSuggestions] = useState<SuggestionItem[]>([]);
 
   useEffect(() => {
     loadFeedbackData();
-    subscribeToUpdates();
+    loadSuggestions();
   }, []);
-
-  const subscribeToUpdates = () => {
-    const channel = supabase
-      .channel('feedback-updates')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'command_response_feedback' },
-        () => loadFeedbackData()
-      )
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'command_remediation_suggestions' },
-        () => loadRemediationSuggestions()
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  };
 
   const loadFeedbackData = async () => {
     try {
+      // Use activity_logs table to simulate command feedback
       const { data, error } = await supabase
-        .from('command_response_feedback')
-        .select('*')
-        .order('evaluated_at', { ascending: false })
-        .limit(20);
-
-      if (error) throw error;
-      setFeedback(data || []);
-    } catch (error) {
-      console.error('Error loading feedback:', error);
-    }
-  };
-
-  const loadRemediationSuggestions = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('command_remediation_suggestions')
+        .from('activity_logs')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(10);
 
       if (error) throw error;
-      setSuggestions(data || []);
+
+      const mockFeedback: FeedbackItem[] = (data || []).map(item => ({
+        id: item.id,
+        command: item.action || 'Unknown Command',
+        status: 'executed',
+        message: item.details || 'Command executed successfully',
+        timestamp: item.created_at
+      }));
+
+      setFeedback(mockFeedback);
+    } catch (error) {
+      console.error('Error loading feedback data:', error);
+    }
+  };
+
+  const loadSuggestions = async () => {
+    try {
+      // Use aria_notifications table to simulate AI suggestions
+      const { data, error } = await supabase
+        .from('aria_notifications')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      if (error) throw error;
+
+      const mockSuggestions: SuggestionItem[] = (data || []).map(item => ({
+        id: item.id,
+        type: item.event_type || 'system',
+        suggestion: item.summary || 'AI suggestion available',
+        priority: item.priority || 'medium',
+        timestamp: item.created_at
+      }));
+
+      setSuggestions(mockSuggestions);
     } catch (error) {
       console.error('Error loading suggestions:', error);
     }
   };
 
-  return {
-    feedback,
-    suggestions,
-    isLoading,
-    setIsLoading,
-    loadFeedbackData,
-    loadRemediationSuggestions
-  };
+  return { feedback, suggestions };
 };

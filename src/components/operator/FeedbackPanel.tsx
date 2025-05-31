@@ -1,30 +1,29 @@
 
 import React from 'react';
-import { LuminoscorePanel } from './LuminoscorePanel';
-import { CortextracePanel } from './CortextracePanel';
-import { SentinelgridPanel } from './SentinelgridPanel';
-import { ZeuslinkPanel } from './ZeuslinkPanel';
-import { PerimetrixPanel } from './PerimetrixPanel';
-import { TitanvaultPanel } from './TitanvaultPanel';
-import { PolarisPanel } from './PolarisPanel';
-import { VoxtracePanel } from './VoxtracePanel';
-import { ShadowvaultPanel } from './ShadowvaultPanel';
-import { StrikecorePanel } from './StrikecorePanel';
-import { CerebraPanel } from './CerebraPanel';
-import { IronvaultPanel } from './IronvaultPanel';
-import { HalcyonPanel } from './HalcyonPanel';
-import { ShieldhavenPanel } from './ShieldhavenPanel';
-import { MirrorspacePanel } from './MirrorspacePanel';
-import { CitadelPanel } from './CitadelPanel';
-import { PropheticVisionPanel } from './PropheticVisionPanel';
-import { SentinelShieldPanel } from './SentinelShieldPanel';
-import { NexusPanel } from './NexusPanel';
-import { PanopticaPanel } from './PanopticaPanel';
-import { SelfHealingPanel } from './SelfHealingPanel';
-import { StrategicResponsePanel } from './StrategicResponsePanel';
-import { AletheiaTruthPanel } from './AletheiaTruthPanel';
-import { ErisPanel } from './ErisPanel';
-import { SentiencePanel } from './SentiencePanel';
+import LuminoscorePanel from './LuminoscorePanel';
+import CitadelPanel from './CitadelPanel';
+import SentinelgridPanel from './SentinelgridPanel';
+import ZeuslinkPanel from './ZeuslinkPanel';
+import PerimetrixPanel from './PerimetrixPanel';
+import TitanvaultPanel from './TitanvaultPanel';
+import PolarisPanel from './PolarisPanel';
+import VoxtracePanel from './VoxtracePanel';
+import ShadowvaultPanel from './ShadowvaultPanel';
+import StrikecorePanel from './StrikecorePanel';
+import CerebraPanel from './CerebraPanel';
+import IronvaultPanel from './IronvaultPanel';
+import HalcyonPanel from './HalcyonPanel';
+import ShieldhavenPanel from './ShieldhavenPanel';
+import MirrorspacePanel from './MirrorspacePanel';
+import PropheticVisionPanel from './PropheticVisionPanel';
+import SentinelShieldPanel from './SentinelShieldPanel';
+import NexusPanel from './NexusPanel';
+import PanopticaPanel from './PanopticaPanel';
+import SelfHealingPanel from './SelfHealingPanel';
+import StrategicResponsePanel from './StrategicResponsePanel';
+import AletheiaTruthPanel from './AletheiaTruthPanel';
+import ErisPanel from './ErisPanel';
+import SentiencePanel from './SentiencePanel';
 import { CommandExecutionFeedback } from './feedback/CommandExecutionFeedback';
 import { RemediationSuggestions } from './feedback/RemediationSuggestions';
 import { useFeedbackData } from './feedback/useFeedbackData';
@@ -41,8 +40,8 @@ export const FeedbackPanel = ({ commandHistory }: FeedbackPanelProps) => {
       {/* LUMINOSCORE™ Influence, Impact & Exposure Scoring System Panel */}
       <LuminoscorePanel />
 
-      {/* CORTEXTRACE™ Strategic Memory & Trajectory Engine Panel */}
-      <CortextracePanel />
+      {/* CITADEL™ Infrastructure Reinforcement & Policy Vaulting Panel */}
+      <CitadelPanel />
 
       {/* SENTINELGRID™ Global Risk Sentinel Mesh Panel */}
       <SentinelgridPanel />
@@ -82,9 +81,6 @@ export const FeedbackPanel = ({ commandHistory }: FeedbackPanelProps) => {
 
       {/* MIRRORSPACE™ Behavioral Surveillance & Influence Index Panel */}
       <MirrorspacePanel />
-
-      {/* CITADEL™ Infrastructure Reinforcement & Policy Vaulting Panel */}
-      <CitadelPanel />
 
       {/* PROPHETIC VISION™ Predictive Threat Intelligence Panel */}
       <PropheticVisionPanel />
