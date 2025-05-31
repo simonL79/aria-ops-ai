@@ -108,22 +108,23 @@ const PersonaSaturationPanel = () => {
     const progressInterval = setInterval(() => {
       setCurrentCampaign(prev => {
         if (!prev) return null;
-        const newProgress = Math.min(prev.progress + 20, 80); // Stop at 80% until real completion
+        const newProgress = Math.min(prev.progress + 15, 75); // Stop at 75% until real completion
         let newStatus = prev.status;
         
-        if (newProgress === 20) newStatus = 'generating';
-        if (newProgress === 40) newStatus = 'deploying';
-        if (newProgress === 60) newStatus = 'indexing';
-        if (newProgress === 80) newStatus = 'monitoring';
+        if (newProgress === 15) newStatus = 'generating';
+        if (newProgress === 30) newStatus = 'deploying';
+        if (newProgress === 45) newStatus = 'indexing';
+        if (newProgress === 60) newStatus = 'monitoring';
+        if (newProgress === 75) newStatus = 'monitoring';
         
         return { ...prev, progress: newProgress, status: newStatus };
       });
-    }, 2000);
+    }, 3000);
 
     try {
       const keywords = targetKeywords.split(',').map(k => k.trim()).filter(k => k.length > 0);
       
-      console.log('Sending request to persona-saturation function...');
+      console.log('🚀 Deploying live articles to GitHub Pages...');
       
       const { data, error } = await supabase.functions.invoke('persona-saturation', {
         body: {
@@ -158,7 +159,12 @@ const PersonaSaturationPanel = () => {
         estimatedImpact: data.estimatedSERPImpact
       } : null);
 
-      toast.success(`Persona Saturation deployed: ${data.campaign.contentGenerated} pieces across ${data.campaign.deployments.successful} live GitHub Pages sites`);
+      toast.success(`🎯 Live Deployment Complete! ${data.campaign.deployments.successful}/${contentCount} articles now live on GitHub Pages`);
+      
+      // Show deployment URLs
+      if (data.campaign.deployments.urls && data.campaign.deployments.urls.length > 0) {
+        toast.success(`🌐 ${data.campaign.deployments.urls.length} live websites created. Check Reports tab for all URLs.`);
+      }
       
       // Refresh campaigns list if we're on that tab
       if (activeTab === 'campaigns') {
@@ -176,13 +182,11 @@ const PersonaSaturationPanel = () => {
         estimatedImpact: 'Failed - See error details'
       } : null);
       
-      // More detailed error message
       const errorMessage = error.message || 'Unknown error occurred';
-      toast.error(`Persona Saturation failed: ${errorMessage}`);
+      toast.error(`❌ Deployment failed: ${errorMessage}`);
       
-      // If it's a connection error, provide additional guidance
-      if (errorMessage.includes('Failed to send a request') || errorMessage.includes('fetch')) {
-        toast.error('Edge function connection issue. Please check function deployment and try again.');
+      if (errorMessage.includes('GitHub token')) {
+        toast.error('⚠️ GitHub token missing. Please configure GITHUB_TOKEN in edge function secrets.');
       }
     } finally {
       setIsExecuting(false);
@@ -212,10 +216,10 @@ const PersonaSaturationPanel = () => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Rocket className="h-5 w-5" />
-          A.R.I.A™ Persona Saturation Deployment
+          A.R.I.A™ Live Article Deployment
         </CardTitle>
         <p className="text-sm text-muted-foreground">
-          Deploy 50-1000+ positive articles across live GitHub Pages sites to dominate search results
+          Deploy SEO-optimized articles to live GitHub Pages sites with automated indexing
         </p>
       </CardHeader>
       <CardContent>
@@ -224,7 +228,7 @@ const PersonaSaturationPanel = () => {
             <TabsTrigger value="deploy">Deploy Campaign</TabsTrigger>
             <TabsTrigger value="monitor">Monitor Progress</TabsTrigger>
             <TabsTrigger value="campaigns">Campaign History</TabsTrigger>
-            <TabsTrigger value="reports">Article Reports</TabsTrigger>
+            <TabsTrigger value="reports">Live Reports</TabsTrigger>
           </TabsList>
 
           <TabsContent value="deploy" className="space-y-4">
@@ -314,9 +318,13 @@ const PersonaSaturationPanel = () => {
               <div className="flex items-center gap-2">
                 <Globe className="h-5 w-5 text-green-600" />
                 <div>
-                  <h4 className="font-medium text-green-800">Live GitHub Deployment</h4>
+                  <h4 className="font-medium text-green-800">Live GitHub Pages Deployment</h4>
                   <p className="text-sm text-green-700">
-                    Creating real GitHub repositories with live GitHub Pages sites. All articles will be publicly accessible.
+                    ✅ Creates real GitHub repositories<br/>
+                    ✅ Deploys to live GitHub Pages sites<br/>
+                    ✅ Includes SEO optimization & structured data<br/>
+                    ✅ Generates sitemap.xml and RSS feeds<br/>
+                    ✅ Automatically pings search engines
                   </p>
                 </div>
               </div>
@@ -334,12 +342,12 @@ const PersonaSaturationPanel = () => {
               {isExecuting ? (
                 <>
                   <Shield className="h-4 w-4 mr-2 animate-spin" />
-                  Creating Live GitHub Pages Sites...
+                  Deploying {contentCount} Live Articles...
                 </>
               ) : (
                 <>
                   <Rocket className="h-4 w-4 mr-2" />
-                  Deploy {contentCount} Live Articles to GitHub Pages
+                  🚀 Deploy {contentCount} Live Articles to GitHub Pages
                 </>
               )}
             </Button>
