@@ -1,57 +1,19 @@
+
 import DashboardPage from "@/pages/dashboard/DashboardPage";
-import AiScrapingPage from "@/pages/AiScrapingPage";
-import CleanLaunchPage from "@/pages/CleanLaunchPage";
-import { ExecutiveReportsPage } from "@/pages/ExecutiveReportsPage";
-import SettingsPage from "@/pages/Settings";
-import { UsersPage } from "@/pages/UsersPage";
-import HyperCorePage from "@/pages/HyperCorePage";
 import { 
   Home,
-  Search,
   Users,
-  BarChart3,
   Settings,
-  ShieldCheck,
-  Bot,
-  Radar,
-  FileText,
-  Zap,
   Shield,
-  Brain,
-  Eye,
-  Target,
-  Layers,
-  Gauge,
-  AlertTriangle,
-  Clock,
-  MessageSquare,
-  Building,
-  UserCheck,
-  Calendar,
-  LifeBuoy,
-  HelpCircle,
-  Lock,
-  Globe,
-  FileX,
-  Trash2,
-  UserPlus,
-  Calculator,
-  AlertOctagon
+  FileText,
+  Mail
 } from "lucide-react";
 
 export type NavItem = {
   title: string;
   to?: string;
   url?: string;
-  icon:
-    | "home"
-    | "layout"
-    | "settings"
-    | "users"
-    | "zap"
-    | "fileAnalytics"
-    | "shield"
-    | typeof AlertOctagon;
+  icon: "home" | "users" | "settings" | "shield" | "fileText" | "mail";
   page?: React.FC;
   adminOnly?: boolean;
 };
@@ -64,45 +26,31 @@ export const navItems: NavItem[] = [
     page: DashboardPage,
   },
   {
-    title: "HyperCore",
-    to: "/hypercore",
+    title: "Genesis Sentinel",
+    to: "/admin/genesis-sentinel",
     icon: "shield",
-    page: HyperCorePage,
+    adminOnly: true,
   },
   {
-    title: "AI Scraping",
-    to: "/ai-scraping",
-    icon: "zap",
-    page: AiScrapingPage,
-  },
-  {
-    title: "Clean Launch",
-    to: "/clean-launch",
-    icon: "layout",
-    page: CleanLaunchPage,
-  },
-  {
-    title: "Executive Reports",
-    to: "/executive-reports",
-    icon: "fileAnalytics",
-    page: ExecutiveReportsPage,
-  },
-  {
-    title: "Users",
-    to: "/users",
+    title: "Clients",
+    to: "/admin/clients",
     icon: "users",
-    page: UsersPage,
+    adminOnly: true,
+  },
+  {
+    title: "Blog",
+    to: "/blog",
+    icon: "fileText",
+  },
+  {
+    title: "Contact",
+    to: "/contact",
+    icon: "mail",
   },
   {
     title: "Settings",
-    to: "/settings",
+    to: "/admin/settings",
     icon: "settings",
-    page: SettingsPage,
-  },
-  {
-    title: "A.R.I.A/EX™ Emergency",
-    url: "/emergency-strike",
-    icon: "shield",
     adminOnly: true,
   },
 ];
