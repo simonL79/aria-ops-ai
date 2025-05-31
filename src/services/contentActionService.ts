@@ -13,10 +13,18 @@ export const requestContentRemoval = async (alert: ContentAlert): Promise<boolea
     // Simulate API call for content removal request
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    // In a real implementation, this would make an API call to:
-    // - Flag content for platform review
-    // - Submit takedown request
-    // - Log the action in the system
+    // Log the action using activity_logs instead of content_actions
+    await supabase.from('activity_logs').insert({
+      action: 'content_removal_request',
+      details: JSON.stringify({
+        alert_id: alert.id,
+        platform: alert.platform,
+        content_excerpt: alert.content.substring(0, 100),
+        status: 'requested'
+      }),
+      entity_type: 'content_action',
+      entity_id: alert.id
+    });
     
     return true;
   } catch (error) {
@@ -35,7 +43,17 @@ export const markAlertAsRead = async (alert: ContentAlert): Promise<boolean> => 
     // Simulate API call to update alert status
     await new Promise(resolve => setTimeout(resolve, 500));
     
-    // In a real implementation, this would update the alert status in the database
+    // Log the action using activity_logs
+    await supabase.from('activity_logs').insert({
+      action: 'alert_marked_read',
+      details: JSON.stringify({
+        alert_id: alert.id,
+        platform: alert.platform,
+        content_excerpt: alert.content.substring(0, 100)
+      }),
+      entity_type: 'content_action',
+      entity_id: alert.id
+    });
     
     return true;
   } catch (error) {
@@ -49,15 +67,18 @@ export const markAlertAsRead = async (alert: ContentAlert): Promise<boolean> => 
  */
 export const dismissAlert = async (alert: ContentAlert): Promise<boolean> => {
   try {
-    // Log the dismiss action in the database
-    const { data, error } = await supabase.from("content_actions").insert({
-      alert_id: alert.id,
-      action: "dismiss",
-      type: "content_status_update",
-      platform: alert.platform,
-      description: `Dismissed alert: "${alert.content.substring(0, 50)}..."`,
-      status: "completed"
-    }).select();
+    // Log the dismiss action using activity_logs instead of content_actions
+    const { error } = await supabase.from('activity_logs').insert({
+      action: 'alert_dismissed',
+      details: JSON.stringify({
+        alert_id: alert.id,
+        platform: alert.platform,
+        content_excerpt: alert.content.substring(0, 50),
+        status: 'dismissed'
+      }),
+      entity_type: 'content_action',
+      entity_id: alert.id
+    });
 
     if (error) {
       console.error("Error dismissing alert:", error);
@@ -65,6 +86,7 @@ export const dismissAlert = async (alert: ContentAlert): Promise<boolean> => {
       return false;
     }
 
+    toast.success("Alert dismissed successfully");
     return true;
   } catch (error) {
     console.error("Error dismissing alert:", error);
