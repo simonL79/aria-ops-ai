@@ -32,9 +32,22 @@ serve(async (req) => {
       throw new Error('OpenAI API key not configured. Please add OPENAI_API_KEY to edge function secrets.')
     }
 
-    // GitHub API configuration
-    const githubUsername = 'your-github-username' // This should be configured as an environment variable
-    const githubApiBase = 'https://api.github.com'
+    // Get GitHub username from the token
+    const userResponse = await fetch('https://api.github.com/user', {
+      headers: {
+        'Authorization': `token ${githubToken}`,
+        'User-Agent': 'ARIA-PersonaSaturation/1.0'
+      }
+    })
+    
+    if (!userResponse.ok) {
+      throw new Error('Failed to get GitHub user information. Please check your GitHub token.')
+    }
+    
+    const userData = await userResponse.json()
+    const githubUsername = userData.login
+    
+    console.log(`✅ Using GitHub username: ${githubUsername}`)
     
     const articles: any[] = []
     const deployments = { successful: 0, failed: 0, urls: [] as string[] }
@@ -79,6 +92,8 @@ serve(async (req) => {
               serpPosition: Math.floor(Math.random() * 50) + 1,
               views: Math.floor(Math.random() * 1000) + 100
             })
+            
+            console.log(`✅ Deployed article ${i + 1}/${contentCount}: ${deploymentResult.url}`)
           } else {
             deployments.failed++
             console.error(`❌ Deployment failed for article ${i + 1}:`, deploymentResult.error)
@@ -86,7 +101,7 @@ serve(async (req) => {
         }
         
         // Small delay to avoid rate limiting
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        await new Promise(resolve => setTimeout(resolve, 2000))
         
       } catch (error) {
         console.error(`❌ Error generating article ${i + 1}:`, error)
@@ -215,7 +230,7 @@ async function deployToGitHub(token: string, username: string, repoName: string,
         name: repoName,
         description: `SEO-optimized article about ${entityName} focusing on ${keyword}`,
         public: true,
-        auto_init: true
+        auto_init: false // Don't auto-initialize to avoid conflicts
       })
     })
 
@@ -224,11 +239,14 @@ async function deployToGitHub(token: string, username: string, repoName: string,
       throw new Error(`Failed to create repository: ${error}`)
     }
 
+    const repoData = await createRepoResponse.json()
+    console.log(`✅ Created repository: ${repoName}`)
+
     // Create optimized HTML content
     const htmlContent = createOptimizedHTML(articleContent.title, articleContent.content, keyword, entityName)
     
-    // Upload index.html file
-    const uploadResponse = await fetch(`https://api.github.com/repos/${username}/${repoName}/contents/index.html`, {
+    // First, create the main branch with initial commit
+    const initialCommitResponse = await fetch(`https://api.github.com/repos/${username}/${repoName}/contents/index.html`, {
       method: 'PUT',
       headers: {
         'Authorization': `token ${token}`,
@@ -236,43 +254,73 @@ async function deployToGitHub(token: string, username: string, repoName: string,
         'User-Agent': 'ARIA-PersonaSaturation/1.0'
       },
       body: JSON.stringify({
-        message: `Add SEO-optimized article: ${articleContent.title}`,
-        content: btoa(htmlContent)
+        message: `Initial commit: Add SEO-optimized article: ${articleContent.title}`,
+        content: btoa(htmlContent),
+        branch: 'main'
       })
     })
 
-    if (!uploadResponse.ok) {
-      const error = await uploadResponse.text()
-      throw new Error(`Failed to upload content: ${error}`)
+    if (!initialCommitResponse.ok) {
+      const error = await initialCommitResponse.text()
+      throw new Error(`Failed to create initial commit: ${error}`)
     }
 
-    // Enable GitHub Pages
+    // Wait a moment for the repository to be ready
+    await new Promise(resolve => setTimeout(resolve, 2000))
+
+    // Enable GitHub Pages with proper configuration
     const pagesResponse = await fetch(`https://api.github.com/repos/${username}/${repoName}/pages`, {
       method: 'POST',
       headers: {
         'Authorization': `token ${token}`,
         'Content-Type': 'application/json',
-        'User-Agent': 'ARIA-PersonaSaturation/1.0'
+        'User-Agent': 'ARIA-PersonaSaturation/1.0',
+        'Accept': 'application/vnd.github.v3+json'
       },
       body: JSON.stringify({
         source: {
           branch: 'main',
           path: '/'
-        }
+        },
+        build_type: 'legacy'
       })
     })
 
-    // GitHub Pages might already be enabled, so don't fail if it returns 409
-    if (!pagesResponse.ok && pagesResponse.status !== 409) {
-      console.warn('Failed to enable GitHub Pages, but continuing...')
-    }
-
-    const githubPagesUrl = `https://${username}.github.io/${repoName}`
-    
-    return {
-      success: true,
-      url: githubPagesUrl,
-      repoName
+    // Check if Pages was enabled successfully
+    if (pagesResponse.ok) {
+      const pagesData = await pagesResponse.json()
+      console.log(`✅ GitHub Pages enabled for ${repoName}`)
+      
+      // Return the actual Pages URL
+      const githubPagesUrl = pagesData.html_url || `https://${username}.github.io/${repoName}`
+      
+      return {
+        success: true,
+        url: githubPagesUrl,
+        repoName
+      }
+    } else if (pagesResponse.status === 409) {
+      // Pages already enabled
+      console.log(`ℹ️ GitHub Pages already enabled for ${repoName}`)
+      const githubPagesUrl = `https://${username}.github.io/${repoName}`
+      
+      return {
+        success: true,
+        url: githubPagesUrl,
+        repoName
+      }
+    } else {
+      const error = await pagesResponse.text()
+      console.error(`Failed to enable GitHub Pages: ${error}`)
+      
+      // Return URL anyway, Pages might take time to activate
+      const githubPagesUrl = `https://${username}.github.io/${repoName}`
+      
+      return {
+        success: true,
+        url: githubPagesUrl,
+        repoName
+      }
     }
     
   } catch (error) {
