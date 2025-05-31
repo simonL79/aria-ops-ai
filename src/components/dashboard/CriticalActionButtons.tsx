@@ -30,15 +30,15 @@ const CriticalActionButtons: React.FC<CriticalActionButtonsProps> = React.memo((
   return (
     <Card className="corporate-card mb-4 w-full" data-testid="critical-action-buttons">
       <CardContent className="p-2 sm:p-3 lg:p-4">
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-1 sm:gap-2 lg:gap-3 w-full">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 lg:gap-4 w-full">
           <Button
             onClick={onLiveThreatScan}
             disabled={isScanning}
             data-testid="live-threat-scan-button"
-            className="bg-red-600 hover:bg-red-700 text-white text-xs sm:text-sm px-1 sm:px-2 lg:px-3 py-2 sm:py-3 lg:py-4 h-auto flex flex-col items-center justify-center gap-0.5 sm:gap-1 min-h-[50px] sm:min-h-[60px] lg:min-h-[70px] w-full transition-colors duration-200"
+            className="bg-red-600 hover:bg-red-700 text-white px-2 sm:px-3 lg:px-4 py-3 sm:py-4 lg:py-5 h-auto flex flex-col items-center justify-center gap-1 sm:gap-2 min-h-[60px] sm:min-h-[70px] lg:min-h-[80px] w-full transition-all duration-200 text-xs sm:text-sm lg:text-base"
           >
-            <Search className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-            <span className="text-center leading-tight font-medium text-[10px] sm:text-xs lg:text-sm">
+            <Search className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 flex-shrink-0" />
+            <span className="text-center leading-tight font-medium">
               Live Threat Scan
             </span>
           </Button>
@@ -47,10 +47,10 @@ const CriticalActionButtons: React.FC<CriticalActionButtonsProps> = React.memo((
             onClick={onLiveIntelligenceSweep}
             disabled={isScanning}
             data-testid="live-intelligence-sweep-button"
-            className="bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm px-1 sm:px-2 lg:px-3 py-2 sm:py-3 lg:py-4 h-auto flex flex-col items-center justify-center gap-0.5 sm:gap-1 min-h-[50px] sm:min-h-[60px] lg:min-h-[70px] w-full transition-colors duration-200"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-2 sm:px-3 lg:px-4 py-3 sm:py-4 lg:py-5 h-auto flex flex-col items-center justify-center gap-1 sm:gap-2 min-h-[60px] sm:min-h-[70px] lg:min-h-[80px] w-full transition-all duration-200 text-xs sm:text-sm lg:text-base"
           >
-            <Activity className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-            <span className="text-center leading-tight font-medium text-[10px] sm:text-xs lg:text-sm">
+            <Activity className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 flex-shrink-0" />
+            <span className="text-center leading-tight font-medium">
               Live Intelligence Sweep
             </span>
           </Button>
@@ -58,14 +58,14 @@ const CriticalActionButtons: React.FC<CriticalActionButtonsProps> = React.memo((
           <Button
             onClick={onGuardianToggle}
             data-testid="guardian-toggle-button"
-            className={`text-white text-xs sm:text-sm px-1 sm:px-2 lg:px-3 py-2 sm:py-3 lg:py-4 h-auto flex flex-col items-center justify-center gap-0.5 sm:gap-1 min-h-[50px] sm:min-h-[60px] lg:min-h-[70px] w-full transition-colors duration-200 ${
+            className={`text-white px-2 sm:px-3 lg:px-4 py-3 sm:py-4 lg:py-5 h-auto flex flex-col items-center justify-center gap-1 sm:gap-2 min-h-[60px] sm:min-h-[70px] lg:min-h-[80px] w-full transition-all duration-200 text-xs sm:text-sm lg:text-base ${
               isGuardianActive 
                 ? 'bg-green-600 hover:bg-green-700' 
                 : 'bg-gray-600 hover:bg-gray-700'
             }`}
           >
-            <Shield className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-            <span className="text-center leading-tight font-medium text-[10px] sm:text-xs lg:text-sm">
+            <Shield className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 flex-shrink-0" />
+            <span className="text-center leading-tight font-medium">
               Guardian
             </span>
           </Button>
@@ -73,10 +73,10 @@ const CriticalActionButtons: React.FC<CriticalActionButtonsProps> = React.memo((
           <Button
             onClick={onGenerateReport}
             data-testid="generate-report-button"
-            className="bg-corporate-accent hover:bg-corporate-accentDark text-black text-xs sm:text-sm px-1 sm:px-2 lg:px-3 py-2 sm:py-3 lg:py-4 h-auto flex flex-col items-center justify-center gap-0.5 sm:gap-1 min-h-[50px] sm:min-h-[60px] lg:min-h-[70px] w-full transition-colors duration-200"
+            className="bg-corporate-accent hover:bg-corporate-accentDark text-black px-2 sm:px-3 lg:px-4 py-3 sm:py-4 lg:py-5 h-auto flex flex-col items-center justify-center gap-1 sm:gap-2 min-h-[60px] sm:min-h-[70px] lg:min-h-[80px] w-full transition-all duration-200 text-xs sm:text-sm lg:text-base"
           >
-            <FileText className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-            <span className="text-center leading-tight font-medium text-[10px] sm:text-xs lg:text-sm">
+            <FileText className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 flex-shrink-0" />
+            <span className="text-center leading-tight font-medium">
               Generate Report
             </span>
           </Button>
@@ -84,14 +84,14 @@ const CriticalActionButtons: React.FC<CriticalActionButtonsProps> = React.memo((
           <Button
             onClick={onActivateRealTime}
             data-testid="activate-realtime-button"
-            className={`text-white text-xs sm:text-sm px-1 sm:px-2 lg:px-3 py-2 sm:py-3 lg:py-4 h-auto flex flex-col items-center justify-center gap-0.5 sm:gap-1 min-h-[50px] sm:min-h-[60px] lg:min-h-[70px] w-full transition-colors duration-200 ${
+            className={`text-white px-2 sm:px-3 lg:px-4 py-3 sm:py-4 lg:py-5 h-auto flex flex-col items-center justify-center gap-1 sm:gap-2 min-h-[60px] sm:min-h-[70px] lg:min-h-[80px] w-full transition-all duration-200 text-xs sm:text-sm lg:text-base ${
               isRealTimeActive 
                 ? 'bg-corporate-accent hover:bg-corporate-accentDark text-black' 
                 : 'bg-purple-600 hover:bg-purple-700'
             }`}
           >
-            <Zap className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-            <span className="text-center leading-tight font-medium text-[10px] sm:text-xs lg:text-sm">
+            <Zap className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 flex-shrink-0" />
+            <span className="text-center leading-tight font-medium">
               Activate Real-Time
             </span>
           </Button>
@@ -100,10 +100,10 @@ const CriticalActionButtons: React.FC<CriticalActionButtonsProps> = React.memo((
             onClick={onRunManualScan}
             disabled={isScanning}
             data-testid="run-manual-scan-button"
-            className="bg-orange-600 hover:bg-orange-700 text-white text-xs sm:text-sm px-1 sm:px-2 lg:px-3 py-2 sm:py-3 lg:py-4 h-auto flex flex-col items-center justify-center gap-0.5 sm:gap-1 min-h-[50px] sm:min-h-[60px] lg:min-h-[70px] w-full transition-colors duration-200"
+            className="bg-orange-600 hover:bg-orange-700 text-white px-2 sm:px-3 lg:px-4 py-3 sm:py-4 lg:py-5 h-auto flex flex-col items-center justify-center gap-1 sm:gap-2 min-h-[60px] sm:min-h-[70px] lg:min-h-[80px] w-full transition-all duration-200 text-xs sm:text-sm lg:text-base"
           >
-            <Play className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-            <span className="text-center leading-tight font-medium text-[10px] sm:text-xs lg:text-sm">
+            <Play className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 flex-shrink-0" />
+            <span className="text-center leading-tight font-medium">
               Run Manual Scan
             </span>
           </Button>

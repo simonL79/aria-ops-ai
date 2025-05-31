@@ -1,3 +1,4 @@
+
 import React, { Suspense, lazy } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,54 +7,84 @@ import { Shield, CheckCircle, AlertTriangle, TrendingUp, Monitor, Zap } from 'lu
 import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 
-// Lazy load heavy components
+// Aggressive lazy loading for performance
 const ComprehensiveQADashboard = lazy(() => import('@/components/qa/ComprehensiveQADashboard'));
 const CriticalActionButtons = lazy(() => import('@/components/dashboard/CriticalActionButtons'));
 
+// Memoized overview cards component
+const QAOverviewCards = React.memo(() => (
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
+    <Card className="corporate-card">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-xs sm:text-sm flex items-center gap-1 corporate-heading">
+          <Monitor className="h-3 w-3 sm:h-4 sm:w-4 text-corporate-accent" />
+          UI & Navigation
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="text-xl sm:text-2xl font-bold text-white">4 Tests</div>
+        <p className="text-xs corporate-subtext">Interface validation</p>
+      </CardContent>
+    </Card>
+
+    <Card className="corporate-card">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-xs sm:text-sm flex items-center gap-1 corporate-heading">
+          <Zap className="h-3 w-3 sm:h-4 sm:w-4 text-corporate-accent" />
+          Functional
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="text-xl sm:text-2xl font-bold text-white">5 Tests</div>
+        <p className="text-xs corporate-subtext">Core features</p>
+      </CardContent>
+    </Card>
+
+    <Card className="corporate-card sm:col-span-2 lg:col-span-1">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-xs sm:text-sm flex items-center gap-1 corporate-heading">
+          <Shield className="h-3 w-3 sm:h-4 sm:w-4 text-corporate-accent" />
+          Security
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="text-xl sm:text-2xl font-bold text-white">4 Tests</div>
+        <p className="text-xs corporate-subtext">Security validation</p>
+      </CardContent>
+    </Card>
+  </div>
+));
+
 const QATestingPage = React.memo(() => {
-  // Critical action button handlers for QA testing
-  const handleLiveThreatScan = React.useCallback(() => {
-    toast.info('🔍 QA Test: Live Threat Scan initiated');
-  }, []);
-
-  const handleLiveIntelligenceSweep = React.useCallback(() => {
-    toast.info('🔍 QA Test: Live Intelligence Sweep initiated');
-  }, []);
-
-  const handleGuardianToggle = React.useCallback(() => {
-    toast.info('🛡️ QA Test: Guardian Mode toggled');
-  }, []);
-
-  const handleGenerateReport = React.useCallback(() => {
-    toast.info('📊 QA Test: Report generation initiated');
-  }, []);
-
-  const handleActivateRealTime = React.useCallback(() => {
-    toast.info('📡 QA Test: Real-Time monitoring toggled');
-  }, []);
-
-  const handleRunManualScan = React.useCallback(() => {
-    toast.info('🔄 QA Test: Manual scan initiated');
-  }, []);
+  // Memoized action handlers to prevent unnecessary re-renders
+  const actionHandlers = React.useMemo(() => ({
+    handleLiveThreatScan: () => toast.info('🔍 QA Test: Live Threat Scan initiated'),
+    handleLiveIntelligenceSweep: () => toast.info('🔍 QA Test: Live Intelligence Sweep initiated'),
+    handleGuardianToggle: () => toast.info('🛡️ QA Test: Guardian Mode toggled'),
+    handleGenerateReport: () => toast.info('📊 QA Test: Report generation initiated'),
+    handleActivateRealTime: () => toast.info('📡 QA Test: Real-Time monitoring toggled'),
+    handleRunManualScan: () => toast.info('🔄 QA Test: Manual scan initiated')
+  }), []);
 
   return (
     <DashboardLayout>
       <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 lg:p-6 bg-corporate-dark min-h-screen">
-        {/* Critical Action Buttons - Required for QA Testing */}
+        {/* Critical Action Buttons - Performance optimized */}
         <Suspense fallback={<Skeleton className="h-16 w-full bg-corporate-darkSecondary" />}>
           <CriticalActionButtons
-            onLiveThreatScan={handleLiveThreatScan}
-            onLiveIntelligenceSweep={handleLiveIntelligenceSweep}
-            onGuardianToggle={handleGuardianToggle}
-            onGenerateReport={handleGenerateReport}
-            onActivateRealTime={handleActivateRealTime}
-            onRunManualScan={handleRunManualScan}
+            onLiveThreatScan={actionHandlers.handleLiveThreatScan}
+            onLiveIntelligenceSweep={actionHandlers.handleLiveIntelligenceSweep}
+            onGuardianToggle={actionHandlers.handleGuardianToggle}
+            onGenerateReport={actionHandlers.handleGenerateReport}
+            onActivateRealTime={actionHandlers.handleActivateRealTime}
+            onRunManualScan={actionHandlers.handleRunManualScan}
             isScanning={false}
             isGuardianActive={true}
             isRealTimeActive={false}
           />
         </Suspense>
 
+        {/* Header section - responsive */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2 corporate-heading">
@@ -76,54 +107,15 @@ const QATestingPage = React.memo(() => {
           </div>
         </div>
 
-        {/* QA Overview */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
-          <Card className="corporate-card">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-xs sm:text-sm flex items-center gap-1 corporate-heading">
-                <Monitor className="h-3 w-3 sm:h-4 sm:w-4 text-corporate-accent" />
-                UI & Navigation
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-xl sm:text-2xl font-bold text-white">4 Tests</div>
-              <p className="text-xs corporate-subtext">Interface validation</p>
-            </CardContent>
-          </Card>
+        {/* QA Overview Cards - Memoized */}
+        <QAOverviewCards />
 
-          <Card className="corporate-card">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-xs sm:text-sm flex items-center gap-1 corporate-heading">
-                <Zap className="h-3 w-3 sm:h-4 sm:w-4 text-corporate-accent" />
-                Functional
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-xl sm:text-2xl font-bold text-white">5 Tests</div>
-              <p className="text-xs corporate-subtext">Core features</p>
-            </CardContent>
-          </Card>
-
-          <Card className="corporate-card sm:col-span-2 lg:col-span-1">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-xs sm:text-sm flex items-center gap-1 corporate-heading">
-                <Shield className="h-3 w-3 sm:h-4 sm:w-4 text-corporate-accent" />
-                Security
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-xl sm:text-2xl font-bold text-white">4 Tests</div>
-              <p className="text-xs corporate-subtext">Security validation</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Main QA Dashboard */}
+        {/* Main QA Dashboard - Lazy loaded */}
         <Suspense fallback={<Skeleton className="h-96 w-full bg-corporate-darkSecondary" />}>
           <ComprehensiveQADashboard />
         </Suspense>
 
-        {/* QA Process Overview */}
+        {/* QA Process Overview - Responsive grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           <Card className="corporate-card">
             <CardHeader>
@@ -207,7 +199,7 @@ const QATestingPage = React.memo(() => {
           </Card>
         </div>
 
-        {/* Deployment Readiness */}
+        {/* Deployment Readiness - Optimized */}
         <Card className="border-corporate-accent bg-corporate-darkSecondary">
           <CardHeader>
             <CardTitle className="text-corporate-accent flex items-center gap-2 text-sm sm:text-base">

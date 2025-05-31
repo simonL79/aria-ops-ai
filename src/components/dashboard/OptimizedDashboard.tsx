@@ -1,10 +1,10 @@
 
-import React, { Suspense, lazy, memo } from 'react';
+import React, { Suspense, lazy, memo, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { RefreshCw } from 'lucide-react';
 
-// Lazy load components with preloading for better performance
+// Lazy load components with aggressive optimization
 const ReputationScore = lazy(() => import('@/components/dashboard/ReputationScore'));
 const ContentAlerts = lazy(() => import('@/components/dashboard/ContentAlerts'));
 const SourceOverview = lazy(() => import('@/components/dashboard/SourceOverview'));
@@ -37,14 +37,10 @@ interface OptimizedDashboardProps {
   isRealTimeActive?: boolean;
 }
 
-// Optimized loading skeleton
+// Optimized skeleton with better performance
 const DashboardSkeleton = memo(() => (
-  <div className="space-y-4 animate-pulse">
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
-      {Array.from({ length: 6 }).map((_, i) => (
-        <Skeleton key={i} className="h-16 bg-corporate-darkSecondary" />
-      ))}
-    </div>
+  <div className="space-y-4">
+    <Skeleton className="h-20 w-full bg-corporate-darkSecondary" />
     <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
       <div className="xl:col-span-3 space-y-3">
         <Skeleton className="h-32 bg-corporate-darkSecondary" />
@@ -60,9 +56,9 @@ const DashboardSkeleton = memo(() => (
   </div>
 ));
 
-// Lightweight fallback components
+// Ultra-lightweight fallback
 const QuickSkeleton = memo(() => (
-  <Skeleton className="h-24 bg-corporate-darkSecondary rounded-lg" />
+  <Skeleton className="h-20 bg-corporate-darkSecondary rounded-lg" />
 ));
 
 const OptimizedDashboard: React.FC<OptimizedDashboardProps> = memo(({
@@ -88,11 +84,24 @@ const OptimizedDashboard: React.FC<OptimizedDashboardProps> = memo(({
   isGuardianActive = false,
   isRealTimeActive = false
 }) => {
-  const displayAlerts = filteredAlerts?.length ? filteredAlerts : alerts;
+  // Memoize display alerts to prevent unnecessary re-renders
+  const displayAlerts = React.useMemo(() => 
+    filteredAlerts?.length ? filteredAlerts : alerts
+  , [filteredAlerts, alerts]);
+
+  // Memoize action handlers to prevent re-renders
+  const memoizedHandlers = React.useMemo(() => ({
+    onLiveThreatScan,
+    onLiveIntelligenceSweep,
+    onGuardianToggle,
+    onGenerateReport,
+    onActivateRealTime,
+    onRunManualScan
+  }), [onLiveThreatScan, onLiveIntelligenceSweep, onGuardianToggle, onGenerateReport, onActivateRealTime, onRunManualScan]);
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-corporate-dark p-4">
+      <div className="min-h-screen bg-corporate-dark p-2 sm:p-4">
         <DashboardSkeleton />
       </div>
     );
@@ -100,7 +109,7 @@ const OptimizedDashboard: React.FC<OptimizedDashboardProps> = memo(({
 
   if (error) {
     return (
-      <div className="min-h-screen bg-corporate-dark p-4">
+      <div className="min-h-screen bg-corporate-dark p-2 sm:p-4">
         <Card className="corporate-card max-w-md mx-auto">
           <CardContent className="text-center py-6">
             <RefreshCw className="h-8 w-8 text-red-500 mx-auto mb-3" />
@@ -114,26 +123,21 @@ const OptimizedDashboard: React.FC<OptimizedDashboardProps> = memo(({
 
   return (
     <div className="min-h-screen bg-corporate-dark">
-      <div className="container mx-auto px-2 sm:px-4 py-4 space-y-4 max-w-7xl">
-        {/* Critical Action Buttons - Always visible and prioritized */}
+      <div className="container mx-auto px-2 sm:px-4 py-2 sm:py-4 space-y-3 sm:space-y-4 max-w-7xl">
+        {/* Critical Action Buttons - Highest priority */}
         <Suspense fallback={<QuickSkeleton />}>
           <CriticalActionButtons
-            onLiveThreatScan={onLiveThreatScan}
-            onLiveIntelligenceSweep={onLiveIntelligenceSweep}
-            onGuardianToggle={onGuardianToggle}
-            onGenerateReport={onGenerateReport}
-            onActivateRealTime={onActivateRealTime}
-            onRunManualScan={onRunManualScan}
+            {...memoizedHandlers}
             isScanning={isScanning}
             isGuardianActive={isGuardianActive}
             isRealTimeActive={isRealTimeActive}
           />
         </Suspense>
 
-        {/* Main Dashboard Grid - Optimized layout */}
-        <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
-          {/* Left Column - Compact on mobile */}
-          <div className="xl:col-span-3 space-y-4">
+        {/* Main Dashboard Grid - Responsive optimization */}
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-3 sm:gap-4">
+          {/* Left Column - Stacked on mobile */}
+          <div className="xl:col-span-3 space-y-3 sm:space-y-4">
             <Suspense fallback={<QuickSkeleton />}>
               <ReputationScore score={reputationScore} previousScore={previousScore} />
             </Suspense>
@@ -144,13 +148,13 @@ const OptimizedDashboard: React.FC<OptimizedDashboardProps> = memo(({
           </div>
           
           {/* Center Column - Main content */}
-          <div className="xl:col-span-6 space-y-4">
+          <div className="xl:col-span-6 space-y-3 sm:space-y-4">
             <Suspense fallback={<Skeleton className="h-80 bg-corporate-darkSecondary" />}>
               <ContentAlerts alerts={displayAlerts} isLoading={loading} />
             </Suspense>
           </div>
 
-          {/* Right Column - Secondary info */}
+          {/* Right Column - Entity summary */}
           <div className="xl:col-span-3">
             <Suspense fallback={<QuickSkeleton />}>
               <EntitySummaryPanel alerts={displayAlerts} />
@@ -158,8 +162,8 @@ const OptimizedDashboard: React.FC<OptimizedDashboardProps> = memo(({
           </div>
         </div>
 
-        {/* Bottom Section - Load last for better perceived performance */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Bottom Section - Lower priority */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
           <Suspense fallback={<QuickSkeleton />}>
             <SourceOverview sources={sources} />
           </Suspense>
