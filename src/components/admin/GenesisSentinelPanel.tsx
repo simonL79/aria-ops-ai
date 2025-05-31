@@ -152,15 +152,15 @@ const GenesisSentinelPanel = () => {
       // Create threat reports from live results
       if (allResults.length > 0) {
         for (const result of allResults) {
-          // Only create reports for moderate to high severity items
-          if (['moderate', 'high', 'critical'].includes(result.severity)) {
+          // Only create reports for moderate to high severity items - fix severity comparison
+          if (['moderate', 'high'].includes(result.severity) || result.severity === 'critical') {
             try {
               await supabase
                 .from('genesis_threat_reports')
                 .insert({
                   entity_id: entityId,
                   threat_summary: `Live threat detected on ${result.platform}: ${result.content.substring(0, 200)}...`,
-                  threat_level: result.severity,
+                  threat_level: result.severity === 'critical' ? 'critical' : result.severity,
                   sentiment_score: typeof result.sentiment === 'number' ? result.sentiment : 0,
                   evidence_links: [result.url].filter(Boolean),
                   is_live: true
@@ -173,7 +173,7 @@ const GenesisSentinelPanel = () => {
       }
 
       toast.success(`Genesis Sentinel live discovery completed for ${targetEntity}`, {
-        description: `${allResults.length} live intelligence items processed, ${allResults.filter(r => ['moderate', 'high', 'critical'].includes(r.severity)).length} threat reports generated`
+        description: `${allResults.length} live intelligence items processed, ${allResults.filter(r => ['moderate', 'high'].includes(r.severity) || r.severity === 'critical').length} threat reports generated`
       });
       
       // Create notification

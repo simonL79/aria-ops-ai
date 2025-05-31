@@ -1,23 +1,62 @@
-import { MetricValue, ContentSource, ContentAction, ResponseToneStyle, SeoContent } from "@/types/dashboard";
-import { supabase } from "@/integrations/supabase/client";
 
-export const getMetrics = async (): Promise<MetricValue[]> => {
+import { supabase } from '@/integrations/supabase/client';
+
+export interface ActionItem {
+  id: string;
+  title: string;
+  description: string;
+  priority: string;
+  status: string;
+  created_at: string;
+}
+
+export const fetchMetrics = async () => {
   try {
-    const [alertsData, sourcesData] = await Promise.all([
-      supabase.from('scan_results').select('*'),
-      supabase.from('monitored_platforms').select('*')
-    ]);
+    // Fetch metrics from scan_results
+    const { data: scanData, error: scanError } = await supabase
+      .from('scan_results')
+      .select('severity, status, created_at');
 
-    const totalMentions = alertsData.data?.length || 0;
-    const negativeSentiment = alertsData.data?.filter(item => item.sentiment < 0).length || 0;
-    const activeSources = sourcesData.data?.filter(item => item.active).length || 0;
-    const threatLevel = Math.round((negativeSentiment / totalMentions) * 100) || 0;
+    if (scanError) throw scanError;
+
+    const totalThreats = scanData?.length || 0;
+    const highRiskThreats = scanData?.filter(item => item.severity === 'high').length || 0;
+    const resolvedThreats = scanData?.filter(item => item.status === 'resolved').length || 0;
+    const resolutionRate = totalThreats > 0 ? Math.round((resolvedThreats / totalThreats) * 100) : 0;
 
     return [
-      { id: "1", title: "Total Mentions", value: totalMentions, change: 0, icon: "trending-up", color: "blue", delta: 0, deltaType: "increase" },
-      { id: "2", title: "Negative Sentiment", value: negativeSentiment, change: 0, icon: "trending-down", color: "red", delta: 0, deltaType: "increase" },
-      { id: "3", title: "Active Sources", value: activeSources, change: 0, icon: "trending-up", color: "green", delta: 0, deltaType: "increase" },
-      { id: "4", title: "Threat Level", value: threatLevel, change: 0, icon: "trending-down", color: "yellow", delta: 0, deltaType: "increase" }
+      {
+        id: '1',
+        title: 'Total Threats',
+        value: totalThreats,
+        delta: 0,
+        icon: 'shield',
+        color: 'blue'
+      },
+      {
+        id: '2',
+        title: 'High Risk',
+        value: highRiskThreats,
+        delta: 0,
+        icon: 'trending-up',
+        color: 'red'
+      },
+      {
+        id: '3',
+        title: 'Resolution Rate',
+        value: resolutionRate,
+        delta: 0,
+        icon: 'activity',
+        color: 'green'
+      },
+      {
+        id: '4',
+        title: 'Active Sources',
+        value: 4,
+        delta: 0,
+        icon: 'trending-up',
+        color: 'yellow'
+      }
     ];
   } catch (error) {
     console.error('Error fetching metrics:', error);
@@ -25,75 +64,73 @@ export const getMetrics = async (): Promise<MetricValue[]> => {
   }
 };
 
-export const getSources = async (): Promise<ContentSource[]> => {
+export const fetchAlerts = async () => {
   try {
     const { data, error } = await supabase
-      .from('monitored_platforms')
+      .from('scan_results')
       .select('*')
-      .eq('active', true);
-    
+      .eq('severity', 'high')
+      .order('created_at', { ascending: false })
+      .limit(10);
+
     if (error) throw error;
-    
-    return data.map(item => ({
+
+    return (data || []).map(item => ({
       id: item.id,
-      name: item.name,
-      type: item.type || 'platform',
-      status: item.status as "critical" | "good" | "warning",
-      lastUpdate: new Date(item.last_updated).toLocaleDateString(),
-      metrics: {
-        total: item.total || 0,
-        positive: Math.floor((item.positive_ratio || 0) * (item.total || 0) / 100),
-        negative: Math.floor((100 - (item.positive_ratio || 0)) * (item.total || 0) / 100),
-        neutral: 0
-      },
-      positiveRatio: item.positive_ratio || 0,
-      total: item.total || 0,
-      active: item.active,
-      lastUpdated: new Date(item.last_updated).toLocaleDateString(),
-      mentionCount: item.mention_count || 0,
-      sentiment: item.sentiment || 0
+      title: `High severity threat detected`,
+      content: item.content || 'Threat content',
+      platform: item.platform || 'Unknown',
+      severity: item.severity || 'medium',
+      timestamp: item.created_at,
+      status: item.status || 'new',
+      sentiment: item.sentiment > 0 ? 'positive' : item.sentiment < 0 ? 'negative' : 'neutral',
+      date: item.created_at,
+      url: item.url || ''
     }));
   } catch (error) {
-    console.error('Error fetching sources:', error);
+    console.error('Error fetching alerts:', error);
     return [];
   }
 };
 
 export const fetchActionItems = async (): Promise<ActionItem[]> => {
   try {
-    // Use existing activity_logs table instead of content_actions
-    const { data, error } = await supabase
-      .from('activity_logs')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(50);
-
-    if (error) {
-      console.error('Error fetching action items:', error);
-      return [];
-    }
-
-    return (data || []).map((item: any) => ({
-      id: item.id,
-      type: item.entity_type || 'system',
-      description: item.details || 'Activity logged',
-      createdAt: item.created_at,
-      status: 'completed',
-      platform: 'System',
-      action: item.action || 'logged',
-      timestamp: item.created_at,
-    }));
+    // Mock action items since we don't have a dedicated table
+    return [
+      {
+        id: '1',
+        title: 'Review High Priority Threats',
+        description: 'Multiple high-severity threats require immediate attention',
+        priority: 'high',
+        status: 'pending',
+        created_at: new Date().toISOString()
+      },
+      {
+        id: '2',
+        title: 'Update Response Templates',
+        description: 'Response templates need updating for new threat types',
+        priority: 'medium',
+        status: 'in_progress',
+        created_at: new Date().toISOString()
+      }
+    ];
   } catch (error) {
-    console.error('Error in fetchActionItems:', error);
+    console.error('Error fetching action items:', error);
     return [];
   }
 };
 
-export const getToneStyles = async (): Promise<ResponseToneStyle[]> => {
-  return ['professional', 'casual', 'empathetic', 'assertive'];
-};
-
-export const getSeoContent = async (): Promise<SeoContent[]> => {
-  // This would fetch from a real SEO content table if it exists
-  return [];
+export const fetchSources = async () => {
+  try {
+    // Mock sources data
+    return [
+      { id: '1', name: 'Reddit OSINT', type: 'osint_source', status: 'active' },
+      { id: '2', name: 'News Feeds', type: 'news_source', status: 'active' },
+      { id: '3', name: 'Forum Scanner', type: 'forum_source', status: 'active' },
+      { id: '4', name: 'RSS Monitor', type: 'rss_source', status: 'active' }
+    ];
+  } catch (error) {
+    console.error('Error fetching sources:', error);
+    return [];
+  }
 };

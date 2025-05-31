@@ -15,16 +15,9 @@ export const useAnubisSystemIntegration = () => {
     if (!user) return;
 
     await anubisIntegrationService.logActivity({
-      module: 'UI_TRACKING',
-      activity_type: 'component_access',
-      user_id: user.id,
-      metadata: {
-        component: componentName,
-        access_type: accessType,
-        timestamp: new Date().toISOString()
-      },
-      severity: 'info',
-      source_component: componentName
+      action: 'component_access',
+      details: `${componentName} - ${accessType} - ${new Date().toISOString()}`,
+      user_email: user.email || 'unknown'
     });
   };
 
@@ -33,50 +26,27 @@ export const useAnubisSystemIntegration = () => {
     if (!user) return;
 
     await anubisIntegrationService.logActivity({
-      module: 'USER_ACTIONS',
-      activity_type: action,
-      user_id: user.id,
-      metadata: {
-        action_details: details,
-        timestamp: new Date().toISOString()
-      },
-      severity,
-      source_component: 'UserInterface'
+      action: action,
+      details: `${JSON.stringify(details)} - ${severity} - ${new Date().toISOString()}`,
+      user_email: user.email || 'unknown'
     });
   };
 
   // Log API calls
   const logApiCall = async (endpoint: string, method: string, status: number, responseTime?: number) => {
     await anubisIntegrationService.logActivity({
-      module: 'API_TRACKING',
-      activity_type: 'api_call',
-      user_id: user?.id,
-      metadata: {
-        endpoint,
-        method,
-        status_code: status,
-        response_time_ms: responseTime,
-        timestamp: new Date().toISOString()
-      },
-      severity: status >= 400 ? 'error' : status >= 300 ? 'warning' : 'info',
-      source_component: 'ApiClient'
+      action: 'api_call',
+      details: `${method} ${endpoint} - ${status} - ${responseTime}ms - ${new Date().toISOString()}`,
+      user_email: user?.email || 'unknown'
     });
   };
 
   // Log errors
   const logError = async (error: Error, context: string) => {
     await anubisIntegrationService.logActivity({
-      module: 'ERROR_TRACKING',
-      activity_type: 'error_occurred',
-      user_id: user?.id,
-      metadata: {
-        error_message: error.message,
-        error_stack: error.stack,
-        context,
-        timestamp: new Date().toISOString()
-      },
-      severity: 'error',
-      source_component: context
+      action: 'error_occurred',
+      details: `${context}: ${error.message} - ${error.stack} - ${new Date().toISOString()}`,
+      user_email: user?.email || 'unknown'
     });
   };
 
