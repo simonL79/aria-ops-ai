@@ -17,6 +17,7 @@ import BlogPage from "./pages/BlogPage";
 import SimonLindsayPage from "./pages/SimonLindsayPage";
 import ContactPage from "./pages/ContactPage";
 import SentinelPage from "./pages/admin/SentinelPage";
+import SentinelOperatorPage from "./pages/admin/SentinelOperatorPage";
 import WatchtowerPage from "./pages/admin/WatchtowerPage";
 
 const queryClient = new QueryClient();
@@ -49,6 +50,14 @@ function App() {
                 element={
                   <AdminGuard>
                     <SentinelPage />
+                  </AdminGuard>
+                } 
+              />
+              <Route 
+                path="/admin/sentinel-command" 
+                element={
+                  <AdminGuard>
+                    <SentinelOperatorPage />
                   </AdminGuard>
                 } 
               />
