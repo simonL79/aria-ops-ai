@@ -16,6 +16,7 @@ import PricingPage from "./pages/PricingPage";
 import BlogPage from "./pages/BlogPage";
 import SimonLindsayPage from "./pages/SimonLindsayPage";
 import ContactPage from "./pages/ContactPage";
+import ContactFormPage from "./pages/ContactFormPage";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +34,7 @@ function App() {
               <Route path="/sales-funnel" element={<SalesFunnelPage />} />
               <Route path="/pricing" element={<PricingPage />} />
               <Route path="/contact" element={<ContactPage />} />
+              <Route path="/contact-sales" element={<ContactFormPage />} />
               <Route path="/scan" element={<ContactPage />} />
               <Route 
                 path="/dashboard" 
