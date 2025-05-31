@@ -12,13 +12,13 @@ interface AIAttackLog {
 }
 
 class AnubisSecurityService {
-  detectHotword(transcript: string, userId: string): boolean {
+  static detectHotword(transcript: string, userId: string): boolean {
     // Simple hotword detection logic
     const hotwords = ['emergency', 'alert', 'crisis', 'urgent'];
     return hotwords.some(word => transcript.toLowerCase().includes(word));
   }
 
-  analyzePromptForAttacks(prompt: string, inputType: string) {
+  static analyzePromptForAttacks(prompt: string, inputType: string) {
     // Simple attack detection logic
     const attackPatterns = ['inject', 'bypass', 'override', 'hack'];
     const isAttack = attackPatterns.some(pattern => prompt.toLowerCase().includes(pattern));
@@ -29,9 +29,21 @@ class AnubisSecurityService {
     };
   }
 
-  async queueSlackEvent(event: any): Promise<void> {
+  static async queueSlackEvent(event: any): Promise<void> {
     console.log('Slack event queued:', event);
     // Simulate slack notification
+  }
+
+  detectHotword(transcript: string, userId: string): boolean {
+    return AnubisSecurityService.detectHotword(transcript, userId);
+  }
+
+  analyzePromptForAttacks(prompt: string, inputType: string) {
+    return AnubisSecurityService.analyzePromptForAttacks(prompt, inputType);
+  }
+
+  async queueSlackEvent(event: any): Promise<void> {
+    return AnubisSecurityService.queueSlackEvent(event);
   }
 
   async getHotwordEvents(userId: string, limit: number): Promise<HotwordEvent[]> {

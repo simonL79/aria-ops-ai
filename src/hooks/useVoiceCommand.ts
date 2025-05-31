@@ -6,8 +6,18 @@ import { toast } from 'sonner';
 export const useVoiceCommand = () => {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
+  const [isSpeaking, setIsSpeaking] = useState(false);
+
+  // Check if speech recognition is supported
+  const isSupported = typeof window !== 'undefined' && 
+    ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window);
 
   const startListening = () => {
+    if (!isSupported) {
+      toast.error('Speech recognition not supported in this browser');
+      return;
+    }
+    
     setIsListening(true);
     // Mock voice recognition
     setTimeout(() => {
@@ -40,6 +50,8 @@ export const useVoiceCommand = () => {
     transcript,
     startListening,
     stopListening,
-    processCommand
+    processCommand,
+    isSupported,
+    isSpeaking
   };
 };

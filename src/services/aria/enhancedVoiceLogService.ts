@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { AnubisSecurityService } from './anubisSecurityService';
+import { anubisSecurityService } from './anubisSecurityService';
 
 export interface EnhancedVoiceLogEntry {
   id: string;
@@ -25,14 +25,14 @@ export const enhancedVoiceLogService = {
   }): Promise<boolean> {
     try {
       // Check for hotword detection
-      const hotwordDetected = AnubisSecurityService.detectHotword(entry.transcript, entry.user_id);
+      const hotwordDetected = anubisSecurityService.detectHotword(entry.transcript, entry.user_id);
       
       // Analyze for AI attacks if this is user input
       let securityFlagged = false;
       let attackVector = '';
       
       if (entry.source === 'mic') {
-        const analysis = AnubisSecurityService.analyzePromptForAttacks(entry.transcript, 'voice_input');
+        const analysis = anubisSecurityService.analyzePromptForAttacks(entry.transcript, 'voice_input');
         securityFlagged = analysis.isAttack;
         attackVector = analysis.attackVector || '';
       }
@@ -63,7 +63,7 @@ export const enhancedVoiceLogService = {
 
       // Log security events if detected
       if (securityFlagged) {
-        await AnubisSecurityService.queueSlackEvent({
+        await anubisSecurityService.queueSlackEvent({
           channel: '#security-alerts',
           event_type: 'voice_attack_detected',
           payload: {
@@ -97,7 +97,7 @@ export const enhancedVoiceLogService = {
       }
 
       // Transform activity logs to voice log entries
-      const enhancedLogs = (data || []).map((log) => {
+      const enhancedLogs: EnhancedVoiceLogEntry[] = (data || []).map((log) => {
         const details = typeof log.details === 'string' ? JSON.parse(log.details) : log.details;
         return {
           id: log.id,
