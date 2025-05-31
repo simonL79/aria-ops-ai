@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export interface SystemConfigResult {
@@ -117,7 +116,7 @@ export class SystemConfigManager {
   private static async checkTableIntegrity(result: SystemBugScanResult): Promise<void> {
     // Use type assertions for table names to avoid TypeScript strict typing issues
     const criticalTables = [
-      'anubis_creeper_log',
+      'activity_logs',
       'system_config',
       'user_roles',
       'scan_results',
@@ -334,10 +333,11 @@ export class SystemConfigManager {
         result.fixes_applied.push('Recent scan activity verified');
       }
 
-      // Check Anubis log activity
+      // Check activity logs for Anubis activity instead of anubis_creeper_log
       const { data: recentLogs } = await supabase
-        .from('anubis_creeper_log')
+        .from('activity_logs')
         .select('created_at')
+        .eq('entity_type', 'anubis')
         .gt('created_at', new Date(Date.now() - 60 * 60 * 1000).toISOString())
         .limit(1);
 

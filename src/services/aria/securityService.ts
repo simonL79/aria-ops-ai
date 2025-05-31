@@ -18,6 +18,9 @@ export interface ModuleRegistry {
   security_level: string;
   access_control: string;
   is_active: boolean;
+  owner: string;
+  classification: string;
+  declared_at: string;
 }
 
 export interface ModuleAccessStats {
@@ -92,7 +95,7 @@ export const checkModuleAccess = async (moduleId: string): Promise<boolean> => {
 };
 
 export const getModuleRegistry = async (): Promise<ModuleRegistry[]> => {
-  // Return simulated module registry data
+  // Return simulated module registry data with all required properties
   return [
     {
       id: '1',
@@ -100,7 +103,10 @@ export const getModuleRegistry = async (): Promise<ModuleRegistry[]> => {
       module_type: 'security',
       security_level: 'high',
       access_control: 'admin_only',
-      is_active: true
+      is_active: true,
+      owner: 'A.R.I.A™ Security Team',
+      classification: 'confidential',
+      declared_at: new Date().toISOString()
     },
     {
       id: '2',
@@ -108,7 +114,10 @@ export const getModuleRegistry = async (): Promise<ModuleRegistry[]> => {
       module_type: 'intelligence',
       security_level: 'medium',
       access_control: 'staff',
-      is_active: true
+      is_active: true,
+      owner: 'Intelligence Operations',
+      classification: 'restricted',
+      declared_at: new Date().toISOString()
     }
   ];
 };

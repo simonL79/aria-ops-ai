@@ -61,16 +61,23 @@ const ARIASecurityPanel = () => {
   };
 
   const handleTestAccess = async (moduleName: string) => {
-    await checkInternalAccess(moduleName);
+    const result = await checkInternalAccess(moduleName);
+    if (result) {
+      toast.success(`Access test passed for ${moduleName}`);
+    } else {
+      toast.error(`Access test failed for ${moduleName}`);
+    }
     // Reload audit logs to show the new attempt
     setTimeout(() => loadSecurityData(), 1000);
   };
 
   const handleLogUsage = async (moduleName: string, action: string) => {
-    const success = await logModuleUsage(moduleName, action, 'Manual usage logging from security panel');
-    if (success) {
+    try {
+      await logModuleUsage(moduleName, action, 'Manual usage logging from security panel');
       toast.success(`Logged ${action} for ${moduleName}`);
       setTimeout(() => loadSecurityData(), 1000);
+    } catch (error) {
+      toast.error(`Failed to log usage for ${moduleName}`);
     }
   };
 
