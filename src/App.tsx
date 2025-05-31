@@ -18,6 +18,7 @@ import WatchtowerPage from './pages/admin/WatchtowerPage';
 import IntelligenceCorePage from './pages/admin/IntelligenceCorePage';
 import PersonaSaturationPage from './pages/admin/PersonaSaturationPage';
 import LegalOpsPage from './pages/admin/LegalOpsPage';
+import QATestingPage from './pages/admin/QATestingPage';
 
 const queryClient = new QueryClient();
 
@@ -96,6 +97,14 @@ function App() {
                   element={
                     <AdminGuard>
                       <SettingsPage />
+                    </AdminGuard>
+                  } 
+                />
+                <Route 
+                  path="/admin/qa-testing" 
+                  element={
+                    <AdminGuard>
+                      <QATestingPage />
                     </AdminGuard>
                   } 
                 />

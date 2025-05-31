@@ -1,351 +1,211 @@
 
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Star, TrendingUp, Users, Eye, BarChart3, Zap } from 'lucide-react';
-import { toast } from 'sonner';
+import { Badge } from '@/components/ui/badge';
+import { Brain, TrendingUp, AlertCircle, Activity, Target } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
-interface ImpactMetric {
+interface ContentAlert {
   id: string;
-  entity_name: string;
-  source: string;
-  mention_count: number;
-  audience_reach: number;
-  influence_rating: number;
-  exposure_score: number;
-  sentiment_average: number;
-  calculated_at: string;
+  content: string;
+  platform: string;
+  severity: string;
+  sentiment: number;
+  created_at: string;
 }
 
-// Helper function to safely extract entity name from detected_entities
-const extractEntityName = (detectedEntities: any): string => {
-  if (!detectedEntities) return 'Unknown Entity';
-  
-  // If it's an array
-  if (Array.isArray(detectedEntities)) {
-    if (detectedEntities.length === 0) return 'Unknown Entity';
-    const firstEntity = detectedEntities[0];
-    
-    // If the first element is an object with name property
-    if (typeof firstEntity === 'object' && firstEntity.name) {
-      return firstEntity.name;
-    }
-    
-    // If the first element is a string
-    if (typeof firstEntity === 'string') {
-      return firstEntity;
-    }
-    
-    // Fallback - convert to string
-    return String(firstEntity);
-  }
-  
-  // If it's a string
-  if (typeof detectedEntities === 'string') {
-    return detectedEntities;
-  }
-  
-  // If it's an object with name property
-  if (typeof detectedEntities === 'object' && detectedEntities.name) {
-    return detectedEntities.name;
-  }
-  
-  // Fallback
-  return 'Unknown Entity';
-};
-
-export const LuminoscorePanel = () => {
-  const [impactMetrics, setImpactMetrics] = useState<ImpactMetric[]>([]);
-  const [scanResults, setScanResults] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+const LuminoscorePanel = () => {
+  const [alerts, setAlerts] = useState<ContentAlert[]>([]);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [luminoScore, setLuminoScore] = useState(85);
+  const [trendDirection, setTrendDirection] = useState<'up' | 'down' | 'stable'>('stable');
 
   useEffect(() => {
-    loadRealData();
-    // Set up real-time subscription for new scan results
-    const scanSubscription = supabase
-      .channel('scan_results_changes')
-      .on('postgres_changes', {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'scan_results'
-      }, () => {
-        console.log('New scan result detected, reloading data...');
-        loadRealData();
-      })
-      .subscribe();
-
-    return () => {
-      scanSubscription.unsubscribe();
-    };
+    loadContentAlerts();
+    calculateLuminoScore();
   }, []);
 
-  const loadRealData = async () => {
+  const loadContentAlerts = async () => {
     try {
-      console.log('🔄 Loading real data from database...');
-      
-      // Load real scan results from the database
-      const { data: scanData, error: scanError } = await supabase
+      // Use scan_results table as content alerts
+      const { data, error } = await supabase
         .from('scan_results')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(20);
-
-      if (scanError) {
-        console.error('Error loading scan results:', scanError);
-      } else if (scanData && scanData.length > 0) {
-        console.log(`✅ Loaded ${scanData.length} real scan results`);
-        setScanResults(scanData);
-        
-        // Convert scan results to impact metrics format
-        const metrics = scanData.map((scan: any) => ({
-          id: scan.id,
-          entity_name: extractEntityName(scan.detected_entities),
-          source: scan.platform,
-          mention_count: 1,
-          audience_reach: scan.potential_reach || 0,
-          influence_rating: (scan.confidence_score || 75) / 100,
-          exposure_score: (scan.sentiment || 0) * 50 + 50, // Convert sentiment to exposure score
-          sentiment_average: scan.sentiment || 0,
-          calculated_at: scan.created_at
-        }));
-        setImpactMetrics(metrics);
-      } else {
-        console.log('ℹ️ No scan results found in database');
-        setScanResults([]);
-        setImpactMetrics([]);
-      }
-
-      // Load content alerts as additional metrics
-      const { data: alertData, error: alertError } = await supabase
-        .from('content_alerts')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(10);
 
-      if (alertError) {
-        console.error('Error loading content alerts:', alertError);
-      } else if (alertData && alertData.length > 0) {
-        console.log(`✅ Loaded ${alertData.length} content alerts`);
-        const alertMetrics = alertData.map((alert: any) => ({
-          id: alert.id,
-          entity_name: extractEntityName(alert.detected_entities),
-          source: alert.platform,
-          mention_count: 1,
-          audience_reach: alert.potential_reach || 0,
-          influence_rating: (alert.confidence_score || 75) / 100,
-          exposure_score: (alert.sentiment || 0) * 50 + 50,
-          sentiment_average: alert.sentiment || 0,
-          calculated_at: alert.created_at
-        }));
-        setImpactMetrics(prev => [...prev, ...alertMetrics]);
-      }
+      if (error) throw error;
 
+      // Transform scan results into content alerts
+      const mockAlerts: ContentAlert[] = (data || []).map(item => ({
+        id: item.id,
+        content: item.content || 'Content analysis data',
+        platform: item.platform || 'Unknown',
+        severity: item.severity || 'low',
+        sentiment: item.sentiment || 0,
+        created_at: item.created_at
+      }));
+
+      setAlerts(mockAlerts);
     } catch (error) {
-      console.error('❌ Error loading real data:', error);
-      toast.error('Failed to load impact metrics from database');
+      console.error('Error loading content alerts:', error);
     }
   };
 
-  const getInfluenceColor = (rating: number) => {
-    if (rating >= 0.8) return 'bg-green-500/20 text-green-400 border-green-500/50';
-    if (rating >= 0.6) return 'bg-blue-500/20 text-blue-400 border-blue-500/50';
-    if (rating >= 0.4) return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50';
-    return 'bg-red-500/20 text-red-400 border-red-500/50';
-  };
-
-  const getExposureColor = (score: number) => {
-    if (score >= 80) return 'bg-green-500/20 text-green-400 border-green-500/50';
-    if (score >= 60) return 'bg-blue-500/20 text-blue-400 border-blue-500/50';
-    if (score >= 40) return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50';
-    return 'bg-red-500/20 text-red-400 border-red-500/50';
-  };
-
-  const getSentimentColor = (sentiment: number) => {
-    if (sentiment >= 0.3) return 'bg-green-500/20 text-green-400 border-green-500/50';
-    if (sentiment >= -0.1) return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/50';
-    return 'bg-red-500/20 text-red-400 border-red-500/50';
-  };
-
-  const triggerRealScan = async () => {
-    setIsLoading(true);
+  const calculateLuminoScore = async () => {
     try {
-      console.log('🚀 Triggering real monitoring scan...');
-      
-      // Call the real monitoring scan
-      const { data, error } = await supabase.functions.invoke('monitoring-scan', {
-        body: { 
-          fullScan: true,
-          source: 'luminoscore_panel'
-        }
+      const { data, error } = await supabase
+        .from('scan_results')
+        .select('sentiment, severity')
+        .limit(50);
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        const avgSentiment = data.reduce((sum, item) => sum + (item.sentiment || 0), 0) / data.length;
+        const highSeverityCount = data.filter(item => item.severity === 'high').length;
+        
+        // Calculate luminosity score (0-100)
+        const baseScore = Math.max(0, Math.min(100, 50 + (avgSentiment * 50)));
+        const severityPenalty = (highSeverityCount / data.length) * 30;
+        const finalScore = Math.max(0, baseScore - severityPenalty);
+        
+        setLuminoScore(Math.round(finalScore));
+        
+        // Determine trend
+        if (finalScore > 75) setTrendDirection('up');
+        else if (finalScore < 50) setTrendDirection('down');
+        else setTrendDirection('stable');
+      }
+    } catch (error) {
+      console.error('Error calculating lumino score:', error);
+    }
+  };
+
+  const runAnalysis = async () => {
+    setIsAnalyzing(true);
+    try {
+      await supabase.from('activity_logs').insert({
+        action: 'lumino_analysis',
+        details: 'Content luminosity analysis initiated',
+        entity_type: 'lumino_system'
       });
+
+      // Simulate analysis time
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
-      if (error) {
-        console.error('❌ Scan error:', error);
-        toast.error('Failed to start real scan');
-      } else {
-        console.log('✅ Real scan initiated successfully');
-        toast.success('Real scan initiated - results will appear shortly');
-        // Reload data after scan
-        setTimeout(() => {
-          loadRealData();
-        }, 2000);
-      }
+      await calculateLuminoScore();
+      await loadContentAlerts();
+      
+      toast.success('Luminosity analysis complete');
     } catch (error) {
-      console.error('❌ Error triggering scan:', error);
-      toast.error('Failed to trigger monitoring scan');
+      console.error('Error running analysis:', error);
+      toast.error('Analysis failed');
     } finally {
-      setIsLoading(false);
+      setIsAnalyzing(false);
     }
   };
 
-  const generateReport = async () => {
-    setIsLoading(true);
-    try {
-      const totalMetrics = impactMetrics.length;
-      const avgInfluence = totalMetrics > 0 ? impactMetrics.reduce((sum, metric) => sum + metric.influence_rating, 0) / totalMetrics : 0;
-      const avgExposure = totalMetrics > 0 ? impactMetrics.reduce((sum, metric) => sum + metric.exposure_score, 0) / totalMetrics : 0;
-      const totalReach = impactMetrics.reduce((sum, metric) => sum + metric.audience_reach, 0);
-      
-      toast.success(
-        `LUMINOSCORE™ Report: ${totalMetrics} entities, avg influence: ${avgInfluence.toFixed(2)}, avg exposure: ${avgExposure.toFixed(1)}, total reach: ${totalReach.toLocaleString()}`
-      );
-    } catch (error) {
-      console.error('Error generating report:', error);
-      toast.error('Failed to generate LUMINOSCORE™ report');
-    } finally {
-      setIsLoading(false);
+  const getScoreColor = () => {
+    if (luminoScore >= 80) return 'text-green-400';
+    if (luminoScore >= 60) return 'text-yellow-400';
+    return 'text-red-400';
+  };
+
+  const getTrendIcon = () => {
+    switch (trendDirection) {
+      case 'up': return <TrendingUp className="h-4 w-4 text-green-400" />;
+      case 'down': return <TrendingUp className="h-4 w-4 text-red-400 transform rotate-180" />;
+      default: return <Activity className="h-4 w-4 text-gray-400" />;
     }
   };
 
   return (
     <div className="space-y-4">
-      {/* Real Impact Metrics Display */}
-      <Card className="bg-black border-orange-500/30">
+      <Card className="bg-gray-900 border-gray-700">
         <CardHeader>
-          <CardTitle className="text-orange-400 text-sm flex items-center gap-2">
-            <Star className="h-4 w-4" />
-            LUMINOSCORE™ Live Impact Metrics
-            <Button
-              size="sm"
-              onClick={triggerRealScan}
-              disabled={isLoading}
-              className="ml-auto text-xs bg-orange-600 hover:bg-orange-700"
-            >
-              <BarChart3 className="h-3 w-3 mr-1" />
-              {isLoading ? 'Scanning...' : 'Real Scan'}
-            </Button>
+          <CardTitle className="flex items-center gap-2 text-purple-400">
+            <Brain className="h-5 w-5" />
+            A.R.I.A™ Luminoscore Engine
           </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2 max-h-48 overflow-y-auto">
-          {impactMetrics.length === 0 ? (
-            <div className="text-gray-500 text-sm">
-              No real impact metrics available. Click "Real Scan" to trigger monitoring scan and generate live data.
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-400">Current Score:</span>
+              <span className={`text-2xl font-bold ${getScoreColor()}`}>{luminoScore}</span>
             </div>
-          ) : (
-            impactMetrics.map((metric) => (
-              <div key={metric.id} className="flex items-start gap-3 p-2 bg-gray-900/50 rounded">
-                <Star className="h-4 w-4 text-orange-400" />
-                <div className="flex-1">
-                  <div className="text-sm text-white mb-1">
-                    <span className="text-orange-300">[{metric.entity_name}]</span>
-                  </div>
-                  <div className="text-xs text-orange-400 mb-1">
-                    {metric.source} | {metric.mention_count} mentions | {metric.audience_reach.toLocaleString()} reach
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    Calculated: {new Date(metric.calculated_at).toLocaleTimeString()}
-                  </div>
-                </div>
-                <div className="flex flex-col gap-1">
-                  <Badge className={getInfluenceColor(metric.influence_rating)}>
-                    Inf: {(metric.influence_rating * 100).toFixed(0)}%
-                  </Badge>
-                  <Badge className={getExposureColor(metric.exposure_score)}>
-                    Exp: {metric.exposure_score.toFixed(1)}
-                  </Badge>
-                  <Badge className={getSentimentColor(metric.sentiment_average)}>
-                    Sent: {metric.sentiment_average.toFixed(2)}
-                  </Badge>
-                </div>
+            <div className="flex items-center gap-2">
+              {getTrendIcon()}
+              <span className="text-sm text-gray-400">Trend: {trendDirection}</span>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="bg-gray-800 p-4 rounded">
+              <div className="flex items-center gap-2">
+                <Target className="h-4 w-4 text-blue-400" />
+                <span className="text-sm text-gray-400">Content Signals</span>
               </div>
-            ))
-          )}
-        </CardContent>
-      </Card>
+              <div className="text-2xl font-bold text-white">{alerts.length}</div>
+            </div>
+            
+            <div className="bg-gray-800 p-4 rounded">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="h-4 w-4 text-yellow-400" />
+                <span className="text-sm text-gray-400">High Priority</span>
+              </div>
+              <div className="text-2xl font-bold text-white">
+                {alerts.filter(a => a.severity === 'high').length}
+              </div>
+            </div>
+            
+            <div className="bg-gray-800 p-4 rounded">
+              <div className="flex items-center gap-2">
+                <Activity className="h-4 w-4 text-green-400" />
+                <span className="text-sm text-gray-400">Avg Sentiment</span>
+              </div>
+              <div className="text-2xl font-bold text-white">
+                {alerts.length > 0 ? 
+                  (alerts.reduce((sum, a) => sum + a.sentiment, 0) / alerts.length).toFixed(2) : 
+                  '0.00'
+                }
+              </div>
+            </div>
+          </div>
 
-      {/* Real Scan Results Display */}
-      <Card className="bg-black border-cyan-500/30">
-        <CardHeader>
-          <CardTitle className="text-cyan-400 text-sm flex items-center gap-2">
-            <TrendingUp className="h-4 w-4" />
-            Live Scan Results ({scanResults.length} items)
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2 max-h-40 overflow-y-auto">
-          {scanResults.length === 0 ? (
-            <div className="text-gray-500 text-sm">No scan results available - trigger a real scan to see live data</div>
-          ) : (
-            scanResults.slice(0, 5).map((result) => (
-              <div key={result.id} className="flex items-start gap-3 p-2 bg-gray-900/50 rounded">
-                <TrendingUp className="h-4 w-4 text-cyan-400" />
-                <div className="flex-1">
-                  <div className="text-sm text-white mb-1">
-                    <span className="text-cyan-300">[{result.platform}]</span>
-                  </div>
-                  <div className="text-xs text-cyan-400 mb-1">
-                    {result.content?.substring(0, 100)}...
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    {new Date(result.created_at).toLocaleTimeString()} | {result.severity} severity
-                  </div>
-                </div>
-                <Badge className={result.severity === 'high' ? 'bg-red-500/20 text-red-400' : 'bg-yellow-500/20 text-yellow-400'}>
-                  {result.severity}
-                </Badge>
-              </div>
-            ))
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Analysis Controls */}
-      <Card className="bg-black border-green-500/30">
-        <CardHeader>
-          <CardTitle className="text-green-400 text-sm flex items-center gap-2">
-            <Eye className="h-4 w-4" />
-            LUMINOSCORE™ Analysis Engine
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold text-white">Content Analysis</h3>
             <Button
-              size="sm"
-              onClick={generateReport}
-              disabled={isLoading}
-              className="ml-auto text-xs bg-green-600 hover:bg-green-700"
+              onClick={runAnalysis}
+              disabled={isAnalyzing}
+              className="bg-purple-600 hover:bg-purple-700"
             >
-              <Zap className="h-3 w-3 mr-1" />
-              Report
+              {isAnalyzing ? 'Analyzing...' : 'Run Analysis'}
             </Button>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          <div className="grid grid-cols-3 gap-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-orange-400">{impactMetrics.length}</div>
-              <div className="text-xs text-gray-500">Impact Metrics</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-cyan-400">{scanResults.length}</div>
-              <div className="text-xs text-gray-500">Scan Results</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-purple-400">
-                {scanResults.filter(r => r.severity === 'high').length}
+          </div>
+
+          <div className="space-y-2 max-h-60 overflow-y-auto">
+            {alerts.map((alert) => (
+              <div key={alert.id} className="bg-gray-800 p-3 rounded">
+                <div className="flex items-center justify-between mb-2">
+                  <Badge variant={alert.severity === 'high' ? 'destructive' : 'secondary'}>
+                    {alert.severity.toUpperCase()}
+                  </Badge>
+                  <span className="text-sm text-gray-400">{alert.platform}</span>
+                </div>
+                <div className="text-white text-sm line-clamp-2">{alert.content}</div>
+                <div className="text-xs text-gray-500 mt-1">
+                  Sentiment: {alert.sentiment.toFixed(2)} | {new Date(alert.created_at).toLocaleString()}
+                </div>
               </div>
-              <div className="text-xs text-gray-500">High Priority</div>
-            </div>
+            ))}
           </div>
         </CardContent>
       </Card>
     </div>
   );
 };
+
+export default LuminoscorePanel;

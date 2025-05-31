@@ -25,7 +25,8 @@ import {
   Satellite,
   Brain,
   Globe,
-  Scale
+  Scale,
+  TestTube
 } from 'lucide-react';
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { useAuth } from '@/hooks/useAuth';
@@ -109,6 +110,12 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       icon: <Users className="h-4 w-4" />,
       href: "/admin/clients",
       active: pathname === "/admin/clients",
+    },
+    {
+      label: "QA Testing",
+      icon: <TestTube className="h-4 w-4" />,
+      href: "/admin/qa-testing",
+      active: pathname === "/admin/qa-testing",
     },
     {
       label: "Blog",
