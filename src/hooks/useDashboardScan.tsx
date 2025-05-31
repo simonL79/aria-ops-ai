@@ -66,20 +66,21 @@ export const useDashboardScan = (
       }
 
       if (liveResults && liveResults.length > 0) {
-        // Convert to ContentAlert format
+        // Convert to ContentAlert format with proper typing
         const newAlerts: ContentAlert[] = liveResults.map(result => ({
           id: result.id,
           platform: result.platform,
           content: result.content,
           date: new Date(result.created_at).toLocaleDateString(),
-          severity: result.severity,
-          status: 'new',
+          severity: (['high', 'medium', 'low'].includes(result.severity) ? result.severity : 'low') as 'high' | 'medium' | 'low',
+          status: 'new' as const,
           threatType: 'live_intelligence',
           confidenceScore: result.confidence_score,
           sourceType: result.source_type,
           sentiment: result.sentiment > 0 ? 'positive' : result.sentiment < 0 ? 'negative' : 'neutral',
           potentialReach: 0,
-          detectedEntities: result.detected_entities || [],
+          detectedEntities: Array.isArray(result.detected_entities) ? 
+            result.detected_entities.map(String) : [],
           url: result.url
         }));
 
