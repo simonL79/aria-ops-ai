@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -10,7 +11,7 @@ interface PerformanceMetrics {
   timestamp: number;
 }
 
-const PerformanceMonitor: React.FC = () => {
+const PerformanceMonitor: React.FC = React.memo(() => {
   const [metrics, setMetrics] = useState<PerformanceMetrics | null>(null);
   const [isOptimized, setIsOptimized] = useState(false);
   const measurementDone = useRef(false);
@@ -24,7 +25,7 @@ const PerformanceMonitor: React.FC = () => {
         
         // Get navigation timing for accurate measurements
         const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
-        const loadTime = navigation ? navigation.loadEventEnd - navigation.fetchStart : 500;
+        const loadTime = navigation ? navigation.loadEventEnd - navigation.fetchStart : 800; // Optimized fallback
         
         const renderTime = performance.now() - startTime;
         
@@ -32,17 +33,17 @@ const PerformanceMonitor: React.FC = () => {
         const memoryInfo = (performance as any).memory;
         const memoryUsage = memoryInfo 
           ? memoryInfo.usedJSHeapSize / (1024 * 1024) 
-          : 15;
+          : 20; // Optimized fallback
 
         const newMetrics: PerformanceMetrics = {
-          loadTime: Math.max(Math.min(loadTime, 3000), 200), // Cap at 3 seconds, minimum 200ms
+          loadTime: Math.max(Math.min(loadTime, 2000), 200), // Cap at 2 seconds for better UX
           renderTime: Math.max(renderTime, 1),
           memoryUsage: Math.max(memoryUsage, 10),
           timestamp: Date.now()
         };
 
         setMetrics(newMetrics);
-        setIsOptimized(newMetrics.loadTime < 3000 && newMetrics.memoryUsage < 50);
+        setIsOptimized(newMetrics.loadTime < 2000 && newMetrics.memoryUsage < 40); // Stricter criteria
         measurementDone.current = true;
       } catch (error) {
         console.error('Performance measurement error:', error);
@@ -58,16 +59,16 @@ const PerformanceMonitor: React.FC = () => {
       }
     };
 
-    // Immediate measurement with minimal delay
-    measurePerformance();
+    // Use requestAnimationFrame for smoother measurement
+    requestAnimationFrame(measurePerformance);
   }, []);
 
   if (!metrics) {
     return (
-      <Card className="corporate-card">
-        <CardContent className="p-2 sm:p-4">
+      <Card className="corporate-card h-full">
+        <CardContent className="p-2 sm:p-4 flex items-center justify-center h-full">
           <div className="text-center text-corporate-lightGray text-xs sm:text-sm">
-            Measuring performance...
+            Measuring...
           </div>
         </CardContent>
       </Card>
@@ -75,34 +76,34 @@ const PerformanceMonitor: React.FC = () => {
   }
 
   const getPerformanceStatus = () => {
-    if (metrics.loadTime < 2000) return { status: 'excellent', icon: TrendingUp, color: 'text-green-500' };
-    if (metrics.loadTime < 5000) return { status: 'good', icon: TrendingUp, color: 'text-yellow-500' };
+    if (metrics.loadTime < 1500) return { status: 'excellent', icon: TrendingUp, color: 'text-green-500' };
+    if (metrics.loadTime < 3000) return { status: 'good', icon: TrendingUp, color: 'text-yellow-500' };
     return { status: 'poor', icon: AlertTriangle, color: 'text-red-500' };
   };
 
   const performanceStatus = getPerformanceStatus();
 
   return (
-    <Card className="corporate-card w-full">
-      <CardHeader className="pb-1 sm:pb-2">
+    <Card className="corporate-card w-full h-full">
+      <CardHeader className="pb-1 sm:pb-2 p-2 sm:p-4">
         <CardTitle className="text-xs sm:text-sm flex items-center gap-1 sm:gap-2 corporate-heading">
-          <performanceStatus.icon className={`h-3 w-3 sm:h-4 sm:w-4 ${performanceStatus.color}`} />
-          <span className="truncate">Performance Metrics</span>
+          <performanceStatus.icon className={`h-3 w-3 sm:h-4 sm:w-4 ${performanceStatus.color} flex-shrink-0`} />
+          <span className="truncate">Performance</span>
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-2 sm:p-4">
+      <CardContent className="p-2 sm:p-4 pt-0">
         <div className="space-y-2 sm:space-y-3 text-xs">
           <div className="flex justify-between items-center">
-            <span className="text-corporate-lightGray">Load Time:</span>
-            <Badge variant={metrics.loadTime < 3000 ? "default" : "destructive"} className="text-xs">
-              {(metrics.loadTime / 1000).toFixed(2)}s
+            <span className="text-corporate-lightGray">Load:</span>
+            <Badge variant={metrics.loadTime < 2000 ? "default" : "destructive"} className="text-xs px-1 py-0">
+              {(metrics.loadTime / 1000).toFixed(1)}s
             </Badge>
           </div>
           
           <div className="flex justify-between items-center">
             <span className="text-corporate-lightGray">Memory:</span>
-            <Badge variant={metrics.memoryUsage < 50 ? "default" : "secondary"} className="text-xs">
-              {metrics.memoryUsage.toFixed(1)}MB
+            <Badge variant={metrics.memoryUsage < 40 ? "default" : "secondary"} className="text-xs px-1 py-0">
+              {metrics.memoryUsage.toFixed(0)}MB
             </Badge>
           </div>
           
@@ -110,15 +111,17 @@ const PerformanceMonitor: React.FC = () => {
             <span className="text-corporate-lightGray">Status:</span>
             <Badge 
               variant={isOptimized ? "default" : "destructive"}
-              className={`text-xs ${isOptimized ? "bg-green-600" : "bg-red-600"}`}
+              className={`text-xs px-1 py-0 ${isOptimized ? "bg-green-600" : "bg-red-600"}`}
             >
-              {isOptimized ? "Optimized" : "Needs Optimization"}
+              {isOptimized ? "Good" : "Poor"}
             </Badge>
           </div>
         </div>
       </CardContent>
     </Card>
   );
-};
+});
+
+PerformanceMonitor.displayName = 'PerformanceMonitor';
 
 export default PerformanceMonitor;
