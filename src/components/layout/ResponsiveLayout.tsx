@@ -11,15 +11,15 @@ const ResponsiveLayout: React.FC<ResponsiveLayoutProps> = ({ children, className
   return (
     <div className={cn(
       "responsive-container w-full min-h-screen",
-      "px-2 sm:px-4 lg:px-6 xl:px-8",
-      "py-2 sm:py-4 lg:py-6",
+      "px-1 sm:px-2 md:px-4 lg:px-6 xl:px-8",
+      "py-1 sm:py-2 md:py-4 lg:py-6",
       "max-w-[100vw] overflow-x-hidden",
       className
     )}>
       <div className={cn(
-        "responsive-content mx-auto",
-        "max-w-sm sm:max-w-2xl md:max-w-4xl lg:max-w-6xl xl:max-w-7xl 2xl:max-w-full",
-        "space-y-3 sm:space-y-4 lg:space-y-6"
+        "responsive-content mx-auto w-full",
+        "max-w-xs sm:max-w-md md:max-w-2xl lg:max-w-4xl xl:max-w-6xl 2xl:max-w-7xl",
+        "space-y-2 sm:space-y-3 md:space-y-4 lg:space-y-6"
       )}>
         {children}
       </div>
