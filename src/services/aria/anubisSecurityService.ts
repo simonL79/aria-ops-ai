@@ -43,6 +43,77 @@ class AnubisSecurityService {
     // Return empty array since table doesn't exist
     return [];
   }
+
+  async logSecurityEvent(event: any): Promise<void> {
+    try {
+      await supabase.from('activity_logs').insert({
+        action: 'security_event',
+        details: JSON.stringify(event),
+        entity_type: 'security'
+      });
+    } catch (error) {
+      console.error('Error logging security event:', error);
+    }
+  }
+
+  async logTestResult(result: any): Promise<void> {
+    try {
+      await supabase.from('activity_logs').insert({
+        action: 'test_result',
+        details: JSON.stringify(result),
+        entity_type: 'test'
+      });
+    } catch (error) {
+      console.error('Error logging test result:', error);
+    }
+  }
+
+  async registerMobileSession(sessionData: any): Promise<void> {
+    try {
+      await supabase.from('activity_logs').insert({
+        action: 'mobile_session',
+        details: JSON.stringify(sessionData),
+        entity_type: 'session'
+      });
+    } catch (error) {
+      console.error('Error registering mobile session:', error);
+    }
+  }
+
+  async logAIAttack(attackData: any): Promise<void> {
+    try {
+      await supabase.from('activity_logs').insert({
+        action: 'ai_attack',
+        details: JSON.stringify(attackData),
+        entity_type: 'security'
+      });
+    } catch (error) {
+      console.error('Error logging AI attack:', error);
+    }
+  }
+
+  async getSecurityMetrics(): Promise<any> {
+    try {
+      const { data, error } = await supabase
+        .from('activity_logs')
+        .select('*')
+        .eq('entity_type', 'security')
+        .order('created_at', { ascending: false })
+        .limit(100);
+
+      if (error) throw error;
+
+      return {
+        totalEvents: data?.length || 0,
+        recentAlerts: data?.slice(0, 10) || [],
+        securityScore: 85 // Mock score
+      };
+    } catch (error) {
+      console.error('Error getting security metrics:', error);
+      return { totalEvents: 0, recentAlerts: [], securityScore: 0 };
+    }
+  }
 }
 
-export const AnubisSecurityService = new AnubisSecurityService();
+export { AnubisSecurityService };
+export const anubisSecurityService = new AnubisSecurityService();

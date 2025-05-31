@@ -1,56 +1,13 @@
 
 import { useState, useEffect } from 'react';
 import { anubisIntegrationService } from '@/services/aria/anubisIntegrationService';
-import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
 export const useAnubisSystemIntegration = () => {
   const [systemHealth, setSystemHealth] = useState<any>(null);
-  const [systemMetrics, setSystemMetrics] = useState<any>(null);
+  const [metrics, setMetrics] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const { user } = useAuth();
 
-  // Log page/component access
-  const logComponentAccess = async (componentName: string, accessType: 'view' | 'interact' | 'modify' = 'view') => {
-    if (!user) return;
-
-    await anubisIntegrationService.logActivity({
-      action: 'component_access',
-      details: `${componentName} - ${accessType} - ${new Date().toISOString()}`,
-      user_email: user.email || 'unknown'
-    });
-  };
-
-  // Log user actions
-  const logUserAction = async (action: string, details: any, severity: 'info' | 'warning' | 'error' | 'critical' = 'info') => {
-    if (!user) return;
-
-    await anubisIntegrationService.logActivity({
-      action: action,
-      details: `${JSON.stringify(details)} - ${severity} - ${new Date().toISOString()}`,
-      user_email: user.email || 'unknown'
-    });
-  };
-
-  // Log API calls
-  const logApiCall = async (endpoint: string, method: string, status: number, responseTime?: number) => {
-    await anubisIntegrationService.logActivity({
-      action: 'api_call',
-      details: `${method} ${endpoint} - ${status} - ${responseTime}ms - ${new Date().toISOString()}`,
-      user_email: user?.email || 'unknown'
-    });
-  };
-
-  // Log errors
-  const logError = async (error: Error, context: string) => {
-    await anubisIntegrationService.logActivity({
-      action: 'error_occurred',
-      details: `${context}: ${error.message} - ${error.stack} - ${new Date().toISOString()}`,
-      user_email: user?.email || 'unknown'
-    });
-  };
-
-  // Get system health
   const checkSystemHealth = async () => {
     setIsLoading(true);
     try {
@@ -58,55 +15,76 @@ export const useAnubisSystemIntegration = () => {
       setSystemHealth(health);
       return health;
     } catch (error) {
-      console.error('Failed to check system health:', error);
-      toast.error('Failed to retrieve system health status');
+      console.error('Error checking system health:', error);
+      toast.error('Failed to check system health');
       return null;
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Get system metrics
-  const getSystemMetrics = async (timeframe: '1h' | '24h' | '7d' = '24h') => {
+  const getSystemMetrics = async (timeframe: '7d' | '30d' = '7d') => {
+    setIsLoading(true);
     try {
-      const metrics = await anubisIntegrationService.getSystemMetrics(timeframe);
-      setSystemMetrics(metrics);
-      return metrics;
+      const metricsData = await anubisIntegrationService.getSystemMetrics(timeframe);
+      setMetrics(metricsData);
+      return metricsData;
     } catch (error) {
-      console.error('Failed to get system metrics:', error);
-      toast.error('Failed to retrieve system metrics');
+      console.error('Error getting system metrics:', error);
+      toast.error('Failed to get system metrics');
       return null;
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // Auto-refresh system status
+  const logActivity = async (activity: any) => {
+    try {
+      await anubisIntegrationService.logActivity(activity);
+      return true;
+    } catch (error) {
+      console.error('Error logging activity:', error);
+      return false;
+    }
+  };
+
+  const logEmergencyStrike = async (threatId: string, action: string, userId?: string) => {
+    try {
+      await anubisIntegrationService.logEmergencyStrike(threatId, action, userId);
+      toast.success('Emergency strike logged');
+      return true;
+    } catch (error) {
+      console.error('Error logging emergency strike:', error);
+      toast.error('Failed to log emergency strike');
+      return false;
+    }
+  };
+
+  const logSovraDecision = async (threatId: string, decision: string, confidence: number, userId?: string) => {
+    try {
+      await anubisIntegrationService.logSovraDecision(threatId, decision, confidence, userId);
+      toast.success('Sovra decision logged');
+      return true;
+    } catch (error) {
+      console.error('Error logging Sovra decision:', error);
+      toast.error('Failed to log Sovra decision');
+      return false;
+    }
+  };
+
   useEffect(() => {
     checkSystemHealth();
     getSystemMetrics();
-
-    // Refresh every 5 minutes
-    const interval = setInterval(() => {
-      checkSystemHealth();
-      getSystemMetrics();
-    }, 5 * 60 * 1000);
-
-    return () => clearInterval(interval);
   }, []);
 
   return {
-    // System status
     systemHealth,
-    systemMetrics,
+    metrics,
     isLoading,
-    
-    // Logging functions
-    logComponentAccess,
-    logUserAction,
-    logApiCall,
-    logError,
-    
-    // Status functions
     checkSystemHealth,
-    getSystemMetrics
+    getSystemMetrics,
+    logActivity,
+    logEmergencyStrike,
+    logSovraDecision
   };
 };

@@ -1,5 +1,5 @@
+
 import { supabase } from '@/integrations/supabase/client';
-import { enhancedVoiceLogService } from './enhancedVoiceLogService';
 
 export interface VoiceLogEntry {
   id: string;
@@ -9,71 +9,67 @@ export interface VoiceLogEntry {
   source: string;
   processed: boolean;
   response?: string;
-  response_time?: string;
 }
 
-export const getVoiceLogs = async (limit: number = 50): Promise<VoiceLogEntry[]> => {
+export const logVoiceInteraction = async (entry: {
+  user_id: string;
+  transcript: string;
+  source: string;
+  response?: string;
+}): Promise<boolean> => {
   try {
-    // Use enhanced voice log service for better functionality
-    const enhancedLogs = await enhancedVoiceLogService.getEnhancedVoiceLogs(limit);
-    
-    // Convert to original format for backward compatibility
-    return enhancedLogs.map(log => ({
-      id: log.id,
-      user_id: log.user_id,
-      transcript: log.transcript,
-      timestamp: log.timestamp,
-      source: log.source,
-      processed: log.processed,
-      response: log.response,
-      response_time: log.response_time
-    }));
-  } catch (error) {
-    console.error('Error in getVoiceLogs:', error);
-    return [];
-  }
-};
-
-export const markVoiceLogProcessed = async (id: string, response: string): Promise<boolean> => {
-  try {
+    // Use activity_logs table instead of anubis_voice_log
     const { error } = await supabase
-      .from('anubis_voice_log')
-      .update({
-        processed: true,
-        response: response,
-        response_time: new Date().toISOString()
-      })
-      .eq('id', id);
+      .from('activity_logs')
+      .insert({
+        action: 'voice_interaction',
+        details: JSON.stringify({
+          transcript: entry.transcript,
+          response: entry.response,
+          source: entry.source,
+          processed: !!entry.response
+        }),
+        entity_type: 'voice_log',
+        user_id: entry.user_id
+      });
 
-    if (error) {
-      console.error('Error updating voice log:', error);
-      return false;
-    }
-
+    if (error) throw error;
     return true;
   } catch (error) {
-    console.error('Error in markVoiceLogProcessed:', error);
+    console.error('Error logging voice interaction:', error);
     return false;
   }
 };
 
-export const getUnprocessedVoiceLogs = async (): Promise<VoiceLogEntry[]> => {
+export const getVoiceLogs = async (limit = 50): Promise<VoiceLogEntry[]> => {
   try {
+    // Use activity_logs table instead of anubis_voice_log
     const { data, error } = await supabase
-      .from('anubis_voice_log')
+      .from('activity_logs')
       .select('*')
-      .eq('processed', false)
-      .eq('source', 'mic')
-      .order('timestamp', { ascending: true });
+      .eq('action', 'voice_interaction')
+      .order('created_at', { ascending: false })
+      .limit(limit);
 
-    if (error) {
-      console.error('Error fetching unprocessed voice logs:', error);
-      return [];
-    }
+    if (error) throw error;
 
-    return data || [];
+    // Transform to VoiceLogEntry format
+    const voiceLogs: VoiceLogEntry[] = (data || []).map((item: any) => {
+      const details = typeof item.details === 'string' ? JSON.parse(item.details) : item.details;
+      return {
+        id: item.id,
+        user_id: item.user_id || '',
+        transcript: details.transcript || '',
+        timestamp: item.created_at,
+        source: details.source || 'unknown',
+        processed: details.processed || false,
+        response: details.response
+      };
+    });
+
+    return voiceLogs;
   } catch (error) {
-    console.error('Error in getUnprocessedVoiceLogs:', error);
+    console.error('Error fetching voice logs:', error);
     return [];
   }
 };
