@@ -82,7 +82,7 @@ const GenesisSentinelPage = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-400">< 5min</div>
+              <div className="text-2xl font-bold text-green-400">&lt; 5min</div>
               <p className="text-xs corporate-subtext">Threat to outreach</p>
             </CardContent>
           </Card>

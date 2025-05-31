@@ -7,6 +7,7 @@ import EntityDiscoveryTab from './genesis-sentinel/EntityDiscoveryTab';
 import RiskIntelligenceTab from './genesis-sentinel/RiskIntelligenceTab';
 import LeadGenerationTab from './genesis-sentinel/LeadGenerationTab';
 import StrategicMappingTab from './genesis-sentinel/StrategicMappingTab';
+import PreemptiveIntelTab from './genesis-sentinel/PreemptiveIntelTab';
 
 const GenesisSentinelPanel = () => {
   const [activeTab, setActiveTab] = useState('discovery');
@@ -24,12 +25,15 @@ const GenesisSentinelPanel = () => {
       </CardHeader>
       <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 bg-corporate-darkSecondary border border-corporate-border">
+          <TabsList className="grid w-full grid-cols-5 bg-corporate-darkSecondary border border-corporate-border">
             <TabsTrigger value="discovery" className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray">
               Entity Discovery
             </TabsTrigger>
             <TabsTrigger value="intelligence" className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray">
               Risk Intelligence
+            </TabsTrigger>
+            <TabsTrigger value="preemptive" className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray">
+              Preemptive Intel
             </TabsTrigger>
             <TabsTrigger value="leads" className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray">
               Lead Generation
@@ -45,6 +49,10 @@ const GenesisSentinelPanel = () => {
 
           <TabsContent value="intelligence" className="mt-6">
             <RiskIntelligenceTab />
+          </TabsContent>
+
+          <TabsContent value="preemptive" className="mt-6">
+            <PreemptiveIntelTab />
           </TabsContent>
 
           <TabsContent value="leads" className="mt-6">
