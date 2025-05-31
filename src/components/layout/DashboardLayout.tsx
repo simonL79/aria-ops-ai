@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ReactNode } from 'react';
 import { 
@@ -30,6 +29,7 @@ import {
 } from 'lucide-react';
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { useAuth } from '@/hooks/useAuth';
+import { useCurrentPage } from '@/hooks/useCurrentPage';
 import { toast } from 'sonner';
 
 interface DashboardLayoutProps {
@@ -40,6 +40,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const { user, signOut } = useAuth();
   const { pathname } = useLocation();
   const navigate = useNavigate();
+  const { title, description } = useCurrentPage();
   
   const handleSignOut = async () => {
     try {
@@ -200,8 +201,12 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           </Sidebar>
           <main className="flex-1 p-4 md:p-6">
             <div className="flex items-center py-4 mb-6 justify-between">
-              <div>
+              <div className="flex items-center gap-4">
                 <SidebarTrigger />
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
+                  <p className="text-gray-600">{description}</p>
+                </div>
               </div>
               <div className="flex items-center gap-4">
                 <div className="text-sm text-muted-foreground">
