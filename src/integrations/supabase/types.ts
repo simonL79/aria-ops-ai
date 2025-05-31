@@ -6056,6 +6056,63 @@ export type Database = {
         }
         Relationships: []
       }
+      response_execution_log: {
+        Row: {
+          case_id: string | null
+          created_at: string | null
+          effectiveness_score: number | null
+          executed_by: string | null
+          execution_details: Json | null
+          execution_status: string | null
+          execution_time_ms: number | null
+          execution_type: string
+          id: string
+          response_plan_id: string | null
+          success_metrics: Json | null
+        }
+        Insert: {
+          case_id?: string | null
+          created_at?: string | null
+          effectiveness_score?: number | null
+          executed_by?: string | null
+          execution_details?: Json | null
+          execution_status?: string | null
+          execution_time_ms?: number | null
+          execution_type: string
+          id?: string
+          response_plan_id?: string | null
+          success_metrics?: Json | null
+        }
+        Update: {
+          case_id?: string | null
+          created_at?: string | null
+          effectiveness_score?: number | null
+          executed_by?: string | null
+          execution_details?: Json | null
+          execution_status?: string | null
+          execution_time_ms?: number | null
+          execution_type?: string
+          id?: string
+          response_plan_id?: string | null
+          success_metrics?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "response_execution_log_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "sentinel_cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "response_execution_log_response_plan_id_fkey"
+            columns: ["response_plan_id"]
+            isOneToOne: false
+            referencedRelation: "sentinel_response_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       response_transparency_log: {
         Row: {
           approved_at: string | null
@@ -6683,6 +6740,62 @@ export type Database = {
           },
         ]
       }
+      sentinel_cases: {
+        Row: {
+          case_status: string | null
+          case_summary: string | null
+          case_title: string | null
+          client_id: string | null
+          created_at: string | null
+          discovery_method: string | null
+          entity_name: string
+          escalation_level: string | null
+          id: string
+          intelligence_brief: string | null
+          response_status: string | null
+          threat_level: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          case_status?: string | null
+          case_summary?: string | null
+          case_title?: string | null
+          client_id?: string | null
+          created_at?: string | null
+          discovery_method?: string | null
+          entity_name: string
+          escalation_level?: string | null
+          id?: string
+          intelligence_brief?: string | null
+          response_status?: string | null
+          threat_level?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          case_status?: string | null
+          case_summary?: string | null
+          case_title?: string | null
+          client_id?: string | null
+          created_at?: string | null
+          discovery_method?: string | null
+          entity_name?: string
+          escalation_level?: string | null
+          id?: string
+          intelligence_brief?: string | null
+          response_status?: string | null
+          threat_level?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sentinel_cases_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sentinel_clients: {
         Row: {
           auto_response_enabled: boolean
@@ -6882,6 +6995,44 @@ export type Database = {
           },
         ]
       }
+      sentinel_mission_reports: {
+        Row: {
+          case_id: string | null
+          created_at: string | null
+          generated_by: string | null
+          id: string
+          mission_id: string | null
+          report_data: Json | null
+          response_type: string | null
+        }
+        Insert: {
+          case_id?: string | null
+          created_at?: string | null
+          generated_by?: string | null
+          id?: string
+          mission_id?: string | null
+          report_data?: Json | null
+          response_type?: string | null
+        }
+        Update: {
+          case_id?: string | null
+          created_at?: string | null
+          generated_by?: string | null
+          id?: string
+          mission_id?: string | null
+          report_data?: Json | null
+          response_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sentinel_mission_reports_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "sentinel_cases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sentinel_response_plans: {
         Row: {
           approved_at: string | null
@@ -7035,6 +7186,53 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      sentinel_threat_timeline: {
+        Row: {
+          case_id: string | null
+          created_at: string | null
+          event_description: string | null
+          event_type: string
+          id: string
+          metadata: Json | null
+          response_taken: string | null
+          source_platform: string | null
+          source_url: string | null
+          threat_severity: string | null
+        }
+        Insert: {
+          case_id?: string | null
+          created_at?: string | null
+          event_description?: string | null
+          event_type: string
+          id?: string
+          metadata?: Json | null
+          response_taken?: string | null
+          source_platform?: string | null
+          source_url?: string | null
+          threat_severity?: string | null
+        }
+        Update: {
+          case_id?: string | null
+          created_at?: string | null
+          event_description?: string | null
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          response_taken?: string | null
+          source_platform?: string | null
+          source_url?: string | null
+          threat_severity?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sentinel_threat_timeline_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "sentinel_cases"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       sentinelgrid_entity_risk_links: {
         Row: {
@@ -7799,6 +7997,134 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      watchtower_candidates: {
+        Row: {
+          confidence_score: number | null
+          created_at: string | null
+          discovery_source: string | null
+          entity_name: string
+          id: string
+          last_scanned: string | null
+          outreach_status: string | null
+          potential_value: number | null
+          scan_results: Json | null
+          threat_details: Json | null
+          threat_score: number | null
+          threat_summary: string | null
+        }
+        Insert: {
+          confidence_score?: number | null
+          created_at?: string | null
+          discovery_source?: string | null
+          entity_name: string
+          id?: string
+          last_scanned?: string | null
+          outreach_status?: string | null
+          potential_value?: number | null
+          scan_results?: Json | null
+          threat_details?: Json | null
+          threat_score?: number | null
+          threat_summary?: string | null
+        }
+        Update: {
+          confidence_score?: number | null
+          created_at?: string | null
+          discovery_source?: string | null
+          entity_name?: string
+          id?: string
+          last_scanned?: string | null
+          outreach_status?: string | null
+          potential_value?: number | null
+          scan_results?: Json | null
+          threat_details?: Json | null
+          threat_score?: number | null
+          threat_summary?: string | null
+        }
+        Relationships: []
+      }
+      watchtower_conversion_pipeline: {
+        Row: {
+          candidate_id: string | null
+          conversion_value: number | null
+          converted_to_client_id: string | null
+          id: string
+          moved_to_stage_at: string | null
+          pipeline_stage: string | null
+          stage_data: Json | null
+        }
+        Insert: {
+          candidate_id?: string | null
+          conversion_value?: number | null
+          converted_to_client_id?: string | null
+          id?: string
+          moved_to_stage_at?: string | null
+          pipeline_stage?: string | null
+          stage_data?: Json | null
+        }
+        Update: {
+          candidate_id?: string | null
+          conversion_value?: number | null
+          converted_to_client_id?: string | null
+          id?: string
+          moved_to_stage_at?: string | null
+          pipeline_stage?: string | null
+          stage_data?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "watchtower_conversion_pipeline_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "watchtower_candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "watchtower_conversion_pipeline_converted_to_client_id_fkey"
+            columns: ["converted_to_client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      watchtower_outreach_log: {
+        Row: {
+          candidate_id: string | null
+          conversion_status: string | null
+          id: string
+          outreach_content: string | null
+          outreach_type: string | null
+          response_received: boolean | null
+          sent_at: string | null
+        }
+        Insert: {
+          candidate_id?: string | null
+          conversion_status?: string | null
+          id?: string
+          outreach_content?: string | null
+          outreach_type?: string | null
+          response_received?: boolean | null
+          sent_at?: string | null
+        }
+        Update: {
+          candidate_id?: string | null
+          conversion_status?: string | null
+          id?: string
+          outreach_content?: string | null
+          outreach_type?: string | null
+          response_received?: boolean | null
+          sent_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "watchtower_outreach_log_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "watchtower_candidates"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       zero_day_events: {
         Row: {
