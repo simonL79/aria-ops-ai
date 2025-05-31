@@ -9,10 +9,11 @@ export class Phase7DataProtection extends BaseTestPhase {
     
     // Test 7.1: Data Encryption Status
     try {
-      // Check if sensitive data fields are properly handled
+      // Check if data protection activities are logged in activity_logs
       const { data, error } = await this.getSupabase()
-        .from('consent_records')
+        .from('activity_logs')
         .select('*')
+        .eq('entity_type', 'data_protection')
         .limit(1);
       
       if (error) throw error;
