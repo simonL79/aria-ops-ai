@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -82,22 +83,22 @@ const PlatformSelector = ({ selectedPlatforms, onPlatformToggle, deploymentTier 
               </Badge>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {platforms.map((platform) => {
                 const isSelected = selectedPlatforms.includes(platform.id);
-                const isDisabled = false; // All platforms are now enabled
+                const isDisabled = false; // All platforms are enabled
                 const platformLimit = calculatePlatformLimit(platform);
                 
                 return (
                   <div
                     key={platform.id}
-                    className={`p-3 border rounded-lg transition-all ${
+                    className={`p-4 border rounded-lg transition-all min-h-[120px] flex flex-col ${
                       isSelected
                         ? 'border-blue-500 bg-blue-50' 
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
-                    <div className="flex items-start space-x-3">
+                    <div className="flex items-start space-x-3 flex-1">
                       <Checkbox
                         id={platform.id}
                         checked={isSelected}
@@ -105,38 +106,40 @@ const PlatformSelector = ({ selectedPlatforms, onPlatformToggle, deploymentTier 
                         onCheckedChange={(checked) => 
                           onPlatformToggle(platform.id, !!checked)
                         }
-                        className="mt-1"
+                        className="mt-1 flex-shrink-0"
                       />
                       <div className="flex-1 min-w-0">
                         <label
                           htmlFor={platform.id}
-                          className="text-sm font-medium cursor-pointer"
+                          className="text-sm font-medium cursor-pointer block mb-2"
                         >
                           {platform.name}
                         </label>
                         
-                        <div className="flex items-center gap-2 mt-1">
-                          <Badge 
-                            variant="secondary" 
-                            className="text-xs"
-                          >
-                            {platformLimit} articles max
-                          </Badge>
-                          
-                          {platform.requiresAuth && (
-                            <Badge variant="outline" className="text-xs">
-                              Auth Required
+                        <div className="space-y-2">
+                          <div className="flex flex-wrap gap-1">
+                            <Badge 
+                              variant="secondary" 
+                              className="text-xs whitespace-nowrap"
+                            >
+                              {platformLimit} articles max
                             </Badge>
-                          )}
+                            
+                            {platform.requiresAuth && (
+                              <Badge variant="outline" className="text-xs whitespace-nowrap">
+                                Auth Required
+                              </Badge>
+                            )}
+                            
+                            <Badge variant="default" className="text-xs text-green-600 bg-green-100 border-green-200 whitespace-nowrap">
+                              Available
+                            </Badge>
+                          </div>
                           
-                          <Badge variant="default" className="text-xs text-green-600">
-                            Available
-                          </Badge>
+                          <p className="text-xs text-muted-foreground">
+                            Delay: {platform.delayMs}ms between articles
+                          </p>
                         </div>
-                        
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Delay: {platform.delayMs}ms between articles
-                        </p>
                       </div>
                     </div>
                   </div>
