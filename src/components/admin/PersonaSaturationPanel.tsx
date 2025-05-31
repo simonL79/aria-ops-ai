@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
-import { Rocket, Target, Globe, TrendingUp, Shield, Zap, AlertTriangle } from 'lucide-react';
+import { Rocket, Target, Globe, TrendingUp, Shield, Zap, AlertTriangle, Cloud, Code, FileText, Radio } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import PersonaSaturationReports from './PersonaSaturationReports';
@@ -284,11 +284,21 @@ const PersonaSaturationPanel = () => {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Deployment Platforms</label>
+              <label className="text-sm font-medium">Free Hosting Platforms</label>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                 {[
-                  { id: 'github-pages', name: 'GitHub Pages', icon: Globe },
-                  { id: 'netlify', name: 'Netlify', icon: TrendingUp }
+                  { id: 'github-pages', name: 'GitHub Pages', icon: Globe, category: 'Git-based' },
+                  { id: 'netlify', name: 'Netlify', icon: TrendingUp, category: 'JAMstack' },
+                  { id: 'vercel', name: 'Vercel', icon: Zap, category: 'Edge' },
+                  { id: 'surge', name: 'Surge.sh', icon: Target, category: 'Static' },
+                  { id: 'firebase', name: 'Firebase', icon: Shield, category: 'Google' },
+                  { id: 'gitlab-pages', name: 'GitLab Pages', icon: Code, category: 'Git-based' },
+                  { id: 'render', name: 'Render', icon: Cloud, category: 'Static' },
+                  { id: 'telegraph', name: 'Telegraph', icon: FileText, category: 'Instant' },
+                  { id: 'pages-dev', name: 'Pages.dev', icon: Globe, category: 'Cloudflare' },
+                  { id: 'tiiny-host', name: 'Tiiny Host', icon: Target, category: 'Simple' },
+                  { id: 'neocities', name: 'Neocities', icon: Radio, category: 'Creative' },
+                  { id: 'google-sites', name: 'Google Sites', icon: Shield, category: 'Google' }
                 ].map(platform => {
                   const Icon = platform.icon;
                   const isSelected = deploymentTargets.includes(platform.id);
@@ -297,7 +307,7 @@ const PersonaSaturationPanel = () => {
                       key={platform.id}
                       variant={isSelected ? "default" : "outline"}
                       size="sm"
-                      className="justify-start"
+                      className="justify-start h-auto py-2 px-3"
                       onClick={() => {
                         if (isSelected) {
                           setDeploymentTargets(prev => prev.filter(t => t !== platform.id));
@@ -306,11 +316,19 @@ const PersonaSaturationPanel = () => {
                         }
                       }}
                     >
-                      <Icon className="h-4 w-4 mr-1" />
-                      {platform.name}
+                      <div className="flex flex-col items-start w-full">
+                        <div className="flex items-center gap-1 mb-1">
+                          <Icon className="h-3 w-3" />
+                          <span className="text-xs font-medium">{platform.name}</span>
+                        </div>
+                        <span className="text-xs text-muted-foreground">{platform.category}</span>
+                      </div>
                     </Button>
                   );
                 })}
+              </div>
+              <div className="text-xs text-muted-foreground mt-2">
+                Selected {deploymentTargets.length} platform{deploymentTargets.length !== 1 ? 's' : ''} • Each creates unique domains for maximum SERP coverage
               </div>
             </div>
 
@@ -318,13 +336,13 @@ const PersonaSaturationPanel = () => {
               <div className="flex items-center gap-2">
                 <Globe className="h-5 w-5 text-green-600" />
                 <div>
-                  <h4 className="font-medium text-green-800">Live GitHub Pages Deployment</h4>
+                  <h4 className="font-medium text-green-800">Multi-Platform SERP Saturation</h4>
                   <p className="text-sm text-green-700">
-                    ✅ Creates real GitHub repositories<br/>
-                    ✅ Deploys to live GitHub Pages sites<br/>
-                    ✅ Includes SEO optimization & structured data<br/>
-                    ✅ Generates sitemap.xml and RSS feeds<br/>
-                    ✅ Automatically pings search engines
+                    ✅ Deploy across {deploymentTargets.length} free hosting platform{deploymentTargets.length !== 1 ? 's' : ''}<br/>
+                    ✅ Creates diverse domain portfolio for SEO<br/>
+                    ✅ Strategic backlinks between all articles<br/>
+                    ✅ Central hub repository with sitemap<br/>
+                    ✅ Automatic search engine pinging
                   </p>
                 </div>
               </div>
@@ -335,19 +353,19 @@ const PersonaSaturationPanel = () => {
 
             <Button 
               onClick={executePersonaSaturation}
-              disabled={isExecuting || !entityName.trim() || !targetKeywords.trim()}
+              disabled={isExecuting || !entityName.trim() || !targetKeywords.trim() || deploymentTargets.length === 0}
               className="w-full"
               size="lg"
             >
               {isExecuting ? (
                 <>
                   <Shield className="h-4 w-4 mr-2 animate-spin" />
-                  Deploying {contentCount} Live Articles...
+                  Deploying {contentCount} Articles to {deploymentTargets.length} Platform{deploymentTargets.length !== 1 ? 's' : ''}...
                 </>
               ) : (
                 <>
                   <Rocket className="h-4 w-4 mr-2" />
-                  🚀 Deploy {contentCount} Live Articles to GitHub Pages
+                  🚀 Deploy {contentCount} Articles to {deploymentTargets.length} Platform{deploymentTargets.length !== 1 ? 's' : ''}
                 </>
               )}
             </Button>
