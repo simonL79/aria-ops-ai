@@ -1,14 +1,88 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Globe, FileText, CheckCircle, TrendingUp, Zap, Shield } from 'lucide-react';
+import CampaignConfiguration from '@/components/persona/CampaignConfiguration';
+import CampaignMonitor from '@/components/persona/CampaignMonitor';
+import { toast } from 'sonner';
+
+interface SaturationCampaign {
+  id: string;
+  entityName: string;
+  status: 'planning' | 'generating' | 'deploying' | 'indexing' | 'monitoring' | 'completed';
+  progress: number;
+  contentGenerated: number;
+  deploymentsSuccessful: number;
+  serpPenetration: number;
+  estimatedImpact: string;
+}
 
 const PersonaSaturationPage = () => {
+  const [entityName, setEntityName] = useState('');
+  const [targetKeywords, setTargetKeywords] = useState('');
+  const [contentCount, setContentCount] = useState(10);
+  const [saturationMode, setSaturationMode] = useState<'defensive' | 'aggressive' | 'nuclear'>('defensive');
+  const [deploymentTargets, setDeploymentTargets] = useState(['github-pages']);
+  const [isExecuting, setIsExecuting] = useState(false);
+  const [currentCampaign, setCurrentCampaign] = useState<SaturationCampaign | null>(null);
+
+  const executePersonaSaturation = async () => {
+    if (!entityName.trim() || !targetKeywords.trim()) {
+      toast.error('Please enter entity name and target keywords');
+      return;
+    }
+
+    if (deploymentTargets.length === 0) {
+      toast.error('Please select at least one deployment platform');
+      return;
+    }
+
+    setIsExecuting(true);
+    
+    const campaign: SaturationCampaign = {
+      id: `campaign-${Date.now()}`,
+      entityName,
+      status: 'planning',
+      progress: 0,
+      contentGenerated: 0,
+      deploymentsSuccessful: 0,
+      serpPenetration: 0,
+      estimatedImpact: 'Calculating...'
+    };
+    setCurrentCampaign(campaign);
+
+    // Simulate campaign progress
+    const stages = [
+      { status: 'planning' as const, progress: 10, duration: 1000 },
+      { status: 'generating' as const, progress: 40, duration: 2000 },
+      { status: 'deploying' as const, progress: 70, duration: 1500 },
+      { status: 'indexing' as const, progress: 90, duration: 1000 },
+      { status: 'completed' as const, progress: 100, duration: 500 }
+    ];
+
+    for (const stage of stages) {
+      await new Promise(resolve => setTimeout(resolve, stage.duration));
+      setCurrentCampaign(prev => prev ? {
+        ...prev,
+        status: stage.status,
+        progress: stage.progress,
+        contentGenerated: stage.progress >= 40 ? contentCount : 0,
+        deploymentsSuccessful: stage.progress >= 70 ? Math.floor(contentCount * 0.9) : 0,
+        serpPenetration: stage.progress >= 90 ? 85 : 0,
+        estimatedImpact: stage.status === 'completed' ? `${Math.floor(contentCount * 0.9)} articles deployed successfully` : 'Processing...'
+      } : null);
+    }
+
+    toast.success('🎯 Persona Saturation Campaign Completed!');
+    setIsExecuting(false);
+  };
+
   return (
     <DashboardLayout>
-      <div className="space-y-6 p-6 bg-corporate-dark min-h-screen">
+      <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -87,108 +161,41 @@ const PersonaSaturationPage = () => {
           </Card>
         </div>
 
-        {/* Current Implementation */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="corporate-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 corporate-heading">
-                <FileText className="h-5 w-5 text-corporate-accent" />
-                10-Article Live Engine
-              </CardTitle>
-              <Badge className="bg-green-500/20 text-green-400 text-xs">PRODUCTION</Badge>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3 text-sm text-corporate-lightGray">
-                <div>• GitHub Pages automated deployment</div>
-                <div>• Real-time URL verification system</div>
-                <div>• AI-generated content based on persona facts</div>
-                <div>• SEO-optimized title and meta generation</div>
-                <div>• Cross-linking strategy implementation</div>
-                <div>• Performance analytics & optimization</div>
-              </div>
-            </CardContent>
-          </Card>
+        {/* Main Content */}
+        <Tabs defaultValue="deploy" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2 bg-corporate-darkSecondary border border-corporate-border">
+            <TabsTrigger value="deploy" className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray">
+              Deploy Campaign
+            </TabsTrigger>
+            <TabsTrigger value="monitor" className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray">
+              Monitor Progress
+            </TabsTrigger>
+          </TabsList>
 
-          <Card className="corporate-card border-amber-500/30">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 corporate-heading">
-                <Globe className="h-5 w-5 text-amber-400" />
-                Expansion Modules
-              </CardTitle>
-              <Badge className="bg-amber-500/20 text-amber-400 text-xs">DEVELOPMENT</Badge>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3 text-sm text-corporate-lightGray">
-                <div>• 100-500 article campaign engine</div>
-                <div>• 12+ platform deployment (Medium, LinkedIn, etc.)</div>
-                <div>• Multi-language content generation</div>
-                <div>• Advanced persona modeling</div>
-                <div>• Social proof amplification</div>
-                <div>• Competitor suppression tactics</div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Technical Architecture */}
-        <Card className="corporate-card">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 corporate-heading">
-              <Shield className="h-5 w-5 text-corporate-accent" />
-              Live-Only Enforcement Protocol
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-corporate-lightGray">
-              <div>
-                <h4 className="text-white font-medium mb-2">Content Generation</h4>
-                <div className="space-y-1">
-                  <div>• Historical fact verification</div>
-                  <div>• Persona-specific narrative</div>
-                  <div>• SEO keyword integration</div>
-                  <div>• Brand voice consistency</div>
-                </div>
-              </div>
-              <div>
-                <h4 className="text-white font-medium mb-2">Deployment Pipeline</h4>
-                <div className="space-y-1">
-                  <div>• Automated GitHub commits</div>
-                  <div>• DNS propagation monitoring</div>
-                  <div>• SSL certificate validation</div>
-                  <div>• CDN cache management</div>
-                </div>
-              </div>
-              <div>
-                <h4 className="text-white font-medium mb-2">Verification System</h4>
-                <div className="space-y-1">
-                  <div>• Real-time URL accessibility</div>
-                  <div>• Content integrity checking</div>
-                  <div>• Search engine indexing</div>
-                  <div>• Performance monitoring</div>
-                </div>
-              </div>
+          <TabsContent value="deploy" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <CampaignConfiguration
+                entityName={entityName}
+                setEntityName={setEntityName}
+                targetKeywords={targetKeywords}
+                setTargetKeywords={setTargetKeywords}
+                contentCount={contentCount}
+                setContentCount={setContentCount}
+                saturationMode={saturationMode}
+                setSaturationMode={setSaturationMode}
+                deploymentTargets={deploymentTargets}
+                setDeploymentTargets={setDeploymentTargets}
+                isExecuting={isExecuting}
+                onExecute={executePersonaSaturation}
+              />
+              <CampaignMonitor currentCampaign={currentCampaign} />
             </div>
-          </CardContent>
-        </Card>
+          </TabsContent>
 
-        {/* Value Proposition */}
-        <Card className="border-corporate-accent bg-corporate-darkSecondary">
-          <CardHeader>
-            <CardTitle className="text-corporate-accent flex items-center gap-2">
-              <Globe className="h-5 w-5" />
-              Reputation Flood Defense
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-corporate-lightGray space-y-2 text-sm">
-              <p><strong className="text-white">Instant Response:</strong> Deploy positive content within minutes of threat detection</p>
-              <p><strong className="text-white">Search Dominance:</strong> Flood search results with verified positive content</p>
-              <p><strong className="text-white">Scalable Defense:</strong> From 10 to 500+ articles based on threat severity</p>
-              <p><strong className="text-white">Quality Assurance:</strong> Every article verified live before logging</p>
-              <p><strong className="text-white">Strategic Advantage:</strong> Proactive reputation building, not reactive damage control</p>
-            </div>
-          </CardContent>
-        </Card>
+          <TabsContent value="monitor" className="space-y-6">
+            <CampaignMonitor currentCampaign={currentCampaign} />
+          </TabsContent>
+        </Tabs>
       </div>
     </DashboardLayout>
   );

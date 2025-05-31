@@ -10,18 +10,21 @@ import "@/styles/responsive.css";
 
 // Lazy load routes for better performance
 const Index = React.lazy(() => import("./pages/Index"));
-const Login = React.lazy(() => import("./pages/Login"));
 const DashboardPage = React.lazy(() => import("./pages/dashboard/DashboardPage"));
 const AdminDashboard = React.lazy(() => import("./pages/AdminDashboard"));
 const QATestingPage = React.lazy(() => import("./pages/admin/QATestingPage"));
 const AnubisMemoryPage = React.lazy(() => import("./pages/admin/AnubisMemoryPage"));
+const IntelligenceCorePage = React.lazy(() => import("./pages/admin/IntelligenceCorePage"));
+const PersonaSaturationPage = React.lazy(() => import("./pages/admin/PersonaSaturationPage"));
+const LegalOpsPage = React.lazy(() => import("./pages/admin/LegalOpsPage"));
+const ClientsPage = React.lazy(() => import("./pages/admin/ClientsPage"));
 
 // Create a client
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 5 * 60 * 1000, // 5 minutes
-      cacheTime: 10 * 60 * 1000, // 10 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes (renamed from cacheTime)
     },
   },
 });
@@ -52,11 +55,14 @@ function App() {
           <Suspense fallback={<PageLoader />}>
             <Routes>
               <Route path="/" element={<Index />} />
-              <Route path="/auth" element={<Login />} />
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/admin/qa-testing" element={<QATestingPage />} />
               <Route path="/admin/anubis-memory" element={<AnubisMemoryPage />} />
+              <Route path="/admin/intelligence-core" element={<IntelligenceCorePage />} />
+              <Route path="/admin/persona-saturation" element={<PersonaSaturationPage />} />
+              <Route path="/admin/legal-ops" element={<LegalOpsPage />} />
+              <Route path="/admin/clients" element={<ClientsPage />} />
             </Routes>
           </Suspense>
         </BrowserRouter>

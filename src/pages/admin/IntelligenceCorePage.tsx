@@ -4,11 +4,13 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Brain, Network, Activity, Database, Cpu, Shield } from 'lucide-react';
+import ThreatAnalysisPanel from '@/components/intelligence/ThreatAnalysisPanel';
+import EntityGraphViewer from '@/components/intelligence/EntityGraphViewer';
 
 const IntelligenceCorePage = () => {
   return (
     <DashboardLayout>
-      <div className="space-y-6 p-6 bg-corporate-dark min-h-screen">
+      <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -87,6 +89,12 @@ const IntelligenceCorePage = () => {
           </Card>
         </div>
 
+        {/* Main Intelligence Panels */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <ThreatAnalysisPanel />
+          <EntityGraphViewer />
+        </div>
+
         {/* Core Services */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card className="corporate-card">
@@ -146,25 +154,6 @@ const IntelligenceCorePage = () => {
             </CardContent>
           </Card>
         </div>
-
-        {/* System Architecture */}
-        <Card className="border-corporate-accent bg-corporate-darkSecondary">
-          <CardHeader>
-            <CardTitle className="text-corporate-accent flex items-center gap-2">
-              <Brain className="h-5 w-5" />
-              Neural Architecture Foundation
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-corporate-lightGray space-y-2 text-sm">
-              <p><strong className="text-white">Distributed Processing:</strong> Scalable microservices architecture</p>
-              <p><strong className="text-white">Real-Time Analytics:</strong> Stream processing for instant insights</p>
-              <p><strong className="text-white">Machine Learning:</strong> Adaptive algorithms that improve over time</p>
-              <p><strong className="text-white">Security First:</strong> Zero-trust architecture with end-to-end encryption</p>
-              <p><strong className="text-white">Edge Computing:</strong> Global deployment for minimal latency</p>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </DashboardLayout>
   );

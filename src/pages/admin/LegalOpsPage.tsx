@@ -4,11 +4,13 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Scale, FileText, AlertTriangle, CheckCircle, Gavel, Shield } from 'lucide-react';
+import DocumentGenerator from '@/components/legal/DocumentGenerator';
+import ResponseFramework from '@/components/legal/ResponseFramework';
 
 const LegalOpsPage = () => {
   return (
     <DashboardLayout>
-      <div className="space-y-6 p-6 bg-corporate-dark min-h-screen">
+      <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -87,125 +89,11 @@ const LegalOpsPage = () => {
           </Card>
         </div>
 
-        {/* Legal Tools */}
+        {/* Main Functionality */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="corporate-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 corporate-heading">
-                <FileText className="h-5 w-5 text-corporate-accent" />
-                Automated Legal Documents
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3 text-sm text-corporate-lightGray">
-                <div>• Cease & Desist letter generation</div>
-                <div>• DMCA takedown notice creation</div>
-                <div>• Defamation demand letters</div>
-                <div>• Retraction notice templates</div>
-                <div>• Copyright infringement claims</div>
-                <div>• Privacy violation notifications</div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="corporate-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 corporate-heading">
-                <Gavel className="h-5 w-5 text-corporate-accent" />
-                Escalation Protocols
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3 text-sm text-corporate-lightGray">
-                <div>• Soft approach: Polite correction requests</div>
-                <div>• Firm response: Formal legal notices</div>
-                <div>• Nuclear option: Litigation preparation</div>
-                <div>• Multi-jurisdiction coordination</div>
-                <div>• Evidence preservation protocols</div>
-                <div>• Legal counsel integration</div>
-              </div>
-            </CardContent>
-          </Card>
+          <DocumentGenerator />
+          <ResponseFramework />
         </div>
-
-        {/* Response Frameworks */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <Card className="corporate-card border-green-500/30">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 corporate-heading">
-                <CheckCircle className="h-5 w-5 text-green-400" />
-                Soft Response
-              </CardTitle>
-              <Badge className="bg-green-500/20 text-green-400 text-xs">DIPLOMATIC</Badge>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2 text-sm text-corporate-lightGray">
-                <div>• Polite correction requests</div>
-                <div>• Educational content sharing</div>
-                <div>• Collaborative fact-checking</div>
-                <div>• Relationship preservation</div>
-                <div>• Community engagement</div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="corporate-card border-yellow-500/30">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 corporate-heading">
-                <AlertTriangle className="h-5 w-5 text-yellow-400" />
-                Firm Response
-              </CardTitle>
-              <Badge className="bg-yellow-500/20 text-yellow-400 text-xs">AUTHORITATIVE</Badge>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2 text-sm text-corporate-lightGray">
-                <div>• Formal cease & desist letters</div>
-                <div>• Platform takedown requests</div>
-                <div>• Legal precedent citations</div>
-                <div>• Professional enforcement</div>
-                <div>• Deadline-driven action</div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="corporate-card border-red-500/30">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 corporate-heading">
-                <Scale className="h-5 w-5 text-red-400" />
-                Nuclear Response
-              </CardTitle>
-              <Badge className="bg-red-500/20 text-red-400 text-xs">LITIGATION</Badge>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2 text-sm text-corporate-lightGray">
-                <div>• Litigation threat assessment</div>
-                <div>• Court filing preparation</div>
-                <div>• Asset investigation</div>
-                <div>• Injunctive relief pursuit</div>
-                <div>• Damages calculation</div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Value Proposition */}
-        <Card className="border-corporate-accent bg-corporate-darkSecondary">
-          <CardHeader>
-            <CardTitle className="text-corporate-accent flex items-center gap-2">
-              <Scale className="h-5 w-5" />
-              Legal Authority in Digital Defense
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-corporate-lightGray space-y-2 text-sm">
-              <p><strong className="text-white">Immediate Authority:</strong> Professional legal documents within hours</p>
-              <p><strong className="text-white">Graduated Response:</strong> Escalation ladder from diplomatic to nuclear</p>
-              <p><strong className="text-white">Evidence Preservation:</strong> Complete audit trail for legal proceedings</p>
-              <p><strong className="text-white">Multi-Jurisdiction:</strong> Global legal framework understanding</p>
-              <p><strong className="text-white">Cost Effective:</strong> 90% less expensive than traditional legal routes</p>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </DashboardLayout>
   );
