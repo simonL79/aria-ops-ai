@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -193,26 +192,26 @@ const PersonaSaturationPanel = () => {
   };
 
   return (
-    <Card>
+    <Card className="corporate-card">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Rocket className="h-5 w-5" />
+        <CardTitle className="flex items-center gap-2 corporate-heading">
+          <Rocket className="h-5 w-5 text-corporate-accent" />
           A.R.I.A™ Multi-Platform Article Deployment
         </CardTitle>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm corporate-subtext">
           Deploy SEO-optimized articles across multiple platforms using tiered scaling strategies
         </p>
       </CardHeader>
       <CardContent>
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="deploy">Deploy Campaign</TabsTrigger>
-            <TabsTrigger value="monitor">Monitor Progress</TabsTrigger>
-            <TabsTrigger value="campaigns">Campaign History</TabsTrigger>
-            <TabsTrigger value="reports">Live Reports</TabsTrigger>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-4 bg-corporate-darkSecondary border border-corporate-border">
+            <TabsTrigger value="deploy" className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray">Deploy Campaign</TabsTrigger>
+            <TabsTrigger value="monitor" className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray">Monitor Progress</TabsTrigger>
+            <TabsTrigger value="campaigns" className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray">Campaign History</TabsTrigger>
+            <TabsTrigger value="reports" className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray">Live Reports</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="deploy" className="space-y-4">
+          <TabsContent value="deploy" className="space-y-4 mt-6">
             <CampaignConfiguration
               entityName={entityName}
               setEntityName={setEntityName}
@@ -229,15 +228,15 @@ const PersonaSaturationPanel = () => {
             />
           </TabsContent>
 
-          <TabsContent value="monitor">
+          <TabsContent value="monitor" className="mt-6">
             <CampaignMonitor currentCampaign={currentCampaign} />
           </TabsContent>
 
-          <TabsContent value="campaigns">
+          <TabsContent value="campaigns" className="mt-6">
             <CampaignHistory campaigns={campaigns} loadingCampaigns={loadingCampaigns} />
           </TabsContent>
 
-          <TabsContent value="reports">
+          <TabsContent value="reports" className="mt-6">
             <PersonaSaturationReports />
           </TabsContent>
         </Tabs>
