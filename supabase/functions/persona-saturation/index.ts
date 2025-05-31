@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.26.0";
 
@@ -65,23 +66,22 @@ serve(async (req) => {
       throw new Error('At least one target keyword is required');
     }
 
-    // Remove artificial limits - allow full requested content count
-    const actualContentCount = contentCount; // Use the full requested amount
-    const maxBatchSize = Math.min(50, actualContentCount); // Process in batches of up to 50
-    
-    console.log(`Processing ${actualContentCount} articles in batches of ${maxBatchSize}`);
+    // Use the FULL requested content count - no artificial limits
+    const actualContentCount = contentCount;
+    console.log(`Processing ${actualContentCount} articles as requested`);
 
-    // Generate content in batches
-    const contentPieces = await generateContentInBatches(
+    // Generate content pieces
+    const contentPieces = await generateContentPieces(
       entityName, 
       targetKeywords, 
       actualContentCount, 
-      saturationMode, 
-      maxBatchSize
+      saturationMode
     );
     
-    // Simulate deployment results with realistic success rate
-    const successRate = Math.min(0.95, 0.8 + (contentPieces.length * 0.001));
+    console.log(`Generated ${contentPieces.length} content pieces`);
+    
+    // Simulate deployment with high success rate
+    const successRate = 0.95; // 95% success rate
     const successfulDeployments = Math.floor(contentPieces.length * successRate);
     
     const deploymentResults = {
@@ -101,9 +101,9 @@ serve(async (req) => {
       }))
     };
 
-    // Generate SERP analysis with realistic penetration rates
-    const basePenetration = saturationMode === 'nuclear' ? 0.85 : saturationMode === 'aggressive' ? 0.75 : 0.65;
-    const scaledPenetration = Math.min(0.95, basePenetration + (successfulDeployments * 0.001));
+    // Generate SERP analysis
+    const basePenetration = saturationMode === 'nuclear' ? 0.90 : saturationMode === 'aggressive' ? 0.80 : 0.70;
+    const scaledPenetration = Math.min(0.95, basePenetration + (successfulDeployments * 0.0005));
     
     const serpResults = {
       penetrationRate: scaledPenetration,
@@ -201,57 +201,11 @@ serve(async (req) => {
   }
 });
 
-async function generateContentInBatches(
+async function generateContentPieces(
   entityName: string, 
   keywords: string[], 
   totalCount: number, 
-  mode: string, 
-  batchSize: number
-): Promise<any[]> {
-  const allContent = [];
-  const batches = Math.ceil(totalCount / batchSize);
-  
-  console.log(`Processing ${totalCount} articles in ${batches} batches of ${batchSize}`);
-  
-  for (let batchIndex = 0; batchIndex < batches; batchIndex++) {
-    const startIndex = batchIndex * batchSize;
-    const endIndex = Math.min(startIndex + batchSize, totalCount);
-    const batchCount = endIndex - startIndex;
-    
-    console.log(`Processing batch ${batchIndex + 1}/${batches}: ${batchCount} articles`);
-    
-    try {
-      const batchContent = await generateContentBatch(
-        entityName, 
-        keywords, 
-        batchCount, 
-        mode, 
-        startIndex
-      );
-      
-      allContent.push(...batchContent);
-      
-      // Small delay between batches to avoid overwhelming
-      if (batchIndex < batches - 1) {
-        await new Promise(resolve => setTimeout(resolve, 50));
-      }
-      
-    } catch (error) {
-      console.error(`Error in batch ${batchIndex + 1}:`, error);
-      // Continue with other batches even if one fails
-    }
-  }
-  
-  console.log(`Total content pieces generated: ${allContent.length}`);
-  return allContent;
-}
-
-async function generateContentBatch(
-  entityName: string, 
-  keywords: string[], 
-  count: number, 
-  mode: string, 
-  startIndex: number
+  mode: string
 ): Promise<any[]> {
   const contentTypes = [
     'news_article', 'blog_post', 'case_study', 'interview', 'press_release',
@@ -259,18 +213,19 @@ async function generateContentBatch(
   ];
 
   const contentPieces = [];
+  
+  console.log(`Generating ${totalCount} content pieces...`);
 
-  for (let i = 0; i < count; i++) {
-    const globalIndex = startIndex + i;
-    const contentType = contentTypes[globalIndex % contentTypes.length];
-    const keyword = keywords[globalIndex % keywords.length];
+  for (let i = 0; i < totalCount; i++) {
+    const contentType = contentTypes[i % contentTypes.length];
+    const keyword = keywords[i % keywords.length];
     
     try {
       const title = generateTitle(entityName, keyword, contentType);
       const content = generateHTML(title, entityName, keyword, mode);
       
       contentPieces.push({
-        id: `content_${globalIndex + 1}`,
+        id: `content_${i + 1}`,
         type: contentType,
         keyword: keyword,
         title: title,
@@ -283,11 +238,17 @@ async function generateContentBatch(
         }
       });
     } catch (error) {
-      console.error(`Error generating content piece ${globalIndex + 1}:`, error);
-      // Continue with other content pieces
+      console.error(`Error generating content piece ${i + 1}:`, error);
+      // Continue with other content pieces even if one fails
+    }
+    
+    // Log progress every 50 pieces
+    if ((i + 1) % 50 === 0) {
+      console.log(`Generated ${i + 1}/${totalCount} content pieces`);
     }
   }
 
+  console.log(`Content generation complete: ${contentPieces.length} pieces created`);
   return contentPieces;
 }
 
