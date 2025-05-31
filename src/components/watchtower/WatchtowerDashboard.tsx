@@ -82,7 +82,8 @@ const WatchtowerDashboard = () => {
           mode: scanParams.mode,
           keywords: scanParams.keywords.length > 0 ? scanParams.keywords : undefined,
           industries: scanParams.industries.length > 0 ? scanParams.industries : undefined,
-          maxCandidates: scanParams.maxCandidates
+          maxCandidates: scanParams.maxCandidates,
+          useLocalInference: true // Enable local inference for analysis
         }
       });
 
@@ -153,9 +154,10 @@ const WatchtowerDashboard = () => {
   return (
     <div className="space-y-6">
       <Tabs defaultValue="scanner" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="scanner">Discovery Scanner</TabsTrigger>
           <TabsTrigger value="candidates">Prospects ({candidates.length})</TabsTrigger>
+          <TabsTrigger value="local-ai">Local AI</TabsTrigger>
           <TabsTrigger value="outreach">Outreach Hub</TabsTrigger>
         </TabsList>
 
@@ -316,6 +318,16 @@ const WatchtowerDashboard = () => {
               ))}
             </div>
           )}
+        </TabsContent>
+
+        <TabsContent value="local-ai" className="space-y-4">
+          <LocalInferencePanel 
+            entityName={selectedCandidate?.entity_name || 'Test Entity'}
+            onAnalysisComplete={(analysis) => {
+              console.log('Local analysis completed:', analysis);
+              toast.success(`Local AI analysis: ${analysis.category} threat detected`);
+            }}
+          />
         </TabsContent>
 
         <TabsContent value="outreach" className="space-y-4">
