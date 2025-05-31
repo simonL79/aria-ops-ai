@@ -64,7 +64,8 @@ const mapPlatformToSourceType = (platform: string): string => {
 const mapNumericSentimentToString = (sentiment?: number): ContentAlert['sentiment'] => {
   if (sentiment === undefined || sentiment === null) return 'neutral';
   
-  if (sentiment < -70) return 'threatening';
+  // Map threatening sentiment (-70 or below) to negative since we can't use 'threatening'
+  if (sentiment < -70) return 'negative';
   if (sentiment < -20) return 'negative';
   if (sentiment > 50) return 'positive';
   return 'neutral';

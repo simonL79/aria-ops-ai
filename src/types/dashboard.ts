@@ -58,3 +58,52 @@ export interface ContentAction {
   action: string;
   date: string;
 }
+
+export type ResponseToneStyle = 
+  | 'professional' 
+  | 'friendly' 
+  | 'formal' 
+  | 'casual' 
+  | 'humorous' 
+  | 'apologetic' 
+  | 'technical' 
+  | 'empathetic';
+
+export interface SeoContent {
+  id: string;
+  title: string;
+  url: string;
+  rank: number;
+  impression: number;
+  content: string;
+  keywords: string[];
+  priority: 'high' | 'medium' | 'low';
+  status?: string;
+  type?: string;
+  score?: number;
+  publishDate?: string;
+}
+
+export interface DashboardMainContentProps {
+  metrics: MetricValue[];
+  alerts: ContentAlert[];
+  classifiedAlerts: ContentAlert[];
+  sources: ContentSource[];
+  actions: ContentAction[];
+  toneStyles: ResponseToneStyle[];
+  recentActivity: any[];
+  seoContent: SeoContent[];
+  negativeContent: number;
+  positiveContent: number;
+  neutralContent: number;
+  onSimulateNewData: () => void;
+  loading: boolean;
+  error: string | null;
+  fetchData: () => void;
+  filteredAlerts: ContentAlert[];
+  onFilterChange: (filters: any) => void;
+  reputationScore?: number;
+  previousScore?: number;
+  selectedClient?: any;
+  clientEntities?: any[];
+}

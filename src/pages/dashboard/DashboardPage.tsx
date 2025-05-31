@@ -8,7 +8,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useDashboardScan } from '@/hooks/useDashboardScan';
 import { performComprehensiveScan } from '@/services/monitoring/monitoringScanService';
 import { toast } from 'sonner';
-import type { ContentAlert } from '@/hooks/useDashboardData';
+import type { ContentAlert } from '@/types/dashboard';
 
 const DashboardPage = () => {
   const navigate = useNavigate();
