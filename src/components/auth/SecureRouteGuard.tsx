@@ -1,88 +1,103 @@
 
-import { ReactNode, useEffect } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { toast } from 'sonner';
-import { Loader2, Shield } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { Shield, AlertTriangle } from 'lucide-react';
 
 interface SecureRouteGuardProps {
-  children: ReactNode;
-  requireAdmin?: boolean;
-  allowedRoles?: string[];
-  redirectTo?: string;
+  children: React.ReactNode;
+  requiredRole?: string;
 }
 
-const SecureRouteGuard = ({ 
-  children, 
-  requireAdmin = true, 
-  allowedRoles = [],
-  redirectTo = '/admin/login' 
-}: SecureRouteGuardProps) => {
-  const { isAuthenticated, isLoading, isAdmin, user } = useAuth();
-  const location = useLocation();
+const SecureRouteGuard = ({ children, requiredRole = 'admin' }: SecureRouteGuardProps) => {
+  const { user, isAdmin } = useAuth();
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasAccess, setHasAccess] = useState(false);
 
-  // Log access attempts
   useEffect(() => {
-    const logAccess = async () => {
-      if (!isLoading) {
-        try {
-          await supabase.from('admin_action_logs').insert({
-            action: 'route_access_attempt',
-            success: isAuthenticated && (requireAdmin ? isAdmin : true),
-            details: `Attempted to access ${location.pathname}`,
-            ip_address: 'client-side',
-            user_agent: navigator.userAgent,
-            email_attempted: user?.email || 'unknown'
-          });
-        } catch (error) {
-          console.error('Failed to log route access:', error);
-        }
+    checkAccess();
+  }, [user, isAdmin]);
+
+  const checkAccess = async () => {
+    try {
+      if (!user) {
+        setHasAccess(false);
+        setIsLoading(false);
+        return;
       }
-    };
 
-    logAccess();
-  }, [isLoading, isAuthenticated, isAdmin, location.pathname, user?.email, requireAdmin]);
+      // Log access attempt
+      await supabase.from('activity_logs').insert({
+        action: 'route_access_attempt',
+        details: `User ${user.email} attempted to access secured route requiring ${requiredRole}`,
+        entity_type: 'security',
+        user_id: user.id,
+        user_email: user.email
+      });
 
-  // Show loading state while checking auth
+      // Check if user has required permissions
+      if (requiredRole === 'admin' && isAdmin) {
+        setHasAccess(true);
+        
+        // Log successful access
+        await supabase.from('activity_logs').insert({
+          action: 'route_access_granted',
+          details: `Admin access granted to ${user.email}`,
+          entity_type: 'security',
+          user_id: user.id,
+          user_email: user.email
+        });
+      } else {
+        setHasAccess(false);
+        
+        // Log denied access
+        await supabase.from('activity_logs').insert({
+          action: 'route_access_denied',
+          details: `Access denied to ${user.email} - insufficient permissions`,
+          entity_type: 'security',
+          user_id: user.id,
+          user_email: user.email
+        });
+      }
+    } catch (error) {
+      console.error('Access check failed:', error);
+      setHasAccess(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900">
-        <div className="text-center space-y-4">
-          <Loader2 className="h-12 w-12 animate-spin text-blue-400 mx-auto" />
-          <div className="text-white">
-            <div className="font-semibold">Verifying Security Clearance</div>
-            <div className="text-sm text-gray-400">Authenticating admin access...</div>
-          </div>
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <Shield className="w-12 h-12 text-blue-500 mx-auto mb-4 animate-pulse" />
+          <p className="text-white text-lg">Verifying Security Clearance...</p>
         </div>
       </div>
     );
   }
 
-  // Redirect if not authenticated
-  if (!isAuthenticated) {
-    toast.error('Authentication required for admin access');
-    return <Navigate to={redirectTo} state={{ from: location }} replace />;
+  if (!hasAccess) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
+        <div className="text-center max-w-md">
+          <AlertTriangle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-white mb-2">Access Denied</h2>
+          <p className="text-slate-400 mb-6">
+            You don't have permission to access this area. Administrator privileges required.
+          </p>
+          <button
+            onClick={() => window.location.href = '/'}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded"
+          >
+            Return to Home
+          </button>
+        </div>
+      </div>
+    );
   }
 
-  // Redirect if admin access required but user is not admin
-  if (requireAdmin && !isAdmin) {
-    toast.error('Admin privileges required for this area');
-    return <Navigate to={redirectTo} state={{ from: location }} replace />;
-  }
-
-  // Check role-based access if specific roles are required
-  if (allowedRoles.length > 0) {
-    // This would require role checking logic - placeholder for future role expansion
-    const hasRequiredRole = true; // Implement role checking here
-    
-    if (!hasRequiredRole) {
-      toast.error('Insufficient permissions for this area');
-      return <Navigate to={redirectTo} state={{ from: location }} replace />;
-    }
-  }
-
-  // User is authorized - render protected content
   return <>{children}</>;
 };
 
