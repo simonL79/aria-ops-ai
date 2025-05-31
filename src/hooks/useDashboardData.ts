@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 export interface MetricValue {
   id: string;
   title: string;
-  value: string | number;
+  value: number; // Changed to only number to match dashboard types
   change: number;
   icon: string;
   color: string;
@@ -67,21 +67,10 @@ export interface ContentAction {
 export const useDashboardData = () => {
   const [metrics, setMetrics] = useState<MetricValue[]>([]);
   const [alerts, setAlerts] = useState<ContentAlert[]>([]);
-  const [classifiedAlerts, setClassifiedAlerts] = useState<ContentAlert[]>([]);
   const [sources, setSources] = useState<ContentSource[]>([]);
   const [actions, setActions] = useState<ContentAction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  // Content categorization
-  const negativeContent = alerts.filter(alert => alert.sentiment === 'negative');
-  const positiveContent = alerts.filter(alert => alert.sentiment === 'positive');
-  const neutralContent = alerts.filter(alert => alert.sentiment === 'neutral');
-
-  // Mock data for missing properties
-  const toneStyles = [];
-  const recentActivity = [];
-  const seoContent = [];
 
   const fetchData = async () => {
     setLoading(true);
@@ -116,7 +105,6 @@ export const useDashboardData = () => {
       }));
       
       setAlerts(convertedAlerts);
-      setClassifiedAlerts(convertedAlerts);
       
       // Generate metrics from results
       const threatCount = scanResults.filter(r => r.severity === 'high').length;
@@ -130,7 +118,7 @@ export const useDashboardData = () => {
         {
           id: 'threats',
           title: 'Active Threats',
-          value: threatCount,
+          value: threatCount, // Now always a number
           change: 0,
           icon: 'alert-triangle',
           color: threatCount > 0 ? 'red' : 'green',
@@ -140,7 +128,7 @@ export const useDashboardData = () => {
         {
           id: 'monitoring',
           title: 'Sources Monitored',
-          value: '12+',
+          value: 12, // Changed from '12+' to number
           change: 0,
           icon: 'search',
           color: 'blue',
@@ -203,7 +191,7 @@ export const useDashboardData = () => {
         { 
           id: 'status', 
           title: 'System Status', 
-          value: 'Initializing', 
+          value: 0, // Changed to number
           change: 0,
           icon: 'alert', 
           color: 'yellow',
@@ -212,7 +200,6 @@ export const useDashboardData = () => {
         }
       ]);
       setAlerts([]);
-      setClassifiedAlerts([]);
       setSources([]);
       setActions([]);
       
@@ -238,18 +225,12 @@ export const useDashboardData = () => {
   return {
     metrics,
     alerts,
-    classifiedAlerts,
     sources,
     actions,
-    toneStyles,
-    recentActivity,
-    seoContent,
-    negativeContent,
-    positiveContent,
-    neutralContent,
     loading,
     error,
     fetchData,
-    simulateNewData
+    simulateNewData,
+    setAlerts
   };
 };

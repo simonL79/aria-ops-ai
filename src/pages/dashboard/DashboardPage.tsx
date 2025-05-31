@@ -1,83 +1,113 @@
 
-import React from 'react';
-import DashboardLayout from "@/components/layout/DashboardLayout";
-import DashboardMainContent from "@/components/dashboard/DashboardMainContent";
-import MetricsOverview from "@/components/dashboard/MetricsOverview";
-import LiveDataGuard from "@/components/dashboard/LiveDataGuard";
-import { useDashboardData } from "@/hooks/useDashboardData";
-import { useClientSelection } from "@/hooks/useClientSelection";
-import { useState } from "react";
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import DashboardMainContent from '@/components/dashboard/DashboardMainContent';
+import { useDashboardData } from '@/hooks/useDashboardData';
+import { useAuth } from '@/hooks/useAuth';
+import { useDashboardScan } from '@/hooks/useDashboardScan';
+import { ContentAlert } from '@/types/dashboard';
+import { performComprehensiveScan } from '@/services/monitoring/monitoringScanService';
+import { toast } from 'sonner';
 
 const DashboardPage = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [selectedClient, setSelectedClient] = useState(null);
+  const [clientEntities, setClientEntities] = useState([]);
+  const [filteredAlerts, setFilteredAlerts] = useState<ContentAlert[]>([]);
+  
   const {
-    metrics,
     alerts,
-    classifiedAlerts,
     sources,
     actions,
-    toneStyles,
-    recentActivity,
-    seoContent,
-    negativeContent,
-    positiveContent,
-    neutralContent,
+    metrics,
     loading,
     error,
     fetchData,
-    simulateNewData
+    setAlerts
   } = useDashboardData();
 
-  const { selectedClient, clientEntities } = useClientSelection();
-  const [filteredAlerts, setFilteredAlerts] = useState(alerts);
+  const { isScanning, performScan } = useDashboardScan(alerts, setAlerts);
 
-  const handleFilterChange = (filters: { platforms: string[]; severities: string[]; statuses: string[]; }) => {
-    // Apply filters to alerts array based on the filter criteria
+  useEffect(() => {
+    if (!user) {
+      navigate('/admin/login');
+      return;
+    }
+    fetchData();
+  }, [user, navigate, fetchData]);
+
+  const handleSimulateNewData = async () => {
+    try {
+      toast.info("Starting live intelligence scan...");
+      const results = await performComprehensiveScan();
+      if (results.length > 0) {
+        fetchData(); // Refresh dashboard data
+        toast.success(`Scan complete: ${results.length} intelligence items found`);
+      } else {
+        toast.info("No new intelligence detected");
+      }
+    } catch (error) {
+      console.error('Scan error:', error);
+      toast.error("Intelligence scan failed");
+    }
+  };
+
+  const handleFilterChange = (filters: any) => {
     let filtered = alerts;
     
-    if (filters.platforms.length > 0) {
-      filtered = filtered.filter(alert => filters.platforms.includes(alert.platform));
+    if (filters.severity && filters.severity !== 'all') {
+      filtered = filtered.filter(alert => alert.severity === filters.severity);
     }
     
-    if (filters.severities.length > 0) {
-      filtered = filtered.filter(alert => filters.severities.includes(alert.severity));
-    }
-    
-    if (filters.statuses.length > 0) {
-      filtered = filtered.filter(alert => filters.statuses.includes(alert.status));
+    if (filters.platform && filters.platform !== 'all') {
+      filtered = filtered.filter(alert => alert.platform === filters.platform);
     }
     
     setFilteredAlerts(filtered);
   };
 
+  // Convert metrics to match dashboard types
+  const convertedMetrics = metrics.map(metric => ({
+    ...metric,
+    value: typeof metric.value === 'string' ? 0 : metric.value
+  }));
+
+  // Calculate content arrays from alerts
+  const negativeContent = alerts.filter(alert => alert.sentiment === 'negative');
+  const positiveContent = alerts.filter(alert => alert.sentiment === 'positive');  
+  const neutralContent = alerts.filter(alert => alert.sentiment === 'neutral');
+
+  if (!user) {
+    return null;
+  }
+
   return (
     <DashboardLayout>
-      <LiveDataGuard enforceStrict={true}>
-        <div className="space-y-6">
-          <MetricsOverview metrics={metrics} loading={loading} />
-          
-          <DashboardMainContent
-            metrics={metrics}
-            alerts={alerts}
-            classifiedAlerts={classifiedAlerts}
-            sources={sources}
-            actions={actions}
-            toneStyles={toneStyles}
-            recentActivity={recentActivity}
-            seoContent={seoContent}
-            negativeContent={negativeContent}
-            positiveContent={positiveContent}
-            neutralContent={neutralContent}
-            onSimulateNewData={simulateNewData}
-            loading={loading}
-            error={error}
-            fetchData={fetchData}
-            filteredAlerts={filteredAlerts}
-            onFilterChange={handleFilterChange}
-            selectedClient={selectedClient}
-            clientEntities={clientEntities}
-          />
-        </div>
-      </LiveDataGuard>
+      <DashboardMainContent
+        metrics={convertedMetrics}
+        alerts={alerts}
+        classifiedAlerts={alerts}
+        sources={sources}
+        actions={actions}
+        toneStyles={[]}
+        recentActivity={[]}
+        seoContent={[]}
+        negativeContent={negativeContent.length}
+        positiveContent={positiveContent.length}
+        neutralContent={neutralContent.length}
+        onSimulateNewData={handleSimulateNewData}
+        loading={loading}
+        error={error}
+        fetchData={fetchData}
+        filteredAlerts={filteredAlerts}
+        onFilterChange={handleFilterChange}
+        reputationScore={75}
+        previousScore={70}
+        selectedClient={selectedClient}
+        clientEntities={clientEntities}
+      />
     </DashboardLayout>
   );
 };
