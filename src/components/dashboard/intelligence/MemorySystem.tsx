@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, Brain, PlusCircle, Database } from "lucide-react";
-import { anubisMemoryService, AnubisEntityMemory } from "@/services/aria/anubisMemoryService";
+import { AnubisMemoryService, AnubisEntityMemory } from "@/services/aria/anubisMemoryService";
 import { toast } from "sonner";
 
 const MEMORY_CATEGORIES: Array<AnubisEntityMemory['memory_type']> = [
@@ -35,7 +35,7 @@ const MemorySystem = () => {
     
     setIsLoading(true);
     try {
-      const results = await anubisMemoryService.recallEntityMemory({
+      const results = await AnubisMemoryService.recallEntityMemory({
         entity_name: searchTerm
       });
       
@@ -71,7 +71,7 @@ const MemorySystem = () => {
       return;
     }
 
-    const success = await anubisMemoryService.storeEntityMemory({
+    const success = await AnubisMemoryService.storeEntityMemory({
       entity_name: searchTerm,
       memory_type: 'metadata',
       memory_summary: 'Manual memory entry created from Intelligence Hub',
@@ -91,7 +91,7 @@ const MemorySystem = () => {
       return;
     }
 
-    const success = await anubisMemoryService.storePattern({
+    const success = await AnubisMemoryService.storePattern({
       entity_name: searchTerm,
       pattern_fingerprint: `pattern_${Date.now()}`,
       pattern_summary: 'Manual pattern recognition entry from Intelligence Hub',
