@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -53,24 +52,26 @@ const PersonaSaturationPanel = () => {
     };
     setCurrentCampaign(campaign);
 
+    // Progress simulation
     const progressInterval = setInterval(() => {
       setCurrentCampaign(prev => {
         if (!prev) return null;
-        const newProgress = Math.min(prev.progress + 20, 100);
+        const newProgress = Math.min(prev.progress + 20, 80); // Stop at 80% until real completion
         let newStatus = prev.status;
         
         if (newProgress === 20) newStatus = 'generating';
         if (newProgress === 40) newStatus = 'deploying';
         if (newProgress === 60) newStatus = 'indexing';
         if (newProgress === 80) newStatus = 'monitoring';
-        if (newProgress === 100) newStatus = 'completed';
         
         return { ...prev, progress: newProgress, status: newStatus };
       });
-    }, 3000);
+    }, 2000);
 
     try {
-      const keywords = targetKeywords.split(',').map(k => k.trim());
+      const keywords = targetKeywords.split(',').map(k => k.trim()).filter(k => k.length > 0);
+      
+      console.log('Sending request to persona-saturation function...');
       
       const { data, error } = await supabase.functions.invoke('persona-saturation', {
         body: {
@@ -82,16 +83,25 @@ const PersonaSaturationPanel = () => {
         }
       });
 
-      if (error) throw error;
-
       clearInterval(progressInterval);
+
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw new Error(error.message || 'Failed to invoke persona saturation function');
+      }
+
+      if (!data || !data.success) {
+        throw new Error(data?.error || 'Unknown error from persona saturation function');
+      }
+
+      // Update campaign with real results
       setCurrentCampaign(prev => prev ? {
         ...prev,
         status: 'completed',
         progress: 100,
         contentGenerated: data.campaign.contentGenerated,
         deploymentsSuccessful: data.campaign.deployments.successful,
-        serpPenetration: data.campaign.serpAnalysis.penetrationRate * 100,
+        serpPenetration: (data.campaign.serpAnalysis.penetrationRate || 0) * 100,
         estimatedImpact: data.estimatedSERPImpact
       } : null);
 
@@ -99,9 +109,23 @@ const PersonaSaturationPanel = () => {
       
     } catch (error: any) {
       clearInterval(progressInterval);
-      setCurrentCampaign(prev => prev ? { ...prev, status: 'completed', progress: 0 } : null);
       console.error('Persona Saturation error:', error);
-      toast.error('Persona Saturation failed: ' + error.message);
+      
+      setCurrentCampaign(prev => prev ? { 
+        ...prev, 
+        status: 'completed', 
+        progress: 0,
+        estimatedImpact: 'Failed - See error details'
+      } : null);
+      
+      // More detailed error message
+      const errorMessage = error.message || 'Unknown error occurred';
+      toast.error(`Persona Saturation failed: ${errorMessage}`);
+      
+      // If it's a connection error, provide additional guidance
+      if (errorMessage.includes('Failed to send a request') || errorMessage.includes('fetch')) {
+        toast.error('Edge function connection issue. Please check function deployment and try again.');
+      }
     } finally {
       setIsExecuting(false);
     }
@@ -171,6 +195,7 @@ const PersonaSaturationPanel = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="10">10 Articles (Test)</SelectItem>
                     <SelectItem value="25">25 Articles (Light)</SelectItem>
                     <SelectItem value="50">50 Articles (Standard)</SelectItem>
                     <SelectItem value="100">100 Articles (Heavy)</SelectItem>
@@ -301,9 +326,19 @@ const PersonaSaturationPanel = () => {
                 </div>
 
                 {currentCampaign.status === 'completed' && (
-                  <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-                    <h4 className="font-medium text-green-800 mb-2">Campaign Completed Successfully</h4>
-                    <p className="text-sm text-green-700">{currentCampaign.estimatedImpact}</p>
+                  <div className={`p-4 border rounded-lg ${
+                    currentCampaign.progress === 0 ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'
+                  }`}>
+                    <h4 className={`font-medium mb-2 ${
+                      currentCampaign.progress === 0 ? 'text-red-800' : 'text-green-800'
+                    }`}>
+                      {currentCampaign.progress === 0 ? 'Campaign Failed' : 'Campaign Completed Successfully'}
+                    </h4>
+                    <p className={`text-sm ${
+                      currentCampaign.progress === 0 ? 'text-red-700' : 'text-green-700'
+                    }`}>
+                      {currentCampaign.estimatedImpact}
+                    </p>
                   </div>
                 )}
               </div>
