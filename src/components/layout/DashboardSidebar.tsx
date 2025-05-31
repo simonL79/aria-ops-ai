@@ -1,81 +1,168 @@
 
-import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { 
-  Home, 
-  Activity, 
-  Shield, 
-  Eye, 
-  Search, 
-  Settings, 
-  LogOut,
-  BarChart3,
-  Terminal,
-  MessageSquare,
-  Target
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useAuth } from '@/hooks/useAuth';
+import { useState } from "react";
+import { useLocation, Link } from "react-router-dom";
+import { cn } from "@/lib/utils";
+import { Home, Settings, Users, AlertTriangle, Shield, Search, BarChart3, Mail, MessageSquare, FileText, Radar, Building, FileBarChart, Brain, Activity, Bell, Zap, Layout } from "lucide-react";
+
+interface SidebarProps {
+  className?: string;
+}
 
 const DashboardSidebar = () => {
-  const navigate = useNavigate();
   const location = useLocation();
-  const { signOut, isAdmin } = useAuth();
+  const [isDarkTheme, setIsDarkTheme] = useState(false);
 
-  const menuItems = [
-    { icon: Home, label: 'Dashboard', path: '/dashboard' },
-    { icon: Shield, label: 'A.R.I.A™ SIGMA', path: '/dashboard/sigma' },
-    { icon: Activity, label: 'Intelligence', path: '/dashboard/intelligence' },
-    { icon: Eye, label: 'Monitoring', path: '/dashboard/monitoring' },
-    { icon: Search, label: 'Mentions', path: '/dashboard/mentions' },
-    { icon: BarChart3, label: 'Analytics', path: '/dashboard/analytics' },
-    { icon: MessageSquare, label: 'Command Center', path: '/dashboard/command-center' },
-    { icon: Terminal, label: 'Ghost Protocol', path: '/dashboard/operator-console' },
-    { icon: Settings, label: 'Settings', path: '/dashboard/settings' },
-  ];
-
-  const handleSignOut = async () => {
-    await signOut();
-    navigate('/admin/login');
+  const toggleTheme = () => {
+    setIsDarkTheme(!isDarkTheme);
+    document.documentElement.classList.toggle("dark");
   };
 
   return (
-    <div className="bg-white border-r border-gray-200 w-64 min-h-screen flex flex-col">
-      <div className="p-6">
-        <h1 className="text-xl font-bold text-gray-900">A.R.I.A™</h1>
-        <p className="text-sm text-gray-600">Intelligence Platform</p>
-      </div>
-      
-      <nav className="flex-1 px-4 space-y-1">
-        {menuItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = location.pathname === item.path;
-          
-          return (
-            <Button
-              key={item.path}
-              variant={isActive ? "default" : "ghost"}
-              className={`w-full justify-start gap-2 ${
-                isActive ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'
+    <div className="flex h-full flex-col border-r bg-secondary">
+      <div className="flex-1 overflow-y-auto py-6">
+        <div className="px-3 py-2">
+          <Link
+            to="/"
+            className="mb-2 flex items-center space-x-2 px-4 text-lg font-semibold tracking-tight"
+          >
+            <Shield className="mr-2 h-4 w-4" />
+            <span>A.R.I.A.</span>
+          </Link>
+          <div className="space-y-1">
+            <Link
+              to="/"
+              className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
+                location.pathname === '/' ? 'bg-accent text-accent-foreground' : ''
               }`}
-              onClick={() => navigate(item.path)}
             >
-              <Icon className="h-4 w-4" />
-              {item.label}
-            </Button>
-          );
-        })}
-      </nav>
-      
-      <div className="p-4 border-t border-gray-200">
-        <Button
-          variant="ghost"
-          className="w-full justify-start gap-2 text-gray-700 hover:bg-gray-100"
-          onClick={handleSignOut}
-        >
-          <LogOut className="h-4 w-4" />
-          Sign Out
-        </Button>
+              <div className="flex items-center">
+                <Home className="mr-2 h-4 w-4" />
+                <span>Home</span>
+              </div>
+            </Link>
+            <Link
+              to="/discovery"
+              className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
+                location.pathname.includes('/discovery') ? 'bg-accent text-accent-foreground' : ''
+              }`}
+            >
+              <div className="flex items-center">
+                <Brain className="mr-2 h-4 w-4" />
+                <span>Discovery</span>
+              </div>
+            </Link>
+            <Link
+              to="/dashboard"
+              className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
+                location.pathname === '/dashboard' ? 'bg-accent text-accent-foreground' : ''
+              }`}
+            >
+              <div className="flex items-center">
+                <Activity className="mr-2 h-4 w-4" />
+                <span>Dashboard</span>
+              </div>
+            </Link>
+            <Link
+              to="/eidetic"
+              className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
+                location.pathname.includes('/eidetic') ? 'bg-accent text-accent-foreground' : ''
+              }`}
+            >
+              <div className="flex items-center">
+                <Brain className="mr-2 h-4 w-4" />
+                <span>EIDETIC™</span>
+              </div>
+            </Link>
+            <Link
+              to="/rsi"
+              className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
+                location.pathname.includes('/rsi') ? 'bg-accent text-accent-foreground' : ''
+              }`}
+            >
+              <div className="flex items-center">
+                <Shield className="mr-2 h-4 w-4" />
+                <span>RSI™</span>
+              </div>
+            </Link>
+            <Link
+              to="/graveyard"
+              className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
+                location.pathname.includes('/graveyard') ? 'bg-accent text-accent-foreground' : ''
+              }`}
+            >
+              <div className="flex items-center">
+                <Activity className="mr-2 h-4 w-4" />
+                <span>🪦 Graveyard</span>
+              </div>
+            </Link>
+            <Link
+              to="/anubis-cockpit"
+              className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
+                location.pathname.includes('/anubis-cockpit') ? 'bg-accent text-accent-foreground' : ''
+              }`}
+            >
+              <div className="flex items-center">
+                <Radar className="mr-2 h-4 w-4" />
+                <span>Anubis Cockpit</span>
+              </div>
+            </Link>
+            <Link
+              to="/clients"
+              className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
+                location.pathname.includes('/clients') ? 'bg-accent text-accent-foreground' : ''
+              }`}
+            >
+              <div className="flex items-center">
+                <Users className="mr-2 h-4 w-4" />
+                <span>Client Management</span>
+              </div>
+            </Link>
+            <Link
+              to="/employee-risk"
+              className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
+                location.pathname.includes('/employee-risk') ? 'bg-accent text-accent-foreground' : ''
+              }`}
+            >
+              <div className="flex items-center">
+                <AlertTriangle className="mr-2 h-4 w-4" />
+                <span>Employee Risk</span>
+              </div>
+            </Link>
+            <Link
+              to="/compliance"
+              className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
+                location.pathname.includes('/compliance') ? 'bg-accent text-accent-foreground' : ''
+              }`}
+            >
+              <div className="flex items-center">
+                <FileText className="mr-2 h-4 w-4" />
+                <span>Compliance</span>
+              </div>
+            </Link>
+            <Link
+              to="/about"
+              className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
+                location.pathname === '/about' ? 'bg-accent text-accent-foreground' : ''
+              }`}
+            >
+              <div className="flex items-center">
+                <FileText className="mr-2 h-4 w-4" />
+                <span>About</span>
+              </div>
+            </Link>
+            <Link
+              to="/blog"
+              className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
+                location.pathname === '/blog' ? 'bg-accent text-accent-foreground' : ''
+              }`}
+            >
+              <div className="flex items-center">
+                <FileText className="mr-2 h-4 w-4" />
+                <span>Blog</span>
+              </div>
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   );

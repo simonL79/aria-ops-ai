@@ -144,8 +144,7 @@ const useScanningLogic = () => {
   const mapNumericSentimentToString = (sentiment?: number): ContentAlert['sentiment'] => {
     if (sentiment === undefined || sentiment === null) return 'neutral';
     
-    // Map threatening sentiment (-70 or below) to negative since we can't use 'threatening'
-    if (sentiment < -70) return 'negative';
+    if (sentiment < -70) return 'threatening';
     if (sentiment < -20) return 'negative';
     if (sentiment > 50) return 'positive';
     return 'neutral';

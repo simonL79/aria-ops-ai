@@ -1,4 +1,3 @@
-
 import { ContentAlert } from "@/types/dashboard";
 
 /**
@@ -74,8 +73,8 @@ const identifyThreatType = (content: string): ContentAlert['threatType'] => {
   
   const contentLower = content.toLowerCase();
   
-  if (threateningWords.some(word => contentLower.includes(word))) return 'legal_threat';
-  return 'reputation_risk';
+  if (threateningWords.some(word => contentLower.includes(word))) return 'threatening';
+  return 'non-threatening';
 };
 
 const getSourceType = (platform: string): string => {
@@ -93,8 +92,7 @@ const analyzeSentiment = (content: string): ContentAlert['sentiment'] => {
   
   const contentLower = content.toLowerCase();
   
-  // Map threatening to negative since we can't use 'threatening'
-  if (threateningWords.some(word => contentLower.includes(word))) return 'negative';
+  if (threateningWords.some(word => contentLower.includes(word))) return 'threatening';
   if (negativeWords.some(word => contentLower.includes(word))) return 'negative';
   if (positiveWords.some(word => contentLower.includes(word))) return 'positive';
   return 'neutral';

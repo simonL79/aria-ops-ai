@@ -1,41 +1,113 @@
 
-import { MetricValue, ContentAlert, ContentSource, ContentAction, ResponseToneStyle, SeoContent } from '@/types/dashboard';
+import { MetricValue, ContentSource, ContentAction, ResponseToneStyle, SeoContent } from "@/types/dashboard";
+import { supabase } from "@/integrations/supabase/client";
 
-export const fetchDashboardMetrics = async (): Promise<MetricValue[]> => {
-  // Mock data for now - replace with actual API calls
-  return [
-    { id: "1", title: "Total Mentions", value: 156, change: 12, icon: "trending-up", color: "blue", delta: 12, deltaType: "increase" },
-    { id: "2", title: "Negative Sentiment", value: 23, change: -5, icon: "trending-down", color: "red", delta: -5, deltaType: "decrease" },
-    { id: "3", title: "Active Sources", value: 8, change: 2, icon: "trending-up", color: "green", delta: 2, deltaType: "increase" },
-    { id: "4", title: "Response Rate", value: 87, change: 8, icon: "trending-up", color: "yellow", delta: 8, deltaType: "increase" }
-  ];
+export const getMetrics = async (): Promise<MetricValue[]> => {
+  try {
+    const [alertsData, sourcesData] = await Promise.all([
+      supabase.from('scan_results').select('*'),
+      supabase.from('monitored_platforms').select('*')
+    ]);
+
+    const totalMentions = alertsData.data?.length || 0;
+    const negativeSentiment = alertsData.data?.filter(item => item.sentiment < 0).length || 0;
+    const activeSources = sourcesData.data?.filter(item => item.active).length || 0;
+    const threatLevel = Math.round((negativeSentiment / totalMentions) * 100) || 0;
+
+    return [
+      { id: "1", title: "Total Mentions", value: totalMentions, change: 0, icon: "trending-up", color: "blue", delta: 0, deltaType: "increase" },
+      { id: "2", title: "Negative Sentiment", value: negativeSentiment, change: 0, icon: "trending-down", color: "red", delta: 0, deltaType: "increase" },
+      { id: "3", title: "Active Sources", value: activeSources, change: 0, icon: "trending-up", color: "green", delta: 0, deltaType: "increase" },
+      { id: "4", title: "Threat Level", value: threatLevel, change: 0, icon: "trending-down", color: "yellow", delta: 0, deltaType: "increase" }
+    ];
+  } catch (error) {
+    console.error('Error fetching metrics:', error);
+    return [];
+  }
 };
 
-export const fetchContentAlerts = async (): Promise<ContentAlert[]> => {
-  // Mock data - replace with actual API calls
-  return [];
+export const getSources = async (): Promise<ContentSource[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('monitored_platforms')
+      .select('*')
+      .eq('active', true);
+    
+    if (error) throw error;
+    
+    return data.map(item => ({
+      id: item.id,
+      name: item.name,
+      type: item.type || 'platform',
+      status: item.status as "critical" | "good" | "warning",
+      lastUpdate: new Date(item.last_updated).toLocaleDateString(),
+      metrics: {
+        total: item.total || 0,
+        positive: Math.floor((item.positive_ratio || 0) * (item.total || 0) / 100),
+        negative: Math.floor((100 - (item.positive_ratio || 0)) * (item.total || 0) / 100),
+        neutral: 0
+      },
+      positiveRatio: item.positive_ratio || 0,
+      total: item.total || 0,
+      active: item.active,
+      lastUpdated: new Date(item.last_updated).toLocaleDateString(),
+      mentionCount: item.mention_count || 0,
+      sentiment: item.sentiment || 0
+    }));
+  } catch (error) {
+    console.error('Error fetching sources:', error);
+    return [];
+  }
 };
 
-export const fetchContentSources = async (): Promise<ContentSource[]> => {
-  // Mock data - replace with actual API calls
-  return [];
+export const getRecentActivity = async (): Promise<ContentAction[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('content_actions')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(20);
+    
+    if (error) throw error;
+    
+    return data.map(item => {
+      // Map database values to correct union types
+      const mapType = (dbType: string): "urgent" | "monitoring" | "response" => {
+        if (dbType === 'urgent' || dbType === 'monitoring' || dbType === 'response') {
+          return dbType;
+        }
+        return 'monitoring'; // default fallback
+      };
+
+      const mapStatus = (dbStatus: string): "pending" | "completed" | "failed" => {
+        if (dbStatus === 'pending' || dbStatus === 'completed' || dbStatus === 'failed') {
+          return dbStatus;
+        }
+        return 'pending'; // default fallback
+      };
+
+      return {
+        id: item.id,
+        type: mapType(item.type),
+        description: item.description,
+        timestamp: new Date(item.created_at).toLocaleDateString(),
+        status: mapStatus(item.status),
+        platform: item.platform,
+        action: item.action,
+        date: new Date(item.created_at).toLocaleDateString()
+      };
+    });
+  } catch (error) {
+    console.error('Error fetching recent activity:', error);
+    return [];
+  }
 };
 
-export const fetchContentActions = async (): Promise<ContentAction[]> => {
-  // Mock data - replace with actual API calls
-  return [];
+export const getToneStyles = async (): Promise<ResponseToneStyle[]> => {
+  return ['professional', 'casual', 'empathetic', 'assertive'];
 };
 
-export const generateResponse = async (
-  content: string,
-  tone: ResponseToneStyle = 'professional',
-  context?: string
-): Promise<string> => {
-  // Mock implementation - replace with actual API call
-  return `Generated response in ${tone} tone for: ${content.substring(0, 50)}...`;
-};
-
-export const fetchSeoContent = async (): Promise<SeoContent[]> => {
-  // Mock data - replace with actual API calls
+export const getSeoContent = async (): Promise<SeoContent[]> => {
+  // This would fetch from a real SEO content table if it exists
   return [];
 };

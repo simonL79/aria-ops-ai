@@ -94,7 +94,7 @@ function fallbackEntityExtraction(text: string): ScanEntity[] {
   nameMatches.forEach(name => {
     // Skip common false positives
     const commonWords = ['The', 'This', 'That', 'These', 'Those'];
-    if (!commonWords.some(word => name.startsWith(word))) {
+    if (!commonWords.some(word => name.includes(word))) {
       entities.push({ name, type: 'PERSON' });
     }
   });

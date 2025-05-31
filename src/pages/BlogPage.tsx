@@ -1,104 +1,146 @@
 
 import React from 'react';
-import PublicLayout from '@/components/layout/PublicLayout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Calendar, User, ArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import PublicLayout from "@/components/layout/PublicLayout";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Calendar, User, ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
+import { useBlogPosts } from "@/hooks/useBlogPosts";
 
 const BlogPage = () => {
-  const posts = [
-    {
-      id: 1,
-      title: "The Rise of AI-Powered Reputation Management",
-      excerpt: "How artificial intelligence is revolutionizing the way we protect and manage digital reputations in 2024.",
-      author: "Simon Lindsay",
-      date: "2024-01-15",
-      category: "Technology",
-      readTime: "5 min read"
-    },
-    {
-      id: 2,
-      title: "Understanding Digital Threats in the Modern Age",
-      excerpt: "A comprehensive guide to identifying and mitigating online reputation threats before they damage your brand.",
-      author: "Simon Lindsay",
-      date: "2024-01-10",
-      category: "Security",
-      readTime: "8 min read"
-    },
-    {
-      id: 3,
-      title: "Case Study: How A.R.I.A.™ Saved a Fortune 500 Company",
-      excerpt: "Real-world example of crisis management and reputation recovery using advanced AI monitoring systems.",
-      author: "Simon Lindsay",
-      date: "2024-01-05",
-      category: "Case Study",
-      readTime: "6 min read"
-    }
-  ];
+  const { blogPosts, loading, error } = useBlogPosts();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black text-white">
+        <PublicLayout>
+          <div className="py-16">
+            <div className="container mx-auto px-6">
+              <div className="max-w-4xl mx-auto">
+                <div className="text-center mb-12">
+                  <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white">A.R.I.A™ Blog</h1>
+                  <p className="text-xl text-gray-300">
+                    Insights on reputation intelligence, digital security, and crisis prevention
+                  </p>
+                </div>
+                <div className="text-center py-10">
+                  <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-orange-500 mx-auto mb-4"></div>
+                  <p className="text-lg text-gray-300">Loading blog posts...</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </PublicLayout>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-black text-white">
+        <PublicLayout>
+          <div className="py-16">
+            <div className="container mx-auto px-6">
+              <div className="max-w-4xl mx-auto">
+                <div className="text-center mb-12">
+                  <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white">A.R.I.A™ Blog</h1>
+                  <p className="text-xl text-gray-300">
+                    Insights on reputation intelligence, digital security, and crisis prevention
+                  </p>
+                </div>
+                <div className="text-center py-10 text-red-500">
+                  <p className="text-lg">Error loading blog posts: {error}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </PublicLayout>
+      </div>
+    );
+  }
 
   return (
-    <PublicLayout>
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 py-12">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
-              Reputation Intelligence Blog
-            </h1>
-            <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-              Insights, strategies, and the latest developments in digital reputation management
-            </p>
-          </div>
+    <div className="min-h-screen bg-black text-white">
+      <PublicLayout>
+        <div className="py-16">
+          <div className="container mx-auto px-6">
+            <div className="max-w-4xl mx-auto">
+              <div className="text-center mb-12">
+                <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white">A.R.I.A™ Blog</h1>
+                <p className="text-xl text-gray-300">
+                  Insights on reputation intelligence, digital security, and crisis prevention
+                </p>
+              </div>
+              
+              {blogPosts.length === 0 ? (
+                <div className="text-center py-10">
+                  <p className="text-lg text-gray-300">No blog posts found.</p>
+                </div>
+              ) : (
+                <div className="space-y-8">
+                  {blogPosts.map((post, index) => (
+                    <Card key={post.id || index} className="bg-gray-800 border-gray-700 hover:border-orange-500 transition-colors">
+                      <CardHeader>
+                        <div className="flex flex-wrap gap-2 mb-3">
+                          <Badge variant="secondary" className="bg-orange-500 text-black">
+                            {post.category}
+                          </Badge>
+                        </div>
+                        <CardTitle className="text-2xl text-white hover:text-orange-500 transition-colors">
+                          <Link to={`/blog/${post.slug}`}>
+                            {post.title}
+                          </Link>
+                        </CardTitle>
+                        <CardDescription className="text-gray-300 text-lg">
+                          {post.description}
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4 text-sm text-gray-400">
+                            <div className="flex items-center gap-1">
+                              <Calendar className="h-4 w-4" />
+                              {post.date}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <User className="h-4 w-4" />
+                              {post.author}
+                            </div>
+                          </div>
+                          <Button asChild variant="ghost" className="text-orange-500 hover:text-orange-400 hover:bg-gray-700">
+                            <Link to={`/blog/${post.slug}`} className="flex items-center gap-1">
+                              Read More <ArrowRight className="h-4 w-4" />
+                            </Link>
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-            {posts.map((post) => (
-              <Card key={post.id} className="bg-gray-800 border-gray-700 hover:border-orange-500 transition-colors">
-                <CardHeader>
-                  <div className="flex items-center gap-2 mb-3">
-                    <Badge variant="outline" className="border-orange-500 text-orange-500">
-                      {post.category}
-                    </Badge>
-                    <span className="text-sm text-gray-400">{post.readTime}</span>
-                  </div>
-                  <CardTitle className="text-white text-xl mb-3">
-                    {post.title}
-                  </CardTitle>
-                  <p className="text-gray-300 text-sm leading-relaxed">
-                    {post.excerpt}
-                  </p>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4 text-sm text-gray-400">
-                      <div className="flex items-center gap-1">
-                        <User className="h-4 w-4" />
-                        {post.author}
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Calendar className="h-4 w-4" />
-                        {new Date(post.date).toLocaleDateString()}
-                      </div>
-                    </div>
-                    <Link 
-                      to={`/blog/${post.id}`}
-                      className="text-orange-500 hover:text-orange-400 flex items-center gap-1 text-sm"
-                    >
-                      Read More <ArrowRight className="h-4 w-4" />
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          <div className="text-center mt-12">
-            <p className="text-gray-400">
-              Stay informed about the latest in reputation management and digital security.
-            </p>
+              <div className="text-center mt-12">
+                <h2 className="text-2xl font-bold mb-4 text-white">Stay Updated</h2>
+                <p className="text-gray-300 mb-6">
+                  Subscribe to our newsletter for the latest insights on reputation intelligence.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
+                  <input 
+                    type="email" 
+                    placeholder="Your email address" 
+                    className="flex-1 p-3 bg-gray-800 border border-gray-600 rounded-md text-white placeholder-gray-400"
+                  />
+                  <Button className="bg-orange-500 hover:bg-orange-600 text-white">
+                    Subscribe
+                  </Button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </PublicLayout>
+      </PublicLayout>
+    </div>
   );
 };
 

@@ -1,69 +1,108 @@
+import DashboardPage from "@/pages/dashboard/DashboardPage";
+import AiScrapingPage from "@/pages/AiScrapingPage";
+import CleanLaunchPage from "@/pages/CleanLaunchPage";
+import { ExecutiveReportsPage } from "@/pages/ExecutiveReportsPage";
+import SettingsPage from "@/pages/Settings";
+import { UsersPage } from "@/pages/UsersPage";
+import HyperCorePage from "@/pages/HyperCorePage";
+import { 
+  Home,
+  Search,
+  Users,
+  BarChart3,
+  Settings,
+  ShieldCheck,
+  Bot,
+  Radar,
+  FileText,
+  Zap,
+  Shield,
+  Brain,
+  Eye,
+  Target,
+  Layers,
+  Gauge,
+  AlertTriangle,
+  Clock,
+  MessageSquare,
+  Building,
+  UserCheck,
+  Calendar,
+  LifeBuoy,
+  HelpCircle,
+  Lock,
+  Globe,
+  FileX,
+  Trash2,
+  UserPlus,
+  Calculator,
+  AlertOctagon
+} from "lucide-react";
 
-import { HomeIcon, Settings, BarChart3, Shield, Users, Search, Activity, Target } from "lucide-react";
-import Index from "./pages/Index";
-import DashboardPage from "./pages/dashboard/DashboardPage";
-import MentionsPage from "./pages/dashboard/MentionsPage";
-import MonitoringPage from "./pages/dashboard/MonitoringPage";
-import SentinelPage from "./pages/dashboard/SentinelPage";
-import ScanPage from "./pages/ScanPage";
-import PricingPage from "./pages/PricingPage";
-import BlogPage from "./pages/BlogPage";
+export type NavItem = {
+  title: string;
+  to?: string;
+  url?: string;
+  icon:
+    | "home"
+    | "layout"
+    | "settings"
+    | "users"
+    | "zap"
+    | "fileAnalytics"
+    | "shield"
+    | typeof AlertOctagon;
+  page?: React.FC;
+  adminOnly?: boolean;
+};
 
-export const navItems = [
-  {
-    title: "Home",
-    to: "/",
-    icon: <HomeIcon className="h-4 w-4" />,
-    page: <Index />,
-  },
-  {
-    title: "Scan",
-    to: "/scan",
-    icon: <Search className="h-4 w-4" />,
-    page: <ScanPage />,
-  },
-  {
-    title: "Pricing",
-    to: "/pricing",
-    icon: <Target className="h-4 w-4" />,
-    page: <PricingPage />,
-  },
-  {
-    title: "Blog",
-    to: "/blog",
-    icon: <Users className="h-4 w-4" />,
-    page: <BlogPage />,
-  },
+export const navItems: NavItem[] = [
   {
     title: "Dashboard",
     to: "/dashboard",
-    icon: <BarChart3 className="h-4 w-4" />,
-    page: <DashboardPage />,
-    requiresAuth: true,
-    requiresAdmin: true,
+    icon: "home",
+    page: DashboardPage,
   },
   {
-    title: "Mentions",
-    to: "/mentions",
-    icon: <Search className="h-4 w-4" />,
-    page: <MentionsPage />,
-    requiresAuth: true,
-    requiresAdmin: true,
+    title: "HyperCore",
+    to: "/hypercore",
+    icon: "shield",
+    page: HyperCorePage,
   },
   {
-    title: "Monitoring",
-    to: "/monitoring",
-    icon: <Activity className="h-4 w-4" />,
-    page: <MonitoringPage />,
-    requiresAuth: true,
-    requiresAdmin: true,
+    title: "AI Scraping",
+    to: "/ai-scraping",
+    icon: "zap",
+    page: AiScrapingPage,
   },
   {
-    title: "Sentinel Protocol",
-    to: "/sentinel",
-    icon: <Target className="h-4 w-4" />,
-    page: <SentinelPage />,
-    requiresAuth: true,
-    requiresAdmin: true,
+    title: "Clean Launch",
+    to: "/clean-launch",
+    icon: "layout",
+    page: CleanLaunchPage,
+  },
+  {
+    title: "Executive Reports",
+    to: "/executive-reports",
+    icon: "fileAnalytics",
+    page: ExecutiveReportsPage,
+  },
+  {
+    title: "Users",
+    to: "/users",
+    icon: "users",
+    page: UsersPage,
+  },
+  {
+    title: "Settings",
+    to: "/settings",
+    icon: "settings",
+    page: SettingsPage,
+  },
+  {
+    title: "A.R.I.A/EX™ Emergency",
+    url: "/emergency-strike",
+    icon: "shield",
+    adminOnly: true,
   },
 ];

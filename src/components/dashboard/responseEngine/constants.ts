@@ -1,29 +1,18 @@
 
-import { ResponseToneStyle } from '@/types/dashboard';
-import { AutoResponseSettings } from './types';
+import { ResponseToneStyle } from "@/types/dashboard";
 
 export const TONE_STYLES: Record<ResponseToneStyle, string> = {
-  professional: 'Professional and business-focused',
-  friendly: 'Warm and approachable',
-  formal: 'Structured and official',
-  casual: 'Relaxed and conversational',
-  humorous: 'Light-hearted with appropriate humor',
-  apologetic: 'Acknowledging concerns with empathy',
-  technical: 'Detailed and solution-oriented',
-  empathetic: 'Understanding and supportive'
+  professional: 'Professional and formal communication style',
+  casual: 'Casual and conversational tone',
+  empathetic: 'Understanding and compassionate approach',
+  assertive: 'Direct and confident messaging'
 };
 
-export const DEFAULT_TONE: ResponseToneStyle = 'professional';
-
-export const toneOptions: ResponseToneStyle[] = [
+export const toneOptions = [
   'professional',
-  'friendly', 
-  'formal',
-  'casual',
-  'humorous',
-  'apologetic',
-  'technical',
-  'empathetic'
+  'casual', 
+  'empathetic',
+  'assertive'
 ];
 
 export const languageOptions = [
@@ -31,48 +20,49 @@ export const languageOptions = [
   { code: 'es', name: 'Spanish' },
   { code: 'fr', name: 'French' },
   { code: 'de', name: 'German' },
-  { code: 'it', name: 'Italian' },
-  { code: 'pt', name: 'Portuguese' },
-  { code: 'ru', name: 'Russian' },
-  { code: 'ja', name: 'Japanese' },
-  { code: 'ko', name: 'Korean' },
-  { code: 'zh', name: 'Chinese' }
+  { code: 'it', name: 'Italian' }
 ];
 
 export const responseTemplates = [
   {
     id: '1',
+    name: 'Standard Response',
+    content: 'Thank you for your feedback. We take all concerns seriously and will investigate this matter promptly.',
+    tone: 'professional' as ResponseToneStyle,
     type: 'empathetic',
-    description: 'Understanding and supportive response',
-    icon: 'UserRound',
-    template: 'Thank you for sharing your experience. We understand your concerns and take all feedback seriously.'
+    description: 'A professional response that acknowledges the feedback',
+    icon: 'MessageSquareText',
+    template: 'Thank you for your feedback. We take all concerns seriously and will investigate this matter promptly.'
   },
   {
     id: '2', 
-    type: 'correction',
-    description: 'Factual correction with evidence',
-    icon: 'FileCheck',
-    template: 'We appreciate you bringing this to our attention. Here are the facts regarding this matter...'
+    name: 'Empathetic Response',
+    content: 'We understand your frustration and sincerely apologize for any inconvenience caused. Please allow us to make this right.',
+    tone: 'empathetic' as ResponseToneStyle,
+    type: 'apology',
+    description: 'An empathetic response that shows understanding',
+    icon: 'UserRound',
+    template: 'We understand your frustration and sincerely apologize for any inconvenience caused. Please allow us to make this right.'
   },
   {
     id: '3',
-    type: 'apology',
-    description: 'Sincere apology and commitment to improvement',
-    icon: 'ThumbsUp',
-    template: 'We sincerely apologize for this experience. This does not reflect our standards and we are taking immediate action.'
-  },
-  {
-    id: '4',
-    type: 'gratitude',
-    description: 'Thankful response for positive feedback',
-    icon: 'MessageSquareText',
-    template: 'Thank you so much for taking the time to share your positive experience with us.'
+    name: 'Clarification Request', 
+    content: 'We appreciate you bringing this to our attention. Could you please provide more details so we can better assist you?',
+    tone: 'professional' as ResponseToneStyle,
+    type: 'clarification',
+    description: 'A request for more information',
+    icon: 'FileCheck',
+    template: 'We appreciate you bringing this to our attention. Could you please provide more details so we can better assist you?'
   }
 ];
 
-export const defaultAutoResponseSettings: AutoResponseSettings = {
+export const defaultAutoResponseSettings = {
   enabled: false,
-  threshold: 'high',
-  reviewRequired: true,
-  defaultTone: 'professional'
+  threshold: 'high' as 'high' | 'medium' | 'all' | 'none',
+  reviewRequired: false,
+  defaultTone: 'professional' as ResponseToneStyle
 };
+
+export const DEFAULT_RESPONSE = `Thank you for raising your concern. We are committed to addressing this issue and ensuring your satisfaction.`;
+
+export const DEFAULT_SEO_CONTENT = `This is a sample SEO content. Please replace with actual content.`;
