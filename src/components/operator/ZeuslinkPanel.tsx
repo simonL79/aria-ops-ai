@@ -1,11 +1,10 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Zap, Database, Link, Activity } from 'lucide-react';
 
-const ZeuslinkPanel = () => {
+export const ZeuslinkPanel = () => {
   const [signalBridges, setSignalBridges] = useState(12);
   const [osintSources, setOsintSources] = useState(48);
 
@@ -38,5 +37,3 @@ const ZeuslinkPanel = () => {
     </Card>
   );
 };
-
-export default ZeuslinkPanel;

@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Globe, Shield, AlertTriangle, Activity } from 'lucide-react';
 
-const SentinelgridPanel = () => {
+export const SentinelgridPanel = () => {
   const [meshStatus, setMeshStatus] = useState('active');
   const [globalThreats, setGlobalThreats] = useState(7);
 
@@ -38,5 +37,3 @@ const SentinelgridPanel = () => {
     </Card>
   );
 };
-
-export default SentinelgridPanel;

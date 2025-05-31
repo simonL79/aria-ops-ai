@@ -1,10 +1,9 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Star, MessageSquare, Target } from 'lucide-react';
 
-const PolarisPanel = () => {
+export const PolarisPanel = () => {
   const [narrativeStatus, setNarrativeStatus] = useState('active');
   const [counterNarratives, setCounterNarratives] = useState(23);
 
@@ -37,5 +36,3 @@ const PolarisPanel = () => {
     </Card>
   );
 };
-
-export default PolarisPanel;

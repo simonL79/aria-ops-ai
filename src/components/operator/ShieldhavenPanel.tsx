@@ -1,10 +1,9 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Shield, Scale, CheckCircle } from 'lucide-react';
 
-const ShieldhavenPanel = () => {
+export const ShieldhavenPanel = () => {
   const [legalDefenseStatus, setLegalDefenseStatus] = useState('ready');
   const [regulatoryCompliance, setRegulatoryCompliance] = useState(98);
 
@@ -37,5 +36,3 @@ const ShieldhavenPanel = () => {
     </Card>
   );
 };
-
-export default ShieldhavenPanel;

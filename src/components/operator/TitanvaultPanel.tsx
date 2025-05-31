@@ -1,10 +1,9 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { FileText, Shield, CheckCircle } from 'lucide-react';
 
-const TitanvaultPanel = () => {
+export const TitanvaultPanel = () => {
   const [complianceStatus, setComplianceStatus] = useState('compliant');
   const [legalDocuments, setLegalDocuments] = useState(156);
 
@@ -37,5 +36,3 @@ const TitanvaultPanel = () => {
     </Card>
   );
 };
-
-export default TitanvaultPanel;

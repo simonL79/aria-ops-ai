@@ -1,10 +1,9 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tv, AlertTriangle, CheckCircle } from 'lucide-react';
 
-const HalcyonPanel = () => {
+export const HalcyonPanel = () => {
   const [mediaStatus, setMediaStatus] = useState('monitoring');
   const [propagandaDetected, setPropagandaDetected] = useState(3);
 
@@ -37,5 +36,3 @@ const HalcyonPanel = () => {
     </Card>
   );
 };
-
-export default HalcyonPanel;

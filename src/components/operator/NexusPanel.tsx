@@ -1,10 +1,9 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Network, Users, Activity } from 'lucide-react';
 
-const NexusPanel = () => {
+export const NexusPanel = () => {
   const [agentCollaboration, setAgentCollaboration] = useState('optimal');
   const [activeAgents, setActiveAgents] = useState(24);
 
@@ -37,5 +36,3 @@ const NexusPanel = () => {
     </Card>
   );
 };
-
-export default NexusPanel;

@@ -1,10 +1,9 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Target, TrendingUp, Activity } from 'lucide-react';
 
-const StrikecorePanel = () => {
+export const StrikecorePanel = () => {
   const [reputationScore, setReputationScore] = useState(87);
   const [recoveryActions, setRecoveryActions] = useState(5);
 
@@ -37,5 +36,3 @@ const StrikecorePanel = () => {
     </Card>
   );
 };
-
-export default StrikecorePanel;
