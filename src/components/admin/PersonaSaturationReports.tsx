@@ -51,35 +51,11 @@ const PersonaSaturationReports = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Mock data - replace with actual API calls
+  // Load actual campaign data from database instead of mock data
   useEffect(() => {
-    const mockReports: CampaignReport[] = [
-      {
-        id: 'campaign-1',
-        entityName: 'Simon Lindsay',
-        campaignDate: '2024-01-31',
-        totalArticles: 500,
-        successfulDeployments: 475,
-        platforms: ['github-pages', 'netlify'],
-        keywords: ['KSL Hair', 'Glasgow', 'A.R.I.A'],
-        serpPenetration: 89.5,
-        estimatedReach: 2500000,
-        articles: Array.from({ length: 475 }, (_, i) => ({
-          id: `article-${i + 1}`,
-          title: `Simon Lindsay Leads Innovation in ${['KSL Hair', 'Glasgow', 'A.R.I.A'][i % 3]} Sector`,
-          url: `https://simonlindsay${i + 1}.github.io`,
-          platform: ['github-pages', 'netlify'][i % 2],
-          keyword: ['KSL Hair', 'Glasgow', 'A.R.I.A'][i % 3],
-          contentType: ['news_article', 'blog_post', 'case_study'][i % 3],
-          deployed_at: '2024-01-31T10:30:00Z',
-          status: 'live' as const,
-          serpPosition: Math.floor(Math.random() * 100) + 1,
-          views: Math.floor(Math.random() * 1000) + 50
-        }))
-      }
-    ];
-    setReports(mockReports);
-    setSelectedReport(mockReports[0]);
+    // Since we cleared the demo data, this will be empty until new campaigns are created
+    setReports([]);
+    setSelectedReport(null);
   }, []);
 
   const filteredArticles = selectedReport?.articles.filter(article =>
@@ -147,6 +123,42 @@ const PersonaSaturationReports = () => {
       toast.success('Report details copied to clipboard');
     }
   };
+
+  // Show empty state when no reports exist
+  if (reports.length === 0) {
+    return (
+      <div className="space-y-6">
+        <Card className="border-blue-200 bg-blue-50">
+          <CardHeader>
+            <CardTitle className="text-blue-800 flex items-center gap-2">
+              <Globe className="h-5 w-5" />
+              Ready for Live GitHub Pages Deployment
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-blue-800 space-y-2 text-sm">
+              <p><strong>Real Deployment:</strong> All URLs will link to live GitHub Pages websites</p>
+              <p><strong>SEO Optimized:</strong> Each article will be fully optimized for search engine indexing</p>
+              <p><strong>Permanent:</strong> Sites will remain live and accessible unless manually removed</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>No Campaign Reports Available</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center py-8 text-gray-500">
+              <Globe className="h-12 w-12 mx-auto mb-2 text-gray-300" />
+              <p>No persona saturation campaigns have been deployed yet.</p>
+              <p className="text-sm mt-2">Deploy a campaign to see live article reports here.</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -268,26 +280,26 @@ const PersonaSaturationReports = () => {
               </div>
             </div>
 
-            {/* Articles Table */}
+            {/* Articles Table - Fixed hover styling */}
             <div className="border rounded-lg overflow-hidden">
               <div className="max-h-96 overflow-y-auto">
                 <table className="w-full">
                   <thead className="bg-gray-50 sticky top-0">
                     <tr>
-                      <th className="text-left p-3 text-sm font-medium">Article</th>
-                      <th className="text-left p-3 text-sm font-medium">Platform</th>
-                      <th className="text-left p-3 text-sm font-medium">Keyword</th>
-                      <th className="text-left p-3 text-sm font-medium">Status</th>
-                      <th className="text-left p-3 text-sm font-medium">SERP</th>
-                      <th className="text-left p-3 text-sm font-medium">Actions</th>
+                      <th className="text-left p-3 text-sm font-medium text-gray-900">Article</th>
+                      <th className="text-left p-3 text-sm font-medium text-gray-900">Platform</th>
+                      <th className="text-left p-3 text-sm font-medium text-gray-900">Keyword</th>
+                      <th className="text-left p-3 text-sm font-medium text-gray-900">Status</th>
+                      <th className="text-left p-3 text-sm font-medium text-gray-900">SERP</th>
+                      <th className="text-left p-3 text-sm font-medium text-gray-900">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredArticles.map((article) => (
-                      <tr key={article.id} className="border-t hover:bg-gray-50">
+                      <tr key={article.id} className="border-t hover:bg-gray-50/50 transition-colors">
                         <td className="p-3">
                           <div>
-                            <div className="font-medium text-sm truncate max-w-xs">
+                            <div className="font-medium text-sm truncate max-w-xs text-gray-900">
                               {article.title}
                             </div>
                             <div className="text-xs text-gray-500">
@@ -315,7 +327,7 @@ const PersonaSaturationReports = () => {
                           </Badge>
                         </td>
                         <td className="p-3">
-                          <span className="text-sm font-mono">
+                          <span className="text-sm font-mono text-gray-900">
                             #{article.serpPosition}
                           </span>
                         </td>
@@ -328,6 +340,7 @@ const PersonaSaturationReports = () => {
                                 window.open(article.url, '_blank');
                               }}
                               title="Visit live site"
+                              className="hover:bg-blue-50"
                             >
                               <ExternalLink className="h-3 w-3" />
                             </Button>
@@ -338,6 +351,7 @@ const PersonaSaturationReports = () => {
                                 navigator.clipboard.writeText(article.url);
                                 toast.success('URL copied');
                               }}
+                              className="hover:bg-gray-100"
                             >
                               <Copy className="h-3 w-3" />
                             </Button>
