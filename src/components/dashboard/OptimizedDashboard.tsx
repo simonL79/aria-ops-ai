@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { RefreshCw } from 'lucide-react';
 
-// Lazy load components with aggressive optimization
+// Ultra-lazy loading with smaller chunks
 const ReputationScore = lazy(() => import('@/components/dashboard/ReputationScore'));
 const ContentAlerts = lazy(() => import('@/components/dashboard/ContentAlerts'));
 const SourceOverview = lazy(() => import('@/components/dashboard/SourceOverview'));
@@ -37,28 +37,25 @@ interface OptimizedDashboardProps {
   isRealTimeActive?: boolean;
 }
 
-// Optimized skeleton with better performance
-const DashboardSkeleton = memo(() => (
-  <div className="space-y-4">
-    <Skeleton className="h-20 w-full bg-corporate-darkSecondary" />
-    <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
-      <div className="xl:col-span-3 space-y-3">
-        <Skeleton className="h-32 bg-corporate-darkSecondary" />
-        <Skeleton className="h-48 bg-corporate-darkSecondary" />
-      </div>
-      <div className="xl:col-span-6">
-        <Skeleton className="h-80 bg-corporate-darkSecondary" />
-      </div>
-      <div className="xl:col-span-3">
-        <Skeleton className="h-80 bg-corporate-darkSecondary" />
-      </div>
-    </div>
-  </div>
+// Minimal skeleton for instant rendering
+const QuickSkeleton = memo(() => (
+  <Skeleton className="h-20 bg-corporate-darkSecondary rounded-lg animate-pulse" />
 ));
 
-// Ultra-lightweight fallback
-const QuickSkeleton = memo(() => (
-  <Skeleton className="h-20 bg-corporate-darkSecondary rounded-lg" />
+// Optimized error component
+const ErrorComponent = memo(({ error, onRetry }: { error: string; onRetry?: () => void }) => (
+  <Card className="corporate-card max-w-md mx-auto">
+    <CardContent className="text-center py-6">
+      <RefreshCw className="h-8 w-8 text-red-500 mx-auto mb-3" />
+      <h3 className="text-lg font-semibold text-white mb-2">System Error</h3>
+      <p className="text-corporate-lightGray text-sm mb-3">{error}</p>
+      {onRetry && (
+        <button onClick={onRetry} className="text-corporate-accent hover:underline">
+          Retry
+        </button>
+      )}
+    </CardContent>
+  </Card>
 ));
 
 const OptimizedDashboard: React.FC<OptimizedDashboardProps> = memo(({
@@ -84,13 +81,13 @@ const OptimizedDashboard: React.FC<OptimizedDashboardProps> = memo(({
   isGuardianActive = false,
   isRealTimeActive = false
 }) => {
-  // Memoize display alerts to prevent unnecessary re-renders
+  // Micro-optimized display alerts
   const displayAlerts = React.useMemo(() => 
-    filteredAlerts?.length ? filteredAlerts : alerts
+    filteredAlerts?.length ? filteredAlerts.slice(0, 50) : alerts.slice(0, 50)
   , [filteredAlerts, alerts]);
 
-  // Memoize action handlers to prevent re-renders
-  const memoizedHandlers = React.useMemo(() => ({
+  // Stable action handlers reference
+  const handlers = React.useMemo(() => ({
     onLiveThreatScan,
     onLiveIntelligenceSweep,
     onGuardianToggle,
@@ -102,7 +99,7 @@ const OptimizedDashboard: React.FC<OptimizedDashboardProps> = memo(({
   if (loading) {
     return (
       <div className="min-h-screen bg-corporate-dark p-2 sm:p-4">
-        <DashboardSkeleton />
+        <QuickSkeleton />
       </div>
     );
   }
@@ -110,13 +107,7 @@ const OptimizedDashboard: React.FC<OptimizedDashboardProps> = memo(({
   if (error) {
     return (
       <div className="min-h-screen bg-corporate-dark p-2 sm:p-4">
-        <Card className="corporate-card max-w-md mx-auto">
-          <CardContent className="text-center py-6">
-            <RefreshCw className="h-8 w-8 text-red-500 mx-auto mb-3" />
-            <h3 className="text-lg font-semibold text-white mb-2">System Error</h3>
-            <p className="text-corporate-lightGray text-sm mb-3">{error}</p>
-          </CardContent>
-        </Card>
+        <ErrorComponent error={error} onRetry={fetchData} />
       </div>
     );
   }
@@ -124,19 +115,19 @@ const OptimizedDashboard: React.FC<OptimizedDashboardProps> = memo(({
   return (
     <div className="min-h-screen bg-corporate-dark">
       <div className="container mx-auto px-2 sm:px-4 py-2 sm:py-4 space-y-3 sm:space-y-4 max-w-7xl">
-        {/* Critical Action Buttons - Highest priority */}
+        {/* Critical Action Buttons - Priority load */}
         <Suspense fallback={<QuickSkeleton />}>
           <CriticalActionButtons
-            {...memoizedHandlers}
+            {...handlers}
             isScanning={isScanning}
             isGuardianActive={isGuardianActive}
             isRealTimeActive={isRealTimeActive}
           />
         </Suspense>
 
-        {/* Main Dashboard Grid - Responsive optimization */}
+        {/* Responsive grid layout */}
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-3 sm:gap-4">
-          {/* Left Column - Stacked on mobile */}
+          {/* Left Column */}
           <div className="xl:col-span-3 space-y-3 sm:space-y-4">
             <Suspense fallback={<QuickSkeleton />}>
               <ReputationScore score={reputationScore} previousScore={previousScore} />
@@ -147,14 +138,14 @@ const OptimizedDashboard: React.FC<OptimizedDashboardProps> = memo(({
             </Suspense>
           </div>
           
-          {/* Center Column - Main content */}
+          {/* Center Column */}
           <div className="xl:col-span-6 space-y-3 sm:space-y-4">
-            <Suspense fallback={<Skeleton className="h-80 bg-corporate-darkSecondary" />}>
+            <Suspense fallback={<QuickSkeleton />}>
               <ContentAlerts alerts={displayAlerts} isLoading={loading} />
             </Suspense>
           </div>
 
-          {/* Right Column - Entity summary */}
+          {/* Right Column */}
           <div className="xl:col-span-3">
             <Suspense fallback={<QuickSkeleton />}>
               <EntitySummaryPanel alerts={displayAlerts} />
@@ -162,14 +153,14 @@ const OptimizedDashboard: React.FC<OptimizedDashboardProps> = memo(({
           </div>
         </div>
 
-        {/* Bottom Section - Lower priority */}
+        {/* Bottom Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
           <Suspense fallback={<QuickSkeleton />}>
-            <SourceOverview sources={sources} />
+            <SourceOverview sources={sources.slice(0, 10)} />
           </Suspense>
           
           <Suspense fallback={<QuickSkeleton />}>
-            <RecentActions actions={actions} />
+            <RecentActions actions={actions.slice(0, 10)} />
           </Suspense>
         </div>
       </div>
