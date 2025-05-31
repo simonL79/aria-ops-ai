@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -23,7 +22,7 @@ interface WatchtowerCandidate {
   last_scanned: string;
   outreach_status: string;
   threat_details?: any;
-  scan_results?: any[];
+  scan_results?: any;
 }
 
 interface ScanParameters {
@@ -59,7 +58,15 @@ const WatchtowerDashboard = () => {
         .limit(20);
 
       if (error) throw error;
-      setCandidates(data || []);
+      
+      // Type-safe conversion of the database response
+      const typedCandidates: WatchtowerCandidate[] = (data || []).map(item => ({
+        ...item,
+        scan_results: Array.isArray(item.scan_results) ? item.scan_results : [],
+        threat_details: item.threat_details || {}
+      }));
+      
+      setCandidates(typedCandidates);
     } catch (error) {
       console.error('Error loading candidates:', error);
     }
