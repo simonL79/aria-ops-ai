@@ -16,24 +16,12 @@ import {
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { 
   Home, 
-  Search, 
-  Brain, 
-  Radar, 
-  Activity, 
-  Building2, 
+  Shield, 
+  Users, 
   Settings, 
   LogOut,
-  MessageSquare,
-  Bell,
-  BarChart,
-  Users,
   FileText,
-  TrendingUp,
-  AlertTriangle,
-  Shield,
-  Terminal,
-  Zap,
-  TestTube
+  Mail
 } from 'lucide-react';
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { useAuth } from '@/hooks/useAuth';
@@ -83,58 +71,16 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       active: pathname === "/dashboard",
     },
     {
+      label: "Genesis Sentinel",
+      icon: <Shield className="h-4 w-4" />,
+      href: "/admin/genesis-sentinel",
+      active: pathname === "/admin/genesis-sentinel",
+    },
+    {
       label: "Clients",
       icon: <Users className="h-4 w-4" />,
-      href: "/clients",
-      active: pathname === "/clients",
-    },
-    {
-      label: "Analytics",
-      icon: <BarChart className="h-4 w-4" />,
-      href: "/analytics",
-      active: pathname === "/analytics",
-    },
-    {
-      label: "Intelligence Workbench",
-      icon: <Brain className="h-4 w-4" />,
-      href: "/intelligence/workbench",
-      active: pathname === "/intelligence/workbench",
-    },
-    {
-      label: "Enhanced Intelligence",
-      icon: <Shield className="h-4 w-4" />,
-      href: "/intelligence/enhanced",
-      active: pathname === "/intelligence/enhanced",
-    },
-    {
-      label: "Offensive Operations",
-      icon: <AlertTriangle className="h-4 w-4" />,
-      href: "/intelligence/offensive-operations",
-      active: pathname === "/intelligence/offensive-operations",
-    },
-    {
-      label: "AI Scraping",
-      icon: <Search className="h-4 w-4" />,
-      href: "/ai-scraping",
-      active: pathname === "/ai-scraping",
-    },
-    {
-      label: "Clean Launch",
-      icon: <Building2 className="h-4 w-4" />,
-      href: "/clean-launch",
-      active: pathname === "/clean-launch",
-    },
-    {
-      label: "Anubis GPT Cockpit",
-      icon: <Brain className="h-4 w-4" />,
-      href: "/anubis-gpt",
-      active: pathname === "/anubis-gpt",
-    },
-    {
-      label: "Operator Console",
-      icon: <Terminal className="h-4 w-4" />,
-      href: "/operator-console",
-      active: pathname === "/operator-console",
+      href: "/admin/clients",
+      active: pathname === "/admin/clients",
     },
     {
       label: "Blog",
@@ -143,22 +89,16 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       active: pathname === "/blog",
     },
     {
-      label: "Reputation Scan",
-      icon: <TrendingUp className="h-4 w-4" />,
-      href: "/reputation-scan",
-      active: pathname === "/reputation-scan",
+      label: "Contact",
+      icon: <Mail className="h-4 w-4" />,
+      href: "/contact",
+      active: pathname === "/contact",
     },
     {
-      label: "QA Testing",
-      icon: <TestTube className="h-4 w-4" />,
-      href: "/qa-test",
-      active: pathname === "/qa-test",
-    },
-    {
-      label: "Admin",
-      icon: <Shield className="h-4 w-4" />,
-      href: "/admin",
-      active: pathname === "/admin",
+      label: "Settings",
+      icon: <Settings className="h-4 w-4" />,
+      href: "/admin/settings",
+      active: pathname === "/admin/settings",
     }
   ];
 

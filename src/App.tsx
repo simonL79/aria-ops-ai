@@ -12,6 +12,8 @@ import BlogPage from "./pages/BlogPage";
 import SimonLindsayPage from "./pages/SimonLindsayPage";
 import ContactPage from "./pages/ContactPage";
 import GenesisSentinelPage from './pages/admin/GenesisSentinelPage';
+import ClientsPage from './pages/admin/ClientsPage';
+import SettingsPage from './pages/admin/SettingsPage';
 
 const queryClient = new QueryClient();
 
@@ -42,6 +44,22 @@ function App() {
                   element={
                     <AdminGuard>
                       <GenesisSentinelPage />
+                    </AdminGuard>
+                  } 
+                />
+                <Route 
+                  path="/admin/clients" 
+                  element={
+                    <AdminGuard>
+                      <ClientsPage />
+                    </AdminGuard>
+                  } 
+                />
+                <Route 
+                  path="/admin/settings" 
+                  element={
+                    <AdminGuard>
+                      <SettingsPage />
                     </AdminGuard>
                   } 
                 />
