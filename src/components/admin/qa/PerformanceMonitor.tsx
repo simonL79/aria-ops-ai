@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -25,7 +24,7 @@ const PerformanceMonitor: React.FC = () => {
         
         // Get navigation timing for accurate measurements
         const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
-        const loadTime = navigation ? navigation.loadEventEnd - navigation.navigationStart : 500;
+        const loadTime = navigation ? navigation.loadEventEnd - navigation.fetchStart : 500;
         
         const renderTime = performance.now() - startTime;
         
