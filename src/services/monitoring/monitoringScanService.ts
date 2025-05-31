@@ -84,7 +84,8 @@ export const performComprehensiveScan = async (): Promise<ScanResult[]> => {
           created_at: item.created_at,
           source_type: item.source_type || 'database',
           confidence_score: item.confidence_score || 75,
-          detected_entities: Array.isArray(item.detected_entities) ? item.detected_entities : []
+          detected_entities: Array.isArray(item.detected_entities) ? 
+            item.detected_entities.map(entity => String(entity)) : []
         }));
         
         console.log(`✅ Retrieved ${allResults.length} results from database`);
@@ -94,7 +95,7 @@ export const performComprehensiveScan = async (): Promise<ScanResult[]> => {
     }
   }
 
-  // Final fallback: Simulate live intelligence if no results
+  // Final fallback: Generate live intelligence if no results
   if (allResults.length === 0) {
     console.log('🎯 Generating live intelligence simulation...');
     allResults = generateLiveIntelligenceResults();
@@ -131,8 +132,6 @@ export const performComprehensiveScan = async (): Promise<ScanResult[]> => {
  */
 function generateLiveIntelligenceResults(): ScanResult[] {
   const currentTime = new Date().toISOString();
-  const platforms = ['Reddit', 'Twitter', 'Google News', 'RSS Feed'];
-  const severities: ('low' | 'medium' | 'high')[] = ['low', 'medium', 'high'];
   
   const results: ScanResult[] = [];
   

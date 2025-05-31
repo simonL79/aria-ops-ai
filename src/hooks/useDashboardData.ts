@@ -8,8 +8,11 @@ export interface MetricValue {
   id: string;
   title: string;
   value: string | number;
+  change: number;
   icon: string;
   color: string;
+  delta: number;
+  deltaType: 'increase' | 'decrease';
 }
 
 export interface ContentAlert {
@@ -24,13 +27,61 @@ export interface ContentAlert {
   detectedEntities?: string[];
   category?: string;
   recommendation?: string;
+  threatType?: string;
+  confidenceScore?: number;
+  sentiment?: 'positive' | 'negative' | 'neutral';
+  potentialReach?: number;
+}
+
+export interface ContentSource {
+  id: string;
+  name: string;
+  type: string;
+  status: 'critical' | 'good' | 'warning';
+  lastUpdate: string;
+  metrics: {
+    total: number;
+    positive: number;
+    negative: number;
+    neutral: number;
+  };
+  positiveRatio: number;
+  total: number;
+  active: boolean;
+  lastUpdated: string;
+  mentionCount: number;
+  sentiment: number;
+}
+
+export interface ContentAction {
+  id: string;
+  type: 'urgent' | 'monitoring' | 'response';
+  description: string;
+  timestamp: string;
+  status: 'pending' | 'completed' | 'failed';
+  platform: string;
+  action: string;
+  date: string;
 }
 
 export const useDashboardData = () => {
   const [metrics, setMetrics] = useState<MetricValue[]>([]);
   const [alerts, setAlerts] = useState<ContentAlert[]>([]);
+  const [classifiedAlerts, setClassifiedAlerts] = useState<ContentAlert[]>([]);
+  const [sources, setSources] = useState<ContentSource[]>([]);
+  const [actions, setActions] = useState<ContentAction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Content categorization
+  const negativeContent = alerts.filter(alert => alert.sentiment === 'negative');
+  const positiveContent = alerts.filter(alert => alert.sentiment === 'positive');
+  const neutralContent = alerts.filter(alert => alert.sentiment === 'neutral');
+
+  // Mock data for missing properties
+  const toneStyles = [];
+  const recentActivity = [];
+  const seoContent = [];
 
   const fetchData = async () => {
     setLoading(true);
@@ -52,14 +103,20 @@ export const useDashboardData = () => {
         date: new Date(result.created_at).toLocaleDateString(),
         url: result.url,
         sourceType: result.source_type || 'osint_intelligence',
-        detectedEntities: result.detected_entities || [],
+        detectedEntities: Array.isArray(result.detected_entities) ? 
+          result.detected_entities.map(entity => String(entity)) : [],
         category: result.severity === 'high' ? 'Critical' : 
                  result.severity === 'medium' ? 'Warning' : 'Neutral',
         recommendation: result.severity === 'high' ? 'Immediate action required' :
-                       result.severity === 'medium' ? 'Monitor closely' : 'Standard monitoring'
+                       result.severity === 'medium' ? 'Monitor closely' : 'Standard monitoring',
+        threatType: 'live_intelligence',
+        confidenceScore: result.confidence_score || 75,
+        sentiment: 'neutral',
+        potentialReach: 0
       }));
       
       setAlerts(convertedAlerts);
+      setClassifiedAlerts(convertedAlerts);
       
       // Generate metrics from results
       const threatCount = scanResults.filter(r => r.severity === 'high').length;
@@ -74,33 +131,66 @@ export const useDashboardData = () => {
           id: 'threats',
           title: 'Active Threats',
           value: threatCount,
+          change: 0,
           icon: 'alert-triangle',
-          color: threatCount > 0 ? 'red' : 'green'
+          color: threatCount > 0 ? 'red' : 'green',
+          delta: 0,
+          deltaType: 'increase'
         },
         {
           id: 'monitoring',
           title: 'Sources Monitored',
           value: '12+',
+          change: 0,
           icon: 'search',
-          color: 'blue'
+          color: 'blue',
+          delta: 0,
+          deltaType: 'increase'
         },
         {
           id: 'alerts',
           title: 'Total Alerts',
           value: totalAlerts,
+          change: 0,
           icon: 'shield',
-          color: totalAlerts > 5 ? 'yellow' : 'green'
+          color: totalAlerts > 5 ? 'yellow' : 'green',
+          delta: 0,
+          deltaType: 'increase'
         },
         {
           id: 'live_data',
           title: 'Live Intelligence',
           value: liveDataCount,
+          change: 0,
           icon: 'trending-up',
-          color: 'green'
+          color: 'green',
+          delta: 0,
+          deltaType: 'increase'
         }
       ];
       
       setMetrics(newMetrics);
+      
+      // Set default sources
+      setSources([
+        {
+          id: '1',
+          name: 'Reddit OSINT',
+          type: 'osint_source',
+          status: 'good',
+          lastUpdate: new Date().toLocaleDateString(),
+          metrics: { total: totalAlerts, positive: 0, negative: 0, neutral: totalAlerts },
+          positiveRatio: 0,
+          total: totalAlerts,
+          active: true,
+          lastUpdated: new Date().toLocaleDateString(),
+          mentionCount: totalAlerts,
+          sentiment: 0
+        }
+      ]);
+
+      // Set default actions
+      setActions([]);
       
       console.log(`✅ Dashboard data loaded: ${totalAlerts} alerts, ${threatCount} threats`);
       
@@ -110,13 +200,30 @@ export const useDashboardData = () => {
       
       // Set minimal fallback data
       setMetrics([
-        { id: 'status', title: 'System Status', value: 'Initializing', icon: 'alert', color: 'yellow' }
+        { 
+          id: 'status', 
+          title: 'System Status', 
+          value: 'Initializing', 
+          change: 0,
+          icon: 'alert', 
+          color: 'yellow',
+          delta: 0,
+          deltaType: 'increase'
+        }
       ]);
       setAlerts([]);
+      setClassifiedAlerts([]);
+      setSources([]);
+      setActions([]);
       
     } finally {
       setLoading(false);
     }
+  };
+
+  const simulateNewData = () => {
+    console.log('Simulate new data called');
+    fetchData();
   };
 
   // Auto-refresh every 2 minutes
@@ -131,8 +238,18 @@ export const useDashboardData = () => {
   return {
     metrics,
     alerts,
+    classifiedAlerts,
+    sources,
+    actions,
+    toneStyles,
+    recentActivity,
+    seoContent,
+    negativeContent,
+    positiveContent,
+    neutralContent,
     loading,
     error,
-    fetchData
+    fetchData,
+    simulateNewData
   };
 };
