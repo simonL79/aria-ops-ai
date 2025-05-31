@@ -19,10 +19,10 @@ interface WatchtowerCandidate {
   threat_score: number;
   confidence_score: number;
   potential_value: number;
-  priority_score: number;
-  industry_category: string;
   created_at: string;
-  contact_information?: any;
+  last_scanned: string;
+  outreach_status: string;
+  threat_details?: any;
   scan_results?: any[];
 }
 
@@ -55,7 +55,7 @@ const WatchtowerDashboard = () => {
       const { data, error } = await supabase
         .from('watchtower_candidates')
         .select('*')
-        .order('priority_score', { ascending: false })
+        .order('threat_score', { ascending: false })
         .limit(20);
 
       if (error) throw error;
@@ -129,7 +129,7 @@ const WatchtowerDashboard = () => {
     }));
   };
 
-  const getPriorityColor = (score: number) => {
+  const getThreatColor = (score: number) => {
     if (score > 0.8) return 'bg-red-500';
     if (score > 0.6) return 'bg-orange-500';
     if (score > 0.4) return 'bg-yellow-500';
@@ -283,11 +283,11 @@ const WatchtowerDashboard = () => {
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
                           <h3 className="font-semibold corporate-heading">{candidate.entity_name}</h3>
-                          <Badge className={`${getPriorityColor(candidate.priority_score)} text-white`}>
+                          <Badge className={`${getThreatColor(candidate.threat_score)} text-white`}>
                             {getThreatLevel(candidate.threat_score)}
                           </Badge>
                           <Badge variant="outline" className="border-corporate-border text-corporate-lightGray">
-                            {candidate.industry_category}
+                            {candidate.discovery_source}
                           </Badge>
                         </div>
                         <p className="text-sm corporate-subtext mb-2">{candidate.threat_summary}</p>
@@ -299,9 +299,9 @@ const WatchtowerDashboard = () => {
                       </div>
                       <div className="text-right">
                         <div className="text-2xl font-bold text-corporate-accent">
-                          {Math.round(candidate.priority_score * 100)}
+                          {Math.round(candidate.threat_score * 100)}
                         </div>
-                        <div className="text-xs corporate-subtext">Priority</div>
+                        <div className="text-xs corporate-subtext">Threat Score</div>
                       </div>
                     </div>
                   </CardContent>
@@ -330,7 +330,7 @@ const WatchtowerDashboard = () => {
                         Value: ${selectedCandidate.potential_value?.toLocaleString()}
                       </Badge>
                       <Badge variant="outline" className="border-corporate-border text-corporate-lightGray">
-                        {selectedCandidate.industry_category}
+                        {selectedCandidate.discovery_source}
                       </Badge>
                     </div>
                   </div>
