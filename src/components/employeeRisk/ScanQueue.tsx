@@ -1,252 +1,142 @@
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Clock, Play, Pause } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Clock, Play, Pause, RotateCcw, User } from 'lucide-react';
 
 interface QueueItem {
   id: string;
-  employee_id: string;
+  employee_name: string;
+  status: 'queued' | 'processing' | 'completed' | 'failed';
   priority: number;
-  status: string;
-  retry_count: number;
-  max_retries: number;
-  error_message: string;
   created_at: string;
-  company_employees: {
-    full_name: string;
-    email: string;
-    companies: { name: string };
-  };
+  started_at?: string;
+  completed_at?: string;
+  error_message?: string;
 }
 
 const ScanQueue = () => {
   const [queueItems, setQueueItems] = useState<QueueItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetchQueueItems();
-    
-    // Set up real-time subscription
-    const subscription = supabase
-      .channel('scan_queue_changes')
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'employee_scan_queue' },
-        () => {
-          fetchQueueItems();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      subscription.unsubscribe();
-    };
+    loadQueueData();
   }, []);
 
-  const fetchQueueItems = async () => {
+  const loadQueueData = async () => {
     try {
+      // Use existing employee_scan_queue table
       const { data, error } = await supabase
         .from('employee_scan_queue')
-        .select(`
-          *,
-          company_employees (
-            full_name,
-            email,
-            companies (name)
-          )
-        `)
+        .select('*')
         .order('priority', { ascending: false })
-        .order('created_at');
+        .order('created_at', { ascending: true });
 
       if (error) throw error;
-      setQueueItems(data || []);
+
+      // Transform data to match interface
+      const items: QueueItem[] = (data || []).map(item => ({
+        id: item.id,
+        employee_name: `Employee ${item.employee_id?.slice(0, 8)}`,
+        status: item.status as QueueItem['status'],
+        priority: item.priority || 5,
+        created_at: item.created_at,
+        started_at: item.started_at,
+        completed_at: item.completed_at,
+        error_message: item.error_message
+      }));
+
+      setQueueItems(items);
     } catch (error) {
-      console.error('Error fetching queue items:', error);
-      toast.error('Failed to fetch scan queue');
+      console.error('Error loading queue data:', error);
+      toast.error('Failed to load scan queue');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  const updateQueueStatus = async (id: string, status: string) => {
-    try {
-      const { error } = await supabase
-        .from('employee_scan_queue')
-        .update({ status })
-        .eq('id', id);
-      
-      if (error) throw error;
-      toast.success(`Scan ${status} successfully`);
-      fetchQueueItems();
-    } catch (error) {
-      console.error('Error updating queue status:', error);
-      toast.error('Failed to update scan status');
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'queued': return 'bg-blue-100 text-blue-800';
+      case 'processing': return 'bg-yellow-100 text-yellow-800';
+      case 'completed': return 'bg-green-100 text-green-800';
+      case 'failed': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
-  };
-
-  const retryFailedScan = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('employee_scan_queue')
-        .update({ 
-          status: 'queued',
-          retry_count: 0,
-          error_message: null
-        })
-        .eq('id', id);
-      
-      if (error) throw error;
-      toast.success('Scan queued for retry');
-      fetchQueueItems();
-    } catch (error) {
-      console.error('Error retrying scan:', error);
-      toast.error('Failed to retry scan');
-    }
-  };
-
-  const getStatusBadge = (status: string) => {
-    const statusMap = {
-      queued: { variant: 'outline' as const, text: 'Queued', icon: Clock },
-      processing: { variant: 'default' as const, text: 'Processing', icon: Play },
-      completed: { variant: 'secondary' as const, text: 'Completed', icon: Play },
-      failed: { variant: 'destructive' as const, text: 'Failed', icon: Pause },
-      retrying: { variant: 'secondary' as const, text: 'Retrying', icon: RotateCcw }
-    };
-    
-    const statusInfo = statusMap[status as keyof typeof statusMap] || statusMap.queued;
-    const Icon = statusInfo.icon;
-    
-    return (
-      <Badge variant={statusInfo.variant} className="flex items-center gap-1">
-        <Icon className="h-3 w-3" />
-        {statusInfo.text}
-      </Badge>
-    );
   };
 
   const getPriorityBadge = (priority: number) => {
-    if (priority >= 8) return <Badge variant="destructive">High</Badge>;
-    if (priority >= 5) return <Badge variant="secondary">Medium</Badge>;
-    return <Badge variant="outline">Low</Badge>;
+    if (priority >= 8) return <Badge className="bg-red-100 text-red-800">High</Badge>;
+    if (priority >= 5) return <Badge className="bg-yellow-100 text-yellow-800">Medium</Badge>;
+    return <Badge className="bg-green-100 text-green-800">Low</Badge>;
   };
 
-  if (loading) {
-    return <div className="text-center p-8">Loading scan queue...</div>;
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <Clock className="w-8 h-8 animate-spin text-blue-500" />
+      </div>
+    );
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Scan Queue</h2>
-        <div className="text-sm text-gray-600">
-          {queueItems.filter(item => item.status === 'queued').length} queued, 
-          {queueItems.filter(item => item.status === 'processing').length} processing
-        </div>
-      </div>
-
       <Card>
         <CardHeader>
-          <CardTitle>Active Scan Queue</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Clock className="h-6 w-6 text-blue-500" />
+            Scan Queue
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          {queueItems.length === 0 ? (
-            <div className="text-center py-12">
-              <Clock className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No scans in queue</h3>
-              <p className="text-gray-500">
-                Employee scans will appear here when they are queued for processing.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {queueItems.map((item) => (
-                <div key={item.id} className="border rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      <User className="h-5 w-5 text-gray-500" />
-                      <div>
-                        <h3 className="font-semibold">{item.company_employees.full_name}</h3>
-                        <p className="text-sm text-gray-600">
-                          {item.company_employees.companies.name} • {item.company_employees.email}
-                        </p>
+          <div className="space-y-3">
+            {queueItems.map((item) => (
+              <Card key={item.id} className="border">
+                <CardContent className="p-4">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <h4 className="font-medium">{item.employee_name}</h4>
+                        {getPriorityBadge(item.priority)}
                       </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {getPriorityBadge(item.priority)}
-                      {getStatusBadge(item.status)}
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
-                    <div>
-                      <span className="text-gray-500">Priority:</span>
-                      <div className="font-medium">{item.priority}/10</div>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">Retries:</span>
-                      <div className="font-medium">{item.retry_count}/{item.max_retries}</div>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">Queued:</span>
-                      <div className="font-medium">
-                        {new Date(item.created_at).toLocaleDateString()}
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <span>Created: {new Date(item.created_at).toLocaleString()}</span>
+                        {item.started_at && (
+                          <span>Started: {new Date(item.started_at).toLocaleString()}</span>
+                        )}
+                        {item.completed_at && (
+                          <span>Completed: {new Date(item.completed_at).toLocaleString()}</span>
+                        )}
                       </div>
+                      {item.error_message && (
+                        <p className="text-sm text-red-600 mt-2">{item.error_message}</p>
+                      )}
                     </div>
-                    <div>
-                      <span className="text-gray-500">Status:</span>
-                      <div className="font-medium">{item.status}</div>
-                    </div>
+                    <Badge className={getStatusColor(item.status)}>
+                      {item.status}
+                    </Badge>
                   </div>
+                </CardContent>
+              </Card>
+            ))}
+            
+            {queueItems.length === 0 && (
+              <div className="text-center py-8 text-muted-foreground">
+                <Clock className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                <p>No items in scan queue</p>
+              </div>
+            )}
+          </div>
 
-                  {item.error_message && (
-                    <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                      <p className="text-sm text-red-700">
-                        <strong>Error:</strong> {item.error_message}
-                      </p>
-                    </div>
-                  )}
-                  
-                  <div className="flex gap-2">
-                    {item.status === 'queued' && (
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        onClick={() => updateQueueStatus(item.id, 'processing')}
-                      >
-                        <Play className="h-4 w-4 mr-1" />
-                        Start
-                      </Button>
-                    )}
-                    
-                    {item.status === 'processing' && (
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        onClick={() => updateQueueStatus(item.id, 'queued')}
-                      >
-                        <Pause className="h-4 w-4 mr-1" />
-                        Pause
-                      </Button>
-                    )}
-                    
-                    {item.status === 'failed' && item.retry_count < item.max_retries && (
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        onClick={() => retryFailedScan(item.id)}
-                      >
-                        <RotateCcw className="h-4 w-4 mr-1" />
-                        Retry
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+          <div className="mt-6 flex gap-3">
+            <Button onClick={loadQueueData} variant="outline">
+              <Play className="w-4 h-4 mr-2" />
+              Refresh Queue
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>

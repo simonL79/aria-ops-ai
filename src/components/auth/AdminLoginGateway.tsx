@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -71,7 +70,7 @@ const AdminLoginGateway = ({ onComplete }: AdminLoginGatewayProps) => {
         return;
       }
 
-      if (result?.data?.user) {
+      if (result?.user) {
         await logAdminAction('login_success', `Successful admin login for ${email}`);
         toast.success('Admin access granted');
         onComplete(true);
