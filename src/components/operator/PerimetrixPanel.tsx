@@ -1,9 +1,10 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Shield, Network, AlertTriangle } from 'lucide-react';
 
-export const PerimetrixPanel = () => {
+export function PerimetrixPanel() {
   const [networkStatus, setNetworkStatus] = useState('secure');
   const [perimeterEvents, setPerimeterEvents] = useState(3);
 
@@ -35,4 +36,4 @@ export const PerimetrixPanel = () => {
       </CardContent>
     </Card>
   );
-};
+}

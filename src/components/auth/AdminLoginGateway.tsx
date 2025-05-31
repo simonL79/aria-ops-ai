@@ -6,7 +6,6 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Shield, Eye, EyeOff, AlertTriangle, CheckCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
 interface AdminLoginGatewayProps {
@@ -14,7 +13,6 @@ interface AdminLoginGatewayProps {
 }
 
 const AdminLoginGateway = ({ onComplete }: AdminLoginGatewayProps) => {
-  const { signIn } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -61,16 +59,19 @@ const AdminLoginGateway = ({ onComplete }: AdminLoginGatewayProps) => {
     setIsLoading(true);
 
     try {
-      const result = await signIn(email, password);
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
       
-      if (result?.error) {
-        await logAdminAction('login_failed', `Failed login attempt for ${email}: ${result.error.message}`);
-        toast.error('Login failed: ' + result.error.message);
+      if (error) {
+        await logAdminAction('login_failed', `Failed login attempt for ${email}: ${error.message}`);
+        toast.error('Login failed: ' + error.message);
         onComplete(false);
         return;
       }
 
-      if (result?.user) {
+      if (data?.user) {
         await logAdminAction('login_success', `Successful admin login for ${email}`);
         toast.success('Admin access granted');
         onComplete(true);
@@ -137,7 +138,7 @@ const AdminLoginGateway = ({ onComplete }: AdminLoginGatewayProps) => {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-white"
                 >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 w-4" />}
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>

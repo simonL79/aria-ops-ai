@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Globe, Shield, AlertTriangle, Activity } from 'lucide-react';
+import { Globe, Shield, AlertTriangle } from 'lucide-react';
 
-export const SentinelgridPanel = () => {
+export function SentinelgridPanel() {
   const [meshStatus, setMeshStatus] = useState('active');
   const [globalThreats, setGlobalThreats] = useState(7);
 
@@ -36,4 +36,4 @@ export const SentinelgridPanel = () => {
       </CardContent>
     </Card>
   );
-};
+}

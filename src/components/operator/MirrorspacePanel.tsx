@@ -1,9 +1,10 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Users, Eye, TrendingUp } from 'lucide-react';
 
-export const MirrorspacePanel = () => {
+export function MirrorspacePanel() {
   const [behaviorIndex, setBehaviorIndex] = useState(74);
   const [influenceScore, setInfluenceScore] = useState(82);
 
@@ -35,4 +36,4 @@ export const MirrorspacePanel = () => {
       </CardContent>
     </Card>
   );
-};
+}

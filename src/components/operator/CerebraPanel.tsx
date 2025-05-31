@@ -1,9 +1,10 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Brain, AlertTriangle, CheckCircle } from 'lucide-react';
 
-export const CerebraPanel = () => {
+export function CerebraPanel() {
   const [biasDetection, setBiasDetection] = useState('active');
   const [influenceEvents, setInfluenceEvents] = useState(12);
 
@@ -35,4 +36,4 @@ export const CerebraPanel = () => {
       </CardContent>
     </Card>
   );
-};
+}

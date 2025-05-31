@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Star, TrendingUp, Eye } from 'lucide-react';
 
-export const LuminoscorePanel = () => {
+export function LuminoscorePanel() {
   const [influenceScore, setInfluenceScore] = useState(78);
   const [exposureIndex, setExposureIndex] = useState(42);
 
@@ -36,6 +36,4 @@ export const LuminoscorePanel = () => {
       </CardContent>
     </Card>
   );
-};
-
-export default LuminoscorePanel;
+}

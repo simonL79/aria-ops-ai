@@ -1,9 +1,10 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Eye, Brain, AlertTriangle } from 'lucide-react';
 
-export const PropheticVisionPanel = () => {
+export function PropheticVisionPanel() {
   const [predictionAccuracy, setPredictionAccuracy] = useState(89);
   const [futureThreats, setFutureThreats] = useState(4);
 
@@ -35,4 +36,4 @@ export const PropheticVisionPanel = () => {
       </CardContent>
     </Card>
   );
-};
+}

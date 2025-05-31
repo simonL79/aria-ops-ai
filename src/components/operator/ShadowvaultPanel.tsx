@@ -1,9 +1,10 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Eye, Globe, AlertTriangle } from 'lucide-react';
 
-export const ShadowvaultPanel = () => {
+export function ShadowvaultPanel() {
   const [darkWebStatus, setDarkWebStatus] = useState('monitoring');
   const [threatIndex, setThreatIndex] = useState(42);
 
@@ -35,4 +36,4 @@ export const ShadowvaultPanel = () => {
       </CardContent>
     </Card>
   );
-};
+}

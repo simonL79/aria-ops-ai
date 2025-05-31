@@ -1,9 +1,10 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Shield, Zap, Activity } from 'lucide-react';
 
-export const SentinelShieldPanel = () => {
+export function SentinelShieldPanel() {
   const [defenseStatus, setDefenseStatus] = useState('autonomous');
   const [blockedThreats, setBlockedThreats] = useState(156);
 
@@ -35,4 +36,4 @@ export const SentinelShieldPanel = () => {
       </CardContent>
     </Card>
   );
-};
+}

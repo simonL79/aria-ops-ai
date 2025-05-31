@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Heart, RefreshCw, CheckCircle } from 'lucide-react';
 
-export const SelfHealingPanel = () => {
+export function SelfHealingPanel() {
   const [healingStatus, setHealingStatus] = useState('active');
   const [autoRepairs, setAutoRepairs] = useState(7);
 
@@ -36,4 +36,4 @@ export const SelfHealingPanel = () => {
       </CardContent>
     </Card>
   );
-};
+}

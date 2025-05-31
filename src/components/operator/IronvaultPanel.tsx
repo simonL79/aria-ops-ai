@@ -1,9 +1,10 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { FileText, Eye, Shield } from 'lucide-react';
 
-export const IronvaultPanel = () => {
+export function IronvaultPanel() {
   const [surveillanceStatus, setSurveillanceStatus] = useState('active');
   const [documentLeaks, setDocumentLeaks] = useState(0);
 
@@ -35,4 +36,4 @@ export const IronvaultPanel = () => {
       </CardContent>
     </Card>
   );
-};
+}

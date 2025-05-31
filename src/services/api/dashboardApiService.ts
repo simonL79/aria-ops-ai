@@ -1,4 +1,3 @@
-
 import { MetricValue, ContentSource, ContentAction, ResponseToneStyle, SeoContent } from "@/types/dashboard";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -60,45 +59,32 @@ export const getSources = async (): Promise<ContentSource[]> => {
   }
 };
 
-export const getRecentActivity = async (): Promise<ContentAction[]> => {
+export const fetchActionItems = async (): Promise<ActionItem[]> => {
   try {
+    // Use existing activity_logs table instead of content_actions
     const { data, error } = await supabase
-      .from('content_actions')
+      .from('activity_logs')
       .select('*')
       .order('created_at', { ascending: false })
-      .limit(20);
-    
-    if (error) throw error;
-    
-    return data.map(item => {
-      // Map database values to correct union types
-      const mapType = (dbType: string): "urgent" | "monitoring" | "response" => {
-        if (dbType === 'urgent' || dbType === 'monitoring' || dbType === 'response') {
-          return dbType;
-        }
-        return 'monitoring'; // default fallback
-      };
+      .limit(50);
 
-      const mapStatus = (dbStatus: string): "pending" | "completed" | "failed" => {
-        if (dbStatus === 'pending' || dbStatus === 'completed' || dbStatus === 'failed') {
-          return dbStatus;
-        }
-        return 'pending'; // default fallback
-      };
+    if (error) {
+      console.error('Error fetching action items:', error);
+      return [];
+    }
 
-      return {
-        id: item.id,
-        type: mapType(item.type),
-        description: item.description,
-        timestamp: new Date(item.created_at).toLocaleDateString(),
-        status: mapStatus(item.status),
-        platform: item.platform,
-        action: item.action,
-        date: new Date(item.created_at).toLocaleDateString()
-      };
-    });
+    return (data || []).map((item: any) => ({
+      id: item.id,
+      type: item.entity_type || 'system',
+      description: item.details || 'Activity logged',
+      createdAt: item.created_at,
+      status: 'completed',
+      platform: 'System',
+      action: item.action || 'logged',
+      timestamp: item.created_at,
+    }));
   } catch (error) {
-    console.error('Error fetching recent activity:', error);
+    console.error('Error in fetchActionItems:', error);
     return [];
   }
 };

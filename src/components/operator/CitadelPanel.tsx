@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Shield, Lock, Database } from 'lucide-react';
 
-export const CitadelPanel = () => {
+export function CitadelPanel() {
   const [infrastructureStatus, setInfrastructureStatus] = useState('reinforced');
   const [policyVaults, setPolicyVaults] = useState(12);
 
@@ -36,6 +36,4 @@ export const CitadelPanel = () => {
       </CardContent>
     </Card>
   );
-};
-
-export default CitadelPanel;
+}
