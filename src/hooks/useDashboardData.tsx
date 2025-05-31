@@ -40,8 +40,8 @@ export const useDashboardData = () => {
         platform: item.platform || 'Unknown',
         content: item.content || '',
         date: new Date(item.created_at).toLocaleDateString(),
-        severity: (item.severity as 'high' | 'medium' | 'low') || 'low',
-        status: (item.status as ContentAlert['status']) || 'new',
+        severity: (['high', 'medium', 'low'].includes(item.severity) ? item.severity : 'low') as 'high' | 'medium' | 'low',
+        status: (['new', 'read', 'dismissed', 'actioned', 'reviewing', 'resolved'].includes(item.status) ? item.status : 'new') as ContentAlert['status'],
         threatType: item.threat_type || 'reputation_risk',
         confidenceScore: item.confidence_score || 75,
         sourceType: item.source_type || 'live_osint',
@@ -147,10 +147,10 @@ export const useDashboardData = () => {
       
       return data.map(item => ({
         id: item.id,
-        type: (item.type as "urgent" | "monitoring" | "response") || 'monitoring',
+        type: (["urgent", "monitoring", "response"].includes(item.type) ? item.type : 'monitoring') as "urgent" | "monitoring" | "response",
         description: item.description,
         timestamp: new Date(item.created_at).toLocaleDateString(),
-        status: (item.status as "pending" | "completed" | "failed") || 'pending',
+        status: (["pending", "completed", "failed"].includes(item.status) ? item.status : 'pending') as "pending" | "completed" | "failed",
         platform: item.platform,
         action: item.action,
         date: new Date(item.created_at).toLocaleDateString()

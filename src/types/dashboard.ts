@@ -74,7 +74,7 @@ export interface ContentAlert {
   sentiment?: 'positive' | 'negative' | 'neutral' | 'threatening';
   category?: string;
   recommendation?: string;
-  sourceType?: string;
+  sourceType?: string; // Added this missing property
 }
 
 export interface ToneStyle {
