@@ -45,6 +45,204 @@ export type Database = {
         }
         Relationships: []
       }
+      anubis_auto_escalation_log: {
+        Row: {
+          auto_action: string | null
+          detection_summary: string | null
+          entity_id: string | null
+          id: string
+          resolution_status: string | null
+          trigger_level: string | null
+          triggered_at: string | null
+        }
+        Insert: {
+          auto_action?: string | null
+          detection_summary?: string | null
+          entity_id?: string | null
+          id?: string
+          resolution_status?: string | null
+          trigger_level?: string | null
+          triggered_at?: string | null
+        }
+        Update: {
+          auto_action?: string | null
+          detection_summary?: string | null
+          entity_id?: string | null
+          id?: string
+          resolution_status?: string | null
+          trigger_level?: string | null
+          triggered_at?: string | null
+        }
+        Relationships: []
+      }
+      anubis_entity_memory: {
+        Row: {
+          context_reference: string | null
+          created_at: string | null
+          created_by: string | null
+          entity_id: string | null
+          entity_name: string
+          id: string
+          key_findings: Json | null
+          last_seen: string | null
+          memory_summary: string
+          memory_type: string | null
+        }
+        Insert: {
+          context_reference?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          entity_id?: string | null
+          entity_name: string
+          id?: string
+          key_findings?: Json | null
+          last_seen?: string | null
+          memory_summary: string
+          memory_type?: string | null
+        }
+        Update: {
+          context_reference?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          entity_id?: string | null
+          entity_name?: string
+          id?: string
+          key_findings?: Json | null
+          last_seen?: string | null
+          memory_summary?: string
+          memory_type?: string | null
+        }
+        Relationships: []
+      }
+      anubis_mission_chain: {
+        Row: {
+          action_type: string | null
+          detail: string | null
+          entity_id: string | null
+          followup_required: boolean | null
+          id: string
+          initiated_by: string | null
+          result: string | null
+          triggered_at: string | null
+        }
+        Insert: {
+          action_type?: string | null
+          detail?: string | null
+          entity_id?: string | null
+          followup_required?: boolean | null
+          id?: string
+          initiated_by?: string | null
+          result?: string | null
+          triggered_at?: string | null
+        }
+        Update: {
+          action_type?: string | null
+          detail?: string | null
+          entity_id?: string | null
+          followup_required?: boolean | null
+          id?: string
+          initiated_by?: string | null
+          result?: string | null
+          triggered_at?: string | null
+        }
+        Relationships: []
+      }
+      anubis_operator_memory: {
+        Row: {
+          decision_context: string
+          final_decision: string | null
+          id: string
+          memory_lookup: string | null
+          operator_name: string | null
+          system_warning: string | null
+          timestamp: string | null
+        }
+        Insert: {
+          decision_context: string
+          final_decision?: string | null
+          id?: string
+          memory_lookup?: string | null
+          operator_name?: string | null
+          system_warning?: string | null
+          timestamp?: string | null
+        }
+        Update: {
+          decision_context?: string
+          final_decision?: string | null
+          id?: string
+          memory_lookup?: string | null
+          operator_name?: string | null
+          system_warning?: string | null
+          timestamp?: string | null
+        }
+        Relationships: []
+      }
+      anubis_pattern_log: {
+        Row: {
+          confidence_score: number | null
+          entity_name: string | null
+          first_detected: string | null
+          id: string
+          pattern_fingerprint: string
+          pattern_summary: string | null
+          previous_outcome: string | null
+          recommended_response: string | null
+        }
+        Insert: {
+          confidence_score?: number | null
+          entity_name?: string | null
+          first_detected?: string | null
+          id?: string
+          pattern_fingerprint: string
+          pattern_summary?: string | null
+          previous_outcome?: string | null
+          recommended_response?: string | null
+        }
+        Update: {
+          confidence_score?: number | null
+          entity_name?: string | null
+          first_detected?: string | null
+          id?: string
+          pattern_fingerprint?: string
+          pattern_summary?: string | null
+          previous_outcome?: string | null
+          recommended_response?: string | null
+        }
+        Relationships: []
+      }
+      anubis_watchtower_log: {
+        Row: {
+          company_name: string | null
+          contact_attempted: boolean | null
+          first_discovered: string | null
+          id: string
+          last_outreach: string | null
+          notes: string | null
+          response_received: boolean | null
+          status: string | null
+        }
+        Insert: {
+          company_name?: string | null
+          contact_attempted?: boolean | null
+          first_discovered?: string | null
+          id?: string
+          last_outreach?: string | null
+          notes?: string | null
+          response_received?: boolean | null
+          status?: string | null
+        }
+        Update: {
+          company_name?: string | null
+          contact_attempted?: boolean | null
+          first_discovered?: string | null
+          id?: string
+          last_outreach?: string | null
+          notes?: string | null
+          response_received?: boolean | null
+          status?: string | null
+        }
+        Relationships: []
+      }
       aria_notifications: {
         Row: {
           created_at: string | null

@@ -5,63 +5,103 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Brain, PlusCircle } from "lucide-react";
-import { MemoryEntry } from "@/types/intelligence/memory";
-import { getMemories, storeMemory } from "@/services/intelligence/memoryService";
+import { Search, Brain, PlusCircle, Database } from "lucide-react";
+import { anubisMemoryService, AnubisEntityMemory } from "@/services/aria/anubisMemoryService";
 import { toast } from "sonner";
 
-const MEMORY_CATEGORIES: Array<MemoryEntry['category']> = [
-  'insight',
+const MEMORY_CATEGORIES: Array<AnubisEntityMemory['memory_type']> = [
   'threat',
-  'pattern',
+  'outreach', 
   'response',
-  'feedback'
+  'metadata'
 ];
 
-const categoryColors: Record<MemoryEntry['category'], string> = {
-  insight: "bg-blue-100 text-blue-800",
+const categoryColors: Record<AnubisEntityMemory['memory_type'], string> = {
   threat: "bg-red-100 text-red-800",
-  pattern: "bg-purple-100 text-purple-800",
+  outreach: "bg-blue-100 text-blue-800",
   response: "bg-green-100 text-green-800",
-  feedback: "bg-amber-100 text-amber-800"
+  metadata: "bg-purple-100 text-purple-800"
 };
 
 const MemorySystem = () => {
   const [activeTab, setActiveTab] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [memories, setMemories] = useState<MemoryEntry[]>([]);
+  const [memories, setMemories] = useState<AnubisEntityMemory[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   
-  // Load memories based on active tab and search term
+  // Load memories from Anubis system
+  const loadMemories = async () => {
+    if (!searchTerm.trim()) return;
+    
+    setIsLoading(true);
+    try {
+      const results = await anubisMemoryService.recallEntityMemory({
+        entity_name: searchTerm
+      });
+      
+      // Filter by category if not "all"
+      const filteredResults = activeTab !== "all" 
+        ? results.filter(m => m.memory_type === activeTab)
+        : results;
+        
+      setMemories(filteredResults);
+    } catch (error) {
+      console.error('Error loading memories:', error);
+      toast.error('Failed to load memories');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const category = activeTab !== "all" ? activeTab as MemoryEntry['category'] : undefined;
-    const results = getMemories({
-      category,
-      searchTerm: searchTerm,
-      limit: 20
-    });
-    
-    setMemories(results);
-  }, [activeTab, searchTerm]);
+    if (searchTerm.trim()) {
+      const debounceTimer = setTimeout(() => {
+        loadMemories();
+      }, 500);
+      
+      return () => clearTimeout(debounceTimer);
+    } else {
+      setMemories([]);
+    }
+  }, [searchTerm, activeTab]);
   
-  const handleAddMemory = () => {
-    // In a real implementation, this would open a form to create a new memory
-    // For demo purposes, we'll just add a predefined memory
-    const newMemory: MemoryEntry = {
-      id: `mem-${Date.now()}`,
-      timestamp: new Date().toISOString(),
-      category: 'insight',
-      content: 'New AI-generated insight based on recent data patterns',
-      source: 'ai-analysis',
-      confidence: 0.85,
-      tags: ['ai-generated', 'recent-insight']
-    };
-    
-    storeMemory(newMemory);
-    setMemories(prev => [newMemory, ...prev]);
-    
-    toast.success("New memory created and stored", {
-      description: "AI intelligence memory system updated"
+  const handleStoreMemory = async () => {
+    if (!searchTerm.trim()) {
+      toast.error('Please enter an entity name first');
+      return;
+    }
+
+    const success = await anubisMemoryService.storeEntityMemory({
+      entity_name: searchTerm,
+      memory_type: 'metadata',
+      memory_summary: 'Manual memory entry created from Intelligence Hub',
+      context_reference: 'intelligence-dashboard',
+      created_by: 'operator'
     });
+    
+    if (success) {
+      // Reload memories to show the new one
+      loadMemories();
+    }
+  };
+
+  const handleStorePattern = async () => {
+    if (!searchTerm.trim()) {
+      toast.error('Please enter an entity name first');
+      return;
+    }
+
+    const success = await anubisMemoryService.storePattern({
+      entity_name: searchTerm,
+      pattern_fingerprint: `pattern_${Date.now()}`,
+      pattern_summary: 'Manual pattern recognition entry from Intelligence Hub',
+      confidence_score: 0.75,
+      recommended_response: 'Monitor and analyze'
+    });
+    
+    if (success) {
+      toast.success('Pattern stored in Anubis system');
+    }
   };
 
   return (
@@ -70,18 +110,24 @@ const MemorySystem = () => {
         <div className="flex justify-between items-center">
           <CardTitle className="text-lg flex items-center gap-2">
             <Brain className="h-5 w-5" />
-            Intelligence Memory System
+            Anubis Memory System
           </CardTitle>
-          <Button variant="outline" size="sm" onClick={handleAddMemory}>
-            <PlusCircle className="h-4 w-4 mr-2" />
-            Add Memory
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={handleStoreMemory}>
+              <PlusCircle className="h-4 w-4 mr-2" />
+              Store Memory
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleStorePattern}>
+              <Database className="h-4 w-4 mr-2" />
+              Store Pattern
+            </Button>
+          </div>
         </div>
         
         <div className="relative mt-2">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search memories..."
+            placeholder="Search entity memories..."
             className="pl-8"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -91,7 +137,7 @@ const MemorySystem = () => {
       
       <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid grid-cols-6">
+          <TabsList className="grid grid-cols-5">
             <TabsTrigger value="all">All</TabsTrigger>
             {MEMORY_CATEGORIES.map(cat => (
               <TabsTrigger key={cat} value={cat}>
@@ -102,50 +148,59 @@ const MemorySystem = () => {
           
           <TabsContent value={activeTab} className="mt-4">
             <div className="space-y-4 max-h-[350px] overflow-y-auto pr-2">
-              {memories.length > 0 ? (
+              {isLoading ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin h-8 w-8 border-2 border-blue-500 border-t-transparent rounded-full mx-auto"></div>
+                  <p className="text-sm text-muted-foreground mt-2">Loading memories...</p>
+                </div>
+              ) : memories.length > 0 ? (
                 memories.map(memory => (
                   <div 
                     key={memory.id} 
                     className="p-3 border rounded-md bg-white hover:bg-slate-50 transition-colors"
                   >
                     <div className="flex justify-between items-start mb-2">
-                      <Badge className={categoryColors[memory.category]}>
-                        {memory.category}
+                      <Badge className={categoryColors[memory.memory_type]}>
+                        {memory.memory_type}
                       </Badge>
                       <span className="text-xs text-muted-foreground">
-                        {new Date(memory.timestamp).toLocaleString()}
+                        {new Date(memory.last_seen).toLocaleString()}
                       </span>
                     </div>
                     
-                    <p className="text-sm mb-2">{memory.content}</p>
+                    <div className="mb-2">
+                      <p className="font-medium text-sm">{memory.entity_name}</p>
+                      <p className="text-sm">{memory.memory_summary}</p>
+                    </div>
                     
-                    {memory.context && (
+                    {memory.context_reference && (
                       <p className="text-xs text-muted-foreground mb-2">
-                        Context: {memory.context}
+                        Context: {memory.context_reference}
                       </p>
                     )}
                     
                     <div className="flex items-center justify-between">
-                      <div className="flex gap-1 flex-wrap">
-                        {memory.tags.map(tag => (
-                          <Badge 
-                            key={tag} 
-                            variant="outline" 
-                            className="text-xs bg-slate-50"
-                          >
-                            {tag}
-                          </Badge>
-                        ))}
-                      </div>
                       <div className="text-xs text-muted-foreground">
-                        Confidence: {Math.round(memory.confidence * 100)}%
+                        Created: {new Date(memory.created_at).toLocaleString()}
                       </div>
+                      {memory.created_by && (
+                        <Badge variant="outline" className="text-xs">
+                          {memory.created_by}
+                        </Badge>
+                      )}
                     </div>
                   </div>
                 ))
+              ) : searchTerm.trim() ? (
+                <div className="py-8 text-center">
+                  <Brain className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-muted-foreground">No memories found for "{searchTerm}"</p>
+                  <p className="text-sm text-muted-foreground">Try searching for a different entity</p>
+                </div>
               ) : (
                 <div className="py-8 text-center">
-                  <p className="text-muted-foreground">No memories found</p>
+                  <Search className="h-12 w-12 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-muted-foreground">Enter an entity name to search Anubis memory</p>
                 </div>
               )}
             </div>
