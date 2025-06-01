@@ -13,7 +13,8 @@ import {
   CheckCircle,
   Clock,
   AlertCircle,
-  Copy
+  Copy,
+  GitBranch
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -55,7 +56,14 @@ const ReviewPostGenerator = () => {
       setTotalDeployments(data.totalDeployments || 0);
       
       toast.success(
-        `Generated ${data.totalReviews} review posts with ${data.totalDeployments} deployments`
+        `Generated ${data.totalReviews} review posts with ${data.totalDeployments} deployments`,
+        {
+          description: 'Articles are being deployed to GitHub Pages automatically',
+          action: {
+            label: 'View Logs',
+            onClick: () => window.open('https://github.com/actions', '_blank')
+          }
+        }
       );
       
     } catch (error) {
@@ -87,7 +95,7 @@ const ReviewPostGenerator = () => {
             Review Post Generator
           </CardTitle>
           <div className="text-sm text-corporate-lightGray">
-            Generate professional review posts from ingested content sources
+            Generate professional review posts from ingested content sources and auto-deploy to GitHub Pages
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -119,17 +127,18 @@ const ReviewPostGenerator = () => {
           <Button
             onClick={generateReviewPosts}
             disabled={isGenerating}
-            className="bg-corporate-accent text-black hover:bg-corporate-accentDark"
+            className="bg-corporate-accent text-black hover:bg-corporate-accentDark w-full"
           >
             {isGenerating ? (
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4 animate-spin" />
-                Generating Reviews...
+                Generating Reviews & Auto-Deploying...
               </div>
             ) : (
               <div className="flex items-center gap-2">
                 <Play className="h-4 w-4" />
-                Generate Review Posts
+                <GitBranch className="h-4 w-4" />
+                Generate & Deploy Review Posts
               </div>
             )}
           </Button>
@@ -137,7 +146,7 @@ const ReviewPostGenerator = () => {
           {isGenerating && (
             <div className="space-y-2">
               <div className="text-sm text-corporate-lightGray">
-                Processing articles and generating review content...
+                Processing articles, generating review content, and triggering GitHub Pages deployment...
               </div>
               <Progress value={50} className="h-2" />
             </div>
@@ -157,6 +166,10 @@ const ReviewPostGenerator = () => {
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="text-corporate-accent">
                   {totalDeployments} Deployments
+                </Badge>
+                <Badge variant="outline" className="text-green-400">
+                  <GitBranch className="h-3 w-3 mr-1" />
+                  Auto-Deploy
                 </Badge>
                 <Button
                   size="sm"
@@ -189,6 +202,10 @@ const ReviewPostGenerator = () => {
                     <span>{result.wordCount.toLocaleString()} words</span>
                     <span>{result.platforms} platforms</span>
                     <span>{result.deploymentUrls.length} URLs</span>
+                    <Badge variant="outline" className="text-xs">
+                      <GitBranch className="h-3 w-3 mr-1" />
+                      GitHub Pages
+                    </Badge>
                   </div>
 
                   <div className="flex items-center gap-2">
@@ -215,7 +232,7 @@ const ReviewPostGenerator = () => {
 
                 {result.deploymentUrls.length > 0 && (
                   <div className="mt-3 space-y-1">
-                    <div className="text-xs text-corporate-lightGray">Deployment URLs:</div>
+                    <div className="text-xs text-corporate-lightGray">GitHub Pages URLs:</div>
                     <div className="max-h-20 overflow-y-auto space-y-1">
                       {result.deploymentUrls.map((url, urlIndex) => (
                         <div key={urlIndex} className="text-xs text-corporate-accent truncate">
@@ -237,11 +254,12 @@ const ReviewPostGenerator = () => {
           <div className="flex items-start gap-3">
             <AlertCircle className="h-5 w-5 text-corporate-accent flex-shrink-0 mt-0.5" />
             <div className="text-sm text-corporate-lightGray">
-              <p className="font-medium text-white mb-2">How Review Generation Works:</p>
+              <p className="font-medium text-white mb-2">Auto-Deployment Pipeline:</p>
               <ul className="space-y-1">
                 <li>• Pulls latest articles from Watchtower content sources</li>
                 <li>• Generates professional review content with A.R.I.A™ analysis</li>
-                <li>• Creates deployments across multiple static hosting platforms</li>
+                <li>• Creates static HTML files in /articles directory</li>
+                <li>• Triggers GitHub Action for automatic GitHub Pages deployment</li>
                 <li>• Logs all URLs for tracking and verification</li>
               </ul>
             </div>
