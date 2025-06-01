@@ -5,10 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Zap, Shield, Target, Globe, GitBranch, Cloud, Database, Server } from 'lucide-react';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Brain, Zap, Target, Globe } from 'lucide-react';
 
 interface CampaignConfigurationProps {
   entityName: string;
@@ -18,80 +18,14 @@ interface CampaignConfigurationProps {
   contentCount: number;
   setContentCount: (value: number) => void;
   saturationMode: 'defensive' | 'aggressive' | 'nuclear';
-  setSaturationMode: (mode: 'defensive' | 'aggressive' | 'nuclear') => void;
+  setSaturationMode: (value: 'defensive' | 'aggressive' | 'nuclear') => void;
   deploymentTargets: string[];
-  setDeploymentTargets: (targets: string[]) => void;
+  setDeploymentTargets: (value: string[]) => void;
   isExecuting: boolean;
   onExecute: () => void;
 }
 
-const PLATFORM_OPTIONS = [
-  { 
-    id: 'github-pages', 
-    name: 'GitHub Pages', 
-    icon: GitBranch, 
-    type: 'Git-based',
-    description: 'Direct Git push deployment - Real URLs',
-    noApiKey: true,
-    maxArticles: 500
-  },
-  { 
-    id: 'cloudflare-pages', 
-    name: 'Cloudflare Pages', 
-    icon: Cloud, 
-    type: 'Git/CLI',
-    description: 'Wrangler CLI or Git deployment',
-    noApiKey: true,
-    maxArticles: 300
-  },
-  { 
-    id: 'netlify', 
-    name: 'Netlify', 
-    icon: Globe, 
-    type: 'CLI-based',
-    description: 'Netlify CLI deployment',
-    noApiKey: true,
-    maxArticles: 200
-  },
-  { 
-    id: 'ipfs-pinata', 
-    name: 'IPFS/Pinata', 
-    icon: Database, 
-    type: 'Upload',
-    description: 'IPFS static deployment via gateway',
-    noApiKey: true,
-    maxArticles: 100
-  },
-  { 
-    id: 's3-static', 
-    name: 'S3 Static', 
-    icon: Server, 
-    type: 'Upload',
-    description: 'S3 public bucket static hosting',
-    noApiKey: true,
-    maxArticles: 400
-  },
-  { 
-    id: 'arweave', 
-    name: 'Arweave', 
-    icon: Database, 
-    type: 'Permanent',
-    description: 'Permanent static deploy via CLI',
-    noApiKey: true,
-    maxArticles: 50
-  },
-  { 
-    id: 'local-static', 
-    name: 'Local Static', 
-    icon: Server, 
-    type: 'Local',
-    description: 'Local NGINX or Supabase Storage',
-    noApiKey: true,
-    maxArticles: 1000
-  }
-];
-
-const CampaignConfiguration = ({
+const CampaignConfiguration: React.FC<CampaignConfigurationProps> = ({
   entityName,
   setEntityName,
   targetKeywords,
@@ -104,198 +38,217 @@ const CampaignConfiguration = ({
   setDeploymentTargets,
   isExecuting,
   onExecute
-}: CampaignConfigurationProps) => {
+}) => {
+  const platforms = [
+    { id: 'github-pages', name: 'GitHub Pages', description: 'Static site hosting via Git' },
+    { id: 'netlify', name: 'Netlify', description: 'JAMstack deployment platform' },
+    { id: 'vercel', name: 'Vercel', description: 'Frontend cloud platform' },
+    { id: 'cloudflare', name: 'Cloudflare Pages', description: 'Edge-optimized hosting' },
+    { id: 'firebase', name: 'Firebase Hosting', description: 'Google cloud hosting' },
+    { id: 'surge', name: 'Surge.sh', description: 'Static web publishing' }
+  ];
+
   const handlePlatformToggle = (platformId: string) => {
-    if (deploymentTargets.includes(platformId)) {
-      setDeploymentTargets(deploymentTargets.filter(id => id !== platformId));
-    } else {
-      setDeploymentTargets([...deploymentTargets, platformId]);
-    }
+    setDeploymentTargets(prev => 
+      prev.includes(platformId) 
+        ? prev.filter(id => id !== platformId)
+        : [...prev, platformId]
+    );
   };
 
-  const getModeIcon = (mode: string) => {
+  const getSaturationDescription = (mode: string) => {
     switch (mode) {
-      case 'defensive': return Shield;
-      case 'aggressive': return Target;
-      case 'nuclear': return Zap;
-      default: return Shield;
-    }
-  };
-
-  const getModeColor = (mode: string) => {
-    switch (mode) {
-      case 'defensive': return 'text-blue-400';
-      case 'aggressive': return 'text-orange-400';
-      case 'nuclear': return 'text-red-400';
-      default: return 'text-blue-400';
+      case 'defensive':
+        return 'Conservative approach - 10-25 articles across 2-3 platforms';
+      case 'aggressive':
+        return 'Comprehensive deployment - 25-50 articles across 4-6 platforms';
+      case 'nuclear':
+        return 'Maximum saturation - 50+ articles across all available platforms';
+      default:
+        return '';
     }
   };
 
   return (
-    <Card className="corporate-card">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 corporate-heading">
-          <Globe className="h-5 w-5 text-corporate-accent" />
-          Campaign Configuration
-        </CardTitle>
-        <div className="text-sm text-corporate-lightGray">
-          No-API-Key Static Deployment Strategy
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Entity Configuration */}
-        <div className="space-y-4">
+    <div className="space-y-6">
+      {/* Local AI Notice */}
+      <Card className="corporate-card border-green-500/30 bg-green-500/5">
+        <CardContent className="pt-6">
+          <div className="flex items-center gap-3">
+            <Brain className="h-8 w-8 text-green-400" />
+            <div>
+              <h3 className="text-lg font-semibold text-green-400">Local AI Inference Active</h3>
+              <p className="text-sm text-green-300">
+                No API keys required - using advanced local content generation and deployment
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Entity Configuration */}
+      <Card className="corporate-card">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 corporate-heading">
+            <Target className="h-5 w-5 text-corporate-accent" />
+            Target Entity Configuration
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
           <div>
-            <Label htmlFor="entityName" className="text-corporate-lightGray">Entity Name</Label>
+            <Label htmlFor="entityName" className="text-white">Entity Name</Label>
             <Input
               id="entityName"
               value={entityName}
               onChange={(e) => setEntityName(e.target.value)}
-              placeholder="Enter entity name..."
+              placeholder="Enter entity name (person, company, brand)"
               className="bg-corporate-darkSecondary border-corporate-border text-white"
             />
           </div>
 
           <div>
-            <Label htmlFor="targetKeywords" className="text-corporate-lightGray">Target Keywords</Label>
+            <Label htmlFor="keywords" className="text-white">Target Keywords</Label>
             <Textarea
-              id="targetKeywords"
+              id="keywords"
               value={targetKeywords}
               onChange={(e) => setTargetKeywords(e.target.value)}
-              placeholder="Enter keywords separated by commas..."
-              className="bg-corporate-darkSecondary border-corporate-border text-white"
-              rows={3}
+              placeholder="Enter comma-separated keywords (e.g., leadership, innovation, excellence)"
+              className="bg-corporate-darkSecondary border-corporate-border text-white min-h-20"
             />
+            <p className="text-xs text-corporate-lightGray mt-1">
+              Keywords will be used for content generation and SEO optimization
+            </p>
           </div>
-        </div>
+        </CardContent>
+      </Card>
 
-        {/* Content Count */}
-        <div className="space-y-3">
-          <Label className="text-corporate-lightGray">Content Count: {contentCount}</Label>
-          <Slider
-            value={[contentCount]}
-            onValueChange={(value) => setContentCount(value[0])}
-            max={50}
-            min={1}
-            step={1}
-            className="w-full"
-          />
-          <div className="text-xs text-corporate-lightGray">
-            Articles will be distributed across selected platforms
-          </div>
-        </div>
+      {/* Saturation Mode */}
+      <Card className="corporate-card">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 corporate-heading">
+            <Zap className="h-5 w-5 text-corporate-accent" />
+            Saturation Mode
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <RadioGroup
+            value={saturationMode}
+            onValueChange={(value: 'defensive' | 'aggressive' | 'nuclear') => setSaturationMode(value)}
+            className="space-y-3"
+          >
+            <div className="flex items-center space-x-2 p-3 bg-corporate-darkSecondary rounded">
+              <RadioGroupItem value="defensive" id="defensive" />
+              <div className="flex-1">
+                <Label htmlFor="defensive" className="text-white font-medium">Defensive</Label>
+                <p className="text-sm text-corporate-lightGray">{getSaturationDescription('defensive')}</p>
+              </div>
+              <Badge variant="outline" className="text-green-400 border-green-400">Recommended</Badge>
+            </div>
+            
+            <div className="flex items-center space-x-2 p-3 bg-corporate-darkSecondary rounded">
+              <RadioGroupItem value="aggressive" id="aggressive" />
+              <div className="flex-1">
+                <Label htmlFor="aggressive" className="text-white font-medium">Aggressive</Label>
+                <p className="text-sm text-corporate-lightGray">{getSaturationDescription('aggressive')}</p>
+              </div>
+              <Badge variant="outline" className="text-yellow-400 border-yellow-400">Advanced</Badge>
+            </div>
+            
+            <div className="flex items-center space-x-2 p-3 bg-corporate-darkSecondary rounded">
+              <RadioGroupItem value="nuclear" id="nuclear" />
+              <div className="flex-1">
+                <Label htmlFor="nuclear" className="text-white font-medium">Nuclear</Label>
+                <p className="text-sm text-corporate-lightGray">{getSaturationDescription('nuclear')}</p>
+              </div>
+              <Badge variant="outline" className="text-red-400 border-red-400">Maximum</Badge>
+            </div>
+          </RadioGroup>
+        </CardContent>
+      </Card>
 
-        {/* Saturation Mode */}
-        <div className="space-y-3">
-          <Label className="text-corporate-lightGray">Saturation Mode</Label>
-          <div className="grid grid-cols-3 gap-2">
-            {(['defensive', 'aggressive', 'nuclear'] as const).map((mode) => {
-              const Icon = getModeIcon(mode);
-              const isSelected = saturationMode === mode;
-              return (
-                <Button
-                  key={mode}
-                  variant={isSelected ? "default" : "outline"}
-                  onClick={() => setSaturationMode(mode)}
-                  className={`flex items-center gap-2 ${isSelected ? 'bg-corporate-accent text-black' : 'border-corporate-border text-corporate-lightGray hover:bg-corporate-darkSecondary'}`}
-                >
-                  <Icon className={`h-4 w-4 ${isSelected ? 'text-black' : getModeColor(mode)}`} />
-                  <span className="capitalize">{mode}</span>
-                </Button>
-              );
-            })}
+      {/* Content Configuration */}
+      <Card className="corporate-card">
+        <CardHeader>
+          <CardTitle className="corporate-heading">Content Generation</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div>
+            <Label htmlFor="contentCount" className="text-white">
+              Article Count: {contentCount}
+            </Label>
+            <input
+              type="range"
+              id="contentCount"
+              min="5"
+              max="100"
+              value={contentCount}
+              onChange={(e) => setContentCount(parseInt(e.target.value))}
+              className="w-full mt-2"
+            />
+            <div className="flex justify-between text-xs text-corporate-lightGray mt-1">
+              <span>5 articles</span>
+              <span>100 articles</span>
+            </div>
           </div>
-        </div>
+        </CardContent>
+      </Card>
 
-        {/* Deployment Platforms */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <Label className="text-corporate-lightGray">Static Deployment Platforms</Label>
-            <Badge variant="outline" className="text-xs bg-green-500/20 text-green-400 border-green-500/50">
-              No API Keys Required
-            </Badge>
-          </div>
-          <div className="grid grid-cols-1 gap-3">
-            {PLATFORM_OPTIONS.map((platform) => {
-              const Icon = platform.icon;
-              const isSelected = deploymentTargets.includes(platform.id);
-              
-              return (
-                <div
-                  key={platform.id}
-                  className={`p-3 rounded-lg border cursor-pointer transition-colors ${
-                    isSelected 
-                      ? 'border-corporate-accent bg-corporate-accent/10' 
-                      : 'border-corporate-border bg-corporate-darkSecondary/50 hover:bg-corporate-darkSecondary'
-                  }`}
-                  onClick={() => handlePlatformToggle(platform.id)}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Checkbox 
-                        checked={isSelected}
-                        onChange={() => handlePlatformToggle(platform.id)}
-                      />
-                      <Icon className="h-5 w-5 text-corporate-accent" />
-                      <div>
-                        <div className="font-medium text-white">{platform.name}</div>
-                        <div className="text-xs text-corporate-lightGray">{platform.description}</div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <Badge variant="outline" className="text-xs mb-1">
-                        {platform.type}
-                      </Badge>
-                      <div className="text-xs text-corporate-lightGray">
-                        Max: {platform.maxArticles}
-                      </div>
-                    </div>
-                  </div>
+      {/* Platform Selection */}
+      <Card className="corporate-card">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 corporate-heading">
+            <Globe className="h-5 w-5 text-corporate-accent" />
+            Deployment Platforms
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {platforms.map(platform => (
+              <div key={platform.id} className="flex items-center space-x-3 p-3 bg-corporate-darkSecondary rounded">
+                <Checkbox
+                  checked={deploymentTargets.includes(platform.id)}
+                  onCheckedChange={() => handlePlatformToggle(platform.id)}
+                />
+                <div className="flex-1">
+                  <div className="text-white font-medium">{platform.name}</div>
+                  <div className="text-xs text-corporate-lightGray">{platform.description}</div>
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
-          
-          {deploymentTargets.length === 0 && (
-            <div className="text-sm text-orange-400 p-3 bg-orange-500/10 rounded-lg border border-orange-500/30">
-              Please select at least one deployment platform
-            </div>
-          )}
-        </div>
+          <p className="text-sm text-corporate-lightGray mt-3">
+            Selected: {deploymentTargets.length} platform{deploymentTargets.length !== 1 ? 's' : ''}
+          </p>
+        </CardContent>
+      </Card>
 
-        {/* Deployment Summary */}
-        {deploymentTargets.length > 0 && (
-          <div className="p-3 bg-corporate-darkSecondary rounded-lg">
-            <div className="text-sm font-medium text-white mb-2">Deployment Summary</div>
-            <div className="text-xs text-corporate-lightGray space-y-1">
-              <div>Selected Platforms: {deploymentTargets.length}</div>
-              <div>Articles per Platform: ~{Math.ceil(contentCount / deploymentTargets.length)}</div>
-              <div>Strategy: Static HTML, No API Keys</div>
-              <div>Mode: {saturationMode.charAt(0).toUpperCase() + saturationMode.slice(1)}</div>
-            </div>
-          </div>
-        )}
-
-        {/* Execute Button */}
-        <Button
-          onClick={onExecute}
-          disabled={isExecuting || !entityName.trim() || !targetKeywords.trim() || deploymentTargets.length === 0}
-          className="w-full bg-corporate-accent text-black hover:bg-corporate-accentDark disabled:opacity-50"
-        >
-          {isExecuting ? (
-            <div className="flex items-center gap-2">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-black"></div>
-              Deploying Static Content...
-            </div>
-          ) : (
-            <div className="flex items-center gap-2">
-              <Zap className="h-4 w-4" />
-              Deploy Static Campaign
-            </div>
-          )}
-        </Button>
-      </CardContent>
-    </Card>
+      {/* Execute Button */}
+      <Card className="corporate-card">
+        <CardContent className="pt-6">
+          <Button
+            onClick={onExecute}
+            disabled={isExecuting || !entityName.trim() || !targetKeywords.trim() || deploymentTargets.length === 0}
+            className="w-full bg-corporate-accent text-black hover:bg-corporate-accentDark font-semibold py-3"
+            size="lg"
+          >
+            {isExecuting ? (
+              <>
+                <Brain className="h-5 w-5 mr-2 animate-pulse" />
+                Generating Content with Local AI...
+              </>
+            ) : (
+              <>
+                <Zap className="h-5 w-5 mr-2" />
+                Execute Persona Saturation (Local AI)
+              </>
+            )}
+          </Button>
+          <p className="text-xs text-center text-corporate-lightGray mt-2">
+            ✅ No API keys required - Using advanced local inference
+          </p>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
