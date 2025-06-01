@@ -151,27 +151,37 @@ const PersonaSaturationPanel = () => {
         const campaignData = data[0];
         console.log('✅ Found Simon Lindsay campaign:', campaignData);
         
-        // Process the campaign data
+        // Process the campaign data more carefully
         const deploymentUrls: string[] = [];
         const platformResults: Record<string, { success: number; total: number; urls: string[] }> = {};
         
         const typedCampaignData = campaignData.campaign_data as CampaignData;
-        console.log('📋 Parsed campaign data:', typedCampaignData);
+        console.log('📋 Processing campaign data:', typedCampaignData);
         
-        if (typedCampaignData?.deployments?.urls) {
+        // Extract URLs from deployments.urls
+        if (typedCampaignData?.deployments?.urls && Array.isArray(typedCampaignData.deployments.urls)) {
           deploymentUrls.push(...typedCampaignData.deployments.urls);
           console.log('🔗 Found deployment URLs:', typedCampaignData.deployments.urls);
         }
         
-        if (typedCampaignData?.platformResults) {
+        // Extract URLs from platformResults
+        if (typedCampaignData?.platformResults && typeof typedCampaignData.platformResults === 'object') {
           Object.entries(typedCampaignData.platformResults).forEach(([platform, results]) => {
-            platformResults[platform] = results;
-            if (results.urls) {
+            if (results && typeof results === 'object' && 'urls' in results && Array.isArray(results.urls)) {
+              platformResults[platform] = {
+                success: results.success || 0,
+                total: results.total || 0,
+                urls: results.urls
+              };
               deploymentUrls.push(...results.urls);
               console.log(`🔗 Found ${platform} URLs:`, results.urls);
             }
           });
         }
+
+        // Remove duplicates and filter out empty URLs
+        const uniqueUrls = [...new Set(deploymentUrls)].filter(url => url && url.trim().length > 0);
+        console.log('🎯 Final unique URLs:', uniqueUrls);
 
         const formattedCampaign: SaturationCampaign = {
           id: campaignData.id,
@@ -183,30 +193,27 @@ const PersonaSaturationPanel = () => {
           serpPenetration: (typedCampaignData?.serpPenetration || 0) * 100,
           estimatedImpact: `${typedCampaignData?.deploymentsSuccessful || 0} articles deployed successfully`,
           createdAt: campaignData.created_at,
-          deploymentUrls: [...new Set(deploymentUrls)],
+          deploymentUrls: uniqueUrls,
           platformResults: platformResults
         };
 
-        console.log('🎯 Setting campaign data:', formattedCampaign);
+        console.log('🎯 Setting formatted campaign:', formattedCampaign);
         setCurrentCampaign(formattedCampaign);
         setEntityName(campaignData.entity_name);
         
         // Switch to monitor tab to show the campaign
         setActiveTab('monitor');
         
-        toast.success(`📊 Loaded Simon Lindsay campaign: ${deploymentUrls.length} URLs found`);
+        toast.success(`📊 Loaded Simon Lindsay campaign: ${uniqueUrls.length} live URLs found`);
       } else {
-        console.log('ℹ️ No Simon Lindsay campaigns found in database, creating sample...');
+        console.log('ℹ️ No Simon Lindsay campaigns found, creating sample...');
         
-        // Create sample campaign data
         try {
-          const sampleCampaign = await createSampleSimonLindsayCampaign();
-          
-          // Now load the sample campaign
+          await createSampleSimonLindsayCampaign();
+          // Retry loading after creating sample
           setTimeout(() => {
             loadRecentSimonLindsayCampaign();
-          }, 500);
-          
+          }, 1000);
         } catch (createError) {
           console.error('Failed to create sample campaign:', createError);
           toast.info('No Simon Lindsay campaigns found. Deploy a campaign to see data here.');
