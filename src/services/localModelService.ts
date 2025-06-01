@@ -1,4 +1,3 @@
-
 import { toast } from 'sonner';
 import { pipeline, PipelineType, env } from '@huggingface/transformers';
 
@@ -27,35 +26,62 @@ const loadedModels: Record<string, any> = {};
 const modelStatus: Record<string, ModelStatus> = {};
 
 /**
- * Check if we're in a browser environment that supports transformers
+ * Enhanced browser compatibility check for transformers
  */
 const isTransformersSupported = (): boolean => {
   try {
-    // Enhanced browser compatibility checks
+    // Basic environment checks
     const hasWebAssembly = typeof WebAssembly !== 'undefined';
     const hasFetch = typeof fetch !== 'undefined';
-    const hasWorker = typeof Worker !== 'undefined';
-    const hasSharedArrayBuffer = typeof SharedArrayBuffer !== 'undefined';
+    const hasWindow = typeof window !== 'undefined';
     
-    // Test WebAssembly instantiation
+    // Test WebAssembly instantiation with a minimal module
     let wasmSupport = false;
     try {
-      const wasmModule = new WebAssembly.Module(new Uint8Array([0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00]));
+      // Create a minimal valid WebAssembly module
+      const wasmBinary = new Uint8Array([
+        0x00, 0x61, 0x73, 0x6d, // WASM magic number
+        0x01, 0x00, 0x00, 0x00  // WASM version
+      ]);
+      const wasmModule = new WebAssembly.Module(wasmBinary);
       wasmSupport = wasmModule instanceof WebAssembly.Module;
     } catch {
       wasmSupport = false;
     }
     
+    // Check for SharedArrayBuffer (required for some models)
+    const hasSharedArrayBuffer = typeof SharedArrayBuffer !== 'undefined';
+    
+    // Check browser user agent for known compatibility issues
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isChrome = userAgent.includes('chrome');
+    const isEdge = userAgent.includes('edge');
+    const isFirefox = userAgent.includes('firefox');
+    const isSafari = userAgent.includes('safari') && !userAgent.includes('chrome');
+    
     console.log('Enhanced browser compatibility check:', {
       hasWebAssembly,
       wasmSupport,
       hasFetch,
-      hasWorker,
+      hasWindow,
       hasSharedArrayBuffer,
-      userAgent: navigator.userAgent.substring(0, 50)
+      browser: { isChrome, isEdge, isFirefox, isSafari },
+      userAgent: userAgent.substring(0, 50)
     });
     
-    return hasWebAssembly && wasmSupport && hasFetch && typeof window !== 'undefined';
+    // Minimum requirements for transformers.js
+    const basicSupport = hasWebAssembly && wasmSupport && hasFetch && hasWindow;
+    
+    // Warn about potential issues
+    if (!hasSharedArrayBuffer) {
+      console.warn('SharedArrayBuffer not available - some models may not work optimally');
+    }
+    
+    if (isSafari) {
+      console.warn('Safari detected - WebAssembly support may be limited');
+    }
+    
+    return basicSupport;
   } catch (error) {
     console.error('Browser compatibility check failed:', error);
     return false;
@@ -63,21 +89,25 @@ const isTransformersSupported = (): boolean => {
 };
 
 /**
- * Get smaller, more compatible models for browser use
+ * Get the most compatible model for browser use
  */
 const getBrowserCompatibleModel = (taskType: string): string => {
   switch (taskType) {
     case 'sentiment-analysis':
-      return 'Xenova/distilbert-base-uncased-finetuned-sst-2-english'; // Smaller quantized version
     case 'text-classification':
+      // Use the smallest, most compatible models
       return 'Xenova/distilbert-base-uncased-finetuned-sst-2-english';
+    case 'feature-extraction':
+      return 'Xenova/all-MiniLM-L6-v2';
+    case 'token-classification':
+      return 'Xenova/bert-base-NER';
     default:
       return 'Xenova/distilbert-base-uncased-finetuned-sst-2-english';
   }
 };
 
 /**
- * Load a model from HuggingFace in the browser with enhanced compatibility
+ * Load a model from HuggingFace with progressive fallback strategy
  */
 export const loadLocalModel = async (modelId: string, taskType: string): Promise<boolean> => {
   if (!isTransformersSupported()) {
@@ -85,7 +115,7 @@ export const loadLocalModel = async (modelId: string, taskType: string): Promise
     return false;
   }
 
-  // Use browser-compatible model if original fails
+  // Use browser-compatible model
   const compatibleModelId = getBrowserCompatibleModel(taskType);
   const actualModelId = modelId.includes('Xenova/') ? modelId : compatibleModelId;
 
@@ -107,27 +137,44 @@ export const loadLocalModel = async (modelId: string, taskType: string): Promise
     const device = 'cpu';
     const pipelineType = taskType as PipelineType;
     
-    // Enhanced loading with shorter timeout for browser compatibility
-    const loadWithTimeout = async (timeoutMs: number = 15000) => {
-      return Promise.race([
-        pipeline(pipelineType, actualModelId, { 
-          device,
-          progress_callback: (progress: any) => {
-            if (progress.status === 'downloading') {
-              console.log(`Downloading ${actualModelId}: ${Math.round(progress.progress * 100)}%`);
-            } else if (progress.status === 'loading') {
-              console.log(`Loading ${actualModelId}: ${progress.name || 'model files'}`);
-            }
+    // Progressive loading with multiple timeout strategies
+    const loadWithProgressiveTimeout = async () => {
+      const timeouts = [10000, 15000, 25000]; // Progressive timeouts
+      
+      for (let i = 0; i < timeouts.length; i++) {
+        try {
+          console.log(`Attempt ${i + 1}/3: Loading with ${timeouts[i]}ms timeout`);
+          
+          return await Promise.race([
+            pipeline(pipelineType, actualModelId, { 
+              device,
+              progress_callback: (progress: any) => {
+                if (progress.status === 'downloading') {
+                  console.log(`Downloading ${actualModelId}: ${Math.round(progress.progress * 100)}%`);
+                } else if (progress.status === 'loading') {
+                  console.log(`Loading ${actualModelId}: ${progress.name || 'model files'}`);
+                } else if (progress.status === 'ready') {
+                  console.log(`Model ${actualModelId} ready for inference`);
+                }
+              }
+            }),
+            new Promise((_, reject) =>
+              setTimeout(() => reject(new Error(`Timeout after ${timeouts[i]}ms`)), timeouts[i])
+            )
+          ]);
+        } catch (timeoutError) {
+          console.log(`Attempt ${i + 1} failed:`, timeoutError.message);
+          if (i === timeouts.length - 1) {
+            throw timeoutError;
           }
-        }),
-        new Promise((_, reject) =>
-          setTimeout(() => reject(new Error(`Model loading timeout after ${timeoutMs}ms`)), timeoutMs)
-        )
-      ]);
+          // Brief pause before retry
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      }
     };
 
-    // Load the model with shorter timeout
-    loadedModels[actualModelId] = await loadWithTimeout();
+    // Load the model with progressive timeout strategy
+    loadedModels[actualModelId] = await loadWithProgressiveTimeout();
     
     // Update model status
     modelStatus[actualModelId] = {
@@ -139,7 +186,9 @@ export const loadLocalModel = async (modelId: string, taskType: string): Promise
     console.log(`✅ Browser-compatible model ${actualModelId} loaded successfully`);
     
     if (typeof window !== 'undefined') {
-      toast.success(`Model ${actualModelId.split('/').pop()} ready for inference`);
+      toast.success(`Model ready for inference`, {
+        description: `${actualModelId.split('/').pop()} loaded successfully`
+      });
     }
     
     return true;
@@ -147,18 +196,20 @@ export const loadLocalModel = async (modelId: string, taskType: string): Promise
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.error(`❌ Error loading browser-compatible model ${actualModelId}:`, error);
     
-    // Enhanced error analysis for browser compatibility
+    // Enhanced error analysis
     let specificError = 'Model loading failed';
-    if (errorMessage.includes('timeout')) {
-      specificError = 'Model download timeout - try refreshing the page';
-    } else if (errorMessage.includes('WebAssembly')) {
-      specificError = 'WebAssembly not supported - try a different browser (Chrome/Edge recommended)';
-    } else if (errorMessage.includes('memory')) {
-      specificError = 'Insufficient memory - try closing other browser tabs';
+    if (errorMessage.includes('timeout') || errorMessage.includes('Timeout')) {
+      specificError = 'Model download timeout - network may be slow. Try refreshing or using a faster connection.';
+    } else if (errorMessage.includes('WebAssembly') || errorMessage.includes('wasm')) {
+      specificError = 'WebAssembly not supported or disabled. Try Chrome/Edge with WebAssembly enabled.';
+    } else if (errorMessage.includes('memory') || errorMessage.includes('Memory')) {
+      specificError = 'Insufficient memory - close other browser tabs and try again.';
     } else if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
-      specificError = 'Network error - check internet connection and try again';
+      specificError = 'Network error - check internet connection and try again.';
     } else if (errorMessage.includes('CORS')) {
-      specificError = 'CORS error - browser security blocking model download';
+      specificError = 'CORS error - browser security blocking model download.';
+    } else if (errorMessage.includes('quota') || errorMessage.includes('storage')) {
+      specificError = 'Browser storage quota exceeded - clear browser data and try again.';
     }
     
     // Update model status
@@ -168,10 +219,11 @@ export const loadLocalModel = async (modelId: string, taskType: string): Promise
       error: specificError
     };
     
-    // Don't show toast for testing environment
+    // Don't show toast in testing environment
     if (typeof window !== 'undefined') {
       toast.error(`Failed to load model`, {
-        description: specificError
+        description: specificError,
+        duration: 8000
       });
     }
     
@@ -191,7 +243,7 @@ export const getModelStatus = (modelId: string): ModelStatus => {
 };
 
 /**
- * Run sentiment analysis using a local model with enhanced fallback
+ * Run sentiment analysis with enhanced fallback
  */
 export const analyzeSentiment = async (modelId: string, text: string): Promise<PredictionResult> => {
   // Get browser-compatible model
@@ -203,22 +255,35 @@ export const analyzeSentiment = async (modelId: string, text: string): Promise<P
     const loaded = await loadLocalModel(actualModelId, 'sentiment-analysis');
     if (!loaded) {
       console.log('Using enhanced keyword-based sentiment fallback');
-      // Enhanced fallback with more sophisticated keyword analysis
-      const positiveKeywords = ['good', 'great', 'excellent', 'amazing', 'wonderful', 'fantastic', 'love', 'awesome', 'perfect', 'brilliant'];
-      const negativeKeywords = ['bad', 'terrible', 'awful', 'horrible', 'worst', 'hate', 'disgusting', 'pathetic', 'useless', 'disappointing'];
-      const neutralKeywords = ['okay', 'fine', 'average', 'normal', 'standard', 'regular'];
+      
+      // Enhanced fallback with more sophisticated analysis
+      const positiveKeywords = ['good', 'great', 'excellent', 'amazing', 'wonderful', 'fantastic', 'love', 'awesome', 'perfect', 'brilliant', 'outstanding', 'superb'];
+      const negativeKeywords = ['bad', 'terrible', 'awful', 'horrible', 'worst', 'hate', 'disgusting', 'pathetic', 'useless', 'disappointing', 'dreadful', 'appalling'];
+      const neutralKeywords = ['okay', 'fine', 'average', 'normal', 'standard', 'regular', 'acceptable', 'moderate'];
       
       const lowerText = text.toLowerCase();
+      const words = lowerText.split(/\s+/);
+      
       const positiveScore = positiveKeywords.filter(word => lowerText.includes(word)).length;
       const negativeScore = negativeKeywords.filter(word => lowerText.includes(word)).length;
       const neutralScore = neutralKeywords.filter(word => lowerText.includes(word)).length;
       
+      // Consider text length and complexity
+      const textLength = words.length;
+      const complexityBonus = textLength > 10 ? 0.1 : 0;
+      
       if (positiveScore > negativeScore && positiveScore > neutralScore) {
-        return { label: 'POSITIVE', score: Math.min(0.7 + (positiveScore * 0.1), 0.95) };
+        return { 
+          label: 'POSITIVE', 
+          score: Math.min(0.7 + (positiveScore * 0.1) + complexityBonus, 0.95) 
+        };
       } else if (negativeScore > positiveScore && negativeScore > neutralScore) {
-        return { label: 'NEGATIVE', score: Math.min(0.7 + (negativeScore * 0.1), 0.95) };
+        return { 
+          label: 'NEGATIVE', 
+          score: Math.min(0.7 + (negativeScore * 0.1) + complexityBonus, 0.95) 
+        };
       } else {
-        return { label: 'NEUTRAL', score: 0.6 };
+        return { label: 'NEUTRAL', score: 0.6 + complexityBonus };
       }
     }
   }

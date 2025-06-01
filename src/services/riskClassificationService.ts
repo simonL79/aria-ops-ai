@@ -17,7 +17,7 @@ interface RiskClassificationResult {
 const loadedClassifiers: Record<string, any> = {};
 
 /**
- * Check if we're in a supported environment with enhanced browser checks
+ * Enhanced browser support check for risk classification
  */
 const isSupported = (): boolean => {
   try {
@@ -25,23 +25,38 @@ const isSupported = (): boolean => {
     const hasFetch = typeof fetch !== 'undefined';
     const hasWindow = typeof window !== 'undefined';
     
-    // Test WebAssembly instantiation
+    // Test WebAssembly with enhanced validation
     let wasmSupport = false;
     try {
-      const wasmModule = new WebAssembly.Module(new Uint8Array([0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00]));
+      const wasmBinary = new Uint8Array([
+        0x00, 0x61, 0x73, 0x6d, // WASM magic number
+        0x01, 0x00, 0x00, 0x00  // WASM version
+      ]);
+      const wasmModule = new WebAssembly.Module(wasmBinary);
       wasmSupport = wasmModule instanceof WebAssembly.Module;
+      
+      // Test instantiation as well
+      const wasmInstance = new WebAssembly.Instance(wasmModule);
+      wasmSupport = wasmSupport && wasmInstance instanceof WebAssembly.Instance;
     } catch {
       wasmSupport = false;
     }
     
-    console.log('Risk classifier browser support:', {
+    // Check for required browser features
+    const hasArrayBuffer = typeof ArrayBuffer !== 'undefined';
+    const hasUint8Array = typeof Uint8Array !== 'undefined';
+    
+    console.log('Risk classifier enhanced support check:', {
       hasWebAssembly,
       wasmSupport,
       hasFetch,
-      hasWindow
+      hasWindow,
+      hasArrayBuffer,
+      hasUint8Array,
+      userAgent: navigator.userAgent.substring(0, 50)
     });
     
-    return hasWebAssembly && wasmSupport && hasFetch && hasWindow;
+    return hasWebAssembly && wasmSupport && hasFetch && hasWindow && hasArrayBuffer && hasUint8Array;
   } catch (error) {
     console.error('Risk classifier support check failed:', error);
     return false;
@@ -49,7 +64,7 @@ const isSupported = (): boolean => {
 };
 
 /**
- * Load a sentiment classification model in the browser with better error handling
+ * Load risk classification model with progressive loading strategy
  */
 export const loadRiskClassifier = async (modelId: string = 'Xenova/distilbert-base-uncased-finetuned-sst-2-english'): Promise<boolean> => {
   if (!isSupported()) {
@@ -57,7 +72,7 @@ export const loadRiskClassifier = async (modelId: string = 'Xenova/distilbert-ba
     return false;
   }
 
-  // Use browser-compatible quantized model
+  // Ensure we use browser-compatible model
   const browserModelId = modelId.includes('Xenova/') ? modelId : 'Xenova/distilbert-base-uncased-finetuned-sst-2-english';
 
   if (loadedClassifiers[browserModelId]) {
@@ -70,31 +85,55 @@ export const loadRiskClassifier = async (modelId: string = 'Xenova/distilbert-ba
     // Always use CPU for maximum compatibility
     const device = 'cpu';
     
-    // Load with shorter timeout for browser compatibility
-    const loadWithTimeout = async (timeoutMs: number = 15000) => {
-      return Promise.race([
-        pipeline('text-classification' as any, browserModelId, { 
-          device,
-          progress_callback: (progress: any) => {
-            if (progress.status === 'downloading') {
-              console.log(`Downloading risk classifier: ${Math.round(progress.progress * 100)}%`);
-            } else if (progress.status === 'loading') {
-              console.log(`Loading risk classifier: ${progress.name || 'model files'}`);
-            }
+    // Progressive loading with multiple strategies
+    const loadWithMultipleStrategies = async () => {
+      const strategies = [
+        { timeout: 8000, description: 'Quick load' },
+        { timeout: 15000, description: 'Standard load' },
+        { timeout: 30000, description: 'Extended load' }
+      ];
+      
+      for (let i = 0; i < strategies.length; i++) {
+        const strategy = strategies[i];
+        try {
+          console.log(`Risk classifier attempt ${i + 1}/3: ${strategy.description} (${strategy.timeout}ms timeout)`);
+          
+          return await Promise.race([
+            pipeline('text-classification' as any, browserModelId, { 
+              device,
+              progress_callback: (progress: any) => {
+                if (progress.status === 'downloading') {
+                  console.log(`Downloading risk classifier: ${Math.round(progress.progress * 100)}%`);
+                } else if (progress.status === 'loading') {
+                  console.log(`Loading risk classifier: ${progress.name || 'model files'}`);
+                } else if (progress.status === 'ready') {
+                  console.log(`Risk classifier ready for inference`);
+                }
+              }
+            }),
+            new Promise((_, reject) =>
+              setTimeout(() => reject(new Error(`Risk classifier loading timeout after ${strategy.timeout}ms`)), strategy.timeout)
+            )
+          ]);
+        } catch (strategyError) {
+          console.log(`Strategy ${i + 1} failed:`, strategyError.message);
+          if (i === strategies.length - 1) {
+            throw strategyError;
           }
-        }),
-        new Promise((_, reject) =>
-          setTimeout(() => reject(new Error(`Risk classifier loading timeout after ${timeoutMs}ms`)), timeoutMs)
-        )
-      ]);
+          // Brief pause before retry
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+      }
     };
 
-    loadedClassifiers[browserModelId] = await loadWithTimeout();
+    loadedClassifiers[browserModelId] = await loadWithMultipleStrategies();
     
     console.log(`✅ Risk classifier ${browserModelId} loaded successfully on ${device}`);
     
     if (typeof window !== 'undefined') {
-      toast.success('Risk classification model ready');
+      toast.success('Risk classification model ready', {
+        description: 'Advanced threat detection enabled'
+      });
     }
     
     return true;
@@ -102,9 +141,26 @@ export const loadRiskClassifier = async (modelId: string = 'Xenova/distilbert-ba
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.error(`❌ Error loading risk classifier ${browserModelId}:`, error);
     
+    // Enhanced error analysis for better user guidance
+    let specificError = 'Risk classifier loading failed';
+    if (errorMessage.includes('timeout') || errorMessage.includes('Timeout')) {
+      specificError = 'Model download timeout - network connection may be slow. Try refreshing or using a faster connection.';
+    } else if (errorMessage.includes('WebAssembly') || errorMessage.includes('wasm')) {
+      specificError = 'WebAssembly not supported or disabled. Enable WebAssembly in browser settings or try Chrome/Edge.';
+    } else if (errorMessage.includes('memory') || errorMessage.includes('Memory')) {
+      specificError = 'Insufficient browser memory - close other tabs and try again.';
+    } else if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
+      specificError = 'Network error - check internet connection and firewall settings.';
+    } else if (errorMessage.includes('quota') || errorMessage.includes('storage')) {
+      specificError = 'Browser storage full - clear browser cache and try again.';
+    } else if (errorMessage.includes('CORS')) {
+      specificError = 'Cross-origin request blocked - browser security restrictions.';
+    }
+    
     if (typeof window !== 'undefined') {
       toast.error(`Failed to load risk classification model`, {
-        description: errorMessage.includes('timeout') ? 'Model download timeout - try refreshing' : 'Using enhanced fallback classification'
+        description: specificError,
+        duration: 10000
       });
     }
     
@@ -113,7 +169,7 @@ export const loadRiskClassifier = async (modelId: string = 'Xenova/distilbert-ba
 };
 
 /**
- * Classify risk in a text using local HuggingFace model with enhanced fallback
+ * Classify risk with enhanced fallback logic
  */
 export const classifyRisk = async (text: string, modelId: string = 'distilbert-base-uncased-finetuned-sst-2-english'): Promise<RiskClassificationResult> => {
   // Ensure model is loaded
@@ -122,39 +178,51 @@ export const classifyRisk = async (text: string, modelId: string = 'distilbert-b
     if (!loaded) {
       console.log('Using enhanced fallback risk classification');
       
-      // Enhanced fallback with threat keyword analysis
-      const threatKeywords = ['threat', 'attack', 'hack', 'malware', 'virus', 'scam', 'fraud', 'steal', 'breach', 'vulnerability'];
-      const highRiskKeywords = ['kill', 'bomb', 'terrorist', 'violence', 'weapon', 'dangerous'];
-      const mediumRiskKeywords = ['suspicious', 'warning', 'alert', 'concern', 'issue', 'problem'];
+      // Enhanced fallback with comprehensive threat analysis
+      const highRiskKeywords = ['kill', 'bomb', 'terrorist', 'violence', 'weapon', 'dangerous', 'murder', 'attack', 'assault', 'harm'];
+      const threatKeywords = ['threat', 'hack', 'malware', 'virus', 'scam', 'fraud', 'steal', 'breach', 'vulnerability', 'exploit'];
+      const mediumRiskKeywords = ['suspicious', 'warning', 'alert', 'concern', 'issue', 'problem', 'risk', 'unsafe', 'questionable'];
+      const negativeKeywords = ['bad', 'terrible', 'awful', 'horrible', 'disgusting', 'hate', 'angry', 'furious', 'upset'];
       
       const lowerText = text.toLowerCase();
+      const words = lowerText.split(/\s+/);
+      
+      // Calculate scores based on keyword presence and frequency
       const highRiskScore = highRiskKeywords.filter(word => lowerText.includes(word)).length;
       const threatScore = threatKeywords.filter(word => lowerText.includes(word)).length;
       const mediumRiskScore = mediumRiskKeywords.filter(word => lowerText.includes(word)).length;
+      const negativeScore = negativeKeywords.filter(word => lowerText.includes(word)).length;
+      
+      // Consider text length and intensity
+      const textLength = words.length;
+      const intensityMarkers = ['very', 'extremely', 'absolutely', 'completely', '!!!', 'definitely'].filter(marker => lowerText.includes(marker)).length;
+      
+      // Calculate base confidence with complexity factors
+      const baseConfidence = 0.6 + (Math.min(textLength, 20) * 0.01) + (intensityMarkers * 0.05);
       
       if (highRiskScore > 0) {
         return {
           risk: 'High',
-          confidence: 0.85,
-          summary: 'High-risk content detected via keyword analysis (fallback mode)'
+          confidence: Math.min(baseConfidence + 0.25 + (highRiskScore * 0.1), 0.95),
+          summary: `High-risk content detected: ${highRiskScore} critical indicators found (fallback mode)`
         };
-      } else if (threatScore > 1) {
+      } else if (threatScore > 1 || (threatScore > 0 && intensityMarkers > 0)) {
         return {
           risk: 'Medium-High',
-          confidence: 0.75,
-          summary: 'Multiple threat indicators detected (fallback mode)'
+          confidence: Math.min(baseConfidence + 0.15 + (threatScore * 0.08), 0.9),
+          summary: `Multiple threat indicators detected: ${threatScore} threats, ${intensityMarkers} intensity markers (fallback mode)`
         };
-      } else if (threatScore > 0 || mediumRiskScore > 1) {
+      } else if (threatScore > 0 || mediumRiskScore > 1 || (negativeScore > 2 && intensityMarkers > 0)) {
         return {
           risk: 'Medium',
-          confidence: 0.65,
-          summary: 'Moderate risk indicators detected (fallback mode)'
+          confidence: Math.min(baseConfidence + 0.05 + (mediumRiskScore * 0.05), 0.8),
+          summary: `Moderate risk indicators: ${threatScore} threats, ${mediumRiskScore} concerns, ${negativeScore} negative terms (fallback mode)`
         };
       } else {
         return {
           risk: 'Low',
-          confidence: 0.55,
-          summary: 'No significant risk indicators detected (fallback mode)'
+          confidence: Math.min(baseConfidence, 0.7),
+          summary: `No significant risk indicators detected in ${words.length} words (fallback mode)`
         };
       }
     }
@@ -169,32 +237,38 @@ export const classifyRisk = async (text: string, modelId: string = 'distilbert-b
     const label = result[0].label;
     const score = result[0].score;
     
-    // Enhanced logic: treat "NEGATIVE" as potential risk
-    if (label === 'NEGATIVE' && score > 0.8) {
+    // Enhanced logic: treat "NEGATIVE" as potential risk with nuanced scoring
+    if (label === 'NEGATIVE' && score > 0.9) {
       return {
         risk: 'High',
         confidence: score,
-        summary: `High risk detected with ${Math.round(score * 100)}% confidence`
+        summary: `High confidence negative sentiment detected (${Math.round(score * 100)}%)`
       };
-    } else if (label === 'NEGATIVE' && score > 0.6) {
+    } else if (label === 'NEGATIVE' && score > 0.75) {
       return {
         risk: 'Medium-High',
         confidence: score,
-        summary: `Medium-high risk detected with ${Math.round(score * 100)}% confidence`
+        summary: `Strong negative sentiment detected (${Math.round(score * 100)}%)`
+      };
+    } else if (label === 'NEGATIVE' && score > 0.6) {
+      return {
+        risk: 'Medium',
+        confidence: score,
+        summary: `Moderate negative sentiment detected (${Math.round(score * 100)}%)`
       };
     }
     
     return {
       risk: score > 0.8 ? 'Low' : 'Medium',
       confidence: score,
-      summary: `Risk assessment completed (${label})`
+      summary: `Risk assessment completed: ${label} sentiment (${Math.round(score * 100)}% confidence)`
     };
   } catch (error) {
     console.error(`Error running risk classification:`, error);
     return {
       risk: 'Medium',
       confidence: 0.5,
-      summary: 'Error during classification - using safe fallback'
+      summary: 'Error during classification - using safe medium risk fallback'
     };
   }
 };
