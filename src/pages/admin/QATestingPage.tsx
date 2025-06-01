@@ -1,4 +1,3 @@
-
 import React, { Suspense, lazy, useState, useEffect, useMemo } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -16,6 +15,7 @@ import QAProcessCards from '@/components/admin/qa/QAProcessCards';
 import QADeploymentCriteria from '@/components/admin/qa/QADeploymentCriteria';
 import QAResponsiveLayout from '@/components/admin/qa/QAResponsiveLayout';
 import QAPerformanceOptimizer from '@/components/admin/qa/QAPerformanceOptimizer';
+import QALocalModelTester from '@/components/admin/qa/QALocalModelTester';
 
 const QATestingPage = React.memo(() => {
   const [testSuite, setTestSuite] = useState<QATestSuite | null>(null);
@@ -113,6 +113,9 @@ const QATestingPage = React.memo(() => {
 
         {/* Header Section - Responsive */}
         <QATestingHeader />
+
+        {/* Local AI Model Testing - New Priority Section */}
+        <QALocalModelTester />
 
         {/* Performance Monitor and Overview - Enhanced Responsive Grid */}
         <div className="grid grid-cols-1 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
