@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -362,6 +361,7 @@ const DeploymentScheduler = () => {
                         variant="outline"
                         onClick={() => toggleScheduleStatus(schedule.id, schedule.status)}
                         className="border-corporate-border text-corporate-lightGray hover:bg-corporate-accent hover:text-black"
+                        title={schedule.status === 'active' ? 'Pause Schedule' : 'Activate Schedule'}
                       >
                         {schedule.status === 'active' ? (
                           <Pause className="h-4 w-4" />
@@ -374,6 +374,7 @@ const DeploymentScheduler = () => {
                         variant="outline"
                         onClick={() => deleteSchedule(schedule.id)}
                         className="border-red-500 text-red-400 hover:bg-red-500 hover:text-white"
+                        title="Delete Schedule"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
