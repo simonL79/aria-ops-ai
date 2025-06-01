@@ -6,13 +6,12 @@ export interface ScheduledDeployment {
   time: string;
   platforms: string[];
   articleCount: number;
-  status: 'active' | 'paused';
+  status: 'active' | 'paused' | 'completed';
   nextRun: string;
   lastRun: string;
   entityName: string;
   keywords: string[];
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
 }
 
 export interface ValidationResult {

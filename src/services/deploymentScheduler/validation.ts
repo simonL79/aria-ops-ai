@@ -1,33 +1,22 @@
 
-import { ScheduledDeployment, ValidationResult } from './types';
-
 export class DeploymentValidation {
-  /**
-   * Validate deployment data to prevent mock data
-   */
-  static validateDeploymentData(deployment: Partial<ScheduledDeployment>): ValidationResult {
+  static validateDeploymentData(data: any): { isValid: boolean; errors: string[] } {
     const errors: string[] = [];
-    
-    // Check for mock data indicators
-    if (deployment.entityName) {
-      const name = deployment.entityName.toLowerCase();
-      if (name.includes('test') || name.includes('mock') || name.includes('demo') || name.includes('sample')) {
-        errors.push('Entity name contains mock data indicators (test, mock, demo, sample)');
-      }
+
+    if (!data.name || data.name.trim() === '') {
+      errors.push('Name is required');
     }
 
-    if (deployment.keywords) {
-      const keywordString = deployment.keywords.join(' ').toLowerCase();
-      if (keywordString.includes('test') || keywordString.includes('mock') || keywordString.includes('demo')) {
-        errors.push('Keywords contain mock data indicators');
-      }
+    if (!data.entityName || data.entityName.trim() === '') {
+      errors.push('Entity name is required');
     }
 
-    if (deployment.name) {
-      const nameString = deployment.name.toLowerCase();
-      if (nameString.includes('test') || nameString.includes('mock') || nameString.includes('demo')) {
-        errors.push('Schedule name contains mock data indicators');
-      }
+    if (!data.platforms || data.platforms.length === 0) {
+      errors.push('At least one platform must be selected');
+    }
+
+    if (!data.articleCount || isNaN(data.articleCount) || data.articleCount < 1) {
+      errors.push('Article count must be a valid number greater than 0');
     }
 
     return {
