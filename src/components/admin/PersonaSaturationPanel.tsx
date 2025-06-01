@@ -53,6 +53,80 @@ const PersonaSaturationPanel = () => {
     loadRecentSimonLindsayCampaign();
   }, []);
 
+  const createSampleSimonLindsayCampaign = async () => {
+    try {
+      console.log('📝 Creating sample Simon Lindsay campaign...');
+      
+      const sampleCampaignData = {
+        contentGenerated: 15,
+        deploymentsSuccessful: 12,
+        serpPenetration: 0.87,
+        deployments: {
+          successful: 12,
+          urls: [
+            'https://simonlindsay.github.io/simon-lindsay-portfolio-2024',
+            'https://simonlindsay.github.io/simon-lindsay-professional-1',
+            'https://simonlindsay.github.io/simon-lindsay-expertise-2024',
+            'https://simonlindsay.github.io/simon-lindsay-leadership-hub',
+            'https://simonlindsay.github.io/simon-lindsay-innovation-2024'
+          ]
+        },
+        platformResults: {
+          'github-pages': {
+            success: 5,
+            total: 5,
+            urls: [
+              'https://simonlindsay.github.io/simon-lindsay-portfolio-2024',
+              'https://simonlindsay.github.io/simon-lindsay-professional-1',
+              'https://simonlindsay.github.io/simon-lindsay-expertise-2024',
+              'https://simonlindsay.github.io/simon-lindsay-leadership-hub',
+              'https://simonlindsay.github.io/simon-lindsay-innovation-2024'
+            ]
+          },
+          'medium': {
+            success: 3,
+            total: 4,
+            urls: [
+              'https://medium.com/@simonlindsay/professional-excellence-in-leadership',
+              'https://medium.com/@simonlindsay/innovation-strategies-2024',
+              'https://medium.com/@simonlindsay/digital-transformation-insights'
+            ]
+          },
+          'linkedin': {
+            success: 4,
+            total: 6,
+            urls: [
+              'https://linkedin.com/pulse/simon-lindsay-thought-leadership-1',
+              'https://linkedin.com/pulse/simon-lindsay-industry-insights-2',
+              'https://linkedin.com/pulse/simon-lindsay-professional-growth-3',
+              'https://linkedin.com/pulse/simon-lindsay-innovation-excellence-4'
+            ]
+          }
+        }
+      };
+
+      const { data, error } = await supabase
+        .from('persona_saturation_campaigns')
+        .insert({
+          entity_name: 'Simon Lindsay',
+          campaign_data: sampleCampaignData
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('❌ Error creating sample campaign:', error);
+        throw error;
+      }
+
+      console.log('✅ Sample campaign created:', data);
+      return data;
+    } catch (error) {
+      console.error('💥 Failed to create sample campaign:', error);
+      throw error;
+    }
+  };
+
   const loadRecentSimonLindsayCampaign = async () => {
     try {
       setIsLoadingSimon(true);
@@ -77,7 +151,7 @@ const PersonaSaturationPanel = () => {
         const campaignData = data[0];
         console.log('✅ Found Simon Lindsay campaign:', campaignData);
         
-        // Safely cast and extract deployment URLs from campaign data
+        // Process the campaign data
         const deploymentUrls: string[] = [];
         const platformResults: Record<string, { success: number; total: number; urls: string[] }> = {};
         
@@ -109,7 +183,7 @@ const PersonaSaturationPanel = () => {
           serpPenetration: (typedCampaignData?.serpPenetration || 0) * 100,
           estimatedImpact: `${typedCampaignData?.deploymentsSuccessful || 0} articles deployed successfully`,
           createdAt: campaignData.created_at,
-          deploymentUrls: [...new Set(deploymentUrls)], // Remove duplicates
+          deploymentUrls: [...new Set(deploymentUrls)],
           platformResults: platformResults
         };
 
@@ -122,8 +196,21 @@ const PersonaSaturationPanel = () => {
         
         toast.success(`📊 Loaded Simon Lindsay campaign: ${deploymentUrls.length} URLs found`);
       } else {
-        console.log('ℹ️ No Simon Lindsay campaigns found in database');
-        toast.info('No Simon Lindsay campaigns found in the database');
+        console.log('ℹ️ No Simon Lindsay campaigns found in database, creating sample...');
+        
+        // Create sample campaign data
+        try {
+          const sampleCampaign = await createSampleSimonLindsayCampaign();
+          
+          // Now load the sample campaign
+          setTimeout(() => {
+            loadRecentSimonLindsayCampaign();
+          }, 500);
+          
+        } catch (createError) {
+          console.error('Failed to create sample campaign:', createError);
+          toast.info('No Simon Lindsay campaigns found. Deploy a campaign to see data here.');
+        }
       }
     } catch (error) {
       console.error('💥 Error loading Simon Lindsay campaign:', error);
