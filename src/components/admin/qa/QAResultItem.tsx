@@ -52,13 +52,25 @@ const QAResultItem = ({ result, index }: QAResultItemProps) => {
     }
   };
 
-  const getDataSourceIcon = (dataSource?: 'live' | 'none') => {
+  const getDataSourceIcon = (dataSource?: string) => {
     if (dataSource === 'live') {
       return <Database className="h-3 w-3 text-green-600" />;
     } else if (dataSource === 'none') {
       return <Eye className="h-3 w-3 text-gray-400" />;
     }
     return null;
+  };
+
+  // Safely handle timestamp conversion
+  const getTimestampDisplay = (timestamp?: string) => {
+    if (!timestamp) return new Date().toLocaleTimeString();
+    
+    try {
+      const date = new Date(timestamp);
+      return date.toLocaleTimeString();
+    } catch {
+      return new Date().toLocaleTimeString();
+    }
   };
 
   return (
@@ -83,7 +95,7 @@ const QAResultItem = ({ result, index }: QAResultItemProps) => {
             </p>
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <Clock className="h-3 w-3" />
-              {result.timestamp.toLocaleTimeString()}
+              {getTimestampDisplay(result.timestamp)}
               <span>•</span>
               <span>{result.phase}</span>
               {result.dataSource && (

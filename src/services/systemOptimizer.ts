@@ -147,7 +147,7 @@ export class SystemOptimizer {
     }
   }
 
-  // Make these methods public for QA testing access
+  // Public methods for QA testing access
   static async checkDatabaseHealth(): Promise<SystemHealthReport['component_health'][0]> {
     const startTime = Date.now();
     try {
@@ -454,116 +454,5 @@ export class SystemOptimizer {
     } catch (error) {
       result.warnings.push(`Performance optimization failed: ${error.message}`);
     }
-  }
-
-  private static async checkAriaModules(): Promise<SystemHealthReport['component_health']> {
-    const modules = [
-      { name: 'aria_core', table: 'scan_results' },
-      { name: 'threat_processing', table: 'scan_results' },
-      { name: 'monitoring_systems', table: 'monitoring_status' }
-    ];
-
-    const results: SystemHealthReport['component_health'] = [];
-
-    for (const module of modules) {
-      try {
-        const { data, error } = await supabase
-          .from(module.table as any)
-          .select('*')
-          .limit(1);
-
-        if (error) throw error;
-
-        results.push({
-          component: module.name,
-          status: 'healthy',
-          details: `${module.name} module operational`
-        });
-      } catch (error) {
-        results.push({
-          component: module.name,
-          status: 'degraded',
-          details: `${module.name} module check failed: ${error.message}`
-        });
-      }
-    }
-
-    return results;
-  }
-
-  private static async checkSystemConfiguration(): Promise<SystemHealthReport['component_health'][0]> {
-    try {
-      const { data } = await supabase
-        .from('system_config')
-        .select('config_key, config_value')
-        .in('config_key', ['system_mode', 'live_enforcement', 'allow_mock_data']);
-
-      const configs = new Map(data?.map(c => [c.config_key, c.config_value]) || []);
-      
-      const issues = [];
-      if (configs.get('system_mode') !== 'live') issues.push('Not in live mode');
-      if (configs.get('live_enforcement') !== 'enabled') issues.push('Live enforcement disabled');
-      if (configs.get('allow_mock_data') === 'enabled') issues.push('Mock data allowed');
-
-      return {
-        component: 'system_configuration',
-        status: issues.length === 0 ? 'healthy' : 'degraded',
-        details: issues.length === 0 ? 'System configuration optimal' : `Issues: ${issues.join(', ')}`
-      };
-    } catch (error) {
-      return {
-        component: 'system_configuration',
-        status: 'down',
-        details: `Configuration check failed: ${error.message}`
-      };
-    }
-  }
-
-  private static calculateOptimizationLevel(result: OptimizationResult): number {
-    const fixesWeight = result.fixes_applied.length * 15;
-    const improvementsWeight = result.performance_improvements.length * 10;
-    const issuesWeight = result.issues_resolved.length * 20;
-    const warningsWeight = result.warnings.length * -5;
-    
-    const baseScore = 60;
-    const totalScore = baseScore + fixesWeight + improvementsWeight + issuesWeight + warningsWeight;
-    
-    return Math.min(100, Math.max(0, totalScore));
-  }
-
-  private static determineOverallStatus(
-    componentHealth: SystemHealthReport['component_health'],
-    optimizationPercentage: number
-  ): SystemHealthReport['overall_status'] {
-    const downComponents = componentHealth.filter(c => c.status === 'down').length;
-    const degradedComponents = componentHealth.filter(c => c.status === 'degraded').length;
-    
-    if (downComponents > 0 || optimizationPercentage < 70) return 'critical';
-    if (degradedComponents > 1 || optimizationPercentage < 85) return 'degraded';
-    if (optimizationPercentage < 95) return 'good';
-    return 'optimal';
-  }
-
-  private static generateRecommendations(
-    componentHealth: SystemHealthReport['component_health']
-  ): string[] {
-    const recommendations: string[] = [];
-    
-    const downComponents = componentHealth.filter(c => c.status === 'down');
-    const degradedComponents = componentHealth.filter(c => c.status === 'degraded');
-    
-    if (downComponents.length > 0) {
-      recommendations.push(`Immediate attention required for: ${downComponents.map(c => c.component).join(', ')}`);
-    }
-    
-    if (degradedComponents.length > 0) {
-      recommendations.push(`Performance optimization needed for: ${degradedComponents.map(c => c.component).join(', ')}`);
-    }
-    
-    if (downComponents.length === 0 && degradedComponents.length === 0) {
-      recommendations.push('System is running at optimal performance');
-    }
-    
-    return recommendations;
   }
 }
