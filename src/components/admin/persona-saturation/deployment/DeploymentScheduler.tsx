@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -20,6 +19,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { DeploymentSchedulerService, type ScheduledDeployment } from '@/services/deploymentScheduler';
 
 interface ScheduledDeployment {
   id: string;
@@ -36,22 +36,8 @@ interface ScheduledDeployment {
 }
 
 const DeploymentScheduler = () => {
-  const [schedules, setSchedules] = useState<ScheduledDeployment[]>([
-    {
-      id: '1',
-      name: 'Daily Review Posts',
-      frequency: 'daily',
-      time: '09:00',
-      platforms: ['github-pages', 'netlify'],
-      articleCount: 10,
-      status: 'active',
-      nextRun: '2024-01-15 09:00:00',
-      lastRun: '2024-01-14 09:00:00',
-      entityName: 'Professional Entity',
-      keywords: ['excellence', 'leadership', 'innovation']
-    }
-  ]);
-
+  const [schedules, setSchedules] = useState<ScheduledDeployment[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [newSchedule, setNewSchedule] = useState({
     name: '',
     frequency: 'daily',
@@ -80,11 +66,38 @@ const DeploymentScheduler = () => {
     { id: 'surge', name: 'Surge.sh' }
   ];
 
+  useEffect(() => {
+    loadSchedules();
+  }, []);
+
+  const loadSchedules = async () => {
+    setIsLoading(true);
+    try {
+      console.log('🔄 Loading scheduled deployments from database...');
+      const loadedSchedules = await DeploymentSchedulerService.loadScheduledDeployments();
+      console.log(`✅ Loaded ${loadedSchedules.length} scheduled deployments`);
+      setSchedules(loadedSchedules);
+    } catch (error) {
+      console.error('Error loading schedules:', error);
+      toast.error('Failed to load scheduled deployments');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const executeScheduledDeployment = async (schedule: ScheduledDeployment) => {
     setIsExecuting(schedule.id);
     console.log(`🚀 Executing scheduled deployment: ${schedule.name}`);
 
     try {
+      // Validate deployment data before execution
+      const validation = DeploymentSchedulerService.validateDeploymentData(schedule);
+      if (!validation.isValid) {
+        console.error('❌ Deployment validation failed:', validation.errors);
+        toast.error(`Deployment blocked: ${validation.errors.join(', ')}`);
+        return;
+      }
+
       const { data, error } = await supabase.functions.invoke('persona-saturation', {
         body: {
           entityName: schedule.entityName,
@@ -102,16 +115,28 @@ const DeploymentScheduler = () => {
 
       console.log('✅ Scheduled deployment successful:', data);
 
-      // Update the schedule's last run time
-      setSchedules(prev => prev.map(s => 
-        s.id === schedule.id 
-          ? { 
-              ...s, 
-              lastRun: new Date().toISOString(),
-              nextRun: calculateNextRun(s.frequency, s.time)
-            }
-          : s
-      ));
+      // Update the schedule's last run time and next run
+      const updatedSchedule = {
+        ...schedule,
+        lastRun: new Date().toISOString(),
+        nextRun: DeploymentSchedulerService.calculateNextRun(schedule.frequency, schedule.time)
+      };
+
+      // Update in database
+      const updateSuccess = await DeploymentSchedulerService.updateScheduledDeployment(
+        schedule.id, 
+        { 
+          lastRun: updatedSchedule.lastRun, 
+          nextRun: updatedSchedule.nextRun 
+        }
+      );
+
+      if (updateSuccess) {
+        // Update local state
+        setSchedules(prev => prev.map(s => 
+          s.id === schedule.id ? updatedSchedule : s
+        ));
+      }
 
       toast.success(`✅ Scheduled deployment "${schedule.name}" completed successfully! ${data?.campaign?.deploymentsSuccessful || 0} articles deployed.`);
 
@@ -123,20 +148,36 @@ const DeploymentScheduler = () => {
     }
   };
 
-  const toggleScheduleStatus = (id: string) => {
-    setSchedules(prev => prev.map(schedule => 
-      schedule.id === id 
-        ? { ...schedule, status: schedule.status === 'active' ? 'paused' : 'active' }
-        : schedule
-    ));
+  const toggleScheduleStatus = async (id: string) => {
+    const schedule = schedules.find(s => s.id === id);
+    if (!schedule) return;
+
+    const newStatus: 'active' | 'paused' = schedule.status === 'active' ? 'paused' : 'active';
+    
+    const updateSuccess = await DeploymentSchedulerService.updateScheduledDeployment(id, { status: newStatus });
+    
+    if (updateSuccess) {
+      setSchedules(prev => prev.map(s => 
+        s.id === id ? { ...s, status: newStatus } : s
+      ));
+      toast.success(`Schedule ${newStatus === 'active' ? 'activated' : 'paused'}`);
+    } else {
+      toast.error('Failed to update schedule status');
+    }
   };
 
-  const deleteSchedule = (id: string) => {
-    setSchedules(prev => prev.filter(schedule => schedule.id !== id));
-    toast.success('Schedule deleted successfully');
+  const deleteSchedule = async (id: string) => {
+    const deleteSuccess = await DeploymentSchedulerService.deleteScheduledDeployment(id);
+    
+    if (deleteSuccess) {
+      setSchedules(prev => prev.filter(s => s.id !== id));
+      toast.success('Schedule deleted successfully');
+    } else {
+      toast.error('Failed to delete schedule');
+    }
   };
 
-  const addSchedule = () => {
+  const addSchedule = async () => {
     if (!newSchedule.name || !newSchedule.entityName || !newSchedule.keywords) {
       toast.error('Please fill in all required fields');
       return;
@@ -146,56 +187,48 @@ const DeploymentScheduler = () => {
       toast.error('Please select at least one deployment platform');
       return;
     }
-    
-    const schedule: ScheduledDeployment = {
-      id: Date.now().toString(),
+
+    const deploymentData = {
       ...newSchedule,
       keywords: newSchedule.keywords.split(',').map(k => k.trim()),
-      status: 'active',
-      nextRun: calculateNextRun(newSchedule.frequency, newSchedule.time),
+      status: 'active' as const,
+      nextRun: DeploymentSchedulerService.calculateNextRun(newSchedule.frequency, newSchedule.time),
       lastRun: 'Never'
     };
-    
-    setSchedules(prev => [...prev, schedule]);
-    setNewSchedule({
-      name: '',
-      frequency: 'daily',
-      time: '09:00',
-      platforms: [],
-      articleCount: 10,
-      entityName: '',
-      keywords: ''
-    });
-    
-    toast.success('Schedule created successfully');
-  };
 
-  const calculateNextRun = (frequency: string, time: string) => {
-    const now = new Date();
-    switch (frequency) {
-      case 'hourly':
-        return new Date(now.getTime() + 60 * 60 * 1000).toISOString();
-      case 'daily':
-        const tomorrow = new Date(now);
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        return `${tomorrow.toISOString().split('T')[0]} ${time}:00`;
-      case 'weekly':
-        const nextWeek = new Date(now);
-        nextWeek.setDate(nextWeek.getDate() + 7);
-        return `${nextWeek.toISOString().split('T')[0]} ${time}:00`;
-      case 'monthly':
-        const nextMonth = new Date(now);
-        nextMonth.setMonth(nextMonth.getMonth() + 1);
-        return `${nextMonth.toISOString().split('T')[0]} ${time}:00`;
-      default:
-        return 'Manual trigger';
+    // Validate before saving
+    const validation = DeploymentSchedulerService.validateDeploymentData(deploymentData);
+    if (!validation.isValid) {
+      toast.error(`Invalid deployment data: ${validation.errors.join(', ')}`);
+      return;
+    }
+
+    const savedId = await DeploymentSchedulerService.saveScheduledDeployment(deploymentData);
+    
+    if (savedId) {
+      // Reload schedules from database to get the latest data
+      await loadSchedules();
+      
+      setNewSchedule({
+        name: '',
+        frequency: 'daily',
+        time: '09:00',
+        platforms: [],
+        articleCount: 10,
+        entityName: '',
+        keywords: ''
+      });
+      
+      toast.success('Schedule created and saved successfully');
+    } else {
+      toast.error('Failed to save schedule');
     }
   };
 
   const getStatusBadge = (status: string) => {
     return status === 'active' 
-      ? <Badge className="bg-green-500/20 text-green-400">Active</Badge>
-      : <Badge className="bg-gray-500/20 text-gray-400">Paused</Badge>;
+      ? <Badge className="bg-green-500/20 text-green-400"><CheckCircle className="h-3 w-3 mr-1" />Active</Badge>
+      : <Badge className="bg-gray-500/20 text-gray-400"><Pause className="h-3 w-3 mr-1" />Paused</Badge>;
   };
 
   const togglePlatformSelection = (platformId: string) => {
@@ -206,6 +239,15 @@ const DeploymentScheduler = () => {
         : [...prev.platforms, platformId]
     }));
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <RefreshCw className="h-8 w-8 animate-spin text-corporate-accent" />
+        <span className="ml-2 text-white">Loading scheduled deployments...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -326,9 +368,19 @@ const DeploymentScheduler = () => {
       {/* Existing Schedules */}
       <Card className="corporate-card">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 corporate-heading">
-            <Calendar className="h-5 w-5 text-corporate-accent" />
-            Scheduled Deployments
+          <CardTitle className="flex items-center justify-between corporate-heading">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-corporate-accent" />
+              Scheduled Deployments ({schedules.length})
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={loadSchedules}
+              className="border-corporate-accent text-corporate-accent hover:bg-corporate-accent hover:text-black"
+            >
+              <RefreshCw className="h-4 w-4" />
+            </Button>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -357,7 +409,7 @@ const DeploymentScheduler = () => {
                       size="sm"
                       variant="outline"
                       onClick={() => executeScheduledDeployment(schedule)}
-                      disabled={isExecuting === schedule.id}
+                      disabled={isExecuting === schedule.id || schedule.status === 'paused'}
                       className="border-corporate-accent text-corporate-accent hover:bg-corporate-accent hover:text-black"
                     >
                       {isExecuting === schedule.id ? (
@@ -370,6 +422,7 @@ const DeploymentScheduler = () => {
                       size="sm"
                       variant="outline"
                       onClick={() => toggleScheduleStatus(schedule.id)}
+                      className="border-corporate-border text-white hover:bg-corporate-darkSecondary"
                     >
                       {schedule.status === 'active' ? (
                         <Pause className="h-4 w-4" />
@@ -381,6 +434,7 @@ const DeploymentScheduler = () => {
                       size="sm"
                       variant="outline"
                       onClick={() => deleteSchedule(schedule.id)}
+                      className="border-red-500 text-red-400 hover:bg-red-500 hover:text-white"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -415,7 +469,7 @@ const DeploymentScheduler = () => {
             {schedules.length === 0 && (
               <div className="text-center py-8 text-corporate-lightGray">
                 <Calendar className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                <p>No scheduled deployments configured</p>
+                <p>No scheduled deployments found</p>
                 <p className="text-sm">Create your first schedule above to automate persona saturation</p>
               </div>
             )}
