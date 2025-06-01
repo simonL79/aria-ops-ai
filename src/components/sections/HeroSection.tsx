@@ -1,37 +1,103 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Shield, Eye, Zap } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import Logo from '@/components/ui/logo';
 
 const HeroSection = () => {
   return (
-    <section className="hero bg-corporate-dark text-white py-8 sm:py-12 lg:py-16 relative overflow-hidden min-h-[80vh] sm:min-h-screen flex items-center">
-      <div className="absolute inset-0 bg-gradient-to-r from-corporate-dark via-corporate-darkSecondary to-corporate-darkTertiary opacity-95"></div>
+    <section className="hero bg-corporate-dark text-white py-12 sm:py-16 lg:py-24 relative overflow-hidden min-h-screen flex items-center">
+      {/* Background gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-corporate-dark via-corporate-darkSecondary to-corporate-darkTertiary opacity-95"></div>
+      
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-corporate-accent/5 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-corporate-accent/3 rounded-full blur-3xl animate-pulse delay-1000"></div>
+      </div>
+      
       <div className="container mx-auto px-4 sm:px-6 relative z-10 w-full">
-        <div className="flex flex-col items-center justify-center mb-6 sm:mb-8">
-          <Logo variant="light" size="lg" className="mb-4 sm:mb-6 text-2xl sm:text-3xl lg:text-4xl aria-logo" />
-          <div className="text-center max-w-4xl mx-auto">
-            <p className="text-sm sm:text-lg md:text-xl mb-3 sm:mb-4 text-corporate-accent font-medium px-4">
-              Your Reputation Is Being Shaped Online
-            </p>
-            <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 leading-tight text-shadow-lg px-4 corporate-heading">
-              Monitor. Analyze. <span className="text-corporate-accent">Command.</span>
-            </h1>
+        <div className="flex flex-col items-center justify-center text-center max-w-6xl mx-auto">
+          
+          {/* Logo and Brand */}
+          <div className="mb-8 sm:mb-12">
+            <Logo variant="light" size="xl" className="mb-6 aria-logo" />
+            <div className="inline-flex items-center px-4 py-2 rounded-full bg-corporate-accent/10 border border-corporate-accent/20 mb-6">
+              <Shield className="w-4 h-4 mr-2 text-corporate-accent" />
+              <span className="text-corporate-accent font-medium text-sm">AI-Powered Reputation Defense</span>
+            </div>
           </div>
-        </div>
-        
-        <p className="text-base sm:text-xl md:text-2xl mb-6 sm:mb-8 lg:mb-10 max-w-2xl mx-auto leading-relaxed text-corporate-lightGray text-center px-4">
-          ARIA is your real-time Reputation NOC — a centralized threat intelligence hub built for rapid digital risk response.
-        </p>
-        
-        <div className="flex justify-center w-full px-4">
-          <Button asChild size="lg" className="w-full sm:w-auto sm:max-w-md corporate-button px-6 sm:px-8 py-4 sm:py-7 text-base sm:text-lg font-semibold rounded-md shadow-lg hover:shadow-xl transition-all duration-300 amber-glow">
-            <Link to="/scan" className="flex items-center justify-center gap-2">
-              Enter Command Center <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
-            </Link>
-          </Button>
+
+          {/* Main Headline */}
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 sm:mb-8 leading-tight corporate-heading">
+            Your Digital Reputation
+            <br />
+            <span className="text-corporate-accent bg-gradient-to-r from-corporate-accent to-yellow-400 bg-clip-text text-transparent">
+              Under Command
+            </span>
+          </h1>
+
+          {/* Subtitle */}
+          <p className="text-xl sm:text-2xl md:text-3xl mb-8 sm:mb-12 max-w-4xl leading-relaxed text-corporate-lightGray">
+            ARIA™ is your real-time Reputation NOC — a centralized threat intelligence hub built for rapid digital risk response.
+          </p>
+
+          {/* Key Benefits */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 max-w-4xl w-full">
+            <div className="flex items-center justify-center md:justify-start space-x-3 p-4 rounded-lg bg-corporate-darkTertiary/50 border border-corporate-border">
+              <Eye className="w-6 h-6 text-corporate-accent flex-shrink-0" />
+              <span className="text-white font-medium">24/7 Monitoring</span>
+            </div>
+            <div className="flex items-center justify-center md:justify-start space-x-3 p-4 rounded-lg bg-corporate-darkTertiary/50 border border-corporate-border">
+              <Zap className="w-6 h-6 text-corporate-accent flex-shrink-0" />
+              <span className="text-white font-medium">Instant Alerts</span>
+            </div>
+            <div className="flex items-center justify-center md:justify-start space-x-3 p-4 rounded-lg bg-corporate-darkTertiary/50 border border-corporate-border">
+              <Shield className="w-6 h-6 text-corporate-accent flex-shrink-0" />
+              <span className="text-white font-medium">Threat Mitigation</span>
+            </div>
+          </div>
+
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 w-full sm:w-auto">
+            <Button asChild size="lg" className="corporate-button px-8 sm:px-12 py-4 sm:py-6 text-lg font-semibold rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300 amber-glow">
+              <Link to="/scan" className="flex items-center justify-center gap-3">
+                Enter Command Center 
+                <ArrowRight className="w-5 h-5" />
+              </Link>
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              size="lg" 
+              className="px-8 sm:px-12 py-4 sm:py-6 text-lg font-semibold rounded-lg border-2 border-corporate-accent text-corporate-accent hover:bg-corporate-accent hover:text-black transition-all duration-300"
+              asChild
+            >
+              <Link to="/how-it-works">
+                Learn More
+              </Link>
+            </Button>
+          </div>
+
+          {/* Trust Indicators */}
+          <div className="mt-12 pt-8 border-t border-corporate-border w-full max-w-4xl">
+            <p className="text-corporate-lightGray text-sm mb-4">Trusted by founders, influencers, and enterprises worldwide</p>
+            <div className="flex flex-wrap justify-center items-center gap-8 text-corporate-lightGray text-sm">
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                <span>GDPR Compliant</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                <span>Enterprise Security</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                <span>UK Built</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
