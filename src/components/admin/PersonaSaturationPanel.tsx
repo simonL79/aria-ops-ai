@@ -1,9 +1,11 @@
+
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import CampaignConfiguration from './persona-saturation/CampaignConfiguration';
 import CampaignMonitor from './persona-saturation/CampaignMonitor';
 import ContentSourcesPanel from './persona-saturation/ContentSourcesPanel';
 import ReviewPostGenerator from './persona-saturation/ReviewPostGenerator';
+import AdvancedDeploymentPanel from './persona-saturation/AdvancedDeploymentPanel';
 import { Globe, Monitor, Database, Settings, FileText } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -89,7 +91,7 @@ const PersonaSaturationPanel = () => {
       <div>
         <h2 className="text-2xl font-bold corporate-heading">A.R.I.A™ Persona Saturation Engine</h2>
         <p className="corporate-subtext mt-1">
-          Static deployment across multiple platforms without API keys
+          Advanced deployment management and content saturation
         </p>
       </div>
 
@@ -151,11 +153,7 @@ const PersonaSaturationPanel = () => {
         </TabsContent>
 
         <TabsContent value="deploy">
-          <div className="text-center py-12">
-            <Globe className="h-12 w-12 mx-auto mb-4 text-corporate-gray" />
-            <h3 className="text-lg font-medium text-white mb-2">Advanced Deployment</h3>
-            <p className="text-corporate-lightGray">Advanced deployment options coming soon...</p>
-          </div>
+          <AdvancedDeploymentPanel />
         </TabsContent>
       </Tabs>
     </div>
