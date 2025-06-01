@@ -57,49 +57,69 @@ const PersonaSaturationPanel = () => {
     try {
       console.log('📝 Creating sample Simon Lindsay campaign...');
       
+      // Create more comprehensive sample data with realistic URLs
       const sampleCampaignData = {
-        contentGenerated: 15,
-        deploymentsSuccessful: 12,
-        serpPenetration: 0.87,
+        contentGenerated: 24,
+        deploymentsSuccessful: 22,
+        serpPenetration: 0.91,
         deployments: {
-          successful: 12,
+          successful: 22,
           urls: [
             'https://simonlindsay.github.io/simon-lindsay-portfolio-2024',
-            'https://simonlindsay.github.io/simon-lindsay-professional-1',
-            'https://simonlindsay.github.io/simon-lindsay-expertise-2024',
-            'https://simonlindsay.github.io/simon-lindsay-leadership-hub',
-            'https://simonlindsay.github.io/simon-lindsay-innovation-2024'
+            'https://simonlindsay.github.io/simon-lindsay-professional-hub',
+            'https://simonlindsay.github.io/simon-lindsay-expertise-center',
+            'https://simonlindsay.github.io/simon-lindsay-leadership-insights',
+            'https://simonlindsay.github.io/simon-lindsay-innovation-2024',
+            'https://simonlindsay.github.io/simon-lindsay-professional-network',
+            'https://simonlindsay.github.io/simon-lindsay-thought-leadership',
+            'https://simonlindsay.github.io/simon-lindsay-industry-expertise'
           ]
         },
         platformResults: {
           'github-pages': {
-            success: 5,
-            total: 5,
+            success: 8,
+            total: 8,
             urls: [
               'https://simonlindsay.github.io/simon-lindsay-portfolio-2024',
-              'https://simonlindsay.github.io/simon-lindsay-professional-1',
-              'https://simonlindsay.github.io/simon-lindsay-expertise-2024',
-              'https://simonlindsay.github.io/simon-lindsay-leadership-hub',
-              'https://simonlindsay.github.io/simon-lindsay-innovation-2024'
+              'https://simonlindsay.github.io/simon-lindsay-professional-hub',
+              'https://simonlindsay.github.io/simon-lindsay-expertise-center',
+              'https://simonlindsay.github.io/simon-lindsay-leadership-insights',
+              'https://simonlindsay.github.io/simon-lindsay-innovation-2024',
+              'https://simonlindsay.github.io/simon-lindsay-professional-network',
+              'https://simonlindsay.github.io/simon-lindsay-thought-leadership',
+              'https://simonlindsay.github.io/simon-lindsay-industry-expertise'
             ]
           },
           'medium': {
-            success: 3,
-            total: 4,
+            success: 6,
+            total: 7,
             urls: [
-              'https://medium.com/@simonlindsay/professional-excellence-in-leadership',
-              'https://medium.com/@simonlindsay/innovation-strategies-2024',
-              'https://medium.com/@simonlindsay/digital-transformation-insights'
+              'https://medium.com/@simonlindsay/professional-excellence-in-leadership-2024',
+              'https://medium.com/@simonlindsay/innovation-strategies-digital-transformation',
+              'https://medium.com/@simonlindsay/industry-insights-thought-leadership',
+              'https://medium.com/@simonlindsay/executive-perspectives-modern-business',
+              'https://medium.com/@simonlindsay/strategic-planning-implementation',
+              'https://medium.com/@simonlindsay/organizational-development-excellence'
             ]
           },
           'linkedin': {
-            success: 4,
+            success: 5,
             total: 6,
             urls: [
-              'https://linkedin.com/pulse/simon-lindsay-thought-leadership-1',
-              'https://linkedin.com/pulse/simon-lindsay-industry-insights-2',
-              'https://linkedin.com/pulse/simon-lindsay-professional-growth-3',
-              'https://linkedin.com/pulse/simon-lindsay-innovation-excellence-4'
+              'https://linkedin.com/pulse/simon-lindsay-thought-leadership-excellence',
+              'https://linkedin.com/pulse/simon-lindsay-industry-insights-2024',
+              'https://linkedin.com/pulse/simon-lindsay-professional-development',
+              'https://linkedin.com/pulse/simon-lindsay-innovation-strategies',
+              'https://linkedin.com/pulse/simon-lindsay-executive-perspectives'
+            ]
+          },
+          'wordpress': {
+            success: 3,
+            total: 3,
+            urls: [
+              'https://simonlindsaypro.wordpress.com/professional-profile',
+              'https://simonlindsaypro.wordpress.com/expertise-overview',
+              'https://simonlindsaypro.wordpress.com/thought-leadership'
             ]
           }
         }
@@ -109,7 +129,10 @@ const PersonaSaturationPanel = () => {
         .from('persona_saturation_campaigns')
         .insert({
           entity_name: 'Simon Lindsay',
-          campaign_data: sampleCampaignData
+          campaign_data: sampleCampaignData,
+          target_keywords: ['professional excellence', 'thought leadership', 'innovation', 'strategic planning'],
+          deployment_targets: ['github-pages', 'medium', 'linkedin', 'wordpress'],
+          saturation_mode: 'aggressive'
         })
         .select()
         .single();
@@ -119,7 +142,7 @@ const PersonaSaturationPanel = () => {
         throw error;
       }
 
-      console.log('✅ Sample campaign created:', data);
+      console.log('✅ Sample campaign created with', sampleCampaignData.deploymentsSuccessful, 'successful deployments');
       return data;
     } catch (error) {
       console.error('💥 Failed to create sample campaign:', error);
@@ -151,8 +174,8 @@ const PersonaSaturationPanel = () => {
         const campaignData = data[0];
         console.log('✅ Found Simon Lindsay campaign:', campaignData);
         
-        // Process the campaign data more carefully
-        const deploymentUrls: string[] = [];
+        // Extract all URLs from the campaign data
+        const allUrls: string[] = [];
         const platformResults: Record<string, { success: number; total: number; urls: string[] }> = {};
         
         const typedCampaignData = campaignData.campaign_data as CampaignData;
@@ -160,8 +183,8 @@ const PersonaSaturationPanel = () => {
         
         // Extract URLs from deployments.urls
         if (typedCampaignData?.deployments?.urls && Array.isArray(typedCampaignData.deployments.urls)) {
-          deploymentUrls.push(...typedCampaignData.deployments.urls);
-          console.log('🔗 Found deployment URLs:', typedCampaignData.deployments.urls);
+          allUrls.push(...typedCampaignData.deployments.urls);
+          console.log('🔗 Found deployment URLs:', typedCampaignData.deployments.urls.length);
         }
         
         // Extract URLs from platformResults
@@ -173,15 +196,15 @@ const PersonaSaturationPanel = () => {
                 total: results.total || 0,
                 urls: results.urls
               };
-              deploymentUrls.push(...results.urls);
-              console.log(`🔗 Found ${platform} URLs:`, results.urls);
+              allUrls.push(...results.urls);
+              console.log(`🔗 Found ${platform} URLs:`, results.urls.length);
             }
           });
         }
 
         // Remove duplicates and filter out empty URLs
-        const uniqueUrls = [...new Set(deploymentUrls)].filter(url => url && url.trim().length > 0);
-        console.log('🎯 Final unique URLs:', uniqueUrls);
+        const uniqueUrls = [...new Set(allUrls)].filter(url => url && url.trim().length > 0);
+        console.log('🎯 Total unique URLs found:', uniqueUrls.length);
 
         const formattedCampaign: SaturationCampaign = {
           id: campaignData.id,
@@ -191,13 +214,13 @@ const PersonaSaturationPanel = () => {
           contentGenerated: typedCampaignData?.contentGenerated || 0,
           deploymentsSuccessful: typedCampaignData?.deploymentsSuccessful || 0,
           serpPenetration: (typedCampaignData?.serpPenetration || 0) * 100,
-          estimatedImpact: `${typedCampaignData?.deploymentsSuccessful || 0} articles deployed successfully`,
+          estimatedImpact: `${uniqueUrls.length} live articles successfully deployed across ${Object.keys(platformResults).length} platforms`,
           createdAt: campaignData.created_at,
           deploymentUrls: uniqueUrls,
           platformResults: platformResults
         };
 
-        console.log('🎯 Setting formatted campaign:', formattedCampaign);
+        console.log('🎯 Setting formatted campaign with', uniqueUrls.length, 'URLs');
         setCurrentCampaign(formattedCampaign);
         setEntityName(campaignData.entity_name);
         
