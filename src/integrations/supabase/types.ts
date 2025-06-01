@@ -3719,6 +3719,45 @@ export type Database = {
         }
         Relationships: []
       }
+      persona_deployments: {
+        Row: {
+          article_slug: string
+          created_at: string | null
+          deployed_at: string | null
+          deployment_type: string | null
+          entity_name: string | null
+          id: string
+          live_url: string
+          platform: string
+          success: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          article_slug: string
+          created_at?: string | null
+          deployed_at?: string | null
+          deployment_type?: string | null
+          entity_name?: string | null
+          id?: string
+          live_url: string
+          platform: string
+          success?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          article_slug?: string
+          created_at?: string | null
+          deployed_at?: string | null
+          deployment_type?: string | null
+          entity_name?: string | null
+          id?: string
+          live_url?: string
+          platform?: string
+          success?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       persona_saturation_campaigns: {
         Row: {
           campaign_data: Json
