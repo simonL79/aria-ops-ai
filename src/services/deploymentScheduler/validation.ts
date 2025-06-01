@@ -1,22 +1,32 @@
 
+import { ScheduledDeployment, ValidationResult } from './types';
+
 export class DeploymentValidation {
-  static validateDeploymentData(data: any): { isValid: boolean; errors: string[] } {
+  static validateDeploymentData(deployment: Partial<ScheduledDeployment>): ValidationResult {
     const errors: string[] = [];
 
-    if (!data.name || data.name.trim() === '') {
-      errors.push('Name is required');
+    if (!deployment.name || deployment.name.trim().length === 0) {
+      errors.push('Deployment name is required');
     }
 
-    if (!data.entityName || data.entityName.trim() === '') {
+    if (!deployment.entityName || deployment.entityName.trim().length === 0) {
       errors.push('Entity name is required');
     }
 
-    if (!data.platforms || data.platforms.length === 0) {
+    if (!deployment.platforms || deployment.platforms.length === 0) {
       errors.push('At least one platform must be selected');
     }
 
-    if (!data.articleCount || isNaN(data.articleCount) || data.articleCount < 1) {
-      errors.push('Article count must be a valid number greater than 0');
+    if (!deployment.frequency) {
+      errors.push('Frequency is required');
+    }
+
+    if (!deployment.time) {
+      errors.push('Time is required');
+    }
+
+    if (deployment.articleCount && (deployment.articleCount < 1 || deployment.articleCount > 100)) {
+      errors.push('Article count must be between 1 and 100');
     }
 
     return {

@@ -1,6 +1,6 @@
 
 export interface ScheduledDeployment {
-  id: string;
+  id?: string;
   name: string;
   frequency: string;
   time: string;
@@ -12,6 +12,7 @@ export interface ScheduledDeployment {
   entityName: string;
   keywords: string[];
   createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface ValidationResult {

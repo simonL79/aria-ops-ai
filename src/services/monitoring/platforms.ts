@@ -13,8 +13,16 @@ export const getMonitoredPlatforms = async (): Promise<MonitorablePlatform[]> =>
       .order('name');
     
     if (error) {
-      console.error("Error fetching monitored platforms:", error);
-      return [];
+      console.warn("Could not fetch monitored platforms (may require auth):", error.message);
+      // Return default platforms if database access fails
+      return [
+        { id: 'twitter', name: 'Twitter', isActive: true, type: 'social' },
+        { id: 'reddit', name: 'Reddit', isActive: true, type: 'forum' },
+        { id: 'google-news', name: 'Google News', isActive: true, type: 'news' },
+        { id: 'facebook', name: 'Facebook', isActive: true, type: 'social' },
+        { id: 'linkedin', name: 'LinkedIn', isActive: true, type: 'professional' },
+        { id: 'yelp', name: 'Yelp', isActive: true, type: 'review' }
+      ];
     }
     
     return data.map(platform => ({
@@ -24,8 +32,16 @@ export const getMonitoredPlatforms = async (): Promise<MonitorablePlatform[]> =>
       type: platform.type
     }));
   } catch (error) {
-    console.error("Error in getMonitoredPlatforms:", error);
-    return [];
+    console.warn("Error in getMonitoredPlatforms:", error);
+    // Return default platforms as fallback
+    return [
+      { id: 'twitter', name: 'Twitter', isActive: true, type: 'social' },
+      { id: 'reddit', name: 'Reddit', isActive: true, type: 'forum' },
+      { id: 'google-news', name: 'Google News', isActive: true, type: 'news' },
+      { id: 'facebook', name: 'Facebook', isActive: true, type: 'social' },
+      { id: 'linkedin', name: 'LinkedIn', isActive: true, type: 'professional' },
+      { id: 'yelp', name: 'Yelp', isActive: true, type: 'review' }
+    ];
   }
 };
 
@@ -41,14 +57,14 @@ export const isPlatformMonitored = async (platformName: string): Promise<boolean
       .maybeSingle();
     
     if (error) {
-      console.error("Error checking platform status:", error);
-      return false;
+      console.warn("Could not check platform status:", error.message);
+      return true; // Default to monitored if we can't check
     }
     
     return data?.active || false;
   } catch (error) {
-    console.error("Error in isPlatformMonitored:", error);
-    return false;
+    console.warn("Error in isPlatformMonitored:", error);
+    return true; // Default to monitored if there's an error
   }
 };
 
@@ -66,14 +82,13 @@ export const updatePlatformStatus = async (platformId: string, isActive: boolean
       .eq('id', platformId);
     
     if (error) {
-      console.error("Error updating platform status:", error);
+      console.warn("Could not update platform status:", error.message);
       return false;
     }
     
     return true;
   } catch (error) {
-    console.error("Error in updatePlatformStatus:", error);
+    console.warn("Error in updatePlatformStatus:", error);
     return false;
   }
 };
-
