@@ -41,24 +41,49 @@ const DataIntegrityPanel = () => {
     try {
       console.log('🔍 Loading data integrity statistics...');
 
-      // Check for any remaining mock data across key tables
-      const tables = ['scan_results', 'content_sources', 'entities', 'activity_logs'];
-      let totalRecords = 0;
-      let cleanRecords = 0;
+      // Check scan_results table
+      const { count: scanResultsTotal } = await supabase
+        .from('scan_results')
+        .select('*', { count: 'exact', head: true });
 
-      for (const table of tables) {
-        const { count: totalCount } = await supabase
-          .from(table)
-          .select('*', { count: 'exact', head: true });
+      const { count: scanResultsMock } = await supabase
+        .from('scan_results')
+        .select('*', { count: 'exact', head: true })
+        .or('content.ilike.%mock%,content.ilike.%test%,content.ilike.%demo%,url.ilike.%example.com%');
 
-        const { count: mockCount } = await supabase
-          .from(table)
-          .select('*', { count: 'exact', head: true })
-          .or('content.ilike.%mock%,content.ilike.%test%,content.ilike.%demo%');
+      // Check content_sources table
+      const { count: contentSourcesTotal } = await supabase
+        .from('content_sources')
+        .select('*', { count: 'exact', head: true });
 
-        totalRecords += totalCount || 0;
-        cleanRecords += (totalCount || 0) - (mockCount || 0);
-      }
+      const { count: contentSourcesMock } = await supabase
+        .from('content_sources')
+        .select('*', { count: 'exact', head: true })
+        .or('url.ilike.%example.com%,title.ilike.%test%,title.ilike.%mock%');
+
+      // Check entities table
+      const { count: entitiesTotal } = await supabase
+        .from('entities')
+        .select('*', { count: 'exact', head: true });
+
+      const { count: entitiesMock } = await supabase
+        .from('entities')
+        .select('*', { count: 'exact', head: true })
+        .or('name.ilike.%test%,name.ilike.%mock%,name.ilike.%demo%');
+
+      // Check activity_logs table
+      const { count: activityLogsTotal } = await supabase
+        .from('activity_logs')
+        .select('*', { count: 'exact', head: true });
+
+      const { count: activityLogsMock } = await supabase
+        .from('activity_logs')
+        .select('*', { count: 'exact', head: true })
+        .or('action.ilike.%mock%,action.ilike.%test%,details.ilike.%mock%');
+
+      const totalRecords = (scanResultsTotal || 0) + (contentSourcesTotal || 0) + (entitiesTotal || 0) + (activityLogsTotal || 0);
+      const mockRecords = (scanResultsMock || 0) + (contentSourcesMock || 0) + (entitiesMock || 0) + (activityLogsMock || 0);
+      const cleanRecords = totalRecords - mockRecords;
 
       // Get last cleanup from activity logs
       const { data: lastCleanup } = await supabase
@@ -67,7 +92,7 @@ const DataIntegrityPanel = () => {
         .eq('action', 'system_cleanup')
         .order('created_at', { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
 
       setStats({
         totalRecords,
@@ -110,6 +135,16 @@ const DataIntegrityPanel = () => {
 
       if (mockResults && mockResults.length > 0) {
         mockDataSources.push({ table: 'scan_results', count: mockResults.length, items: mockResults });
+      }
+
+      // Scan entities
+      const { data: mockEntities } = await supabase
+        .from('entities')
+        .select('id, name')
+        .or('name.ilike.%test%,name.ilike.%mock%,name.ilike.%demo%');
+
+      if (mockEntities && mockEntities.length > 0) {
+        mockDataSources.push({ table: 'entities', count: mockEntities.length, items: mockEntities });
       }
 
       if (mockDataSources.length === 0) {
