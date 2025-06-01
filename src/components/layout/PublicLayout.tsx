@@ -31,7 +31,7 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
   const isHomePage = location.pathname === '/' || location.pathname === '/sales-funnel';
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-corporate-dark">
       <header className="sticky top-0 z-50 w-full bg-black/95 backdrop-blur border-b border-corporate-border">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between py-3 sm:py-4">
@@ -171,7 +171,7 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
         )}
       </header>
       
-      <main className="flex-1 w-full">
+      <main className="flex-1 w-full bg-corporate-dark">
         {children}
       </main>
       

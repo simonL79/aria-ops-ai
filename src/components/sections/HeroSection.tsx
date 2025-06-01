@@ -7,8 +7,8 @@ import Logo from '@/components/ui/logo';
 
 const HeroSection = () => {
   return (
-    <section className="hero bg-gradient-to-r from-corporate-dark to-corporate-darkSecondary text-white py-8 sm:py-12 lg:py-16 relative overflow-hidden min-h-[80vh] sm:min-h-screen flex items-center">
-      <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1557682250-33bd709cbe85?q=80&w=1000')] bg-cover bg-center opacity-5"></div>
+    <section className="hero bg-corporate-dark text-white py-8 sm:py-12 lg:py-16 relative overflow-hidden min-h-[80vh] sm:min-h-screen flex items-center">
+      <div className="absolute inset-0 bg-gradient-to-r from-corporate-dark via-corporate-darkSecondary to-corporate-darkTertiary opacity-95"></div>
       <div className="container mx-auto px-4 sm:px-6 relative z-10 w-full">
         <div className="flex flex-col items-center justify-center mb-6 sm:mb-8">
           <Logo variant="light" size="lg" className="mb-4 sm:mb-6 text-2xl sm:text-3xl lg:text-4xl aria-logo" />

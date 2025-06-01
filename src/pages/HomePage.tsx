@@ -16,15 +16,17 @@ const HomePage = () => {
   return (
     <PageLayout title="A.R.I.A™ - AI Reputation Intelligence Agent" className="bg-corporate-dark">
       <PublicLayout>
-        <HeroSection />
-        <NOCFeaturesSection />
-        <ProblemSection />
-        <HowItWorksSection />
-        <PlatformsSection />
-        <ReputationOpsCenterSection />
-        <EnhancedTestimonialsSection />
-        <CTASection />
-        <EnhancedCTASection />
+        <div className="bg-corporate-dark">
+          <HeroSection />
+          <NOCFeaturesSection />
+          <ProblemSection />
+          <HowItWorksSection />
+          <PlatformsSection />
+          <ReputationOpsCenterSection />
+          <EnhancedTestimonialsSection />
+          <CTASection />
+          <EnhancedCTASection />
+        </div>
       </PublicLayout>
     </PageLayout>
   );
