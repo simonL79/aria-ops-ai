@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -15,13 +14,12 @@ import Authentication from "./pages/Authentication";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import ClientsPage from "./pages/admin/ClientsPage";
 import QATestPage from "./pages/QATestPage";
-import GenesisSentinelPage from "./pages/admin/GenesisSentinelPage";
+import SentinelOperatorPage from "./pages/admin/SentinelOperatorPage";
 import SettingsPage from "./pages/admin/SettingsPage";
 import SystemOptimizationPage from "./pages/admin/SystemOptimizationPage";
 import WatchtowerPage from "./pages/admin/WatchtowerPage";
 import IntelligenceCorePage from "./pages/admin/IntelligenceCorePage";
 import PersonaSaturationPage from "./pages/admin/PersonaSaturationPage";
-import EmergencyStrikePage from "./pages/EmergencyStrikePage";
 
 const queryClient = new QueryClient();
 
@@ -41,7 +39,7 @@ const App = () => (
             <Route path="/blog/:slug" element={<BlogPostPage />} />
             <Route path="/auth" element={<Authentication />} />
             <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/admin/genesis-sentinel" element={<GenesisSentinelPage />} />
+            <Route path="/admin/genesis-sentinel" element={<SentinelOperatorPage />} />
             <Route path="/admin/persona-saturation" element={<PersonaSaturationPage />} />
             <Route path="/admin/watchtower" element={<WatchtowerPage />} />
             <Route path="/admin/intelligence-core" element={<IntelligenceCorePage />} />
@@ -50,7 +48,6 @@ const App = () => (
             <Route path="/admin/qa-testing" element={<QATestPage />} />
             <Route path="/admin/settings" element={<SettingsPage />} />
             <Route path="/admin/system-optimization" element={<SystemOptimizationPage />} />
-            <Route path="/emergency-strike" element={<EmergencyStrikePage />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>

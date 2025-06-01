@@ -19,8 +19,6 @@ interface DashboardLayoutProps {
 }
 
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
-  console.log('🔄 DashboardLayout rendering');
-  
   const { signOut } = useAuth();
   const { pathname } = useLocation();
   const navigate = useNavigate();
@@ -37,7 +35,11 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     }
   };
 
-  console.log('🔄 DashboardLayout rendering for:', pathname);
+  // Add debugging to track route changes
+  React.useEffect(() => {
+    console.log('🔄 Route changed to:', pathname);
+    console.log('📍 Current page info:', { title, description });
+  }, [pathname, title, description]);
 
   return (
     <TooltipProvider>
@@ -49,9 +51,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           </Sidebar>
           <main className="flex-1 p-4 md:p-6">
             <DashboardMainHeader />
-            <div className="max-w-7xl mx-auto">
-              {children}
-            </div>
+            {children}
           </main>
         </div>
       </SidebarProvider>
