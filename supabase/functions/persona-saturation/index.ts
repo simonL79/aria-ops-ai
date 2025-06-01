@@ -1,4 +1,5 @@
 
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 
 const corsHeaders = {
@@ -100,8 +101,8 @@ async function simulateDeployment(content: string, platform: string, entityName:
   url: string;
   platform: string;
 }> {
-  // Simulate deployment delay
-  await new Promise(resolve => setTimeout(resolve, Math.random() * 500 + 100));
+  // Reduced simulation delay to prevent timeouts
+  await new Promise(resolve => setTimeout(resolve, Math.random() * 200 + 50));
   
   const slug = entityName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-');
   const articleId = Math.random().toString(36).substring(2, 8);
@@ -116,25 +117,27 @@ async function simulateDeployment(content: string, platform: string, entityName:
   };
 
   return {
-    success: Math.random() > 0.15, // 85% success rate
+    success: Math.random() > 0.1, // 90% success rate
     url: baseUrls[platform as keyof typeof baseUrls] || `https://${platform}-${slug}-${articleId}.com`,
     platform
   };
 }
 
 serve(async (req) => {
-  console.log(`🌐 Request method: ${req.method}`);
-  console.log(`📍 Request URL: ${req.url}`);
-  
+  // Always handle CORS first
   if (req.method === 'OPTIONS') {
-    console.log('✅ Handling CORS preflight request');
-    return new Response(null, { headers: corsHeaders })
+    return new Response(null, { 
+      headers: corsHeaders,
+      status: 200 
+    });
   }
 
   try {
-    console.log('📥 Processing request body...');
+    console.log(`🌐 Request method: ${req.method}`);
+    console.log(`📍 Request URL: ${req.url}`);
+    
     const requestBody = await req.text();
-    console.log('📄 Raw request body:', requestBody);
+    console.log('📄 Raw request body received');
     
     let parsedBody;
     try {
@@ -155,16 +158,19 @@ serve(async (req) => {
 
     console.log(`🚀 Starting LOCAL persona saturation for ${entityName}`);
     
-    // Limit content count to prevent timeouts
-    const maxContent = Math.min(contentCount || 10, 20);
+    // Strict limits to prevent timeouts and concurrent request issues
+    const maxContent = Math.min(contentCount || 5, 10); // Further reduced from 20 to 10
+    const maxPlatforms = Math.min(deploymentTargets.length, 2); // Limit platforms per request
+    const limitedPlatforms = deploymentTargets.slice(0, maxPlatforms);
+    
     console.log(`📝 Generating ${maxContent} articles with LOCAL inference`);
     console.log(`🎯 Keywords: ${targetKeywords.join(', ')}`);
-    console.log(`📡 Deploying to: ${deploymentTargets.join(', ')}`);
+    console.log(`📡 Deploying to: ${limitedPlatforms.join(', ')}`);
 
     const deploymentUrls: string[] = [];
     const platformResults: Record<string, any> = {};
     
-    // Generate limited articles to prevent timeout
+    // Process articles sequentially to avoid overwhelming the function
     for (let i = 0; i < maxContent; i++) {
       const contentTypes = ['article', 'review'];
       const contentType = contentTypes[i % contentTypes.length];
@@ -174,44 +180,48 @@ serve(async (req) => {
       // Generate content using local templates
       const content = generateArticleContent(entityName, targetKeywords, contentType);
       
-      // Deploy to each platform (limit to 2 platforms max to prevent timeout)
-      const limitedPlatforms = deploymentTargets.slice(0, 2);
+      // Deploy to limited platforms
       for (const platform of limitedPlatforms) {
-        const deployment = await simulateDeployment(content, platform, entityName);
-        
-        if (deployment.success) {
-          deploymentUrls.push(deployment.url);
+        try {
+          const deployment = await simulateDeployment(content, platform, entityName);
           
-          if (!platformResults[platform]) {
-            platformResults[platform] = { 
-              platform: platform,
-              successful: 0, 
-              failed: 0, 
-              urls: [],
-              articlesDeployed: 0,
-              totalAttempted: 0
-            };
+          if (deployment.success) {
+            deploymentUrls.push(deployment.url);
+            
+            if (!platformResults[platform]) {
+              platformResults[platform] = { 
+                platform: platform,
+                successful: 0, 
+                failed: 0, 
+                urls: [],
+                articlesDeployed: 0,
+                totalAttempted: 0
+              };
+            }
+            platformResults[platform].successful++;
+            platformResults[platform].articlesDeployed++;
+            platformResults[platform].totalAttempted++;
+            platformResults[platform].urls.push(deployment.url);
+            
+            console.log(`✅ Deployed to ${platform}: ${deployment.url}`);
+          } else {
+            if (!platformResults[platform]) {
+              platformResults[platform] = { 
+                platform: platform,
+                successful: 0, 
+                failed: 0, 
+                urls: [],
+                articlesDeployed: 0,
+                totalAttempted: 0
+              };
+            }
+            platformResults[platform].failed++;
+            platformResults[platform].totalAttempted++;
+            console.log(`❌ Failed to deploy to ${platform}`);
           }
-          platformResults[platform].successful++;
-          platformResults[platform].articlesDeployed++;
-          platformResults[platform].totalAttempted++;
-          platformResults[platform].urls.push(deployment.url);
-          
-          console.log(`✅ Deployed to ${platform}: ${deployment.url}`);
-        } else {
-          if (!platformResults[platform]) {
-            platformResults[platform] = { 
-              platform: platform,
-              successful: 0, 
-              failed: 0, 
-              urls: [],
-              articlesDeployed: 0,
-              totalAttempted: 0
-            };
-          }
-          platformResults[platform].failed++;
-          platformResults[platform].totalAttempted++;
-          console.log(`❌ Failed to deploy to ${platform}`);
+        } catch (deploymentError) {
+          console.error(`❌ Deployment error for ${platform}:`, deploymentError);
+          // Continue with other platforms even if one fails
         }
       }
     }
@@ -238,6 +248,7 @@ serve(async (req) => {
       message: `Successfully deployed ${totalDeployments} articles using LOCAL inference - no API keys required!`
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 200
     });
 
   } catch (error) {
@@ -245,7 +256,7 @@ serve(async (req) => {
     
     return new Response(JSON.stringify({
       success: false,
-      error: error.message,
+      error: error.message || 'Unknown error',
       message: 'LOCAL persona saturation failed'
     }), {
       status: 500,
@@ -253,3 +264,4 @@ serve(async (req) => {
     });
   }
 });
+
