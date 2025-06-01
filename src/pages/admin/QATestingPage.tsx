@@ -114,7 +114,7 @@ const QATestingPage = React.memo(() => {
         {/* Header Section - Responsive */}
         <QATestingHeader />
 
-        {/* Local AI Model Testing - New Priority Section */}
+        {/* Local AI Model Testing - Restored Priority Section */}
         <QALocalModelTester />
 
         {/* Performance Monitor and Overview - Enhanced Responsive Grid */}
