@@ -13,6 +13,11 @@ import BlogPage from "./pages/BlogPage";
 import BlogPostPage from "./pages/BlogPostPage";
 import Authentication from "./pages/Authentication";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import ClientsPage from "./pages/admin/ClientsPage";
+import QATestPage from "./pages/QATestPage";
+import SentinelOperatorPage from "./pages/admin/SentinelOperatorPage";
+import SettingsPage from "./pages/admin/SettingsPage";
+import SystemOptimizationPage from "./pages/admin/SystemOptimizationPage";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +37,15 @@ const App = () => (
             <Route path="/blog/:slug" element={<BlogPostPage />} />
             <Route path="/auth" element={<Authentication />} />
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/genesis-sentinel" element={<SentinelOperatorPage />} />
+            <Route path="/admin/persona-saturation" element={<AdminDashboard />} />
+            <Route path="/admin/watchtower" element={<AdminDashboard />} />
+            <Route path="/admin/intelligence-core" element={<AdminDashboard />} />
+            <Route path="/admin/legal-ops" element={<AdminDashboard />} />
+            <Route path="/admin/clients" element={<ClientsPage />} />
+            <Route path="/admin/qa-testing" element={<QATestPage />} />
+            <Route path="/admin/settings" element={<SettingsPage />} />
+            <Route path="/admin/system-optimization" element={<SystemOptimizationPage />} />
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
