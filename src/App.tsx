@@ -1,75 +1,42 @@
-import React, { Suspense } from 'react';
-import { Toaster } from "@/components/ui/sonner";
+
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Skeleton } from "@/components/ui/skeleton";
-import "@/styles/responsive.css";
+import { HelmetProvider } from 'react-helmet-async';
+import Index from "./pages/Index";
+import About from "./pages/About";
+import ScanPage from "./pages/ScanPage";
+import SimonLindsayPage from "./pages/SimonLindsayPage";
+import BlogPage from "./pages/BlogPage";
+import BlogPostPage from "./pages/BlogPostPage";
+import AuthPage from "./pages/AuthPage";
+import AdminDashboard from "./pages/admin/AdminDashboard";
 
-// Lazy load routes for better performance
-const Index = React.lazy(() => import("./pages/Index"));
-const DashboardPage = React.lazy(() => import("./pages/dashboard/DashboardPage"));
-const AdminDashboard = React.lazy(() => import("./pages/AdminDashboard"));
-const QATestingPage = React.lazy(() => import("./pages/admin/QATestingPage"));
-const AnubisMemoryPage = React.lazy(() => import("./pages/admin/AnubisMemoryPage"));
-const IntelligenceCorePage = React.lazy(() => import("./pages/admin/IntelligenceCorePage"));
-const PersonaSaturationPage = React.lazy(() => import("./pages/admin/PersonaSaturationPage"));
-const LegalOpsPage = React.lazy(() => import("./pages/admin/LegalOpsPage"));
-const ClientsPage = React.lazy(() => import("./pages/admin/ClientsPage"));
-const GenesisSentinelPage = React.lazy(() => import("./pages/admin/GenesisSentinelPage"));
-const WatchtowerPage = React.lazy(() => import("./pages/admin/WatchtowerPage"));
+const queryClient = new QueryClient();
 
-// Create a client
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes
-      retry: 1, // Reduce retries for faster error handling
-    },
-  },
-});
-
-// Loading component
-const PageLoader = () => (
-  <div className="min-h-screen bg-corporate-dark p-6">
-    <div className="space-y-6">
-      <Skeleton className="h-16 bg-corporate-darkSecondary" />
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Skeleton className="h-32 bg-corporate-darkSecondary" />
-        <Skeleton className="h-32 bg-corporate-darkSecondary" />
-        <Skeleton className="h-32 bg-corporate-darkSecondary" />
-      </div>
-      <Skeleton className="h-96 bg-corporate-darkSecondary" />
-    </div>
-  </div>
-);
-
-function App() {
-  return (
+const App = () => (
+  <HelmetProvider>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
+        <Sonner />
         <BrowserRouter>
-          <Suspense fallback={<PageLoader />}>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/dashboard" element={<DashboardPage />} />
-              <Route path="/admin" element={<AdminDashboard />} />
-              <Route path="/admin/qa-testing" element={<QATestingPage />} />
-              <Route path="/admin/anubis-memory" element={<AnubisMemoryPage />} />
-              <Route path="/admin/intelligence-core" element={<IntelligenceCorePage />} />
-              <Route path="/admin/persona-saturation" element={<PersonaSaturationPage />} />
-              <Route path="/admin/legal-ops" element={<LegalOpsPage />} />
-              <Route path="/admin/clients" element={<ClientsPage />} />
-              <Route path="/admin/genesis-sentinel" element={<GenesisSentinelPage />} />
-              <Route path="/admin/watchtower" element={<WatchtowerPage />} />
-            </Routes>
-          </Suspense>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/scan" element={<ScanPage />} />
+            <Route path="/simon-lindsay" element={<SimonLindsayPage />} />
+            <Route path="/blog" element={<BlogPage />} />
+            <Route path="/blog/:slug" element={<BlogPostPage />} />
+            <Route path="/auth" element={<AuthPage />} />
+            <Route path="/admin" element={<AdminDashboard />} />
+          </Routes>
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
-  );
-}
+  </HelmetProvider>
+);
 
 export default App;
