@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -74,13 +75,39 @@ const QALocalModelTester = () => {
 
   const checkLocalServerHealth = async (): Promise<boolean> => {
     try {
-      // Use the correct Ollama endpoint that we know works
-      const response = await fetch('http://localhost:3001/api/tags', {
-        method: 'GET',
-        signal: AbortSignal.timeout(5000)
-      });
-      return response.ok;
-    } catch {
+      // Enhanced health check with multiple endpoints and better error handling
+      const endpoints = [
+        'http://localhost:3001/api/tags',
+        'http://127.0.0.1:3001/api/tags'
+      ];
+      
+      for (const endpoint of endpoints) {
+        try {
+          console.log(`Testing Ollama endpoint: ${endpoint}`);
+          const response = await fetch(endpoint, {
+            method: 'GET',
+            mode: 'cors',
+            headers: {
+              'Accept': 'application/json',
+            },
+            signal: AbortSignal.timeout(3000)
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            console.log(`✅ Ollama server responding at ${endpoint}:`, data);
+            return true;
+          } else {
+            console.log(`❌ Response not OK from ${endpoint}:`, response.status, response.statusText);
+          }
+        } catch (endpointError) {
+          console.log(`❌ Failed to connect to ${endpoint}:`, endpointError.message);
+        }
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('❌ Health check error:', error);
       return false;
     }
   };
@@ -94,7 +121,7 @@ const QALocalModelTester = () => {
     });
 
     try {
-      // Test 0: Local Server Health Check
+      // Test 0: Local Server Health Check - Run this first for better diagnostics
       console.log('🧪 Testing Local Server Health...');
       updateTestStatus('Local Server Health Check', 'running');
       
@@ -108,7 +135,7 @@ const QALocalModelTester = () => {
             'Local Server Health Check', 
             'passed', 
             duration0,
-            'Local inference server (Ollama) is running and accessible'
+            'Local inference server (Ollama) is running and accessible on port 3001'
           );
           console.log('✅ Local server health check passed');
         } else {
@@ -116,16 +143,16 @@ const QALocalModelTester = () => {
             'Local Server Health Check', 
             'failed', 
             duration0,
-            'Local inference server not running - start Ollama server on port 3001'
+            'Cannot connect to Ollama server. Verify server is running with: ollama serve --host 0.0.0.0:3001'
           );
-          console.log('❌ Local server not available');
+          console.log('❌ Local server not accessible');
         }
       } catch (error) {
         updateTestStatus(
           'Local Server Health Check', 
           'failed', 
           Date.now() - startTime0,
-          `Server check failed: ${error.message}`
+          `Server check failed: ${error.message}. Check CORS policy and server configuration.`
         );
       }
       
@@ -439,9 +466,10 @@ const QALocalModelTester = () => {
                 <strong>Setup Requirements:</strong>
                 <ul className="mt-1 space-y-1 ml-2">
                   <li>• HuggingFace models require first-time download (~100-500MB)</li>
-                  <li>• Ollama server must be running on localhost:3001</li>
+                  <li>• Ollama server must be running: <code>ollama serve --host 0.0.0.0:3001</code></li>
                   <li>• WebGPU requires modern browser with GPU acceleration enabled</li>
                   <li>• Memory search requires existing data in Anubis system</li>
+                  <li>• For HuggingFace issues: Clear browser cache or try Chrome/Edge</li>
                 </ul>
               </div>
             </div>
@@ -453,3 +481,4 @@ const QALocalModelTester = () => {
 };
 
 export default QALocalModelTester;
+
