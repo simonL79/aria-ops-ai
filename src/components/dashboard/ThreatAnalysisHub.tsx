@@ -23,8 +23,8 @@ const ThreatAnalysisHub = ({
     <Card className="w-full">
       <Tabs defaultValue="classify" className="w-full">
         <TabsList className="grid grid-cols-4 mb-2 w-full">
-          <TabsTrigger value="classify" className="px-2 py-1.5 text-sm">Threat Classification</TabsTrigger>
-          <TabsTrigger value="respond" className="px-2 py-1.5 text-sm">Response Generation</TabsTrigger>
+          <TabsTrigger value="classify" className="px-2 py-1.5 text-sm">Live Threat Classification</TabsTrigger>
+          <TabsTrigger value="respond" className="px-2 py-1.5 text-sm">Live Response Engine</TabsTrigger>
           <TabsTrigger value="strategic" className="px-2 py-1.5 text-sm">Strategic Response</TabsTrigger>
           <TabsTrigger value="advanced" className="px-2 py-1.5 text-sm">Advanced Intelligence</TabsTrigger>
         </TabsList>
