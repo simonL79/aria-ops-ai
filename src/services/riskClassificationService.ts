@@ -1,11 +1,11 @@
-
 import { pipeline, env } from '@huggingface/transformers';
 import { toast } from 'sonner';
 
-// Configure transformers environment for better browser compatibility
+// Configure transformers environment for maximum browser compatibility
 env.allowRemoteModels = true;
 env.allowLocalModels = false;
 env.useBrowserCache = true;
+env.backends.onnx.wasm.numThreads = 1; // Single thread for better compatibility
 
 interface RiskClassificationResult {
   risk: 'Low' | 'Medium' | 'Medium-High' | 'High';
@@ -17,7 +17,7 @@ interface RiskClassificationResult {
 const loadedClassifiers: Record<string, any> = {};
 
 /**
- * Check if we're in a supported environment with enhanced checks
+ * Check if we're in a supported environment with enhanced browser checks
  */
 const isSupported = (): boolean => {
   try {
@@ -25,13 +25,23 @@ const isSupported = (): boolean => {
     const hasFetch = typeof fetch !== 'undefined';
     const hasWindow = typeof window !== 'undefined';
     
+    // Test WebAssembly instantiation
+    let wasmSupport = false;
+    try {
+      const wasmModule = new WebAssembly.Module(new Uint8Array([0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00]));
+      wasmSupport = wasmModule instanceof WebAssembly.Module;
+    } catch {
+      wasmSupport = false;
+    }
+    
     console.log('Risk classifier browser support:', {
       hasWebAssembly,
+      wasmSupport,
       hasFetch,
       hasWindow
     });
     
-    return hasWebAssembly && hasFetch && hasWindow;
+    return hasWebAssembly && wasmSupport && hasFetch && hasWindow;
   } catch (error) {
     console.error('Risk classifier support check failed:', error);
     return false;
@@ -41,27 +51,31 @@ const isSupported = (): boolean => {
 /**
  * Load a sentiment classification model in the browser with better error handling
  */
-export const loadRiskClassifier = async (modelId: string = 'distilbert-base-uncased-finetuned-sst-2-english'): Promise<boolean> => {
+export const loadRiskClassifier = async (modelId: string = 'Xenova/distilbert-base-uncased-finetuned-sst-2-english'): Promise<boolean> => {
   if (!isSupported()) {
-    console.warn('Risk classifier not supported in this environment - missing required browser features');
+    console.warn('Risk classifier not supported - missing required browser features or WebAssembly');
     return false;
   }
 
-  if (loadedClassifiers[modelId]) {
+  // Use browser-compatible quantized model
+  const browserModelId = modelId.includes('Xenova/') ? modelId : 'Xenova/distilbert-base-uncased-finetuned-sst-2-english';
+
+  if (loadedClassifiers[browserModelId]) {
     return true;
   }
   
   try {
-    console.log(`Loading classification model ${modelId}...`);
+    console.log(`Loading risk classification model ${browserModelId}...`);
     
     // Always use CPU for maximum compatibility
     const device = 'cpu';
     
-    // Load with extended timeout for classification models
-    const loadWithTimeout = async (timeoutMs: number = 60000) => {
+    // Load with shorter timeout for browser compatibility
+    const loadWithTimeout = async (timeoutMs: number = 25000) => {
       return Promise.race([
-        pipeline('text-classification' as any, modelId, { 
+        pipeline('text-classification' as any, browserModelId, { 
           device,
+          quantized: true, // Use quantized models for better performance
           progress_callback: (progress: any) => {
             if (progress.status === 'downloading') {
               console.log(`Downloading risk classifier: ${Math.round(progress.progress * 100)}%`);
@@ -76,9 +90,9 @@ export const loadRiskClassifier = async (modelId: string = 'distilbert-base-unca
       ]);
     };
 
-    loadedClassifiers[modelId] = await loadWithTimeout();
+    loadedClassifiers[browserModelId] = await loadWithTimeout();
     
-    console.log(`✅ Risk classifier ${modelId} loaded successfully on ${device}`);
+    console.log(`✅ Risk classifier ${browserModelId} loaded successfully on ${device}`);
     
     if (typeof window !== 'undefined') {
       toast.success('Risk classification model ready');
@@ -87,11 +101,11 @@ export const loadRiskClassifier = async (modelId: string = 'distilbert-base-unca
     return true;
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error(`❌ Error loading risk classifier ${modelId}:`, error);
+    console.error(`❌ Error loading risk classifier ${browserModelId}:`, error);
     
     if (typeof window !== 'undefined') {
       toast.error(`Failed to load risk classification model`, {
-        description: errorMessage.includes('timeout') ? 'Model download timeout - try again' : 'Using fallback classification'
+        description: errorMessage.includes('timeout') ? 'Model download timeout - try refreshing' : 'Using enhanced fallback classification'
       });
     }
     

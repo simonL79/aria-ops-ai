@@ -1,10 +1,11 @@
 import { toast } from 'sonner';
 import { pipeline, PipelineType, env } from '@huggingface/transformers';
 
-// Configure transformers environment for better browser compatibility
+// Configure transformers environment for maximum browser compatibility
 env.allowRemoteModels = true;
 env.allowLocalModels = false;
 env.useBrowserCache = true;
+env.backends.onnx.wasm.numThreads = 1; // Single thread for better compatibility
 
 // Interface for model loading status
 interface ModelStatus {
@@ -29,24 +30,48 @@ const modelStatus: Record<string, ModelStatus> = {};
  */
 const isTransformersSupported = (): boolean => {
   try {
-    // Check for required browser features
+    // Enhanced browser compatibility checks
     const hasWebAssembly = typeof WebAssembly !== 'undefined';
-    const hasSharedArrayBuffer = typeof SharedArrayBuffer !== 'undefined';
-    const hasWorker = typeof Worker !== 'undefined';
     const hasFetch = typeof fetch !== 'undefined';
+    const hasWorker = typeof Worker !== 'undefined';
+    const hasSharedArrayBuffer = typeof SharedArrayBuffer !== 'undefined';
     
-    console.log('Browser compatibility check:', {
+    // Test WebAssembly instantiation
+    let wasmSupport = false;
+    try {
+      const wasmModule = new WebAssembly.Module(new Uint8Array([0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00]));
+      wasmSupport = wasmModule instanceof WebAssembly.Module;
+    } catch {
+      wasmSupport = false;
+    }
+    
+    console.log('Enhanced browser compatibility check:', {
       hasWebAssembly,
-      hasSharedArrayBuffer,
-      hasWorker,
+      wasmSupport,
       hasFetch,
-      userAgent: navigator.userAgent
+      hasWorker,
+      hasSharedArrayBuffer,
+      userAgent: navigator.userAgent.substring(0, 50)
     });
     
-    return hasWebAssembly && hasFetch && typeof window !== 'undefined';
+    return hasWebAssembly && wasmSupport && hasFetch && typeof window !== 'undefined';
   } catch (error) {
     console.error('Browser compatibility check failed:', error);
     return false;
+  }
+};
+
+/**
+ * Get smaller, more compatible models for browser use
+ */
+const getBrowserCompatibleModel = (taskType: string): string => {
+  switch (taskType) {
+    case 'sentiment-analysis':
+      return 'Xenova/distilbert-base-uncased-finetuned-sst-2-english'; // Smaller quantized version
+    case 'text-classification':
+      return 'Xenova/distilbert-base-uncased-finetuned-sst-2-english';
+    default:
+      return 'Xenova/distilbert-base-uncased-finetuned-sst-2-english';
   }
 };
 
@@ -55,40 +80,43 @@ const isTransformersSupported = (): boolean => {
  */
 export const loadLocalModel = async (modelId: string, taskType: string): Promise<boolean> => {
   if (!isTransformersSupported()) {
-    console.warn('Transformers not supported in this environment - missing WebAssembly or other required features');
+    console.warn('Transformers not supported - missing WebAssembly or required browser features');
     return false;
   }
 
-  if (loadedModels[modelId]) {
+  // Use browser-compatible model if original fails
+  const compatibleModelId = getBrowserCompatibleModel(taskType);
+  const actualModelId = modelId.includes('Xenova/') ? modelId : compatibleModelId;
+
+  if (loadedModels[actualModelId]) {
     return true;
   }
   
   // Initialize model status
-  modelStatus[modelId] = {
+  modelStatus[actualModelId] = {
     isLoading: true,
     isReady: false,
     error: null
   };
   
   try {
-    console.log(`Loading model ${modelId} for task ${taskType}...`);
+    console.log(`Loading browser-compatible model ${actualModelId} for task ${taskType}...`);
     
-    // Always start with CPU for maximum compatibility
-    let device: "cpu" | "webgpu" = 'cpu';
-    
-    // Convert string taskType to PipelineType
+    // Always use CPU for maximum compatibility
+    const device = 'cpu';
     const pipelineType = taskType as PipelineType;
     
-    // Enhanced loading with better timeout and error handling
-    const loadWithTimeout = async (timeoutMs: number = 45000) => {
+    // Enhanced loading with shorter timeout for browser compatibility
+    const loadWithTimeout = async (timeoutMs: number = 20000) => {
       return Promise.race([
-        pipeline(pipelineType, modelId, { 
+        pipeline(pipelineType, actualModelId, { 
           device,
+          quantized: true, // Use quantized models for better performance
           progress_callback: (progress: any) => {
             if (progress.status === 'downloading') {
-              console.log(`Downloading ${modelId}: ${Math.round(progress.progress * 100)}%`);
+              console.log(`Downloading ${actualModelId}: ${Math.round(progress.progress * 100)}%`);
             } else if (progress.status === 'loading') {
-              console.log(`Loading ${modelId}: ${progress.name || 'model files'}`);
+              console.log(`Loading ${actualModelId}: ${progress.name || 'model files'}`);
             }
           }
         }),
@@ -98,38 +126,43 @@ export const loadLocalModel = async (modelId: string, taskType: string): Promise
       ]);
     };
 
-    // Load the model with timeout
-    loadedModels[modelId] = await loadWithTimeout();
+    // Load the model with shorter timeout
+    loadedModels[actualModelId] = await loadWithTimeout();
     
     // Update model status
-    modelStatus[modelId] = {
+    modelStatus[actualModelId] = {
       isLoading: false,
       isReady: true,
       error: null
     };
     
-    console.log(`✅ Model ${modelId} loaded successfully on ${device}`);
+    console.log(`✅ Browser-compatible model ${actualModelId} loaded successfully`);
+    
+    if (typeof window !== 'undefined') {
+      toast.success(`Model ${actualModelId.split('/').pop()} ready for inference`);
+    }
+    
     return true;
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error(`❌ Error loading model ${modelId}:`, error);
+    console.error(`❌ Error loading browser-compatible model ${actualModelId}:`, error);
     
-    // Enhanced error analysis
+    // Enhanced error analysis for browser compatibility
     let specificError = 'Model loading failed';
     if (errorMessage.includes('timeout')) {
-      specificError = 'Model download/loading timeout - try again with better connection';
+      specificError = 'Model download timeout - try refreshing the page';
     } else if (errorMessage.includes('WebAssembly')) {
-      specificError = 'WebAssembly not supported or disabled in browser';
-    } else if (errorMessage.includes('SharedArrayBuffer')) {
-      specificError = 'SharedArrayBuffer not available - try enabling cross-origin isolation';
-    } else if (errorMessage.includes('fetch')) {
-      specificError = 'Network error - check internet connection';
+      specificError = 'WebAssembly not supported - try a different browser (Chrome/Edge recommended)';
+    } else if (errorMessage.includes('memory')) {
+      specificError = 'Insufficient memory - try closing other browser tabs';
+    } else if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
+      specificError = 'Network error - check internet connection and try again';
     } else if (errorMessage.includes('CORS')) {
-      specificError = 'CORS error - browser blocking model download';
+      specificError = 'CORS error - browser security blocking model download';
     }
     
     // Update model status
-    modelStatus[modelId] = {
+    modelStatus[actualModelId] = {
       isLoading: false,
       isReady: false,
       error: specificError
@@ -137,7 +170,7 @@ export const loadLocalModel = async (modelId: string, taskType: string): Promise
     
     // Don't show toast for testing environment
     if (typeof window !== 'undefined') {
-      toast.error(`Failed to load model ${modelId}`, {
+      toast.error(`Failed to load model`, {
         description: specificError
       });
     }
@@ -161,32 +194,38 @@ export const getModelStatus = (modelId: string): ModelStatus => {
  * Run sentiment analysis using a local model with enhanced fallback
  */
 export const analyzeSentiment = async (modelId: string, text: string): Promise<PredictionResult> => {
+  // Get browser-compatible model
+  const compatibleModelId = getBrowserCompatibleModel('sentiment-analysis');
+  const actualModelId = modelId.includes('Xenova/') ? modelId : compatibleModelId;
+  
   // Ensure model is loaded
-  if (!loadedModels[modelId]) {
-    const loaded = await loadLocalModel(modelId, 'sentiment-analysis');
+  if (!loadedModels[actualModelId]) {
+    const loaded = await loadLocalModel(actualModelId, 'sentiment-analysis');
     if (!loaded) {
-      console.log('Using fallback sentiment analysis');
-      // Enhanced fallback with basic keyword analysis
-      const positiveKeywords = ['good', 'great', 'excellent', 'amazing', 'wonderful', 'fantastic'];
-      const negativeKeywords = ['bad', 'terrible', 'awful', 'horrible', 'worst', 'hate'];
+      console.log('Using enhanced keyword-based sentiment fallback');
+      // Enhanced fallback with more sophisticated keyword analysis
+      const positiveKeywords = ['good', 'great', 'excellent', 'amazing', 'wonderful', 'fantastic', 'love', 'awesome', 'perfect', 'brilliant'];
+      const negativeKeywords = ['bad', 'terrible', 'awful', 'horrible', 'worst', 'hate', 'disgusting', 'pathetic', 'useless', 'disappointing'];
+      const neutralKeywords = ['okay', 'fine', 'average', 'normal', 'standard', 'regular'];
       
       const lowerText = text.toLowerCase();
       const positiveScore = positiveKeywords.filter(word => lowerText.includes(word)).length;
       const negativeScore = negativeKeywords.filter(word => lowerText.includes(word)).length;
+      const neutralScore = neutralKeywords.filter(word => lowerText.includes(word)).length;
       
-      if (positiveScore > negativeScore) {
-        return { label: 'POSITIVE', score: 0.75 };
-      } else if (negativeScore > positiveScore) {
-        return { label: 'NEGATIVE', score: 0.75 };
+      if (positiveScore > negativeScore && positiveScore > neutralScore) {
+        return { label: 'POSITIVE', score: Math.min(0.7 + (positiveScore * 0.1), 0.95) };
+      } else if (negativeScore > positiveScore && negativeScore > neutralScore) {
+        return { label: 'NEGATIVE', score: Math.min(0.7 + (negativeScore * 0.1), 0.95) };
       } else {
-        return { label: 'NEUTRAL', score: 0.50 };
+        return { label: 'NEUTRAL', score: 0.6 };
       }
     }
   }
   
   try {
     // Run the model
-    const result = await loadedModels[modelId](text);
+    const result = await loadedModels[actualModelId](text);
     
     // Process the result (format depends on the model)
     if (Array.isArray(result)) {
@@ -195,7 +234,7 @@ export const analyzeSentiment = async (modelId: string, text: string): Promise<P
       return result;
     }
   } catch (error) {
-    console.error(`Error running model ${modelId}:`, error);
+    console.error(`Error running model ${actualModelId}:`, error);
     // Return fallback result
     return {
       label: 'NEUTRAL',
