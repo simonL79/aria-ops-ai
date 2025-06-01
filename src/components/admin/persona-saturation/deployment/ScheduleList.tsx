@@ -4,23 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Play, Pause, Trash2, Clock } from 'lucide-react';
-
-interface Schedule {
-  id: string;
-  name: string;
-  frequency: string;
-  time: string;
-  platforms: string[];
-  articleCount: number;
-  status: string;
-  nextRun: string;
-  lastRun: string;
-  entityName: string;
-  keywords: string[];
-}
+import { ScheduledDeployment } from '@/services/deploymentScheduler';
 
 interface ScheduleListProps {
-  schedules: Schedule[];
+  schedules: ScheduledDeployment[]; // Use ScheduledDeployment instead of Schedule
   onToggleStatus: (id: string, currentStatus: string) => void;
   onDelete: (id: string) => void;
 }

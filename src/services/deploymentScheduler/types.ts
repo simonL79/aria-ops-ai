@@ -1,6 +1,6 @@
 
 export interface ScheduledDeployment {
-  id?: string;
+  id: string; // Made required instead of optional
   name: string;
   frequency: string;
   time: string;

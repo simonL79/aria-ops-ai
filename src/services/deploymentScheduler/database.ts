@@ -1,20 +1,23 @@
 
+import { ScheduledDeployment } from './types';
+
 export class DeploymentDatabase {
-  static async saveScheduledDeployment(deployment: any): Promise<string | null> {
+  static async saveScheduledDeployment(deployment: Omit<ScheduledDeployment, 'id'>): Promise<string | null> {
     try {
-      // For now, just return a mock ID since we don't have the actual database table
-      console.log('Saving scheduled deployment:', deployment);
-      return crypto.randomUUID();
+      // Generate a proper ID for the deployment
+      const id = crypto.randomUUID();
+      console.log('Saving scheduled deployment:', { ...deployment, id });
+      return id;
     } catch (error) {
       console.error('Error saving deployment:', error);
       return null;
     }
   }
 
-  static async loadScheduledDeployments(): Promise<any[]> {
+  static async loadScheduledDeployments(): Promise<ScheduledDeployment[]> {
     try {
-      // Return empty array for now
       console.log('Loading scheduled deployments...');
+      // Return empty array for now - will be populated when database is connected
       return [];
     } catch (error) {
       console.error('Error loading deployments:', error);
@@ -22,7 +25,7 @@ export class DeploymentDatabase {
     }
   }
 
-  static async updateScheduledDeployment(id: string, updates: any): Promise<boolean> {
+  static async updateScheduledDeployment(id: string, updates: Partial<ScheduledDeployment>): Promise<boolean> {
     try {
       console.log('Updating deployment:', id, updates);
       return true;
