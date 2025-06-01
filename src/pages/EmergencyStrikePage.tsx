@@ -2,6 +2,7 @@
 import { Helmet } from 'react-helmet-async';
 import EmergencyStrikeEngine from '@/components/aria/EmergencyStrikeEngine';
 import AdminGuard from '@/components/auth/AdminGuard';
+import DashboardLayout from '@/components/layout/DashboardLayout';
 
 const EmergencyStrikePage = () => {
   return (
@@ -12,9 +13,11 @@ const EmergencyStrikePage = () => {
       </Helmet>
       
       <AdminGuard>
-        <div className="container mx-auto py-8">
-          <EmergencyStrikeEngine />
-        </div>
+        <DashboardLayout>
+          <div className="container mx-auto py-8">
+            <EmergencyStrikeEngine />
+          </div>
+        </DashboardLayout>
       </AdminGuard>
     </>
   );
