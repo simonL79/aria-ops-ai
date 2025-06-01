@@ -1,5 +1,10 @@
 import { toast } from 'sonner';
-import { pipeline, PipelineType } from '@huggingface/transformers';
+import { pipeline, PipelineType, env } from '@huggingface/transformers';
+
+// Configure transformers environment for better browser compatibility
+env.allowRemoteModels = true;
+env.allowLocalModels = false;
+env.useBrowserCache = true;
 
 // Interface for model loading status
 interface ModelStatus {
@@ -24,18 +29,33 @@ const modelStatus: Record<string, ModelStatus> = {};
  */
 const isTransformersSupported = (): boolean => {
   try {
-    return typeof window !== 'undefined' && 'fetch' in window;
-  } catch {
+    // Check for required browser features
+    const hasWebAssembly = typeof WebAssembly !== 'undefined';
+    const hasSharedArrayBuffer = typeof SharedArrayBuffer !== 'undefined';
+    const hasWorker = typeof Worker !== 'undefined';
+    const hasFetch = typeof fetch !== 'undefined';
+    
+    console.log('Browser compatibility check:', {
+      hasWebAssembly,
+      hasSharedArrayBuffer,
+      hasWorker,
+      hasFetch,
+      userAgent: navigator.userAgent
+    });
+    
+    return hasWebAssembly && hasFetch && typeof window !== 'undefined';
+  } catch (error) {
+    console.error('Browser compatibility check failed:', error);
     return false;
   }
 };
 
 /**
- * Load a model from HuggingFace in the browser
+ * Load a model from HuggingFace in the browser with enhanced compatibility
  */
 export const loadLocalModel = async (modelId: string, taskType: string): Promise<boolean> => {
   if (!isTransformersSupported()) {
-    console.warn('Transformers not supported in this environment');
+    console.warn('Transformers not supported in this environment - missing WebAssembly or other required features');
     return false;
   }
 
@@ -53,34 +73,27 @@ export const loadLocalModel = async (modelId: string, taskType: string): Promise
   try {
     console.log(`Loading model ${modelId} for task ${taskType}...`);
     
-    // Use CPU device as fallback if WebGPU fails
+    // Always start with CPU for maximum compatibility
     let device: "cpu" | "webgpu" = 'cpu';
-    
-    // Try WebGPU if available
-    if ('gpu' in navigator) {
-      try {
-        device = 'webgpu';
-      } catch {
-        device = 'cpu';
-      }
-    }
     
     // Convert string taskType to PipelineType
     const pipelineType = taskType as PipelineType;
     
-    // Add timeout and retry logic
-    const loadWithTimeout = async (timeoutMs: number = 30000) => {
+    // Enhanced loading with better timeout and error handling
+    const loadWithTimeout = async (timeoutMs: number = 45000) => {
       return Promise.race([
         pipeline(pipelineType, modelId, { 
           device,
           progress_callback: (progress: any) => {
             if (progress.status === 'downloading') {
               console.log(`Downloading ${modelId}: ${Math.round(progress.progress * 100)}%`);
+            } else if (progress.status === 'loading') {
+              console.log(`Loading ${modelId}: ${progress.name || 'model files'}`);
             }
           }
         }),
         new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Model loading timeout')), timeoutMs)
+          setTimeout(() => reject(new Error(`Model loading timeout after ${timeoutMs}ms`)), timeoutMs)
         )
       ]);
     };
@@ -95,22 +108,37 @@ export const loadLocalModel = async (modelId: string, taskType: string): Promise
       error: null
     };
     
-    console.log(`Model ${modelId} loaded successfully on ${device}`);
+    console.log(`✅ Model ${modelId} loaded successfully on ${device}`);
     return true;
   } catch (error) {
-    console.error(`Error loading model ${modelId}:`, error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error(`❌ Error loading model ${modelId}:`, error);
+    
+    // Enhanced error analysis
+    let specificError = 'Model loading failed';
+    if (errorMessage.includes('timeout')) {
+      specificError = 'Model download/loading timeout - try again with better connection';
+    } else if (errorMessage.includes('WebAssembly')) {
+      specificError = 'WebAssembly not supported or disabled in browser';
+    } else if (errorMessage.includes('SharedArrayBuffer')) {
+      specificError = 'SharedArrayBuffer not available - try enabling cross-origin isolation';
+    } else if (errorMessage.includes('fetch')) {
+      specificError = 'Network error - check internet connection';
+    } else if (errorMessage.includes('CORS')) {
+      specificError = 'CORS error - browser blocking model download';
+    }
     
     // Update model status
     modelStatus[modelId] = {
       isLoading: false,
       isReady: false,
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: specificError
     };
     
     // Don't show toast for testing environment
     if (typeof window !== 'undefined') {
       toast.error(`Failed to load model ${modelId}`, {
-        description: 'Model may need to download or device not supported'
+        description: specificError
       });
     }
     
@@ -130,18 +158,29 @@ export const getModelStatus = (modelId: string): ModelStatus => {
 };
 
 /**
- * Run sentiment analysis using a local model with fallback
+ * Run sentiment analysis using a local model with enhanced fallback
  */
 export const analyzeSentiment = async (modelId: string, text: string): Promise<PredictionResult> => {
   // Ensure model is loaded
   if (!loadedModels[modelId]) {
     const loaded = await loadLocalModel(modelId, 'sentiment-analysis');
     if (!loaded) {
-      // Return mock result for testing
-      return {
-        label: 'POSITIVE',
-        score: 0.85
-      };
+      console.log('Using fallback sentiment analysis');
+      // Enhanced fallback with basic keyword analysis
+      const positiveKeywords = ['good', 'great', 'excellent', 'amazing', 'wonderful', 'fantastic'];
+      const negativeKeywords = ['bad', 'terrible', 'awful', 'horrible', 'worst', 'hate'];
+      
+      const lowerText = text.toLowerCase();
+      const positiveScore = positiveKeywords.filter(word => lowerText.includes(word)).length;
+      const negativeScore = negativeKeywords.filter(word => lowerText.includes(word)).length;
+      
+      if (positiveScore > negativeScore) {
+        return { label: 'POSITIVE', score: 0.75 };
+      } else if (negativeScore > positiveScore) {
+        return { label: 'NEGATIVE', score: 0.75 };
+      } else {
+        return { label: 'NEUTRAL', score: 0.50 };
+      }
     }
   }
   

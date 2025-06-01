@@ -1,6 +1,11 @@
 
-import { pipeline } from '@huggingface/transformers';
+import { pipeline, env } from '@huggingface/transformers';
 import { toast } from 'sonner';
+
+// Configure transformers environment for better browser compatibility
+env.allowRemoteModels = true;
+env.allowLocalModels = false;
+env.useBrowserCache = true;
 
 interface RiskClassificationResult {
   risk: 'Low' | 'Medium' | 'Medium-High' | 'High';
@@ -12,22 +17,33 @@ interface RiskClassificationResult {
 const loadedClassifiers: Record<string, any> = {};
 
 /**
- * Check if we're in a supported environment
+ * Check if we're in a supported environment with enhanced checks
  */
 const isSupported = (): boolean => {
   try {
-    return typeof window !== 'undefined' && 'fetch' in window;
-  } catch {
+    const hasWebAssembly = typeof WebAssembly !== 'undefined';
+    const hasFetch = typeof fetch !== 'undefined';
+    const hasWindow = typeof window !== 'undefined';
+    
+    console.log('Risk classifier browser support:', {
+      hasWebAssembly,
+      hasFetch,
+      hasWindow
+    });
+    
+    return hasWebAssembly && hasFetch && hasWindow;
+  } catch (error) {
+    console.error('Risk classifier support check failed:', error);
     return false;
   }
 };
 
 /**
- * Load a sentiment classification model in the browser
+ * Load a sentiment classification model in the browser with better error handling
  */
 export const loadRiskClassifier = async (modelId: string = 'distilbert-base-uncased-finetuned-sst-2-english'): Promise<boolean> => {
   if (!isSupported()) {
-    console.warn('Risk classifier not supported in this environment');
+    console.warn('Risk classifier not supported in this environment - missing required browser features');
     return false;
   }
 
@@ -38,36 +54,31 @@ export const loadRiskClassifier = async (modelId: string = 'distilbert-base-unca
   try {
     console.log(`Loading classification model ${modelId}...`);
     
-    // Determine device to use (fallback to CPU if WebGPU fails)
-    let device: "cpu" | "webgpu" = 'cpu';
-    if ('gpu' in navigator) {
-      try {
-        device = 'webgpu';
-      } catch {
-        device = 'cpu';
-      }
-    }
+    // Always use CPU for maximum compatibility
+    const device = 'cpu';
     
-    // Load with timeout
-    const loadWithTimeout = async (timeoutMs: number = 25000) => {
+    // Load with extended timeout for classification models
+    const loadWithTimeout = async (timeoutMs: number = 60000) => {
       return Promise.race([
         pipeline('text-classification' as any, modelId, { 
           device,
           progress_callback: (progress: any) => {
             if (progress.status === 'downloading') {
               console.log(`Downloading risk classifier: ${Math.round(progress.progress * 100)}%`);
+            } else if (progress.status === 'loading') {
+              console.log(`Loading risk classifier: ${progress.name || 'model files'}`);
             }
           }
         }),
         new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Risk classifier loading timeout')), timeoutMs)
+          setTimeout(() => reject(new Error(`Risk classifier loading timeout after ${timeoutMs}ms`)), timeoutMs)
         )
       ]);
     };
 
     loadedClassifiers[modelId] = await loadWithTimeout();
     
-    console.log(`Risk classifier ${modelId} loaded successfully on ${device}`);
+    console.log(`✅ Risk classifier ${modelId} loaded successfully on ${device}`);
     
     if (typeof window !== 'undefined') {
       toast.success('Risk classification model ready');
@@ -75,11 +86,12 @@ export const loadRiskClassifier = async (modelId: string = 'distilbert-base-unca
     
     return true;
   } catch (error) {
-    console.error(`Error loading risk classifier ${modelId}:`, error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error(`❌ Error loading risk classifier ${modelId}:`, error);
     
     if (typeof window !== 'undefined') {
       toast.error(`Failed to load risk classification model`, {
-        description: 'Using fallback classification'
+        description: errorMessage.includes('timeout') ? 'Model download timeout - try again' : 'Using fallback classification'
       });
     }
     
@@ -88,19 +100,50 @@ export const loadRiskClassifier = async (modelId: string = 'distilbert-base-unca
 };
 
 /**
- * Classify risk in a text using local HuggingFace model
+ * Classify risk in a text using local HuggingFace model with enhanced fallback
  */
 export const classifyRisk = async (text: string, modelId: string = 'distilbert-base-uncased-finetuned-sst-2-english'): Promise<RiskClassificationResult> => {
   // Ensure model is loaded
   if (!loadedClassifiers[modelId]) {
     const loaded = await loadRiskClassifier(modelId);
     if (!loaded) {
-      // Return fallback classification
-      return {
-        risk: 'Medium',
-        confidence: 0.75,
-        summary: 'Fallback risk assessment - model unavailable'
-      };
+      console.log('Using enhanced fallback risk classification');
+      
+      // Enhanced fallback with threat keyword analysis
+      const threatKeywords = ['threat', 'attack', 'hack', 'malware', 'virus', 'scam', 'fraud', 'steal', 'breach', 'vulnerability'];
+      const highRiskKeywords = ['kill', 'bomb', 'terrorist', 'violence', 'weapon', 'dangerous'];
+      const mediumRiskKeywords = ['suspicious', 'warning', 'alert', 'concern', 'issue', 'problem'];
+      
+      const lowerText = text.toLowerCase();
+      const highRiskScore = highRiskKeywords.filter(word => lowerText.includes(word)).length;
+      const threatScore = threatKeywords.filter(word => lowerText.includes(word)).length;
+      const mediumRiskScore = mediumRiskKeywords.filter(word => lowerText.includes(word)).length;
+      
+      if (highRiskScore > 0) {
+        return {
+          risk: 'High',
+          confidence: 0.85,
+          summary: 'High-risk content detected via keyword analysis (fallback mode)'
+        };
+      } else if (threatScore > 1) {
+        return {
+          risk: 'Medium-High',
+          confidence: 0.75,
+          summary: 'Multiple threat indicators detected (fallback mode)'
+        };
+      } else if (threatScore > 0 || mediumRiskScore > 1) {
+        return {
+          risk: 'Medium',
+          confidence: 0.65,
+          summary: 'Moderate risk indicators detected (fallback mode)'
+        };
+      } else {
+        return {
+          risk: 'Low',
+          confidence: 0.55,
+          summary: 'No significant risk indicators detected (fallback mode)'
+        };
+      }
     }
   }
   
