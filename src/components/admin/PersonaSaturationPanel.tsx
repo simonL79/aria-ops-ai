@@ -46,6 +46,7 @@ const PersonaSaturationPanel = () => {
   const [currentCampaign, setCurrentCampaign] = useState<SaturationCampaign | null>(null);
   const [campaigns, setCampaigns] = useState<SaturationCampaign[]>([]);
   const [loadingCampaigns, setLoadingCampaigns] = useState(false);
+  const [isLoadingSimon, setIsLoadingSimon] = useState(true);
 
   // Load most recent "Simon Lindsay" campaign on component mount
   useEffect(() => {
@@ -54,6 +55,7 @@ const PersonaSaturationPanel = () => {
 
   const loadRecentSimonLindsayCampaign = async () => {
     try {
+      setIsLoadingSimon(true);
       console.log('🔍 Looking for recent Simon Lindsay campaign...');
       
       const { data, error } = await supabase
@@ -63,8 +65,11 @@ const PersonaSaturationPanel = () => {
         .order('created_at', { ascending: false })
         .limit(1);
 
+      console.log('📊 Database query result:', { data, error });
+
       if (error) {
-        console.error('Error fetching Simon Lindsay campaign:', error);
+        console.error('❌ Error fetching Simon Lindsay campaign:', error);
+        toast.error(`Database error: ${error.message}`);
         return;
       }
 
@@ -77,9 +82,11 @@ const PersonaSaturationPanel = () => {
         const platformResults: Record<string, { success: number; total: number; urls: string[] }> = {};
         
         const typedCampaignData = campaignData.campaign_data as CampaignData;
+        console.log('📋 Parsed campaign data:', typedCampaignData);
         
         if (typedCampaignData?.deployments?.urls) {
           deploymentUrls.push(...typedCampaignData.deployments.urls);
+          console.log('🔗 Found deployment URLs:', typedCampaignData.deployments.urls);
         }
         
         if (typedCampaignData?.platformResults) {
@@ -87,6 +94,7 @@ const PersonaSaturationPanel = () => {
             platformResults[platform] = results;
             if (results.urls) {
               deploymentUrls.push(...results.urls);
+              console.log(`🔗 Found ${platform} URLs:`, results.urls);
             }
           });
         }
@@ -105,18 +113,23 @@ const PersonaSaturationPanel = () => {
           platformResults: platformResults
         };
 
+        console.log('🎯 Setting campaign data:', formattedCampaign);
         setCurrentCampaign(formattedCampaign);
         setEntityName(campaignData.entity_name);
         
         // Switch to monitor tab to show the campaign
         setActiveTab('monitor');
         
-        toast.success(`📊 Loaded recent campaign: ${deploymentUrls.length} URLs found`);
+        toast.success(`📊 Loaded Simon Lindsay campaign: ${deploymentUrls.length} URLs found`);
       } else {
         console.log('ℹ️ No Simon Lindsay campaigns found in database');
+        toast.info('No Simon Lindsay campaigns found in the database');
       }
     } catch (error) {
-      console.error('Error loading Simon Lindsay campaign:', error);
+      console.error('💥 Error loading Simon Lindsay campaign:', error);
+      toast.error(`Failed to load campaign: ${error}`);
+    } finally {
+      setIsLoadingSimon(false);
     }
   };
 
@@ -308,6 +321,11 @@ const PersonaSaturationPanel = () => {
         <p className="text-sm corporate-subtext">
           Deploy SEO-optimized articles across multiple platforms using tiered scaling strategies
         </p>
+        {isLoadingSimon && (
+          <p className="text-sm text-blue-400">
+            🔍 Loading recent Simon Lindsay campaign...
+          </p>
+        )}
       </CardHeader>
       <CardContent>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
