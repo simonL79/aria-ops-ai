@@ -1,45 +1,28 @@
 
-import React, { Suspense, lazy, useState, useEffect } from 'react';
+import React, { Suspense, lazy, useState, useEffect, useMemo } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import ResponsiveLayout from '@/components/layout/ResponsiveLayout';
 import { Skeleton } from '@/components/ui/skeleton';
 import { qaTestRunner, QATestSuite } from '@/services/testing/qaTestRunner';
 
-// Lazy load components for better performance
+// Lazy load heavy components for better performance
 const CriticalActionButtons = lazy(() => import('@/components/dashboard/CriticalActionButtons'));
-const PerformanceMonitor = lazy(() => import('@/components/admin/qa/PerformanceMonitor'));
 const ComprehensiveQADashboard = lazy(() => import('@/components/qa/ComprehensiveQADashboard'));
 
-// Import optimized components directly (no lazy loading for small components)
+// Import optimized components directly for better performance
 import QATestingHeader from '@/components/admin/qa/QATestingHeader';
 import QAOverviewCards from '@/components/admin/qa/QAOverviewCards';
 import QAComplianceStatus from '@/components/admin/qa/QAComplianceStatus';
 import QAProcessCards from '@/components/admin/qa/QAProcessCards';
 import QADeploymentCriteria from '@/components/admin/qa/QADeploymentCriteria';
+import QAResponsiveLayout from '@/components/admin/qa/QAResponsiveLayout';
+import QAPerformanceOptimizer from '@/components/admin/qa/QAPerformanceOptimizer';
 
 const QATestingPage = React.memo(() => {
   const [testSuite, setTestSuite] = useState<QATestSuite | null>(null);
   const [isRunningTests, setIsRunningTests] = useState(false);
 
-  // Run initial QA tests on component mount
-  useEffect(() => {
-    const runInitialTests = async () => {
-      setIsRunningTests(true);
-      try {
-        const results = await qaTestRunner.runFullQASuite();
-        setTestSuite(results);
-      } catch (error) {
-        console.error('Failed to run QA tests:', error);
-      } finally {
-        setIsRunningTests(false);
-      }
-    };
-
-    runInitialTests();
-  }, []);
-
-  // Enhanced validation for live data only
-  const actionHandlers = React.useMemo(() => ({
+  // Memoized action handlers to prevent unnecessary re-renders
+  const actionHandlers = useMemo(() => ({
     handleLiveThreatScan: () => {
       console.log('🔍 A.R.I.A™ OSINT: Live Threat Scan initiated - NO SIMULATIONS');
     },
@@ -60,12 +43,60 @@ const QATestingPage = React.memo(() => {
     }
   }), []);
 
+  // Optimized test initialization
+  useEffect(() => {
+    let isMounted = true;
+    
+    const runInitialTests = async () => {
+      if (isRunningTests) return;
+      
+      setIsRunningTests(true);
+      try {
+        // Use requestIdleCallback for better performance
+        const runTests = () => {
+          if (!isMounted) return;
+          
+          qaTestRunner.runFullQASuite().then(results => {
+            if (isMounted) {
+              setTestSuite(results);
+              setIsRunningTests(false);
+            }
+          }).catch(error => {
+            console.error('Failed to run QA tests:', error);
+            if (isMounted) {
+              setIsRunningTests(false);
+            }
+          });
+        };
+
+        if ('requestIdleCallback' in window) {
+          requestIdleCallback(runTests);
+        } else {
+          setTimeout(runTests, 100);
+        }
+      } catch (error) {
+        console.error('Failed to initialize QA tests:', error);
+        if (isMounted) {
+          setIsRunningTests(false);
+        }
+      }
+    };
+
+    runInitialTests();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isRunningTests]);
+
   return (
     <DashboardLayout>
-      <ResponsiveLayout className="bg-corporate-dark min-h-screen w-full">
-        {/* Critical Action Buttons - Live Data Validated - Responsive Design Enhanced */}
-        <Suspense fallback={<Skeleton className="h-12 sm:h-16 lg:h-20 w-full bg-corporate-darkSecondary rounded" />}>
-          <div className="w-full px-2 sm:px-4 lg:px-6">
+      <QAResponsiveLayout className="bg-corporate-dark">
+        {/* Critical Action Buttons - Optimized Loading */}
+        <Suspense fallback={
+          <Skeleton className="h-12 sm:h-16 lg:h-20 w-full bg-corporate-darkSecondary rounded" />
+        }>
+          <div className="w-full">
             <CriticalActionButtons
               onLiveThreatScan={actionHandlers.handleLiveThreatScan}
               onLiveIntelligenceSweep={actionHandlers.handleLiveIntelligenceSweep}
@@ -80,47 +111,35 @@ const QATestingPage = React.memo(() => {
           </div>
         </Suspense>
 
-        {/* Header section - Live Data Compliance - Responsive */}
-        <div className="w-full px-2 sm:px-4 lg:px-6 mt-4 sm:mt-6">
-          <QATestingHeader />
-        </div>
+        {/* Header Section - Responsive */}
+        <QATestingHeader />
 
-        {/* Performance monitor and overview - Enhanced Responsive Grid */}
-        <div className="w-full px-2 sm:px-4 lg:px-6">
-          <div className="grid grid-cols-1 xl:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6 w-full">
-            <div className="xl:col-span-3 w-full min-w-0">
-              <QAOverviewCards testSuite={testSuite} />
-            </div>
-            <div className="xl:col-span-1 w-full min-w-0">
-              <Suspense fallback={<Skeleton className="h-32 sm:h-40 bg-corporate-darkSecondary rounded" />}>
-                <PerformanceMonitor />
-              </Suspense>
-            </div>
+        {/* Performance Monitor and Overview - Enhanced Responsive Grid */}
+        <div className="grid grid-cols-1 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+          <div className="xl:col-span-3 w-full min-w-0">
+            <QAOverviewCards testSuite={testSuite} />
+          </div>
+          <div className="xl:col-span-1 w-full min-w-0">
+            <QAPerformanceOptimizer />
           </div>
         </div>
 
-        {/* Main QA Dashboard - Responsive Container */}
-        <div className="w-full px-2 sm:px-4 lg:px-6">
-          <Suspense fallback={<Skeleton className="h-64 sm:h-80 lg:h-96 w-full bg-corporate-darkSecondary rounded" />}>
-            <ComprehensiveQADashboard />
-          </Suspense>
-        </div>
+        {/* Main QA Dashboard - Optimized Loading */}
+        <Suspense fallback={
+          <Skeleton className="h-64 sm:h-80 lg:h-96 w-full bg-corporate-darkSecondary rounded" />
+        }>
+          <ComprehensiveQADashboard />
+        </Suspense>
 
-        {/* Live Data Compliance Status - Responsive */}
-        <div className="w-full px-2 sm:px-4 lg:px-6 mt-4 sm:mt-6">
-          <QAComplianceStatus />
-        </div>
+        {/* Compliance Status - Responsive */}
+        <QAComplianceStatus />
 
-        {/* QA Process Overview - Updated for Live Data - Responsive */}
-        <div className="w-full px-2 sm:px-4 lg:px-6 mt-4 sm:mt-6">
-          <QAProcessCards />
-        </div>
+        {/* QA Process Overview - Responsive */}
+        <QAProcessCards />
 
         {/* Deployment Criteria - Responsive */}
-        <div className="w-full px-2 sm:px-4 lg:px-6 mt-4 sm:mt-6 pb-6">
-          <QADeploymentCriteria />
-        </div>
-      </ResponsiveLayout>
+        <QADeploymentCriteria />
+      </QAResponsiveLayout>
     </DashboardLayout>
   );
 });
