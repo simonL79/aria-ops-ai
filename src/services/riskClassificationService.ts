@@ -39,7 +39,7 @@ export const loadRiskClassifier = async (modelId: string = 'distilbert-base-unca
     console.log(`Loading classification model ${modelId}...`);
     
     // Determine device to use (fallback to CPU if WebGPU fails)
-    let device = 'cpu';
+    let device: "cpu" | "webgpu" = 'cpu';
     if ('gpu' in navigator) {
       try {
         device = 'webgpu';

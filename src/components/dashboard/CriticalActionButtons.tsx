@@ -40,7 +40,7 @@ const CriticalActionButtons: React.FC<CriticalActionButtonsProps> = React.memo((
             className="bg-red-600 hover:bg-red-700 text-white px-2 sm:px-3 lg:px-4 py-3 sm:py-4 lg:py-5 h-auto flex flex-col items-center justify-center gap-1 sm:gap-2 min-h-[60px] sm:min-h-[70px] lg:min-h-[80px] w-full transition-all duration-200 text-xs sm:text-sm lg:text-base"
           >
             <Search className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 flex-shrink-0" />
-            <span className="text-center leading-tight font-medium">
+            <span className="text-center leading-tight font-medium text-center">
               Live Threat Scan
             </span>
           </Button>
@@ -54,7 +54,7 @@ const CriticalActionButtons: React.FC<CriticalActionButtonsProps> = React.memo((
             className="bg-blue-600 hover:bg-blue-700 text-white px-2 sm:px-3 lg:px-4 py-3 sm:py-4 lg:py-5 h-auto flex flex-col items-center justify-center gap-1 sm:gap-2 min-h-[60px] sm:min-h-[70px] lg:min-h-[80px] w-full transition-all duration-200 text-xs sm:text-sm lg:text-base"
           >
             <Activity className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 flex-shrink-0" />
-            <span className="text-center leading-tight font-medium">
+            <span className="text-center leading-tight font-medium text-center">
               Live Intelligence Sweep
             </span>
           </Button>
@@ -71,7 +71,7 @@ const CriticalActionButtons: React.FC<CriticalActionButtonsProps> = React.memo((
             }`}
           >
             <Shield className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 flex-shrink-0" />
-            <span className="text-center leading-tight font-medium">
+            <span className="text-center leading-tight font-medium text-center">
               Guardian
             </span>
           </Button>
@@ -84,7 +84,7 @@ const CriticalActionButtons: React.FC<CriticalActionButtonsProps> = React.memo((
             className="bg-corporate-accent hover:bg-corporate-accentDark text-black px-2 sm:px-3 lg:px-4 py-3 sm:py-4 lg:py-5 h-auto flex flex-col items-center justify-center gap-1 sm:gap-2 min-h-[60px] sm:min-h-[70px] lg:min-h-[80px] w-full transition-all duration-200 text-xs sm:text-sm lg:text-base"
           >
             <FileText className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 flex-shrink-0" />
-            <span className="text-center leading-tight font-medium">
+            <span className="text-center leading-tight font-medium text-center">
               Generate Report
             </span>
           </Button>
@@ -101,7 +101,7 @@ const CriticalActionButtons: React.FC<CriticalActionButtonsProps> = React.memo((
             }`}
           >
             <Zap className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 flex-shrink-0" />
-            <span className="text-center leading-tight font-medium">
+            <span className="text-center leading-tight font-medium text-center">
               Activate Real-Time
             </span>
           </Button>
@@ -115,7 +115,7 @@ const CriticalActionButtons: React.FC<CriticalActionButtonsProps> = React.memo((
             className="bg-orange-600 hover:bg-orange-700 text-white px-2 sm:px-3 lg:px-4 py-3 sm:py-4 lg:py-5 h-auto flex flex-col items-center justify-center gap-1 sm:gap-2 min-h-[60px] sm:min-h-[70px] lg:min-h-[80px] w-full transition-all duration-200 text-xs sm:text-sm lg:text-base"
           >
             <Play className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 flex-shrink-0" />
-            <span className="text-center leading-tight font-medium">
+            <span className="text-center leading-tight font-medium text-center">
               Run Manual Scan
             </span>
           </Button>

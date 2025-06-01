@@ -55,7 +55,7 @@ export const loadLocalModel = async (modelId: string, taskType: string): Promise
     console.log(`Loading model ${modelId} for task ${taskType}...`);
     
     // Use CPU device as fallback if WebGPU fails
-    let device = 'cpu';
+    let device: "cpu" | "webgpu" = 'cpu';
     
     // Try WebGPU if available
     if ('gpu' in navigator) {
