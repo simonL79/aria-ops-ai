@@ -601,6 +601,45 @@ export type Database = {
         }
         Relationships: []
       }
+      content_sources: {
+        Row: {
+          created_at: string | null
+          extracted_html: string | null
+          id: string
+          published_at: string | null
+          source_type: string
+          summary: string | null
+          tags: string[] | null
+          title: string
+          updated_at: string | null
+          url: string
+        }
+        Insert: {
+          created_at?: string | null
+          extracted_html?: string | null
+          id?: string
+          published_at?: string | null
+          source_type: string
+          summary?: string | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string | null
+          url: string
+        }
+        Update: {
+          created_at?: string | null
+          extracted_html?: string | null
+          id?: string
+          published_at?: string | null
+          source_type?: string
+          summary?: string | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string | null
+          url?: string
+        }
+        Relationships: []
+      }
       counter_narratives: {
         Row: {
           created_at: string | null
