@@ -201,7 +201,7 @@ const PersonaSaturationPanel = () => {
         setCurrentCampaign(formattedCampaign);
         setEntityName(campaignData.entity_name);
         
-        // Switch to monitor tab to show the campaign
+        // Force switch to monitor tab to show the campaign
         setActiveTab('monitor');
         
         toast.success(`📊 Loaded Simon Lindsay campaign: ${uniqueUrls.length} live URLs found`);
