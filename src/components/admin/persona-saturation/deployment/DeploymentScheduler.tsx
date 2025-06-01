@@ -3,11 +3,10 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Separator } from '@/components/ui/separator';
 import { 
   Calendar, 
   Clock, 
@@ -16,34 +15,36 @@ import {
   Trash2, 
   Plus,
   Settings,
-  Target,
-  CheckCircle,
-  AlertTriangle
+  RefreshCw
 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { DeploymentSchedulerService, ScheduledDeployment } from '@/services/deploymentScheduler';
 import { toast } from 'sonner';
-import { DeploymentSchedulerService, type ScheduledDeployment } from '@/services/deploymentScheduler';
+import DeploymentHistory from './DeploymentHistory';
 
 const DeploymentScheduler = () => {
   const [schedules, setSchedules] = useState<ScheduledDeployment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [showAddForm, setShowAddForm] = useState(false);
-  
+  const [showCreateForm, setShowCreateForm] = useState(false);
+
   // Form state
-  const [newSchedule, setNewSchedule] = useState({
+  const [formData, setFormData] = useState({
     name: '',
-    entityName: '',
     frequency: 'daily',
     time: '09:00',
-    platforms: ['github-pages'],
+    platforms: [] as string[],
     articleCount: 10,
-    keywords: [''],
-    status: 'active' as const
+    entityName: '',
+    keywords: ''
   });
 
-  useEffect(() => {
-    loadSchedules();
-  }, []);
+  const availablePlatforms = [
+    'github-pages',
+    'netlify', 
+    'vercel',
+    'cloudflare',
+    'firebase',
+    'surge'
+  ];
 
   const loadSchedules = async () => {
     setIsLoading(true);
@@ -51,93 +52,54 @@ const DeploymentScheduler = () => {
       const loadedSchedules = await DeploymentSchedulerService.loadScheduledDeployments();
       setSchedules(loadedSchedules);
     } catch (error) {
-      console.error('Error loading schedules:', error);
+      console.error('Failed to load schedules:', error);
       toast.error('Failed to load scheduled deployments');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const executeScheduledDeployment = async (schedule: ScheduledDeployment) => {
-    try {
-      console.log(`🚀 Executing scheduled deployment: ${schedule.entityName}`);
-      
-      const { data, error } = await supabase.functions.invoke('persona-saturation', {
-        body: {
-          entityName: schedule.entityName,
-          targetKeywords: schedule.keywords,
-          contentCount: schedule.articleCount,
-          deploymentTargets: schedule.platforms,
-          saturationMode: 'comprehensive'
-        }
-      });
+  useEffect(() => {
+    loadSchedules();
+  }, []);
 
-      if (error) {
-        console.error('❌ Scheduled deployment error:', error);
-        throw error;
-      }
-
-      console.log('✅ Scheduled deployment successful:', data);
-      
-      // Update last run time and calculate next run
-      const now = new Date().toISOString();
-      const nextRun = DeploymentSchedulerService.calculateNextRun(schedule.frequency, schedule.time);
-      
-      await DeploymentSchedulerService.updateScheduledDeployment(schedule.id, {
-        lastRun: now,
-        nextRun: nextRun
-      });
-
-      toast.success(`Deployment successful for ${schedule.entityName}`);
-      await loadSchedules(); // Refresh the list
-      
-    } catch (error) {
-      console.error('❌ Scheduled deployment failed:', error);
-      toast.error(`Deployment failed for ${schedule.entityName}`);
-    }
-  };
-
-  const addSchedule = async () => {
-    if (!newSchedule.name || !newSchedule.entityName) {
+  const handleCreateSchedule = async () => {
+    if (!formData.name || !formData.entityName || formData.platforms.length === 0) {
       toast.error('Please fill in all required fields');
       return;
     }
 
-    // Validate for mock data
-    const validation = DeploymentSchedulerService.validateDeploymentData({
-      name: newSchedule.name,
-      entityName: newSchedule.entityName,
-      keywords: newSchedule.keywords.filter(k => k.trim() !== '')
-    });
+    const keywords = formData.keywords.split(',').map(k => k.trim()).filter(k => k);
+    const nextRun = DeploymentSchedulerService.calculateNextRun(formData.frequency, formData.time);
 
-    if (!validation.isValid) {
-      toast.error(`Cannot schedule deployment: ${validation.errors.join(', ')}`);
-      return;
-    }
+    const scheduleData = {
+      name: formData.name,
+      frequency: formData.frequency,
+      time: formData.time,
+      platforms: formData.platforms,
+      articleCount: formData.articleCount,
+      status: 'active' as const,
+      nextRun,
+      lastRun: 'Never',
+      entityName: formData.entityName,
+      keywords
+    };
 
     try {
-      const nextRun = DeploymentSchedulerService.calculateNextRun(newSchedule.frequency, newSchedule.time);
-      
-      const scheduleData: Omit<ScheduledDeployment, 'id' | 'createdAt' | 'updatedAt'> = {
-        name: newSchedule.name,
-        entityName: newSchedule.entityName,
-        frequency: newSchedule.frequency,
-        time: newSchedule.time,
-        platforms: newSchedule.platforms,
-        articleCount: newSchedule.articleCount,
-        keywords: newSchedule.keywords.filter(k => k.trim() !== ''),
-        status: newSchedule.status,
-        nextRun: nextRun,
-        lastRun: 'Never'
-      };
-
-      const savedId = await DeploymentSchedulerService.saveScheduledDeployment(scheduleData);
-      
-      if (savedId) {
+      const scheduleId = await DeploymentSchedulerService.saveScheduledDeployment(scheduleData);
+      if (scheduleId) {
         toast.success('Scheduled deployment created successfully');
-        setShowAddForm(false);
-        resetForm();
-        await loadSchedules();
+        setShowCreateForm(false);
+        setFormData({
+          name: '',
+          frequency: 'daily',
+          time: '09:00',
+          platforms: [],
+          articleCount: 10,
+          entityName: '',
+          keywords: ''
+        });
+        loadSchedules();
       } else {
         toast.error('Failed to create scheduled deployment');
       }
@@ -147,31 +109,15 @@ const DeploymentScheduler = () => {
     }
   };
 
-  const deleteSchedule = async (id: string) => {
-    try {
-      const success = await DeploymentSchedulerService.deleteScheduledDeployment(id);
-      if (success) {
-        toast.success('Scheduled deployment deleted');
-        await loadSchedules();
-      } else {
-        toast.error('Failed to delete scheduled deployment');
-      }
-    } catch (error) {
-      console.error('Error deleting schedule:', error);
-      toast.error('Failed to delete scheduled deployment');
-    }
-  };
-
-  const toggleScheduleStatus = async (id: string, currentStatus: string) => {
+  const toggleScheduleStatus = async (scheduleId: string, currentStatus: string) => {
     const newStatus = currentStatus === 'active' ? 'paused' : 'active';
     try {
-      const success = await DeploymentSchedulerService.updateScheduledDeployment(id, {
-        status: newStatus as 'active' | 'paused'
+      const success = await DeploymentSchedulerService.updateScheduledDeployment(scheduleId, { 
+        status: newStatus 
       });
-      
       if (success) {
         toast.success(`Schedule ${newStatus === 'active' ? 'activated' : 'paused'}`);
-        await loadSchedules();
+        loadSchedules();
       } else {
         toast.error('Failed to update schedule status');
       }
@@ -181,320 +127,269 @@ const DeploymentScheduler = () => {
     }
   };
 
-  const resetForm = () => {
-    setNewSchedule({
-      name: '',
-      entityName: '',
-      frequency: 'daily',
-      time: '09:00',
-      platforms: ['github-pages'],
-      articleCount: 10,
-      keywords: [''],
-      status: 'active'
-    });
+  const deleteSchedule = async (scheduleId: string) => {
+    try {
+      const success = await DeploymentSchedulerService.deleteScheduledDeployment(scheduleId);
+      if (success) {
+        toast.success('Schedule deleted successfully');
+        loadSchedules();
+      } else {
+        toast.error('Failed to delete schedule');
+      }
+    } catch (error) {
+      console.error('Error deleting schedule:', error);
+      toast.error('Failed to delete schedule');
+    }
   };
 
-  const addKeywordField = () => {
-    setNewSchedule(prev => ({
-      ...prev,
-      keywords: [...prev.keywords, '']
-    }));
+  const getStatusBadge = (status: string) => {
+    return status === 'active' ? (
+      <Badge className="bg-green-500/20 text-green-400">Active</Badge>
+    ) : (
+      <Badge className="bg-gray-500/20 text-gray-400">Paused</Badge>
+    );
   };
-
-  const updateKeyword = (index: number, value: string) => {
-    setNewSchedule(prev => ({
-      ...prev,
-      keywords: prev.keywords.map((k, i) => i === index ? value : k)
-    }));
-  };
-
-  const removeKeyword = (index: number) => {
-    setNewSchedule(prev => ({
-      ...prev,
-      keywords: prev.keywords.filter((_, i) => i !== index)
-    }));
-  };
-
-  const platformOptions = [
-    { id: 'github-pages', name: 'GitHub Pages' },
-    { id: 'netlify', name: 'Netlify' },
-    { id: 'vercel', name: 'Vercel' },
-    { id: 'cloudflare', name: 'Cloudflare Pages' },
-    { id: 'firebase', name: 'Firebase Hosting' },
-    { id: 'surge', name: 'Surge.sh' }
-  ];
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-xl font-semibold text-white">Deployment Scheduler</h3>
-          <p className="text-corporate-lightGray">Automate content deployment across platforms</p>
-        </div>
-        <Button 
-          onClick={() => setShowAddForm(!showAddForm)}
-          className="bg-corporate-accent hover:bg-corporate-accent/80 text-black"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Schedule Deployment
-        </Button>
-      </div>
-
-      {/* Add Schedule Form */}
-      {showAddForm && (
-        <Card className="corporate-card">
-          <CardHeader>
-            <CardTitle className="corporate-heading">New Scheduled Deployment</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="schedule-name">Schedule Name</Label>
-                <Input
-                  id="schedule-name"
-                  value={newSchedule.name}
-                  onChange={(e) => setNewSchedule(prev => ({ ...prev, name: e.target.value }))}
-                  placeholder="e.g., Daily Brand Defense"
-                  className="corporate-input"
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="entity-name">Entity Name</Label>
-                <Input
-                  id="entity-name"
-                  value={newSchedule.entityName}
-                  onChange={(e) => setNewSchedule(prev => ({ ...prev, entityName: e.target.value }))}
-                  placeholder="e.g., John Smith"
-                  className="corporate-input"
-                />
-              </div>
+      {/* Scheduled Deployments */}
+      <Card className="corporate-card">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2 corporate-heading">
+              <Calendar className="h-5 w-5 text-corporate-accent" />
+              Scheduled Deployments
+            </CardTitle>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={loadSchedules}
+                disabled={isLoading}
+                className="border-corporate-accent text-corporate-accent hover:bg-corporate-accent hover:text-black"
+              >
+                {isLoading ? (
+                  <RefreshCw className="h-4 w-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-4 w-4" />
+                )}
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => setShowCreateForm(!showCreateForm)}
+                className="bg-corporate-accent text-black hover:bg-corporate-accent/90"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                New Schedule
+              </Button>
             </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {showCreateForm && (
+            <div className="mb-6 p-4 bg-corporate-darkSecondary rounded-lg border border-corporate-border">
+              <h3 className="font-medium text-white mb-4">Create New Schedule</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="schedule-name" className="text-corporate-lightGray">Schedule Name</Label>
+                  <Input
+                    id="schedule-name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="e.g., Daily Simon Lindsay Campaign"
+                    className="bg-corporate-darkSecondary border-corporate-border text-white"
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="entity-name" className="text-corporate-lightGray">Entity Name</Label>
+                  <Input
+                    id="entity-name"
+                    value={formData.entityName}
+                    onChange={(e) => setFormData({ ...formData, entityName: e.target.value })}
+                    placeholder="e.g., Simon Lindsay"
+                    className="bg-corporate-darkSecondary border-corporate-border text-white"
+                  />
+                </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor="frequency">Frequency</Label>
-                <Select value={newSchedule.frequency} onValueChange={(value) => setNewSchedule(prev => ({ ...prev, frequency: value }))}>
-                  <SelectTrigger className="corporate-input">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="hourly">Hourly</SelectItem>
-                    <SelectItem value="daily">Daily</SelectItem>
-                    <SelectItem value="weekly">Weekly</SelectItem>
-                    <SelectItem value="monthly">Monthly</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div>
+                  <Label htmlFor="frequency" className="text-corporate-lightGray">Frequency</Label>
+                  <Select value={formData.frequency} onValueChange={(value) => setFormData({ ...formData, frequency: value })}>
+                    <SelectTrigger className="bg-corporate-darkSecondary border-corporate-border text-white">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="hourly">Hourly</SelectItem>
+                      <SelectItem value="daily">Daily</SelectItem>
+                      <SelectItem value="weekly">Weekly</SelectItem>
+                      <SelectItem value="monthly">Monthly</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label htmlFor="time" className="text-corporate-lightGray">Time</Label>
+                  <Input
+                    id="time"
+                    type="time"
+                    value={formData.time}
+                    onChange={(e) => setFormData({ ...formData, time: e.target.value })}
+                    className="bg-corporate-darkSecondary border-corporate-border text-white"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="article-count" className="text-corporate-lightGray">Articles per Run</Label>
+                  <Input
+                    id="article-count"
+                    type="number"
+                    min="1"
+                    max="50"
+                    value={formData.articleCount}
+                    onChange={(e) => setFormData({ ...formData, articleCount: parseInt(e.target.value) })}
+                    className="bg-corporate-darkSecondary border-corporate-border text-white"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="keywords" className="text-corporate-lightGray">Keywords (comma-separated)</Label>
+                  <Input
+                    id="keywords"
+                    value={formData.keywords}
+                    onChange={(e) => setFormData({ ...formData, keywords: e.target.value })}
+                    placeholder="e.g., reputation management, digital strategy"
+                    className="bg-corporate-darkSecondary border-corporate-border text-white"
+                  />
+                </div>
               </div>
 
-              <div>
-                <Label htmlFor="time">Time</Label>
-                <Input
-                  id="time"
-                  type="time"
-                  value={newSchedule.time}
-                  onChange={(e) => setNewSchedule(prev => ({ ...prev, time: e.target.value }))}
-                  className="corporate-input"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="article-count">Article Count</Label>
-                <Input
-                  id="article-count"
-                  type="number"
-                  min="1"
-                  max="50"
-                  value={newSchedule.articleCount}
-                  onChange={(e) => setNewSchedule(prev => ({ ...prev, articleCount: parseInt(e.target.value) || 10 }))}
-                  className="corporate-input"
-                />
-              </div>
-            </div>
-
-            <div>
-              <Label>Target Platforms</Label>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2">
-                {platformOptions.map((platform) => (
-                  <div key={platform.id} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={platform.id}
-                      checked={newSchedule.platforms.includes(platform.id)}
-                      onCheckedChange={(checked) => {
-                        if (checked) {
-                          setNewSchedule(prev => ({
-                            ...prev,
-                            platforms: [...prev.platforms, platform.id]
-                          }));
-                        } else {
-                          setNewSchedule(prev => ({
-                            ...prev,
-                            platforms: prev.platforms.filter(p => p !== platform.id)
-                          }));
-                        }
+              <div className="mt-4">
+                <Label className="text-corporate-lightGray">Deployment Platforms</Label>
+                <div className="grid grid-cols-3 gap-2 mt-2">
+                  {availablePlatforms.map((platform) => (
+                    <Button
+                      key={platform}
+                      size="sm"
+                      variant={formData.platforms.includes(platform) ? "default" : "outline"}
+                      onClick={() => {
+                        const newPlatforms = formData.platforms.includes(platform)
+                          ? formData.platforms.filter(p => p !== platform)
+                          : [...formData.platforms, platform];
+                        setFormData({ ...formData, platforms: newPlatforms });
                       }}
-                      className="border-corporate-border"
-                    />
-                    <Label htmlFor={platform.id} className="text-sm text-corporate-lightGray">
-                      {platform.name}
-                    </Label>
-                  </div>
-                ))}
+                      className={formData.platforms.includes(platform) 
+                        ? "bg-corporate-accent text-black" 
+                        : "border-corporate-border text-corporate-lightGray hover:bg-corporate-accent hover:text-black"
+                      }
+                    >
+                      {platform}
+                    </Button>
+                  ))}
+                </div>
               </div>
-            </div>
 
-            <div>
-              <Label>Keywords</Label>
-              <div className="space-y-2 mt-2">
-                {newSchedule.keywords.map((keyword, index) => (
-                  <div key={index} className="flex gap-2">
-                    <Input
-                      value={keyword}
-                      onChange={(e) => updateKeyword(index, e.target.value)}
-                      placeholder="Enter keyword"
-                      className="corporate-input"
-                    />
-                    {newSchedule.keywords.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => removeKeyword(index)}
-                        className="border-red-500 text-red-400 hover:bg-red-500 hover:text-white"
-                      >
-                        Remove
-                      </Button>
-                    )}
-                  </div>
-                ))}
+              <div className="flex justify-end gap-2 mt-4">
                 <Button
-                  type="button"
                   variant="outline"
-                  size="sm"
-                  onClick={addKeywordField}
-                  className="border-corporate-accent text-corporate-accent hover:bg-corporate-accent hover:text-black"
+                  onClick={() => setShowCreateForm(false)}
+                  className="border-corporate-border text-corporate-lightGray"
                 >
-                  <Plus className="h-3 w-3 mr-1" />
-                  Add Keyword
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleCreateSchedule}
+                  className="bg-corporate-accent text-black hover:bg-corporate-accent/90"
+                >
+                  Create Schedule
                 </Button>
               </div>
             </div>
+          )}
 
-            <div className="flex gap-2 pt-4">
-              <Button 
-                onClick={addSchedule}
-                className="bg-corporate-accent hover:bg-corporate-accent/80 text-black"
-              >
-                Create Schedule
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => {
-                  setShowAddForm(false);
-                  resetForm();
-                }}
-                className="border-corporate-border text-corporate-lightGray hover:bg-corporate-darkSecondary"
-              >
-                Cancel
-              </Button>
+          {schedules.length === 0 ? (
+            <div className="text-center py-8 text-corporate-lightGray">
+              <Calendar className="h-12 w-12 mx-auto mb-4 text-corporate-accent opacity-50" />
+              <p>No scheduled deployments found</p>
+              <p className="text-sm">Create your first schedule to automate deployments</p>
             </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Scheduled Deployments List */}
-      <div className="space-y-4">
-        {isLoading ? (
-          <Card className="corporate-card">
-            <CardContent className="p-6">
-              <p className="text-center text-corporate-lightGray">Loading scheduled deployments...</p>
-            </CardContent>
-          </Card>
-        ) : schedules.length === 0 ? (
-          <Card className="corporate-card">
-            <CardContent className="p-6">
-              <p className="text-center text-corporate-lightGray">No scheduled deployments configured</p>
-            </CardContent>
-          </Card>
-        ) : (
-          schedules.map((schedule) => (
-            <Card key={schedule.id} className="corporate-card">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h4 className="font-medium text-white">{schedule.name}</h4>
-                      <Badge variant={schedule.status === 'active' ? 'default' : 'secondary'}>
-                        {schedule.status}
-                      </Badge>
+          ) : (
+            <div className="space-y-4">
+              {schedules.map((schedule) => (
+                <div key={schedule.id} className="p-4 bg-corporate-darkSecondary rounded-lg border border-corporate-border">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h3 className="font-medium text-white">{schedule.name}</h3>
+                      <p className="text-sm text-corporate-lightGray">
+                        {schedule.entityName} • {schedule.frequency} at {schedule.time}
+                      </p>
                     </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
-                      <div>
-                        <p className="text-corporate-lightGray">Entity</p>
-                        <p className="text-white">{schedule.entityName}</p>
-                      </div>
-                      <div>
-                        <p className="text-corporate-lightGray">Schedule</p>
-                        <p className="text-white">{schedule.frequency} at {schedule.time}</p>
-                      </div>
-                      <div>
-                        <p className="text-corporate-lightGray">Next Run</p>
-                        <p className="text-white">{new Date(schedule.nextRun).toLocaleString()}</p>
-                      </div>
-                      <div>
-                        <p className="text-corporate-lightGray">Last Run</p>
-                        <p className="text-white">{schedule.lastRun === 'Never' ? 'Never' : new Date(schedule.lastRun).toLocaleString()}</p>
-                      </div>
-                    </div>
+                    {getStatusBadge(schedule.status)}
+                  </div>
 
-                    <div className="mt-3 flex flex-wrap gap-1">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-3 text-sm">
+                    <div>
+                      <span className="text-corporate-lightGray">Articles:</span>
+                      <span className="ml-2 text-white">{schedule.articleCount}</span>
+                    </div>
+                    <div>
+                      <span className="text-corporate-lightGray">Platforms:</span>
+                      <span className="ml-2 text-white">{schedule.platforms.length}</span>
+                    </div>
+                    <div>
+                      <span className="text-corporate-lightGray">Next Run:</span>
+                      <span className="ml-2 text-white">
+                        {schedule.nextRun !== 'Never' ? new Date(schedule.nextRun).toLocaleString() : 'Never'}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-corporate-lightGray">Last Run:</span>
+                      <span className="ml-2 text-white">{schedule.lastRun}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex flex-wrap gap-1">
                       {schedule.platforms.map((platform) => (
-                        <Badge key={platform} variant="outline" className="text-xs">
+                        <Badge key={platform} variant="outline" className="border-corporate-border text-corporate-lightGray">
                           {platform}
                         </Badge>
                       ))}
                     </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 ml-4">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => executeScheduledDeployment(schedule)}
-                      className="border-corporate-accent text-corporate-accent hover:bg-corporate-accent hover:text-black"
-                    >
-                      <Play className="h-3 w-3" />
-                    </Button>
                     
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => toggleScheduleStatus(schedule.id, schedule.status)}
-                      className={schedule.status === 'active' 
-                        ? "border-yellow-500 text-yellow-400 hover:bg-yellow-500 hover:text-black"
-                        : "border-green-500 text-green-400 hover:bg-green-500 hover:text-black"
-                      }
-                    >
-                      {schedule.status === 'active' ? <Pause className="h-3 w-3" /> : <Play className="h-3 w-3" />}
-                    </Button>
-
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => deleteSchedule(schedule.id)}
-                      className="border-red-500 text-red-400 hover:bg-red-500 hover:text-white"
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => toggleScheduleStatus(schedule.id, schedule.status)}
+                        className="border-corporate-border text-corporate-lightGray hover:bg-corporate-accent hover:text-black"
+                      >
+                        {schedule.status === 'active' ? (
+                          <Pause className="h-4 w-4" />
+                        ) : (
+                          <Play className="h-4 w-4" />
+                        )}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => deleteSchedule(schedule.id)}
+                        className="border-red-500 text-red-400 hover:bg-red-500 hover:text-white"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          ))
-        )}
-      </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Separator className="bg-corporate-border" />
+
+      {/* Deployment History */}
+      <DeploymentHistory />
     </div>
   );
 };
