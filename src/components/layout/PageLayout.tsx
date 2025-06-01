@@ -22,8 +22,17 @@ const PageLayout = ({
         <meta name="description" content={description} />
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
+        <style>
+          {`
+            html, body, #root {
+              background-color: #0A0B0D !important;
+              color: #F9FAFB !important;
+              min-height: 100vh !important;
+            }
+          `}
+        </style>
       </Helmet>
-      <div className={`min-h-screen bg-corporate-dark ${className}`}>
+      <div className={`min-h-screen bg-corporate-dark text-white ${className}`} style={{ backgroundColor: '#0A0B0D', color: '#F9FAFB' }}>
         {children}
       </div>
     </>

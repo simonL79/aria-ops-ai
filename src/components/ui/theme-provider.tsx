@@ -18,7 +18,7 @@ type ThemeProviderState = {
 }
 
 const initialState: ThemeProviderState = {
-  theme: "system",
+  theme: "dark", // Force dark theme by default
   setTheme: () => null,
 }
 
@@ -26,36 +26,34 @@ const ThemeProviderContext = createContext<ThemeProviderState>(initialState)
 
 export function ThemeProvider({
   children,
-  defaultTheme = "system",
+  defaultTheme = "dark", // Force dark theme
   storageKey = "ui-theme",
   ...props
 }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(
-    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
+    () => "dark" // Always return dark theme
   )
 
   useEffect(() => {
     const root = window.document.documentElement
     root.classList.remove("light", "dark")
-
-    if (theme === "system") {
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-        .matches
-        ? "dark"
-        : "light"
-
-      root.classList.add(systemTheme)
-      return
-    }
-
-    root.classList.add(theme)
+    
+    // Always apply dark theme for corporate styling
+    root.classList.add("dark")
+    
+    // Force corporate dark background
+    document.body.style.backgroundColor = '#0A0B0D'
+    document.body.style.color = '#F9FAFB'
+    document.documentElement.style.backgroundColor = '#0A0B0D'
+    document.documentElement.style.color = '#F9FAFB'
   }, [theme])
 
   const value = {
-    theme,
+    theme: "dark" as Theme,
     setTheme: (theme: Theme) => {
-      localStorage.setItem(storageKey, theme)
-      setTheme(theme)
+      // Always stay on dark theme for corporate branding
+      localStorage.setItem(storageKey, "dark")
+      setTheme("dark")
     },
   }
 
@@ -76,14 +74,5 @@ export const useTheme = () => {
 }
 
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme()
-
-  return (
-    <button
-      onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-      className="rounded-md p-2 hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-    >
-      {theme === "light" ? "Dark" : "Light"} Mode
-    </button>
-  )
+  return null // Disable theme toggle for corporate branding
 }
