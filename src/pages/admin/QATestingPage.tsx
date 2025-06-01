@@ -63,53 +63,61 @@ const QATestingPage = React.memo(() => {
   return (
     <DashboardLayout>
       <ResponsiveLayout className="bg-corporate-dark min-h-screen w-full">
-        {/* Critical Action Buttons - Live Data Validated */}
+        {/* Critical Action Buttons - Live Data Validated - Responsive Design Enhanced */}
         <Suspense fallback={<Skeleton className="h-12 sm:h-16 lg:h-20 w-full bg-corporate-darkSecondary rounded" />}>
-          <CriticalActionButtons
-            onLiveThreatScan={actionHandlers.handleLiveThreatScan}
-            onLiveIntelligenceSweep={actionHandlers.handleLiveIntelligenceSweep}
-            onGuardianToggle={actionHandlers.handleGuardianToggle}
-            onGenerateReport={actionHandlers.handleGenerateReport}
-            onActivateRealTime={actionHandlers.handleActivateRealTime}
-            onRunManualScan={actionHandlers.handleRunManualScan}
-            isScanning={isRunningTests}
-            isGuardianActive={true}
-            isRealTimeActive={false}
-          />
+          <div className="w-full px-2 sm:px-4 lg:px-6">
+            <CriticalActionButtons
+              onLiveThreatScan={actionHandlers.handleLiveThreatScan}
+              onLiveIntelligenceSweep={actionHandlers.handleLiveIntelligenceSweep}
+              onGuardianToggle={actionHandlers.handleGuardianToggle}
+              onGenerateReport={actionHandlers.handleGenerateReport}
+              onActivateRealTime={actionHandlers.handleActivateRealTime}
+              onRunManualScan={actionHandlers.handleRunManualScan}
+              isScanning={isRunningTests}
+              isGuardianActive={true}
+              isRealTimeActive={false}
+            />
+          </div>
         </Suspense>
 
-        {/* Header section - Live Data Compliance */}
-        <QATestingHeader />
+        {/* Header section - Live Data Compliance - Responsive */}
+        <div className="w-full px-2 sm:px-4 lg:px-6 mt-4 sm:mt-6">
+          <QATestingHeader />
+        </div>
 
-        {/* Performance monitor and overview */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6 w-full">
-          <div className="lg:col-span-3 w-full min-w-0">
-            <QAOverviewCards testSuite={testSuite} />
-          </div>
-          <div className="lg:col-span-1 w-full min-w-0">
-            <Suspense fallback={<Skeleton className="h-32 sm:h-40 bg-corporate-darkSecondary rounded" />}>
-              <PerformanceMonitor />
-            </Suspense>
+        {/* Performance monitor and overview - Enhanced Responsive Grid */}
+        <div className="w-full px-2 sm:px-4 lg:px-6">
+          <div className="grid grid-cols-1 xl:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6 w-full">
+            <div className="xl:col-span-3 w-full min-w-0">
+              <QAOverviewCards testSuite={testSuite} />
+            </div>
+            <div className="xl:col-span-1 w-full min-w-0">
+              <Suspense fallback={<Skeleton className="h-32 sm:h-40 bg-corporate-darkSecondary rounded" />}>
+                <PerformanceMonitor />
+              </Suspense>
+            </div>
           </div>
         </div>
 
-        {/* Main QA Dashboard */}
-        <Suspense fallback={<Skeleton className="h-64 sm:h-80 lg:h-96 w-full bg-corporate-darkSecondary rounded" />}>
-          <ComprehensiveQADashboard />
-        </Suspense>
+        {/* Main QA Dashboard - Responsive Container */}
+        <div className="w-full px-2 sm:px-4 lg:px-6">
+          <Suspense fallback={<Skeleton className="h-64 sm:h-80 lg:h-96 w-full bg-corporate-darkSecondary rounded" />}>
+            <ComprehensiveQADashboard />
+          </Suspense>
+        </div>
 
-        {/* Live Data Compliance Status */}
-        <div className="mt-4 sm:mt-6">
+        {/* Live Data Compliance Status - Responsive */}
+        <div className="w-full px-2 sm:px-4 lg:px-6 mt-4 sm:mt-6">
           <QAComplianceStatus />
         </div>
 
-        {/* QA Process Overview - Updated for Live Data */}
-        <div className="mt-4 sm:mt-6">
+        {/* QA Process Overview - Updated for Live Data - Responsive */}
+        <div className="w-full px-2 sm:px-4 lg:px-6 mt-4 sm:mt-6">
           <QAProcessCards />
         </div>
 
-        {/* Deployment Criteria */}
-        <div className="mt-4 sm:mt-6">
+        {/* Deployment Criteria - Responsive */}
+        <div className="w-full px-2 sm:px-4 lg:px-6 mt-4 sm:mt-6 pb-6">
           <QADeploymentCriteria />
         </div>
       </ResponsiveLayout>

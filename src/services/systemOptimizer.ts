@@ -121,7 +121,7 @@ export class SystemOptimizer {
         recommendations
       };
       
-      // Store health check results
+      // Store health check results safely
       await this.storeHealthCheckResults(report);
       
       console.log(`✅ Health check completed: ${optimizationPercentage}% optimal`);
@@ -151,7 +151,8 @@ export class SystemOptimizer {
   static async checkDatabaseHealth(): Promise<SystemHealthReport['component_health'][0]> {
     const startTime = Date.now();
     try {
-      await supabase.from('activity_logs').select('id').limit(1);
+      // Simple query that doesn't require RLS permissions
+      const { data, error } = await supabase.from('activity_logs').select('id').limit(1);
       return {
         component: 'database',
         status: 'healthy',
@@ -345,22 +346,30 @@ export class SystemOptimizer {
 
   private static async storeHealthCheckResults(report: SystemHealthReport): Promise<void> {
     try {
-      // Use activity_logs instead of system_health_checks since that table structure exists
-      for (const component of report.component_health) {
-        await supabase
-          .from('activity_logs')
-          .insert({
-            entity_type: 'system_health',
-            entity_id: component.component,
-            action: 'health_check',
-            details: JSON.stringify({
-              status: component.status,
-              response_time: component.response_time,
-              details: component.details
-            }),
-            user_id: '',
-            user_email: 'system'
-          });
+      // Get current user safely
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      // Only log if we have a valid user session, otherwise skip logging
+      if (user?.id) {
+        for (const component of report.component_health) {
+          await supabase
+            .from('activity_logs')
+            .insert({
+              entity_type: 'system_health',
+              entity_id: component.component,
+              action: 'health_check',
+              details: JSON.stringify({
+                status: component.status,
+                response_time: component.response_time,
+                details: component.details
+              }),
+              user_id: user.id,
+              user_email: user.email || 'system'
+            });
+        }
+      } else {
+        // If no user session, just log to console instead of database
+        console.log('Health check completed without user session - results not stored in database');
       }
     } catch (error) {
       console.warn('Could not store health check results:', error);
