@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -22,11 +21,12 @@ export interface MemorySearchResult {
 }
 
 /**
- * Check if local inference server is available
+ * Check if local inference server is available - Updated for Ollama
  */
 const checkLocalServer = async (): Promise<boolean> => {
   try {
-    const response = await fetch('http://localhost:3001/health', {
+    // Use the correct Ollama endpoint that works
+    const response = await fetch('http://localhost:3001/api/tags', {
       method: 'GET',
       signal: AbortSignal.timeout(3000)
     });

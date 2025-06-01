@@ -1,4 +1,3 @@
-
 import { toast } from 'sonner';
 import { pipeline, PipelineType } from '@huggingface/transformers';
 
@@ -195,11 +194,12 @@ export const classifyText = async (modelId: string, text: string): Promise<Predi
 };
 
 /**
- * Check if local inference server is available
+ * Check if local inference server is available - Updated for Ollama
  */
 export const checkLocalInferenceServer = async (): Promise<boolean> => {
   try {
-    const response = await fetch('http://localhost:3001/health', {
+    // Use the correct Ollama endpoint that we know works
+    const response = await fetch('http://localhost:3001/api/tags', {
       method: 'GET',
       signal: AbortSignal.timeout(5000)
     });
