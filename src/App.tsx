@@ -1,10 +1,12 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from 'react-helmet-async';
-import Index from "./pages/Index";
+import { AuthProvider } from '@/hooks/useAuth';
+import HomePage from "./pages/HomePage";
 import AboutPage from "./pages/AboutPage";
 import ScanPage from "./pages/ScanPage";
 import SimonLindsayPage from "./pages/SimonLindsayPage";
@@ -26,31 +28,33 @@ const queryClient = new QueryClient();
 const App = () => (
   <HelmetProvider>
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/scan" element={<ScanPage />} />
-            <Route path="/simon-lindsay" element={<SimonLindsayPage />} />
-            <Route path="/blog" element={<BlogPage />} />
-            <Route path="/blog/:slug" element={<BlogPostPage />} />
-            <Route path="/auth" element={<Authentication />} />
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/admin/genesis-sentinel" element={<SentinelOperatorPage />} />
-            <Route path="/admin/persona-saturation" element={<PersonaSaturationPage />} />
-            <Route path="/admin/watchtower" element={<WatchtowerPage />} />
-            <Route path="/admin/intelligence-core" element={<IntelligenceCorePage />} />
-            <Route path="/admin/legal-ops" element={<AdminDashboard />} />
-            <Route path="/admin/clients" element={<ClientsPage />} />
-            <Route path="/admin/qa-testing" element={<QATestPage />} />
-            <Route path="/admin/settings" element={<SettingsPage />} />
-            <Route path="/admin/system-optimization" element={<SystemOptimizationPage />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/scan" element={<ScanPage />} />
+              <Route path="/simon-lindsay" element={<SimonLindsayPage />} />
+              <Route path="/blog" element={<BlogPage />} />
+              <Route path="/blog/:slug" element={<BlogPostPage />} />
+              <Route path="/auth" element={<Authentication />} />
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin/genesis-sentinel" element={<SentinelOperatorPage />} />
+              <Route path="/admin/persona-saturation" element={<PersonaSaturationPage />} />
+              <Route path="/admin/watchtower" element={<WatchtowerPage />} />
+              <Route path="/admin/intelligence-core" element={<IntelligenceCorePage />} />
+              <Route path="/admin/legal-ops" element={<AdminDashboard />} />
+              <Route path="/admin/clients" element={<ClientsPage />} />
+              <Route path="/admin/qa-testing" element={<QATestPage />} />
+              <Route path="/admin/settings" element={<SettingsPage />} />
+              <Route path="/admin/system-optimization" element={<SystemOptimizationPage />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
     </QueryClientProvider>
   </HelmetProvider>
 );
