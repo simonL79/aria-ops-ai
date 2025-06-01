@@ -24,6 +24,19 @@ interface SaturationCampaign {
   platformResults?: Record<string, any>;
 }
 
+// Add proper type for campaign data
+interface CampaignData {
+  contentGenerated?: number;
+  deploymentsSuccessful?: number;
+  serpPenetration?: number;
+  estimatedReach?: number;
+  platformResults?: Record<string, any>;
+  deployments?: {
+    successful?: number;
+    urls?: string[];
+  };
+}
+
 const PersonaSaturationPanel = () => {
   const [entityName, setEntityName] = useState('');
   const [targetKeywords, setTargetKeywords] = useState('');
@@ -62,7 +75,8 @@ const PersonaSaturationPanel = () => {
 
       if (data && data.length > 0) {
         const transformedCampaigns: SaturationCampaign[] = data.map(campaign => {
-          const campaignData = campaign.campaign_data || {};
+          // Properly type the campaign_data as CampaignData
+          const campaignData = (campaign.campaign_data as CampaignData) || {};
           const deployments = campaignData.deployments || {};
           
           return {
