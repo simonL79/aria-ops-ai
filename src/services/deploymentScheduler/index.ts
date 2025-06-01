@@ -3,7 +3,7 @@ import { DeploymentDatabase } from './database';
 import { DeploymentValidation } from './validation';
 import { DeploymentScheduler } from './scheduler';
 
-export type { ScheduledDeployment, ValidationResult } from './types';
+export { ScheduledDeployment, ValidationResult } from './types';
 
 export class DeploymentSchedulerService {
   // Database operations
