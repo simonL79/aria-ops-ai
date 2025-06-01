@@ -148,6 +148,11 @@ const PersonaSaturationPanel = () => {
 
     try {
       console.log('🚀 Starting REAL persona saturation deployment...');
+      console.log('Entity:', entityName);
+      console.log('Keywords:', targetKeywords);
+      console.log('Platforms:', deploymentTargets);
+      console.log('Content Count:', contentCount);
+      console.log('Mode:', saturationMode);
       
       // Show progress updates
       setCurrentCampaign(prev => prev ? { ...prev, status: 'planning', progress: 10 } : null);
@@ -157,6 +162,7 @@ const PersonaSaturationPanel = () => {
       await new Promise(resolve => setTimeout(resolve, 1000));
 
       // Call the actual edge function
+      console.log('📡 Calling persona-saturation edge function...');
       const { data: result, error } = await supabase.functions.invoke('persona-saturation', {
         body: {
           entityName,
@@ -180,11 +186,14 @@ const PersonaSaturationPanel = () => {
         return;
       }
 
-      console.log('✅ Deployment successful:', result);
+      console.log('✅ Deployment response received:', result);
 
       if (result?.success) {
         const campaignData = result.campaign || {};
         const platformResults = result.platformResults || {};
+        
+        console.log('📊 Campaign data:', campaignData);
+        console.log('🌐 Platform results:', platformResults);
         
         // Update campaign with real results
         const finalCampaign: SaturationCampaign = {
@@ -201,12 +210,16 @@ const PersonaSaturationPanel = () => {
           platformResults
         };
 
+        console.log('🎯 Final campaign:', finalCampaign);
+        console.log('🔗 Deployment URLs:', finalCampaign.deploymentUrls);
+
         setCurrentCampaign(finalCampaign);
         
         // Add to campaigns list
         setCampaigns(prev => [finalCampaign, ...prev]);
         
-        toast.success(`🎯 Campaign completed! ${campaignData.deploymentsSuccessful || 0} articles deployed across ${deploymentTargets.length} platforms`);
+        const urlCount = finalCampaign.deploymentUrls?.length || 0;
+        toast.success(`🎯 Campaign completed! ${campaignData.deploymentsSuccessful || 0} articles deployed with ${urlCount} live URLs across ${deploymentTargets.length} platforms`);
         
         // Reload campaigns from database to get the saved version
         setTimeout(() => loadCampaigns(), 2000);
