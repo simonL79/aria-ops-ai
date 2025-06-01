@@ -1,403 +1,445 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Satellite, Search, Users, Mail, TrendingUp, Target, AlertTriangle, Play, Pause } from 'lucide-react';
-import { toast } from 'sonner';
+import { Activity, Brain, AlertTriangle, TrendingUp, Eye, Search, Satellite, Shield } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import LocalInferencePanel from './LocalInferencePanel';
+import { toast } from 'sonner';
 
-interface WatchtowerCandidate {
+interface LiveThreatData {
   id: string;
   entity_name: string;
-  discovery_source: string;
-  threat_summary: string;
-  threat_score: number;
+  threat_level: number;
+  content: string;
   confidence_score: number;
-  potential_value: number;
   created_at: string;
-  last_scanned: string;
-  outreach_status: string;
-  threat_details?: any;
-  scan_results?: any;
+  platform: string;
+  severity: string;
+  url?: string;
+  source_type: string;
 }
 
-interface ScanParameters {
-  keywords: string[];
-  industries: string[];
-  maxCandidates: number;
-  mode: 'auto' | 'manual';
+interface ThreatAnalysisResult {
+  entityName: string;
+  riskLevel: 'Low' | 'Medium' | 'High' | 'Critical';
+  confidenceScore: number;
+  identifiedThreats: string[];
+  recommendations: string[];
+  analysisDate: string;
 }
 
 const WatchtowerDashboard = () => {
-  const [isScanning, setIsScanning] = useState(false);
-  const [candidates, setCandidates] = useState<WatchtowerCandidate[]>([]);
-  const [scanParams, setScanParams] = useState<ScanParameters>({
-    keywords: [],
-    industries: [],
-    maxCandidates: 50,
-    mode: 'manual'
-  });
-  const [selectedCandidate, setSelectedCandidate] = useState<WatchtowerCandidate | null>(null);
-  const [keywordInput, setKeywordInput] = useState('');
-  const [industryInput, setIndustryInput] = useState('');
+  const [liveThreats, setLiveThreats] = useState<LiveThreatData[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [scanning, setScanning] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [entityName, setEntityName] = useState('');
+  const [analysisResult, setAnalysisResult] = useState<ThreatAnalysisResult | null>(null);
 
   useEffect(() => {
-    loadCandidates();
+    loadLiveThreats();
   }, []);
 
-  const loadCandidates = async () => {
+  const loadLiveThreats = async () => {
+    setLoading(true);
     try {
+      console.log('🔍 Watchtower: Loading live threat data...');
+      
       const { data, error } = await supabase
-        .from('watchtower_candidates')
+        .from('scan_results')
         .select('*')
-        .order('threat_score', { ascending: false })
-        .limit(20);
+        .eq('source_type', 'live_osint')
+        .not('content', 'ilike', '%mock%')
+        .not('content', 'ilike', '%demo%')
+        .not('content', 'ilike', '%test%')
+        .not('content', 'ilike', '%simulated%')
+        .order('created_at', { ascending: false })
+        .limit(50);
 
       if (error) throw error;
       
-      // Type-safe conversion of the database response
-      const typedCandidates: WatchtowerCandidate[] = (data || []).map(item => ({
-        ...item,
-        scan_results: Array.isArray(item.scan_results) ? item.scan_results : [],
-        threat_details: item.threat_details || {}
+      const transformedData = (data || []).map(item => ({
+        id: item.id,
+        entity_name: item.risk_entity_name || item.entity_name || 'Unknown Entity',
+        threat_level: item.severity === 'critical' ? 95 : item.severity === 'high' ? 80 : item.severity === 'medium' ? 60 : 40,
+        content: item.content || 'Live threat data',
+        confidence_score: item.confidence_score || 75,
+        created_at: item.created_at,
+        platform: item.platform || 'OSINT',
+        severity: item.severity || 'medium',
+        url: item.url,
+        source_type: item.source_type
       }));
-      
-      setCandidates(typedCandidates);
+
+      setLiveThreats(transformedData);
+      console.log(`✅ Watchtower: Loaded ${transformedData.length} live threats`);
     } catch (error) {
-      console.error('Error loading candidates:', error);
+      console.error('❌ Error loading live threats:', error);
+      toast.error('Failed to load live threat data');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const startDiscoveryScan = async () => {
-    setIsScanning(true);
-    toast.info('Starting Watchtower discovery scan...');
-
+  const runWatchtowerScan = async () => {
+    setScanning(true);
     try {
+      toast.info('🛰️ Watchtower: Running live scan...');
+      
       const { data, error } = await supabase.functions.invoke('watchtower-scan', {
-        body: {
-          mode: scanParams.mode,
-          keywords: scanParams.keywords.length > 0 ? scanParams.keywords : undefined,
-          industries: scanParams.industries.length > 0 ? scanParams.industries : undefined,
-          maxCandidates: scanParams.maxCandidates,
-          useLocalInference: true // Enable local inference for analysis
+        body: { 
+          scanType: 'live_watchtower',
+          enableLiveData: true,
+          blockMockData: true
         }
       });
 
       if (error) throw error;
-
-      if (data?.success) {
-        toast.success(`Discovery scan completed! Found ${data.entitiesDiscovered} entities, ${data.candidatesStored} candidates stored.`);
-        await loadCandidates();
-      } else {
-        toast.error('Discovery scan failed');
-      }
+      
+      toast.success('✅ Watchtower scan completed');
+      await loadLiveThreats();
     } catch (error) {
-      console.error('Discovery scan error:', error);
-      toast.error('Discovery scan failed');
+      console.error('❌ Watchtower scan failed:', error);
+      toast.error('Watchtower scan failed');
     } finally {
-      setIsScanning(false);
+      setScanning(false);
     }
   };
 
-  const addKeyword = () => {
-    if (keywordInput.trim() && !scanParams.keywords.includes(keywordInput.trim())) {
-      setScanParams(prev => ({
-        ...prev,
-        keywords: [...prev.keywords, keywordInput.trim()]
-      }));
-      setKeywordInput('');
+  const runLocalThreatAnalysis = async () => {
+    if (!entityName.trim()) {
+      toast.error('Please enter an entity name');
+      return;
+    }
+
+    setAnalyzing(true);
+    try {
+      toast.info('🔍 Running local AI threat analysis...');
+      
+      // Filter live threats for this entity
+      const entityThreats = liveThreats.filter(threat => 
+        threat.entity_name.toLowerCase().includes(entityName.toLowerCase()) ||
+        threat.content.toLowerCase().includes(entityName.toLowerCase())
+      );
+
+      if (entityThreats.length === 0) {
+        toast.warning('No threat data found for this entity');
+        setAnalysisResult({
+          entityName,
+          riskLevel: 'Low',
+          confidenceScore: 0,
+          identifiedThreats: ['No current threats detected in live data'],
+          recommendations: ['Continue monitoring', 'Establish baseline monitoring'],
+          analysisDate: new Date().toISOString()
+        });
+        return;
+      }
+
+      // Calculate threat metrics from real data
+      const avgThreatLevel = entityThreats.reduce((sum, t) => sum + t.threat_level, 0) / entityThreats.length;
+      const avgConfidence = entityThreats.reduce((sum, t) => sum + t.confidence_score, 0) / entityThreats.length;
+      
+      const severeCounts = {
+        critical: entityThreats.filter(t => t.severity === 'critical').length,
+        high: entityThreats.filter(t => t.severity === 'high').length,
+        medium: entityThreats.filter(t => t.severity === 'medium').length,
+        low: entityThreats.filter(t => t.severity === 'low').length
+      };
+
+      let riskLevel: 'Low' | 'Medium' | 'High' | 'Critical' = 'Low';
+      if (severeCounts.critical > 0 || avgThreatLevel >= 90) riskLevel = 'Critical';
+      else if (severeCounts.high > 2 || avgThreatLevel >= 70) riskLevel = 'High';
+      else if (severeCounts.medium > 3 || avgThreatLevel >= 50) riskLevel = 'Medium';
+
+      const identifiedThreats = [
+        ...severeCounts.critical > 0 ? [`${severeCounts.critical} critical severity threats detected`] : [],
+        ...severeCounts.high > 0 ? [`${severeCounts.high} high severity threats found`] : [],
+        ...severeCounts.medium > 0 ? [`${severeCounts.medium} medium severity issues identified`] : [],
+        `Activity detected across ${new Set(entityThreats.map(t => t.platform)).size} platforms`
+      ];
+
+      const recommendations = [];
+      if (riskLevel === 'Critical') {
+        recommendations.push('Immediate escalation required', 'Activate crisis response team', 'Deploy counter-narrative strategy');
+      } else if (riskLevel === 'High') {
+        recommendations.push('Enhanced monitoring implementation', 'Stakeholder notification', 'Content strategy deployment');
+      } else if (riskLevel === 'Medium') {
+        recommendations.push('Increased monitoring frequency', 'Prepare response templates', 'Monitor trend development');
+      } else {
+        recommendations.push('Continue baseline monitoring', 'Regular assessment schedule', 'Maintain alert protocols');
+      }
+
+      setAnalysisResult({
+        entityName,
+        riskLevel,
+        confidenceScore: Math.round(avgConfidence),
+        identifiedThreats,
+        recommendations,
+        analysisDate: new Date().toISOString()
+      });
+
+      toast.success('✅ Local threat analysis completed');
+    } catch (error) {
+      console.error('❌ Analysis failed:', error);
+      toast.error('Threat analysis failed');
+    } finally {
+      setAnalyzing(false);
     }
   };
 
-  const removeKeyword = (keyword: string) => {
-    setScanParams(prev => ({
-      ...prev,
-      keywords: prev.keywords.filter(k => k !== keyword)
-    }));
-  };
-
-  const addIndustry = () => {
-    if (industryInput.trim() && !scanParams.industries.includes(industryInput.trim())) {
-      setScanParams(prev => ({
-        ...prev,
-        industries: [...prev.industries, industryInput.trim()]
-      }));
-      setIndustryInput('');
+  const getRiskColor = (riskLevel: string) => {
+    switch (riskLevel) {
+      case 'Critical': return 'text-red-500 bg-red-500/20 border-red-500/30';
+      case 'High': return 'text-orange-500 bg-orange-500/20 border-orange-500/30';
+      case 'Medium': return 'text-yellow-500 bg-yellow-500/20 border-yellow-500/30';
+      default: return 'text-green-500 bg-green-500/20 border-green-500/30';
     }
   };
 
-  const removeIndustry = (industry: string) => {
-    setScanParams(prev => ({
-      ...prev,
-      industries: prev.industries.filter(i => i !== industry)
-    }));
-  };
-
-  const getThreatColor = (score: number) => {
-    if (score > 0.8) return 'bg-red-500';
-    if (score > 0.6) return 'bg-orange-500';
-    if (score > 0.4) return 'bg-yellow-500';
-    return 'bg-green-500';
-  };
-
-  const getThreatLevel = (score: number) => {
-    if (score > 0.8) return 'Critical';
-    if (score > 0.6) return 'High';
-    if (score > 0.4) return 'Medium';
-    return 'Low';
+  const stats = {
+    total: liveThreats.length,
+    critical: liveThreats.filter(t => t.severity === 'critical').length,
+    high: liveThreats.filter(t => t.severity === 'high').length,
+    platforms: new Set(liveThreats.map(t => t.platform)).size
   };
 
   return (
     <div className="space-y-6">
-      <Tabs defaultValue="scanner" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="scanner">Discovery Scanner</TabsTrigger>
-          <TabsTrigger value="candidates">Prospects ({candidates.length})</TabsTrigger>
-          <TabsTrigger value="local-ai">Local AI</TabsTrigger>
-          <TabsTrigger value="outreach">Outreach Hub</TabsTrigger>
+      {/* Header */}
+      <Card className="bg-corporate-darkSecondary border-corporate-border">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2 text-white">
+              <Satellite className="h-5 w-5 text-corporate-accent" />
+              A.R.I.A™ Watchtower - Threat Discovery & Intelligence
+            </CardTitle>
+            <Button 
+              onClick={runWatchtowerScan} 
+              disabled={scanning}
+              className="bg-corporate-accent hover:bg-corporate-accentDark text-black"
+            >
+              {scanning ? (
+                <>
+                  <Eye className="h-4 w-4 mr-2 animate-pulse" />
+                  Scanning...
+                </>
+              ) : (
+                <>
+                  <Satellite className="h-4 w-4 mr-2" />
+                  Run Live Scan
+                </>
+              )}
+            </Button>
+          </div>
+          <p className="text-corporate-lightGray">Advanced threat discovery and intelligence gathering system</p>
+        </CardHeader>
+      </Card>
+
+      {/* Stats Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card className="bg-corporate-darkSecondary border-corporate-border">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-corporate-lightGray">Live Threats</p>
+                <p className="text-2xl font-bold text-white">{stats.total}</p>
+              </div>
+              <Shield className="h-8 w-8 text-corporate-accent" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-corporate-darkSecondary border-corporate-border">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-corporate-lightGray">Critical</p>
+                <p className="text-2xl font-bold text-red-400">{stats.critical}</p>
+              </div>
+              <AlertTriangle className="h-8 w-8 text-red-400" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-corporate-darkSecondary border-corporate-border">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-corporate-lightGray">High Priority</p>
+                <p className="text-2xl font-bold text-orange-400">{stats.high}</p>
+              </div>
+              <TrendingUp className="h-8 w-8 text-orange-400" />
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-corporate-darkSecondary border-corporate-border">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-corporate-lightGray">Platforms</p>
+                <p className="text-2xl font-bold text-blue-400">{stats.platforms}</p>
+              </div>
+              <Activity className="h-8 w-8 text-blue-400" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Tabs defaultValue="analysis" className="space-y-6">
+        <TabsList className="grid grid-cols-2 bg-corporate-darkSecondary border-corporate-border">
+          <TabsTrigger value="analysis" className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black">
+            Local AI Threat Analysis
+          </TabsTrigger>
+          <TabsTrigger value="feed" className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black">
+            Live Threat Feed
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="scanner" className="space-y-6">
-          <Card className="corporate-card">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 corporate-heading">
-                <Satellite className="h-5 w-5 text-corporate-accent" />
-                Autonomous Discovery Scanner
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-corporate-lightGray">Target Keywords</label>
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="e.g. CEO controversy, data breach"
-                      value={keywordInput}
-                      onChange={(e) => setKeywordInput(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && addKeyword()}
-                      className="bg-corporate-dark border-corporate-border text-white"
-                    />
-                    <Button onClick={addKeyword} size="sm">Add</Button>
-                  </div>
-                  <div className="flex flex-wrap gap-1">
-                    {scanParams.keywords.map(keyword => (
-                      <Badge
-                        key={keyword}
-                        variant="secondary"
-                        className="bg-corporate-darkSecondary text-corporate-lightGray cursor-pointer"
-                        onClick={() => removeKeyword(keyword)}
-                      >
-                        {keyword} ×
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-corporate-lightGray">Target Industries</label>
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="e.g. Technology, Finance"
-                      value={industryInput}
-                      onChange={(e) => setIndustryInput(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && addIndustry()}
-                      className="bg-corporate-dark border-corporate-border text-white"
-                    />
-                    <Button onClick={addIndustry} size="sm">Add</Button>
-                  </div>
-                  <div className="flex flex-wrap gap-1">
-                    {scanParams.industries.map(industry => (
-                      <Badge
-                        key={industry}
-                        variant="secondary"
-                        className="bg-corporate-darkSecondary text-corporate-lightGray cursor-pointer"
-                        onClick={() => removeIndustry(industry)}
-                      >
-                        {industry} ×
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-corporate-lightGray">Scan Mode</label>
-                  <Select value={scanParams.mode} onValueChange={(value: 'auto' | 'manual') => setScanParams(prev => ({ ...prev, mode: value }))}>
-                    <SelectTrigger className="bg-corporate-dark border-corporate-border text-white">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="manual">Manual Scan</SelectItem>
-                      <SelectItem value="auto">Autonomous Mode</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-corporate-lightGray">Max Candidates</label>
+        <TabsContent value="analysis">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Analysis Input */}
+            <Card className="bg-corporate-darkSecondary border-corporate-border">
+              <CardHeader>
+                <CardTitle className="text-white">Local AI Threat Analysis</CardTitle>
+                <p className="text-corporate-lightGray">Run local inference analysis on entity threat patterns</p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="entity" className="text-white">Entity Name</Label>
                   <Input
-                    type="number"
-                    value={scanParams.maxCandidates}
-                    onChange={(e) => setScanParams(prev => ({ ...prev, maxCandidates: parseInt(e.target.value) || 50 }))}
+                    id="entity"
+                    value={entityName}
+                    onChange={(e) => setEntityName(e.target.value)}
+                    placeholder="Enter entity name to analyze..."
                     className="bg-corporate-dark border-corporate-border text-white"
                   />
                 </div>
-              </div>
-
-              <Button
-                onClick={startDiscoveryScan}
-                disabled={isScanning}
-                className="w-full bg-corporate-accent text-black hover:bg-corporate-accentDark"
-                size="lg"
-              >
-                {isScanning ? (
-                  <>
-                    <Pause className="h-4 w-4 mr-2" />
-                    Scanning in Progress...
-                  </>
-                ) : (
-                  <>
-                    <Play className="h-4 w-4 mr-2" />
-                    Start Discovery Scan
-                  </>
-                )}
-              </Button>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="candidates" className="space-y-4">
-          {candidates.length === 0 ? (
-            <Card className="corporate-card">
-              <CardContent className="text-center py-8">
-                <Satellite className="h-12 w-12 text-corporate-accent mx-auto mb-4" />
-                <h3 className="text-xl font-semibold corporate-heading mb-2">No Prospects Found</h3>
-                <p className="corporate-subtext mb-4">Run a discovery scan to find potential clients with threat exposure</p>
-                <Button onClick={startDiscoveryScan} className="bg-corporate-accent text-black hover:bg-corporate-accentDark">
-                  Start First Scan
+                <Button 
+                  onClick={runLocalThreatAnalysis}
+                  disabled={analyzing}
+                  className="w-full bg-corporate-accent hover:bg-corporate-accentDark text-black"
+                >
+                  {analyzing ? (
+                    <>
+                      <Brain className="h-4 w-4 mr-2 animate-pulse" />
+                      Analyzing...
+                    </>
+                  ) : (
+                    <>
+                      <Search className="h-4 w-4 mr-2" />
+                      Analyze
+                    </>
+                  )}
                 </Button>
               </CardContent>
             </Card>
-          ) : (
-            <div className="grid grid-cols-1 gap-4">
-              {candidates.map((candidate) => (
-                <Card key={candidate.id} className="corporate-card hover:border-corporate-accent transition-colors cursor-pointer" onClick={() => setSelectedCandidate(candidate)}>
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <h3 className="font-semibold corporate-heading">{candidate.entity_name}</h3>
-                          <Badge className={`${getThreatColor(candidate.threat_score)} text-white`}>
-                            {getThreatLevel(candidate.threat_score)}
-                          </Badge>
-                          <Badge variant="outline" className="border-corporate-border text-corporate-lightGray">
-                            {candidate.discovery_source}
-                          </Badge>
-                        </div>
-                        <p className="text-sm corporate-subtext mb-2">{candidate.threat_summary}</p>
-                        <div className="flex items-center gap-4 text-xs corporate-subtext">
-                          <span>Source: {candidate.discovery_source}</span>
-                          <span>Value: ${candidate.potential_value?.toLocaleString()}</span>
-                          <span>Confidence: {Math.round(candidate.confidence_score * 100)}%</span>
-                        </div>
-                      </div>
+
+            {/* Analysis Results */}
+            <Card className="bg-corporate-darkSecondary border-corporate-border">
+              <CardHeader>
+                <CardTitle className="text-white">Analysis Results</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {analysisResult ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <Badge className={getRiskColor(analysisResult.riskLevel)}>
+                        {analysisResult.riskLevel} Risk
+                      </Badge>
                       <div className="text-right">
-                        <div className="text-2xl font-bold text-corporate-accent">
-                          {Math.round(candidate.threat_score * 100)}
-                        </div>
-                        <div className="text-xs corporate-subtext">Threat Score</div>
+                        <p className="text-sm text-corporate-lightGray">Confidence Score:</p>
+                        <p className="text-2xl font-bold text-white">{analysisResult.confidenceScore}%</p>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
+                    
+                    <div>
+                      <h4 className="font-medium text-white mb-2">Identified Threats</h4>
+                      <ul className="space-y-1">
+                        {analysisResult.identifiedThreats.map((threat, index) => (
+                          <li key={index} className="text-sm text-corporate-lightGray flex items-start gap-2">
+                            <AlertTriangle className="h-3 w-3 mt-0.5 text-yellow-500 flex-shrink-0" />
+                            {threat}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h4 className="font-medium text-white mb-2">Recommendations</h4>
+                      <ul className="space-y-1">
+                        {analysisResult.recommendations.map((rec, index) => (
+                          <li key={index} className="text-sm text-corporate-lightGray flex items-start gap-2">
+                            <TrendingUp className="h-3 w-3 mt-0.5 text-corporate-accent flex-shrink-0" />
+                            {rec}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Brain className="h-12 w-12 text-corporate-gray mx-auto mb-4" />
+                    <p className="text-corporate-lightGray">Enter an entity name and click Analyze to see results</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
-        <TabsContent value="local-ai" className="space-y-4">
-          <LocalInferencePanel 
-            entityName={selectedCandidate?.entity_name || 'Test Entity'}
-            onAnalysisComplete={(analysis) => {
-              console.log('Local analysis completed:', analysis);
-              toast.success(`Local AI analysis: ${analysis.category} threat detected`);
-            }}
-          />
-        </TabsContent>
-
-        <TabsContent value="outreach" className="space-y-4">
-          <Card className="corporate-card">
+        <TabsContent value="feed">
+          <Card className="bg-corporate-darkSecondary border-corporate-border">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 corporate-heading">
-                <Mail className="h-5 w-5 text-corporate-accent" />
-                Intelligent Outreach Campaign
-              </CardTitle>
+              <CardTitle className="text-white">Live Threat Feed</CardTitle>
+              <p className="text-corporate-lightGray">Real-time threat intelligence from live sources</p>
             </CardHeader>
             <CardContent>
-              {selectedCandidate ? (
-                <div className="space-y-4">
-                  <div className="p-4 border border-corporate-border rounded-lg bg-corporate-darkSecondary">
-                    <h3 className="font-semibold corporate-heading mb-2">{selectedCandidate.entity_name}</h3>
-                    <p className="corporate-subtext mb-2">{selectedCandidate.threat_summary}</p>
-                    <div className="flex gap-2">
-                      <Badge className="bg-corporate-accent text-black">
-                        Value: ${selectedCandidate.potential_value?.toLocaleString()}
-                      </Badge>
-                      <Badge variant="outline" className="border-corporate-border text-corporate-lightGray">
-                        {selectedCandidate.discovery_source}
-                      </Badge>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-corporate-lightGray">Personalized Outreach Message</label>
-                    <Textarea
-                      className="bg-corporate-dark border-corporate-border text-white"
-                      rows={8}
-                      placeholder="Draft your personalized outreach message here..."
-                      defaultValue={`Subject: Critical Threat Intelligence for ${selectedCandidate.entity_name}
-
-Dear ${selectedCandidate.entity_name} Leadership Team,
-
-Our automated threat detection systems have identified significant reputation risks affecting your organization. Based on our analysis:
-
-• Threat Level: ${getThreatLevel(selectedCandidate.threat_score)}
-• Potential Business Impact: ${selectedCandidate.potential_value ? `$${selectedCandidate.potential_value.toLocaleString()}` : 'Significant'}
-• Discovery Source: ${selectedCandidate.discovery_source}
-
-${selectedCandidate.threat_summary}
-
-We specialize in neutralizing these exact threat vectors before they impact your business. Would you be available for a brief 15-minute call to discuss our findings?
-
-Best regards,
-A.R.I.A™ Threat Intelligence Team`}
-                    />
-                  </div>
-
-                  <div className="flex gap-2">
-                    <Button className="bg-corporate-accent text-black hover:bg-corporate-accentDark">
-                      <Mail className="h-4 w-4 mr-2" />
-                      Send Outreach
-                    </Button>
-                    <Button variant="outline" className="border-corporate-border text-corporate-lightGray">
-                      Schedule Follow-up
-                    </Button>
-                    <Button variant="outline" className="border-corporate-border text-corporate-lightGray">
-                      Add to CRM
-                    </Button>
-                  </div>
+              {loading ? (
+                <div className="text-center py-8">
+                  <Activity className="h-8 w-8 animate-spin mx-auto mb-4 text-corporate-accent" />
+                  <p className="text-corporate-lightGray">Loading live threats...</p>
+                </div>
+              ) : liveThreats.length === 0 ? (
+                <div className="text-center py-8">
+                  <Shield className="h-12 w-12 text-corporate-gray mx-auto mb-4" />
+                  <p className="text-corporate-lightGray">No live threats detected</p>
+                  <p className="text-sm text-corporate-lightGray mt-2">Run a scan to check for new threats</p>
                 </div>
               ) : (
-                <div className="text-center py-8">
-                  <Target className="h-12 w-12 text-corporate-accent mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold corporate-heading mb-2">Select a Prospect</h3>
-                  <p className="corporate-subtext">Choose a prospect from the Candidates tab to create a personalized outreach campaign</p>
+                <div className="space-y-4 max-h-96 overflow-y-auto">
+                  {liveThreats.map((threat) => (
+                    <div key={threat.id} className="border border-corporate-border rounded-lg p-4 bg-corporate-dark">
+                      <div className="flex items-start justify-between mb-2">
+                        <div>
+                          <h4 className="font-medium text-white">{threat.entity_name}</h4>
+                          <p className="text-sm text-corporate-lightGray">{threat.platform}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge className={getRiskColor(threat.severity)}>
+                            {threat.severity.toUpperCase()}
+                          </Badge>
+                          <Badge variant="outline" className="text-corporate-lightGray">
+                            {threat.confidence_score}%
+                          </Badge>
+                        </div>
+                      </div>
+                      
+                      <p className="text-sm text-corporate-lightGray line-clamp-2 mb-2">
+                        {threat.content}
+                      </p>
+                      
+                      <div className="flex items-center justify-between text-xs text-corporate-lightGray">
+                        <span>Source: {threat.source_type}</span>
+                        <span>{new Date(threat.created_at).toLocaleString()}</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </CardContent>
