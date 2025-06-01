@@ -1,18 +1,18 @@
 
 import React from 'react';
-import PageLayout from '@/components/layout/PageLayout';
 import PublicLayout from '@/components/layout/PublicLayout';
 import HeroSection from '@/components/sections/HeroSection';
 import TrustedCompaniesSection from '@/components/sections/TrustedCompaniesSection';
 import AIPoweredSection from '@/components/sections/AIPoweredSection';
 import TestimonialsSection from '@/components/sections/TestimonialsSection';
 import PricingSection from '@/components/sections/PricingSection';
+import ErrorBoundary from '@/components/error/ErrorBoundary';
 
 const HomePage = () => {
   return (
-    <PageLayout title="A.R.I.A™ - AI Reputation Intelligence Agent" className="bg-black">
+    <ErrorBoundary>
       <PublicLayout>
-        <div className="bg-black text-white">
+        <div className="bg-background text-foreground min-h-screen">
           <HeroSection />
           <TrustedCompaniesSection />
           <AIPoweredSection />
@@ -20,7 +20,7 @@ const HomePage = () => {
           <PricingSection />
         </div>
       </PublicLayout>
-    </PageLayout>
+    </ErrorBoundary>
   );
 };
 

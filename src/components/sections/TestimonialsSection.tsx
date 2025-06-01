@@ -24,24 +24,24 @@ const TestimonialsSection = () => {
   ];
 
   return (
-    <section className="py-24 bg-black">
+    <section className="py-24 bg-background">
       <div className="container mx-auto px-6">
         <div className="mb-16">
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-light mb-8">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-light mb-8 text-foreground">
             Real Stories,
             <br />
             Real Results
           </h2>
-          <p className="text-gray-400 text-lg max-w-md">
+          <p className="text-muted-foreground text-lg max-w-md">
             Learn from our success stories. Our clients have experienced remarkable transformations in their online reputation and business growth.
           </p>
         </div>
         
         <div className="grid md:grid-cols-3 gap-8">
           {testimonials.map((testimonial, index) => (
-            <div key={index} className="bg-gray-900 p-8 rounded-lg">
+            <div key={index} className="bg-card p-8 rounded-lg border border-border">
               <div className="flex items-center mb-6">
-                <div className="w-16 h-16 bg-gray-700 rounded-full mr-4 overflow-hidden">
+                <div className="w-16 h-16 bg-muted rounded-full mr-4 overflow-hidden">
                   <img 
                     src={testimonial.image} 
                     alt={testimonial.name}
@@ -49,11 +49,11 @@ const TestimonialsSection = () => {
                   />
                 </div>
                 <div>
-                  <h3 className="text-white font-semibold">{testimonial.name}</h3>
-                  <p className="text-gray-400 text-sm uppercase tracking-wide">{testimonial.title}</p>
+                  <h3 className="text-foreground font-semibold">{testimonial.name}</h3>
+                  <p className="text-muted-foreground text-sm uppercase tracking-wide">{testimonial.title}</p>
                 </div>
               </div>
-              <p className="text-gray-300 leading-relaxed">"{testimonial.quote}"</p>
+              <p className="text-muted-foreground leading-relaxed">"{testimonial.quote}"</p>
             </div>
           ))}
         </div>

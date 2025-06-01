@@ -11,11 +11,11 @@ const TrustedCompaniesSection = () => {
   ];
 
   return (
-    <section className="py-16 bg-black border-t border-gray-800">
+    <section className="py-16 bg-background border-t border-border">
       <div className="container mx-auto px-6">
         <div className="flex flex-wrap items-center justify-center gap-12 md:gap-16 lg:gap-20">
           {companies.map((company, index) => (
-            <div key={index} className="text-gray-400 text-xl md:text-2xl font-light tracking-wide opacity-60 hover:opacity-100 transition-opacity">
+            <div key={index} className="text-muted-foreground text-xl md:text-2xl font-light tracking-wide opacity-60 hover:opacity-100 transition-opacity">
               {company.logo === "Goldman\nSachs" ? (
                 <div className="text-center">
                   <div>Goldman</div>
