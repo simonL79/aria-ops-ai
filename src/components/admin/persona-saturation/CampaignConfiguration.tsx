@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -49,10 +48,10 @@ const CampaignConfiguration: React.FC<CampaignConfigurationProps> = ({
   ];
 
   const handlePlatformToggle = (platformId: string) => {
-    setDeploymentTargets(prev => 
-      prev.includes(platformId) 
-        ? prev.filter(id => id !== platformId)
-        : [...prev, platformId]
+    setDeploymentTargets(
+      deploymentTargets.includes(platformId) 
+        ? deploymentTargets.filter(id => id !== platformId)
+        : [...deploymentTargets, platformId]
     );
   };
 
