@@ -47,15 +47,33 @@ const initializeLiveStatus = async (): Promise<void> => {
     ];
 
     for (const module of liveModules) {
-      await supabase
-        .from('live_status')
-        .upsert({
-          name: module,
-          active_threats: 0,
-          last_threat_seen: new Date().toISOString(),
-          last_report: new Date().toISOString(),
-          system_status: 'LIVE'
-        }, { onConflict: 'name' });
+      try {
+        // First check if the module already exists
+        const { data: existing } = await supabase
+          .from('live_status')
+          .select('name')
+          .eq('name', module)
+          .single();
+
+        if (!existing) {
+          // Only insert if it doesn't exist
+          const { error } = await supabase
+            .from('live_status')
+            .insert({
+              name: module,
+              active_threats: 0,
+              last_threat_seen: new Date().toISOString(),
+              last_report: new Date().toISOString(),
+              system_status: 'LIVE'
+            });
+
+          if (error) {
+            console.warn(`Could not initialize module ${module}:`, error.message);
+          }
+        }
+      } catch (moduleError) {
+        console.warn(`Failed to check/insert module ${module}:`, moduleError);
+      }
     }
 
     console.log('✅ Live status monitoring initialized for all modules');
@@ -69,16 +87,41 @@ const initializeLiveStatus = async (): Promise<void> => {
  */
 const initializeSystemConfig = async (): Promise<void> => {
   try {
-    await supabase
-      .from('system_config')
-      .upsert([
-        { config_key: 'allow_mock_data', config_value: 'disabled' },
-        { config_key: 'system_mode', config_value: 'live' },
-        { config_key: 'scanner_mode', config_value: 'production' },
-        { config_key: 'data_validation', config_value: 'strict' },
-        { config_key: 'aria_core_active', config_value: 'true' },
-        { config_key: 'live_enforcement', config_value: 'enabled' }
-      ], { onConflict: 'config_key' });
+    const configs = [
+      { key: 'allow_mock_data', value: 'disabled' },
+      { key: 'system_mode', value: 'live' },
+      { key: 'scanner_mode', value: 'production' },
+      { key: 'data_validation', value: 'strict' },
+      { key: 'aria_core_active', value: 'true' },
+      { key: 'live_enforcement', value: 'enabled' }
+    ];
+
+    for (const config of configs) {
+      try {
+        // Check if config exists first
+        const { data: existing } = await supabase
+          .from('system_config')
+          .select('config_key')
+          .eq('config_key', config.key)
+          .single();
+
+        if (!existing) {
+          // Only insert if it doesn't exist
+          const { error } = await supabase
+            .from('system_config')
+            .insert({
+              config_key: config.key,
+              config_value: config.value
+            });
+
+          if (error) {
+            console.warn(`Could not create config ${config.key}:`, error.message);
+          }
+        }
+      } catch (configError) {
+        console.warn(`Failed to check/insert config ${config.key}:`, configError);
+      }
+    }
 
     console.log('✅ System configuration initialized for live operation');
   } catch (error) {

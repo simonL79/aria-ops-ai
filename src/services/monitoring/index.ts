@@ -18,29 +18,42 @@ export const initializeMonitoringPlatforms = async (): Promise<void> => {
     // Import here to avoid circular dependency
     const { supabase } = await import('@/integrations/supabase/client');
     
-    // Initialize monitoring platforms
-    const platforms = [
-      'Social Media',
-      'News Sources', 
-      'Forums',
-      'Legal Discussions',
-      'Dark Web',
-      'AI Models'
-    ];
-    
-    // Update or create monitoring status
-    const { error } = await supabase
+    // Check if monitoring status exists first
+    const { data: existing } = await supabase
       .from('monitoring_status')
-      .upsert({
-        id: '1',
-        is_active: true,
-        sources_count: platforms.length,
-        last_run: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'id' });
-    
-    if (error && error.code !== 'PGRST116') {
-      console.warn('Could not update monitoring status:', error);
+      .select('id')
+      .eq('id', '1')
+      .single();
+
+    if (!existing) {
+      // Only insert if it doesn't exist
+      const { error } = await supabase
+        .from('monitoring_status')
+        .insert({
+          id: '1',
+          is_active: true,
+          sources_count: 6,
+          last_run: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        });
+
+      if (error) {
+        console.warn('Could not create monitoring status:', error.message);
+      }
+    } else {
+      // Update existing record
+      const { error } = await supabase
+        .from('monitoring_status')
+        .update({
+          is_active: true,
+          sources_count: 6,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', '1');
+
+      if (error) {
+        console.warn('Could not update monitoring status:', error.message);
+      }
     }
     
     console.log('✅ Monitoring platforms initialized');
