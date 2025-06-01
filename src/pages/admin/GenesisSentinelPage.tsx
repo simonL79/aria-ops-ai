@@ -14,25 +14,25 @@ const GenesisSentinelPage = () => {
         <meta name="description" content="Genesis Sentinel operator console for advanced threat detection and response" />
       </Helmet>
       
-      <div className="space-y-6 p-6 bg-corporate-dark min-h-screen">
+      <div className="space-y-6 p-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2 corporate-heading">
-              <Shield className="h-8 w-8 text-corporate-accent" />
+            <h1 className="text-3xl font-bold flex items-center gap-2">
+              <Shield className="h-8 w-8 text-blue-500" />
               A.R.I.A™ Genesis Sentinel
             </h1>
-            <p className="corporate-subtext mt-1">
+            <p className="text-muted-foreground mt-1">
               Reputation Intelligence Early Warning System - Detect threats and prospects before they emerge
             </p>
           </div>
           
           <div className="flex items-center gap-2">
-            <Badge variant="secondary" className="flex items-center gap-1 bg-corporate-darkSecondary text-corporate-lightGray border-corporate-border">
+            <Badge variant="secondary" className="flex items-center gap-1">
               <Eye className="h-3 w-3" />
               Intelligence First
             </Badge>
-            <Badge className="bg-corporate-accent text-black hover:bg-corporate-accentDark">
+            <Badge className="bg-blue-500 text-white hover:bg-blue-600">
               Elite Tier Service
             </Badge>
           </div>
@@ -40,71 +40,71 @@ const GenesisSentinelPage = () => {
 
         {/* Service Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card className="corporate-card">
+          <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm flex items-center gap-1 corporate-heading">
-                <Globe className="h-4 w-4 text-corporate-accent" />
+              <CardTitle className="text-sm flex items-center gap-1">
+                <Globe className="h-4 w-4 text-blue-500" />
                 Entity Discovery
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">24/7</div>
-              <p className="text-xs corporate-subtext">Global monitoring</p>
+              <div className="text-2xl font-bold">24/7</div>
+              <p className="text-xs text-muted-foreground">Global monitoring</p>
             </CardContent>
           </Card>
 
-          <Card className="corporate-card">
+          <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm flex items-center gap-1 corporate-heading">
-                <TrendingUp className="h-4 w-4 text-corporate-accent" />
+              <CardTitle className="text-sm flex items-center gap-1">
+                <TrendingUp className="h-4 w-4 text-blue-500" />
                 Risk Prediction
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">Pre-Crisis</div>
-              <p className="text-xs corporate-subtext">Early detection</p>
+              <div className="text-2xl font-bold">Pre-Crisis</div>
+              <p className="text-xs text-muted-foreground">Early detection</p>
             </CardContent>
           </Card>
 
-          <Card className="corporate-card">
+          <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm flex items-center gap-1 corporate-heading">
-                <AlertTriangle className="h-4 w-4 text-corporate-accent" />
+              <CardTitle className="text-sm flex items-center gap-1">
+                <AlertTriangle className="h-4 w-4 text-blue-500" />
                 Lead Generation
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white">Auto</div>
-              <p className="text-xs corporate-subtext">Prospect identification</p>
+              <div className="text-2xl font-bold">Auto</div>
+              <p className="text-xs text-muted-foreground">Prospect identification</p>
             </CardContent>
           </Card>
 
-          <Card className="corporate-card">
+          <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm flex items-center gap-1 corporate-heading">
-                <Zap className="h-4 w-4 text-corporate-accent" />
+              <CardTitle className="text-sm flex items-center gap-1">
+                <Zap className="h-4 w-4 text-blue-500" />
                 Response Time
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-400">&lt; 5min</div>
-              <p className="text-xs corporate-subtext">Threat to outreach</p>
+              <div className="text-2xl font-bold text-green-500">&lt; 5min</div>
+              <p className="text-xs text-muted-foreground">Threat to outreach</p>
             </CardContent>
           </Card>
         </div>
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <Card className="corporate-card">
+          <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 corporate-heading">
-                <Globe className="h-5 w-5 text-corporate-accent" />
+              <CardTitle className="flex items-center gap-2">
+                <Globe className="h-5 w-5 text-blue-500" />
                 Proactive Monitoring
               </CardTitle>
-              <CardDescription className="corporate-subtext">Global entity intelligence scanning</CardDescription>
+              <CardDescription>Global entity intelligence scanning</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2 text-sm text-corporate-lightGray">
+              <div className="space-y-2 text-sm text-muted-foreground">
                 <div>• New business registrations</div>
                 <div>• Director & corporate changes</div>
                 <div>• Domain registrations & launches</div>
@@ -115,16 +115,16 @@ const GenesisSentinelPage = () => {
             </CardContent>
           </Card>
 
-          <Card className="corporate-card">
+          <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 corporate-heading">
-                <AlertTriangle className="h-5 w-5 text-corporate-accent" />
+              <CardTitle className="flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-blue-500" />
                 Risk Intelligence
               </CardTitle>
-              <CardDescription className="corporate-subtext">Predictive threat assessment</CardDescription>
+              <CardDescription>Predictive threat assessment</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2 text-sm text-corporate-lightGray">
+              <div className="space-y-2 text-sm text-muted-foreground">
                 <div>• Director risk scoring & linkage</div>
                 <div>• Historical litigation tracking</div>
                 <div>• Sector risk pattern analysis</div>
@@ -135,16 +135,16 @@ const GenesisSentinelPage = () => {
             </CardContent>
           </Card>
 
-          <Card className="corporate-card">
+          <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 corporate-heading">
-                <TrendingUp className="h-5 w-5 text-corporate-accent" />
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-blue-500" />
                 Lead Generation
               </CardTitle>
-              <CardDescription className="corporate-subtext">Automated prospect identification</CardDescription>
+              <CardDescription>Automated prospect identification</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2 text-sm text-corporate-lightGray">
+              <div className="space-y-2 text-sm text-muted-foreground">
                 <div>• Auto-generated risk profiles</div>
                 <div>• Watchtower candidate pipeline</div>
                 <div>• Pre-outreach intelligence briefs</div>
@@ -157,20 +157,20 @@ const GenesisSentinelPage = () => {
         </div>
 
         {/* Value Proposition */}
-        <Card className="border-corporate-accent bg-corporate-darkSecondary">
+        <Card className="border-blue-200 bg-blue-50">
           <CardHeader>
-            <CardTitle className="text-corporate-accent flex items-center gap-2">
+            <CardTitle className="text-blue-700 flex items-center gap-2">
               <Shield className="h-5 w-5" />
               Intelligence First, Reputation Always
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-corporate-lightGray space-y-2 text-sm">
-              <p><strong className="text-white">Early Warning System:</strong> Detect reputation threats before they exist</p>
-              <p><strong className="text-white">Prospect Intelligence:</strong> Identify clients before they know they need you</p>
-              <p><strong className="text-white">Market Leadership:</strong> Position as the authority on emerging risks</p>
-              <p><strong className="text-white">Strategic Growth:</strong> Self-feeding client acquisition engine</p>
-              <p><strong className="text-white">Competitive Moat:</strong> Always ahead of market developments</p>
+            <div className="text-muted-foreground space-y-2 text-sm">
+              <p><strong className="text-foreground">Early Warning System:</strong> Detect reputation threats before they exist</p>
+              <p><strong className="text-foreground">Prospect Intelligence:</strong> Identify clients before they know they need you</p>
+              <p><strong className="text-foreground">Market Leadership:</strong> Position as the authority on emerging risks</p>
+              <p><strong className="text-foreground">Strategic Growth:</strong> Self-feeding client acquisition engine</p>
+              <p><strong className="text-foreground">Competitive Moat:</strong> Always ahead of market developments</p>
             </div>
           </CardContent>
         </Card>

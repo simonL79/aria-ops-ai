@@ -35,11 +35,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     }
   };
 
-  // Add debugging to track route changes
-  React.useEffect(() => {
-    console.log('🔄 Route changed to:', pathname);
-    console.log('📍 Current page info:', { title, description });
-  }, [pathname, title, description]);
+  console.log('🔄 DashboardLayout rendering for:', pathname);
 
   return (
     <TooltipProvider>
@@ -51,7 +47,9 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           </Sidebar>
           <main className="flex-1 p-4 md:p-6">
             <DashboardMainHeader />
-            {children}
+            <div className="max-w-7xl mx-auto">
+              {children}
+            </div>
           </main>
         </div>
       </SidebarProvider>
