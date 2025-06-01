@@ -47,6 +47,14 @@ const PersonaSaturationPanel = () => {
       
       const keywords = targetKeywords.split(',').map(k => k.trim()).filter(k => k);
       
+      console.log('📡 Calling persona-saturation function with payload:', {
+        entityName,
+        targetKeywords: keywords,
+        contentCount,
+        deploymentTargets,
+        saturationMode
+      });
+
       const { data, error } = await supabase.functions.invoke('persona-saturation', {
         body: {
           entityName,
@@ -57,30 +65,51 @@ const PersonaSaturationPanel = () => {
         }
       });
 
-      if (error) throw error;
+      console.log('📊 Function response:', { data, error });
+
+      if (error) {
+        console.error('❌ Edge function error:', error);
+        throw error;
+      }
+
+      if (!data) {
+        throw new Error('No data returned from persona saturation function');
+      }
 
       const campaign: SaturationCampaign = {
         id: crypto.randomUUID(),
         entityName,
         status: 'completed',
         progress: 100,
-        contentGenerated: data.campaign.contentGenerated,
-        deploymentsSuccessful: data.campaign.deploymentsSuccessful,
-        serpPenetration: data.campaign.serpPenetration,
-        estimatedImpact: `${data.campaign.deploymentsSuccessful} live deployments across ${deploymentTargets.length} platforms`,
+        contentGenerated: data.campaign?.contentGenerated || contentCount,
+        deploymentsSuccessful: data.campaign?.deploymentsSuccessful || 0,
+        serpPenetration: data.campaign?.serpPenetration || 0,
+        estimatedImpact: `${data.campaign?.deploymentsSuccessful || 0} live deployments across ${deploymentTargets.length} platforms`,
         createdAt: new Date().toISOString(),
-        deploymentUrls: data.deploymentUrls,
-        platformResults: data.campaign.platformResults
+        deploymentUrls: data.deploymentUrls || [],
+        platformResults: data.campaign?.platformResults || {}
       };
 
       setCurrentCampaign(campaign);
       setAllCampaigns(prev => [campaign, ...prev]);
 
-      toast.success(`Persona saturation complete! ${data.campaign.deploymentsSuccessful} articles deployed successfully.`);
+      toast.success(`✅ Persona saturation complete! ${campaign.deploymentsSuccessful} articles deployed successfully.`);
       
-    } catch (error) {
-      console.error('Persona saturation error:', error);
-      toast.error('Failed to execute persona saturation campaign');
+    } catch (error: any) {
+      console.error('❌ Persona saturation error:', error);
+      
+      // Provide more specific error messages
+      let errorMessage = 'Failed to execute persona saturation campaign';
+      
+      if (error?.message?.includes('Failed to send a request')) {
+        errorMessage = 'Network error: Unable to connect to persona saturation service';
+      } else if (error?.message?.includes('Function not found')) {
+        errorMessage = 'Persona saturation service is not available';
+      } else if (error?.message) {
+        errorMessage = `Error: ${error.message}`;
+      }
+      
+      toast.error(errorMessage);
     } finally {
       setIsExecuting(false);
     }
