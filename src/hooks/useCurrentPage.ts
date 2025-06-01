@@ -10,9 +10,17 @@ export const useCurrentPage = (): PageInfo => {
   const location = useLocation();
   
   const pageMap: Record<string, PageInfo> = {
+    '/': {
+      title: 'A.R.I.A.™',
+      description: 'Advanced Reputation Intelligence Assistant'
+    },
     '/dashboard': {
       title: 'Intelligence Dashboard',
       description: 'Real-time threat monitoring and reputation intelligence'
+    },
+    '/admin': {
+      title: 'Admin Dashboard',
+      description: 'System administration and management'
     },
     '/admin/genesis-sentinel': {
       title: 'Genesis Sentinel',
@@ -35,7 +43,7 @@ export const useCurrentPage = (): PageInfo => {
       description: 'Legal operations and tactical response coordination'
     },
     '/admin/clients': {
-      title: 'Clients',
+      title: 'Client Management',
       description: 'Client management and configuration'
     },
     '/admin/qa-testing': {
@@ -43,7 +51,7 @@ export const useCurrentPage = (): PageInfo => {
       description: 'Quality assurance and system testing'
     },
     '/admin/settings': {
-      title: 'Settings',
+      title: 'System Settings',
       description: 'System configuration and preferences'
     },
     '/blog': {
@@ -53,10 +61,38 @@ export const useCurrentPage = (): PageInfo => {
     '/contact': {
       title: 'Contact',
       description: 'Get in touch with our team'
+    },
+    '/about': {
+      title: 'About',
+      description: 'Learn more about A.R.I.A.™'
+    },
+    '/scan': {
+      title: 'Reputation Scan',
+      description: 'Advanced reputation monitoring and analysis'
+    },
+    '/auth': {
+      title: 'Authentication',
+      description: 'Sign in to your account'
     }
   };
   
-  return pageMap[location.pathname] || {
+  // Get the current page info, defaulting to a generic page if not found
+  const currentPageInfo = pageMap[location.pathname];
+  
+  if (currentPageInfo) {
+    return currentPageInfo;
+  }
+  
+  // Handle dynamic routes or fallback
+  if (location.pathname.startsWith('/blog/')) {
+    return {
+      title: 'Blog Post',
+      description: 'Article content and insights'
+    };
+  }
+  
+  // Default fallback
+  return {
     title: 'A.R.I.A.™',
     description: 'Advanced Reputation Intelligence Assistant'
   };
