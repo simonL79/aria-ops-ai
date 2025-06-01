@@ -101,7 +101,7 @@ async function simulateDeployment(content: string, platform: string, entityName:
   platform: string;
 }> {
   // Simulate deployment delay
-  await new Promise(resolve => setTimeout(resolve, Math.random() * 2000 + 1000));
+  await new Promise(resolve => setTimeout(resolve, Math.random() * 1000 + 500));
   
   const slug = entityName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-');
   const articleId = Math.random().toString(36).substring(2, 8);
@@ -123,27 +123,50 @@ async function simulateDeployment(content: string, platform: string, entityName:
 }
 
 serve(async (req) => {
+  console.log(`🌐 Request method: ${req.method}`);
+  console.log(`📍 Request URL: ${req.url}`);
+  
   if (req.method === 'OPTIONS') {
+    console.log('✅ Handling CORS preflight request');
     return new Response(null, { headers: corsHeaders })
   }
 
   try {
-    const { entityName, targetKeywords, contentCount, deploymentTargets, saturationMode } = await req.json()
+    console.log('📥 Processing request body...');
+    const requestBody = await req.text();
+    console.log('📄 Raw request body:', requestBody);
+    
+    let parsedBody;
+    try {
+      parsedBody = JSON.parse(requestBody);
+    } catch (parseError) {
+      console.error('❌ JSON parse error:', parseError);
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'Invalid JSON in request body',
+        message: 'Request body must be valid JSON'
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
-    console.log(`🚀 Starting LOCAL persona saturation for ${entityName}`)
-    console.log(`📝 Generating ${contentCount} articles with LOCAL inference`)
-    console.log(`🎯 Keywords: ${targetKeywords.join(', ')}`)
-    console.log(`📡 Deploying to: ${deploymentTargets.join(', ')}`)
+    const { entityName, targetKeywords, contentCount, deploymentTargets, saturationMode } = parsedBody;
 
-    const deploymentUrls: string[] = []
-    const platformResults: Record<string, any> = {}
+    console.log(`🚀 Starting LOCAL persona saturation for ${entityName}`);
+    console.log(`📝 Generating ${contentCount} articles with LOCAL inference`);
+    console.log(`🎯 Keywords: ${targetKeywords.join(', ')}`);
+    console.log(`📡 Deploying to: ${deploymentTargets.join(', ')}`);
+
+    const deploymentUrls: string[] = [];
+    const platformResults: Record<string, any> = {};
     
     // Generate multiple articles locally
     for (let i = 0; i < contentCount; i++) {
       const contentTypes = ['article', 'review'];
       const contentType = contentTypes[i % contentTypes.length];
       
-      console.log(`📄 Generating ${contentType} ${i + 1}/${contentCount}`)
+      console.log(`📄 Generating ${contentType} ${i + 1}/${contentCount}`);
       
       // Generate content using local templates
       const content = generateArticleContent(entityName, targetKeywords, contentType);
@@ -156,17 +179,34 @@ serve(async (req) => {
           deploymentUrls.push(deployment.url);
           
           if (!platformResults[platform]) {
-            platformResults[platform] = { successful: 0, failed: 0, urls: [] };
+            platformResults[platform] = { 
+              platform: platform,
+              successful: 0, 
+              failed: 0, 
+              urls: [],
+              articlesDeployed: 0,
+              totalAttempted: 0
+            };
           }
           platformResults[platform].successful++;
+          platformResults[platform].articlesDeployed++;
+          platformResults[platform].totalAttempted++;
           platformResults[platform].urls.push(deployment.url);
           
           console.log(`✅ Deployed to ${platform}: ${deployment.url}`);
         } else {
           if (!platformResults[platform]) {
-            platformResults[platform] = { successful: 0, failed: 0, urls: [] };
+            platformResults[platform] = { 
+              platform: platform,
+              successful: 0, 
+              failed: 0, 
+              urls: [],
+              articlesDeployed: 0,
+              totalAttempted: 0
+            };
           }
           platformResults[platform].failed++;
+          platformResults[platform].totalAttempted++;
           console.log(`❌ Failed to deploy to ${platform}`);
         }
       }
@@ -180,7 +220,7 @@ serve(async (req) => {
       deploymentsSuccessful: totalDeployments,
       serpPenetration,
       platformResults,
-      mode: 'local_inference', // No API keys used
+      mode: 'local_inference',
       saturationLevel: saturationMode
     };
 
@@ -194,10 +234,10 @@ serve(async (req) => {
       message: `Successfully deployed ${totalDeployments} articles using LOCAL inference - no API keys required!`
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
+    });
 
   } catch (error) {
-    console.error('LOCAL persona saturation error:', error)
+    console.error('❌ LOCAL persona saturation error:', error);
     
     return new Response(JSON.stringify({
       success: false,
@@ -206,6 +246,6 @@ serve(async (req) => {
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
+    });
   }
-})
+});
