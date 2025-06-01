@@ -33,8 +33,8 @@ export class SystemInitializer {
       // 2. Initialize system configuration
       await this.initializeSystemConfig(result);
       
-      // 3. Initialize live status modules
-      await this.initializeLiveStatusModules(result);
+      // 3. Verify live status modules
+      await this.verifyLiveStatusModules(result);
       
       // 4. Set up monitoring infrastructure
       await this.setupMonitoringInfrastructure(result);
@@ -53,7 +53,7 @@ export class SystemInitializer {
       
       return result;
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ System initialization failed:', error);
       result.issues.push(`System initialization failed: ${error.message}`);
       return result;
@@ -66,8 +66,8 @@ export class SystemInitializer {
   private static async verifyDatabaseConnectivity(result: SystemInitializationResult): Promise<void> {
     try {
       const { error } = await supabase
-        .from('system_config')
-        .select('config_key')
+        .from('live_status')
+        .select('name')
         .limit(1);
       
       if (error) {
@@ -97,15 +97,19 @@ export class SystemInitializer {
       ];
       
       for (const config of configs) {
-        const { error } = await supabase
-          .from('system_config')
-          .upsert({
-            config_key: config.key,
-            config_value: config.value
-          }, { onConflict: 'config_key' });
-        
-        if (error) {
-          result.warnings.push(`Failed to set config: ${config.key}`);
+        try {
+          const { error } = await supabase
+            .from('system_config')
+            .upsert({
+              config_key: config.key,
+              config_value: config.value
+            }, { onConflict: 'config_key' });
+          
+          if (error) {
+            result.warnings.push(`Failed to set config: ${config.key}`);
+          }
+        } catch (configError) {
+          result.warnings.push(`Error setting config ${config.key}: ${configError}`);
         }
       }
       
@@ -116,11 +120,11 @@ export class SystemInitializer {
   }
   
   /**
-   * Initialize live status monitoring for all modules
+   * Verify live status monitoring modules exist
    */
-  private static async initializeLiveStatusModules(result: SystemInitializationResult): Promise<void> {
+  private static async verifyLiveStatusModules(result: SystemInitializationResult): Promise<void> {
     try {
-      const modules = [
+      const expectedModules = [
         'Live Threat Scanner',
         'Social Media Monitor',
         'News Feed Scanner',
@@ -135,34 +139,41 @@ export class SystemInitializer {
         'Graveyard Archive'
       ];
       
-      for (const module of modules) {
-        const { error } = await supabase
-          .from('live_status')
-          .upsert({
-            name: module,
-            active_threats: 0,
-            last_threat_seen: new Date().toISOString(),
-            last_report: new Date().toISOString(),
-            system_status: 'LIVE'
-          }, { onConflict: 'name' });
-        
-        if (error) {
-          result.warnings.push(`Failed to initialize module: ${module}`);
-        } else {
-          result.modulesInitialized++;
-        }
+      const { data: modules, error } = await supabase
+        .from('live_status')
+        .select('name, system_status')
+        .eq('system_status', 'LIVE');
+      
+      if (error) {
+        result.issues.push('Failed to verify live status modules');
+        return;
       }
       
-      console.log(`✅ Initialized ${result.modulesInitialized} live status modules`);
+      const moduleNames = modules?.map(m => m.name) || [];
+      result.modulesInitialized = moduleNames.length;
+      
+      // Check for missing modules
+      const missingModules = expectedModules.filter(module => !moduleNames.includes(module));
+      if (missingModules.length > 0) {
+        result.warnings.push(`Missing modules: ${missingModules.join(', ')}`);
+      }
+      
+      // Update last_report timestamp for active modules
+      await supabase
+        .from('live_status')
+        .update({ last_report: new Date().toISOString() })
+        .eq('system_status', 'LIVE');
+      
+      console.log(`✅ Verified ${result.modulesInitialized} live status modules`);
     } catch (error) {
-      result.issues.push('Failed to initialize live status modules');
+      result.issues.push('Failed to verify live status modules');
     }
   }
   
   /**
    * Set up monitoring infrastructure
    */
-  private static async setupMonitoringInfrastructure(result: SystemInitializationResult): Promise<void> {
+  private static async setupMonitoringInfrastructure(result: SystemInitializationResult): Promise<void> => {
     try {
       // Initialize monitoring status table if it exists
       const { error } = await supabase
@@ -188,7 +199,7 @@ export class SystemInitializer {
   /**
    * Validate system integrity after initialization
    */
-  private static async validateSystemIntegrity(result: SystemInitializationResult): Promise<void> {
+  private static async validateSystemIntegrity(result: SystemInitializationResult): Promise<void> => {
     try {
       // Check if all required tables exist and have data
       const { data: configs, error: configError } = await supabase

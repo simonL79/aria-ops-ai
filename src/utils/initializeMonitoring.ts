@@ -31,52 +31,32 @@ export const initializeDatabase = async (): Promise<void> => {
  */
 const initializeLiveStatus = async (): Promise<void> => {
   try {
-    const liveModules = [
-      'Live Threat Scanner',
-      'Social Media Monitor',
-      'News Feed Scanner',
-      'Forum Analysis Engine',
-      'Legal Discussion Monitor',
-      'Reputation Risk Detector',
-      'Strike Management System',
-      'HyperCore Intelligence',
-      'EIDETIC Memory Engine',
-      'RSI Threat Simulation',
-      'Anubis Diagnostics',
-      'Graveyard Archive'
-    ];
+    // Verify the table exists and has the required modules
+    const { data: modules, error } = await supabase
+      .from('live_status')
+      .select('name, system_status')
+      .eq('system_status', 'LIVE');
 
-    for (const module of liveModules) {
-      try {
-        // First check if the module already exists
-        const { data: existing } = await supabase
-          .from('live_status')
-          .select('name')
-          .eq('name', module)
-          .single();
-
-        if (!existing) {
-          // Only insert if it doesn't exist
-          const { error } = await supabase
-            .from('live_status')
-            .insert({
-              name: module,
-              active_threats: 0,
-              last_threat_seen: new Date().toISOString(),
-              last_report: new Date().toISOString(),
-              system_status: 'LIVE'
-            });
-
-          if (error) {
-            console.warn(`Could not initialize module ${module}:`, error.message);
-          }
-        }
-      } catch (moduleError) {
-        console.warn(`Failed to check/insert module ${module}:`, moduleError);
-      }
+    if (error) {
+      console.error('❌ Error checking live status modules:', error);
+      return;
     }
 
-    console.log('✅ Live status monitoring initialized for all modules');
+    console.log(`✅ Live status monitoring verified: ${modules?.length || 0} modules active`);
+    
+    // Update last_report for all modules to show they're active
+    const { error: updateError } = await supabase
+      .from('live_status')
+      .update({ 
+        last_report: new Date().toISOString(),
+        system_status: 'LIVE'
+      })
+      .eq('system_status', 'LIVE');
+
+    if (updateError) {
+      console.warn('Could not update module timestamps:', updateError.message);
+    }
+
   } catch (error) {
     console.error('❌ Live status initialization failed:', error);
   }
