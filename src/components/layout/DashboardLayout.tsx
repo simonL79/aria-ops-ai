@@ -19,6 +19,8 @@ interface DashboardLayoutProps {
 }
 
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
+  console.log('🔄 DashboardLayout rendering');
+  
   const { signOut } = useAuth();
   const { pathname } = useLocation();
   const navigate = useNavigate();

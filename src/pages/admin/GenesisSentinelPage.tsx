@@ -7,6 +7,8 @@ import { Badge } from '@/components/ui/badge';
 import { Shield, Eye, TrendingUp, Globe, AlertTriangle, Zap } from 'lucide-react';
 
 const GenesisSentinelPage = () => {
+  console.log('🔄 GenesisSentinelPage rendering');
+  
   return (
     <DashboardLayout>
       <Helmet>
