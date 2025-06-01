@@ -44,12 +44,12 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   return (
     <TooltipProvider>
       <SidebarProvider>
-        <div className="min-h-screen flex w-full bg-gray-50">
+        <div className="min-h-screen flex w-full bg-corporate-dark">
           <Sidebar>
             <SidebarRail />
             <DashboardSidebarContent onSignOut={handleSignOut} />
           </Sidebar>
-          <main className="flex-1 p-4 md:p-6">
+          <main className="flex-1 p-4 md:p-6 bg-corporate-dark">
             <DashboardMainHeader />
             {children}
           </main>

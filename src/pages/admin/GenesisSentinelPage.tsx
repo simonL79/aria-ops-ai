@@ -9,7 +9,7 @@ import { Shield, Eye, TrendingUp, Globe, AlertTriangle, Zap } from 'lucide-react
 const GenesisSentinelPage = () => {
   return (
     <DashboardLayout>
-      <div className="space-y-6 p-6 bg-corporate-dark min-h-screen">
+      <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
