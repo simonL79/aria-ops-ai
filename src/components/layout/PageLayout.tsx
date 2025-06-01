@@ -13,7 +13,7 @@ const PageLayout = ({
   children, 
   title = "A.R.I.A™ – AI Reputation Intelligence Agent",
   description = "Monitor, protect, and repair your digital reputation with A.R.I.A™ — the AI-powered reputation defense system built for founders, influencers, and businesses.",
-  className = "bg-corporate-dark"
+  className = ""
 }: PageLayoutProps) => {
   return (
     <>
@@ -23,7 +23,7 @@ const PageLayout = ({
         <meta property="og:title" content={title} />
         <meta property="og:description" content={description} />
       </Helmet>
-      <div className={`min-h-screen ${className}`}>
+      <div className={`min-h-screen bg-corporate-dark ${className}`}>
         {children}
       </div>
     </>
