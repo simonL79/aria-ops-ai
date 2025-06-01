@@ -139,6 +139,12 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     }
   ];
 
+  // Add debugging to track route changes
+  React.useEffect(() => {
+    console.log('🔄 Route changed to:', pathname);
+    console.log('📍 Current page info:', { title, description });
+  }, [pathname, title, description]);
+
   return (
     <TooltipProvider>
       <SidebarProvider>
@@ -162,7 +168,12 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                       isActive={route.active}
                       tooltip={route.label}
                     >
-                      <Link to={route.href}>
+                      <Link 
+                        to={route.href}
+                        onClick={() => {
+                          console.log('🔍 Navigating to:', route.href);
+                        }}
+                      >
                         {route.icon}
                         <span>{route.label}</span>
                       </Link>
