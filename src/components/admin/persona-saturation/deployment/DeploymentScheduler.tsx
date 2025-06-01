@@ -35,6 +35,7 @@ const DeploymentScheduler = () => {
     try {
       const loadedSchedules = await DeploymentSchedulerService.loadScheduledDeployments();
       setSchedules(loadedSchedules);
+      console.log('Loaded schedules:', loadedSchedules);
     } catch (error) {
       console.error('Failed to load schedules:', error);
       toast.error('Failed to load scheduled deployments');
@@ -94,15 +95,21 @@ const DeploymentScheduler = () => {
   };
 
   const toggleScheduleStatus = async (scheduleId: string, currentStatus: string) => {
+    console.log('Toggling schedule status:', scheduleId, 'from', currentStatus);
     const newStatus = currentStatus === 'active' ? 'paused' : 'active';
+    
     try {
       const success = await DeploymentSchedulerService.updateScheduledDeployment(scheduleId, { 
         status: newStatus 
       });
+      
       if (success) {
+        console.log('Successfully updated status to:', newStatus);
         toast.success(`Schedule ${newStatus === 'active' ? 'activated' : 'paused'}`);
-        loadSchedules();
+        // Refresh the schedules list
+        await loadSchedules();
       } else {
+        console.error('Failed to update schedule status');
         toast.error('Failed to update schedule status');
       }
     } catch (error) {

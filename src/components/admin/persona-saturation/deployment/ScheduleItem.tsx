@@ -20,6 +20,11 @@ const ScheduleItem = ({ schedule, onToggleStatus, onDelete }: ScheduleItemProps)
     );
   };
 
+  const handleToggleStatus = () => {
+    console.log('Toggle status clicked for schedule:', schedule.id, 'Current status:', schedule.status);
+    onToggleStatus(schedule.id, schedule.status);
+  };
+
   return (
     <div className="p-4 bg-corporate-darkSecondary rounded-lg border border-corporate-border">
       <div className="flex items-start justify-between mb-3">
@@ -66,7 +71,7 @@ const ScheduleItem = ({ schedule, onToggleStatus, onDelete }: ScheduleItemProps)
           <Button
             size="sm"
             variant="outline"
-            onClick={() => onToggleStatus(schedule.id, schedule.status)}
+            onClick={handleToggleStatus}
             className="border-corporate-border text-corporate-lightGray hover:bg-corporate-accent hover:text-black"
             title={schedule.status === 'active' ? 'Pause Schedule' : 'Activate Schedule'}
           >
