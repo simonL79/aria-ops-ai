@@ -1,10 +1,10 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import CampaignConfiguration from './persona-saturation/CampaignConfiguration';
 import CampaignMonitor from './persona-saturation/CampaignMonitor';
 import ContentSourcesPanel from './persona-saturation/ContentSourcesPanel';
-import { Globe, Monitor, Database, Settings } from 'lucide-react';
+import ReviewPostGenerator from './persona-saturation/ReviewPostGenerator';
+import { Globe, Monitor, Database, Settings, FileText } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -94,7 +94,7 @@ const PersonaSaturationPanel = () => {
       </div>
 
       <Tabs defaultValue="configure" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 bg-corporate-darkSecondary border border-corporate-border">
+        <TabsList className="grid w-full grid-cols-5 bg-corporate-darkSecondary border border-corporate-border">
           <TabsTrigger value="configure" className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray">
             <Settings className="h-4 w-4 mr-2" />
             Configure
@@ -102,6 +102,10 @@ const PersonaSaturationPanel = () => {
           <TabsTrigger value="sources" className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray">
             <Database className="h-4 w-4 mr-2" />
             Content Sources
+          </TabsTrigger>
+          <TabsTrigger value="reviews" className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray">
+            <FileText className="h-4 w-4 mr-2" />
+            Review Generator
           </TabsTrigger>
           <TabsTrigger value="monitor" className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray">
             <Monitor className="h-4 w-4 mr-2" />
@@ -132,6 +136,10 @@ const PersonaSaturationPanel = () => {
 
         <TabsContent value="sources">
           <ContentSourcesPanel />
+        </TabsContent>
+
+        <TabsContent value="reviews">
+          <ReviewPostGenerator />
         </TabsContent>
 
         <TabsContent value="monitor">
