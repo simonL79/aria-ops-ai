@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -107,8 +106,10 @@ const DeploymentScheduler = () => {
         console.log('Update successful, new status:', newStatus);
         toast.success(`Schedule ${newStatus === 'active' ? 'activated' : 'paused'}`);
         
-        // Force reload to get fresh data
-        await loadSchedules();
+        // Wait a moment before reloading to ensure database consistency
+        setTimeout(async () => {
+          await loadSchedules();
+        }, 500);
       } else {
         console.error('Update failed in service');
         toast.error('Failed to update schedule status');

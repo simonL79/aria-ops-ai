@@ -123,30 +123,34 @@ export class DeploymentSchedulerService {
         ? JSON.parse(currentData.details) 
         : currentData.details;
 
-      // Merge updates with current data
+      // Merge updates with current data - ensure status is properly updated
       const updatedDetails = {
         ...currentDetails,
         ...updates,
+        // Explicitly update the status if provided
+        ...(updates.status && { status: updates.status }),
         updatedAt: new Date().toISOString()
       };
 
-      console.log('Updating with details:', updatedDetails);
+      console.log('Current details:', currentDetails);
+      console.log('Updated details:', updatedDetails);
 
-      // Update the record
-      const { error: updateError } = await supabase
+      // Update the record with explicit status handling
+      const { data: updateResult, error: updateError } = await supabase
         .from('activity_logs')
         .update({
           details: JSON.stringify(updatedDetails),
           updated_at: new Date().toISOString()
         })
-        .eq('id', id);
+        .eq('id', id)
+        .select();
 
       if (updateError) {
         console.error('Failed to update scheduled deployment:', updateError);
         return false;
       }
 
-      console.log('Successfully updated deployment in database');
+      console.log('Successfully updated deployment in database:', updateResult);
       return true;
     } catch (error) {
       console.error('Error updating scheduled deployment:', error);
