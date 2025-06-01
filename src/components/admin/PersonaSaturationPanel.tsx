@@ -23,6 +23,17 @@ interface SaturationCampaign {
   platformResults?: Record<string, { success: number; total: number; urls: string[] }>;
 }
 
+interface CampaignData {
+  deployments?: {
+    urls?: string[];
+    successful?: number;
+  };
+  platformResults?: Record<string, { success: number; total: number; urls: string[] }>;
+  contentGenerated?: number;
+  deploymentsSuccessful?: number;
+  serpPenetration?: number;
+}
+
 const PersonaSaturationPanel = () => {
   const [activeTab, setActiveTab] = useState('deploy');
   const [entityName, setEntityName] = useState('');
@@ -61,16 +72,18 @@ const PersonaSaturationPanel = () => {
         const campaignData = data[0];
         console.log('✅ Found Simon Lindsay campaign:', campaignData);
         
-        // Extract deployment URLs from campaign data
+        // Safely cast and extract deployment URLs from campaign data
         const deploymentUrls: string[] = [];
         const platformResults: Record<string, { success: number; total: number; urls: string[] }> = {};
         
-        if (campaignData.campaign_data?.deployments?.urls) {
-          deploymentUrls.push(...campaignData.campaign_data.deployments.urls);
+        const typedCampaignData = campaignData.campaign_data as CampaignData;
+        
+        if (typedCampaignData?.deployments?.urls) {
+          deploymentUrls.push(...typedCampaignData.deployments.urls);
         }
         
-        if (campaignData.campaign_data?.platformResults) {
-          Object.entries(campaignData.campaign_data.platformResults).forEach(([platform, results]: [string, any]) => {
+        if (typedCampaignData?.platformResults) {
+          Object.entries(typedCampaignData.platformResults).forEach(([platform, results]) => {
             platformResults[platform] = results;
             if (results.urls) {
               deploymentUrls.push(...results.urls);
@@ -83,10 +96,10 @@ const PersonaSaturationPanel = () => {
           entityName: campaignData.entity_name,
           status: 'completed',
           progress: 100,
-          contentGenerated: campaignData.campaign_data?.contentGenerated || 0,
-          deploymentsSuccessful: campaignData.campaign_data?.deploymentsSuccessful || 0,
-          serpPenetration: (campaignData.campaign_data?.serpPenetration || 0) * 100,
-          estimatedImpact: `${campaignData.campaign_data?.deploymentsSuccessful || 0} articles deployed successfully`,
+          contentGenerated: typedCampaignData?.contentGenerated || 0,
+          deploymentsSuccessful: typedCampaignData?.deploymentsSuccessful || 0,
+          serpPenetration: (typedCampaignData?.serpPenetration || 0) * 100,
+          estimatedImpact: `${typedCampaignData?.deploymentsSuccessful || 0} articles deployed successfully`,
           createdAt: campaignData.created_at,
           deploymentUrls: [...new Set(deploymentUrls)], // Remove duplicates
           platformResults: platformResults
@@ -122,17 +135,20 @@ const PersonaSaturationPanel = () => {
       }
 
       if (data) {
-        const formattedCampaigns = data.map((campaign: any) => ({
-          id: campaign.id,
-          entityName: campaign.entity_name,
-          status: 'completed' as const,
-          progress: 100,
-          contentGenerated: campaign.campaign_data?.contentGenerated || 0,
-          deploymentsSuccessful: campaign.campaign_data?.deploymentsSuccessful || 0,
-          serpPenetration: (campaign.campaign_data?.serpPenetration || 0) * 100,
-          estimatedImpact: `${campaign.campaign_data?.deploymentsSuccessful || 0} articles deployed`,
-          createdAt: campaign.created_at
-        }));
+        const formattedCampaigns = data.map((campaign: any) => {
+          const typedCampaignData = campaign.campaign_data as CampaignData;
+          return {
+            id: campaign.id,
+            entityName: campaign.entity_name,
+            status: 'completed' as const,
+            progress: 100,
+            contentGenerated: typedCampaignData?.contentGenerated || 0,
+            deploymentsSuccessful: typedCampaignData?.deploymentsSuccessful || 0,
+            serpPenetration: (typedCampaignData?.serpPenetration || 0) * 100,
+            estimatedImpact: `${typedCampaignData?.deploymentsSuccessful || 0} articles deployed`,
+            createdAt: campaign.created_at
+          };
+        });
         setCampaigns(formattedCampaigns);
       }
     } catch (error) {
