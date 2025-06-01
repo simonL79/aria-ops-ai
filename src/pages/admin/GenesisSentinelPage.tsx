@@ -1,7 +1,7 @@
 
 import React from 'react';
+import { Helmet } from 'react-helmet-async';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import GenesisSentinelPanel from '@/components/admin/GenesisSentinelPanel';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Shield, Eye, TrendingUp, Globe, AlertTriangle, Zap } from 'lucide-react';
@@ -9,6 +9,11 @@ import { Shield, Eye, TrendingUp, Globe, AlertTriangle, Zap } from 'lucide-react
 const GenesisSentinelPage = () => {
   return (
     <DashboardLayout>
+      <Helmet>
+        <title>A.R.I.A™ Genesis Sentinel - Advanced Threat Detection</title>
+        <meta name="description" content="Genesis Sentinel operator console for advanced threat detection and response" />
+      </Helmet>
+      
       <div className="space-y-6 p-6 bg-corporate-dark min-h-screen">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -88,10 +93,7 @@ const GenesisSentinelPage = () => {
           </Card>
         </div>
 
-        {/* Main Panel */}
-        <GenesisSentinelPanel />
-
-        {/* Service Features */}
+        {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card className="corporate-card">
             <CardHeader>
