@@ -1,3 +1,4 @@
+
 import { toast } from 'sonner';
 import { pipeline, PipelineType, env } from '@huggingface/transformers';
 
@@ -107,11 +108,10 @@ export const loadLocalModel = async (modelId: string, taskType: string): Promise
     const pipelineType = taskType as PipelineType;
     
     // Enhanced loading with shorter timeout for browser compatibility
-    const loadWithTimeout = async (timeoutMs: number = 20000) => {
+    const loadWithTimeout = async (timeoutMs: number = 15000) => {
       return Promise.race([
         pipeline(pipelineType, actualModelId, { 
           device,
-          quantized: true, // Use quantized models for better performance
           progress_callback: (progress: any) => {
             if (progress.status === 'downloading') {
               console.log(`Downloading ${actualModelId}: ${Math.round(progress.progress * 100)}%`);

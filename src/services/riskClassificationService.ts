@@ -71,11 +71,10 @@ export const loadRiskClassifier = async (modelId: string = 'Xenova/distilbert-ba
     const device = 'cpu';
     
     // Load with shorter timeout for browser compatibility
-    const loadWithTimeout = async (timeoutMs: number = 25000) => {
+    const loadWithTimeout = async (timeoutMs: number = 15000) => {
       return Promise.race([
         pipeline('text-classification' as any, browserModelId, { 
           device,
-          quantized: true, // Use quantized models for better performance
           progress_callback: (progress: any) => {
             if (progress.status === 'downloading') {
               console.log(`Downloading risk classifier: ${Math.round(progress.progress * 100)}%`);
