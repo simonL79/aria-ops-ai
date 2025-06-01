@@ -101,7 +101,7 @@ async function simulateDeployment(content: string, platform: string, entityName:
   platform: string;
 }> {
   // Simulate deployment delay
-  await new Promise(resolve => setTimeout(resolve, Math.random() * 1000 + 500));
+  await new Promise(resolve => setTimeout(resolve, Math.random() * 500 + 100));
   
   const slug = entityName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-');
   const articleId = Math.random().toString(36).substring(2, 8);
@@ -116,7 +116,7 @@ async function simulateDeployment(content: string, platform: string, entityName:
   };
 
   return {
-    success: Math.random() > 0.1, // 90% success rate
+    success: Math.random() > 0.15, // 85% success rate
     url: baseUrls[platform as keyof typeof baseUrls] || `https://${platform}-${slug}-${articleId}.com`,
     platform
   };
@@ -154,25 +154,29 @@ serve(async (req) => {
     const { entityName, targetKeywords, contentCount, deploymentTargets, saturationMode } = parsedBody;
 
     console.log(`🚀 Starting LOCAL persona saturation for ${entityName}`);
-    console.log(`📝 Generating ${contentCount} articles with LOCAL inference`);
+    
+    // Limit content count to prevent timeouts
+    const maxContent = Math.min(contentCount || 10, 20);
+    console.log(`📝 Generating ${maxContent} articles with LOCAL inference`);
     console.log(`🎯 Keywords: ${targetKeywords.join(', ')}`);
     console.log(`📡 Deploying to: ${deploymentTargets.join(', ')}`);
 
     const deploymentUrls: string[] = [];
     const platformResults: Record<string, any> = {};
     
-    // Generate multiple articles locally
-    for (let i = 0; i < contentCount; i++) {
+    // Generate limited articles to prevent timeout
+    for (let i = 0; i < maxContent; i++) {
       const contentTypes = ['article', 'review'];
       const contentType = contentTypes[i % contentTypes.length];
       
-      console.log(`📄 Generating ${contentType} ${i + 1}/${contentCount}`);
+      console.log(`📄 Generating ${contentType} ${i + 1}/${maxContent}`);
       
       // Generate content using local templates
       const content = generateArticleContent(entityName, targetKeywords, contentType);
       
-      // Deploy to each platform
-      for (const platform of deploymentTargets) {
+      // Deploy to each platform (limit to 2 platforms max to prevent timeout)
+      const limitedPlatforms = deploymentTargets.slice(0, 2);
+      for (const platform of limitedPlatforms) {
         const deployment = await simulateDeployment(content, platform, entityName);
         
         if (deployment.success) {
@@ -216,7 +220,7 @@ serve(async (req) => {
     const serpPenetration = Math.min(95, Math.round(totalDeployments * 8.5)); // Estimate SERP penetration
 
     const campaign = {
-      contentGenerated: contentCount,
+      contentGenerated: maxContent,
       deploymentsSuccessful: totalDeployments,
       serpPenetration,
       platformResults,
