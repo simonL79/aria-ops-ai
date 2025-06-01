@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export interface ScheduledDeployment {
@@ -106,10 +105,12 @@ export class DeploymentSchedulerService {
    */
   static async updateScheduledDeployment(id: string, updates: Partial<ScheduledDeployment>): Promise<boolean> {
     try {
+      console.log('Updating deployment:', id, 'with updates:', updates);
+      
       // Get current deployment data
       const { data: currentData, error: fetchError } = await supabase
         .from('activity_logs')
-        .select('details')
+        .select('details, entity_id')
         .eq('id', id)
         .single();
 
@@ -129,7 +130,10 @@ export class DeploymentSchedulerService {
         updatedAt: new Date().toISOString()
       };
 
-      const { error } = await supabase
+      console.log('Updating with details:', updatedDetails);
+
+      // Update the record
+      const { error: updateError } = await supabase
         .from('activity_logs')
         .update({
           details: JSON.stringify(updatedDetails),
@@ -137,11 +141,12 @@ export class DeploymentSchedulerService {
         })
         .eq('id', id);
 
-      if (error) {
-        console.error('Failed to update scheduled deployment:', error);
+      if (updateError) {
+        console.error('Failed to update scheduled deployment:', updateError);
         return false;
       }
 
+      console.log('Successfully updated deployment in database');
       return true;
     } catch (error) {
       console.error('Error updating scheduled deployment:', error);

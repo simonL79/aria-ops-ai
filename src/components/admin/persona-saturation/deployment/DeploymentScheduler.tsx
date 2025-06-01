@@ -34,8 +34,8 @@ const DeploymentScheduler = () => {
     setIsLoading(true);
     try {
       const loadedSchedules = await DeploymentSchedulerService.loadScheduledDeployments();
-      setSchedules(loadedSchedules);
       console.log('Loaded schedules:', loadedSchedules);
+      setSchedules(loadedSchedules);
     } catch (error) {
       console.error('Failed to load schedules:', error);
       toast.error('Failed to load scheduled deployments');
@@ -84,7 +84,7 @@ const DeploymentScheduler = () => {
           entityName: '',
           keywords: ''
         });
-        loadSchedules();
+        await loadSchedules();
       } else {
         toast.error('Failed to create scheduled deployment');
       }
@@ -95,7 +95,7 @@ const DeploymentScheduler = () => {
   };
 
   const toggleScheduleStatus = async (scheduleId: string, currentStatus: string) => {
-    console.log('Toggling schedule status:', scheduleId, 'from', currentStatus);
+    console.log('Toggle initiated for schedule:', scheduleId, 'current status:', currentStatus);
     const newStatus = currentStatus === 'active' ? 'paused' : 'active';
     
     try {
@@ -104,12 +104,13 @@ const DeploymentScheduler = () => {
       });
       
       if (success) {
-        console.log('Successfully updated status to:', newStatus);
+        console.log('Update successful, new status:', newStatus);
         toast.success(`Schedule ${newStatus === 'active' ? 'activated' : 'paused'}`);
-        // Refresh the schedules list
+        
+        // Force reload to get fresh data
         await loadSchedules();
       } else {
-        console.error('Failed to update schedule status');
+        console.error('Update failed in service');
         toast.error('Failed to update schedule status');
       }
     } catch (error) {
@@ -123,7 +124,7 @@ const DeploymentScheduler = () => {
       const success = await DeploymentSchedulerService.deleteScheduledDeployment(scheduleId);
       if (success) {
         toast.success('Schedule deleted successfully');
-        loadSchedules();
+        await loadSchedules();
       } else {
         toast.error('Failed to delete schedule');
       }
