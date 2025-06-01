@@ -14,7 +14,7 @@ import EnhancedCTASection from '@/components/sections/EnhancedCTASection';
 
 const HomePage = () => {
   return (
-    <PageLayout title="A.R.I.A™ - AI Reputation Intelligence Agent">
+    <PageLayout title="A.R.I.A™ - AI Reputation Intelligence Agent" className="bg-corporate-dark">
       <PublicLayout>
         <HeroSection />
         <NOCFeaturesSection />
