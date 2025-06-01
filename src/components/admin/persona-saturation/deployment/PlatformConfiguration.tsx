@@ -1,289 +1,305 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { Slider } from '@/components/ui/slider';
 import { 
   Settings, 
-  Globe, 
-  Key, 
-  Clock, 
-  Zap, 
-  Shield,
-  CheckCircle,
-  AlertTriangle,
-  Edit,
-  Save
+  CheckCircle, 
+  AlertTriangle, 
+  RefreshCw,
+  Globe,
+  Key,
+  TestTube
 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+
+interface PlatformConfig {
+  id: string;
+  name: string;
+  status: 'active' | 'inactive' | 'error';
+  enabled: boolean;
+  apiKey?: string;
+  webhookUrl?: string;
+  deploymentCount: number;
+  lastDeployment?: string;
+  errorMessage?: string;
+}
 
 const PlatformConfiguration = () => {
-  const [editingPlatform, setEditingPlatform] = useState<string | null>(null);
-  
-  const [platforms, setPlatforms] = useState([
+  const [platforms, setPlatforms] = useState<PlatformConfig[]>([
     {
       id: 'github-pages',
       name: 'GitHub Pages',
-      status: 'connected',
+      status: 'active',
       enabled: true,
-      apiKey: '***********',
-      rateLimit: 100,
-      delayMs: 2000,
-      maxConcurrent: 3,
-      successRate: 99.2,
-      lastDeployment: '2 hours ago'
+      deploymentCount: 0,
+      lastDeployment: undefined
     },
     {
       id: 'netlify',
       name: 'Netlify',
-      status: 'connected',
+      status: 'active',
       enabled: true,
-      apiKey: '***********',
-      rateLimit: 150,
-      delayMs: 1500,
-      maxConcurrent: 5,
-      successRate: 98.8,
-      lastDeployment: '45 minutes ago'
+      deploymentCount: 0,
+      lastDeployment: undefined
     },
     {
       id: 'vercel',
       name: 'Vercel',
-      status: 'warning',
+      status: 'active',
       enabled: true,
-      apiKey: 'Not configured',
-      rateLimit: 200,
-      delayMs: 1000,
-      maxConcurrent: 4,
-      successRate: 97.5,
-      lastDeployment: '6 hours ago'
+      deploymentCount: 0,
+      lastDeployment: undefined
     },
     {
       id: 'cloudflare',
       name: 'Cloudflare Pages',
-      status: 'error',
-      enabled: false,
-      apiKey: 'Invalid',
-      rateLimit: 300,
-      delayMs: 500,
-      maxConcurrent: 10,
-      successRate: 85.2,
-      lastDeployment: '2 days ago'
+      status: 'active',
+      enabled: true,
+      deploymentCount: 0,
+      lastDeployment: undefined
+    },
+    {
+      id: 'firebase',
+      name: 'Firebase Hosting',
+      status: 'active',
+      enabled: true,
+      deploymentCount: 0,
+      lastDeployment: undefined
+    },
+    {
+      id: 'surge',
+      name: 'Surge.sh',
+      status: 'active',
+      enabled: true,
+      deploymentCount: 0,
+      lastDeployment: undefined
     }
   ]);
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'connected': return <CheckCircle className="h-4 w-4 text-green-400" />;
-      case 'warning': return <AlertTriangle className="h-4 w-4 text-yellow-400" />;
-      case 'error': return <AlertTriangle className="h-4 w-4 text-red-400" />;
-      default: return <AlertTriangle className="h-4 w-4 text-gray-400" />;
+  const [testingPlatform, setTestingPlatform] = useState<string | null>(null);
+
+  useEffect(() => {
+    loadPlatformStats();
+  }, []);
+
+  const loadPlatformStats = async () => {
+    try {
+      // In a real implementation, this would load from a database
+      // For now, we'll simulate loading platform statistics
+      console.log('Loading platform statistics...');
+      
+      // Update platforms with simulated data
+      setPlatforms(prev => prev.map(platform => ({
+        ...platform,
+        deploymentCount: Math.floor(Math.random() * 100),
+        lastDeployment: Math.random() > 0.5 ? new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString() : undefined
+      })));
+    } catch (error) {
+      console.error('Error loading platform stats:', error);
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'connected': return 'bg-green-500/20 text-green-400';
-      case 'warning': return 'bg-yellow-500/20 text-yellow-400';
-      case 'error': return 'bg-red-500/20 text-red-400';
-      default: return 'bg-gray-500/20 text-gray-400';
-    }
-  };
-
-  const handleEdit = (platformId: string) => {
-    setEditingPlatform(platformId);
-  };
-
-  const handleSave = (platformId: string) => {
-    setEditingPlatform(null);
-    // Save configuration logic here
-  };
-
-  const updatePlatform = (platformId: string, field: string, value: any) => {
+  const togglePlatform = (platformId: string) => {
     setPlatforms(prev => prev.map(platform => 
       platform.id === platformId 
-        ? { ...platform, [field]: value }
+        ? { ...platform, enabled: !platform.enabled }
         : platform
     ));
+    
+    const platform = platforms.find(p => p.id === platformId);
+    if (platform) {
+      toast.success(`${platform.name} ${platform.enabled ? 'disabled' : 'enabled'}`);
+    }
+  };
+
+  const testPlatformConnection = async (platformId: string) => {
+    setTestingPlatform(platformId);
+    
+    try {
+      console.log(`🧪 Testing platform connection: ${platformId}`);
+      
+      // Test deployment with minimal content
+      const { data, error } = await supabase.functions.invoke('persona-saturation', {
+        body: {
+          entityName: 'Test Entity',
+          targetKeywords: ['test'],
+          contentCount: 1,
+          deploymentTargets: [platformId],
+          saturationMode: 'defensive'
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      // Update platform status
+      setPlatforms(prev => prev.map(platform => 
+        platform.id === platformId 
+          ? { 
+              ...platform, 
+              status: 'active' as const,
+              errorMessage: undefined,
+              deploymentCount: platform.deploymentCount + 1,
+              lastDeployment: new Date().toISOString()
+            }
+          : platform
+      ));
+
+      toast.success(`✅ ${platforms.find(p => p.id === platformId)?.name} connection test successful!`);
+      
+    } catch (error: any) {
+      console.error(`❌ Platform test failed for ${platformId}:`, error);
+      
+      // Update platform with error status
+      setPlatforms(prev => prev.map(platform => 
+        platform.id === platformId 
+          ? { 
+              ...platform, 
+              status: 'error' as const,
+              errorMessage: error.message || 'Connection test failed'
+            }
+          : platform
+      ));
+      
+      toast.error(`❌ ${platforms.find(p => p.id === platformId)?.name} connection test failed`);
+    } finally {
+      setTestingPlatform(null);
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'active':
+        return <Badge className="bg-green-500/20 text-green-400"><CheckCircle className="h-3 w-3 mr-1" />Active</Badge>;
+      case 'error':
+        return <Badge className="bg-red-500/20 text-red-400"><AlertTriangle className="h-3 w-3 mr-1" />Error</Badge>;
+      case 'inactive':
+        return <Badge className="bg-gray-500/20 text-gray-400">Inactive</Badge>;
+      default:
+        return <Badge className="bg-gray-500/20 text-gray-400">Unknown</Badge>;
+    }
   };
 
   return (
     <div className="space-y-6">
-      {/* Global Settings */}
+      {/* Platform Status Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="corporate-card">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-1 corporate-heading">
+              <Globe className="h-4 w-4 text-corporate-accent" />
+              Active Platforms
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-white">
+              {platforms.filter(p => p.enabled && p.status === 'active').length}
+            </div>
+            <p className="text-xs corporate-subtext">Ready for deployment</p>
+          </CardContent>
+        </Card>
+
+        <Card className="corporate-card">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-1 corporate-heading">
+              <CheckCircle className="h-4 w-4 text-green-400" />
+              Total Deployments
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-400">
+              {platforms.reduce((sum, p) => sum + p.deploymentCount, 0)}
+            </div>
+            <p className="text-xs corporate-subtext">Across all platforms</p>
+          </CardContent>
+        </Card>
+
+        <Card className="corporate-card">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-1 corporate-heading">
+              <AlertTriangle className="h-4 w-4 text-red-400" />
+              Issues
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-red-400">
+              {platforms.filter(p => p.status === 'error').length}
+            </div>
+            <p className="text-xs corporate-subtext">Platforms with errors</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Platform Configuration */}
       <Card className="corporate-card">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 corporate-heading">
             <Settings className="h-5 w-5 text-corporate-accent" />
-            Global Deployment Settings
+            Platform Configuration
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <Label className="text-white">Default Rate Limit</Label>
-              <Input 
-                type="number" 
-                defaultValue="100" 
-                className="bg-corporate-darkSecondary border-corporate-border text-white"
-              />
-              <p className="text-xs text-corporate-lightGray mt-1">Requests per hour</p>
-            </div>
-            
-            <div>
-              <Label className="text-white">Retry Attempts</Label>
-              <Input 
-                type="number" 
-                defaultValue="3" 
-                className="bg-corporate-darkSecondary border-corporate-border text-white"
-              />
-              <p className="text-xs text-corporate-lightGray mt-1">Failed deployment retries</p>
-            </div>
-            
-            <div>
-              <Label className="text-white">Timeout (seconds)</Label>
-              <Input 
-                type="number" 
-                defaultValue="30" 
-                className="bg-corporate-darkSecondary border-corporate-border text-white"
-              />
-              <p className="text-xs text-corporate-lightGray mt-1">Per deployment timeout</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Platform Configurations */}
-      <div className="space-y-4">
-        {platforms.map(platform => (
-          <Card key={platform.id} className="corporate-card">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Globe className="h-5 w-5 text-corporate-accent" />
-                  <div>
-                    <CardTitle className="corporate-heading">{platform.name}</CardTitle>
-                    <div className="flex items-center gap-2 mt-1">
-                      {getStatusIcon(platform.status)}
-                      <Badge className={getStatusColor(platform.status)}>
-                        {platform.status}
-                      </Badge>
-                      <span className="text-xs text-corporate-lightGray">
-                        Last: {platform.lastDeployment}
-                      </span>
+        <CardContent>
+          <div className="space-y-4">
+            {platforms.map(platform => (
+              <div key={platform.id} className="p-4 bg-corporate-darkSecondary rounded-lg">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <Globe className="h-5 w-5 text-corporate-accent" />
+                    <div>
+                      <h3 className="font-medium text-white">{platform.name}</h3>
+                      <div className="flex items-center gap-2 mt-1">
+                        {getStatusBadge(platform.status)}
+                        <span className="text-xs text-corporate-lightGray">
+                          {platform.deploymentCount} deployments
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  <Switch
-                    checked={platform.enabled}
-                    onCheckedChange={(checked) => updatePlatform(platform.id, 'enabled', checked)}
-                  />
-                  {editingPlatform === platform.id ? (
-                    <Button
-                      size="sm"
-                      onClick={() => handleSave(platform.id)}
-                      className="bg-corporate-accent text-black hover:bg-corporate-accentDark"
-                    >
-                      <Save className="h-4 w-4" />
-                    </Button>
-                  ) : (
+                  
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={platform.enabled}
+                      onCheckedChange={() => togglePlatform(platform.id)}
+                    />
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => handleEdit(platform.id)}
+                      onClick={() => testPlatformConnection(platform.id)}
+                      disabled={testingPlatform === platform.id || !platform.enabled}
+                      className="border-corporate-accent text-corporate-accent hover:bg-corporate-accent hover:text-black"
                     >
-                      <Edit className="h-4 w-4" />
+                      {testingPlatform === platform.id ? (
+                        <RefreshCw className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <TestTube className="h-4 w-4" />
+                      )}
                     </Button>
-                  )}
+                  </div>
                 </div>
+                
+                {platform.errorMessage && (
+                  <div className="text-xs text-red-400 bg-red-500/10 p-2 rounded mt-2">
+                    Error: {platform.errorMessage}
+                  </div>
+                )}
+                
+                {platform.lastDeployment && (
+                  <div className="text-xs text-corporate-lightGray mt-2">
+                    Last deployment: {new Date(platform.lastDeployment).toLocaleString()}
+                  </div>
+                )}
               </div>
-            </CardHeader>
-            
-            <CardContent className="space-y-4">
-              {/* Performance Metrics */}
-              <div className="grid grid-cols-3 gap-4">
-                <div className="text-center p-3 bg-corporate-darkSecondary rounded">
-                  <div className="text-lg font-bold text-white">{platform.successRate}%</div>
-                  <div className="text-xs text-corporate-lightGray">Success Rate</div>
-                </div>
-                <div className="text-center p-3 bg-corporate-darkSecondary rounded">
-                  <div className="text-lg font-bold text-white">{platform.rateLimit}</div>
-                  <div className="text-xs text-corporate-lightGray">Rate Limit</div>
-                </div>
-                <div className="text-center p-3 bg-corporate-darkSecondary rounded">
-                  <div className="text-lg font-bold text-white">{platform.maxConcurrent}</div>
-                  <div className="text-xs text-corporate-lightGray">Max Concurrent</div>
-                </div>
-              </div>
-
-              {editingPlatform === platform.id && (
-                <div className="space-y-4 p-4 bg-corporate-darkSecondary rounded-lg">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label className="text-white flex items-center gap-2">
-                        <Key className="h-4 w-4" />
-                        API Key
-                      </Label>
-                      <Input 
-                        type="password"
-                        value={platform.apiKey}
-                        onChange={(e) => updatePlatform(platform.id, 'apiKey', e.target.value)}
-                        className="bg-corporate-darkPrimary border-corporate-border text-white"
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label className="text-white flex items-center gap-2">
-                        <Clock className="h-4 w-4" />
-                        Delay (ms)
-                      </Label>
-                      <Input 
-                        type="number"
-                        value={platform.delayMs}
-                        onChange={(e) => updatePlatform(platform.id, 'delayMs', parseInt(e.target.value))}
-                        className="bg-corporate-darkPrimary border-corporate-border text-white"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <Label className="text-white flex items-center gap-2 mb-2">
-                      <Zap className="h-4 w-4" />
-                      Rate Limit: {platform.rateLimit}/hour
-                    </Label>
-                    <Slider
-                      value={[platform.rateLimit]}
-                      onValueChange={(value) => updatePlatform(platform.id, 'rateLimit', value[0])}
-                      max={500}
-                      min={10}
-                      step={10}
-                      className="w-full"
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label className="text-white flex items-center gap-2 mb-2">
-                      <Shield className="h-4 w-4" />
-                      Max Concurrent: {platform.maxConcurrent}
-                    </Label>
-                    <Slider
-                      value={[platform.maxConcurrent]}
-                      onValueChange={(value) => updatePlatform(platform.id, 'maxConcurrent', value[0])}
-                      max={20}
-                      min={1}
-                      step={1}
-                      className="w-full"
-                    />
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

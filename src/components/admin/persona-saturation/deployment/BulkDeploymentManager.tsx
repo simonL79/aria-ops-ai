@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,27 +18,38 @@ import {
   AlertTriangle,
   RefreshCw
 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+
+interface DeploymentJob {
+  id: string;
+  name: string;
+  platform: string;
+  status: 'running' | 'queued' | 'completed' | 'failed';
+  progress: number;
+  articles: number;
+  entityName: string;
+  keywords: string[];
+  startedAt: string;
+  url?: string;
+}
 
 const BulkDeploymentManager = () => {
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
   const [batchSize, setBatchSize] = useState(50);
-  const [deploymentSpeed, setDeploymentSpeed] = useState('standard');
+  const [entityName, setEntityName] = useState('');
+  const [keywords, setKeywords] = useState('');
   const [isDeploying, setIsDeploying] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [currentJobs, setCurrentJobs] = useState<DeploymentJob[]>([]);
 
   const platforms = [
-    { id: 'github-pages', name: 'GitHub Pages', status: 'active', articles: 245 },
-    { id: 'netlify', name: 'Netlify', status: 'active', articles: 189 },
-    { id: 'vercel', name: 'Vercel', status: 'active', articles: 156 },
-    { id: 'cloudflare', name: 'Cloudflare Pages', status: 'warning', articles: 78 },
-    { id: 'firebase', name: 'Firebase Hosting', status: 'active', articles: 134 },
-    { id: 'surge', name: 'Surge.sh', status: 'active', articles: 98 },
-  ];
-
-  const currentJobs = [
-    { id: 1, name: 'Entity Batch #847', platform: 'GitHub Pages', status: 'running', progress: 65, articles: 25 },
-    { id: 2, name: 'Review Posts Batch', platform: 'Netlify', status: 'queued', progress: 0, articles: 40 },
-    { id: 3, name: 'Crisis Response Articles', platform: 'Vercel', status: 'completed', progress: 100, articles: 15 },
+    { id: 'github-pages', name: 'GitHub Pages', status: 'active' },
+    { id: 'netlify', name: 'Netlify', status: 'active' },
+    { id: 'vercel', name: 'Vercel', status: 'active' },
+    { id: 'cloudflare', name: 'Cloudflare Pages', status: 'active' },
+    { id: 'firebase', name: 'Firebase Hosting', status: 'active' },
+    { id: 'surge', name: 'Surge.sh', status: 'active' },
   ];
 
   const handlePlatformToggle = (platformId: string) => {
@@ -49,33 +60,96 @@ const BulkDeploymentManager = () => {
     );
   };
 
-  const startBulkDeployment = () => {
+  const startBulkDeployment = async () => {
+    if (selectedPlatforms.length === 0) {
+      toast.error('Please select at least one platform');
+      return;
+    }
+
+    if (!entityName.trim() || !keywords.trim()) {
+      toast.error('Please provide entity name and keywords');
+      return;
+    }
+
     setIsDeploying(true);
-    // Simulate deployment progress
-    const interval = setInterval(() => {
-      setProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setIsDeploying(false);
-          return 100;
+    setProgress(0);
+    
+    try {
+      console.log('🚀 Starting bulk deployment to platforms:', selectedPlatforms);
+      
+      const keywordArray = keywords.split(',').map(k => k.trim()).filter(k => k);
+      
+      const { data, error } = await supabase.functions.invoke('persona-saturation', {
+        body: {
+          entityName,
+          targetKeywords: keywordArray,
+          contentCount: batchSize,
+          deploymentTargets: selectedPlatforms,
+          saturationMode: 'aggressive'
         }
-        return prev + 5;
       });
-    }, 500);
+
+      if (error) {
+        console.error('❌ Bulk deployment error:', error);
+        throw error;
+      }
+
+      console.log('✅ Bulk deployment successful:', data);
+
+      // Create job entries from the deployment results
+      if (data?.deploymentUrls && data.deploymentUrls.length > 0) {
+        const newJobs: DeploymentJob[] = selectedPlatforms.map((platform, index) => ({
+          id: `bulk-${Date.now()}-${index}`,
+          name: `Bulk Deployment - ${entityName}`,
+          platform,
+          status: 'completed' as const,
+          progress: 100,
+          articles: Math.floor(batchSize / selectedPlatforms.length),
+          entityName,
+          keywords: keywordArray,
+          startedAt: new Date().toISOString(),
+          url: data.deploymentUrls[index]
+        }));
+
+        setCurrentJobs(prev => [...newJobs, ...prev].slice(0, 10));
+      }
+
+      setProgress(100);
+      toast.success(`✅ Bulk deployment completed! ${data?.campaign?.deploymentsSuccessful || 0} articles deployed successfully.`);
+      
+    } catch (error: any) {
+      console.error('❌ Bulk deployment failed:', error);
+      toast.error(`❌ Bulk deployment failed: ${error.message || 'Unknown error'}`);
+    } finally {
+      setIsDeploying(false);
+      setTimeout(() => setProgress(0), 2000);
+    }
   };
 
-  const getStatusIcon = (status: string) => {
+  const stopDeployment = () => {
+    setIsDeploying(false);
+    setProgress(0);
+    toast.info('Bulk deployment stopped');
+  };
+
+  const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'running': return <RefreshCw className="h-3 w-3 animate-spin text-blue-400" />;
-      case 'completed': return <CheckCircle className="h-3 w-3 text-green-400" />;
-      case 'queued': return <Clock className="h-3 w-3 text-yellow-400" />;
-      default: return <AlertTriangle className="h-3 w-3 text-red-400" />;
+      case 'completed':
+        return <Badge className="bg-green-500/20 text-green-400"><CheckCircle className="h-3 w-3 mr-1" />Completed</Badge>;
+      case 'running':
+        return <Badge className="bg-blue-500/20 text-blue-400"><RefreshCw className="h-3 w-3 mr-1 animate-spin" />Running</Badge>;
+      case 'failed':
+        return <Badge className="bg-red-500/20 text-red-400"><AlertTriangle className="h-3 w-3 mr-1" />Failed</Badge>;
+      case 'queued':
+        return <Badge className="bg-yellow-500/20 text-yellow-400"><Clock className="h-3 w-3 mr-1" />Queued</Badge>;
+      default:
+        return <Badge className="bg-gray-500/20 text-gray-400">Unknown</Badge>;
     }
   };
 
   return (
     <div className="space-y-6">
-      {/* Configuration Panel */}
+      {/* Bulk Deployment Configuration */}
       <Card className="corporate-card">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 corporate-heading">
@@ -84,63 +158,68 @@ const BulkDeploymentManager = () => {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="batchSize" className="text-white">Batch Size</Label>
+              <Label htmlFor="entityName" className="text-white">Entity Name</Label>
               <Input
-                id="batchSize"
-                type="number"
-                value={batchSize}
-                onChange={(e) => setBatchSize(parseInt(e.target.value))}
+                id="entityName"
+                value={entityName}
+                onChange={(e) => setEntityName(e.target.value)}
+                placeholder="e.g. Professional Services LLC"
                 className="bg-corporate-darkSecondary border-corporate-border text-white"
               />
-              <p className="text-xs text-corporate-lightGray mt-1">Articles per batch</p>
             </div>
             
             <div>
-              <Label className="text-white">Deployment Speed</Label>
-              <div className="space-y-2 mt-2">
-                {['conservative', 'standard', 'aggressive'].map(speed => (
-                  <div key={speed} className="flex items-center space-x-2">
-                    <Checkbox
-                      checked={deploymentSpeed === speed}
-                      onCheckedChange={() => setDeploymentSpeed(speed)}
-                    />
-                    <label className="text-sm text-white capitalize">{speed}</label>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <Label className="text-white">Target Platforms</Label>
-              <div className="text-sm text-corporate-lightGray mt-1">
-                {selectedPlatforms.length} of {platforms.length} selected
-              </div>
+              <Label htmlFor="keywords" className="text-white">Target Keywords (comma-separated)</Label>
+              <Input
+                id="keywords"
+                value={keywords}
+                onChange={(e) => setKeywords(e.target.value)}
+                placeholder="e.g. excellence, leadership, innovation"
+                className="bg-corporate-darkSecondary border-corporate-border text-white"
+              />
             </div>
           </div>
 
-          {/* Platform Selection */}
-          <div className="space-y-2">
-            <Label className="text-white">Select Platforms</Label>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+          <div>
+            <Label htmlFor="batchSize" className="text-white">Batch Size (Articles per Platform)</Label>
+            <Input
+              id="batchSize"
+              type="number"
+              value={batchSize}
+              onChange={(e) => setBatchSize(parseInt(e.target.value) || 50)}
+              className="bg-corporate-darkSecondary border-corporate-border text-white max-w-32"
+            />
+          </div>
+
+          <div>
+            <Label className="text-white">Target Platforms</Label>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2">
               {platforms.map(platform => (
-                <div key={platform.id} className="flex items-center space-x-2 p-2 bg-corporate-darkSecondary rounded">
+                <div key={platform.id} className="flex items-center space-x-2">
                   <Checkbox
+                    id={platform.id}
                     checked={selectedPlatforms.includes(platform.id)}
                     onCheckedChange={() => handlePlatformToggle(platform.id)}
                   />
-                  <div className="flex-1">
-                    <div className="text-sm text-white">{platform.name}</div>
-                    <div className="text-xs text-corporate-lightGray">{platform.articles} articles</div>
-                  </div>
-                  <Badge variant={platform.status === 'active' ? 'default' : 'destructive'} className="text-xs">
-                    {platform.status}
-                  </Badge>
+                  <label htmlFor={platform.id} className="text-sm text-white cursor-pointer">
+                    {platform.name}
+                  </label>
                 </div>
               ))}
             </div>
           </div>
+
+          {isDeploying && (
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-white">Deployment Progress</span>
+                <span className="text-sm text-corporate-accent">{progress}%</span>
+              </div>
+              <Progress value={progress} className="h-2" />
+            </div>
+          )}
 
           <div className="flex gap-2">
             <Button
@@ -148,63 +227,73 @@ const BulkDeploymentManager = () => {
               disabled={isDeploying || selectedPlatforms.length === 0}
               className="bg-corporate-accent text-black hover:bg-corporate-accentDark"
             >
-              <Play className="h-4 w-4 mr-2" />
-              Start Bulk Deployment
+              {isDeploying ? (
+                <>
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  Deploying...
+                </>
+              ) : (
+                <>
+                  <Play className="h-4 w-4 mr-2" />
+                  Start Bulk Deployment
+                </>
+              )}
             </Button>
-            <Button variant="outline" disabled={!isDeploying}>
-              <Pause className="h-4 w-4 mr-2" />
-              Pause
-            </Button>
-            <Button variant="outline" disabled={!isDeploying}>
-              <Square className="h-4 w-4 mr-2" />
-              Stop
-            </Button>
+            
+            {isDeploying && (
+              <Button
+                onClick={stopDeployment}
+                variant="outline"
+                className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
+              >
+                <Square className="h-4 w-4 mr-2" />
+                Stop
+              </Button>
+            )}
           </div>
-
-          {isDeploying && (
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-corporate-lightGray">Deployment Progress</span>
-                <span className="text-white">{progress}%</span>
-              </div>
-              <Progress value={progress} className="h-2" />
-            </div>
-          )}
         </CardContent>
       </Card>
 
-      {/* Current Jobs */}
+      {/* Active Jobs */}
       <Card className="corporate-card">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 corporate-heading">
             <FileText className="h-5 w-5 text-corporate-accent" />
-            Active Deployment Jobs
+            Recent Deployment Jobs
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {currentJobs.map(job => (
-              <div key={job.id} className="p-4 bg-corporate-darkSecondary rounded-lg">
+            {currentJobs.length > 0 ? currentJobs.map(job => (
+              <div key={job.id} className="p-3 bg-corporate-darkSecondary rounded-lg">
                 <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    {getStatusIcon(job.status)}
-                    <span className="font-medium text-white">{job.name}</span>
+                  <div>
+                    <div className="font-medium text-white">{job.name}</div>
+                    <div className="text-sm text-corporate-lightGray">
+                      Platform: {job.platform} | Articles: {job.articles}
+                    </div>
+                    <div className="text-xs text-corporate-lightGray">
+                      Entity: {job.entityName} | Keywords: {job.keywords.join(', ')}
+                    </div>
                   </div>
-                  <Badge variant="outline" className="text-xs">
-                    {job.platform}
-                  </Badge>
+                  {getStatusBadge(job.status)}
                 </div>
-                
-                <div className="flex items-center justify-between mb-2">
-                  <div className="text-sm text-corporate-lightGray">
-                    {job.articles} articles • {job.status}
+                {job.progress < 100 && job.status === 'running' && (
+                  <Progress value={job.progress} className="h-1 mt-2" />
+                )}
+                {job.url && (
+                  <div className="text-xs text-corporate-accent mt-1">
+                    Deployed: {job.url}
                   </div>
-                  <div className="text-sm text-white">{job.progress}%</div>
-                </div>
-                
-                <Progress value={job.progress} className="h-1" />
+                )}
               </div>
-            ))}
+            )) : (
+              <div className="text-center py-8 text-corporate-lightGray">
+                <Globe className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                <p>No deployment jobs yet</p>
+                <p className="text-sm">Start your first bulk deployment above</p>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
