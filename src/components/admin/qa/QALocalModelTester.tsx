@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -73,7 +74,8 @@ const QALocalModelTester = () => {
 
   const checkLocalServerHealth = async (): Promise<boolean> => {
     try {
-      const response = await fetch('http://localhost:3001/health', {
+      // Use the correct Ollama endpoint that we know works
+      const response = await fetch('http://localhost:3001/api/tags', {
         method: 'GET',
         signal: AbortSignal.timeout(5000)
       });
