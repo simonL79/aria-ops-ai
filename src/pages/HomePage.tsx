@@ -3,27 +3,21 @@ import React from 'react';
 import PageLayout from '@/components/layout/PageLayout';
 import PublicLayout from '@/components/layout/PublicLayout';
 import HeroSection from '@/components/sections/HeroSection';
-import NOCFeaturesSection from '@/components/sections/NOCFeaturesSection';
-import HowItWorksSection from '@/components/sections/HowItWorksSection';
-import ProblemSection from '@/components/sections/ProblemSection';
-import PlatformsSection from '@/components/sections/PlatformsSection';
-import ReputationOpsCenterSection from '@/components/sections/ReputationOpsCenterSection';
-import EnhancedTestimonialsSection from '@/components/sections/EnhancedTestimonialsSection';
-import CTASection from '@/components/sections/CTASection';
+import TrustedCompaniesSection from '@/components/sections/TrustedCompaniesSection';
+import AIPoweredSection from '@/components/sections/AIPoweredSection';
+import TestimonialsSection from '@/components/sections/TestimonialsSection';
+import PricingSection from '@/components/sections/PricingSection';
 
 const HomePage = () => {
   return (
-    <PageLayout title="A.R.I.A™ - AI Reputation Intelligence Agent" className="bg-corporate-dark">
+    <PageLayout title="A.R.I.A™ - AI Reputation Intelligence Agent" className="bg-black">
       <PublicLayout>
-        <div className="bg-corporate-dark text-white">
+        <div className="bg-black text-white">
           <HeroSection />
-          <NOCFeaturesSection />
-          <ProblemSection />
-          <HowItWorksSection />
-          <PlatformsSection />
-          <ReputationOpsCenterSection />
-          <EnhancedTestimonialsSection />
-          <CTASection />
+          <TrustedCompaniesSection />
+          <AIPoweredSection />
+          <TestimonialsSection />
+          <PricingSection />
         </div>
       </PublicLayout>
     </PageLayout>
