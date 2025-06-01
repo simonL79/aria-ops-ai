@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,13 +15,30 @@ import {
   Plus,
   RefreshCw,
   CheckCircle,
-  Timer
+  Timer,
+  AlertTriangle
 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+
+interface ScheduledDeployment {
+  id: string;
+  name: string;
+  frequency: string;
+  time: string;
+  platforms: string[];
+  articleCount: number;
+  status: 'active' | 'paused';
+  nextRun: string;
+  lastRun: string;
+  entityName: string;
+  keywords: string[];
+}
 
 const DeploymentScheduler = () => {
-  const [schedules, setSchedules] = useState([
+  const [schedules, setSchedules] = useState<ScheduledDeployment[]>([
     {
-      id: 1,
+      id: '1',
       name: 'Daily Review Posts',
       frequency: 'daily',
       time: '09:00',
@@ -28,29 +46,9 @@ const DeploymentScheduler = () => {
       articleCount: 10,
       status: 'active',
       nextRun: '2024-01-15 09:00:00',
-      lastRun: '2024-01-14 09:00:00'
-    },
-    {
-      id: 2,
-      name: 'Weekly Bulk Deployment',
-      frequency: 'weekly',
-      time: '02:00',
-      platforms: ['vercel', 'cloudflare'],
-      articleCount: 50,
-      status: 'active',
-      nextRun: '2024-01-21 02:00:00',
-      lastRun: '2024-01-14 02:00:00'
-    },
-    {
-      id: 3,
-      name: 'Crisis Response',
-      frequency: 'on-demand',
-      time: 'immediate',
-      platforms: ['all'],
-      articleCount: 25,
-      status: 'paused',
-      nextRun: 'Manual trigger',
-      lastRun: '2024-01-12 15:30:00'
+      lastRun: '2024-01-14 09:00:00',
+      entityName: 'Professional Entity',
+      keywords: ['excellence', 'leadership', 'innovation']
     }
   ]);
 
@@ -58,16 +56,19 @@ const DeploymentScheduler = () => {
     name: '',
     frequency: 'daily',
     time: '09:00',
-    platforms: [],
-    articleCount: 10
+    platforms: [] as string[],
+    articleCount: 10,
+    entityName: '',
+    keywords: ''
   });
+
+  const [isExecuting, setIsExecuting] = useState<string | null>(null);
 
   const frequencies = [
     { value: 'hourly', label: 'Every Hour' },
     { value: 'daily', label: 'Daily' },
     { value: 'weekly', label: 'Weekly' },
-    { value: 'monthly', label: 'Monthly' },
-    { value: 'on-demand', label: 'On Demand' }
+    { value: 'monthly', label: 'Monthly' }
   ];
 
   const platforms = [
@@ -75,10 +76,54 @@ const DeploymentScheduler = () => {
     { id: 'netlify', name: 'Netlify' },
     { id: 'vercel', name: 'Vercel' },
     { id: 'cloudflare', name: 'Cloudflare Pages' },
-    { id: 'all', name: 'All Platforms' }
+    { id: 'firebase', name: 'Firebase Hosting' },
+    { id: 'surge', name: 'Surge.sh' }
   ];
 
-  const toggleScheduleStatus = (id: number) => {
+  const executeScheduledDeployment = async (schedule: ScheduledDeployment) => {
+    setIsExecuting(schedule.id);
+    console.log(`🚀 Executing scheduled deployment: ${schedule.name}`);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('persona-saturation', {
+        body: {
+          entityName: schedule.entityName,
+          targetKeywords: schedule.keywords,
+          contentCount: schedule.articleCount,
+          deploymentTargets: schedule.platforms,
+          saturationMode: 'defensive'
+        }
+      });
+
+      if (error) {
+        console.error('❌ Scheduled deployment error:', error);
+        throw error;
+      }
+
+      console.log('✅ Scheduled deployment successful:', data);
+
+      // Update the schedule's last run time
+      setSchedules(prev => prev.map(s => 
+        s.id === schedule.id 
+          ? { 
+              ...s, 
+              lastRun: new Date().toISOString(),
+              nextRun: calculateNextRun(s.frequency, s.time)
+            }
+          : s
+      ));
+
+      toast.success(`✅ Scheduled deployment "${schedule.name}" completed successfully! ${data?.campaign?.deploymentsSuccessful || 0} articles deployed.`);
+
+    } catch (error: any) {
+      console.error('❌ Scheduled deployment failed:', error);
+      toast.error(`❌ Scheduled deployment "${schedule.name}" failed: ${error.message}`);
+    } finally {
+      setIsExecuting(null);
+    }
+  };
+
+  const toggleScheduleStatus = (id: string) => {
     setSchedules(prev => prev.map(schedule => 
       schedule.id === id 
         ? { ...schedule, status: schedule.status === 'active' ? 'paused' : 'active' }
@@ -86,16 +131,26 @@ const DeploymentScheduler = () => {
     ));
   };
 
-  const deleteSchedule = (id: number) => {
+  const deleteSchedule = (id: string) => {
     setSchedules(prev => prev.filter(schedule => schedule.id !== id));
+    toast.success('Schedule deleted successfully');
   };
 
   const addSchedule = () => {
-    if (!newSchedule.name) return;
+    if (!newSchedule.name || !newSchedule.entityName || !newSchedule.keywords) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
     
-    const schedule = {
-      id: Date.now(),
+    if (newSchedule.platforms.length === 0) {
+      toast.error('Please select at least one deployment platform');
+      return;
+    }
+    
+    const schedule: ScheduledDeployment = {
+      id: Date.now().toString(),
       ...newSchedule,
+      keywords: newSchedule.keywords.split(',').map(k => k.trim()),
       status: 'active',
       nextRun: calculateNextRun(newSchedule.frequency, newSchedule.time),
       lastRun: 'Never'
@@ -107,8 +162,12 @@ const DeploymentScheduler = () => {
       frequency: 'daily',
       time: '09:00',
       platforms: [],
-      articleCount: 10
+      articleCount: 10,
+      entityName: '',
+      keywords: ''
     });
+    
+    toast.success('Schedule created successfully');
   };
 
   const calculateNextRun = (frequency: string, time: string) => {
@@ -124,6 +183,10 @@ const DeploymentScheduler = () => {
         const nextWeek = new Date(now);
         nextWeek.setDate(nextWeek.getDate() + 7);
         return `${nextWeek.toISOString().split('T')[0]} ${time}:00`;
+      case 'monthly':
+        const nextMonth = new Date(now);
+        nextMonth.setMonth(nextMonth.getMonth() + 1);
+        return `${nextMonth.toISOString().split('T')[0]} ${time}:00`;
       default:
         return 'Manual trigger';
     }
@@ -135,6 +198,15 @@ const DeploymentScheduler = () => {
       : <Badge className="bg-gray-500/20 text-gray-400">Paused</Badge>;
   };
 
+  const togglePlatformSelection = (platformId: string) => {
+    setNewSchedule(prev => ({
+      ...prev,
+      platforms: prev.platforms.includes(platformId)
+        ? prev.platforms.filter(p => p !== platformId)
+        : [...prev.platforms, platformId]
+    }));
+  };
+
   return (
     <div className="space-y-6">
       {/* Create New Schedule */}
@@ -142,7 +214,7 @@ const DeploymentScheduler = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 corporate-heading">
             <Plus className="h-5 w-5 text-corporate-accent" />
-            Create New Schedule
+            Create New Scheduled Deployment
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -159,6 +231,30 @@ const DeploymentScheduler = () => {
             </div>
             
             <div>
+              <Label htmlFor="entityName" className="text-white">Entity Name</Label>
+              <Input
+                id="entityName"
+                value={newSchedule.entityName}
+                onChange={(e) => setNewSchedule(prev => ({ ...prev, entityName: e.target.value }))}
+                placeholder="e.g. Company Name"
+                className="bg-corporate-darkSecondary border-corporate-border text-white"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="keywords" className="text-white">Target Keywords (comma-separated)</Label>
+            <Input
+              id="keywords"
+              value={newSchedule.keywords}
+              onChange={(e) => setNewSchedule(prev => ({ ...prev, keywords: e.target.value }))}
+              placeholder="e.g. excellence, leadership, innovation"
+              className="bg-corporate-darkSecondary border-corporate-border text-white"
+            />
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
               <Label className="text-white">Frequency</Label>
               <Select value={newSchedule.frequency} onValueChange={(value) => setNewSchedule(prev => ({ ...prev, frequency: value }))}>
                 <SelectTrigger className="bg-corporate-darkSecondary border-corporate-border text-white">
@@ -173,9 +269,7 @@ const DeploymentScheduler = () => {
                 </SelectContent>
               </Select>
             </div>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            
             <div>
               <Label htmlFor="scheduleTime" className="text-white">Time</Label>
               <Input
@@ -193,9 +287,29 @@ const DeploymentScheduler = () => {
                 id="articleCount"
                 type="number"
                 value={newSchedule.articleCount}
-                onChange={(e) => setNewSchedule(prev => ({ ...prev, articleCount: parseInt(e.target.value) }))}
+                onChange={(e) => setNewSchedule(prev => ({ ...prev, articleCount: parseInt(e.target.value) || 10 }))}
                 className="bg-corporate-darkSecondary border-corporate-border text-white"
               />
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-white">Deployment Platforms</Label>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2">
+              {platforms.map(platform => (
+                <Button
+                  key={platform.id}
+                  variant={newSchedule.platforms.includes(platform.id) ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => togglePlatformSelection(platform.id)}
+                  className={newSchedule.platforms.includes(platform.id) 
+                    ? "bg-corporate-accent text-black" 
+                    : "border-corporate-border text-white hover:bg-corporate-darkSecondary"
+                  }
+                >
+                  {platform.name}
+                </Button>
+              ))}
             </div>
           </div>
           
@@ -232,10 +346,26 @@ const DeploymentScheduler = () => {
                           {schedule.frequency} at {schedule.time}
                         </span>
                       </div>
+                      <div className="text-xs text-corporate-lightGray mt-1">
+                        Entity: {schedule.entityName} | Keywords: {schedule.keywords.join(', ')}
+                      </div>
                     </div>
                   </div>
                   
                   <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => executeScheduledDeployment(schedule)}
+                      disabled={isExecuting === schedule.id}
+                      className="border-corporate-accent text-corporate-accent hover:bg-corporate-accent hover:text-black"
+                    >
+                      {isExecuting === schedule.id ? (
+                        <RefreshCw className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Play className="h-4 w-4" />
+                      )}
+                    </Button>
                     <Button
                       size="sm"
                       variant="outline"
@@ -268,19 +398,27 @@ const DeploymentScheduler = () => {
                   </div>
                   <div>
                     <div className="text-corporate-lightGray">Next Run</div>
-                    <div className="text-white font-medium">
+                    <div className="text-white font-medium text-xs">
                       {schedule.nextRun === 'Manual trigger' ? schedule.nextRun : new Date(schedule.nextRun).toLocaleString()}
                     </div>
                   </div>
                   <div>
                     <div className="text-corporate-lightGray">Last Run</div>
-                    <div className="text-white font-medium">
+                    <div className="text-white font-medium text-xs">
                       {schedule.lastRun === 'Never' ? schedule.lastRun : new Date(schedule.lastRun).toLocaleString()}
                     </div>
                   </div>
                 </div>
               </div>
             ))}
+
+            {schedules.length === 0 && (
+              <div className="text-center py-8 text-corporate-lightGray">
+                <Calendar className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                <p>No scheduled deployments configured</p>
+                <p className="text-sm">Create your first schedule above to automate persona saturation</p>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
