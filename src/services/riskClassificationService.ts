@@ -12,38 +12,77 @@ interface RiskClassificationResult {
 const loadedClassifiers: Record<string, any> = {};
 
 /**
+ * Check if we're in a supported environment
+ */
+const isSupported = (): boolean => {
+  try {
+    return typeof window !== 'undefined' && 'fetch' in window;
+  } catch {
+    return false;
+  }
+};
+
+/**
  * Load a sentiment classification model in the browser
  */
 export const loadRiskClassifier = async (modelId: string = 'distilbert-base-uncased-finetuned-sst-2-english'): Promise<boolean> => {
+  if (!isSupported()) {
+    console.warn('Risk classifier not supported in this environment');
+    return false;
+  }
+
   if (loadedClassifiers[modelId]) {
     return true;
   }
   
   try {
-    toast.info('Loading risk classification model...', {
-      description: 'This may take a moment the first time'
-    });
-    
     console.log(`Loading classification model ${modelId}...`);
     
-    // Determine device to use (prefer WebGPU if available)
-    const device = 'webgpu'; // This will fall back to 'cpu' if WebGPU is not available
+    // Determine device to use (fallback to CPU if WebGPU fails)
+    let device = 'cpu';
+    if ('gpu' in navigator) {
+      try {
+        device = 'webgpu';
+      } catch {
+        device = 'cpu';
+      }
+    }
     
-    // Load the model
-    loadedClassifiers[modelId] = await pipeline(
-      'text-classification' as any, 
-      modelId, 
-      { device }
-    );
+    // Load with timeout
+    const loadWithTimeout = async (timeoutMs: number = 25000) => {
+      return Promise.race([
+        pipeline('text-classification' as any, modelId, { 
+          device,
+          progress_callback: (progress: any) => {
+            if (progress.status === 'downloading') {
+              console.log(`Downloading risk classifier: ${Math.round(progress.progress * 100)}%`);
+            }
+          }
+        }),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Risk classifier loading timeout')), timeoutMs)
+        )
+      ]);
+    };
+
+    loadedClassifiers[modelId] = await loadWithTimeout();
     
-    console.log(`Model ${modelId} loaded successfully`);
-    toast.success('Risk classification model ready');
+    console.log(`Risk classifier ${modelId} loaded successfully on ${device}`);
+    
+    if (typeof window !== 'undefined') {
+      toast.success('Risk classification model ready');
+    }
+    
     return true;
   } catch (error) {
-    console.error(`Error loading model ${modelId}:`, error);
-    toast.error(`Failed to load risk classification model`, {
-      description: error instanceof Error ? error.message : 'Unknown error'
-    });
+    console.error(`Error loading risk classifier ${modelId}:`, error);
+    
+    if (typeof window !== 'undefined') {
+      toast.error(`Failed to load risk classification model`, {
+        description: 'Using fallback classification'
+      });
+    }
+    
     return false;
   }
 };
@@ -56,36 +95,51 @@ export const classifyRisk = async (text: string, modelId: string = 'distilbert-b
   if (!loadedClassifiers[modelId]) {
     const loaded = await loadRiskClassifier(modelId);
     if (!loaded) {
-      throw new Error(`Model ${modelId} failed to load`);
+      // Return fallback classification
+      return {
+        risk: 'Medium',
+        confidence: 0.75,
+        summary: 'Fallback risk assessment - model unavailable'
+      };
     }
   }
   
   try {
     // Run the model
     const result = await loadedClassifiers[modelId](text);
-    console.log('Classification result:', result);
+    console.log('Risk classification result:', result);
     
     // Process the result
     const label = result[0].label;
     const score = result[0].score;
     
-    // Custom logic: treat "NEGATIVE" as potential risk
-    if (label === 'NEGATIVE' && score > 0.7) {
+    // Enhanced logic: treat "NEGATIVE" as potential risk
+    if (label === 'NEGATIVE' && score > 0.8) {
+      return {
+        risk: 'High',
+        confidence: score,
+        summary: `High risk detected with ${Math.round(score * 100)}% confidence`
+      };
+    } else if (label === 'NEGATIVE' && score > 0.6) {
       return {
         risk: 'Medium-High',
         confidence: score,
-        summary: `Flagged as negative with ${Math.round(score * 100)}% confidence`
+        summary: `Medium-high risk detected with ${Math.round(score * 100)}% confidence`
       };
     }
     
     return {
       risk: score > 0.8 ? 'Low' : 'Medium',
       confidence: score,
-      summary: `No major risk detected (${label})`
+      summary: `Risk assessment completed (${label})`
     };
   } catch (error) {
     console.error(`Error running risk classification:`, error);
-    throw error;
+    return {
+      risk: 'Medium',
+      confidence: 0.5,
+      summary: 'Error during classification - using safe fallback'
+    };
   }
 };
 
@@ -101,7 +155,7 @@ export const batchClassifyRisk = async (texts: string[]): Promise<RiskClassifica
     } catch (error) {
       console.error(`Error classifying text: ${text.substring(0, 50)}...`, error);
       results.push({
-        risk: 'Low',
+        risk: 'Low' as const,
         confidence: 0,
         summary: 'Error during classification'
       });

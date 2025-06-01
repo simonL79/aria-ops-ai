@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -52,6 +51,11 @@ const QALocalModelTester = () => {
       name: 'WebGPU Acceleration',
       status: 'pending',
       details: 'Testing WebGPU acceleration for local model inference'
+    },
+    {
+      name: 'Local Server Health Check',
+      status: 'pending',
+      details: 'Checking if local inference server (Ollama) is running'
     }
   ]);
 
@@ -67,6 +71,18 @@ const QALocalModelTester = () => {
     ));
   };
 
+  const checkLocalServerHealth = async (): Promise<boolean> => {
+    try {
+      const response = await fetch('http://localhost:3001/health', {
+        method: 'GET',
+        signal: AbortSignal.timeout(5000)
+      });
+      return response.ok;
+    } catch {
+      return false;
+    }
+  };
+
   const runLocalModelTests = async () => {
     setIsRunning(true);
     setProgress(0);
@@ -76,6 +92,43 @@ const QALocalModelTester = () => {
     });
 
     try {
+      // Test 0: Local Server Health Check
+      console.log('🧪 Testing Local Server Health...');
+      updateTestStatus('Local Server Health Check', 'running');
+      
+      const startTime0 = Date.now();
+      try {
+        const isServerHealthy = await checkLocalServerHealth();
+        const duration0 = Date.now() - startTime0;
+        
+        if (isServerHealthy) {
+          updateTestStatus(
+            'Local Server Health Check', 
+            'passed', 
+            duration0,
+            'Local inference server (Ollama) is running and accessible'
+          );
+          console.log('✅ Local server health check passed');
+        } else {
+          updateTestStatus(
+            'Local Server Health Check', 
+            'failed', 
+            duration0,
+            'Local inference server not running - start Ollama server on port 3001'
+          );
+          console.log('❌ Local server not available');
+        }
+      } catch (error) {
+        updateTestStatus(
+          'Local Server Health Check', 
+          'failed', 
+          Date.now() - startTime0,
+          `Server check failed: ${error.message}`
+        );
+      }
+      
+      setProgress(16);
+
       // Test 1: HuggingFace Transformers Sentiment Analysis
       console.log('🧪 Testing HuggingFace Transformers...');
       updateTestStatus('HuggingFace Transformers - Sentiment Analysis', 'running');
@@ -98,19 +151,19 @@ const QALocalModelTester = () => {
           
           console.log('✅ HuggingFace test passed:', result);
         } else {
-          throw new Error('Model failed to load');
+          throw new Error('Model failed to load - check browser compatibility');
         }
       } catch (error) {
         updateTestStatus(
           'HuggingFace Transformers - Sentiment Analysis', 
           'failed', 
           Date.now() - startTime1,
-          `Error: ${error.message}`
+          `Error: ${error.message}. Try refreshing or check browser WebAssembly support.`
         );
         console.error('❌ HuggingFace test failed:', error);
       }
       
-      setProgress(20);
+      setProgress(32);
 
       // Test 2: Local Ollama Threat Analysis
       console.log('🧪 Testing Local Ollama Inference...');
@@ -127,7 +180,7 @@ const QALocalModelTester = () => {
         
         const duration2 = Date.now() - startTime2;
         
-        if (analysis) {
+        if (analysis && analysis.provider === 'local_ollama') {
           updateTestStatus(
             'Local Threat Analysis via Ollama', 
             'passed', 
@@ -140,7 +193,7 @@ const QALocalModelTester = () => {
             'Local Threat Analysis via Ollama', 
             'failed', 
             duration2,
-            'No analysis result returned - check Ollama server connection'
+            analysis ? 'Analysis returned but using fallback mode' : 'No analysis result - check Ollama server on localhost:3001'
           );
         }
       } catch (error) {
@@ -153,7 +206,7 @@ const QALocalModelTester = () => {
         console.error('❌ Ollama test failed:', error);
       }
       
-      setProgress(40);
+      setProgress(48);
 
       // Test 3: Risk Classification
       console.log('🧪 Testing Risk Classification...');
@@ -175,19 +228,19 @@ const QALocalModelTester = () => {
           );
           console.log('✅ Risk classification test passed:', riskResult);
         } else {
-          throw new Error('Risk classifier failed to load');
+          throw new Error('Risk classifier failed to load - using fallback mode');
         }
       } catch (error) {
         updateTestStatus(
           'Risk Classification Model', 
           'failed', 
           Date.now() - startTime3,
-          `Error: ${error.message}`
+          `Error: ${error.message}. Fallback classification available.`
         );
         console.error('❌ Risk classification test failed:', error);
       }
       
-      setProgress(60);
+      setProgress(64);
 
       // Test 4: Memory Search & Context
       console.log('🧪 Testing Memory Search...');
@@ -240,7 +293,7 @@ const QALocalModelTester = () => {
             'WebGPU Acceleration', 
             'failed', 
             duration5,
-            'WebGPU not available - falling back to CPU inference'
+            'WebGPU not available - models will use CPU (slower but functional)'
           );
           console.log('⚠️ WebGPU not available');
         }
@@ -264,9 +317,13 @@ const QALocalModelTester = () => {
         toast.success('🎉 All Local AI Models Operational!', {
           description: `${passedTests}/${totalTests} tests passed - Local inference ready`
         });
-      } else {
+      } else if (passedTests >= totalTests * 0.5) {
         toast.warning(`⚠️ ${passedTests}/${totalTests} Local AI Tests Passed`, {
-          description: 'Some local models may need configuration'
+          description: 'Some models need setup - check individual test details'
+        });
+      } else {
+        toast.error(`❌ ${passedTests}/${totalTests} Local AI Tests Passed`, {
+          description: 'Most local models need configuration or server setup'
         });
       }
 
@@ -373,9 +430,19 @@ const QALocalModelTester = () => {
         </div>
 
         <div className="mt-4 p-3 bg-corporate-darkSecondary border border-corporate-border rounded-lg">
-          <div className="text-xs text-corporate-lightGray">
-            <AlertTriangle className="h-4 w-4 inline mr-2 text-yellow-500" />
-            <strong>Note:</strong> Local models require initial download and setup. First run may take longer.
+          <div className="text-xs text-corporate-lightGray space-y-2">
+            <div className="flex items-start gap-2">
+              <AlertTriangle className="h-4 w-4 text-yellow-500 mt-0.5 flex-shrink-0" />
+              <div>
+                <strong>Setup Requirements:</strong>
+                <ul className="mt-1 space-y-1 ml-2">
+                  <li>• HuggingFace models require first-time download (~100-500MB)</li>
+                  <li>• Ollama server must be running on localhost:3001</li>
+                  <li>• WebGPU requires modern browser with GPU acceleration enabled</li>
+                  <li>• Memory search requires existing data in Anubis system</li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
       </CardContent>

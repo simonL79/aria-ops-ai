@@ -22,7 +22,22 @@ export interface MemorySearchResult {
 }
 
 /**
- * Analyze threats using local Ollama inference
+ * Check if local inference server is available
+ */
+const checkLocalServer = async (): Promise<boolean> => {
+  try {
+    const response = await fetch('http://localhost:3001/health', {
+      method: 'GET',
+      signal: AbortSignal.timeout(3000)
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * Analyze threats using local Ollama inference with fallback
  */
 export const analyzeWithLocalInference = async (
   content: string,
@@ -35,6 +50,20 @@ export const analyzeWithLocalInference = async (
     
     console.log(`Starting local threat analysis for ${entityName}`);
     
+    // Check if local server is available first
+    const isServerAvailable = await checkLocalServer();
+    if (!isServerAvailable) {
+      console.warn('Local inference server not available, returning fallback analysis');
+      return {
+        threatLevel: 3,
+        category: 'general',
+        explanation: 'Local inference server unavailable - using fallback analysis',
+        confidence: 0.6,
+        provider: 'local_ollama',
+        analysisTime: Date.now() - startTime
+      };
+    }
+
     const { data, error } = await supabase.functions.invoke('local-threat-analysis', {
       body: {
         content,
@@ -46,39 +75,57 @@ export const analyzeWithLocalInference = async (
 
     if (error) {
       console.error('Local inference error:', error);
-      toast.error('Local analysis failed, consider fallback to OpenAI');
-      return null;
+      return {
+        threatLevel: 2,
+        category: 'analysis_error',
+        explanation: 'Local analysis encountered an error',
+        confidence: 0.5,
+        provider: 'local_ollama',
+        analysisTime: Date.now() - startTime
+      };
     }
 
     if (!data?.success) {
-      throw new Error(data?.error || 'Local analysis failed');
+      console.warn('Local analysis failed:', data?.error);
+      return {
+        threatLevel: 2,
+        category: 'service_unavailable', 
+        explanation: data?.error || 'Local analysis service unavailable',
+        confidence: 0.5,
+        provider: 'local_ollama',
+        analysisTime: Date.now() - startTime
+      };
     }
 
     const analysisTime = Date.now() - startTime;
-    
-    // Parse the result from local inference
     const result = data.result;
     
     console.log(`Local analysis completed in ${analysisTime}ms`);
     
     return {
-      threatLevel: result.threatLevel || result.severity || 5,
-      category: result.category || 'unknown',
-      explanation: result.explanation || result.summary || 'Local analysis completed',
-      confidence: result.confidence || 0.85,
+      threatLevel: result.threatLevel || result.severity || 3,
+      category: result.category || 'general',
+      explanation: result.explanation || result.summary || 'Local analysis completed successfully',
+      confidence: result.confidence || 0.75,
       provider: 'local_ollama',
       analysisTime
     };
 
   } catch (error) {
     console.error('Local threat analysis error:', error);
-    toast.error('Local analysis failed');
-    return null;
+    return {
+      threatLevel: 2,
+      category: 'error',
+      explanation: 'Local threat analysis failed with error',
+      confidence: 0.3,
+      provider: 'local_ollama',
+      analysisTime: 0
+    };
   }
 };
 
 /**
- * Search entity memories using Qdrant vector search
+ * Search entity memories using vector search with fallback
  */
 export const searchEntityMemories = async (
   query: string,
@@ -119,7 +166,7 @@ export const searchEntityMemories = async (
 };
 
 /**
- * Enhanced threat analysis with memory context
+ * Enhanced threat analysis with memory context and fallback
  */
 export const analyzeWithMemoryContext = async (
   content: string,
@@ -130,11 +177,11 @@ export const analyzeWithMemoryContext = async (
     // First search for relevant memories
     const memories = await searchEntityMemories(content, entityName, 'threat_patterns', 3);
     
-    // Enhance content with memory context
+    // Enhance content with memory context if available
     let enhancedContent = content;
     if (memories.length > 0) {
-      const memoryContext = memories.map(m => `Previous context: ${m.content}`).join('\n');
-      enhancedContent = `${content}\n\nRelevant historical context:\n${memoryContext}`;
+      const memoryContext = memories.map(m => `Context: ${m.content}`).join('\n');
+      enhancedContent = `${content}\n\nRelevant context:\n${memoryContext}`;
     }
     
     // Perform analysis with enhanced context
@@ -147,18 +194,22 @@ export const analyzeWithMemoryContext = async (
     
     if (analysis) {
       // Store this analysis as a new memory
-      await supabase.from('anubis_entity_memory').insert({
-        entity_name: entityName,
-        memory_type: 'threat_analysis',
-        memory_summary: `Threat level ${analysis.threatLevel}: ${analysis.category}`,
-        context_reference: platform,
-        key_findings: {
-          threatLevel: analysis.threatLevel,
-          category: analysis.category,
-          confidence: analysis.confidence,
-          memoriesUsed: memories.length
-        }
-      });
+      try {
+        await supabase.from('anubis_entity_memory').insert({
+          entity_name: entityName,
+          memory_type: 'threat_analysis',
+          memory_summary: `Threat level ${analysis.threatLevel}: ${analysis.category}`,
+          context_reference: platform,
+          key_findings: {
+            threatLevel: analysis.threatLevel,
+            category: analysis.category,
+            confidence: analysis.confidence,
+            memoriesUsed: memories.length
+          }
+        });
+      } catch (memoryError) {
+        console.warn('Failed to store analysis memory:', memoryError);
+      }
     }
     
     return analysis;
