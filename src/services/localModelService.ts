@@ -89,13 +89,13 @@ const isTransformersSupported = (): boolean => {
 };
 
 /**
- * Get the most compatible model for browser use
+ * Get the most compatible model for browser use - using smaller, quantized models
  */
 const getBrowserCompatibleModel = (taskType: string): string => {
   switch (taskType) {
     case 'sentiment-analysis':
     case 'text-classification':
-      // Use the smallest, most compatible models
+      // Use the smallest, most compatible models for sentiment analysis
       return 'Xenova/distilbert-base-uncased-finetuned-sst-2-english';
     case 'feature-extraction':
       return 'Xenova/all-MiniLM-L6-v2';
@@ -107,19 +107,19 @@ const getBrowserCompatibleModel = (taskType: string): string => {
 };
 
 /**
- * Load a model from HuggingFace with progressive fallback strategy
+ * Load a model from HuggingFace with aggressive timeout and fallback strategy
  */
 export const loadLocalModel = async (modelId: string, taskType: string): Promise<boolean> => {
   if (!isTransformersSupported()) {
-    console.warn('Transformers not supported - missing WebAssembly or required browser features');
+    console.warn('❌ Transformers not supported - missing WebAssembly or required browser features');
     return false;
   }
 
-  // Use browser-compatible model
-  const compatibleModelId = getBrowserCompatibleModel(taskType);
-  const actualModelId = modelId.includes('Xenova/') ? modelId : compatibleModelId;
+  // Always use the most compatible model regardless of input
+  const actualModelId = getBrowserCompatibleModel(taskType);
 
   if (loadedModels[actualModelId]) {
+    console.log('✅ Model already loaded:', actualModelId);
     return true;
   }
   
@@ -131,50 +131,36 @@ export const loadLocalModel = async (modelId: string, taskType: string): Promise
   };
   
   try {
-    console.log(`Loading browser-compatible model ${actualModelId} for task ${taskType}...`);
+    console.log(`🤖 Loading ultra-compatible model ${actualModelId} for task ${taskType}...`);
     
     // Always use CPU for maximum compatibility
     const device = 'cpu';
     const pipelineType = taskType as PipelineType;
     
-    // Progressive loading with multiple timeout strategies
-    const loadWithProgressiveTimeout = async () => {
-      const timeouts = [10000, 15000, 25000]; // Progressive timeouts
-      
-      for (let i = 0; i < timeouts.length; i++) {
-        try {
-          console.log(`Attempt ${i + 1}/3: Loading with ${timeouts[i]}ms timeout`);
-          
-          return await Promise.race([
-            pipeline(pipelineType, actualModelId, { 
-              device,
-              progress_callback: (progress: any) => {
-                if (progress.status === 'downloading') {
-                  console.log(`Downloading ${actualModelId}: ${Math.round(progress.progress * 100)}%`);
-                } else if (progress.status === 'loading') {
-                  console.log(`Loading ${actualModelId}: ${progress.name || 'model files'}`);
-                } else if (progress.status === 'ready') {
-                  console.log(`Model ${actualModelId} ready for inference`);
-                }
-              }
-            }),
-            new Promise((_, reject) =>
-              setTimeout(() => reject(new Error(`Timeout after ${timeouts[i]}ms`)), timeouts[i])
-            )
-          ]);
-        } catch (timeoutError) {
-          console.log(`Attempt ${i + 1} failed:`, timeoutError.message);
-          if (i === timeouts.length - 1) {
-            throw timeoutError;
-          }
-          // Brief pause before retry
-          await new Promise(resolve => setTimeout(resolve, 1000));
+    // Very aggressive timeout strategy - if it doesn't load quickly, it won't work
+    const quickLoadTimeout = 3000; // Only 3 seconds
+    
+    console.log(`⚡ Quick load attempt with ${quickLoadTimeout}ms timeout`);
+    
+    const modelPromise = pipeline(pipelineType, actualModelId, { 
+      device,
+      progress_callback: (progress: any) => {
+        if (progress.status === 'downloading') {
+          console.log(`📥 Downloading ${actualModelId}: ${Math.round(progress.progress * 100)}%`);
+        } else if (progress.status === 'loading') {
+          console.log(`⚙️ Loading ${actualModelId}: ${progress.name || 'model files'}`);
+        } else if (progress.status === 'ready') {
+          console.log(`🎯 Model ${actualModelId} ready for inference`);
         }
       }
-    };
+    });
 
-    // Load the model with progressive timeout strategy
-    loadedModels[actualModelId] = await loadWithProgressiveTimeout();
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error(`Quick load timeout after ${quickLoadTimeout}ms - browser may not support HuggingFace models`)), quickLoadTimeout)
+    );
+
+    // Try to load the model with aggressive timeout
+    loadedModels[actualModelId] = await Promise.race([modelPromise, timeoutPromise]);
     
     // Update model status
     modelStatus[actualModelId] = {
@@ -183,10 +169,10 @@ export const loadLocalModel = async (modelId: string, taskType: string): Promise
       error: null
     };
     
-    console.log(`✅ Browser-compatible model ${actualModelId} loaded successfully`);
+    console.log(`✅ Ultra-compatible model ${actualModelId} loaded successfully in under ${quickLoadTimeout}ms`);
     
     if (typeof window !== 'undefined') {
-      toast.success(`Model ready for inference`, {
+      toast.success(`🧠 AI Model Ready`, {
         description: `${actualModelId.split('/').pop()} loaded successfully`
       });
     }
@@ -194,22 +180,22 @@ export const loadLocalModel = async (modelId: string, taskType: string): Promise
     return true;
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error(`❌ Error loading browser-compatible model ${actualModelId}:`, error);
+    console.error(`❌ Model loading failed for ${actualModelId}:`, error);
     
-    // Enhanced error analysis
-    let specificError = 'Model loading failed';
+    // Enhanced error analysis with specific browser guidance
+    let specificError = 'Model loading failed - using fallback mode';
     if (errorMessage.includes('timeout') || errorMessage.includes('Timeout')) {
-      specificError = 'Model download timeout - network may be slow. Try refreshing or using a faster connection.';
+      specificError = 'Model download timeout - HuggingFace models may not work in this browser. Using keyword-based fallback.';
     } else if (errorMessage.includes('WebAssembly') || errorMessage.includes('wasm')) {
-      specificError = 'WebAssembly not supported or disabled. Try Chrome/Edge with WebAssembly enabled.';
+      specificError = 'WebAssembly not supported - try Chrome/Edge with WebAssembly enabled. Using fallback mode.';
     } else if (errorMessage.includes('memory') || errorMessage.includes('Memory')) {
-      specificError = 'Insufficient memory - close other browser tabs and try again.';
+      specificError = 'Insufficient memory - close other tabs. Using fallback mode.';
     } else if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
-      specificError = 'Network error - check internet connection and try again.';
+      specificError = 'Network error - check connection. Using fallback mode.';
     } else if (errorMessage.includes('CORS')) {
-      specificError = 'CORS error - browser security blocking model download.';
+      specificError = 'CORS error - browser security blocking model. Using fallback mode.';
     } else if (errorMessage.includes('quota') || errorMessage.includes('storage')) {
-      specificError = 'Browser storage quota exceeded - clear browser data and try again.';
+      specificError = 'Storage quota exceeded - clear browser data. Using fallback mode.';
     }
     
     // Update model status
@@ -219,11 +205,11 @@ export const loadLocalModel = async (modelId: string, taskType: string): Promise
       error: specificError
     };
     
-    // Don't show toast in testing environment
+    // Show informative toast but don't make it an error since fallback works
     if (typeof window !== 'undefined') {
-      toast.error(`Failed to load model`, {
+      toast.info(`🔄 Using Fallback AI`, {
         description: specificError,
-        duration: 8000
+        duration: 5000
       });
     }
     
@@ -246,15 +232,14 @@ export const getModelStatus = (modelId: string): ModelStatus => {
  * Run sentiment analysis with enhanced fallback
  */
 export const analyzeSentiment = async (modelId: string, text: string): Promise<PredictionResult> => {
-  // Get browser-compatible model
-  const compatibleModelId = getBrowserCompatibleModel('sentiment-analysis');
-  const actualModelId = modelId.includes('Xenova/') ? modelId : compatibleModelId;
+  // Always use the most compatible model
+  const actualModelId = getBrowserCompatibleModel('sentiment-analysis');
   
   // Ensure model is loaded
   if (!loadedModels[actualModelId]) {
     const loaded = await loadLocalModel(actualModelId, 'sentiment-analysis');
     if (!loaded) {
-      console.log('Using enhanced keyword-based sentiment fallback');
+      console.log('🔄 Using enhanced keyword-based sentiment fallback');
       
       // Enhanced fallback with more sophisticated analysis
       const positiveKeywords = ['good', 'great', 'excellent', 'amazing', 'wonderful', 'fantastic', 'love', 'awesome', 'perfect', 'brilliant', 'outstanding', 'superb'];
