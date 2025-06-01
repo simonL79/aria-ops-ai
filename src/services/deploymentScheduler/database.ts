@@ -1,23 +1,8 @@
+
 import { supabase } from '@/integrations/supabase/client';
+import { ScheduledDeployment } from './types';
 
-export interface ScheduledDeployment {
-  id: string;
-  name: string;
-  frequency: string;
-  time: string;
-  platforms: string[];
-  articleCount: number;
-  status: 'active' | 'paused';
-  nextRun: string;
-  lastRun: string;
-  entityName: string;
-  keywords: string[];
-  createdAt: string;
-  updatedAt: string;
-}
-
-export class DeploymentSchedulerService {
-  
+export class DeploymentDatabase {
   /**
    * Save scheduled deployment to database using activity_logs table
    */
@@ -69,11 +54,11 @@ export class DeploymentSchedulerService {
 
       if (error) {
         console.error('Failed to load scheduled deployments:', error);
-        return this.getDefaultSchedules();
+        return [];
       }
 
       if (!data || data.length === 0) {
-        return this.getDefaultSchedules();
+        return [];
       }
 
       return data.map(log => {
@@ -96,7 +81,7 @@ export class DeploymentSchedulerService {
       });
     } catch (error) {
       console.error('Error loading scheduled deployments:', error);
-      return this.getDefaultSchedules();
+      return [];
     }
   }
 
@@ -178,82 +163,5 @@ export class DeploymentSchedulerService {
       console.error('Error deleting scheduled deployment:', error);
       return false;
     }
-  }
-
-  /**
-   * Calculate next run time based on frequency and time
-   */
-  static calculateNextRun(frequency: string, time: string): string {
-    const now = new Date();
-    const [hours, minutes] = time.split(':').map(Number);
-    
-    switch (frequency) {
-      case 'hourly':
-        const nextHour = new Date(now);
-        nextHour.setHours(nextHour.getHours() + 1, 0, 0, 0);
-        return nextHour.toISOString();
-        
-      case 'daily':
-        const tomorrow = new Date(now);
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        tomorrow.setHours(hours, minutes, 0, 0);
-        return tomorrow.toISOString();
-        
-      case 'weekly':
-        const nextWeek = new Date(now);
-        nextWeek.setDate(nextWeek.getDate() + 7);
-        nextWeek.setHours(hours, minutes, 0, 0);
-        return nextWeek.toISOString();
-        
-      case 'monthly':
-        const nextMonth = new Date(now);
-        nextMonth.setMonth(nextMonth.getMonth() + 1);
-        nextMonth.setHours(hours, minutes, 0, 0);
-        return nextMonth.toISOString();
-        
-      default:
-        return new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString();
-    }
-  }
-
-  /**
-   * Get default schedules (fallback when database is empty)
-   */
-  private static getDefaultSchedules(): ScheduledDeployment[] {
-    return [];
-  }
-
-  /**
-   * Validate deployment data to prevent mock data
-   */
-  static validateDeploymentData(deployment: Partial<ScheduledDeployment>): { isValid: boolean; errors: string[] } {
-    const errors: string[] = [];
-    
-    // Check for mock data indicators
-    if (deployment.entityName) {
-      const name = deployment.entityName.toLowerCase();
-      if (name.includes('test') || name.includes('mock') || name.includes('demo') || name.includes('sample')) {
-        errors.push('Entity name contains mock data indicators (test, mock, demo, sample)');
-      }
-    }
-
-    if (deployment.keywords) {
-      const keywordString = deployment.keywords.join(' ').toLowerCase();
-      if (keywordString.includes('test') || keywordString.includes('mock') || keywordString.includes('demo')) {
-        errors.push('Keywords contain mock data indicators');
-      }
-    }
-
-    if (deployment.name) {
-      const nameString = deployment.name.toLowerCase();
-      if (nameString.includes('test') || nameString.includes('mock') || nameString.includes('demo')) {
-        errors.push('Schedule name contains mock data indicators');
-      }
-    }
-
-    return {
-      isValid: errors.length === 0,
-      errors
-    };
   }
 }
