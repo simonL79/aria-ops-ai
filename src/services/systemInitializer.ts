@@ -173,7 +173,7 @@ export class SystemInitializer {
   /**
    * Set up monitoring infrastructure
    */
-  private static async setupMonitoringInfrastructure(result: SystemInitializationResult): Promise<void> => {
+  private static async setupMonitoringInfrastructure(result: SystemInitializationResult): Promise<void> {
     try {
       // Initialize monitoring status table if it exists
       const { error } = await supabase
@@ -199,7 +199,7 @@ export class SystemInitializer {
   /**
    * Validate system integrity after initialization
    */
-  private static async validateSystemIntegrity(result: SystemInitializationResult): Promise<void> => {
+  private static async validateSystemIntegrity(result: SystemInitializationResult): Promise<void> {
     try {
       // Check if all required tables exist and have data
       const { data: configs, error: configError } = await supabase
