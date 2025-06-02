@@ -11,7 +11,7 @@ const HeroSection = () => {
         <div className="grid lg:grid-cols-2 gap-16 items-center max-w-7xl mx-auto">
           <div className="space-y-8 text-center">
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-light leading-tight text-foreground">
-              Elevate Your <span className="text-primary">Digital</span>
+              Elevate Your <span className="text-orange-500">Digital</span>
               <br />
               Reputation
             </h1>
@@ -26,7 +26,7 @@ const HeroSection = () => {
               <Button 
                 asChild 
                 size="lg" 
-                className="bg-primary hover:bg-primary/90 text-primary-foreground px-8 py-4 text-lg font-medium rounded-lg"
+                className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 text-lg font-medium rounded-lg"
               >
                 <Link to="/scan">
                   Request Assessment
