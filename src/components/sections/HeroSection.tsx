@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { Star } from 'lucide-react';
+import { Star, Shield } from 'lucide-react';
 import Logo from '../ui/logo';
 
 const HeroSection = () => {
@@ -87,11 +87,11 @@ const HeroSection = () => {
               />
               <div className="absolute bottom-6 left-6">
                 <Button 
-                  className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 text-sm font-medium rounded-lg shadow-lg"
+                  className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 text-sm font-medium rounded-lg shadow-lg flex items-center gap-2"
                 >
+                  <Shield className="h-5 w-5" />
                   <div className="text-center">
-                    <div className="text-xs text-white/80 mb-1">Threat Level</div>
-                    <div className="text-lg font-bold">SECURE</div>
+                    <div className="text-lg font-bold">Trusted to Protect</div>
                   </div>
                 </Button>
               </div>
