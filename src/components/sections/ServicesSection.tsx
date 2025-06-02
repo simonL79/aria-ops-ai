@@ -35,7 +35,7 @@ const ServicesSection = () => {
                     <li>• Crisis response activation for harassment or content storms</li>
                   </ul>
                 </div>
-                <div>
+                <div className="border border-gray-600 rounded-lg p-3 bg-gray-800/50">
                   <strong className="text-white">Why It Matters:</strong>
                   <p className="text-sm mt-1">Your digital footprint shapes perception. Every hostile comment gets seen. Social platforms decide who gets amplified and who gets buried.</p>
                 </div>
@@ -60,7 +60,7 @@ const ServicesSection = () => {
                     <li>• Strategic content optimization and placement</li>
                   </ul>
                 </div>
-                <div>
+                <div className="border border-gray-600 rounded-lg p-3 bg-gray-800/50">
                   <strong className="text-white">Why It Matters:</strong>
                   <p className="text-sm mt-1">One coordinated attack can destroy years of audience building. Your creativity gets monetized by platforms designed to exploit creators, and bias gets you.</p>
                 </div>
@@ -85,7 +85,7 @@ const ServicesSection = () => {
                     <li>• Right to be forgotten coaching and advocacy</li>
                   </ul>
                 </div>
-                <div>
+                <div className="border border-gray-600 rounded-lg p-3 bg-gray-800/50">
                   <strong className="text-white">Why It Matters:</strong>
                   <p className="text-sm mt-1">You don't need to be famous to become a target. Ex. If you've had a vindictive roommate, if you've made a political post someone didn't like, you're at risk.</p>
                 </div>
