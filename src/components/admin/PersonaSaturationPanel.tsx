@@ -43,29 +43,63 @@ const PersonaSaturationPanel = () => {
     setIsExecuting(true);
     
     try {
-      console.log('🚀 Starting A.R.I.A™ Persona Saturation deployment...');
+      console.log('🚀 Starting A.R.I.A™ Persona Saturation with LIVE DATA...');
       
+      // First, gather live content sources
+      console.log('📡 Gathering live content sources...');
+      const { data: contentSources, error: contentError } = await supabase
+        .from('content_sources')
+        .select('*')
+        .eq('source_type', 'watchtower')
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      if (contentError) {
+        console.warn('Content sources not available:', contentError);
+      }
+
+      // Get live scan results for context
+      const { data: liveResults, error: scanError } = await supabase
+        .from('scan_results')
+        .select('*')
+        .eq('source_type', 'live_osint')
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+      if (scanError) {
+        console.warn('Live scan results not available:', scanError);
+      }
+
       const keywords = targetKeywords.split(',').map(k => k.trim()).filter(k => k);
       
-      console.log('📡 Calling persona-saturation function with payload:', {
+      console.log('📊 Payload for persona saturation:', {
         entityName,
         targetKeywords: keywords,
         contentCount,
         deploymentTargets,
-        saturationMode
+        saturationMode,
+        liveContentSources: contentSources?.length || 0,
+        liveScanResults: liveResults?.length || 0
       });
+
+      // Enhanced payload with live data context
+      const enhancedPayload = {
+        entityName,
+        targetKeywords: keywords,
+        contentCount,
+        deploymentTargets,
+        saturationMode,
+        liveContentSources: contentSources || [],
+        liveScanResults: liveResults || [],
+        useLiveData: true,
+        enhancedMode: true
+      };
 
       const { data, error } = await supabase.functions.invoke('persona-saturation', {
-        body: {
-          entityName,
-          targetKeywords: keywords,
-          contentCount,
-          deploymentTargets,
-          saturationMode
-        }
+        body: enhancedPayload
       });
 
-      console.log('📊 Function response:', { data, error });
+      console.log('📊 Enhanced function response:', { data, error });
 
       if (error) {
         console.error('❌ Edge function error:', error);
@@ -84,7 +118,7 @@ const PersonaSaturationPanel = () => {
         contentGenerated: data.campaign?.contentGenerated || contentCount,
         deploymentsSuccessful: data.campaign?.deploymentsSuccessful || 0,
         serpPenetration: data.campaign?.serpPenetration || 0,
-        estimatedImpact: `${data.campaign?.deploymentsSuccessful || 0} live deployments across ${deploymentTargets.length} platforms`,
+        estimatedImpact: `${data.campaign?.deploymentsSuccessful || 0} live deployments across ${deploymentTargets.length} platforms using live content sources`,
         createdAt: new Date().toISOString(),
         deploymentUrls: data.deploymentUrls || [],
         platformResults: data.campaign?.platformResults || {}
@@ -93,12 +127,26 @@ const PersonaSaturationPanel = () => {
       setCurrentCampaign(campaign);
       setAllCampaigns(prev => [campaign, ...prev]);
 
-      toast.success(`✅ Persona saturation complete! ${campaign.deploymentsSuccessful} articles deployed successfully.`);
+      // Store campaign in database for persistence
+      try {
+        await supabase
+          .from('persona_deployments')
+          .insert({
+            entity_name: entityName,
+            campaign_data: campaign,
+            deployment_urls: data.deploymentUrls || [],
+            status: 'completed',
+            created_by: (await supabase.auth.getUser()).data.user?.id
+          });
+      } catch (dbError) {
+        console.warn('Could not store campaign in database:', dbError);
+      }
+
+      toast.success(`✅ Live persona saturation complete! ${campaign.deploymentsSuccessful} articles deployed using live data sources.`);
       
     } catch (error: any) {
       console.error('❌ Persona saturation error:', error);
       
-      // Provide more specific error messages
       let errorMessage = 'Failed to execute persona saturation campaign';
       
       if (error?.message?.includes('Failed to send a request')) {
@@ -116,33 +164,33 @@ const PersonaSaturationPanel = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 bg-black text-white min-h-screen">
       <div>
-        <h2 className="text-2xl font-bold corporate-heading">A.R.I.A™ Persona Saturation Engine</h2>
-        <p className="corporate-subtext mt-1">
-          Advanced deployment management and content saturation
+        <h2 className="text-2xl font-bold text-white">A.R.I.A™ Persona Saturation Engine</h2>
+        <p className="text-gray-300 mt-1">
+          Advanced deployment management and content saturation with live data integration
         </p>
       </div>
 
       <Tabs defaultValue="configure" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5 bg-corporate-darkSecondary border border-corporate-border">
-          <TabsTrigger value="configure" className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray">
+        <TabsList className="grid w-full grid-cols-5 bg-gray-900 border border-gray-800">
+          <TabsTrigger value="configure" className="data-[state=active]:bg-amber-500 data-[state=active]:text-black text-gray-300">
             <Settings className="h-4 w-4 mr-2" />
             Configure
           </TabsTrigger>
-          <TabsTrigger value="sources" className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray">
+          <TabsTrigger value="sources" className="data-[state=active]:bg-amber-500 data-[state=active]:text-black text-gray-300">
             <Database className="h-4 w-4 mr-2" />
-            Content Sources
+            Live Sources
           </TabsTrigger>
-          <TabsTrigger value="reviews" className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray">
+          <TabsTrigger value="reviews" className="data-[state=active]:bg-amber-500 data-[state=active]:text-black text-gray-300">
             <FileText className="h-4 w-4 mr-2" />
             Review Generator
           </TabsTrigger>
-          <TabsTrigger value="monitor" className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray">
+          <TabsTrigger value="monitor" className="data-[state=active]:bg-amber-500 data-[state=active]:text-black text-gray-300">
             <Monitor className="h-4 w-4 mr-2" />
             Monitor
           </TabsTrigger>
-          <TabsTrigger value="deploy" className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray">
+          <TabsTrigger value="deploy" className="data-[state=active]:bg-amber-500 data-[state=active]:text-black text-gray-300">
             <Globe className="h-4 w-4 mr-2" />
             Deploy
           </TabsTrigger>
