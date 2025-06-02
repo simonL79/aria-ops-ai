@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Facebook, Instagram, Linkedin, X } from 'lucide-react';
+import { Facebook, Instagram, Linkedin, X, Youtube } from 'lucide-react';
 
 const TrustedCompaniesSection = () => {
   const socialPlatforms = [
@@ -8,7 +8,7 @@ const TrustedCompaniesSection = () => {
     { name: "Instagram", Icon: Instagram },
     { name: "LinkedIn", Icon: Linkedin },
     { name: "X (Twitter)", Icon: X },
-    { name: "Facebook", Icon: Facebook }
+    { name: "YouTube", Icon: Youtube }
   ];
 
   return (
