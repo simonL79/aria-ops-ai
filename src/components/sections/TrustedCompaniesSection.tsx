@@ -14,6 +14,9 @@ const TrustedCompaniesSection = () => {
   return (
     <section className="py-16 bg-black border-t border-gray-700">
       <div className="container mx-auto px-6">
+        <h2 className="text-xl md:text-2xl font-light text-white text-center mb-8">
+          Trusted Across Social Platforms
+        </h2>
         <div className="flex flex-wrap items-center justify-center gap-12 md:gap-16 lg:gap-20">
           {socialPlatforms.map((platform, index) => (
             <div key={index} className="text-gray-400 opacity-60 hover:opacity-100 transition-opacity">
