@@ -16,9 +16,9 @@ const HeroSection = () => {
             </div>
             
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-light leading-tight text-foreground">
-              Elevate Your <span className="text-orange-500">Digital</span>
+              <span className="text-white">Elevate Your</span> <span className="text-orange-500">Digital</span>
               <br />
-              Reputation
+              <span className="text-white">Reputation</span>
             </h1>
             
             <p className="text-xl md:text-2xl leading-relaxed text-white max-w-2xl mx-auto">
