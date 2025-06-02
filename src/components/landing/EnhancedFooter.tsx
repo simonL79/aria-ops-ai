@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
@@ -7,9 +8,12 @@ const EnhancedFooter = () => {
   const navigate = useNavigate();
 
   const handleAdminAccess = () => {
+    console.log('Admin button clicked', { isAuthenticated, isAdmin });
     if (isAuthenticated && isAdmin) {
+      console.log('Navigating to /admin');
       navigate('/admin');
     } else {
+      console.log('Navigating to /admin/login');
       navigate('/admin/login');
     }
   };

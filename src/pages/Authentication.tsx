@@ -11,7 +11,7 @@ const Authentication = () => {
   const { isAuthenticated } = useAuth();
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const from = location.state?.from?.pathname || "/dashboard";
+  const from = location.state?.from?.pathname || "/admin"; // Changed from /dashboard to /admin
   const authType = searchParams.get('type');
   const error = searchParams.get('error');
   const errorDescription = searchParams.get('error_description');
@@ -39,7 +39,7 @@ const Authentication = () => {
     );
   }
   
-  // If already authenticated, redirect to the dashboard or previous page
+  // If already authenticated, redirect to the admin dashboard or previous page
   if (isAuthenticated) {
     return <Navigate to={from} replace />;
   }
