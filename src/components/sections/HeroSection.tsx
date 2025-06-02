@@ -9,20 +9,20 @@ const HeroSection = () => {
     <section className="hero bg-black text-foreground py-20 relative overflow-hidden min-h-screen flex items-center">
       <div className="container mx-auto px-6 relative z-10 w-full">
         <div className="grid lg:grid-cols-2 gap-16 items-center max-w-7xl mx-auto">
-          <div className="space-y-8 text-center lg:text-left">
+          <div className="space-y-8 text-center">
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-light leading-tight text-foreground">
               Elevate Your <span className="text-primary">Digital</span>
               <br />
               Reputation
             </h1>
             
-            <p className="text-xl md:text-2xl leading-relaxed text-muted-foreground max-w-2xl mx-auto lg:mx-0">
+            <p className="text-xl md:text-2xl leading-relaxed text-white max-w-2xl mx-auto">
               Enterprise-grade reputation intelligence and crisis prevention.
               <br />
               Powered by AI, delivered by experts who understand the stakes.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
                 asChild 
                 size="lg" 
@@ -37,7 +37,7 @@ const HeroSection = () => {
                 asChild 
                 variant="outline"
                 size="lg" 
-                className="border-border text-foreground hover:bg-muted px-8 py-4 text-lg font-medium rounded-lg"
+                className="border-border text-white hover:bg-muted px-8 py-4 text-lg font-medium rounded-lg"
               >
                 <Link to="/about">
                   Learn More
@@ -45,35 +45,35 @@ const HeroSection = () => {
               </Button>
             </div>
 
-            <div className="space-y-4 text-center lg:text-left">
-              <div className="flex items-center gap-2 justify-center lg:justify-start">
-                <span className="text-sm text-muted-foreground">Rated Excellent on Trustpilot</span>
+            <div className="space-y-4 text-center">
+              <div className="flex items-center gap-2 justify-center">
+                <span className="text-sm text-white">Rated Excellent on Trustpilot</span>
               </div>
-              <div className="flex items-center gap-1 justify-center lg:justify-start">
+              <div className="flex items-center gap-1 justify-center">
                 {[...Array(5)].map((_, i) => (
                   <Star key={i} className="h-5 w-5 fill-primary text-primary" />
                 ))}
-                <span className="ml-2 text-sm text-muted-foreground">4.9 out of 5 (142 reviews)</span>
+                <span className="ml-2 text-sm text-white">4.9 out of 5 (142 reviews)</span>
               </div>
               
-              <div className="flex items-center gap-2 mt-4 justify-center lg:justify-start">
-                <span className="text-sm text-muted-foreground">ISO certification compliant</span>
+              <div className="flex items-center gap-2 mt-4 justify-center">
+                <span className="text-sm text-white">ISO certification compliant</span>
               </div>
-              <div className="flex items-center gap-1 justify-center lg:justify-start">
+              <div className="flex items-center gap-1 justify-center">
                 {[...Array(5)].map((_, i) => (
                   <Star key={i} className="h-5 w-5 fill-primary text-primary" />
                 ))}
-                <span className="ml-2 text-sm text-muted-foreground">5.0 stars from our existing customers</span>
+                <span className="ml-2 text-sm text-white">5.0 stars from our existing customers</span>
               </div>
             </div>
 
-            <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 inline-flex items-center gap-2 mx-auto lg:mx-0">
+            <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 inline-flex items-center gap-2 mx-auto">
               <div className="w-3 h-3 bg-primary rounded-full animate-pulse"></div>
-              <span className="text-sm text-foreground">Trusted by Fortune 500 companies</span>
+              <span className="text-sm text-white">Trusted by Fortune 500 companies</span>
             </div>
           </div>
           
-          <div className="flex justify-center lg:justify-end">
+          <div className="flex justify-center">
             <div className="relative">
               <img 
                 src="/lovable-uploads/de814ec7-bdd9-4243-a0ea-06396aa78b51.png" 
