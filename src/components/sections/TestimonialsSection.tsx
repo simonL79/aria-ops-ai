@@ -24,26 +24,26 @@ const TestimonialsSection = () => {
     <section className="py-24 bg-black">
       <div className="container mx-auto px-6">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-light mb-8 text-foreground">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-light mb-8 text-white">
             What Our Clients Say
           </h2>
         </div>
         
         <div className="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto">
           {testimonials.map((testimonial, index) => (
-            <div key={index} className="bg-card p-8 rounded-lg border border-border shadow-lg">
+            <div key={index} className="bg-gray-900 p-8 rounded-lg border border-gray-700 shadow-lg">
               <div className="flex items-center mb-4">
                 {[...Array(testimonial.rating)].map((_, i) => (
-                  <Star key={i} className="h-5 w-5 fill-primary text-primary" />
+                  <Star key={i} className="h-5 w-5 fill-orange-500 text-orange-500" />
                 ))}
               </div>
               
-              <blockquote className="text-lg text-muted-foreground leading-relaxed mb-6">
+              <blockquote className="text-lg text-gray-300 leading-relaxed mb-6">
                 "{testimonial.quote}"
               </blockquote>
               
               <div className="flex items-center">
-                <div className="w-14 h-14 bg-muted rounded-full mr-4 overflow-hidden">
+                <div className="w-14 h-14 bg-gray-700 rounded-full mr-4 overflow-hidden">
                   <img 
                     src={testimonial.image} 
                     alt={testimonial.name}
@@ -51,8 +51,8 @@ const TestimonialsSection = () => {
                   />
                 </div>
                 <div>
-                  <h4 className="text-foreground font-semibold text-lg">{testimonial.name}</h4>
-                  <p className="text-muted-foreground text-sm uppercase tracking-wide">{testimonial.title}</p>
+                  <h4 className="text-white font-semibold text-lg">{testimonial.name}</h4>
+                  <p className="text-gray-400 text-sm uppercase tracking-wide">{testimonial.title}</p>
                 </div>
               </div>
             </div>
