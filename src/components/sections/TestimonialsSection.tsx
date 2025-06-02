@@ -21,7 +21,7 @@ const TestimonialsSection = () => {
   ];
 
   return (
-    <section className="py-24 bg-muted/30">
+    <section className="py-24 bg-black">
       <div className="container mx-auto px-6">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-light mb-8 text-foreground">
