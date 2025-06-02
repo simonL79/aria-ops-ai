@@ -107,7 +107,7 @@ const ServicesSection = () => {
           {/* Add-On Services Box */}
           <div className="max-w-7xl mx-auto">
             <div className="bg-gray-900 p-8 rounded-lg border border-gray-700">
-              <h4 className="text-2xl font-semibold mb-8 text-white">Add-On Services</h4>
+              <h4 className="text-2xl font-semibold mb-8 text-orange-500">Add-On Services</h4>
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div className="text-left">
                   <h5 className="text-lg font-medium mb-2 text-white">Dark Web Leak Monitoring</h5>
