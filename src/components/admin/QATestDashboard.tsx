@@ -90,7 +90,7 @@ const QATestDashboard = () => {
   };
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto">
+    <div className="space-y-8 max-w-7xl mx-auto bg-black text-white">
       <QATestHeader 
         onRunTests={runQATests} 
         isRunning={running}
@@ -121,9 +121,9 @@ const QATestDashboard = () => {
 
           <div className="w-full">
             <Tabs value={selectedPhase} onValueChange={setSelectedPhase} className="w-full">
-              <TabsList className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 w-full mb-6">
+              <TabsList className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-8 w-full mb-6 bg-gray-900 border border-gray-800">
                 {getPhases().map((phase) => (
-                  <TabsTrigger key={phase} value={phase} className="text-xs px-2">
+                  <TabsTrigger key={phase} value={phase} className="text-xs px-2 text-gray-300 data-[state=active]:bg-amber-500 data-[state=active]:text-black">
                     {phase === 'all' ? 'All Phases' : phase.replace('Phase ', 'P')}
                   </TabsTrigger>
                 ))}

@@ -283,10 +283,10 @@ const QATestingDashboard = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <Card className="bg-gray-900 border-gray-700">
+    <div className="space-y-6 bg-black text-white min-h-screen">
+      <Card className="bg-black border-gray-800">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-blue-400">
+          <CardTitle className="flex items-center gap-2 text-amber-500">
             <Shield className="h-6 w-6" />
             A.R.I.A™ QA Master Dashboard
           </CardTitle>
@@ -294,7 +294,7 @@ const QATestingDashboard = () => {
             <Button
               onClick={runFullQASuite}
               disabled={isRunning}
-              className="bg-blue-600 hover:bg-blue-700"
+              className="bg-amber-500 hover:bg-amber-600 text-black"
             >
               {isRunning ? (
                 <>
@@ -311,34 +311,34 @@ const QATestingDashboard = () => {
             <Button
               onClick={loadTestResults}
               variant="outline"
-              className="border-gray-600 text-gray-300 hover:bg-gray-800"
+              className="border-gray-700 text-gray-300 hover:bg-gray-900 hover:text-white"
             >
               Refresh Results
             </Button>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="bg-black">
           {/* Stats Overview */}
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-            <div className="bg-gray-800 p-4 rounded">
+            <div className="bg-gray-900 border border-gray-800 p-4 rounded">
               <div className="text-sm text-gray-400">Total Tests</div>
               <div className="text-2xl font-bold text-white">{stats.totalTests}</div>
             </div>
-            <div className="bg-gray-800 p-4 rounded">
+            <div className="bg-gray-900 border border-gray-800 p-4 rounded">
               <div className="text-sm text-gray-400">Passed</div>
               <div className="text-2xl font-bold text-green-400">{stats.passedTests}</div>
             </div>
-            <div className="bg-gray-800 p-4 rounded">
+            <div className="bg-gray-900 border border-gray-800 p-4 rounded">
               <div className="text-sm text-gray-400">Failed</div>
               <div className="text-2xl font-bold text-red-400">{stats.failedTests}</div>
             </div>
-            <div className="bg-gray-800 p-4 rounded">
+            <div className="bg-gray-900 border border-gray-800 p-4 rounded">
               <div className="text-sm text-gray-400">Warnings</div>
               <div className="text-2xl font-bold text-yellow-400">{stats.warningTests}</div>
             </div>
-            <div className="bg-gray-800 p-4 rounded">
+            <div className="bg-gray-900 border border-gray-800 p-4 rounded">
               <div className="text-sm text-gray-400">Success Rate</div>
-              <div className="text-2xl font-bold text-blue-400">
+              <div className="text-2xl font-bold text-amber-500">
                 {stats.totalTests > 0 ? Math.round((stats.passedTests / stats.totalTests) * 100) : 0}%
               </div>
             </div>
@@ -346,19 +346,19 @@ const QATestingDashboard = () => {
 
           {/* Test Results by Category */}
           <Tabs defaultValue="all" className="w-full">
-            <TabsList className="grid grid-cols-6 mb-4 bg-gray-800">
-              <TabsTrigger value="all">All Tests</TabsTrigger>
-              <TabsTrigger value="global">Global</TabsTrigger>
-              <TabsTrigger value="routes">Routes</TabsTrigger>
-              <TabsTrigger value="edge_functions">Edge Functions</TabsTrigger>
-              <TabsTrigger value="database">Database</TabsTrigger>
-              <TabsTrigger value="automation">Automation</TabsTrigger>
+            <TabsList className="grid grid-cols-6 mb-4 bg-gray-900 border border-gray-800">
+              <TabsTrigger value="all" className="data-[state=active]:bg-amber-500 data-[state=active]:text-black">All Tests</TabsTrigger>
+              <TabsTrigger value="global" className="data-[state=active]:bg-amber-500 data-[state=active]:text-black">Global</TabsTrigger>
+              <TabsTrigger value="routes" className="data-[state=active]:bg-amber-500 data-[state=active]:text-black">Routes</TabsTrigger>
+              <TabsTrigger value="edge_functions" className="data-[state=active]:bg-amber-500 data-[state=active]:text-black">Edge Functions</TabsTrigger>
+              <TabsTrigger value="database" className="data-[state=active]:bg-amber-500 data-[state=active]:text-black">Database</TabsTrigger>
+              <TabsTrigger value="automation" className="data-[state=active]:bg-amber-500 data-[state=active]:text-black">Automation</TabsTrigger>
             </TabsList>
 
             <TabsContent value="all">
               <div className="space-y-2 max-h-96 overflow-y-auto">
                 {testResults.map((result) => (
-                  <div key={result.id} className="bg-gray-800 p-3 rounded flex items-center justify-between">
+                  <div key={result.id} className="bg-gray-900 border border-gray-800 p-3 rounded flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       {getStatusIcon(result.status)}
                       <div>
@@ -383,7 +383,7 @@ const QATestingDashboard = () => {
               <TabsContent key={category} value={category}>
                 <div className="space-y-2 max-h-96 overflow-y-auto">
                   {results.map((result) => (
-                    <div key={result.id} className="bg-gray-800 p-3 rounded flex items-center justify-between">
+                    <div key={result.id} className="bg-gray-900 border border-gray-800 p-3 rounded flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         {getStatusIcon(result.status)}
                         <div>
