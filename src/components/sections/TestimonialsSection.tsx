@@ -1,47 +1,49 @@
 
 import React from 'react';
+import { Star } from 'lucide-react';
 
 const TestimonialsSection = () => {
   const testimonials = [
     {
-      name: "Laura M.",
-      title: "ENTREPRENEUR, HOSPITALITY",
-      quote: "Real impact on our business reputation and growth.",
-      image: "/lovable-uploads/25cdb440-ad52-4fdf-a3a0-24ef40720b24.png"
+      name: "Sarah Chen",
+      title: "STARTUP FOUNDER & CEO",
+      quote: "ARIA's intelligence platform helped us identify and neutralize a coordinated attack before it reached mainstream media. Their proactive approach saved our Series A funding round.",
+      image: "/lovable-uploads/25cdb440-ad52-4fdf-a3a0-24ef40720b24.png",
+      rating: 5
     },
     {
-      name: "Andrew R.",
-      title: "STRATEGIC CONSULTANT, HEALTHCARE",
-      quote: "Exceptional service and measurable results for our brand.",
-      image: "/lovable-uploads/25cdb440-ad52-4fdf-a3a0-24ef40720b24.png"
-    },
-    {
-      name: "Sarah W.",
-      title: "DIRECTOR OF GROWTH, STARTUPS",
-      quote: "Transformed our online presence completely.",
-      image: "/lovable-uploads/25cdb440-ad52-4fdf-a3a0-24ef40720b24.png"
+      name: "Michael Rodriguez", 
+      title: "MANAGING PARTNER, HEALTHCARE",
+      quote: "The speed of their analysis and speed of response is unmatched. They don't just monitor - they predict and prevent. Essential for any serious organization.",
+      image: "/lovable-uploads/25cdb440-ad52-4fdf-a3a0-24ef40720b24.png",
+      rating: 5
     }
   ];
 
   return (
-    <section className="py-24 bg-background">
+    <section className="py-24 bg-muted/30">
       <div className="container mx-auto px-6">
-        <div className="mb-16">
+        <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-light mb-8 text-foreground">
-            Real Stories,
-            <br />
-            Real Results
+            What Our Clients Say
           </h2>
-          <p className="text-muted-foreground text-lg max-w-md">
-            Learn from our success stories. Our clients have experienced remarkable transformations in their online reputation and business growth.
-          </p>
         </div>
         
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto">
           {testimonials.map((testimonial, index) => (
-            <div key={index} className="bg-card p-8 rounded-lg border border-border">
-              <div className="flex items-center mb-6">
-                <div className="w-16 h-16 bg-muted rounded-full mr-4 overflow-hidden">
+            <div key={index} className="bg-card p-8 rounded-lg border border-border shadow-lg">
+              <div className="flex items-center mb-4">
+                {[...Array(testimonial.rating)].map((_, i) => (
+                  <Star key={i} className="h-5 w-5 fill-primary text-primary" />
+                ))}
+              </div>
+              
+              <blockquote className="text-lg text-muted-foreground leading-relaxed mb-6">
+                "{testimonial.quote}"
+              </blockquote>
+              
+              <div className="flex items-center">
+                <div className="w-14 h-14 bg-muted rounded-full mr-4 overflow-hidden">
                   <img 
                     src={testimonial.image} 
                     alt={testimonial.name}
@@ -49,11 +51,10 @@ const TestimonialsSection = () => {
                   />
                 </div>
                 <div>
-                  <h3 className="text-foreground font-semibold">{testimonial.name}</h3>
+                  <h4 className="text-foreground font-semibold text-lg">{testimonial.name}</h4>
                   <p className="text-muted-foreground text-sm uppercase tracking-wide">{testimonial.title}</p>
                 </div>
               </div>
-              <p className="text-muted-foreground leading-relaxed">"{testimonial.quote}"</p>
             </div>
           ))}
         </div>

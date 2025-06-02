@@ -3,9 +3,9 @@ import React from 'react';
 import PublicLayout from '@/components/layout/PublicLayout';
 import HeroSection from '@/components/sections/HeroSection';
 import TrustedCompaniesSection from '@/components/sections/TrustedCompaniesSection';
-import AIPoweredSection from '@/components/sections/AIPoweredSection';
+import ServicesSection from '@/components/sections/ServicesSection';
 import TestimonialsSection from '@/components/sections/TestimonialsSection';
-import PricingSection from '@/components/sections/PricingSection';
+import CTASection from '@/components/sections/CTASection';
 import ErrorBoundary from '@/components/error/ErrorBoundary';
 
 const HomePage = () => {
@@ -15,9 +15,9 @@ const HomePage = () => {
         <div className="bg-background text-foreground min-h-screen">
           <HeroSection />
           <TrustedCompaniesSection />
-          <AIPoweredSection />
+          <ServicesSection />
           <TestimonialsSection />
-          <PricingSection />
+          <CTASection />
         </div>
       </PublicLayout>
     </ErrorBoundary>
