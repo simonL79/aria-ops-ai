@@ -27,6 +27,19 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
     }
   };
 
+  const scrollToServices = () => {
+    // If we're on the home page, scroll to services section
+    if (location.pathname === '/' || location.pathname === '/sales-funnel') {
+      const servicesSection = document.querySelector('#services') || document.querySelector('[data-section="services"]');
+      if (servicesSection) {
+        servicesSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      // If we're on another page, navigate to home first then scroll
+      navigate('/#services');
+    }
+  };
+
   // Check if we're on the home page
   const isHomePage = location.pathname === '/' || location.pathname === '/sales-funnel';
 
@@ -60,8 +73,14 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
               <Link to="/scan" className="text-corporate-lightGray hover:text-white transition-colors text-sm lg:text-base">
                 Get Started
               </Link>
-              <Link to="/pricing" className="text-corporate-lightGray hover:text-white transition-colors text-sm lg:text-base">
+              <button 
+                onClick={scrollToServices} 
+                className="text-corporate-lightGray hover:text-white transition-colors text-sm lg:text-base"
+              >
                 Services
+              </button>
+              <Link to="/pricing" className="text-corporate-lightGray hover:text-white transition-colors text-sm lg:text-base">
+                Pricing
               </Link>
               {isAuthenticated ? (
                 <Button 
@@ -134,12 +153,21 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
                 >
                   Get Started
                 </Link>
+                <button 
+                  onClick={() => {
+                    scrollToServices();
+                    setIsMobileMenuOpen(false);
+                  }} 
+                  className="text-corporate-lightGray hover:text-white transition-colors py-2 text-left"
+                >
+                  Services
+                </button>
                 <Link 
                   to="/pricing" 
                   className="text-corporate-lightGray hover:text-white transition-colors py-2"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  Services
+                  Pricing
                 </Link>
                 {isAuthenticated ? (
                   <Button 
