@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Mail, Phone, MapPin, ArrowLeft } from 'lucide-react';
+import { Mail, MapPin, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -151,17 +151,7 @@ const ContactPage = () => {
                   <Mail className="h-8 w-8 text-amber-400" />
                   <div>
                     <h3 className="text-xl font-semibold text-white">Email</h3>
-                    <p className="text-gray-300">contact@aria-intelligence.com</p>
-                  </div>
-                </div>
-              </Card>
-
-              <Card className="bg-[#1A1B1E] border-gray-800 p-8">
-                <div className="flex items-center gap-4 mb-4">
-                  <Phone className="h-8 w-8 text-amber-400" />
-                  <div>
-                    <h3 className="text-xl font-semibold text-white">Phone</h3>
-                    <p className="text-gray-300">Available upon request</p>
+                    <p className="text-gray-300">Simon@ariaops.co.uk</p>
                   </div>
                 </div>
               </Card>
