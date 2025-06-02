@@ -8,14 +8,14 @@ const TestimonialsSection = () => {
       name: "Sarah Chen",
       title: "STARTUP FOUNDER & CEO",
       quote: "ARIA's intelligence platform helped us identify and neutralize a coordinated attack before it reached mainstream media. Their proactive approach saved our Series A funding round.",
-      image: "/lovable-uploads/25cdb440-ad52-4fdf-a3a0-24ef40720b24.png",
+      initials: "SC",
       rating: 5
     },
     {
       name: "Michael Rodriguez", 
       title: "MANAGING PARTNER, HEALTHCARE",
       quote: "The speed of their analysis and speed of response is unmatched. They don't just monitor - they predict and prevent. Essential for any serious organization.",
-      image: "/lovable-uploads/25cdb440-ad52-4fdf-a3a0-24ef40720b24.png",
+      initials: "MR",
       rating: 5
     }
   ];
@@ -43,12 +43,8 @@ const TestimonialsSection = () => {
               </blockquote>
               
               <div className="flex items-center">
-                <div className="w-14 h-14 bg-gray-700 rounded-full mr-4 overflow-hidden">
-                  <img 
-                    src={testimonial.image} 
-                    alt={testimonial.name}
-                    className="w-full h-full object-cover"
-                  />
+                <div className="w-14 h-14 bg-orange-500 rounded-full mr-4 flex items-center justify-center">
+                  <span className="text-white font-semibold text-lg">{testimonial.initials}</span>
                 </div>
                 <div>
                   <h4 className="text-white font-semibold text-lg">{testimonial.name}</h4>
