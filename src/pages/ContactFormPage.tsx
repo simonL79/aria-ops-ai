@@ -121,7 +121,7 @@ const ContactFormPage = () => {
                             {...field} 
                           />
                         </FormControl>
-                        <FormMessage />
+                        <FormMessage className="text-red-500" />
                       </FormItem>
                     )}
                   />
@@ -142,7 +142,7 @@ const ContactFormPage = () => {
                             {...field} 
                           />
                         </FormControl>
-                        <FormMessage />
+                        <FormMessage className="text-red-500" />
                       </FormItem>
                     )}
                   />
@@ -164,7 +164,7 @@ const ContactFormPage = () => {
                             {...field} 
                           />
                         </FormControl>
-                        <FormMessage />
+                        <FormMessage className="text-red-500" />
                       </FormItem>
                     )}
                   />
@@ -186,7 +186,7 @@ const ContactFormPage = () => {
                             {...field} 
                           />
                         </FormControl>
-                        <FormMessage />
+                        <FormMessage className="text-red-500" />
                       </FormItem>
                     )}
                   />
@@ -208,7 +208,7 @@ const ContactFormPage = () => {
                           />
                         </FormControl>
                         <div className="flex justify-between text-sm">
-                          <FormMessage />
+                          <FormMessage className="text-red-500" />
                           <span className="text-gray-400">
                             {wordCount}/500 words ({field.value.length}/3000 characters)
                           </span>
