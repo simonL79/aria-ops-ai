@@ -100,9 +100,34 @@ const ServicesSection = () => {
             Get a comprehensive assessment of your digital risk profile. Our experts will identify vulnerabilities and provide a strategic roadmap.
           </p>
           
-          <button className="bg-orange-500 hover:bg-orange-600 text-white px-12 py-4 text-lg font-medium rounded-lg transition-colors">
+          <button className="bg-orange-500 hover:bg-orange-600 text-white px-12 py-4 text-lg font-medium rounded-lg transition-colors mb-16">
             Request Your Assessment →
           </button>
+
+          {/* Add-On Services Box */}
+          <div className="max-w-7xl mx-auto">
+            <div className="bg-gray-900 p-8 rounded-lg border border-gray-700">
+              <h4 className="text-2xl font-semibold mb-8 text-white">Add-On Services</h4>
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="text-left">
+                  <h5 className="text-lg font-medium mb-2 text-white">Dark Web Leak Monitoring</h5>
+                  <p className="text-gray-300 text-sm">Get notified if your name, photos, or documents appear on black market sites</p>
+                </div>
+                <div className="text-left">
+                  <h5 className="text-lg font-medium mb-2 text-white">AI Disinfo Watchdog</h5>
+                  <p className="text-gray-300 text-sm">Find out if hostile LLMs (like ChatGPT clones) are referencing you unfairly</p>
+                </div>
+                <div className="text-left">
+                  <h5 className="text-lg font-medium mb-2 text-white">Family Reputation Package</h5>
+                  <p className="text-gray-300 text-sm">Protect your children or family members across online platforms</p>
+                </div>
+                <div className="text-left">
+                  <h5 className="text-lg font-medium mb-2 text-white">Full Service Takedowns</h5>
+                  <p className="text-gray-300 text-sm">We do the work — no forms or back-and-forth with platforms</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
