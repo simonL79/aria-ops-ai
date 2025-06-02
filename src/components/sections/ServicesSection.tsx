@@ -3,6 +3,16 @@ import React from 'react';
 import { Shield, MessageSquare, Users } from 'lucide-react';
 
 const ServicesSection = () => {
+  const scrollToCTAForm = () => {
+    const ctaSection = document.querySelector('#cta-section') || document.querySelector('[data-section="cta"]');
+    if (ctaSection) {
+      ctaSection.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      // Fallback: scroll to bottom of page where CTA typically is
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+  };
+
   return (
     <section className="py-24 bg-black">
       <div className="container mx-auto px-6">
@@ -100,7 +110,10 @@ const ServicesSection = () => {
             Get a comprehensive assessment of your digital risk profile. Our experts will identify vulnerabilities and provide a strategic roadmap.
           </p>
           
-          <button className="bg-orange-500 hover:bg-orange-600 text-white px-12 py-4 text-lg font-medium rounded-lg transition-colors mb-16">
+          <button 
+            onClick={scrollToCTAForm}
+            className="bg-orange-500 hover:bg-orange-600 text-white px-12 py-4 text-lg font-medium rounded-lg transition-colors mb-16"
+          >
             Request Your Assessment →
           </button>
 
