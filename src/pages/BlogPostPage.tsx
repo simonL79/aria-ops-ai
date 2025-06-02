@@ -1,10 +1,11 @@
 
 import React from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import PublicLayout from "@/components/layout/PublicLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, User, ArrowLeft } from "lucide-react";
+import { Calendar, User, ArrowLeft, ExternalLink } from "lucide-react";
 import { useBlogPosts } from "@/hooks/useBlogPosts";
 
 const BlogPostPage = () => {
@@ -89,6 +90,25 @@ const BlogPostPage = () => {
 
   return (
     <div className="min-h-screen bg-black text-white">
+      <Helmet>
+        <title>{blogPost.meta_title || blogPost.title}</title>
+        <meta name="description" content={blogPost.meta_description || blogPost.description} />
+        <meta name="keywords" content={blogPost.meta_keywords || `${blogPost.category}, A.R.I.A, reputation management, digital intelligence`} />
+        <meta property="og:title" content={blogPost.meta_title || blogPost.title} />
+        <meta property="og:description" content={blogPost.meta_description || blogPost.description} />
+        <meta property="og:image" content={blogPost.image} />
+        <meta property="og:url" content={`${window.location.origin}/blog/${blogPost.slug}`} />
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={blogPost.meta_title || blogPost.title} />
+        <meta name="twitter:description" content={blogPost.meta_description || blogPost.description} />
+        <meta name="twitter:image" content={blogPost.image} />
+        <link rel="canonical" href={`${window.location.origin}/blog/${blogPost.slug}`} />
+        {blogPost.medium_url && (
+          <link rel="alternate" href={blogPost.medium_url} title="Read on Medium" />
+        )}
+      </Helmet>
+      
       <PublicLayout>
         <div className="py-16">
           <div className="container mx-auto px-6">
@@ -108,7 +128,7 @@ const BlogPostPage = () => {
                   <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white">
                     {blogPost.title}
                   </h1>
-                  <div className="flex items-center gap-4 text-gray-400">
+                  <div className="flex items-center gap-4 text-gray-400 mb-6">
                     <div className="flex items-center gap-1">
                       <Calendar className="h-4 w-4" />
                       {blogPost.date}
@@ -118,6 +138,17 @@ const BlogPostPage = () => {
                       {blogPost.author}
                     </div>
                   </div>
+                  
+                  {blogPost.medium_url && (
+                    <div className="mb-6">
+                      <Button asChild variant="outline" className="border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-black">
+                        <a href={blogPost.medium_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                          <ExternalLink className="h-4 w-4" />
+                          Read Original on Medium
+                        </a>
+                      </Button>
+                    </div>
+                  )}
                 </header>
 
                 <div className="prose prose-invert prose-lg max-w-none">
@@ -128,6 +159,24 @@ const BlogPostPage = () => {
                 </div>
 
                 <footer className="mt-12 pt-8 border-t border-gray-700">
+                  <div className="flex flex-col sm:flex-row gap-4 justify-between items-center mb-8">
+                    <Button asChild variant="ghost" className="text-orange-500 hover:text-orange-400">
+                      <Link to="/blog" className="flex items-center gap-2">
+                        <ArrowLeft className="h-4 w-4" />
+                        Back to All Posts
+                      </Link>
+                    </Button>
+                    
+                    {blogPost.medium_url && (
+                      <Button asChild variant="outline" className="border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-black">
+                        <a href={blogPost.medium_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+                          <ExternalLink className="h-4 w-4" />
+                          Read on Medium
+                        </a>
+                      </Button>
+                    )}
+                  </div>
+                  
                   <div className="text-center">
                     <h3 className="text-2xl font-bold mb-4 text-white">Ready to Protect Your Reputation?</h3>
                     <p className="text-gray-300 mb-6">

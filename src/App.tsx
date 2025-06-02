@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from '@/hooks/useAuth';
 import { ThemeProvider } from '@/components/ui/theme-provider';
 import HomePage from "./pages/HomePage";
@@ -33,39 +34,41 @@ const App = () => {
   
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="dark" storageKey="aria-ui-theme">
-        <AuthProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/about" element={<AboutPage />} />
-                <Route path="/scan" element={<ScanPage />} />
-                <Route path="/simon-lindsay" element={<SimonLindsayPage />} />
-                <Route path="/blog" element={<BlogPage />} />
-                <Route path="/blog/:slug" element={<BlogPostPage />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/contact-sales" element={<ContactFormPage />} />
-                <Route path="/pricing" element={<PricingPage />} />
-                <Route path="/auth" element={<Authentication />} />
-                <Route path="/admin" element={<AdminDashboard />} />
-                <Route path="/admin/login" element={<Authentication />} />
-                <Route path="/admin/genesis-sentinel" element={<SentinelOperatorPage />} />
-                <Route path="/admin/persona-saturation" element={<PersonaSaturationPage />} />
-                <Route path="/admin/watchtower" element={<WatchtowerPage />} />
-                <Route path="/admin/intelligence-core" element={<IntelligenceCorePage />} />
-                <Route path="/admin/legal-ops" element={<AdminDashboard />} />
-                <Route path="/admin/clients" element={<ClientsPage />} />
-                <Route path="/admin/qa-testing" element={<QATestPage />} />
-                <Route path="/admin/settings" element={<SettingsPage />} />
-                <Route path="/admin/system-optimization" element={<SystemOptimizationPage />} />
-              </Routes>
-            </BrowserRouter>
-          </TooltipProvider>
-        </AuthProvider>
-      </ThemeProvider>
+      <HelmetProvider>
+        <ThemeProvider defaultTheme="dark" storageKey="aria-ui-theme">
+          <AuthProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/about" element={<AboutPage />} />
+                  <Route path="/scan" element={<ScanPage />} />
+                  <Route path="/simon-lindsay" element={<SimonLindsayPage />} />
+                  <Route path="/blog" element={<BlogPage />} />
+                  <Route path="/blog/:slug" element={<BlogPostPage />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/contact-sales" element={<ContactFormPage />} />
+                  <Route path="/pricing" element={<PricingPage />} />
+                  <Route path="/auth" element={<Authentication />} />
+                  <Route path="/admin" element={<AdminDashboard />} />
+                  <Route path="/admin/login" element={<Authentication />} />
+                  <Route path="/admin/genesis-sentinel" element={<SentinelOperatorPage />} />
+                  <Route path="/admin/persona-saturation" element={<PersonaSaturationPage />} />
+                  <Route path="/admin/watchtower" element={<WatchtowerPage />} />
+                  <Route path="/admin/intelligence-core" element={<IntelligenceCorePage />} />
+                  <Route path="/admin/legal-ops" element={<AdminDashboard />} />
+                  <Route path="/admin/clients" element={<ClientsPage />} />
+                  <Route path="/admin/qa-testing" element={<QATestPage />} />
+                  <Route path="/admin/settings" element={<SettingsPage />} />
+                  <Route path="/admin/system-optimization" element={<SystemOptimizationPage />} />
+                </Routes>
+              </BrowserRouter>
+            </TooltipProvider>
+          </AuthProvider>
+        </ThemeProvider>
+      </HelmetProvider>
     </QueryClientProvider>
   );
 };

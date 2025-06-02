@@ -1,10 +1,11 @@
 
 import React from 'react';
+import { Helmet } from 'react-helmet-async';
 import PublicLayout from "@/components/layout/PublicLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, User, ArrowRight } from "lucide-react";
+import { Calendar, User, ArrowRight, ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useBlogPosts } from "@/hooks/useBlogPosts";
 
@@ -14,6 +15,11 @@ const BlogPage = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-black text-white">
+        <Helmet>
+          <title>A.R.I.A™ Blog - Reputation Intelligence Insights</title>
+          <meta name="description" content="Expert insights on reputation intelligence, digital security, and crisis prevention from A.R.I.A™ team." />
+          <meta name="keywords" content="reputation intelligence, digital security, crisis prevention, A.R.I.A, blog, insights" />
+        </Helmet>
         <PublicLayout>
           <div className="py-16">
             <div className="container mx-auto px-6">
@@ -39,6 +45,10 @@ const BlogPage = () => {
   if (error) {
     return (
       <div className="min-h-screen bg-black text-white">
+        <Helmet>
+          <title>A.R.I.A™ Blog - Reputation Intelligence Insights</title>
+          <meta name="description" content="Expert insights on reputation intelligence, digital security, and crisis prevention from A.R.I.A™ team." />
+        </Helmet>
         <PublicLayout>
           <div className="py-16">
             <div className="container mx-auto px-6">
@@ -62,6 +72,17 @@ const BlogPage = () => {
 
   return (
     <div className="min-h-screen bg-black text-white">
+      <Helmet>
+        <title>A.R.I.A™ Blog - Reputation Intelligence Insights</title>
+        <meta name="description" content="Expert insights on reputation intelligence, digital security, and crisis prevention from A.R.I.A™ team." />
+        <meta name="keywords" content="reputation intelligence, digital security, crisis prevention, A.R.I.A, blog, insights, Simon Lindsay" />
+        <meta property="og:title" content="A.R.I.A™ Blog - Reputation Intelligence Insights" />
+        <meta property="og:description" content="Expert insights on reputation intelligence, digital security, and crisis prevention from A.R.I.A™ team." />
+        <meta property="og:url" content={`${window.location.origin}/blog`} />
+        <meta property="og:type" content="website" />
+        <link rel="canonical" href={`${window.location.origin}/blog`} />
+      </Helmet>
+      
       <PublicLayout>
         <div className="py-16">
           <div className="container mx-auto px-6">
@@ -86,6 +107,11 @@ const BlogPage = () => {
                           <Badge variant="secondary" className="bg-orange-500 text-black">
                             {post.category}
                           </Badge>
+                          {post.medium_url && (
+                            <Badge variant="outline" className="border-blue-500 text-blue-400">
+                              Available on Medium
+                            </Badge>
+                          )}
                         </div>
                         <CardTitle className="text-2xl text-white hover:text-orange-500 transition-colors">
                           <Link to={`/blog/${post.slug}`}>
@@ -108,11 +134,21 @@ const BlogPage = () => {
                               {post.author}
                             </div>
                           </div>
-                          <Button asChild variant="ghost" className="text-orange-500 hover:text-orange-400 hover:bg-gray-700">
-                            <Link to={`/blog/${post.slug}`} className="flex items-center gap-1">
-                              Read More <ArrowRight className="h-4 w-4" />
-                            </Link>
-                          </Button>
+                          <div className="flex gap-2">
+                            {post.medium_url && (
+                              <Button asChild variant="outline" size="sm" className="border-blue-500 text-blue-400 hover:bg-blue-500 hover:text-white">
+                                <a href={post.medium_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1">
+                                  <ExternalLink className="h-3 w-3" />
+                                  Medium
+                                </a>
+                              </Button>
+                            )}
+                            <Button asChild variant="ghost" className="text-orange-500 hover:text-orange-400 hover:bg-gray-700">
+                              <Link to={`/blog/${post.slug}`} className="flex items-center gap-1">
+                                Read More <ArrowRight className="h-4 w-4" />
+                              </Link>
+                            </Button>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
