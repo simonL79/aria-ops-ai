@@ -127,15 +127,18 @@ const PersonaSaturationPanel = () => {
       setCurrentCampaign(campaign);
       setAllCampaigns(prev => [campaign, ...prev]);
 
-      // Store campaign in scan_results table for persistence
+      // Store campaign in scan_results table using correct column names
       try {
         await supabase
           .from('scan_results')
           .insert({
-            entity_name: entityName,
-            scan_type: 'persona_saturation',
-            source_type: 'aria_deployment',
+            platform: 'A.R.I.A Persona Saturation',
             content: JSON.stringify(campaign),
+            url: '',
+            severity: 'low',
+            status: 'new',
+            threat_type: 'persona_saturation_campaign',
+            source_type: 'aria_deployment',
             confidence_score: campaign.serpPenetration,
             created_by: (await supabase.auth.getUser()).data.user?.id
           });
