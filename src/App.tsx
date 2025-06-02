@@ -1,9 +1,8 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from '@/hooks/useAuth';
 import { ThemeProvider } from '@/components/ui/theme-provider';
@@ -26,10 +25,11 @@ import PersonaSaturationPage from "./pages/admin/PersonaSaturationPage";
 import Contact from "./pages/Contact";
 import ContactFormPage from "./pages/ContactFormPage";
 import PricingPage from "./pages/PricingPage";
+import GenesisSentinel from "@/pages/admin/GenesisSentinel";
 
 const queryClient = new QueryClient();
 
-const App = () => {
+function App() {
   console.log('🔄 App component rendering');
   
   return (
@@ -40,7 +40,7 @@ const App = () => {
             <TooltipProvider>
               <Toaster />
               <Sonner />
-              <BrowserRouter>
+              <Router>
                 <Routes>
                   <Route path="/" element={<HomePage />} />
                   <Route path="/about" element={<AboutPage />} />
@@ -54,7 +54,7 @@ const App = () => {
                   <Route path="/auth" element={<Authentication />} />
                   <Route path="/admin" element={<AdminDashboard />} />
                   <Route path="/admin/login" element={<Authentication />} />
-                  <Route path="/admin/genesis-sentinel" element={<SentinelOperatorPage />} />
+                  <Route path="/admin/genesis-sentinel" element={<GenesisSentinel />} />
                   <Route path="/admin/persona-saturation" element={<PersonaSaturationPage />} />
                   <Route path="/admin/watchtower" element={<WatchtowerPage />} />
                   <Route path="/admin/intelligence-core" element={<IntelligenceCorePage />} />
@@ -64,13 +64,13 @@ const App = () => {
                   <Route path="/admin/settings" element={<SettingsPage />} />
                   <Route path="/admin/system-optimization" element={<SystemOptimizationPage />} />
                 </Routes>
-              </BrowserRouter>
+              </Router>
             </TooltipProvider>
           </AuthProvider>
         </ThemeProvider>
       </HelmetProvider>
     </QueryClientProvider>
   );
-};
+}
 
 export default App;
