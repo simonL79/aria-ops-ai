@@ -9,7 +9,7 @@ const EnhancedFooter = () => {
 
   const handleAdminAccess = () => {
     if (isAuthenticated && isAdmin) {
-      navigate('/dashboard');
+      navigate('/admin');
     } else {
       navigate('/admin/login');
     }
