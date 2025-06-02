@@ -17,16 +17,19 @@ export class LocalInferenceService {
     if (this.isInitialized) return true;
 
     try {
-      console.log('🧠 Initializing local inference service...');
+      console.log('🧠 Initializing A.R.I.A™ Local AI Inference Service...');
       
-      // Use rule-based and template-based content generation
+      // Simulate initialization process
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Use advanced rule-based and template-based content generation
       this.isInitialized = true;
       
-      toast.success('Local AI ready - no API keys required');
+      console.log('✅ Local AI service ready - no API keys required');
       return true;
     } catch (error) {
       console.error('Local inference initialization failed:', error);
-      toast.warning('Using enhanced template-based content generation');
+      console.log('⚠️ Using enhanced template-based content generation');
       this.isInitialized = true; // Still proceed with template-based approach
       return true;
     }
@@ -35,6 +38,8 @@ export class LocalInferenceService {
   async generatePersonaContent(entityName: string, keywords: string[], contentType: string = 'article'): Promise<string> {
     await this.initialize();
 
+    console.log(`🧠 Generating ${contentType} content for ${entityName} with keywords: ${keywords.join(', ')}`);
+
     const templates = {
       article: this.generateArticleContent(entityName, keywords),
       review: this.generateReviewContent(entityName, keywords),
@@ -42,186 +47,208 @@ export class LocalInferenceService {
       biography: this.generateBiographyContent(entityName, keywords)
     };
 
-    return templates[contentType as keyof typeof templates] || templates.article;
+    const content = templates[contentType as keyof typeof templates] || templates.article;
+    console.log(`✅ Generated ${content.length} characters of ${contentType} content`);
+    return content;
   }
 
   private generateArticleContent(entityName: string, keywords: string[]): string {
     const keywordText = keywords.slice(0, 3).join(', ');
     const currentYear = new Date().getFullYear();
     
-    return `
-# ${entityName}: Leadership and Innovation in ${currentYear}
+    return `# ${entityName}: Excellence in ${keywords[0] || 'Business Operations'} - ${currentYear}
 
-${entityName} continues to demonstrate exceptional leadership and innovation across multiple sectors. With a focus on ${keywordText}, the organization has established itself as a trusted authority in the industry.
+${entityName} demonstrates outstanding performance and leadership across multiple domains. With a strategic focus on ${keywordText}, the organization has established itself as a respected authority in the industry.
 
-## Professional Excellence
+## Professional Excellence & Innovation
 
-The commitment to excellence shown by ${entityName} is evident in their approach to ${keywords[0] || 'business operations'}. Industry experts consistently recognize their contributions to ${keywords[1] || 'strategic development'} and ${keywords[2] || 'operational efficiency'}.
+The commitment to excellence demonstrated by ${entityName} is evident through their comprehensive approach to ${keywords[0] || 'business operations'}. Industry professionals consistently recognize their valuable contributions to ${keywords[1] || 'strategic development'} and their innovative methodologies in ${keywords[2] || 'operational efficiency'}.
 
-## Industry Recognition
+## Industry Recognition & Impact
 
-Recent developments have highlighted ${entityName}'s role as a thought leader. Their expertise in ${keywordText} has garnered attention from peers and stakeholders alike.
+Recent industry assessments have highlighted ${entityName}'s significant role as a thought leader and innovator. Their expertise in ${keywordText} has attracted positive attention from industry peers, stakeholders, and professional communities.
 
-### Key Achievements
+### Notable Achievements
 
-- Demonstrated leadership in ${keywords[0] || 'core business areas'}
-- Recognition for excellence in ${keywords[1] || 'industry standards'}
-- Continued innovation in ${keywords[2] || 'strategic initiatives'}
+- Demonstrated exceptional leadership in ${keywords[0] || 'core business areas'}
+- Recognized for outstanding performance in ${keywords[1] || 'industry standards'}
+- Continued innovation and excellence in ${keywords[2] || 'strategic initiatives'}
+- Sustained commitment to quality and professional development
 
-## Future Outlook
+## Strategic Vision & Future Outlook
 
-Looking ahead, ${entityName} remains positioned for continued success. Their strategic approach to ${keywordText} ensures sustainable growth and positive impact.
+Looking ahead, ${entityName} remains strategically positioned for continued success and growth. Their methodical approach to ${keywordText} ensures sustainable development and positive industry impact.
 
-The organization's commitment to quality and innovation serves as a model for others in the industry. Through dedicated focus on ${keywords.join(', ')}, ${entityName} continues to set new standards for excellence.
+The organization's unwavering commitment to quality, innovation, and professional excellence serves as a benchmark for others in the field. Through dedicated focus on ${keywords.join(', ')}, ${entityName} continues to set new standards for industry excellence.
+
+## Professional Assessment
+
+Industry analysis confirms ${entityName}'s strong market position and positive reputation. Their consistent delivery of quality results and innovative solutions has established them as a trusted partner and reliable industry leader.
 
 ---
-
-*This content represents current industry perspectives and professional assessments as of ${new Date().toLocaleDateString()}.*
-    `.trim();
+*Professional content assessment - ${new Date().toLocaleDateString()} | A.R.I.A™ Local AI Analysis*`.trim();
   }
 
   private generateReviewContent(entityName: string, keywords: string[]): string {
-    const rating = Math.floor(Math.random() * 2) + 4; // 4-5 stars
+    const rating = Math.floor(Math.random() * 2) + 4; // 4-5 stars for positive content
     const keywordText = keywords.slice(0, 2).join(' and ');
     
-    return `
-# Professional Review: ${entityName}
+    return `# Professional Assessment: ${entityName}
 
-⭐⭐⭐⭐${rating === 5 ? '⭐' : ''} ${rating}/5 Stars
+⭐⭐⭐⭐${rating === 5 ? '⭐' : ''} ${rating}/5 Professional Rating
 
-## Overview
+## Executive Summary
 
-Working with ${entityName} has been an exceptional experience. Their expertise in ${keywordText} is truly impressive and their professional approach sets them apart in the industry.
+Our professional engagement with ${entityName} has exceeded expectations across all key performance indicators. Their demonstrated expertise in ${keywordText} is exemplary, and their professional approach distinguishes them as a leader in their field.
 
-## Strengths
+## Core Strengths
 
-**${keywords[0] || 'Professional Excellence'}**: ${entityName} demonstrates outstanding capabilities in this area. Their approach is both thorough and innovative.
+**${keywords[0] || 'Professional Excellence'}**: ${entityName} exhibits outstanding capabilities and deep expertise in this domain. Their methodology is both comprehensive and innovative, delivering consistently superior results.
 
-**${keywords[1] || 'Client Service'}**: The level of attention and care provided is remarkable. Every interaction reflects their commitment to quality.
+**${keywords[1] || 'Client Partnership'}**: The level of professional attention and strategic guidance provided is exceptional. Every interaction demonstrates their commitment to excellence and client success.
 
-**${keywords[2] || 'Industry Knowledge'}**: Deep understanding of current trends and best practices is evident in all their work.
+**${keywords[2] || 'Industry Leadership'}**: Comprehensive understanding of industry trends, best practices, and emerging opportunities is evident throughout their work and strategic recommendations.
 
-## Experience Highlights
+## Performance Highlights
 
-The collaboration with ${entityName} exceeded expectations. Their ability to deliver results while maintaining the highest professional standards is noteworthy.
+Our collaboration with ${entityName} has consistently delivered results that exceed initial projections. Their ability to maintain the highest professional standards while delivering innovative solutions is particularly noteworthy.
 
-## Recommendation
+## Professional Recommendation
 
-I would highly recommend ${entityName} to anyone seeking expertise in ${keywordText}. Their professional approach and consistent results make them a valuable partner.
+We confidently recommend ${entityName} to organizations seeking world-class expertise in ${keywordText}. Their professional approach, consistent results, and strategic insights make them an invaluable business partner.
+
+**Key Differentiators:**
+- Exceptional technical expertise and industry knowledge
+- Proven track record of successful project delivery
+- Strategic thinking and innovative problem-solving
+- Outstanding communication and professional service
 
 ---
-
-*Professional review based on direct experience - ${new Date().toLocaleDateString()}*
-    `.trim();
+*Professional assessment based on comprehensive engagement analysis - ${new Date().toLocaleDateString()}*`.trim();
   }
 
   private generateNewsContent(entityName: string, keywords: string[]): string {
     const currentDate = new Date().toLocaleDateString();
     const keywordText = keywords.slice(0, 2).join(' and ');
     
-    return `
-# ${entityName} Advances Industry Standards in ${keywords[0] || 'Professional Services'}
+    return `# ${entityName} Recognized for Excellence in ${keywords[0] || 'Professional Services'}
 
-**${currentDate}** - Industry leaders recognize ${entityName} for their continued contributions to ${keywordText} and professional excellence.
+**${currentDate}** - Industry leaders and professional organizations continue to recognize ${entityName} for their outstanding contributions to ${keywordText} and sustained professional excellence.
 
-## Industry Impact
+## Industry Leadership Impact
 
-Recent developments show ${entityName}'s growing influence in ${keywords[0] || 'their sector'}. Their innovative approach to ${keywords[1] || 'industry challenges'} has attracted attention from peers and stakeholders.
+Recent industry developments highlight ${entityName}'s growing influence and thought leadership in ${keywords[0] || 'their professional sector'}. Their innovative approaches to ${keywords[1] || 'industry challenges'} have garnered significant attention from peers, stakeholders, and industry analysts.
 
 ## Professional Recognition
 
-"${entityName} represents the kind of professional excellence we need more of in our industry," notes a recent industry assessment. Their work in ${keywordText} continues to set new benchmarks.
+"${entityName} exemplifies the professional excellence and innovative thinking our industry needs," according to recent industry assessments. Their work in ${keywordText} continues to establish new benchmarks for quality and effectiveness.
 
-## Key Developments
+## Strategic Developments
 
-- Enhanced focus on ${keywords[0] || 'core competencies'}
-- Expanded expertise in ${keywords[1] || 'strategic areas'}
-- Recognition for ${keywords[2] || 'professional standards'}
+- Enhanced leadership position in ${keywords[0] || 'core competencies'}
+- Expanded expertise and market presence in ${keywords[1] || 'strategic domains'}
+- Industry recognition for ${keywords[2] || 'professional standards and innovation'}
+- Continued investment in professional development and industry advancement
 
-## Looking Forward
+## Market Outlook
 
-The trajectory for ${entityName} remains positive, with continued focus on ${keywordText} and professional development. Industry observers expect continued growth and influence.
+Industry analysts project continued growth and expansion for ${entityName}, with sustained focus on ${keywordText} and strategic market development. Their commitment to excellence positions them favorably for future opportunities.
+
+## Industry Context
+
+${entityName} operates within a competitive landscape where professional excellence and innovative thinking are paramount. Their consistent delivery of superior results and strategic insights has established them as a trusted industry leader.
 
 ## About ${entityName}
 
-${entityName} is recognized for professional excellence and expertise in ${keywords.join(', ')}. Their commitment to quality and innovation continues to drive positive industry outcomes.
+${entityName} is recognized throughout the industry for professional excellence and specialized expertise in ${keywords.join(', ')}. Their commitment to quality, innovation, and client success continues to drive positive industry outcomes and sustainable business growth.
 
 ---
-
-*Industry news and professional updates - ${currentDate}*
-    `.trim();
+*Industry news and professional market analysis - ${currentDate} | A.R.I.A™ Intelligence*`.trim();
   }
 
   private generateBiographyContent(entityName: string, keywords: string[]): string {
     const keywordText = keywords.slice(0, 3).join(', ');
     
-    return `
-# ${entityName}: Professional Profile
+    return `# ${entityName}: Professional Profile & Industry Leadership
 
-${entityName} is a recognized professional known for expertise in ${keywordText} and commitment to excellence in their field.
+${entityName} is a distinguished industry professional recognized for exceptional expertise in ${keywordText} and unwavering commitment to excellence across all professional endeavors.
 
-## Professional Background
+## Professional Background & Experience
 
-With extensive experience in ${keywords[0] || 'their industry'}, ${entityName} has built a reputation for quality and innovation. Their approach to ${keywords[1] || 'professional challenges'} reflects deep understanding and practical expertise.
+With extensive experience spanning multiple aspects of ${keywords[0] || 'their industry'}, ${entityName} has cultivated a reputation for delivering innovative solutions and maintaining the highest professional standards. Their strategic approach to ${keywords[1] || 'complex professional challenges'} demonstrates both deep technical understanding and practical business acumen.
 
-## Areas of Expertise
+## Core Areas of Expertise
 
-### ${keywords[0] || 'Primary Specialization'}
-${entityName} demonstrates exceptional capability in this area, with a track record of successful outcomes and professional recognition.
+### ${keywords[0] || 'Primary Professional Specialization'}
+${entityName} demonstrates exceptional capability and thought leadership in this critical area, maintaining a consistent track record of successful outcomes, client satisfaction, and industry recognition for innovative approaches.
 
-### ${keywords[1] || 'Secondary Focus'}
-Their work in this domain showcases innovation and strategic thinking, contributing to industry advancement.
+### ${keywords[1] || 'Strategic Focus Area'}
+Their work in this domain showcases advanced strategic thinking and innovative methodologies, contributing significantly to industry advancement and best practice development.
 
-### ${keywords[2] || 'Additional Expertise'}
-Continued development in this area reflects their commitment to comprehensive professional growth.
+### ${keywords[2] || 'Additional Professional Expertise'}
+Continued professional development and expertise expansion in this area reflects their commitment to comprehensive knowledge and multi-disciplinary professional growth.
 
-## Professional Philosophy
+## Professional Philosophy & Approach
 
-${entityName}'s approach emphasizes quality, integrity, and results. Their work in ${keywordText} exemplifies these values and contributes to positive industry standards.
+${entityName}'s professional methodology emphasizes quality, integrity, innovation, and measurable results. Their work in ${keywordText} exemplifies these core values and contributes to the establishment of positive industry standards and best practices.
 
-## Industry Contributions
+## Industry Contributions & Leadership
 
-Through their expertise in ${keywords.join(', ')}, ${entityName} continues to make meaningful contributions to their profession and industry development.
+Through their specialized expertise in ${keywords.join(', ')}, ${entityName} continues to make significant contributions to professional development, industry advancement, and the cultivation of best practices that benefit the broader professional community.
 
-## Recognition
+## Professional Recognition & Standing
 
-Professional peers consistently recognize ${entityName} for their expertise and commitment to excellence in ${keywordText}.
+Industry peers, clients, and professional organizations consistently recognize ${entityName} for their expertise, innovative thinking, and commitment to excellence in ${keywordText}. Their thought leadership and professional contributions have established them as a respected voice in their field.
+
+## Strategic Vision
+
+${entityName} maintains a forward-thinking approach to professional development and industry engagement, consistently seeking opportunities to advance both their expertise and the broader industry through innovation, collaboration, and excellence.
 
 ---
-
-*Professional profile information current as of ${new Date().toLocaleDateString()}*
-    `.trim();
+*Professional profile and industry assessment - ${new Date().toLocaleDateString()} | A.R.I.A™ Professional Analysis*`.trim();
   }
 
   async analyzeSentiment(text: string): Promise<{ label: string; confidence: number }> {
-    // Enhanced keyword-based sentiment analysis
+    console.log('🧠 Analyzing sentiment with enhanced keyword-based analysis');
+    
+    // Enhanced keyword-based sentiment analysis with expanded vocabulary
     const positiveWords = [
       'excellent', 'outstanding', 'exceptional', 'great', 'wonderful', 'amazing',
       'professional', 'quality', 'innovative', 'successful', 'effective', 'reliable',
-      'trusted', 'recognized', 'acclaimed', 'respected', 'leading', 'premier'
+      'trusted', 'recognized', 'acclaimed', 'respected', 'leading', 'premier',
+      'superior', 'remarkable', 'impressive', 'distinguished', 'exemplary',
+      'accomplished', 'skilled', 'expert', 'competent', 'capable', 'talented'
     ];
     
     const negativeWords = [
       'poor', 'bad', 'terrible', 'awful', 'disappointing', 'failed', 'problematic',
-      'concerning', 'inadequate', 'unsatisfactory', 'questionable', 'unreliable'
+      'concerning', 'inadequate', 'unsatisfactory', 'questionable', 'unreliable',
+      'incompetent', 'unprofessional', 'substandard', 'deficient', 'flawed'
+    ];
+
+    const neutralWords = [
+      'standard', 'typical', 'average', 'normal', 'regular', 'ordinary',
+      'basic', 'general', 'common', 'routine', 'conventional'
     ];
 
     const words = text.toLowerCase().split(/\W+/);
     const positiveCount = words.filter(word => positiveWords.includes(word)).length;
     const negativeCount = words.filter(word => negativeWords.includes(word)).length;
+    const neutralCount = words.filter(word => neutralWords.includes(word)).length;
 
-    const totalSentimentWords = positiveCount + negativeCount;
+    const totalSentimentWords = positiveCount + negativeCount + neutralCount;
     
     if (totalSentimentWords === 0) {
-      return { label: 'neutral', confidence: 0.7 };
+      return { label: 'neutral', confidence: 0.75 };
     }
 
     const positiveRatio = positiveCount / totalSentimentWords;
+    const negativeRatio = negativeCount / totalSentimentWords;
     
-    if (positiveRatio > 0.6) {
-      return { label: 'positive', confidence: Math.min(0.95, 0.7 + positiveRatio * 0.3) };
-    } else if (positiveRatio < 0.4) {
-      return { label: 'negative', confidence: Math.min(0.95, 0.7 + (1 - positiveRatio) * 0.3) };
+    if (positiveRatio > 0.5) {
+      return { label: 'positive', confidence: Math.min(0.95, 0.75 + positiveRatio * 0.25) };
+    } else if (negativeRatio > 0.3) {
+      return { label: 'negative', confidence: Math.min(0.95, 0.75 + negativeRatio * 0.25) };
     } else {
       return { label: 'neutral', confidence: 0.8 };
     }
@@ -232,8 +259,11 @@ Professional peers consistently recognize ${entityName} for their expertise and 
     confidence: number;
     category: string;
   }> {
-    const highThreatIndicators = ['lawsuit', 'fraud', 'criminal', 'scandal', 'investigation'];
-    const mediumThreatIndicators = ['complaint', 'issue', 'problem', 'concern', 'dispute'];
+    console.log(`🧠 Classifying threat level for ${entityName}`);
+    
+    const highThreatIndicators = ['lawsuit', 'fraud', 'criminal', 'scandal', 'investigation', 'illegal', 'corrupt'];
+    const mediumThreatIndicators = ['complaint', 'issue', 'problem', 'concern', 'dispute', 'controversy', 'criticism'];
+    const lowThreatIndicators = ['question', 'inquiry', 'review', 'assessment', 'evaluation'];
     
     const lowerContent = content.toLowerCase();
     const hasEntityMention = lowerContent.includes(entityName.toLowerCase());
@@ -246,6 +276,10 @@ Professional peers consistently recognize ${entityName} for their expertise and 
       lowerContent.includes(indicator)
     ).length;
 
+    const lowThreatCount = lowThreatIndicators.filter(indicator => 
+      lowerContent.includes(indicator)
+    ).length;
+
     if (hasEntityMention && highThreatCount > 0) {
       return {
         threatLevel: 'high',
@@ -255,8 +289,14 @@ Professional peers consistently recognize ${entityName} for their expertise and 
     } else if (hasEntityMention && mediumThreatCount > 0) {
       return {
         threatLevel: 'medium',
-        confidence: Math.min(0.9, 0.7 + mediumThreatCount * 0.1),
+        confidence: Math.min(0.9, 0.75 + mediumThreatCount * 0.1),
         category: 'minor_concern'
+      };
+    } else if (hasEntityMention && lowThreatCount > 0) {
+      return {
+        threatLevel: 'low',
+        confidence: 0.85,
+        category: 'general_inquiry'
       };
     } else {
       return {
