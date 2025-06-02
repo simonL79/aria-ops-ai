@@ -100,57 +100,9 @@ const ServicesSection = () => {
             Get a comprehensive assessment of your digital risk profile. Our experts will identify vulnerabilities and provide a strategic roadmap.
           </p>
           
-          {/* Updated Form */}
-          <div className="max-w-md mx-auto space-y-4">
-            <div>
-              <label className="block text-white text-left mb-2">Full Name</label>
-              <input 
-                type="text" 
-                placeholder="Enter your full name"
-                className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-orange-500 focus:outline-none"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-white text-left mb-2">Corporate Email</label>
-              <input 
-                type="email" 
-                placeholder="your.email@company.com"
-                className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-orange-500 focus:outline-none"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-white text-left mb-2">Company</label>
-              <input 
-                type="text" 
-                placeholder="Your company name"
-                className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-orange-500 focus:outline-none"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-white text-left mb-2">Phone Number</label>
-              <input 
-                type="tel" 
-                placeholder="+1 (555) 123-4567"
-                className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-orange-500 focus:outline-none"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-white text-left mb-2">Social Media</label>
-              <input 
-                type="text" 
-                placeholder="@username or profile URL"
-                className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:border-orange-500 focus:outline-none"
-              />
-            </div>
-            
-            <button className="w-full bg-orange-500 hover:bg-orange-600 text-white px-12 py-4 text-lg font-medium rounded-lg mt-6 transition-colors">
-              Request Your Assessment →
-            </button>
-          </div>
+          <button className="bg-orange-500 hover:bg-orange-600 text-white px-12 py-4 text-lg font-medium rounded-lg transition-colors">
+            Request Your Assessment →
+          </button>
         </div>
       </div>
     </section>
