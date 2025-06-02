@@ -127,15 +127,16 @@ const PersonaSaturationPanel = () => {
       setCurrentCampaign(campaign);
       setAllCampaigns(prev => [campaign, ...prev]);
 
-      // Store campaign in database for persistence
+      // Store campaign in scan_results table for persistence
       try {
         await supabase
-          .from('persona_deployments')
+          .from('scan_results')
           .insert({
             entity_name: entityName,
-            campaign_data: campaign,
-            deployment_urls: data.deploymentUrls || [],
-            status: 'completed',
+            scan_type: 'persona_saturation',
+            source_type: 'aria_deployment',
+            content: JSON.stringify(campaign),
+            confidence_score: campaign.serpPenetration,
             created_by: (await supabase.auth.getUser()).data.user?.id
           });
       } catch (dbError) {
@@ -174,23 +175,23 @@ const PersonaSaturationPanel = () => {
 
       <Tabs defaultValue="configure" className="space-y-6">
         <TabsList className="grid w-full grid-cols-5 bg-gray-900 border border-gray-800">
-          <TabsTrigger value="configure" className="data-[state=active]:bg-amber-500 data-[state=active]:text-black text-gray-300">
+          <TabsTrigger value="configure" className="data-[state=active]:bg-green-500 data-[state=active]:text-black text-gray-300">
             <Settings className="h-4 w-4 mr-2" />
             Configure
           </TabsTrigger>
-          <TabsTrigger value="sources" className="data-[state=active]:bg-amber-500 data-[state=active]:text-black text-gray-300">
+          <TabsTrigger value="sources" className="data-[state=active]:bg-green-500 data-[state=active]:text-black text-gray-300">
             <Database className="h-4 w-4 mr-2" />
             Live Sources
           </TabsTrigger>
-          <TabsTrigger value="reviews" className="data-[state=active]:bg-amber-500 data-[state=active]:text-black text-gray-300">
+          <TabsTrigger value="reviews" className="data-[state=active]:bg-green-500 data-[state=active]:text-black text-gray-300">
             <FileText className="h-4 w-4 mr-2" />
             Review Generator
           </TabsTrigger>
-          <TabsTrigger value="monitor" className="data-[state=active]:bg-amber-500 data-[state=active]:text-black text-gray-300">
+          <TabsTrigger value="monitor" className="data-[state=active]:bg-green-500 data-[state=active]:text-black text-gray-300">
             <Monitor className="h-4 w-4 mr-2" />
             Monitor
           </TabsTrigger>
-          <TabsTrigger value="deploy" className="data-[state=active]:bg-amber-500 data-[state=active]:text-black text-gray-300">
+          <TabsTrigger value="deploy" className="data-[state=active]:bg-green-500 data-[state=active]:text-black text-gray-300">
             <Globe className="h-4 w-4 mr-2" />
             Deploy
           </TabsTrigger>
