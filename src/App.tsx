@@ -23,6 +23,7 @@ import WatchtowerPage from "./pages/admin/WatchtowerPage";
 import IntelligenceCorePage from "./pages/admin/IntelligenceCorePage";
 import PersonaSaturationPage from "./pages/admin/PersonaSaturationPage";
 import Contact from "./pages/Contact";
+import ContactFormPage from "./pages/ContactFormPage";
 import PricingPage from "./pages/PricingPage";
 
 const queryClient = new QueryClient();
@@ -46,6 +47,7 @@ const App = () => {
                 <Route path="/blog" element={<BlogPage />} />
                 <Route path="/blog/:slug" element={<BlogPostPage />} />
                 <Route path="/contact" element={<Contact />} />
+                <Route path="/contact-sales" element={<ContactFormPage />} />
                 <Route path="/pricing" element={<PricingPage />} />
                 <Route path="/auth" element={<Authentication />} />
                 <Route path="/admin" element={<AdminDashboard />} />

@@ -25,7 +25,7 @@ const contactFormSchema = z.object({
   companyName: z.string().min(2, { message: "Company name must be at least 2 characters" }),
   email: z.string().email({ message: "Please enter a valid email address" }),
   phoneNumber: z.string().min(10, { message: "Please enter a valid phone number" }),
-  description: z.string().min(10, { message: "Please provide at least 10 characters" }).max(500, { message: "Description must not exceed 500 characters" }),
+  description: z.string().min(10, { message: "Please provide at least 10 characters" }).max(3000, { message: "Description must not exceed 3000 characters (approximately 500 words)" }),
 });
 
 type ContactFormData = z.infer<typeof contactFormSchema>;
@@ -79,6 +79,13 @@ const ContactFormPage = () => {
       setIsSubmitting(false);
     }
   };
+
+  const getWordCount = (text: string) => {
+    return text.trim().split(/\s+/).filter(word => word.length > 0).length;
+  };
+
+  const descriptionValue = form.watch('description');
+  const wordCount = getWordCount(descriptionValue);
 
   return (
     <PublicLayout>
@@ -195,15 +202,15 @@ const ContactFormPage = () => {
                         <FormControl>
                           <Textarea 
                             placeholder="Please describe your reputation monitoring needs, any specific concerns, or questions you have about our services. Include details about your industry, company size, and what you're looking to achieve..."
-                            className="min-h-[150px] bg-black/50 border-gray-600 text-white placeholder-gray-400 focus:border-orange-500 resize-none" 
-                            maxLength={500}
+                            className="min-h-[200px] bg-black/50 border-gray-600 text-white placeholder-gray-400 focus:border-orange-500 resize-none" 
+                            maxLength={3000}
                             {...field} 
                           />
                         </FormControl>
                         <div className="flex justify-between text-sm">
                           <FormMessage />
                           <span className="text-gray-400">
-                            {field.value.length}/500 characters
+                            {wordCount}/500 words ({field.value.length}/3000 characters)
                           </span>
                         </div>
                       </FormItem>
