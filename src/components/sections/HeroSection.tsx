@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { Star, Shield, Check } from 'lucide-react';
+import { Star, Shield } from 'lucide-react';
 import Logo from '../ui/logo';
 
 const HeroSection = () => {
@@ -72,7 +72,11 @@ const HeroSection = () => {
               </div>
               
               <div className="flex items-center gap-2 mt-4 justify-center">
-                <Check className="h-5 w-5 text-blue-500" />
+                <img 
+                  src="/lovable-uploads/cf3113a6-304c-4988-ba15-a87157313c78.png" 
+                  alt="Verified" 
+                  className="h-5 w-5"
+                />
                 <span className="text-sm text-white">Social Media Verified</span>
               </div>
             </div>
