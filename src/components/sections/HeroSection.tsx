@@ -3,6 +3,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Star } from 'lucide-react';
+import Logo from '../ui/logo';
 
 const HeroSection = () => {
   return (
@@ -10,6 +11,10 @@ const HeroSection = () => {
       <div className="container mx-auto px-6 relative z-10 w-full">
         <div className="grid lg:grid-cols-2 gap-16 items-center max-w-7xl mx-auto">
           <div className="space-y-8 text-center">
+            <div className="flex justify-center mb-8">
+              <Logo variant="light" size="xl" />
+            </div>
+            
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-light leading-tight text-foreground">
               Elevate Your <span className="text-orange-500">Digital</span>
               <br />
