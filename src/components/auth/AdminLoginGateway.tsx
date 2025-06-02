@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Shield, Eye, EyeOff, AlertTriangle, CheckCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 interface AdminLoginGatewayProps {
   onComplete: (success: boolean) => void;
@@ -18,6 +19,7 @@ const AdminLoginGateway = ({ onComplete }: AdminLoginGatewayProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [systemStatus, setSystemStatus] = useState<'checking' | 'operational' | 'degraded'>('checking');
+  const navigate = useNavigate();
 
   useEffect(() => {
     checkSystemStatus();
@@ -59,12 +61,15 @@ const AdminLoginGateway = ({ onComplete }: AdminLoginGatewayProps) => {
     setIsLoading(true);
 
     try {
+      console.log('🔐 Admin login attempt for:', email);
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
       
       if (error) {
+        console.error('❌ Login error:', error);
         await logAdminAction('login_failed', `Failed login attempt for ${email}: ${error.message}`);
         toast.error('Login failed: ' + error.message);
         onComplete(false);
@@ -72,12 +77,19 @@ const AdminLoginGateway = ({ onComplete }: AdminLoginGatewayProps) => {
       }
 
       if (data?.user) {
+        console.log('✅ Login successful, user:', data.user.email);
         await logAdminAction('login_success', `Successful admin login for ${email}`);
-        toast.success('Admin access granted');
-        onComplete(true);
+        toast.success('Admin access granted - redirecting...');
+        
+        // Force navigation to admin dashboard
+        setTimeout(() => {
+          console.log('🔄 Redirecting to admin dashboard...');
+          navigate('/admin', { replace: true });
+          onComplete(true);
+        }, 1000);
       }
     } catch (error: any) {
-      console.error('Login error:', error);
+      console.error('❌ Login exception:', error);
       await logAdminAction('login_error', `Login error for ${email}: ${error.message}`);
       toast.error('Login failed');
       onComplete(false);
