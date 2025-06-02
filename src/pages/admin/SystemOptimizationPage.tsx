@@ -7,8 +7,8 @@ import SystemOptimizationDashboard from '@/components/admin/SystemOptimizationDa
 const SystemOptimizationPage = () => {
   return (
     <DashboardLayout>
-      <ResponsiveLayout className="bg-corporate-dark min-h-screen">
-        <div className="container mx-auto py-6">
+      <ResponsiveLayout className="bg-black min-h-screen">
+        <div className="container mx-auto py-6 bg-black text-white">
           <SystemOptimizationDashboard />
         </div>
       </ResponsiveLayout>

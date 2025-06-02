@@ -16,7 +16,7 @@ const IntelligenceCorePage = () => {
         <meta name="description" content="Advanced AI-powered threat analysis and intelligence processing" />
       </Helmet>
       
-      <div className="space-y-6">
+      <div className="space-y-6 bg-black text-white min-h-screen">
         {/* Live Intelligence Dashboard */}
         <LiveIntelligenceDashboard />
         

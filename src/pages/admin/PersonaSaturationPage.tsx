@@ -12,7 +12,9 @@ const PersonaSaturationPage = () => {
         <meta name="description" content="Advanced persona saturation and content deployment system" />
       </Helmet>
       
-      <PersonaSaturationPanel />
+      <div className="bg-black text-white min-h-screen">
+        <PersonaSaturationPanel />
+      </div>
     </DashboardLayout>
   );
 };

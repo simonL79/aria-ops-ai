@@ -6,7 +6,9 @@ import ClientManagement from '@/components/clients/ClientManagement';
 const ClientsPage = () => {
   return (
     <DashboardLayout>
-      <ClientManagement />
+      <div className="bg-black text-white min-h-screen">
+        <ClientManagement />
+      </div>
     </DashboardLayout>
   );
 };

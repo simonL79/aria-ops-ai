@@ -12,7 +12,9 @@ const WatchtowerPage = () => {
         <meta name="description" content="Advanced threat discovery and intelligence gathering system" />
       </Helmet>
       
-      <WatchtowerDashboard />
+      <div className="bg-black text-white min-h-screen">
+        <WatchtowerDashboard />
+      </div>
     </DashboardLayout>
   );
 };

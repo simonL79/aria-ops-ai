@@ -12,7 +12,7 @@ const SentinelOperatorPage = () => {
   if (!isAdmin) {
     return (
       <DashboardLayout>
-        <div className="p-6">
+        <div className="p-6 bg-black text-white min-h-screen">
           <Card className="border-red-500/50 bg-red-500/10">
             <CardContent className="p-6 text-center">
               <Shield className="h-12 w-12 text-red-500 mx-auto mb-4" />
@@ -27,7 +27,7 @@ const SentinelOperatorPage = () => {
 
   return (
     <DashboardLayout>
-      <div className="p-6">
+      <div className="p-6 bg-black text-white min-h-screen">
         <SentinelOperatorConsole />
       </div>
     </DashboardLayout>
