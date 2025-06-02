@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Mail, Phone, MapPin, Clock } from "lucide-react";
+import { Mail, MapPin, Clock } from "lucide-react";
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -148,17 +148,7 @@ const Contact = () => {
                         <Mail className="h-6 w-6 text-orange-500 mt-1" />
                         <div>
                           <h3 className="font-semibold text-white">Email</h3>
-                          <p className="text-gray-300">contact@aria-intelligence.com</p>
-                          <p className="text-gray-300">simon@aria-intelligence.com</p>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-start gap-4">
-                        <Phone className="h-6 w-6 text-orange-500 mt-1" />
-                        <div>
-                          <h3 className="font-semibold text-white">Phone</h3>
-                          <p className="text-gray-300">+44 (0) 20 1234 5678</p>
-                          <p className="text-sm text-gray-400">UK Emergency Hotline</p>
+                          <p className="text-gray-300">Simon@ariaops.co.uk</p>
                         </div>
                       </div>
                       
