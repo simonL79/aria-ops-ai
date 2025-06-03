@@ -313,7 +313,7 @@ export class AdvancedEntityMatcher {
   }
 
   /**
-   * Get entity fingerprint by entity ID
+   * Get entity fingerprint by entity ID with proper type conversion
    */
   static async getEntityFingerprint(entityId: string): Promise<AdvancedEntityFingerprint | null> {
     const { data, error } = await supabase
@@ -327,15 +327,16 @@ export class AdvancedEntityMatcher {
       return null;
     }
 
+    // Convert Supabase Json types to proper arrays
     return {
       id: data.id,
       entity_id: data.entity_id,
       primary_name: data.primary_name,
-      aliases: data.aliases || [],
+      aliases: Array.isArray(data.aliases) ? data.aliases : [],
       organization: data.organization,
-      locations: data.locations || [],
-      context_tags: data.context_tags || [],
-      false_positive_blocklist: data.false_positive_blocklist || []
+      locations: Array.isArray(data.locations) ? data.locations : [],
+      context_tags: Array.isArray(data.context_tags) ? data.context_tags : [],
+      false_positive_blocklist: Array.isArray(data.false_positive_blocklist) ? data.false_positive_blocklist : []
     };
   }
 }

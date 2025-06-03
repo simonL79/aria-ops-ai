@@ -70,7 +70,6 @@ const KeywordSystemTabs = ({ keywordData, counterNarratives, onRefresh }: Keywor
             </Badge>
           </div>
           <CounterNarrativeEngine 
-            counterNarratives={counterNarratives}
             onRefresh={onRefresh}
           />
         </div>
@@ -87,7 +86,10 @@ const KeywordSystemTabs = ({ keywordData, counterNarratives, onRefresh }: Keywor
               Content Pipeline
             </Badge>
           </div>
-          <ArticleGenerationHub />
+          <ArticleGenerationHub 
+            narratives={counterNarratives}
+            onRefresh={onRefresh}
+          />
         </div>
       </TabsContent>
 
@@ -102,7 +104,11 @@ const KeywordSystemTabs = ({ keywordData, counterNarratives, onRefresh }: Keywor
               Real-time Metrics
             </Badge>
           </div>
-          <PerformanceTracking />
+          <PerformanceTracking 
+            articles={[]}
+            keywordData={keywordData}
+            onRefresh={onRefresh}
+          />
         </div>
       </TabsContent>
 
@@ -117,7 +123,10 @@ const KeywordSystemTabs = ({ keywordData, counterNarratives, onRefresh }: Keywor
               Multi-Platform
             </Badge>
           </div>
-          <DeploymentCenter />
+          <DeploymentCenter 
+            articles={[]}
+            onRefresh={onRefresh}
+          />
         </div>
       </TabsContent>
     </Tabs>
