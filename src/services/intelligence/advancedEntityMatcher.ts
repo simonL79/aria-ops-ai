@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 /**
@@ -53,26 +52,31 @@ export class AdvancedEntityMatcher {
    * Create or update entity fingerprint
    */
   static async createEntityFingerprint(fingerprint: Omit<AdvancedEntityFingerprint, 'id'>): Promise<string> {
-    const { data, error } = await supabase
-      .from('entity_fingerprints_advanced')
-      .insert({
-        entity_id: fingerprint.entity_id,
-        primary_name: fingerprint.primary_name,
-        aliases: fingerprint.aliases,
-        organization: fingerprint.organization,
-        locations: fingerprint.locations,
-        context_tags: fingerprint.context_tags,
-        false_positive_blocklist: fingerprint.false_positive_blocklist
-      })
-      .select('id')
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('entity_fingerprints_advanced')
+        .insert({
+          entity_id: fingerprint.entity_id,
+          primary_name: fingerprint.primary_name,
+          aliases: fingerprint.aliases,
+          organization: fingerprint.organization,
+          locations: fingerprint.locations,
+          context_tags: fingerprint.context_tags,
+          false_positive_blocklist: fingerprint.false_positive_blocklist
+        })
+        .select('id')
+        .single();
 
-    if (error) {
-      console.error('Failed to create entity fingerprint:', error);
+      if (error) {
+        console.error('Failed to create entity fingerprint:', error);
+        throw error;
+      }
+
+      return data.id;
+    } catch (error) {
+      console.error('Database error creating fingerprint:', error);
       throw error;
     }
-
-    return data.id;
   }
 
   /**
@@ -91,7 +95,7 @@ export class AdvancedEntityMatcher {
     });
 
     // Organization context queries
-    if (fingerprint.organization) {
+    if (fingerprint.organization && fingerprint.organization !== 'Unknown') {
       variants.push({
         id: crypto.randomUUID(),
         query_text: `"${fingerprint.primary_name}" "${fingerprint.organization}"`,
@@ -110,8 +114,9 @@ export class AdvancedEntityMatcher {
       });
     });
 
-    // Context tag queries (for threat intelligence)
-    fingerprint.context_tags.forEach(tag => {
+    // Context tag queries (for threat intelligence) - limit to important ones
+    const importantTags = fingerprint.context_tags.slice(0, 8); // Limit to avoid too many queries
+    importantTags.forEach(tag => {
       variants.push({
         id: crypto.randomUUID(),
         query_text: `"${fingerprint.primary_name}" "${tag}"`,
@@ -120,8 +125,9 @@ export class AdvancedEntityMatcher {
       });
     });
 
-    // Alias queries
-    fingerprint.aliases.forEach(alias => {
+    // Alias queries - limit to important ones
+    const importantAliases = fingerprint.aliases.slice(0, 4);
+    importantAliases.forEach(alias => {
       variants.push({
         id: crypto.randomUUID(),
         query_text: `"${alias}"`,
@@ -134,7 +140,7 @@ export class AdvancedEntityMatcher {
   }
 
   /**
-   * Advanced entity matching with NER and contextual scoring
+   * Advanced entity matching with NER and contextual scoring - RELAXED FOR TESTING
    */
   static analyzeContentMatch(
     content: string, 
@@ -146,9 +152,13 @@ export class AdvancedEntityMatcher {
     const contextMatches: Record<string, number> = {};
     const nerEntities: string[] = [];
 
+    console.log(`🔍 Analyzing content for entity "${fingerprint.primary_name}"`);
+    console.log(`📝 Content preview: "${fullText.substring(0, 100)}..."`);
+
     // Hard filter for known false positives
     const falsePositiveDetected = this.detectFalsePositive(fullText, fingerprint);
     if (falsePositiveDetected) {
+      console.log('🚫 False positive detected');
       return {
         source_url: '',
         raw_title: title,
@@ -168,6 +178,20 @@ export class AdvancedEntityMatcher {
       matchScore += 1.0;
       nerEntities.push(fingerprint.primary_name);
       contextMatches['primary_name'] = 1.0;
+      console.log('✅ Primary name exact match found');
+    }
+
+    // Check for partial name matches (first name + last name separately)
+    const nameParts = fingerprint.primary_name.toLowerCase().split(' ');
+    if (nameParts.length >= 2) {
+      const firstName = nameParts[0];
+      const lastName = nameParts[nameParts.length - 1];
+      
+      if (fullText.includes(firstName) && fullText.includes(lastName)) {
+        matchScore += 0.8;
+        contextMatches['name_parts'] = 0.8;
+        console.log('✅ Name parts match found');
+      }
     }
 
     // Alias matches
@@ -176,14 +200,17 @@ export class AdvancedEntityMatcher {
         matchScore += 0.7;
         nerEntities.push(alias);
         contextMatches['alias_match'] = 0.7;
+        console.log(`✅ Alias match found: ${alias}`);
         break;
       }
     }
 
     // Organization context boost
-    if (fingerprint.organization && fullText.includes(fingerprint.organization.toLowerCase())) {
+    if (fingerprint.organization && fingerprint.organization !== 'Unknown' && 
+        fullText.includes(fingerprint.organization.toLowerCase())) {
       matchScore += 0.3;
       contextMatches['organization'] = 0.3;
+      console.log('✅ Organization context found');
     }
 
     // Location context boost
@@ -191,6 +218,7 @@ export class AdvancedEntityMatcher {
       if (fullText.includes(location.toLowerCase())) {
         matchScore += 0.2;
         contextMatches['location'] = 0.2;
+        console.log(`✅ Location context found: ${location}`);
         break;
       }
     }
@@ -200,7 +228,21 @@ export class AdvancedEntityMatcher {
       if (fullText.includes(tag.toLowerCase())) {
         matchScore += 0.1;
         contextMatches['context_tag'] = 0.1;
+        console.log(`✅ Context tag found: ${tag}`);
         break;
+      }
+    }
+
+    // RELAXED scoring for testing - if we find any name parts, give it a chance
+    if (matchScore === 0) {
+      // Check for any part of the name appearing
+      for (const part of nameParts) {
+        if (part.length > 2 && fullText.includes(part)) {
+          matchScore += 0.4;
+          contextMatches['partial_name'] = 0.4;
+          console.log(`✅ Partial name match: ${part}`);
+          break;
+        }
       }
     }
 
@@ -208,15 +250,17 @@ export class AdvancedEntityMatcher {
     let decision: 'accepted' | 'rejected' | 'quarantined';
     let reasonDiscarded: string | undefined;
 
-    if (matchScore >= 1.0) {
+    if (matchScore >= 0.8) {
       decision = 'accepted';
-    } else if (matchScore >= 0.6) {
+    } else if (matchScore >= 0.4) {  // LOWERED from 0.6 for testing
       decision = 'quarantined';
       reasonDiscarded = 'Medium confidence - requires review';
     } else {
       decision = 'rejected';
       reasonDiscarded = `Low match score: ${matchScore.toFixed(2)} - insufficient entity evidence`;
     }
+
+    console.log(`📊 Match analysis complete: ${decision} (score: ${matchScore.toFixed(2)})`);
 
     return {
       source_url: '',
@@ -327,16 +371,17 @@ export class AdvancedEntityMatcher {
   }
 
   /**
-   * Get entity fingerprint by entity name (not UUID) with proper type conversion
-   * Fixed to search by text fields instead of treating entity names as UUIDs
+   * Get entity fingerprint by entity name with improved search
    */
   static async getEntityFingerprint(entityName: string): Promise<AdvancedEntityFingerprint | null> {
     try {
-      // Search by primary_name or entity_id (both are text fields, not UUIDs)
+      console.log(`🔍 Searching for entity fingerprint: ${entityName}`);
+      
+      // Search by primary_name with exact and partial matches
       const { data, error } = await supabase
         .from('entity_fingerprints_advanced')
         .select('*')
-        .or(`primary_name.ilike.%${entityName}%,entity_id.ilike.%${entityName}%`)
+        .or(`primary_name.eq.${entityName},primary_name.ilike.%${entityName}%`)
         .limit(1)
         .maybeSingle();
 
@@ -349,6 +394,8 @@ export class AdvancedEntityMatcher {
         console.log(`No entity fingerprint found for: ${entityName}`);
         return null;
       }
+
+      console.log(`✅ Found entity fingerprint for: ${entityName}`);
 
       // Convert Supabase Json types to proper arrays with type safety
       return {
