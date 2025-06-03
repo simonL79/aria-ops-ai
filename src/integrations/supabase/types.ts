@@ -2234,6 +2234,48 @@ export type Database = {
           },
         ]
       }
+      entity_fingerprints_advanced: {
+        Row: {
+          aliases: Json
+          context_tags: Json
+          created_at: string
+          created_by: string | null
+          entity_id: string
+          false_positive_blocklist: Json
+          id: string
+          locations: Json
+          organization: string | null
+          primary_name: string
+          updated_at: string
+        }
+        Insert: {
+          aliases?: Json
+          context_tags?: Json
+          created_at?: string
+          created_by?: string | null
+          entity_id: string
+          false_positive_blocklist?: Json
+          id?: string
+          locations?: Json
+          organization?: string | null
+          primary_name: string
+          updated_at?: string
+        }
+        Update: {
+          aliases?: Json
+          context_tags?: Json
+          created_at?: string
+          created_by?: string | null
+          entity_id?: string
+          false_positive_blocklist?: Json
+          id?: string
+          locations?: Json
+          organization?: string | null
+          primary_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       entity_graph: {
         Row: {
           frequency: number | null
@@ -2260,6 +2302,165 @@ export type Database = {
           source_entity?: string | null
         }
         Relationships: []
+      }
+      entity_match_decisions: {
+        Row: {
+          context_matches: Json | null
+          created_at: string
+          decision: string
+          false_positive_detected: boolean | null
+          human_feedback: string | null
+          id: string
+          match_score: number
+          matched_entity: string
+          ner_entities: Json | null
+          query_variant_id: string | null
+          raw_content: string | null
+          raw_title: string | null
+          reason_discarded: string | null
+          reviewed_by: string | null
+          source_url: string
+        }
+        Insert: {
+          context_matches?: Json | null
+          created_at?: string
+          decision: string
+          false_positive_detected?: boolean | null
+          human_feedback?: string | null
+          id?: string
+          match_score?: number
+          matched_entity: string
+          ner_entities?: Json | null
+          query_variant_id?: string | null
+          raw_content?: string | null
+          raw_title?: string | null
+          reason_discarded?: string | null
+          reviewed_by?: string | null
+          source_url: string
+        }
+        Update: {
+          context_matches?: Json | null
+          created_at?: string
+          decision?: string
+          false_positive_detected?: boolean | null
+          human_feedback?: string | null
+          id?: string
+          match_score?: number
+          matched_entity?: string
+          ner_entities?: Json | null
+          query_variant_id?: string | null
+          raw_content?: string | null
+          raw_title?: string | null
+          reason_discarded?: string | null
+          reviewed_by?: string | null
+          source_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "entity_match_decisions_query_variant_id_fkey"
+            columns: ["query_variant_id"]
+            isOneToOne: false
+            referencedRelation: "entity_query_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      entity_precision_stats: {
+        Row: {
+          avg_precision_score: number | null
+          confidence_level: string
+          created_at: string
+          entity_fingerprint_id: string | null
+          false_positive_rate: number | null
+          id: string
+          scan_date: string
+          total_discarded: number | null
+          total_matched: number | null
+          total_queries: number | null
+          total_results: number | null
+        }
+        Insert: {
+          avg_precision_score?: number | null
+          confidence_level: string
+          created_at?: string
+          entity_fingerprint_id?: string | null
+          false_positive_rate?: number | null
+          id?: string
+          scan_date?: string
+          total_discarded?: number | null
+          total_matched?: number | null
+          total_queries?: number | null
+          total_results?: number | null
+        }
+        Update: {
+          avg_precision_score?: number | null
+          confidence_level?: string
+          created_at?: string
+          entity_fingerprint_id?: string | null
+          false_positive_rate?: number | null
+          id?: string
+          scan_date?: string
+          total_discarded?: number | null
+          total_matched?: number | null
+          total_queries?: number | null
+          total_results?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "entity_precision_stats_entity_fingerprint_id_fkey"
+            columns: ["entity_fingerprint_id"]
+            isOneToOne: false
+            referencedRelation: "entity_fingerprints_advanced"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      entity_query_variants: {
+        Row: {
+          avg_match_score: number | null
+          entity_fingerprint_id: string | null
+          executed_at: string
+          id: string
+          matched_count: number | null
+          platform: string
+          query_text: string
+          query_type: string
+          results_count: number | null
+          search_fingerprint_id: string
+        }
+        Insert: {
+          avg_match_score?: number | null
+          entity_fingerprint_id?: string | null
+          executed_at?: string
+          id?: string
+          matched_count?: number | null
+          platform: string
+          query_text: string
+          query_type: string
+          results_count?: number | null
+          search_fingerprint_id?: string
+        }
+        Update: {
+          avg_match_score?: number | null
+          entity_fingerprint_id?: string | null
+          executed_at?: string
+          id?: string
+          matched_count?: number | null
+          platform?: string
+          query_text?: string
+          query_type?: string
+          results_count?: number | null
+          search_fingerprint_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "entity_query_variants_entity_fingerprint_id_fkey"
+            columns: ["entity_fingerprint_id"]
+            isOneToOne: false
+            referencedRelation: "entity_fingerprints_advanced"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       entity_risk_profiles: {
         Row: {

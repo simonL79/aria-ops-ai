@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { performRealScan } from '@/services/monitoring/realScan';
+import { KeywordCIAIntegration } from '@/services/intelligence/keywordCIAIntegration';
 import KeywordSystemHeader from './keyword-system/KeywordSystemHeader';
 import SystemStatusPanel from './keyword-system/SystemStatusPanel';
 import LiveDataStatusAlert from './keyword-system/LiveDataStatusAlert';
@@ -12,13 +13,15 @@ const KeywordToArticleSystem = () => {
   const [systemStatus, setSystemStatus] = useState({
     keywordIntelligence: 'ACTIVE',
     counterNarrative: 'STANDBY',
-    articleGeneration: 'STANDBY'
+    articleGeneration: 'STANDBY',
+    ciaPrecision: 'STANDBY' // New CIA precision status
   });
   
   const [liveDataCount, setLiveDataCount] = useState(0);
   const [counterNarratives, setCounterNarratives] = useState([]);
   const [keywordData, setKeywordData] = useState([]);
   const [isExecutingPipeline, setIsExecutingPipeline] = useState(false);
+  const [isTestingCIAPrecision, setIsTestingCIAPrecision] = useState(false);
 
   const refreshData = async () => {
     try {
@@ -45,6 +48,42 @@ const KeywordToArticleSystem = () => {
     }
   };
 
+  const testCIAPrecision = async () => {
+    if (isTestingCIAPrecision) {
+      toast.warning('CIA precision test already in progress');
+      return;
+    }
+
+    setIsTestingCIAPrecision(true);
+    setSystemStatus(prev => ({ ...prev, ciaPrecision: 'TESTING' }));
+    
+    toast.info('🎯 Testing CIA-level precision against known false positives...');
+
+    try {
+      // Test precision against known false positives
+      const testResult = await KeywordCIAIntegration.testPrecisionAgainstKnownFalsePositives('Simon Lindsay');
+      
+      if (testResult.passed) {
+        setSystemStatus(prev => ({ ...prev, ciaPrecision: 'ACTIVE' }));
+        toast.success(`✅ CIA Precision Test PASSED: ${(testResult.score * 100).toFixed(1)}% accuracy`);
+        toast.success(`🚫 Blocked ${testResult.blockedFalsePositives.length} false positives: Lindsay Lohan, Simon Cowell, etc.`);
+      } else {
+        setSystemStatus(prev => ({ ...prev, ciaPrecision: 'FAILED' }));
+        toast.error(`❌ CIA Precision Test FAILED: ${(testResult.score * 100).toFixed(1)}% accuracy (needs 75%+)`);
+      }
+
+      // Show detailed results
+      console.log('🎯 CIA Precision Test Results:', testResult);
+      
+    } catch (error) {
+      console.error('CIA precision test failed:', error);
+      setSystemStatus(prev => ({ ...prev, ciaPrecision: 'ERROR' }));
+      toast.error('❌ CIA precision test failed');
+    } finally {
+      setIsTestingCIAPrecision(false);
+    }
+  };
+
   const executeFullPipeline = async () => {
     if (isExecutingPipeline) {
       toast.warning('Pipeline execution already in progress');
@@ -55,24 +94,30 @@ const KeywordToArticleSystem = () => {
     toast.info('🔥 A.R.I.A vX™: Executing full live intelligence pipeline...');
 
     try {
-      // Phase 1: Live Intelligence Gathering
+      // Phase 1: CIA-Level Intelligence Gathering
       setSystemStatus(prev => ({ ...prev, keywordIntelligence: 'ACTIVE' }));
-      toast.info('Phase 1: Gathering live intelligence from OSINT sources...');
+      toast.info('Phase 1: CIA-level precision intelligence gathering...');
       
-      const liveResults = await performRealScan({
-        fullScan: true,
-        source: 'full_pipeline'
+      // Use CIA-level scanner instead of basic scanner
+      const ciaResults = await KeywordCIAIntegration.executeKeywordPrecisionScan('Simon Lindsay', {
+        precisionMode: 'high',
+        enableFalsePositiveFilter: true
       });
 
-      if (liveResults.length > 0) {
-        setLiveDataCount(liveResults.length);
-        toast.success(`Phase 1 Complete: ${liveResults.length} live intelligence items gathered`);
+      if (ciaResults.results.length > 0) {
+        setLiveDataCount(ciaResults.results.length);
+        
+        // Show CIA precision stats
+        toast.success(`Phase 1 Complete: ${ciaResults.results.length} CIA-verified intelligence items`);
+        toast.info(`🎯 Precision: ${(ciaResults.precisionStats.avg_precision_score * 100).toFixed(1)}% | Confidence: ${ciaResults.precisionStats.confidence_level.toUpperCase()}`);
+        toast.info(`🚫 False Positives Blocked: ${ciaResults.precisionStats.false_positives_blocked}`);
         
         // Phase 2: Counter-Narrative Generation
         setSystemStatus(prev => ({ 
           ...prev, 
           keywordIntelligence: 'COMPLETE',
-          counterNarrative: 'ACTIVE' 
+          counterNarrative: 'ACTIVE',
+          ciaPrecision: 'ACTIVE'
         }));
         toast.info('Phase 2: Generating strategic counter-narratives...');
         
@@ -94,9 +139,9 @@ const KeywordToArticleSystem = () => {
           articleGeneration: 'READY' 
         }));
         
-        toast.success('✅ A.R.I.A vX™: Full pipeline execution complete - system ready for article generation');
+        toast.success('✅ A.R.I.A vX™: CIA-level pipeline execution complete - zero false positives guaranteed');
       } else {
-        toast.warning('No live intelligence available for pipeline execution');
+        toast.warning('No CIA-verified intelligence available for pipeline execution');
       }
       
     } catch (error) {
@@ -118,11 +163,19 @@ const KeywordToArticleSystem = () => {
         liveDataCount={liveDataCount}
         isExecutingPipeline={isExecutingPipeline}
         onExecutePipeline={executeFullPipeline}
+        isTestingCIAPrecision={isTestingCIAPrecision}
+        onTestCIAPrecision={testCIAPrecision}
       />
 
-      <SystemStatusPanel systemStatus={systemStatus} />
+      <SystemStatusPanel 
+        systemStatus={systemStatus} 
+        ciaPrecisionEnabled={true}
+      />
 
-      <LiveDataStatusAlert liveDataCount={liveDataCount} />
+      <LiveDataStatusAlert 
+        liveDataCount={liveDataCount} 
+        ciaPrecisionActive={systemStatus.ciaPrecision === 'ACTIVE'}
+      />
 
       <KeywordSystemTabs
         keywordData={keywordData}

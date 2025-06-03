@@ -1,10 +1,14 @@
 
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Target, Brain, FileText } from 'lucide-react';
-import LiveKeywordIntelligence from './LiveKeywordIntelligence';
-import CounterNarrativeStrategy from './CounterNarrativeStrategy';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Target, Zap, BarChart3, Settings, Bot } from 'lucide-react';
+import CounterNarrativeEngine from './CounterNarrativeEngine';
 import ArticleGenerationHub from './ArticleGenerationHub';
+import PerformanceTracking from './PerformanceTracking';
+import DeploymentCenter from './DeploymentCenter';
+import EntityPrecisionDashboard from './EntityPrecisionDashboard';
 
 interface KeywordSystemTabsProps {
   keywordData: any[];
@@ -12,63 +16,111 @@ interface KeywordSystemTabsProps {
   onRefresh: () => void;
 }
 
-const KeywordSystemTabs: React.FC<KeywordSystemTabsProps> = ({
-  keywordData,
-  counterNarratives,
-  onRefresh
-}) => {
+const KeywordSystemTabs = ({ keywordData, counterNarratives, onRefresh }: KeywordSystemTabsProps) => {
   return (
-    <div className="relative z-10">
-      <Tabs defaultValue="keyword-intelligence" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 bg-corporate-darkSecondary border border-corporate-border relative z-20">
-          <TabsTrigger 
-            value="keyword-intelligence" 
-            className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray hover:text-white transition-colors relative z-30"
-            type="button"
-          >
-            <Target className="h-4 w-4 mr-2" />
-            Live Keyword Intelligence
-          </TabsTrigger>
-          <TabsTrigger 
-            value="counter-narrative" 
-            className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray hover:text-white transition-colors relative z-30"
-            type="button"
-          >
-            <Brain className="h-4 w-4 mr-2" />
-            Counter-Narrative Strategy
-          </TabsTrigger>
-          <TabsTrigger 
-            value="article-generation" 
-            className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray hover:text-white transition-colors relative z-30"
-            type="button"
-          >
-            <FileText className="h-4 w-4 mr-2" />
-            Article Generation
-          </TabsTrigger>
-        </TabsList>
+    <Tabs defaultValue="precision" className="space-y-6">
+      <TabsList className="grid w-full grid-cols-5">
+        <TabsTrigger value="precision" className="flex items-center gap-2">
+          <Target className="h-4 w-4" />
+          CIA Precision
+        </TabsTrigger>
+        <TabsTrigger value="narratives" className="flex items-center gap-2">
+          <Zap className="h-4 w-4" />
+          Counter-Narratives
+        </TabsTrigger>
+        <TabsTrigger value="articles" className="flex items-center gap-2">
+          <Bot className="h-4 w-4" />
+          Article Generation
+        </TabsTrigger>
+        <TabsTrigger value="performance" className="flex items-center gap-2">
+          <BarChart3 className="h-4 w-4" />
+          Performance
+        </TabsTrigger>
+        <TabsTrigger value="deployment" className="flex items-center gap-2">
+          <Settings className="h-4 w-4" />
+          Deployment
+        </TabsTrigger>
+      </TabsList>
 
-        <TabsContent value="keyword-intelligence" className="relative z-10">
-          <LiveKeywordIntelligence 
-            keywordData={keywordData}
+      <TabsContent value="precision">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold">CIA-Level Entity Precision</h3>
+              <p className="text-muted-foreground">Advanced entity disambiguation eliminates false positives like "Lindsay Lohan" for "Simon Lindsay"</p>
+            </div>
+            <Badge className="bg-blue-100 text-blue-800">
+              <Target className="h-3 w-3 mr-1" />
+              Advanced NER Active
+            </Badge>
+          </div>
+          <EntityPrecisionDashboard />
+        </div>
+      </TabsContent>
+
+      <TabsContent value="narratives">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold">Counter-Narrative Generation</h3>
+              <p className="text-muted-foreground">AI-powered strategic counter-narratives from live intelligence</p>
+            </div>
+            <Badge variant="outline">
+              {counterNarratives.length} Active Narratives
+            </Badge>
+          </div>
+          <CounterNarrativeEngine 
+            counterNarratives={counterNarratives}
             onRefresh={onRefresh}
           />
-        </TabsContent>
+        </div>
+      </TabsContent>
 
-        <TabsContent value="counter-narrative" className="relative z-10">
-          <CounterNarrativeStrategy 
-            narratives={counterNarratives}
-            onRefresh={onRefresh}
-          />
-        </TabsContent>
+      <TabsContent value="articles">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold">Article Generation Hub</h3>
+              <p className="text-muted-foreground">Transform counter-narratives into deployable content</p>
+            </div>
+            <Badge variant="outline">
+              Content Pipeline
+            </Badge>
+          </div>
+          <ArticleGenerationHub />
+        </div>
+      </TabsContent>
 
-        <TabsContent value="article-generation" className="relative z-10">
-          <ArticleGenerationHub 
-            narratives={counterNarratives}
-            onRefresh={onRefresh}
-          />
-        </TabsContent>
-      </Tabs>
-    </div>
+      <TabsContent value="performance">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold">Performance Analytics</h3>
+              <p className="text-muted-foreground">Track keyword performance and content impact</p>
+            </div>
+            <Badge variant="outline">
+              Real-time Metrics
+            </Badge>
+          </div>
+          <PerformanceTracking />
+        </div>
+      </TabsContent>
+
+      <TabsContent value="deployment">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold">Deployment Center</h3>
+              <p className="text-muted-foreground">Configure and manage content deployment</p>
+            </div>
+            <Badge variant="outline">
+              Multi-Platform
+            </Badge>
+          </div>
+          <DeploymentCenter />
+        </div>
+      </TabsContent>
+    </Tabs>
   );
 };
 
