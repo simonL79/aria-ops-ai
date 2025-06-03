@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { LiveDataEnforcer } from '@/services/ariaCore/liveDataEnforcer';
 import type { ScanOptions, LiveScanResult } from '@/types/scan';
@@ -11,9 +10,31 @@ import {
 } from './enhancedEntityMatcher';
 
 /**
- * ENHANCED A.R.I.A™ LIVE OSINT SCANNING - HIGH RECALL, HIGH PRECISION
- * Broad-then-filtered approach with layered confidence scoring
+ * ENHANCED A.R.I.A™ LIVE OSINT SCANNING - SIMULATION-FREE ZONE
+ * 100% LIVE DATA ONLY - ALL SIMULATIONS PERMANENTLY BLOCKED
  */
+
+/**
+ * Enhanced anti-simulation validation
+ */
+function isSimulationContent(content: string): boolean {
+  const simulationIndicators = [
+    'mock', 'test', 'demo', 'sample', 'fake', 'simulated',
+    'placeholder', 'lorem ipsum', 'example', 'dummy', 'synthetic',
+    'generated', 'artificial', 'template', 'sandbox', 'staging',
+    'dev', 'development', 'simulation', 'hypothetical', 'fictional',
+    'advanced ai analysis for target entity',
+    'target entity',
+    'undefined',
+    'null',
+    'test data',
+    'generic response',
+    'this is a sample'
+  ];
+  
+  const contentLower = content.toLowerCase();
+  return simulationIndicators.some(indicator => contentLower.includes(indicator));
+}
 
 /**
  * Log scanner queries for debugging and audit trail
@@ -45,25 +66,25 @@ async function logScannerQuery(
 }
 
 /**
- * Perform enhanced real OSINT scan with layered confidence scoring
+ * Perform enhanced real OSINT scan with ZERO TOLERANCE for simulations
  */
 export const performRealScan = async (options: ScanOptions = {}): Promise<LiveScanResult[]> => {
   try {
-    // Enforce live data compliance
-    const isCompliant = await LiveDataEnforcer.enforceSystemWideLiveData();
-    if (!isCompliant) {
-      console.warn('🚫 BLOCKED: System not compliant for live data operations');
-      throw new Error('Live data enforcement failed. Mock data operations blocked.');
+    // CRITICAL: Enforce live data compliance with enhanced simulation detection
+    const compliance = await LiveDataEnforcer.validateLiveDataCompliance();
+    if (!compliance.isCompliant || compliance.simulationDetected) {
+      console.error('🚫 WEAPONS-GRADE BLOCK: System simulation detected');
+      throw new Error('SIMULATION DETECTED: A.R.I.A™ requires 100% live intelligence. All simulations permanently blocked.');
     }
 
     const entityName = options.targetEntity || 'Simon Lindsay';
-    console.log('🔍 A.R.I.A™ Enhanced OSINT: Starting HIGH RECALL, HIGH PRECISION scan for:', entityName);
+    console.log('🔍 A.R.I.A™ LIVE-ONLY OSINT: Starting SIMULATION-FREE scan for:', entityName);
 
-    // Generate enhanced entity fingerprint with expanded variations
+    // Enhanced entity fingerprint generation
     const entityFingerprint = generateEnhancedEntityFingerprint(entityName);
     const searchQueries = generateExpandedSearchQueries(entityFingerprint);
     
-    console.log('🎯 Enhanced Entity Fingerprint Generated:', {
+    console.log('🎯 Live Entity Fingerprint Generated:', {
       entity: entityFingerprint.entity_name,
       exact_phrases: entityFingerprint.exact_phrases,
       alias_variations: entityFingerprint.alias_variations,
@@ -82,11 +103,11 @@ export const performRealScan = async (options: ScanOptions = {}): Promise<LiveSc
     
     for (const func of scanFunctions) {
       try {
-        console.log(`🔍 A.R.I.A™ Enhanced OSINT: Executing ${func} with expanded search strategy`);
+        console.log(`🔍 A.R.I.A™ LIVE-ONLY: Executing ${func} with ZERO simulation tolerance`);
         
         const { data, error } = await supabase.functions.invoke(func, {
           body: { 
-            scanType: 'enhanced_entity_osint',
+            scanType: 'live_only_osint',
             fullScan: options.fullScan || true,
             targetEntity: entityName,
             entity: entityName,
@@ -96,14 +117,16 @@ export const performRealScan = async (options: ScanOptions = {}): Promise<LiveSc
             keywords: searchQueries,
             source: options.source || 'manual',
             blockMockData: true,
+            blockSimulations: true,
             enforceLiveOnly: true,
             entityFocused: true,
-            confidenceThreshold: 0.6 // Configurable threshold
+            confidenceThreshold: 0.6,
+            simulationTolerance: 0 // ZERO tolerance
           }
         });
 
         if (!error && data) {
-          console.log(`✅ ${func} response:`, data);
+          console.log(`✅ ${func} live response:`, data);
           
           let scanResults = [];
           if (data.results && Array.isArray(data.results)) {
@@ -121,12 +144,26 @@ export const performRealScan = async (options: ScanOptions = {}): Promise<LiveSc
             }));
           }
 
-          // Apply ENHANCED entity filtering with confidence scoring
+          // ENHANCED simulation blocking and entity filtering
           const beforeFilterCount = scanResults.length;
+          
+          // First pass: Remove all simulation content
+          const liveOnlyResults = scanResults.filter(result => {
+            const content = result.content || result.contextSnippet || '';
+            if (isSimulationContent(content)) {
+              console.warn('🚫 SIMULATION BLOCKED:', content.substring(0, 50));
+              return false;
+            }
+            return true;
+          });
+          
+          console.log(`🔍 Simulation filter: ${beforeFilterCount} → ${liveOnlyResults.length} (${beforeFilterCount - liveOnlyResults.length} simulations blocked)`);
+          
+          // Second pass: Apply entity filtering with confidence scoring
           const { filtered: filteredResults, stats } = filterWithConfidenceThreshold(
-            scanResults, 
+            liveOnlyResults, 
             entityFingerprint,
-            0.4 // Lower threshold for broader recall
+            0.4
           );
           
           // Log comprehensive matching statistics
@@ -135,32 +172,34 @@ export const performRealScan = async (options: ScanOptions = {}): Promise<LiveSc
           // Log the query for audit trail
           await logScannerQuery(entityName, searchQueries, func, beforeFilterCount, filteredResults.length, stats);
 
-          // Process filtered results with confidence preservation
+          // Process filtered results with enhanced live validation
           for (const result of filteredResults) {
-            // Skip generic/template content
-            if (isGenericContent(result.content || result.contextSnippet || '')) {
-              continue;
-            }
-
+            // Triple-check: Enhanced live data validation
             const isValidLiveData = await LiveDataEnforcer.validateDataInput(
               result.content || result.contextSnippet || '', 
               result.platform || 'unknown'
             );
             
+            // Additional simulation check
+            if (isSimulationContent(result.content || result.contextSnippet || '')) {
+              console.warn('🚫 FINAL SIMULATION BLOCK:', result.platform);
+              continue;
+            }
+            
             if (isValidLiveData) {
               const processedResult: LiveScanResult = {
-                id: result.id || `enhanced-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+                id: result.id || `live-only-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
                 platform: result.platform || 'Unknown',
                 content: result.content || result.contextSnippet || '',
                 url: result.url || result.sourceUrl || '',
                 severity: (result.severity as 'low' | 'medium' | 'high') || mapThreatLevelToSeverity(result.threatLevel),
                 status: (result.status as 'new' | 'read' | 'actioned' | 'resolved') || 'new',
-                threat_type: result.threat_type || 'enhanced_entity_threat',
+                threat_type: result.threat_type || 'live_intelligence_threat',
                 sentiment: result.sentiment || 0,
                 confidence_score: result.confidence_score || result.entity_match?.confidence_score || 85,
                 potential_reach: result.potential_reach || result.spreadVelocity * 1000 || 0,
                 detected_entities: [entityName],
-                source_type: 'enhanced_live_osint',
+                source_type: 'verified_live_osint',
                 entity_name: entityName,
                 source_credibility_score: result.source_credibility_score || 75,
                 media_is_ai_generated: result.media_is_ai_generated || false,
@@ -180,7 +219,7 @@ export const performRealScan = async (options: ScanOptions = {}): Promise<LiveSc
 
               results.push(processedResult);
             } else {
-              console.warn('🚫 BLOCKED: Mock data detected and filtered:', result.platform);
+              console.warn('🚫 BLOCKED: Failed live validation:', result.platform);
             }
           }
         } else {
@@ -191,16 +230,15 @@ export const performRealScan = async (options: ScanOptions = {}): Promise<LiveSc
       }
     }
 
-    console.log(`✅ A.R.I.A™ Enhanced OSINT: Scan complete - ${results.length} high-confidence entity results for "${entityName}"`);
+    console.log(`✅ A.R.I.A™ LIVE-ONLY OSINT: Scan complete - ${results.length} VERIFIED LIVE intelligence items`);
     
     if (results.length === 0) {
-      console.log('ℹ️ No high-confidence entity matches detected. This could mean:');
-      console.log('   • No recent mentions above confidence threshold (0.4)');
-      console.log('   • All mentions are positive/neutral');
-      console.log('   • Content exists but doesn\'t meet threat criteria');
-      console.log('   • Consider lowering confidence threshold for broader recall');
+      console.log('ℹ️ No live intelligence detected. System operating with ZERO simulation tolerance.');
+      console.log('   • All simulations permanently blocked');
+      console.log('   • Only verified live intelligence processed');
+      console.log('   • Enhanced validation active');
     } else {
-      // Log confidence distribution
+      // Log live data confidence distribution
       const confidenceDistribution = results.reduce((acc, result) => {
         const range = result.confidence_score >= 85 ? 'high' : 
                      result.confidence_score >= 60 ? 'medium' : 'low';
@@ -208,13 +246,13 @@ export const performRealScan = async (options: ScanOptions = {}): Promise<LiveSc
         return acc;
       }, {} as Record<string, number>);
       
-      console.log('📊 Confidence Distribution:', confidenceDistribution);
+      console.log('📊 LIVE Intelligence Distribution:', confidenceDistribution);
     }
     
     return results;
 
   } catch (error) {
-    console.error('❌ Enhanced entity scan failed:', error);
+    console.error('❌ Live-only intelligence scan failed:', error);
     throw error;
   }
 };
@@ -282,14 +320,16 @@ export const performRealTimeMonitoring = async (): Promise<LiveScanResult[]> => 
 };
 
 /**
- * PERMANENTLY BLOCK ALL MOCK OPERATIONS
+ * PERMANENTLY BLOCK ALL SIMULATION OPERATIONS
  */
 export const performMockScan = (): never => {
-  console.error('🚫 BLOCKED: Mock scan operations are permanently disabled. Use performRealScan() for live intelligence.');
-  throw new Error('Mock data operations blocked by A.R.I.A™ live enforcement system');
+  LiveDataEnforcer.blockSimulation('Mock Scan');
 };
 
 export const generateMockData = (): never => {
-  console.error('🚫 BLOCKED: Mock data generation permanently disabled');
-  throw new Error('Mock data generation is permanently disabled. A.R.I.A™ uses 100% live intelligence.');
+  LiveDataEnforcer.blockSimulation('Mock Data Generation');
+};
+
+export const performSimulation = (): never => {
+  LiveDataEnforcer.blockSimulation('Simulation Operations');
 };
