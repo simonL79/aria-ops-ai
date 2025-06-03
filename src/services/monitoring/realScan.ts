@@ -3,13 +3,90 @@ import { LiveDataEnforcer } from '@/services/ariaCore/liveDataEnforcer';
 import type { ScanOptions, LiveScanResult } from '@/types/scan';
 
 /**
- * CONSOLIDATED LIVE OSINT SCANNING - SINGLE SOURCE OF TRUTH
- * NO MOCK DATA - 100% LIVE INTELLIGENCE ONLY
+ * CONSOLIDATED LIVE OSINT SCANNING - ENTITY-SPECIFIC INTELLIGENCE
+ * NO MOCK DATA - 100% LIVE INTELLIGENCE WITH PRECISE TARGETING
  */
 
+interface EntitySearchProfile {
+  entity_name: string;
+  alternate_names: string[];
+  context_tags: string[];
+  search_variations: string[];
+}
+
 /**
- * Perform real OSINT scan with strict live data enforcement
- * This is the ONLY scanning function - all others are permanently blocked
+ * Generate entity-specific search variations for targeted scanning
+ */
+function generateEntitySearchVariations(entityName: string, contextTags: string[] = []): EntitySearchProfile {
+  const baseEntity = entityName.trim();
+  const alternate_names = [
+    baseEntity,
+    `@${baseEntity.replace(/\s+/g, '').toLowerCase()}`,
+    baseEntity.split(' ')[0] + ' ' + baseEntity.split(' ').slice(-1)[0].charAt(0) + '.',
+  ];
+
+  const search_variations = [
+    baseEntity,
+    ...contextTags.map(tag => `"${baseEntity}" ${tag}`),
+    ...contextTags.map(tag => `"${baseEntity} ${tag}"`),
+  ];
+
+  return {
+    entity_name: baseEntity,
+    alternate_names,
+    context_tags: contextTags,
+    search_variations
+  };
+}
+
+/**
+ * Log scanner queries for debugging and audit trail
+ */
+async function logScannerQuery(
+  entityName: string,
+  searchTerms: string[],
+  platform: string,
+  totalResults: number,
+  matchedResults: number
+): Promise<void> {
+  try {
+    await supabase.from('scanner_query_log').insert({
+      entity_name: entityName,
+      search_terms: searchTerms,
+      platform: platform,
+      total_results_returned: totalResults,
+      results_matched_entity: matchedResults,
+      executed_at: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Failed to log scanner query:', error);
+  }
+}
+
+/**
+ * Strict content filtering - only results mentioning the entity
+ */
+function filterEntityContent(results: any[], entityProfile: EntitySearchProfile): any[] {
+  return results.filter(result => {
+    const content = (result.content || result.title || result.contextSnippet || '').toLowerCase();
+    const url = (result.url || '').toLowerCase();
+    
+    // Check if content contains entity name or alternate names
+    const containsEntity = entityProfile.alternate_names.some(name => 
+      content.includes(name.toLowerCase()) || url.includes(name.toLowerCase())
+    );
+    
+    if (!containsEntity) {
+      console.log(`🔍 Filtered out irrelevant content: ${content.substring(0, 100)}...`);
+      return false;
+    }
+    
+    return true;
+  });
+}
+
+/**
+ * Perform real OSINT scan with strict entity targeting
  */
 export const performRealScan = async (options: ScanOptions = {}): Promise<LiveScanResult[]> => {
   try {
@@ -20,11 +97,16 @@ export const performRealScan = async (options: ScanOptions = {}): Promise<LiveSc
       throw new Error('Live data enforcement failed. Mock data operations blocked.');
     }
 
-    console.log('🔍 A.R.I.A™ OSINT: Starting real intelligence scan...');
-    console.log('🔍 Target Entity:', options.targetEntity);
-    console.log('🔍 Options:', options);
+    const entityName = options.targetEntity || 'general';
+    console.log('🔍 A.R.I.A™ OSINT: Starting ENTITY-SPECIFIC intelligence scan for:', entityName);
 
-    // Call live scanning edge functions in sequence with proper entity targeting
+    // Generate entity search profile with context
+    const entityProfile = generateEntitySearchVariations(entityName, [
+      'Glasgow', 'KSL Hair', 'fraud', 'bench warrant', 'controversy', 'lawsuit'
+    ]);
+    
+    console.log('🔍 Entity Search Profile:', entityProfile);
+
     const scanFunctions = [
       'reddit-scan',
       'uk-news-scanner', 
@@ -37,27 +119,29 @@ export const performRealScan = async (options: ScanOptions = {}): Promise<LiveSc
     
     for (const func of scanFunctions) {
       try {
-        console.log(`🔍 A.R.I.A™ OSINT: Executing ${func} for entity: ${options.targetEntity || 'general'}`);
+        console.log(`🔍 A.R.I.A™ OSINT: Executing ${func} with entity variations:`, entityProfile.search_variations);
         
         const { data, error } = await supabase.functions.invoke(func, {
           body: { 
-            scanType: 'live_osint',
+            scanType: 'entity_specific_osint',
             fullScan: options.fullScan || true,
-            targetEntity: options.targetEntity || null,
-            entity: options.targetEntity || null, // Additional field some functions expect
-            search_query: options.targetEntity || null,
-            keywords: options.targetEntity ? [options.targetEntity] : [],
+            targetEntity: entityName,
+            entity: entityName,
+            search_query: entityName,
+            keywords: entityProfile.search_variations,
+            alternate_names: entityProfile.alternate_names,
+            context_tags: entityProfile.context_tags,
+            search_variations: entityProfile.search_variations,
             source: options.source || 'manual',
             blockMockData: true,
             enforceLiveOnly: true,
-            entityFocused: true // Flag to indicate entity-specific search
+            entityFocused: true
           }
         });
 
         if (!error && data) {
           console.log(`✅ ${func} response:`, data);
           
-          // Handle different response formats
           let scanResults = [];
           if (data.results && Array.isArray(data.results)) {
             scanResults = data.results;
@@ -74,28 +158,18 @@ export const performRealScan = async (options: ScanOptions = {}): Promise<LiveSc
             }));
           }
 
-          // Filter results for entity relevance if targetEntity is specified
-          if (options.targetEntity && scanResults.length > 0) {
-            const entityLower = options.targetEntity.toLowerCase();
-            scanResults = scanResults.filter(result => {
-              const content = (result.content || '').toLowerCase();
-              const title = (result.title || '').toLowerCase();
-              const contextSnippet = (result.contextSnippet || '').toLowerCase();
-              
-              // Check if the entity name appears in the content
-              return content.includes(entityLower) || 
-                     title.includes(entityLower) || 
-                     contextSnippet.includes(entityLower) ||
-                     (result.detected_entities && result.detected_entities.some(entity => 
-                       entity && entity.toLowerCase().includes(entityLower)
-                     ));
-            });
-            
-            console.log(`🔍 Filtered ${scanResults.length} entity-relevant results from ${func}`);
-          }
+          // CRITICAL: Apply strict entity filtering
+          const beforeFilterCount = scanResults.length;
+          const filteredResults = filterEntityContent(scanResults, entityProfile);
+          const afterFilterCount = filteredResults.length;
+          
+          console.log(`🔍 ${func}: ${beforeFilterCount} raw results → ${afterFilterCount} entity-matched results`);
+          
+          // Log the query for audit trail
+          await logScannerQuery(entityName, entityProfile.search_variations, func, beforeFilterCount, afterFilterCount);
 
-          // Validate and process results
-          for (const result of scanResults) {
+          // Process filtered results
+          for (const result of filteredResults) {
             // Skip generic/template content
             if (isGenericContent(result.content || result.contextSnippet || '')) {
               continue;
@@ -114,13 +188,13 @@ export const performRealScan = async (options: ScanOptions = {}): Promise<LiveSc
                 url: result.url || result.sourceUrl || '',
                 severity: (result.severity as 'low' | 'medium' | 'high') || mapThreatLevelToSeverity(result.threatLevel),
                 status: (result.status as 'new' | 'read' | 'actioned' | 'resolved') || 'new',
-                threat_type: result.threat_type || 'live_intelligence',
+                threat_type: result.threat_type || 'entity_specific_threat',
                 sentiment: result.sentiment || 0,
                 confidence_score: result.confidence_score || result.matchConfidence * 100 || 75,
                 potential_reach: result.potential_reach || result.spreadVelocity * 1000 || 0,
-                detected_entities: result.detected_entities || [result.entityName].filter(Boolean) || [],
+                detected_entities: [entityName, ...entityProfile.alternate_names],
                 source_type: 'live_osint',
-                entity_name: result.entity_name || result.entityName || options.targetEntity || 'unknown',
+                entity_name: entityName,
                 source_credibility_score: result.source_credibility_score || 75,
                 media_is_ai_generated: result.media_is_ai_generated || false,
                 ai_detection_confidence: result.ai_detection_confidence || 0
@@ -137,21 +211,20 @@ export const performRealScan = async (options: ScanOptions = {}): Promise<LiveSc
       }
     }
 
-    console.log(`✅ A.R.I.A™ OSINT: Validated ${results.length} results as live data for entity: ${options.targetEntity || 'general'}`);
+    console.log(`✅ A.R.I.A™ OSINT: Entity-specific scan complete - ${results.length} verified results for "${entityName}"`);
     
-    // If no entity-specific results found, log this for debugging
-    if (options.targetEntity && results.length === 0) {
-      console.warn(`⚠️ A.R.I.A™ OSINT: No live intelligence found for entity "${options.targetEntity}". This may indicate:
-        1. The entity has limited online presence
-        2. The scanning functions need entity-specific improvements
-        3. The entity name needs alternative search terms
-        4. Time-based filtering is too restrictive`);
-    }
+    // Final validation: ensure all results mention the entity
+    const finalResults = results.filter(result => {
+      const content = result.content.toLowerCase();
+      return entityProfile.alternate_names.some(name => content.includes(name.toLowerCase()));
+    });
     
-    return results;
+    console.log(`🔍 Final entity validation: ${results.length} → ${finalResults.length} confirmed entity matches`);
+    
+    return finalResults;
 
   } catch (error) {
-    console.error('❌ Real scan failed:', error);
+    console.error('❌ Entity-specific scan failed:', error);
     throw error;
   }
 };
@@ -214,7 +287,7 @@ export const getLiveThreatScore = async (entityId: string): Promise<number> => {
  * Perform real-time monitoring scan
  */
 export const performRealTimeMonitoring = async (): Promise<LiveScanResult[]> => {
-  console.log('🔍 A.R.I.A™ OSINT: Real-time monitoring - live data only');
+  console.log('🔍 A.R.I.A™ OSINT: Real-time monitoring - entity-specific live data only');
   return await performRealScan({ fullScan: true, source: 'real_time_monitoring' });
 };
 
