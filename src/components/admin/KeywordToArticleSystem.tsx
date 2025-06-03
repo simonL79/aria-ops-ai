@@ -14,7 +14,7 @@ const KeywordToArticleSystem = () => {
     keywordIntelligence: 'ACTIVE',
     counterNarrative: 'STANDBY',
     articleGeneration: 'STANDBY',
-    ciaPrecision: 'STANDBY' // New CIA precision status
+    ciaPrecision: 'STANDBY'
   });
   
   const [liveDataCount, setLiveDataCount] = useState(0);
@@ -22,6 +22,7 @@ const KeywordToArticleSystem = () => {
   const [keywordData, setKeywordData] = useState([]);
   const [isExecutingPipeline, setIsExecutingPipeline] = useState(false);
   const [isTestingCIAPrecision, setIsTestingCIAPrecision] = useState(false);
+  const [clientCount, setClientCount] = useState(0);
 
   const refreshData = async () => {
     try {
@@ -42,6 +43,14 @@ const KeywordToArticleSystem = () => {
         .limit(50);
       
       setLiveDataCount(scanResults?.length || 0);
+
+      // Get client count
+      const { data: clients } = await supabase
+        .from('clients')
+        .select('id')
+        .order('created_at', { ascending: false });
+      
+      setClientCount(clients?.length || 0);
       
     } catch (error) {
       console.error('Error refreshing data:', error);
@@ -91,26 +100,67 @@ const KeywordToArticleSystem = () => {
     }
 
     setIsExecutingPipeline(true);
-    toast.info('🔥 A.R.I.A vX™: Executing full live intelligence pipeline...');
+    toast.info(`🔥 A.R.I.A vX™: Executing full pipeline for ${clientCount} registered clients...`);
 
     try {
-      // Phase 1: CIA-Level Intelligence Gathering
-      setSystemStatus(prev => ({ ...prev, keywordIntelligence: 'ACTIVE' }));
-      toast.info('Phase 1: CIA-level precision intelligence gathering...');
-      
-      // Use CIA-level scanner instead of basic scanner
-      const ciaResults = await KeywordCIAIntegration.executeKeywordPrecisionScan('Simon Lindsay', {
-        precisionMode: 'high',
-        enableFalsePositiveFilter: true
-      });
+      // Get all registered clients
+      const { data: clients, error: clientError } = await supabase
+        .from('clients')
+        .select('id, name, keywordtargets')
+        .order('created_at', { ascending: false });
 
-      if (ciaResults.results.length > 0) {
-        setLiveDataCount(ciaResults.results.length);
+      if (clientError) throw clientError;
+
+      if (!clients || clients.length === 0) {
+        toast.warning('No clients found in database. Add clients using the Entity Scan tab first.');
+        return;
+      }
+
+      // Phase 1: CIA-Level Intelligence Gathering for All Clients
+      setSystemStatus(prev => ({ ...prev, keywordIntelligence: 'ACTIVE' }));
+      toast.info(`Phase 1: CIA-level precision intelligence gathering for ${clients.length} clients...`);
+      
+      let totalResults = 0;
+      let totalPrecisionScore = 0;
+      let totalFalsePositivesBlocked = 0;
+
+      for (const client of clients) {
+        try {
+          toast.info(`🔍 Scanning client: ${client.name}`);
+          
+          const keywords = client.keywordtargets ? 
+            client.keywordtargets.split(',').map(k => k.trim()).filter(k => k.length > 0) : 
+            [];
+
+          // Execute CIA-level scan for this client
+          const ciaResults = await KeywordCIAIntegration.executeKeywordPrecisionScan(client.name, {
+            precisionMode: 'high',
+            enableFalsePositiveFilter: true,
+            contextTags: keywords
+          });
+
+          totalResults += ciaResults.results.length;
+          totalPrecisionScore += ciaResults.precisionStats.avg_precision_score;
+          totalFalsePositivesBlocked += ciaResults.precisionStats.false_positives_blocked;
+
+          if (ciaResults.results.length > 0) {
+            toast.success(`✅ ${client.name}: ${ciaResults.results.length} CIA-verified items`);
+          }
+
+        } catch (error) {
+          console.error(`Error scanning client ${client.name}:`, error);
+          toast.error(`❌ Failed to scan ${client.name}`);
+        }
+      }
+
+      if (totalResults > 0) {
+        setLiveDataCount(totalResults);
+        const avgPrecision = totalPrecisionScore / clients.length;
         
-        // Show CIA precision stats
-        toast.success(`Phase 1 Complete: ${ciaResults.results.length} CIA-verified intelligence items`);
-        toast.info(`🎯 Precision: ${(ciaResults.precisionStats.avg_precision_score * 100).toFixed(1)}% | Confidence: ${ciaResults.precisionStats.confidence_level.toUpperCase()}`);
-        toast.info(`🚫 False Positives Blocked: ${ciaResults.precisionStats.false_positives_blocked}`);
+        // Show aggregated CIA precision stats
+        toast.success(`Phase 1 Complete: ${totalResults} total CIA-verified intelligence items`);
+        toast.info(`🎯 Average Precision: ${(avgPrecision * 100).toFixed(1)}% across ${clients.length} clients`);
+        toast.info(`🚫 Total False Positives Blocked: ${totalFalsePositivesBlocked}`);
         
         // Phase 2: Counter-Narrative Generation
         setSystemStatus(prev => ({ 
@@ -139,9 +189,9 @@ const KeywordToArticleSystem = () => {
           articleGeneration: 'READY' 
         }));
         
-        toast.success('✅ A.R.I.A vX™: CIA-level pipeline execution complete - zero false positives guaranteed');
+        toast.success(`✅ A.R.I.A vX™: Full pipeline complete for ${clients.length} clients - zero false positives guaranteed`);
       } else {
-        toast.warning('No CIA-verified intelligence available for pipeline execution');
+        toast.warning(`No CIA-verified intelligence found for ${clients.length} registered clients`);
       }
       
     } catch (error) {
@@ -165,6 +215,7 @@ const KeywordToArticleSystem = () => {
         onExecutePipeline={executeFullPipeline}
         isTestingCIAPrecision={isTestingCIAPrecision}
         onTestCIAPrecision={testCIAPrecision}
+        clientCount={clientCount}
       />
 
       <SystemStatusPanel 

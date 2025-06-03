@@ -3,12 +3,13 @@ import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Target, Zap, BarChart3, Settings, Bot } from 'lucide-react';
+import { Target, Zap, BarChart3, Settings, Bot, Search } from 'lucide-react';
 import CounterNarrativeEngine from './CounterNarrativeEngine';
 import ArticleGenerationHub from './ArticleGenerationHub';
 import PerformanceTracking from './PerformanceTracking';
 import DeploymentCenter from './DeploymentCenter';
 import EntityPrecisionDashboard from './EntityPrecisionDashboard';
+import EntityScanningPanel from './EntityScanningPanel';
 
 interface KeywordSystemTabsProps {
   keywordData: any[];
@@ -18,8 +19,15 @@ interface KeywordSystemTabsProps {
 
 const KeywordSystemTabs = ({ keywordData, counterNarratives, onRefresh }: KeywordSystemTabsProps) => {
   return (
-    <Tabs defaultValue="precision" className="space-y-6">
-      <TabsList className="grid w-full grid-cols-5 bg-corporate-darkTertiary border border-corporate-border h-14">
+    <Tabs defaultValue="entity-scan" className="space-y-6">
+      <TabsList className="grid w-full grid-cols-6 bg-corporate-darkTertiary border border-corporate-border h-14">
+        <TabsTrigger 
+          value="entity-scan" 
+          className="flex items-center gap-2 text-base font-medium data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray hover:text-white transition-colors"
+        >
+          <Search className="h-5 w-5" />
+          <span className="hidden sm:inline">Entity Scan</span>
+        </TabsTrigger>
         <TabsTrigger 
           value="precision" 
           className="flex items-center gap-2 text-base font-medium data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray hover:text-white transition-colors"
@@ -56,6 +64,24 @@ const KeywordSystemTabs = ({ keywordData, counterNarratives, onRefresh }: Keywor
           <span className="hidden sm:inline">Deployment</span>
         </TabsTrigger>
       </TabsList>
+
+      <TabsContent value="entity-scan">
+        <div className="space-y-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div className="space-y-2">
+              <h3 className="text-2xl font-semibold text-white">Entity Intelligence Scanning</h3>
+              <p className="text-base text-corporate-lightGray leading-relaxed max-w-3xl">
+                Scan prospects with CIA-level precision before adding them to your client database
+              </p>
+            </div>
+            <Badge className="bg-yellow-900/20 text-yellow-300 border-yellow-500/30 px-4 py-2 text-base font-medium w-fit">
+              <Search className="h-4 w-4 mr-2" />
+              Prospect Scanning
+            </Badge>
+          </div>
+          <EntityScanningPanel onEntityScanned={onRefresh} />
+        </div>
+      </TabsContent>
 
       <TabsContent value="precision">
         <div className="space-y-6">

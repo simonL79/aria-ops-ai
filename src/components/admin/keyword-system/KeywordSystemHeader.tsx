@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Play, Target, Zap, Database, RefreshCw } from 'lucide-react';
+import { Play, Target, Zap, Database, RefreshCw, Users } from 'lucide-react';
 
 interface KeywordSystemHeaderProps {
   liveDataCount: number;
@@ -10,6 +10,7 @@ interface KeywordSystemHeaderProps {
   onExecutePipeline: () => void;
   isTestingCIAPrecision?: boolean;
   onTestCIAPrecision?: () => void;
+  clientCount?: number;
 }
 
 const KeywordSystemHeader = ({ 
@@ -17,7 +18,8 @@ const KeywordSystemHeader = ({
   isExecutingPipeline, 
   onExecutePipeline,
   isTestingCIAPrecision = false,
-  onTestCIAPrecision
+  onTestCIAPrecision,
+  clientCount = 0
 }: KeywordSystemHeaderProps) => {
   return (
     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-8">
@@ -32,6 +34,11 @@ const KeywordSystemHeader = ({
       </div>
 
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+        <div className="flex items-center gap-3 bg-corporate-darkTertiary rounded-lg px-4 py-2 border border-corporate-border">
+          <Users className="h-5 w-5 text-green-400" />
+          <span className="text-base font-medium text-white">{clientCount} Registered Clients</span>
+        </div>
+
         <div className="flex items-center gap-3 bg-corporate-darkTertiary rounded-lg px-4 py-2 border border-corporate-border">
           <Database className="h-5 w-5 text-blue-400" />
           <span className="text-base font-medium text-white">{liveDataCount} Live Data Points</span>
@@ -70,7 +77,7 @@ const KeywordSystemHeader = ({
             ) : (
               <>
                 <Play className="h-5 w-5" />
-                Execute Full Pipeline
+                Execute Full Pipeline ({clientCount} clients)
               </>
             )}
           </Button>
