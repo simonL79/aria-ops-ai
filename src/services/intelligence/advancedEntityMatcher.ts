@@ -318,30 +318,41 @@ export class AdvancedEntityMatcher {
   }
 
   /**
-   * Get entity fingerprint by entity ID with proper type conversion
+   * Get entity fingerprint by entity name (not UUID) with proper type conversion
    */
-  static async getEntityFingerprint(entityId: string): Promise<AdvancedEntityFingerprint | null> {
-    const { data, error } = await supabase
-      .from('entity_fingerprints_advanced')
-      .select('*')
-      .eq('entity_id', entityId)
-      .single();
+  static async getEntityFingerprint(entityName: string): Promise<AdvancedEntityFingerprint | null> {
+    try {
+      // Search by entity_id OR primary_name to handle both cases
+      const { data, error } = await supabase
+        .from('entity_fingerprints_advanced')
+        .select('*')
+        .or(`entity_id.eq.${entityName},primary_name.eq.${entityName}`)
+        .maybeSingle();
 
-    if (error) {
-      console.error('Failed to get entity fingerprint:', error);
+      if (error) {
+        console.error('Failed to get entity fingerprint:', error);
+        return null;
+      }
+
+      if (!data) {
+        console.log(`No entity fingerprint found for: ${entityName}`);
+        return null;
+      }
+
+      // Convert Supabase Json types to proper arrays with type safety
+      return {
+        id: data.id,
+        entity_id: data.entity_id,
+        primary_name: data.primary_name,
+        aliases: jsonArrayToStringArray(data.aliases),
+        organization: data.organization,
+        locations: jsonArrayToStringArray(data.locations),
+        context_tags: jsonArrayToStringArray(data.context_tags),
+        false_positive_blocklist: jsonArrayToStringArray(data.false_positive_blocklist)
+      };
+    } catch (error) {
+      console.error('Error in getEntityFingerprint:', error);
       return null;
     }
-
-    // Convert Supabase Json types to proper arrays with type safety
-    return {
-      id: data.id,
-      entity_id: data.entity_id,
-      primary_name: data.primary_name,
-      aliases: jsonArrayToStringArray(data.aliases),
-      organization: data.organization,
-      locations: jsonArrayToStringArray(data.locations),
-      context_tags: jsonArrayToStringArray(data.context_tags),
-      false_positive_blocklist: jsonArrayToStringArray(data.false_positive_blocklist)
-    };
   }
 }
