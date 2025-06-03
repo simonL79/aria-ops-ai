@@ -50,7 +50,7 @@ async function logScannerQuery(
   matchedResults: number
 ): Promise<void> {
   try {
-    await supabase.from('scanner_query_log').insert({
+    const { error } = await supabase.from('scanner_query_log').insert({
       entity_name: entityName,
       search_terms: searchTerms,
       platform: platform,
@@ -58,6 +58,10 @@ async function logScannerQuery(
       results_matched_entity: matchedResults,
       executed_at: new Date().toISOString()
     });
+    
+    if (error) {
+      console.error('Failed to log scanner query:', error);
+    }
   } catch (error) {
     console.error('Failed to log scanner query:', error);
   }

@@ -6075,6 +6075,45 @@ export type Database = {
           },
         ]
       }
+      scanner_query_log: {
+        Row: {
+          created_at: string | null
+          entity_name: string
+          error_message: string | null
+          executed_at: string | null
+          id: string
+          platform: string
+          query_duration_ms: number | null
+          results_matched_entity: number | null
+          search_terms: string[]
+          total_results_returned: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          entity_name: string
+          error_message?: string | null
+          executed_at?: string | null
+          id?: string
+          platform: string
+          query_duration_ms?: number | null
+          results_matched_entity?: number | null
+          search_terms: string[]
+          total_results_returned?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          entity_name?: string
+          error_message?: string | null
+          executed_at?: string | null
+          id?: string
+          platform?: string
+          query_duration_ms?: number | null
+          results_matched_entity?: number | null
+          search_terms?: string[]
+          total_results_returned?: number | null
+        }
+        Relationships: []
+      }
       sentience_memory_log: {
         Row: {
           context: string
