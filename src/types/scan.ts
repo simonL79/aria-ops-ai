@@ -53,4 +53,8 @@ export interface LiveScanResult {
   source_credibility_score: number;
   media_is_ai_generated: boolean;
   ai_detection_confidence: number;
+  // Enhanced fields for entity matching
+  match_type?: string;
+  matched_alias?: string;
+  context_keywords?: string[];
 }

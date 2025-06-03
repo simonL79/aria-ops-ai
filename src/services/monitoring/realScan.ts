@@ -148,7 +148,7 @@ export const performRealScan = async (options: ScanOptions = {}): Promise<LiveSc
             );
             
             if (isValidLiveData) {
-              results.push({
+              const processedResult: LiveScanResult = {
                 id: result.id || `enhanced-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
                 platform: result.platform || 'Unknown',
                 content: result.content || result.contextSnippet || '',
@@ -164,12 +164,21 @@ export const performRealScan = async (options: ScanOptions = {}): Promise<LiveSc
                 entity_name: entityName,
                 source_credibility_score: result.source_credibility_score || 75,
                 media_is_ai_generated: result.media_is_ai_generated || false,
-                ai_detection_confidence: result.ai_detection_confidence || 0,
-                // Enhanced fields
-                match_type: result.entity_match?.match_type,
-                matched_alias: result.entity_match?.matched_alias,
-                context_keywords: result.entity_match?.context_keywords
-              });
+                ai_detection_confidence: result.ai_detection_confidence || 0
+              };
+
+              // Add enhanced fields if they exist
+              if (result.entity_match?.match_type) {
+                processedResult.match_type = result.entity_match.match_type;
+              }
+              if (result.entity_match?.matched_alias) {
+                processedResult.matched_alias = result.entity_match.matched_alias;
+              }
+              if (result.entity_match?.context_keywords) {
+                processedResult.context_keywords = result.entity_match.context_keywords;
+              }
+
+              results.push(processedResult);
             } else {
               console.warn('🚫 BLOCKED: Mock data detected and filtered:', result.platform);
             }
