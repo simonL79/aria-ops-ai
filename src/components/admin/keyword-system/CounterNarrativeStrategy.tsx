@@ -27,6 +27,8 @@ const CounterNarrativeStrategy: React.FC<CounterNarrativeStrategyProps> = ({
   const [isGenerating, setIsGenerating] = useState(false);
 
   const generateCounterNarratives = async () => {
+    if (isGenerating) return;
+    
     setIsGenerating(true);
     
     try {
@@ -55,9 +57,9 @@ const CounterNarrativeStrategy: React.FC<CounterNarrativeStrategyProps> = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative z-10">
       {/* Counter-Narrative Generation Engine */}
-      <Card className="bg-corporate-darkSecondary border-corporate-accent/30">
+      <Card className="bg-corporate-darkSecondary border-corporate-accent/30 relative z-20">
         <CardHeader>
           <CardTitle className="text-corporate-accent flex items-center gap-2">
             <Brain className="h-5 w-5" />
@@ -68,7 +70,8 @@ const CounterNarrativeStrategy: React.FC<CounterNarrativeStrategyProps> = ({
           <Button
             onClick={generateCounterNarratives}
             disabled={isGenerating}
-            className="bg-corporate-accent text-black hover:bg-corporate-accent/90"
+            className="bg-corporate-accent text-black hover:bg-corporate-accent/90 disabled:opacity-50 disabled:cursor-not-allowed relative z-30"
+            type="button"
           >
             <Zap className={`h-4 w-4 mr-2 ${isGenerating ? 'animate-pulse' : ''}`} />
             {isGenerating ? 'Generating Counter-Narratives...' : 'Generate AI Counter-Narratives'}
@@ -84,9 +87,9 @@ const CounterNarrativeStrategy: React.FC<CounterNarrativeStrategyProps> = ({
       </Card>
 
       {/* Generated Counter-Narratives */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 relative z-10">
         {narratives.length > 0 ? narratives.slice(0, 6).map((narrative, index) => (
-          <Card key={narrative.id || index} className="bg-corporate-dark border-corporate-border hover:border-corporate-accent/50 transition-colors">
+          <Card key={narrative.id || index} className="bg-corporate-dark border-corporate-border hover:border-corporate-accent/50 transition-colors relative z-20">
             <CardContent className="p-4">
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-2">
@@ -133,7 +136,7 @@ const CounterNarrativeStrategy: React.FC<CounterNarrativeStrategyProps> = ({
             </CardContent>
           </Card>
         )) : (
-          <Card className="col-span-full bg-corporate-darkSecondary border-corporate-border">
+          <Card className="col-span-full bg-corporate-darkSecondary border-corporate-border relative z-20">
             <CardContent className="p-8 text-center">
               <Brain className="h-12 w-12 text-gray-500 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-300 mb-2">No Counter-Narratives Generated Yet</h3>
@@ -142,8 +145,10 @@ const CounterNarrativeStrategy: React.FC<CounterNarrativeStrategyProps> = ({
               </p>
               <Button
                 onClick={generateCounterNarratives}
+                disabled={isGenerating}
                 variant="outline"
-                className="border-corporate-accent text-corporate-accent hover:bg-corporate-accent hover:text-black"
+                className="border-corporate-accent text-corporate-accent hover:bg-corporate-accent hover:text-black disabled:opacity-50 disabled:cursor-not-allowed relative z-30"
+                type="button"
               >
                 Generate First Counter-Narrative
               </Button>
@@ -153,7 +158,7 @@ const CounterNarrativeStrategy: React.FC<CounterNarrativeStrategyProps> = ({
       </div>
 
       {narratives.length > 0 && (
-        <Card className="bg-blue-900/20 border-blue-500/30">
+        <Card className="bg-blue-900/20 border-blue-500/30 relative z-20">
           <CardContent className="p-4">
             <div className="flex items-center gap-2 text-blue-400">
               <Shield className="h-4 w-4" />

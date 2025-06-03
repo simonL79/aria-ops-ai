@@ -46,6 +46,11 @@ const KeywordToArticleSystem = () => {
   };
 
   const executeFullPipeline = async () => {
+    if (isExecutingPipeline) {
+      toast.warning('Pipeline execution already in progress');
+      return;
+    }
+
     setIsExecutingPipeline(true);
     toast.info('🔥 A.R.I.A vX™: Executing full live intelligence pipeline...');
 
@@ -108,7 +113,7 @@ const KeywordToArticleSystem = () => {
   }, []);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative z-0">
       <KeywordSystemHeader
         liveDataCount={liveDataCount}
         isExecutingPipeline={isExecutingPipeline}

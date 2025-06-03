@@ -12,6 +12,7 @@ import {
   Clock,
   Settings
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface CounterNarrative {
   id: string;
@@ -36,20 +37,36 @@ const ArticleGenerationHub: React.FC<ArticleGenerationHubProps> = ({
   const [generatingId, setGeneratingId] = useState<string | null>(null);
 
   const generateArticle = async (narrativeId: string) => {
+    if (generatingId === narrativeId) return;
+    
     setGeneratingId(narrativeId);
-    // Simulate article generation
-    setTimeout(() => {
-      setGeneratingId(null);
+    
+    try {
+      toast.info('📝 A.R.I.A vX™: Generating article...');
+      
+      // Simulate article generation
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      
+      toast.success('✅ Article generated successfully');
       onRefresh();
-    }, 3000);
+    } catch (error) {
+      console.error('Article generation failed:', error);
+      toast.error('❌ Article generation failed');
+    } finally {
+      setGeneratingId(null);
+    }
+  };
+
+  const customizeNarrative = (narrativeId: string) => {
+    toast.info('🔧 Opening customization panel...');
   };
 
   const approvedNarratives = narratives.filter(n => n.status === 'approved');
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative z-10">
       {/* Generation Hub Header */}
-      <Card className="bg-corporate-darkSecondary border-corporate-accent/30">
+      <Card className="bg-corporate-darkSecondary border-corporate-accent/30 relative z-20">
         <CardHeader>
           <CardTitle className="text-corporate-accent flex items-center gap-2">
             <FileText className="h-5 w-5" />
@@ -64,9 +81,9 @@ const ArticleGenerationHub: React.FC<ArticleGenerationHubProps> = ({
       </Card>
 
       {/* Approved Narratives for Generation */}
-      <div className="space-y-4">
+      <div className="space-y-4 relative z-10">
         {approvedNarratives.map((narrative) => (
-          <Card key={narrative.id} className="bg-corporate-dark border-corporate-border">
+          <Card key={narrative.id} className="bg-corporate-dark border-corporate-border relative z-20">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="text-white">{narrative.recommended_theme}</CardTitle>
@@ -114,7 +131,8 @@ const ArticleGenerationHub: React.FC<ArticleGenerationHubProps> = ({
                 <Button
                   onClick={() => generateArticle(narrative.id)}
                   disabled={generatingId === narrative.id}
-                  className="bg-corporate-accent text-black hover:bg-corporate-accent/90"
+                  className="bg-corporate-accent text-black hover:bg-corporate-accent/90 disabled:opacity-50 disabled:cursor-not-allowed relative z-30"
+                  type="button"
                 >
                   {generatingId === narrative.id ? (
                     <>
@@ -128,7 +146,12 @@ const ArticleGenerationHub: React.FC<ArticleGenerationHubProps> = ({
                     </>
                   )}
                 </Button>
-                <Button variant="outline" className="border-gray-600 text-gray-300">
+                <Button 
+                  onClick={() => customizeNarrative(narrative.id)}
+                  variant="outline" 
+                  className="border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white relative z-30"
+                  type="button"
+                >
                   <Settings className="h-4 w-4 mr-2" />
                   Customize
                 </Button>
@@ -138,7 +161,7 @@ const ArticleGenerationHub: React.FC<ArticleGenerationHubProps> = ({
         ))}
 
         {approvedNarratives.length === 0 && (
-          <Card className="bg-corporate-darkSecondary border-corporate-border">
+          <Card className="bg-corporate-darkSecondary border-corporate-border relative z-20">
             <CardContent className="p-8 text-center">
               <FileText className="h-12 w-12 text-gray-500 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-300 mb-2">No Approved Strategies</h3>
