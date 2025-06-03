@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { AdvancedEntityMatcher, type AdvancedEntityFingerprint } from './advancedEntityMatcher';
 import type { ScanOptions, LiveScanResult } from '@/types/scan';
@@ -204,6 +203,7 @@ export class CIALevelScanner {
 
   /**
    * Get or create default entity fingerprint for target
+   * Fixed to generate proper entity_id and handle creation properly
    */
   private static async getOrCreateDefaultFingerprint(entityName: string): Promise<AdvancedEntityFingerprint> {
     // First try to find existing fingerprint
@@ -212,18 +212,20 @@ export class CIALevelScanner {
       return existing;
     }
 
-    // Create default fingerprint for Simon Lindsay (example)
+    // Create default fingerprint for the entity
+    const entityId = `entity_${entityName.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '')}`;
+    
     const defaultFingerprint = {
-      entity_id: entityName.toLowerCase().replace(/\s+/g, '-'),
+      entity_id: entityId,
       primary_name: entityName,
       aliases: [
-        'Simon L.',
-        'S. Lindsay', 
-        '@simonlindsay',
-        'Simon KSL'
-      ],
-      organization: 'KSL Hair',
-      locations: ['Glasgow', 'Scotland', 'UK'],
+        entityName.split(' ')[0] + ' ' + entityName.split(' ')[1]?.charAt(0) + '.',
+        entityName.split(' ').map(n => n.charAt(0)).join('. '), 
+        `@${entityName.toLowerCase().replace(/\s+/g, '')}`,
+        entityName.replace(/\s+/g, '')
+      ].filter(alias => alias.length > 2), // Remove very short aliases
+      organization: 'Unknown',
+      locations: ['UK', 'United Kingdom'],
       context_tags: [
         'fraud', 'arrest', 'bench warrant', 'investigation',
         'criminal', 'lawsuit', 'allegations', 'misconduct'
@@ -234,12 +236,21 @@ export class CIALevelScanner {
       ]
     };
 
-    const fingerprintId = await AdvancedEntityMatcher.createEntityFingerprint(defaultFingerprint);
-    
-    return {
-      id: fingerprintId,
-      ...defaultFingerprint
-    };
+    try {
+      const fingerprintId = await AdvancedEntityMatcher.createEntityFingerprint(defaultFingerprint);
+      
+      return {
+        id: fingerprintId,
+        ...defaultFingerprint
+      };
+    } catch (error) {
+      console.error('Failed to create entity fingerprint, using temporary one:', error);
+      // Return a temporary fingerprint if database creation fails
+      return {
+        id: `temp_${Date.now()}`,
+        ...defaultFingerprint
+      };
+    }
   }
 
   /**

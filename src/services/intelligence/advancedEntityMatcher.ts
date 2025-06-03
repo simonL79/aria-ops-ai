@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 /**
@@ -263,16 +264,20 @@ export class AdvancedEntityMatcher {
     matchedCount: number,
     avgScore: number
   ): Promise<void> {
-    await supabase.from('entity_query_variants').insert({
-      entity_fingerprint_id: fingerprintId,
-      query_text: variant.query_text,
-      query_type: variant.query_type,
-      search_fingerprint_id: variant.search_fingerprint_id,
-      platform: platform,
-      results_count: resultsCount,
-      matched_count: matchedCount,
-      avg_match_score: avgScore
-    });
+    try {
+      await supabase.from('entity_query_variants').insert({
+        entity_fingerprint_id: fingerprintId,
+        query_text: variant.query_text,
+        query_type: variant.query_type,
+        search_fingerprint_id: variant.search_fingerprint_id,
+        platform: platform,
+        results_count: resultsCount,
+        matched_count: matchedCount,
+        avg_match_score: avgScore
+      });
+    } catch (error) {
+      console.error('Failed to log query execution:', error);
+    }
   }
 
   /**
@@ -283,19 +288,23 @@ export class AdvancedEntityMatcher {
     decision: MatchDecision,
     sourceUrl: string
   ): Promise<void> {
-    await supabase.from('entity_match_decisions').insert({
-      query_variant_id: queryVariantId,
-      source_url: sourceUrl,
-      raw_title: decision.raw_title,
-      raw_content: decision.raw_content,
-      matched_entity: decision.matched_entity,
-      match_score: decision.match_score,
-      decision: decision.decision,
-      reason_discarded: decision.reason_discarded,
-      false_positive_detected: decision.false_positive_detected,
-      ner_entities: decision.ner_entities,
-      context_matches: decision.context_matches
-    });
+    try {
+      await supabase.from('entity_match_decisions').insert({
+        query_variant_id: queryVariantId,
+        source_url: sourceUrl,
+        raw_title: decision.raw_title,
+        raw_content: decision.raw_content,
+        matched_entity: decision.matched_entity,
+        match_score: decision.match_score,
+        decision: decision.decision,
+        reason_discarded: decision.reason_discarded,
+        false_positive_detected: decision.false_positive_detected,
+        ner_entities: decision.ner_entities,
+        context_matches: decision.context_matches
+      });
+    } catch (error) {
+      console.error('Failed to log match decision:', error);
+    }
   }
 
   /**
@@ -319,14 +328,16 @@ export class AdvancedEntityMatcher {
 
   /**
    * Get entity fingerprint by entity name (not UUID) with proper type conversion
+   * Fixed to search by text fields instead of treating entity names as UUIDs
    */
   static async getEntityFingerprint(entityName: string): Promise<AdvancedEntityFingerprint | null> {
     try {
-      // Search by entity_id OR primary_name to handle both cases
+      // Search by primary_name or entity_id (both are text fields, not UUIDs)
       const { data, error } = await supabase
         .from('entity_fingerprints_advanced')
         .select('*')
-        .or(`entity_id.eq.${entityName},primary_name.eq.${entityName}`)
+        .or(`primary_name.ilike.%${entityName}%,entity_id.ilike.%${entityName}%`)
+        .limit(1)
         .maybeSingle();
 
       if (error) {
