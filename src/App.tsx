@@ -59,10 +59,10 @@ function App() {
                   <Route path="/admin" element={<AdminDashboard />} />
                   <Route path="/admin/login" element={<AdminLogin />} />
                   <Route path="/admin/genesis-sentinel" element={<GenesisSentinel />} />
-                  <Route path="/admin/persona-saturation" element={<PersonaSaturationPage />} />
                   <Route path="/admin/keyword-to-article" element={<KeywordToArticleSystemPage />} />
                   <Route path="/admin/watchtower" element={<WatchtowerPage />} />
                   <Route path="/admin/intelligence-core" element={<IntelligenceCorePage />} />
+                  <Route path="/admin/persona-saturation" element={<PersonaSaturationPage />} />
                   <Route path="/admin/legal-ops" element={<LegalOpsPage />} />
                   <Route path="/admin/clients" element={<ClientsPage />} />
                   <Route path="/admin/qa-testing" element={<QATestPage />} />
