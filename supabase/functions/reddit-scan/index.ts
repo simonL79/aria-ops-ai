@@ -29,17 +29,16 @@ serve(async (req) => {
     const entityName = entity || targetEntity || 'Simon Lindsay'; // Default for testing
     console.log('[REDDIT-SCAN] Starting ENTITY-SPECIFIC Reddit scan for:', entityName);
     console.log('[REDDIT-SCAN] Search variations:', search_variations);
+    console.log('[REDDIT-SCAN] Context tags:', context_tags);
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Use entity-specific search variations - but be more inclusive
+    // Use entity-specific search variations - focus on exact matches
     const searchTerms = search_variations.length > 0 ? search_variations : [
       entityName, 
-      `"${entityName}"`,
-      entityName.split(' ')[0], // First name
-      entityName.split(' ').slice(-1)[0] // Last name
+      `"${entityName}"`, // Exact phrase search is most important
     ];
     
     const results = [];
@@ -73,29 +72,36 @@ serve(async (req) => {
           const content = item[1].match(/<content type="html">(.*?)<\/content>/)?.[1]?.replace(/<!\[CDATA\[(.*?)\]\]>/g, '$1') || title;
           const updated = item[1].match(/<updated>(.*?)<\/updated>/)?.[1] || '';
 
-          // More lenient entity filtering: check for any name parts
+          // STRICT entity filtering: only include results that specifically mention the target entity
           const fullText = (title + ' ' + content).toLowerCase();
           const entityLower = entityName.toLowerCase();
-          const nameParts = entityLower.split(' ');
-          const firstName = nameParts[0];
-          const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : '';
           
-          // Much more inclusive matching - include if ANY name part matches
-          const containsFirstName = firstName && fullText.includes(firstName);
-          const containsLastName = lastName && fullText.includes(lastName);
-          const containsFullName = fullText.includes(entityLower);
-          const containsAlternateName = alternate_names.length > 0 
-            ? alternate_names.some(name => fullText.includes(name.toLowerCase()))
-            : false;
+          // Require either exact full name match OR exact phrase match OR contextual match
+          const hasFullName = fullText.includes(entityLower);
+          const hasExactPhrase = fullText.includes(`"${entityLower}"`);
+          
+          // Contextual matching - if we have context tags, be more flexible
+          let hasContextualMatch = false;
+          if (context_tags && context_tags.length > 0) {
+            const hasContextTags = context_tags.some(tag => 
+              fullText.includes(tag.toLowerCase())
+            );
+            
+            if (hasContextTags) {
+              const nameParts = entityLower.split(' ');
+              const hasAllNameParts = nameParts.every(part => fullText.includes(part));
+              hasContextualMatch = hasAllNameParts;
+            }
+          }
 
-          const entityMentioned = containsFirstName || containsLastName || containsFullName || containsAlternateName;
+          const entityMentioned = hasFullName || hasExactPhrase || hasContextualMatch;
 
           if (!entityMentioned) {
-            console.log('[REDDIT-SCAN] Filtered out non-entity content:', title.substring(0, 50));
+            console.log('[REDDIT-SCAN] Filtered out non-specific content:', title.substring(0, 50));
             continue;
           }
 
-          console.log('[REDDIT-SCAN] ✅ Entity match found:', title.substring(0, 50));
+          console.log('[REDDIT-SCAN] ✅ Specific entity match found:', title.substring(0, 50));
 
           // Calculate threat severity based on context tags
           let severity = 'low';
@@ -132,7 +138,7 @@ serve(async (req) => {
       }
     }
 
-    console.log('[REDDIT-SCAN] Total entity-matched results:', results.length);
+    console.log('[REDDIT-SCAN] Total entity-specific results:', results.length);
 
     // Insert with proper error handling and data validation
     if (results.length > 0) {
@@ -167,7 +173,7 @@ serve(async (req) => {
       success: true,
       inserted: results.length, 
       results: results,
-      message: `Reddit entity-specific scan completed: ${results.length} items found for "${entityName}"`,
+      message: `Reddit entity-specific scan completed: ${results.length} items found specifically for "${entityName}"`,
       entity_name: entityName,
       search_terms: searchTerms,
       dataSource: 'LIVE_REDDIT_RSS'

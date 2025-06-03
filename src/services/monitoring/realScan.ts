@@ -75,7 +75,7 @@ async function logScannerQuery(
 }
 
 /**
- * Much more lenient content filtering - focus on recall over precision
+ * STRICT entity-specific content filtering - only return results specifically about the target entity
  */
 function filterEntityContent(results: any[], entityProfile: EntitySearchProfile): any[] {
   console.log(`🔍 Filtering ${results.length} results for entity: ${entityProfile.entity_name}`);
@@ -86,24 +86,40 @@ function filterEntityContent(results: any[], entityProfile: EntitySearchProfile)
     const fullText = content + ' ' + url;
     
     const entityName = entityProfile.entity_name.toLowerCase();
-    const nameParts = entityName.split(' ');
-    const firstName = nameParts[0];
-    const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : '';
     
-    // Very lenient matching - if any name part appears, include it
-    const containsFirstName = firstName && fullText.includes(firstName);
-    const containsLastName = lastName && fullText.includes(lastName);
-    const containsFullName = fullText.includes(entityName);
+    // For specific entity matching - require either:
+    // 1. Full name match (e.g., "simon lindsay")
+    // 2. Exact phrase match with quotes
+    // 3. Match with context that suggests it's the same person
     
-    // For Simon Lindsay - include if contains "simon" OR "lindsay" OR both
-    const isEntityMatch = containsFirstName || containsLastName || containsFullName;
+    const hasFullName = fullText.includes(entityName);
+    const hasExactPhrase = fullText.includes(`"${entityName}"`);
+    
+    // Check for contextual matches - if searching for "Simon Lindsay", 
+    // require additional context clues if only partial name matches
+    let hasContextualMatch = false;
+    if (entityProfile.context_tags.length > 0) {
+      const hasContextTags = entityProfile.context_tags.some(tag => 
+        fullText.includes(tag.toLowerCase())
+      );
+      
+      // If we have context tags like "Glasgow", "KSL Hair", etc.,
+      // we can be more flexible with partial name matches
+      if (hasContextTags) {
+        const nameParts = entityName.split(' ');
+        const hasAllNameParts = nameParts.every(part => fullText.includes(part));
+        hasContextualMatch = hasAllNameParts;
+      }
+    }
+    
+    const isEntityMatch = hasFullName || hasExactPhrase || hasContextualMatch;
     
     if (!isEntityMatch) {
-      console.log(`🔍 Filtered out: ${content.substring(0, 100)}... (no entity match)`);
+      console.log(`🔍 Filtered out: ${content.substring(0, 100)}... (no specific entity match)`);
       return false;
     }
     
-    console.log(`✅ Entity match found: ${content.substring(0, 100)}...`);
+    console.log(`✅ Specific entity match found: ${content.substring(0, 100)}...`);
     return true;
   });
 }
@@ -181,12 +197,12 @@ export const performRealScan = async (options: ScanOptions = {}): Promise<LiveSc
             }));
           }
 
-          // Apply more lenient entity filtering
+          // Apply STRICT entity filtering - only results specifically about this entity
           const beforeFilterCount = scanResults.length;
           const filteredResults = filterEntityContent(scanResults, entityProfile);
           const afterFilterCount = filteredResults.length;
           
-          console.log(`🔍 ${func}: ${beforeFilterCount} raw results → ${afterFilterCount} entity-matched results`);
+          console.log(`🔍 ${func}: ${beforeFilterCount} raw results → ${afterFilterCount} entity-specific results`);
           
           // Log the query for audit trail
           await logScannerQuery(entityName, entityProfile.search_variations, func, beforeFilterCount, afterFilterCount);
@@ -236,7 +252,6 @@ export const performRealScan = async (options: ScanOptions = {}): Promise<LiveSc
 
     console.log(`✅ A.R.I.A™ OSINT: Entity-specific scan complete - ${results.length} verified results for "${entityName}"`);
     
-    // Remove the overly strict final validation - trust the filtering above
     console.log(`🔍 Final results: ${results.length} entity-specific intelligence items`);
     
     return results;
