@@ -181,7 +181,7 @@ export class RDPComplianceEnforcer {
   }
 
   /**
-   * Quarantine system for violations
+   * Quarantine system for violations using existing tables
    */
   private static async quarantineViolation(violation: {
     violation_type: string;
@@ -193,19 +193,16 @@ export class RDPComplianceEnforcer {
     try {
       const quarantineRecord = {
         id: crypto.randomUUID(),
-        violation_type: violation.violation_type,
-        content: violation.content,
-        source_url: violation.source_url,
-        detected_at: new Date().toISOString(),
-        stage: violation.stage,
-        quarantined: true,
-        reason: violation.reason,
-        policy_version: 'RDP-001'
+        entity_name: 'RDP-001_VIOLATION',
+        event_type: 'rdp_compliance_violation',
+        summary: `RDP-001 Violation: ${violation.reason}`,
+        priority: 'high',
+        seen: false
       };
 
-      // Store in quarantine table
+      // Store in notifications table (existing table)
       const { error } = await supabase
-        .from('compliance_violations')
+        .from('aria_notifications')
         .insert(quarantineRecord);
 
       if (error) {
@@ -214,8 +211,8 @@ export class RDPComplianceEnforcer {
         console.log(`🔒 RDP-001: Violation quarantined: ${violation.violation_type}`);
       }
 
-      // Notify admin
-      await this.notifyAdmin(violation.reason, quarantineRecord);
+      // Also log to activity logs
+      await this.logToActivityLogs(violation.reason, quarantineRecord);
       
     } catch (error) {
       console.error('Quarantine system error:', error);
@@ -223,29 +220,28 @@ export class RDPComplianceEnforcer {
   }
 
   /**
-   * Admin notification system
+   * Log to activity logs using existing table
    */
-  private static async notifyAdmin(reason: string, violation: any): Promise<void> {
+  private static async logToActivityLogs(reason: string, violation: any): Promise<void> {
     try {
-      // Log to admin alerts
       await supabase
-        .from('admin_alerts')
+        .from('activity_logs')
         .insert({
-          alert_type: 'rdp_compliance_violation',
-          message: `RDP-001 Violation: ${reason}`,
-          severity: 'high',
-          data: violation,
-          created_at: new Date().toISOString()
+          action: 'rdp_compliance_violation',
+          entity_type: 'compliance',
+          entity_id: violation.id,
+          details: reason,
+          user_email: 'system@aria.com'
         });
         
-      console.log(`📢 RDP-001: Admin notified of violation: ${reason}`);
+      console.log(`📢 RDP-001: Activity logged: ${reason}`);
     } catch (error) {
-      console.error('Admin notification failed:', error);
+      console.error('Activity logging failed:', error);
     }
   }
 
   /**
-   * Get compliance statistics
+   * Get compliance statistics using existing tables
    */
   static async getComplianceStats(): Promise<{
     total_violations: number;
@@ -255,9 +251,9 @@ export class RDPComplianceEnforcer {
   }> {
     try {
       const { data: violations, error } = await supabase
-        .from('compliance_violations')
+        .from('aria_notifications')
         .select('*')
-        .eq('policy_version', 'RDP-001');
+        .eq('event_type', 'rdp_compliance_violation');
 
       if (error) {
         console.error('Failed to fetch compliance stats:', error);
@@ -270,15 +266,37 @@ export class RDPComplianceEnforcer {
       }
 
       const stats = {
-        total_violations: violations.length,
-        violations_by_type: {},
-        violations_by_stage: {},
-        quarantined_items: violations.filter(v => v.quarantined).length
+        total_violations: violations?.length || 0,
+        violations_by_type: {} as Record<string, number>,
+        violations_by_stage: {} as Record<string, number>,
+        quarantined_items: violations?.filter(v => !v.seen).length || 0
       };
 
-      violations.forEach(v => {
-        stats.violations_by_type[v.violation_type] = (stats.violations_by_type[v.violation_type] || 0) + 1;
-        stats.violations_by_stage[v.stage] = (stats.violations_by_stage[v.stage] || 0) + 1;
+      // Parse violation types and stages from summary
+      violations?.forEach(v => {
+        const summary = v.summary || '';
+        
+        // Extract type from summary
+        if (summary.includes('mock')) {
+          stats.violations_by_type['mock_content'] = (stats.violations_by_type['mock_content'] || 0) + 1;
+        } else if (summary.includes('untrusted')) {
+          stats.violations_by_type['untrusted_source'] = (stats.violations_by_type['untrusted_source'] || 0) + 1;
+        } else if (summary.includes('dead')) {
+          stats.violations_by_type['dead_link'] = (stats.violations_by_type['dead_link'] || 0) + 1;
+        } else {
+          stats.violations_by_type['simulation_detected'] = (stats.violations_by_type['simulation_detected'] || 0) + 1;
+        }
+
+        // Extract stage from summary
+        if (summary.includes('generation')) {
+          stats.violations_by_stage['generation'] = (stats.violations_by_stage['generation'] || 0) + 1;
+        } else if (summary.includes('approval')) {
+          stats.violations_by_stage['approval'] = (stats.violations_by_stage['approval'] || 0) + 1;
+        } else if (summary.includes('deployment')) {
+          stats.violations_by_stage['deployment'] = (stats.violations_by_stage['deployment'] || 0) + 1;
+        } else {
+          stats.violations_by_stage['crawling'] = (stats.violations_by_stage['crawling'] || 0) + 1;
+        }
       });
 
       return stats;
@@ -339,11 +357,11 @@ export class RDPComplianceEnforcer {
       cutoffDate.setHours(cutoffDate.getHours() - hours);
       
       const { data, error } = await supabase
-        .from('compliance_violations')
+        .from('aria_notifications')
         .select('*')
-        .eq('policy_version', 'RDP-001')
-        .gte('detected_at', cutoffDate.toISOString())
-        .order('detected_at', { ascending: false });
+        .eq('event_type', 'rdp_compliance_violation')
+        .gte('created_at', cutoffDate.toISOString())
+        .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Failed to fetch recent violations:', error);

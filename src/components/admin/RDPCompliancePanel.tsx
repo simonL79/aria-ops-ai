@@ -14,7 +14,7 @@ const RDPCompliancePanel = () => {
     violations_by_stage: {},
     quarantined_items: 0
   });
-  const [auditResult, setAuditResult] = useState(null);
+  const [auditResult, setAuditResult] = useState<any>(null);
   const [isAuditing, setIsAuditing] = useState(false);
   const [lastAudit, setLastAudit] = useState(new Date());
 
@@ -145,7 +145,7 @@ const RDPCompliancePanel = () => {
             {Object.entries(complianceStats.violations_by_type).map(([type, count]) => (
               <div key={type} className="flex items-center justify-between">
                 <span className="text-sm capitalize">{type.replace('_', ' ')}</span>
-                <Badge variant="destructive">{count}</Badge>
+                <Badge variant="destructive">{String(count)}</Badge>
               </div>
             ))}
             {Object.keys(complianceStats.violations_by_type).length === 0 && (
@@ -167,7 +167,7 @@ const RDPCompliancePanel = () => {
             {Object.entries(complianceStats.violations_by_stage).map(([stage, count]) => (
               <div key={stage} className="flex items-center justify-between">
                 <span className="text-sm capitalize">{stage}</span>
-                <Badge variant="outline">{count}</Badge>
+                <Badge variant="outline">{String(count)}</Badge>
               </div>
             ))}
             {Object.keys(complianceStats.violations_by_stage).length === 0 && (
