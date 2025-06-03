@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -49,6 +50,11 @@ const LiveKeywordIntelligence: React.FC<LiveKeywordIntelligenceProps> = ({
   const executeLiveIntelligenceScan = async () => {
     if (!targetEntity.trim()) {
       toast.error('Please enter a target entity to scan');
+      return;
+    }
+
+    if (isScanning) {
+      toast.warning('Scan already in progress');
       return;
     }
 
@@ -179,7 +185,7 @@ const LiveKeywordIntelligence: React.FC<LiveKeywordIntelligenceProps> = ({
   const displayData = liveIntelligence.length > 0 ? liveIntelligence : keywordData;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative z-0">
       {/* Live Intelligence Scanner */}
       <Card className="bg-corporate-darkSecondary border-corporate-accent/30">
         <CardHeader>
@@ -198,12 +204,14 @@ const LiveKeywordIntelligence: React.FC<LiveKeywordIntelligenceProps> = ({
                 onChange={(e) => setTargetEntity(e.target.value)}
                 placeholder="Enter person, company, or brand name"
                 className="bg-corporate-dark border-corporate-border text-white"
-                onKeyPress={(e) => e.key === 'Enter' && executeLiveIntelligenceScan()}
+                onKeyPress={(e) => e.key === 'Enter' && !isScanning && executeLiveIntelligenceScan()}
+                disabled={isScanning}
               />
               <Button
                 onClick={executeLiveIntelligenceScan}
-                disabled={isScanning}
-                className="bg-corporate-accent text-black hover:bg-corporate-accent/90"
+                disabled={isScanning || !targetEntity.trim()}
+                className="bg-corporate-accent text-black hover:bg-corporate-accent/90 disabled:opacity-50 disabled:cursor-not-allowed shrink-0 relative z-10"
+                type="button"
               >
                 <Zap className={`h-4 w-4 mr-2 ${isScanning ? 'animate-pulse' : ''}`} />
                 {isScanning ? 'Scanning...' : 'Scan Live Intelligence'}
@@ -284,7 +292,7 @@ const LiveKeywordIntelligence: React.FC<LiveKeywordIntelligenceProps> = ({
                     href={item.source_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-corporate-accent hover:text-corporate-accent/80 flex items-center gap-1"
+                    className="text-corporate-accent hover:text-corporate-accent/80 flex items-center gap-1 relative z-10"
                   >
                     <ExternalLink className="h-3 w-3" />
                     View
@@ -319,7 +327,8 @@ const LiveKeywordIntelligence: React.FC<LiveKeywordIntelligenceProps> = ({
             <Button
               onClick={() => setTargetEntity('sample entity')}
               variant="outline"
-              className="border-corporate-accent text-corporate-accent hover:bg-corporate-accent hover:text-black"
+              className="border-corporate-accent text-corporate-accent hover:bg-corporate-accent hover:text-black relative z-10"
+              type="button"
             >
               Try Sample Scan
             </Button>

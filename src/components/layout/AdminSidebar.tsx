@@ -96,7 +96,7 @@ const AdminSidebar = () => {
 
   return (
     <div className={cn(
-      "flex flex-col h-full bg-corporate-dark border-r border-corporate-border transition-all duration-300",
+      "flex flex-col h-full bg-corporate-dark border-r border-corporate-border transition-all duration-300 relative z-10",
       collapsed ? "w-16" : "w-72"
     )}>
       {/* Header */}
@@ -112,7 +112,7 @@ const AdminSidebar = () => {
             variant="ghost"
             size="sm"
             onClick={() => setCollapsed(!collapsed)}
-            className="text-corporate-lightGray hover:text-white"
+            className="text-corporate-lightGray hover:text-white hover:bg-corporate-darkSecondary shrink-0"
           >
             {collapsed ? <Activity className="h-4 w-4" /> : <Target className="h-4 w-4" />}
           </Button>
@@ -126,7 +126,7 @@ const AdminSidebar = () => {
             "flex items-center gap-2 p-2 rounded-lg bg-green-900/20 border border-green-500/30",
             collapsed && "justify-center"
           )}>
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse shrink-0" />
             {!collapsed && (
               <div>
                 <p className="text-xs font-medium text-green-400">LIVE DATA ACTIVE</p>
@@ -140,7 +140,7 @@ const AdminSidebar = () => {
         <div className="space-y-2 mb-6">
           {!collapsed && (
             <div className="flex items-center gap-2 px-2 py-1">
-              <Lock className="h-3 w-3 text-corporate-accent" />
+              <Lock className="h-3 w-3 text-corporate-accent shrink-0" />
               <h3 className="text-xs font-semibold text-corporate-accent uppercase tracking-wider">
                 Core Modules
               </h3>
@@ -148,26 +148,26 @@ const AdminSidebar = () => {
           )}
           
           {primaryModules.map((item) => (
-            <Link key={item.href} to={item.href}>
+            <Link key={item.href} to={item.href} className="block">
               <Button
                 variant="ghost"
                 className={cn(
-                  "w-full justify-start h-auto p-3 text-left hover:bg-corporate-darkSecondary",
+                  "w-full justify-start h-auto p-3 text-left hover:bg-corporate-darkSecondary relative z-20",
                   isActiveRoute(item.href) && "bg-corporate-accent text-black hover:bg-corporate-accent/90",
                   collapsed && "px-2 justify-center",
                   item.isFeature && "border border-corporate-accent/30 bg-corporate-accent/5"
                 )}
               >
-                <item.icon className={cn("h-4 w-4", collapsed ? "" : "mr-3")} />
+                <item.icon className={cn("h-4 w-4 shrink-0", collapsed ? "" : "mr-3")} />
                 {!collapsed && (
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                      <span className={cn("font-medium", item.isFeature && "text-corporate-accent")}>
+                      <span className={cn("font-medium truncate", item.isFeature && "text-corporate-accent")}>
                         {item.isFeature ? 'A.R.I.A vX™' : item.title}
                       </span>
-                      <span className="text-xs opacity-60">{item.classification}</span>
+                      <span className="text-xs opacity-60 shrink-0 ml-2">{item.classification}</span>
                     </div>
-                    <p className="text-xs opacity-70 mt-0.5">
+                    <p className="text-xs opacity-70 mt-0.5 truncate">
                       {item.isFeature ? 'Keyword-to-Article System' : item.description}
                     </p>
                   </div>
@@ -183,7 +183,7 @@ const AdminSidebar = () => {
         <div className="space-y-2 mt-6">
           {!collapsed && (
             <div className="flex items-center gap-2 px-2 py-1">
-              <Settings className="h-3 w-3 text-corporate-lightGray" />
+              <Settings className="h-3 w-3 text-corporate-lightGray shrink-0" />
               <h3 className="text-xs font-semibold text-corporate-lightGray uppercase tracking-wider">
                 Operations
               </h3>
@@ -191,20 +191,20 @@ const AdminSidebar = () => {
           )}
           
           {operationalModules.map((item) => (
-            <Link key={item.href} to={item.href}>
+            <Link key={item.href} to={item.href} className="block">
               <Button
                 variant="ghost"
                 className={cn(
-                  "w-full justify-start h-auto p-3 text-left hover:bg-corporate-darkSecondary text-corporate-lightGray",
+                  "w-full justify-start h-auto p-3 text-left hover:bg-corporate-darkSecondary text-corporate-lightGray relative z-20",
                   isActiveRoute(item.href) && "bg-corporate-accent text-black hover:bg-corporate-accent/90",
                   collapsed && "px-2 justify-center"
                 )}
               >
-                <item.icon className={cn("h-4 w-4", collapsed ? "" : "mr-3")} />
+                <item.icon className={cn("h-4 w-4 shrink-0", collapsed ? "" : "mr-3")} />
                 {!collapsed && (
-                  <div className="flex-1">
-                    <span className="font-medium">{item.title}</span>
-                    <p className="text-xs opacity-70 mt-0.5">{item.description}</p>
+                  <div className="flex-1 min-w-0">
+                    <span className="font-medium block truncate">{item.title}</span>
+                    <p className="text-xs opacity-70 mt-0.5 truncate">{item.description}</p>
                   </div>
                 )}
               </Button>
