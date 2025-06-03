@@ -1,4 +1,5 @@
 
+
 import { serve } from "https://deno.land/std@0.192.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
 
@@ -34,14 +35,14 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Use entity-specific search variations
-    const searchTerms = search_variations.length > 0 ? search_variations : [entityName];
+    // Use entity-specific search variations - prioritize exact phrase searches
+    const searchTerms = search_variations.length > 0 ? search_variations : [entityName, `"${entityName}"`];
     const results = [];
     
     for (const searchTerm of searchTerms) {
       try {
         const encodedQuery = encodeURIComponent(searchTerm);
-        const feedUrl = `https://www.reddit.com/search.rss?q=${encodedQuery}&sort=new&limit=10`;
+        const feedUrl = `https://www.reddit.com/search.rss?q=${encodedQuery}&sort=new&limit=25`;
         
         console.log('[REDDIT-SCAN] Fetching RSS feed for term:', searchTerm);
         console.log('[REDDIT-SCAN] URL:', feedUrl);
@@ -67,16 +68,27 @@ serve(async (req) => {
           const content = item[1].match(/<content type="html">(.*?)<\/content>/)?.[1]?.replace(/<!\[CDATA\[(.*?)\]\]>/g, '$1') || title;
           const updated = item[1].match(/<updated>(.*?)<\/updated>/)?.[1] || '';
 
-          // Entity filtering: ensure content mentions the entity
+          // Improved entity filtering: check for entity name in various forms
           const fullText = (title + ' ' + content).toLowerCase();
-          const entityMentioned = alternate_names.length > 0 
+          const entityLower = entityName.toLowerCase();
+          const firstName = entityLower.split(' ')[0];
+          const lastName = entityLower.split(' ').slice(-1)[0];
+          
+          // More flexible entity matching
+          const containsFullName = fullText.includes(entityLower);
+          const containsFirstAndLast = fullText.includes(firstName) && fullText.includes(lastName);
+          const containsAlternateName = alternate_names.length > 0 
             ? alternate_names.some(name => fullText.includes(name.toLowerCase()))
-            : fullText.includes(entityName.toLowerCase());
+            : false;
+
+          const entityMentioned = containsFullName || containsFirstAndLast || containsAlternateName;
 
           if (!entityMentioned) {
             console.log('[REDDIT-SCAN] Filtered out non-entity content:', title.substring(0, 50));
             continue;
           }
+
+          console.log('[REDDIT-SCAN] ✅ Entity match found:', title.substring(0, 50));
 
           // Calculate threat severity based on context tags
           let severity = 'low';
@@ -90,20 +102,20 @@ serve(async (req) => {
             severity = 'medium';
           }
 
-          // Fix database syntax error by ensuring numeric values are properly typed
+          // Ensure all numeric values are properly typed for database insertion
           const result = {
             platform: 'Reddit',
             content: title.substring(0, 500), // Limit content length
             url: link,
             severity: severity,
-            sentiment: parseFloat((Math.random() * 0.4 - 0.2).toFixed(3)), // Fix: ensure numeric
-            confidence_score: parseFloat((0.75).toFixed(3)), // Fix: ensure numeric
+            sentiment: Math.round((Math.random() * 0.4 - 0.2) * 1000) / 1000, // Ensure 3 decimal places
+            confidence_score: 75, // Use integer instead of decimal
             detected_entities: [entityName, ...alternate_names],
             source_type: source,
             entity_name: entityName,
             created_at: updated || new Date().toISOString(),
-            potential_reach: Math.floor(Math.random() * 1000) + 100, // Fix: ensure integer
-            source_credibility_score: parseFloat((0.75).toFixed(3)) // Fix: ensure numeric
+            potential_reach: Math.floor(Math.random() * 1000) + 100, // Ensure integer
+            source_credibility_score: 75 // Use integer instead of decimal
           };
 
           results.push(result);
@@ -168,3 +180,4 @@ serve(async (req) => {
     });
   }
 });
+

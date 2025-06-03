@@ -19,16 +19,23 @@ interface EntitySearchProfile {
  */
 function generateEntitySearchVariations(entityName: string, contextTags: string[] = []): EntitySearchProfile {
   const baseEntity = entityName.trim();
+  
+  // Create more comprehensive alternate names
   const alternate_names = [
     baseEntity,
     `@${baseEntity.replace(/\s+/g, '').toLowerCase()}`,
     baseEntity.split(' ')[0] + ' ' + baseEntity.split(' ').slice(-1)[0].charAt(0) + '.',
+    baseEntity.replace(/\s+/g, ''), // "SimonLindsay"
+    baseEntity.toLowerCase(), // "simon lindsay"
   ];
 
+  // Create comprehensive search variations
   const search_variations = [
     baseEntity,
+    `"${baseEntity}"`, // Exact phrase search
     ...contextTags.map(tag => `"${baseEntity}" ${tag}`),
     ...contextTags.map(tag => `"${baseEntity} ${tag}"`),
+    ...contextTags.map(tag => `${baseEntity} ${tag}`), // Without quotes for broader match
   ];
 
   return {
@@ -68,23 +75,38 @@ async function logScannerQuery(
 }
 
 /**
- * Strict content filtering - only results mentioning the entity
+ * Improved content filtering - more flexible entity matching
  */
 function filterEntityContent(results: any[], entityProfile: EntitySearchProfile): any[] {
+  console.log(`🔍 Filtering ${results.length} results for entity: ${entityProfile.entity_name}`);
+  console.log(`🔍 Using alternate names: ${JSON.stringify(entityProfile.alternate_names)}`);
+  
   return results.filter(result => {
     const content = (result.content || result.title || result.contextSnippet || '').toLowerCase();
     const url = (result.url || '').toLowerCase();
+    const fullText = content + ' ' + url;
     
-    // Check if content contains entity name or alternate names
-    const containsEntity = entityProfile.alternate_names.some(name => 
-      content.includes(name.toLowerCase()) || url.includes(name.toLowerCase())
+    // More flexible entity matching
+    const entityName = entityProfile.entity_name.toLowerCase();
+    const firstName = entityName.split(' ')[0];
+    const lastName = entityName.split(' ').slice(-1)[0];
+    
+    // Check multiple matching criteria
+    const containsFullName = fullText.includes(entityName);
+    const containsFirstAndLast = fullText.includes(firstName) && fullText.includes(lastName);
+    const containsAlternateName = entityProfile.alternate_names.some(name => 
+      fullText.includes(name.toLowerCase())
     );
     
-    if (!containsEntity) {
-      console.log(`🔍 Filtered out irrelevant content: ${content.substring(0, 100)}...`);
+    // More lenient matching for better recall
+    const isEntityMatch = containsFullName || containsFirstAndLast || containsAlternateName;
+    
+    if (!isEntityMatch) {
+      console.log(`🔍 Filtered out: ${content.substring(0, 100)}... (no entity match)`);
       return false;
     }
     
+    console.log(`✅ Entity match found: ${content.substring(0, 100)}...`);
     return true;
   });
 }
@@ -162,7 +184,7 @@ export const performRealScan = async (options: ScanOptions = {}): Promise<LiveSc
             }));
           }
 
-          // CRITICAL: Apply strict entity filtering
+          // CRITICAL: Apply improved entity filtering
           const beforeFilterCount = scanResults.length;
           const filteredResults = filterEntityContent(scanResults, entityProfile);
           const afterFilterCount = filteredResults.length;
@@ -217,10 +239,16 @@ export const performRealScan = async (options: ScanOptions = {}): Promise<LiveSc
 
     console.log(`✅ A.R.I.A™ OSINT: Entity-specific scan complete - ${results.length} verified results for "${entityName}"`);
     
-    // Final validation: ensure all results mention the entity
+    // Final validation with more lenient matching
     const finalResults = results.filter(result => {
       const content = result.content.toLowerCase();
-      return entityProfile.alternate_names.some(name => content.includes(name.toLowerCase()));
+      const entityName = entityProfile.entity_name.toLowerCase();
+      const firstName = entityName.split(' ')[0];
+      const lastName = entityName.split(' ').slice(-1)[0];
+      
+      return content.includes(entityName) || 
+             (content.includes(firstName) && content.includes(lastName)) ||
+             entityProfile.alternate_names.some(name => content.includes(name.toLowerCase()));
     });
     
     console.log(`🔍 Final entity validation: ${results.length} → ${finalResults.length} confirmed entity matches`);
