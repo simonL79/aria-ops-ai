@@ -1,12 +1,14 @@
 
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import CampaignConfiguration from './persona-saturation/CampaignConfiguration';
 import CampaignMonitor from './persona-saturation/CampaignMonitor';
 import ContentSourcesPanel from './persona-saturation/ContentSourcesPanel';
 import ReviewPostGenerator from './persona-saturation/ReviewPostGenerator';
 import AdvancedDeploymentPanel from './persona-saturation/AdvancedDeploymentPanel';
-import { Globe, Monitor, Database, Settings, FileText } from 'lucide-react';
+import { Globe, Monitor, Database, Settings, FileText, Radar, Activity, Zap } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -43,7 +45,7 @@ const PersonaSaturationPanel = () => {
     setIsExecuting(true);
     
     try {
-      console.log('🚀 Starting A.R.I.A™ Persona Saturation with LIVE DATA...');
+      console.log('🚀 Starting A.R.I.A vX™ Perception Intelligence & Saturation Engine...');
       
       // First, gather live content sources
       console.log('📡 Gathering live content sources...');
@@ -72,7 +74,7 @@ const PersonaSaturationPanel = () => {
 
       const keywords = targetKeywords.split(',').map(k => k.trim()).filter(k => k);
       
-      console.log('📊 Payload for persona saturation:', {
+      console.log('📊 A.R.I.A vX™ Payload for perception saturation:', {
         entityName,
         targetKeywords: keywords,
         contentCount,
@@ -92,22 +94,23 @@ const PersonaSaturationPanel = () => {
         liveContentSources: contentSources || [],
         liveScanResults: liveResults || [],
         useLiveData: true,
-        enhancedMode: true
+        enhancedMode: true,
+        ariaVersion: 'vX'
       };
 
       const { data, error } = await supabase.functions.invoke('persona-saturation', {
         body: enhancedPayload
       });
 
-      console.log('📊 Enhanced function response:', { data, error });
+      console.log('📊 A.R.I.A vX™ Enhanced function response:', { data, error });
 
       if (error) {
-        console.error('❌ Edge function error:', error);
+        console.error('❌ A.R.I.A vX™ Edge function error:', error);
         throw error;
       }
 
       if (!data) {
-        throw new Error('No data returned from persona saturation function');
+        throw new Error('No data returned from A.R.I.A vX™ persona saturation function');
       }
 
       const campaign: SaturationCampaign = {
@@ -118,7 +121,7 @@ const PersonaSaturationPanel = () => {
         contentGenerated: data.campaign?.contentGenerated || contentCount,
         deploymentsSuccessful: data.campaign?.deploymentsSuccessful || 0,
         serpPenetration: data.campaign?.serpPenetration || 0,
-        estimatedImpact: `${data.campaign?.deploymentsSuccessful || 0} live deployments across ${deploymentTargets.length} platforms using live content sources`,
+        estimatedImpact: `${data.campaign?.deploymentsSuccessful || 0} live deployments across ${deploymentTargets.length} platforms using A.R.I.A vX™ perception intelligence`,
         createdAt: new Date().toISOString(),
         deploymentUrls: data.deploymentUrls || [],
         platformResults: data.campaign?.platformResults || {}
@@ -132,33 +135,33 @@ const PersonaSaturationPanel = () => {
         await supabase
           .from('scan_results')
           .insert({
-            platform: 'A.R.I.A Persona Saturation',
+            platform: 'A.R.I.A vX™ Perception Intelligence',
             content: JSON.stringify(campaign),
             url: '',
             severity: 'low',
             status: 'new',
-            threat_type: 'persona_saturation_campaign',
-            source_type: 'aria_deployment',
+            threat_type: 'aria_vx_saturation_campaign',
+            source_type: 'aria_vx_deployment',
             confidence_score: campaign.serpPenetration,
             created_by: (await supabase.auth.getUser()).data.user?.id
           });
       } catch (dbError) {
-        console.warn('Could not store campaign in database:', dbError);
+        console.warn('Could not store A.R.I.A vX™ campaign in database:', dbError);
       }
 
-      toast.success(`✅ Live persona saturation complete! ${campaign.deploymentsSuccessful} articles deployed using live data sources.`);
+      toast.success(`✅ A.R.I.A vX™ perception saturation complete! ${campaign.deploymentsSuccessful} articles deployed using live intelligence sources.`);
       
     } catch (error: any) {
-      console.error('❌ Persona saturation error:', error);
+      console.error('❌ A.R.I.A vX™ Perception saturation error:', error);
       
-      let errorMessage = 'Failed to execute persona saturation campaign';
+      let errorMessage = 'Failed to execute A.R.I.A vX™ perception saturation campaign';
       
       if (error?.message?.includes('Failed to send a request')) {
-        errorMessage = 'Network error: Unable to connect to persona saturation service';
+        errorMessage = 'Network error: Unable to connect to A.R.I.A vX™ perception saturation service';
       } else if (error?.message?.includes('Function not found')) {
-        errorMessage = 'Persona saturation service is not available';
+        errorMessage = 'A.R.I.A vX™ perception saturation service is not available';
       } else if (error?.message) {
-        errorMessage = `Error: ${error.message}`;
+        errorMessage = `A.R.I.A vX™ Error: ${error.message}`;
       }
       
       toast.error(errorMessage);
@@ -169,32 +172,75 @@ const PersonaSaturationPanel = () => {
 
   return (
     <div className="space-y-6 bg-black text-white min-h-screen">
-      <div>
-        <h2 className="text-2xl font-bold text-white">A.R.I.A™ Persona Saturation Engine</h2>
-        <p className="text-gray-300 mt-1">
-          Advanced deployment management and content saturation with live data integration
-        </p>
+      {/* Enhanced Header with Live Status */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-3xl font-bold text-white flex items-center gap-3">
+            <Radar className="h-8 w-8 text-corporate-accent" />
+            A.R.I.A vX™ — Perception Intelligence & Saturation Engine
+          </h2>
+          <p className="text-gray-300 mt-1">
+            Advanced perception intelligence deployment with live data integration
+          </p>
+        </div>
+        
+        <div className="flex items-center gap-4">
+          <Badge className="bg-green-500/20 text-green-400 border-green-500/50">
+            <Activity className="h-3 w-3 mr-1 animate-pulse" />
+            LIVE ENGINE ACTIVE
+          </Badge>
+          <Badge className="bg-corporate-accent/20 text-corporate-accent border-corporate-accent/50">
+            <Zap className="h-3 w-3 mr-1" />
+            A.R.I.A vX™
+          </Badge>
+        </div>
       </div>
+
+      {/* Engine Status Card */}
+      <Card className="bg-corporate-darkSecondary border-corporate-accent/30">
+        <CardHeader>
+          <CardTitle className="text-corporate-accent flex items-center gap-2">
+            <Radar className="h-5 w-5" />
+            Perception Intelligence Engine Status
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-3 gap-4 text-center">
+            <div>
+              <div className="text-2xl font-bold text-green-400">OPERATIONAL</div>
+              <p className="text-xs text-gray-400">Engine Status</p>
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-blue-400">100%</div>
+              <p className="text-xs text-gray-400">Live Data Integration</p>
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-purple-400">vX™</div>
+              <p className="text-xs text-gray-400">Current Version</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <Tabs defaultValue="configure" className="space-y-6">
         <TabsList className="grid w-full grid-cols-5 bg-gray-900 border border-gray-800">
-          <TabsTrigger value="configure" className="data-[state=active]:bg-green-500 data-[state=active]:text-black text-gray-300">
+          <TabsTrigger value="configure" className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-gray-300">
             <Settings className="h-4 w-4 mr-2" />
             Configure
           </TabsTrigger>
-          <TabsTrigger value="sources" className="data-[state=active]:bg-green-500 data-[state=active]:text-black text-gray-300">
+          <TabsTrigger value="sources" className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-gray-300">
             <Database className="h-4 w-4 mr-2" />
             Live Sources
           </TabsTrigger>
-          <TabsTrigger value="reviews" className="data-[state=active]:bg-green-500 data-[state=active]:text-black text-gray-300">
+          <TabsTrigger value="reviews" className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-gray-300">
             <FileText className="h-4 w-4 mr-2" />
             Review Generator
           </TabsTrigger>
-          <TabsTrigger value="monitor" className="data-[state=active]:bg-green-500 data-[state=active]:text-black text-gray-300">
+          <TabsTrigger value="monitor" className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-gray-300">
             <Monitor className="h-4 w-4 mr-2" />
             Monitor
           </TabsTrigger>
-          <TabsTrigger value="deploy" className="data-[state=active]:bg-green-500 data-[state=active]:text-black text-gray-300">
+          <TabsTrigger value="deploy" className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-gray-300">
             <Globe className="h-4 w-4 mr-2" />
             Deploy
           </TabsTrigger>

@@ -19,7 +19,8 @@ import {
   Eye,
   Brain,
   Target,
-  Lock
+  Lock,
+  Radar
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -29,18 +30,19 @@ const AdminSidebar = () => {
 
   const primaryModules = [
     {
+      title: 'A.R.I.A vX™ — Perception Intelligence & Saturation Engine',
+      href: '/admin/persona-saturation',
+      icon: Radar,
+      description: 'Advanced perception intelligence & content saturation',
+      classification: 'LIVE ENGINE',
+      isFeature: true
+    },
+    {
       title: 'Genesis Sentinel™',
       href: '/admin/genesis-sentinel',
       icon: Crosshair,
       description: 'Weapons-grade threat detection & entity discovery',
       classification: 'LIVE OSINT'
-    },
-    {
-      title: 'Persona Saturation',
-      href: '/admin/persona-saturation',
-      icon: Globe,
-      description: 'Strategic narrative deployment',
-      classification: 'DEPLOYMENT'
     },
     {
       title: 'Watchtower',
@@ -59,6 +61,12 @@ const AdminSidebar = () => {
   ];
 
   const operationalModules = [
+    {
+      title: 'System Optimization',
+      href: '/admin/system-optimization',
+      icon: Zap,
+      description: 'Live data integrity & optimization'
+    },
     {
       title: 'Admin Dashboard',
       href: '/admin',
@@ -146,17 +154,22 @@ const AdminSidebar = () => {
                 className={cn(
                   "w-full justify-start h-auto p-3 text-left hover:bg-corporate-darkSecondary",
                   isActiveRoute(item.href) && "bg-corporate-accent text-black hover:bg-corporate-accent/90",
-                  collapsed && "px-2 justify-center"
+                  collapsed && "px-2 justify-center",
+                  item.isFeature && "border border-corporate-accent/30 bg-corporate-accent/5"
                 )}
               >
                 <item.icon className={cn("h-4 w-4", collapsed ? "" : "mr-3")} />
                 {!collapsed && (
                   <div className="flex-1">
                     <div className="flex items-center justify-between">
-                      <span className="font-medium">{item.title}</span>
+                      <span className={cn("font-medium", item.isFeature && "text-corporate-accent")}>
+                        {item.isFeature ? 'A.R.I.A vX™' : item.title}
+                      </span>
                       <span className="text-xs opacity-60">{item.classification}</span>
                     </div>
-                    <p className="text-xs opacity-70 mt-0.5">{item.description}</p>
+                    <p className="text-xs opacity-70 mt-0.5">
+                      {item.isFeature ? 'Perception Intelligence & Saturation Engine' : item.description}
+                    </p>
                   </div>
                 )}
               </Button>
