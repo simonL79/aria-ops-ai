@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { LiveDataEnforcer } from '@/services/ariaCore/liveDataEnforcer';
+import { RDPComplianceEnforcer } from '@/services/ariaCore/rdpCompliance';
 import type { ScanOptions, LiveScanResult } from '@/types/scan';
 import { 
   generateEnhancedEntityFingerprint, 
@@ -10,8 +11,9 @@ import {
 } from './enhancedEntityMatcher';
 
 /**
- * ENHANCED A.R.I.A™ LIVE OSINT SCANNING - SIMULATION-FREE ZONE
+ * ENHANCED A.R.I.A™ LIVE OSINT SCANNING - RDP-001 COMPLIANT
  * 100% LIVE DATA ONLY - ALL SIMULATIONS PERMANENTLY BLOCKED
+ * Multi-stage validation with quarantine system
  */
 
 /**
@@ -66,11 +68,14 @@ async function logScannerQuery(
 }
 
 /**
- * Perform enhanced real OSINT scan with ZERO TOLERANCE for simulations
+ * Perform enhanced real OSINT scan with RDP-001 compliance
  */
 export const performRealScan = async (options: ScanOptions = {}): Promise<LiveScanResult[]> => {
   try {
-    // CRITICAL: Enforce live data compliance with enhanced simulation detection
+    // STAGE 1: Generation Input Validation (RDP-001)
+    await RDPComplianceEnforcer.enforceOnGeneration(options);
+    
+    // Legacy compliance check
     const compliance = await LiveDataEnforcer.validateLiveDataCompliance();
     if (!compliance.isCompliant || compliance.simulationDetected) {
       console.error('🚫 WEAPONS-GRADE BLOCK: System simulation detected');
@@ -78,7 +83,7 @@ export const performRealScan = async (options: ScanOptions = {}): Promise<LiveSc
     }
 
     const entityName = options.targetEntity || 'Simon Lindsay';
-    console.log('🔍 A.R.I.A™ LIVE-ONLY OSINT: Starting SIMULATION-FREE scan for:', entityName);
+    console.log('🔍 A.R.I.A™ RDP-001 OSINT: Starting compliant scan for:', entityName);
 
     // Enhanced entity fingerprint generation
     const entityFingerprint = generateEnhancedEntityFingerprint(entityName);
@@ -103,7 +108,7 @@ export const performRealScan = async (options: ScanOptions = {}): Promise<LiveSc
     
     for (const func of scanFunctions) {
       try {
-        console.log(`🔍 A.R.I.A™ LIVE-ONLY: Executing ${func} with ZERO simulation tolerance`);
+        console.log(`🔍 A.R.I.A™ RDP-001: Executing ${func} with compliance enforcement`);
         
         const { data, error } = await supabase.functions.invoke(func, {
           body: { 
@@ -121,12 +126,13 @@ export const performRealScan = async (options: ScanOptions = {}): Promise<LiveSc
             enforceLiveOnly: true,
             entityFocused: true,
             confidenceThreshold: 0.6,
-            simulationTolerance: 0 // ZERO tolerance
+            simulationTolerance: 0,
+            rdpCompliant: true // RDP-001 flag
           }
         });
 
         if (!error && data) {
-          console.log(`✅ ${func} live response:`, data);
+          console.log(`✅ ${func} RDP-001 compliant response:`, data);
           
           let scanResults = [];
           if (data.results && Array.isArray(data.results)) {
@@ -144,24 +150,38 @@ export const performRealScan = async (options: ScanOptions = {}): Promise<LiveSc
             }));
           }
 
-          // ENHANCED simulation blocking and entity filtering
+          // STAGE 2: Approval Validation (RDP-001)
           const beforeFilterCount = scanResults.length;
+          const approvedResults = [];
           
-          // First pass: Remove all simulation content
-          const liveOnlyResults = scanResults.filter(result => {
-            const content = result.content || result.contextSnippet || '';
-            if (isSimulationContent(content)) {
-              console.warn('🚫 SIMULATION BLOCKED:', content.substring(0, 50));
-              return false;
+          for (const result of scanResults) {
+            try {
+              // RDP-001 approval validation
+              await RDPComplianceEnforcer.validateArticlePayload({
+                title: result.content?.substring(0, 100) || '',
+                content: result.content || '',
+                external_links: result.url ? [result.url] : []
+              });
+              
+              // Legacy simulation blocking
+              const content = result.content || result.contextSnippet || '';
+              if (isSimulationContent(content)) {
+                console.warn('🚫 SIMULATION BLOCKED:', content.substring(0, 50));
+                continue;
+              }
+              
+              approvedResults.push(result);
+            } catch (rdpError) {
+              console.warn(`🚫 RDP-001 BLOCKED: ${rdpError.message}`);
+              // Item automatically quarantined by RDPComplianceEnforcer
             }
-            return true;
-          });
+          }
           
-          console.log(`🔍 Simulation filter: ${beforeFilterCount} → ${liveOnlyResults.length} (${beforeFilterCount - liveOnlyResults.length} simulations blocked)`);
+          console.log(`🔍 RDP-001 Approval: ${beforeFilterCount} → ${approvedResults.length} (${beforeFilterCount - approvedResults.length} blocked)`);
           
-          // Second pass: Apply entity filtering with confidence scoring
+          // Entity filtering with confidence scoring
           const { filtered: filteredResults, stats } = filterWithConfidenceThreshold(
-            liveOnlyResults, 
+            approvedResults, 
             entityFingerprint,
             0.4
           );
@@ -172,54 +192,59 @@ export const performRealScan = async (options: ScanOptions = {}): Promise<LiveSc
           // Log the query for audit trail
           await logScannerQuery(entityName, searchQueries, func, beforeFilterCount, filteredResults.length, stats);
 
-          // Process filtered results with enhanced live validation
+          // STAGE 3: Final processing with deployment validation
           for (const result of filteredResults) {
-            // Triple-check: Enhanced live data validation
-            const isValidLiveData = await LiveDataEnforcer.validateDataInput(
-              result.content || result.contextSnippet || '', 
-              result.platform || 'unknown'
-            );
-            
-            // Additional simulation check
-            if (isSimulationContent(result.content || result.contextSnippet || '')) {
-              console.warn('🚫 FINAL SIMULATION BLOCK:', result.platform);
-              continue;
-            }
-            
-            if (isValidLiveData) {
-              const processedResult: LiveScanResult = {
-                id: result.id || `live-only-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-                platform: result.platform || 'Unknown',
+            try {
+              // STAGE 3: Deployment Validation (RDP-001)
+              await RDPComplianceEnforcer.enforceOnDeployment({
                 content: result.content || result.contextSnippet || '',
-                url: result.url || result.sourceUrl || '',
-                severity: (result.severity as 'low' | 'medium' | 'high') || mapThreatLevelToSeverity(result.threatLevel),
-                status: (result.status as 'new' | 'read' | 'actioned' | 'resolved') || 'new',
-                threat_type: result.threat_type || 'live_intelligence_threat',
-                sentiment: result.sentiment || 0,
-                confidence_score: result.confidence_score || result.entity_match?.confidence_score || 85,
-                potential_reach: result.potential_reach || result.spreadVelocity * 1000 || 0,
-                detected_entities: [entityName],
-                source_type: 'verified_live_osint',
-                entity_name: entityName,
-                source_credibility_score: result.source_credibility_score || 75,
-                media_is_ai_generated: result.media_is_ai_generated || false,
-                ai_detection_confidence: result.ai_detection_confidence || 0
-              };
+                url: result.url || result.sourceUrl || ''
+              });
+              
+              // Enhanced live data validation
+              const isValidLiveData = await LiveDataEnforcer.validateDataInput(
+                result.content || result.contextSnippet || '', 
+                result.platform || 'unknown'
+              );
+              
+              if (isValidLiveData) {
+                const processedResult: LiveScanResult = {
+                  id: result.id || `rdp-compliant-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+                  platform: result.platform || 'Unknown',
+                  content: result.content || result.contextSnippet || '',
+                  url: result.url || result.sourceUrl || '',
+                  severity: (result.severity as 'low' | 'medium' | 'high') || mapThreatLevelToSeverity(result.threatLevel),
+                  status: (result.status as 'new' | 'read' | 'actioned' | 'resolved') || 'new',
+                  threat_type: result.threat_type || 'rdp_compliant_intelligence',
+                  sentiment: result.sentiment || 0,
+                  confidence_score: result.confidence_score || result.entity_match?.confidence_score || 85,
+                  potential_reach: result.potential_reach || result.spreadVelocity * 1000 || 0,
+                  detected_entities: [entityName],
+                  source_type: 'rdp_verified_live_osint',
+                  entity_name: entityName,
+                  source_credibility_score: result.source_credibility_score || 75,
+                  media_is_ai_generated: result.media_is_ai_generated || false,
+                  ai_detection_confidence: result.ai_detection_confidence || 0
+                };
 
-              // Add enhanced fields if they exist
-              if (result.entity_match?.match_type) {
-                processedResult.match_type = result.entity_match.match_type;
-              }
-              if (result.entity_match?.matched_alias) {
-                processedResult.matched_alias = result.entity_match.matched_alias;
-              }
-              if (result.entity_match?.context_keywords) {
-                processedResult.context_keywords = result.entity_match.context_keywords;
-              }
+                // Add enhanced fields if they exist
+                if (result.entity_match?.match_type) {
+                  processedResult.match_type = result.entity_match.match_type;
+                }
+                if (result.entity_match?.matched_alias) {
+                  processedResult.matched_alias = result.entity_match.matched_alias;
+                }
+                if (result.entity_match?.context_keywords) {
+                  processedResult.context_keywords = result.entity_match.context_keywords;
+                }
 
-              results.push(processedResult);
-            } else {
-              console.warn('🚫 BLOCKED: Failed live validation:', result.platform);
+                results.push(processedResult);
+              } else {
+                console.warn('🚫 BLOCKED: Failed live validation:', result.platform);
+              }
+            } catch (deploymentError) {
+              console.warn(`🚫 RDP-001 DEPLOYMENT BLOCKED: ${deploymentError.message}`);
+              // Item automatically quarantined by RDPComplianceEnforcer
             }
           }
         } else {
@@ -230,13 +255,13 @@ export const performRealScan = async (options: ScanOptions = {}): Promise<LiveSc
       }
     }
 
-    console.log(`✅ A.R.I.A™ LIVE-ONLY OSINT: Scan complete - ${results.length} VERIFIED LIVE intelligence items`);
+    console.log(`✅ A.R.I.A™ RDP-001 OSINT: Scan complete - ${results.length} VERIFIED COMPLIANT intelligence items`);
     
     if (results.length === 0) {
-      console.log('ℹ️ No live intelligence detected. System operating with ZERO simulation tolerance.');
+      console.log('ℹ️ No RDP-001 compliant intelligence detected.');
       console.log('   • All simulations permanently blocked');
-      console.log('   • Only verified live intelligence processed');
-      console.log('   • Enhanced validation active');
+      console.log('   • Multi-stage validation enforced');
+      console.log('   • Quarantine system active');
     } else {
       // Log live data confidence distribution
       const confidenceDistribution = results.reduce((acc, result) => {
@@ -246,13 +271,13 @@ export const performRealScan = async (options: ScanOptions = {}): Promise<LiveSc
         return acc;
       }, {} as Record<string, number>);
       
-      console.log('📊 LIVE Intelligence Distribution:', confidenceDistribution);
+      console.log('📊 RDP-001 Compliant Intelligence Distribution:', confidenceDistribution);
     }
     
     return results;
 
   } catch (error) {
-    console.error('❌ Live-only intelligence scan failed:', error);
+    console.error('❌ RDP-001 compliant intelligence scan failed:', error);
     throw error;
   }
 };

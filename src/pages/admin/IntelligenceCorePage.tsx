@@ -2,10 +2,12 @@
 import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { LiveDataGuard } from '@/components/dashboard/LiveDataGuard';
+import RDPCompliancePanel from '@/components/admin/RDPCompliancePanel';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Brain, Shield, Activity, RefreshCw } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Brain, Shield, Activity, RefreshCw, Lock } from 'lucide-react';
 import FilteringStatsPanel from '@/components/aria/FilteringStatsPanel';
 
 const IntelligenceCorePage = () => {
@@ -17,12 +19,9 @@ const IntelligenceCorePage = () => {
   });
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Always call hooks in the same order - no conditional hooks
   useEffect(() => {
-    // Initialize system status
     const initializeSystem = async () => {
       try {
-        // System initialization logic here
         console.log('🔍 Intelligence Core initializing...');
         setSystemStatus(prev => ({
           ...prev,
@@ -39,7 +38,6 @@ const IntelligenceCorePage = () => {
   const handleRefreshStatus = async () => {
     setIsRefreshing(true);
     try {
-      // Refresh system status
       await new Promise(resolve => setTimeout(resolve, 1000));
       setSystemStatus(prev => ({
         ...prev,
@@ -64,11 +62,15 @@ const IntelligenceCorePage = () => {
                 A.R.I.A™ Intelligence Core
               </h1>
               <p className="text-muted-foreground mt-1">
-                Advanced Real-time Intelligence Analysis & Live Data Validation
+                Advanced Real-time Intelligence Analysis & RDP-001 Compliance
               </p>
             </div>
             
             <div className="flex items-center gap-2">
+              <Badge variant="outline" className="flex items-center gap-1">
+                <Lock className="h-3 w-3" />
+                RDP-001 Enforced
+              </Badge>
               <Badge variant="outline" className="flex items-center gap-1">
                 <Shield className="h-3 w-3" />
                 Live Validation Active
@@ -105,7 +107,7 @@ const IntelligenceCorePage = () => {
                   <div className="text-2xl font-bold text-green-600">
                     {systemStatus.validationPassed ? '✅' : '❌'}
                   </div>
-                  <p className="text-sm font-medium">Validation Passed</p>
+                  <p className="text-sm font-medium">RDP-001 Compliant</p>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-green-600">
@@ -123,42 +125,65 @@ const IntelligenceCorePage = () => {
             </CardContent>
           </Card>
 
-          {/* Filtering Statistics */}
-          <FilteringStatsPanel />
+          {/* Main Content Tabs */}
+          <Tabs defaultValue="compliance" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="compliance">RDP-001 Compliance</TabsTrigger>
+              <TabsTrigger value="operations">Intelligence Operations</TabsTrigger>
+              <TabsTrigger value="statistics">Filtering Statistics</TabsTrigger>
+            </TabsList>
 
-          {/* Intelligence Operations */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Live Intelligence Operations</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="p-4 border rounded-lg">
-                  <h3 className="font-medium mb-2">Enhanced Entity Matching</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Multi-layer confidence scoring with exact, alias, contextual, and fuzzy matching
-                  </p>
-                  <Badge className="mt-2 bg-green-100 text-green-800">Active</Badge>
-                </div>
-                
-                <div className="p-4 border rounded-lg">
-                  <h3 className="font-medium mb-2">Live Data Enforcement</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Zero tolerance simulation blocking with automatic cleanup
-                  </p>
-                  <Badge className="mt-2 bg-green-100 text-green-800">Enforced</Badge>
-                </div>
-                
-                <div className="p-4 border rounded-lg">
-                  <h3 className="font-medium mb-2">Real-time Processing</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Continuous monitoring across Reddit, RSS feeds, and news sources
-                  </p>
-                  <Badge className="mt-2 bg-blue-100 text-blue-800">Online</Badge>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+            <TabsContent value="compliance">
+              <RDPCompliancePanel />
+            </TabsContent>
+
+            <TabsContent value="operations">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Live Intelligence Operations</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="p-4 border rounded-lg">
+                      <h3 className="font-medium mb-2">Enhanced Entity Matching</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Multi-layer confidence scoring with exact, alias, contextual, and fuzzy matching
+                      </p>
+                      <Badge className="mt-2 bg-green-100 text-green-800">Active</Badge>
+                    </div>
+                    
+                    <div className="p-4 border rounded-lg">
+                      <h3 className="font-medium mb-2">RDP-001 Data Enforcement</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Multi-stage validation with quarantine system and live URL verification
+                      </p>
+                      <Badge className="mt-2 bg-blue-100 text-blue-800">Enforced</Badge>
+                    </div>
+                    
+                    <div className="p-4 border rounded-lg">
+                      <h3 className="font-medium mb-2">Real-time Processing</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Continuous monitoring across verified sources with HTTP 200 validation
+                      </p>
+                      <Badge className="mt-2 bg-green-100 text-green-800">Online</Badge>
+                    </div>
+
+                    <div className="p-4 border rounded-lg">
+                      <h3 className="font-medium mb-2">Quarantine System</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Automatic isolation and admin notification for policy violations
+                      </p>
+                      <Badge className="mt-2 bg-red-100 text-red-800">Armed</Badge>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="statistics">
+              <FilteringStatsPanel />
+            </TabsContent>
+          </Tabs>
         </div>
       </DashboardLayout>
     </LiveDataGuard>
