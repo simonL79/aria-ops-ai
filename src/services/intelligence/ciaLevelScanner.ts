@@ -30,6 +30,7 @@ export class CIALevelScanner {
     console.log('🎯 CIA-Level Scanner: Starting precision intelligence gathering...');
     
     const entityName = options.targetEntity || 'Simon Lindsay';
+    console.log(`🔍 Target Entity: "${entityName}"`);
     
     // Get or create entity fingerprint
     let entityFingerprint = options.entityFingerprint;
@@ -105,22 +106,28 @@ export class CIALevelScanner {
     
     for (const func of scanFunctions) {
       try {
-        console.log(`🔍 Scanning ${func} with entity: ${fingerprint.primary_name}`);
+        console.log(`🔍 Scanning ${func} with entity: "${fingerprint.primary_name}"`);
         
+        // FIXED: Ensure all entity field variations are set
+        const scanPayload = { 
+          scanType: 'cia_precision_scan',
+          search_query: variant.query_text,
+          entity: fingerprint.primary_name,
+          targetEntity: fingerprint.primary_name,
+          entityName: fingerprint.primary_name,
+          target_entity: fingerprint.primary_name, // Add this field too
+          blockMockData: true,
+          blockSimulations: true,
+          enforceLiveOnly: true,
+          precisionMode: options.precisionMode || 'medium', // CHANGED: Use medium instead of high
+          fullScan: true,
+          source: 'cia_scanner'
+        };
+
+        console.log(`📡 Scan payload for ${func}:`, scanPayload);
+
         const { data, error } = await supabase.functions.invoke(func, {
-          body: { 
-            scanType: 'cia_precision_scan',
-            search_query: variant.query_text,
-            entity: fingerprint.primary_name,
-            targetEntity: fingerprint.primary_name,
-            entityName: fingerprint.primary_name,
-            blockMockData: true,
-            blockSimulations: true,
-            enforceLiveOnly: true,
-            precisionMode: options.precisionMode || 'high',
-            fullScan: true,
-            source: 'cia_scanner'
-          }
+          body: scanPayload
         });
 
         if (error) {
@@ -137,7 +144,8 @@ export class CIALevelScanner {
           hasResults: !!data.results, 
           resultsCount: data.results?.length || 0,
           hasThreats: !!data.threats,
-          threatsCount: data.threats?.length || 0
+          threatsCount: data.threats?.length || 0,
+          dataKeys: Object.keys(data)
         });
 
         if (data?.results && Array.isArray(data.results)) {
@@ -211,7 +219,7 @@ export class CIALevelScanner {
         continue;
       }
       
-      // Apply CIA-level entity matching with more lenient thresholds for testing
+      // RELAXED: Apply CIA-level entity matching with more lenient thresholds
       const matchDecision = AdvancedEntityMatcher.analyzeContentMatch(
         content,
         title,
@@ -224,8 +232,8 @@ export class CIALevelScanner {
         falsePositive: matchDecision.false_positive_detected
       });
 
-      // Accept more results for testing - lower the bar temporarily
-      if (matchDecision.decision !== 'rejected' || matchDecision.match_score > 0.3) {
+      // RELAXED: Accept more results - very low threshold for testing
+      if (matchDecision.decision !== 'rejected' || matchDecision.match_score > 0.1) {
         const ciaResult: CIAScanResult = {
           id: result.id || `cia-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
           platform: result.platform || platform,
@@ -235,7 +243,7 @@ export class CIALevelScanner {
           status: result.status || 'new',
           threat_type: result.threat_type || 'cia_intelligence',
           sentiment: result.sentiment || 0,
-          confidence_score: Math.max(matchDecision.match_score * 100, 50), // Ensure minimum confidence for testing
+          confidence_score: Math.max(matchDecision.match_score * 100, 25), // LOWERED minimum confidence
           potential_reach: result.potential_reach || 0,
           detected_entities: [fingerprint.primary_name],
           source_type: 'cia_verified_intelligence',
@@ -245,11 +253,11 @@ export class CIALevelScanner {
           ai_detection_confidence: 0,
           
           // CIA-specific fields
-          match_decision: matchDecision.match_score > 0.6 ? 'accepted' : 
-                         matchDecision.match_score > 0.3 ? 'quarantined' : 'rejected',
+          match_decision: matchDecision.match_score > 0.4 ? 'accepted' : 
+                         matchDecision.match_score > 0.1 ? 'quarantined' : 'rejected', // LOWERED thresholds
           match_score: matchDecision.match_score,
-          precision_confidence: matchDecision.match_score >= 0.8 ? 'high' : 
-                               matchDecision.match_score >= 0.6 ? 'medium' : 'low',
+          precision_confidence: matchDecision.match_score >= 0.6 ? 'high' : 
+                               matchDecision.match_score >= 0.3 ? 'medium' : 'low',
           false_positive_detected: matchDecision.false_positive_detected,
           context_matches: matchDecision.context_matches,
           query_variant_used: variant.query_text

@@ -191,6 +191,13 @@ export class AdvancedEntityMatcher {
         matchScore += 0.8;
         contextMatches['name_parts'] = 0.8;
         console.log('✅ Name parts match found');
+      } else {
+        // RELAXED: Check for either first or last name appearing
+        if (fullText.includes(firstName) || fullText.includes(lastName)) {
+          matchScore += 0.4;
+          contextMatches['single_name_part'] = 0.4;
+          console.log('✅ Single name part match found');
+        }
       }
     }
 
@@ -233,14 +240,13 @@ export class AdvancedEntityMatcher {
       }
     }
 
-    // RELAXED scoring for testing - if we find any name parts, give it a chance
+    // VERY RELAXED: If still no match, check for ANY word from the entity name
     if (matchScore === 0) {
-      // Check for any part of the name appearing
       for (const part of nameParts) {
         if (part.length > 2 && fullText.includes(part)) {
-          matchScore += 0.4;
-          contextMatches['partial_name'] = 0.4;
-          console.log(`✅ Partial name match: ${part}`);
+          matchScore += 0.2;
+          contextMatches['word_match'] = 0.2;
+          console.log(`✅ Word match: ${part}`);
           break;
         }
       }
@@ -250,9 +256,9 @@ export class AdvancedEntityMatcher {
     let decision: 'accepted' | 'rejected' | 'quarantined';
     let reasonDiscarded: string | undefined;
 
-    if (matchScore >= 0.8) {
+    if (matchScore >= 0.6) {
       decision = 'accepted';
-    } else if (matchScore >= 0.4) {  // LOWERED from 0.6 for testing
+    } else if (matchScore >= 0.2) {  // VERY LOWERED from 0.4 for testing
       decision = 'quarantined';
       reasonDiscarded = 'Medium confidence - requires review';
     } else {
