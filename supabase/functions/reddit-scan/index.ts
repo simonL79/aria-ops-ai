@@ -1,5 +1,4 @@
 
-
 import { serve } from "https://deno.land/std@0.192.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
 
@@ -27,7 +26,7 @@ serve(async (req) => {
       source = 'reddit' 
     } = await req.json().catch(() => ({}));
     
-    const entityName = entity || targetEntity || 'unknown';
+    const entityName = entity || targetEntity || 'Simon Lindsay'; // Default for testing
     console.log('[REDDIT-SCAN] Starting ENTITY-SPECIFIC Reddit scan for:', entityName);
     console.log('[REDDIT-SCAN] Search variations:', search_variations);
 
@@ -35,8 +34,14 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Use entity-specific search variations - prioritize exact phrase searches
-    const searchTerms = search_variations.length > 0 ? search_variations : [entityName, `"${entityName}"`];
+    // Use entity-specific search variations - but be more inclusive
+    const searchTerms = search_variations.length > 0 ? search_variations : [
+      entityName, 
+      `"${entityName}"`,
+      entityName.split(' ')[0], // First name
+      entityName.split(' ').slice(-1)[0] // Last name
+    ];
+    
     const results = [];
     
     for (const searchTerm of searchTerms) {
@@ -68,20 +73,22 @@ serve(async (req) => {
           const content = item[1].match(/<content type="html">(.*?)<\/content>/)?.[1]?.replace(/<!\[CDATA\[(.*?)\]\]>/g, '$1') || title;
           const updated = item[1].match(/<updated>(.*?)<\/updated>/)?.[1] || '';
 
-          // Improved entity filtering: check for entity name in various forms
+          // More lenient entity filtering: check for any name parts
           const fullText = (title + ' ' + content).toLowerCase();
           const entityLower = entityName.toLowerCase();
-          const firstName = entityLower.split(' ')[0];
-          const lastName = entityLower.split(' ').slice(-1)[0];
+          const nameParts = entityLower.split(' ');
+          const firstName = nameParts[0];
+          const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : '';
           
-          // More flexible entity matching
+          // Much more inclusive matching - include if ANY name part matches
+          const containsFirstName = firstName && fullText.includes(firstName);
+          const containsLastName = lastName && fullText.includes(lastName);
           const containsFullName = fullText.includes(entityLower);
-          const containsFirstAndLast = fullText.includes(firstName) && fullText.includes(lastName);
           const containsAlternateName = alternate_names.length > 0 
             ? alternate_names.some(name => fullText.includes(name.toLowerCase()))
             : false;
 
-          const entityMentioned = containsFullName || containsFirstAndLast || containsAlternateName;
+          const entityMentioned = containsFirstName || containsLastName || containsFullName || containsAlternateName;
 
           if (!entityMentioned) {
             console.log('[REDDIT-SCAN] Filtered out non-entity content:', title.substring(0, 50));
@@ -180,4 +187,3 @@ serve(async (req) => {
     });
   }
 });
-
