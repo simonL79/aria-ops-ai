@@ -71,7 +71,7 @@ const KeywordToArticleSystem = () => {
     liveScanning: false,
     articlesDeployed: 0,
     serpImpact: 0,
-    threatLevel: 'low' as const
+    threatLevel: 'low' as 'low' | 'medium' | 'high' | 'critical'
   });
 
   const executeFullPipeline = async () => {
@@ -157,7 +157,9 @@ const KeywordToArticleSystem = () => {
           id: article.id,
           title: article.article_title,
           url: article.deployment_url,
-          target_keywords: Array.isArray(article.target_keywords) ? article.target_keywords : ['reputation'],
+          target_keywords: Array.isArray(article.target_keywords) 
+            ? article.target_keywords.map(k => String(k)) 
+            : ['reputation'],
           deployment_platform: article.platform,
           serp_performance: Math.floor(Math.random() * 40) + 60,
           click_through_rate: Math.floor(Math.random() * 10) + 5,

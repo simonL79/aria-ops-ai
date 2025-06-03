@@ -30,10 +30,10 @@ const AdminSidebar = () => {
 
   const primaryModules = [
     {
-      title: 'A.R.I.A vX™ — Perception Intelligence & Saturation Engine',
-      href: '/admin/persona-saturation',
-      icon: Radar,
-      description: 'Advanced perception intelligence & content saturation',
+      title: 'A.R.I.A vX™ — Keyword-to-Article System',
+      href: '/admin/keyword-to-article',
+      icon: Target,
+      description: 'Real-time reputation reshaping engine',
       classification: 'LIVE ENGINE',
       isFeature: true
     },
@@ -168,7 +168,7 @@ const AdminSidebar = () => {
                       <span className="text-xs opacity-60">{item.classification}</span>
                     </div>
                     <p className="text-xs opacity-70 mt-0.5">
-                      {item.isFeature ? 'Perception Intelligence & Saturation Engine' : item.description}
+                      {item.isFeature ? 'Keyword-to-Article System' : item.description}
                     </p>
                   </div>
                 )}
