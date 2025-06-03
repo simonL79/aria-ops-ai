@@ -13,7 +13,12 @@ export class WeaponsGradeLiveEnforcer {
     'mock', 'test', 'demo', 'sample', 'fake', 'simulated', 
     'placeholder', 'lorem ipsum', 'example', 'dummy',
     'testing', 'simulation', 'sandbox', 'dev', 'temp',
-    'temporary', 'test_', 'mock_', 'demo_', 'sample_'
+    'temporary', 'test_', 'mock_', 'demo_', 'sample_',
+    'undefined', 'target entity - undefined', 'advanced ai analysis'
+  ];
+
+  private static readonly BANNED_PLATFORMS = [
+    'Enhanced Intelligence' // This platform generates mock data
   ];
 
   private static readonly REQUIRED_LIVE_INDICATORS = [
@@ -39,13 +44,38 @@ export class WeaponsGradeLiveEnforcer {
       
       // 1. NUCLEAR OPTION: Purge ALL mock data from scan_results
       console.log('🔥 PHASE 1: Nuclear purge of scan_results mock data');
+      
+      // Target Enhanced Intelligence platform specifically
+      const { data: enhancedIntelMockData, error: enhancedError } = await supabase
+        .from('scan_results')
+        .select('id, content, platform')
+        .eq('platform', 'Enhanced Intelligence')
+        .or('content.ilike.%undefined%,content.ilike.%Advanced AI analysis%');
+
+      if (!enhancedError && enhancedIntelMockData && enhancedIntelMockData.length > 0) {
+        console.log(`🔥 DETECTED: ${enhancedIntelMockData.length} Enhanced Intelligence mock entries - executing purge`);
+        
+        const { error: purgeEnhancedError } = await supabase
+          .from('scan_results')
+          .delete()
+          .eq('platform', 'Enhanced Intelligence')
+          .or('content.ilike.%undefined%,content.ilike.%Advanced AI analysis%');
+          
+        if (!purgeEnhancedError) {
+          threatsNeutralized += enhancedIntelMockData.length;
+          console.log(`🔥 NEUTRALIZED: ${enhancedIntelMockData.length} Enhanced Intelligence mock entries destroyed`);
+          toast.success(`🔥 WEAPONS GRADE: ${enhancedIntelMockData.length} Enhanced Intelligence mock threats neutralized`);
+        }
+      }
+
+      // 2. General mock data purge
       const { data: mockData, error: checkError } = await supabase
         .from('scan_results')
         .select('id, content, platform')
         .or(this.BANNED_KEYWORDS.map(keyword => `content.ilike.%${keyword}%`).join(','));
 
       if (!checkError && mockData && mockData.length > 0) {
-        console.log(`🔥 DETECTED: ${mockData.length} mock data entries - executing immediate purge`);
+        console.log(`🔥 DETECTED: ${mockData.length} additional mock data entries - executing purge`);
         
         const { error: purgeError } = await supabase
           .from('scan_results')
@@ -54,12 +84,11 @@ export class WeaponsGradeLiveEnforcer {
           
         if (!purgeError) {
           threatsNeutralized += mockData.length;
-          console.log(`🔥 NEUTRALIZED: ${mockData.length} mock data entries destroyed`);
-          toast.success(`🔥 WEAPONS GRADE: ${mockData.length} mock data threats neutralized`);
+          console.log(`🔥 NEUTRALIZED: ${mockData.length} general mock data entries destroyed`);
         }
       }
 
-      // 2. PURGE: Mock data from content_sources
+      // 3. PURGE: Mock data from content_sources
       console.log('🔥 PHASE 2: Purging content_sources mock data');
       const { data: mockContent, error: contentError } = await supabase
         .from('content_sources')
@@ -78,7 +107,7 @@ export class WeaponsGradeLiveEnforcer {
         }
       }
 
-      // 3. PURGE: Mock entities
+      // 4. PURGE: Mock entities
       console.log('🔥 PHASE 3: Purging mock entities');
       const { data: mockEntities, error: entityError } = await supabase
         .from('entities')
@@ -97,36 +126,36 @@ export class WeaponsGradeLiveEnforcer {
         }
       }
 
-      // 4. VALIDATE: Only live OSINT sources remain
+      // 5. VALIDATE: Only live OSINT sources remain
       const { data: liveData, error: liveError } = await supabase
         .from('scan_results')
         .select('id, platform, content, created_at')
         .eq('source_type', 'live_osint')
+        .not('platform', 'in', `(${this.BANNED_PLATFORMS.map(p => `"${p}"`).join(',')})`)
         .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
 
       const liveDataCount = liveData?.length || 0;
       
-      // 5. ACTIVATE: Live OSINT feeds if insufficient data
+      // 6. ACTIVATE: Live OSINT feeds if insufficient data
       if (liveDataCount < 10) {
         console.log('🔥 PHASE 4: Activating emergency OSINT feed collection');
         await this.activateEmergencyOSINTFeeds();
       }
       
-      // 6. ENFORCE: System configuration lockdown
+      // 7. ENFORCE: System configuration lockdown
       await this.lockdownSystemConfiguration();
       
-      // 7. VALIDATE: Real-time source integrity
+      // 8. VALIDATE: Real-time source integrity
       const sourceIntegrity = await this.validateSourceIntegrity();
       
-      const liveDataIntegrity = Math.min(100, Math.max(0, (liveDataCount / 20) * 100)); // Scale based on expected volume
-
+      const liveDataIntegrity = Math.min(100, Math.max(0, (liveDataCount / 20) * 100));
       const systemSecure = sourceIntegrity && threatsNeutralized >= 0 && liveDataIntegrity > 50;
 
       return {
         systemSecure,
         threatsNeutralized,
         liveDataIntegrity,
-        message: `WEAPONS GRADE: ${threatsNeutralized} threats neutralized. Live data integrity: ${liveDataIntegrity.toFixed(1)}%. ${systemSecure ? 'System secured.' : 'System requires additional validation.'}`
+        message: `WEAPONS GRADE: ${threatsNeutralized} threats neutralized (including Enhanced Intelligence mock data). Live data integrity: ${liveDataIntegrity.toFixed(1)}%. ${systemSecure ? 'System secured.' : 'System requires additional validation.'}`
       };
 
     } catch (error) {
@@ -151,7 +180,6 @@ export class WeaponsGradeLiveEnforcer {
       const scanFunctions = [
         'reddit-scan',
         'uk-news-scanner', 
-        'enhanced-intelligence',
         'discovery-scanner'
       ];
 
@@ -162,7 +190,8 @@ export class WeaponsGradeLiveEnforcer {
             body: { 
               emergency: true,
               priority: 'weapons_grade',
-              source: 'emergency_activation'
+              source: 'emergency_activation',
+              blockEnhancedIntelligence: true
             }
           });
         } catch (error) {
@@ -176,7 +205,7 @@ export class WeaponsGradeLiveEnforcer {
         .insert({
           entity_type: 'emergency_activation',
           action: 'osint_feeds_activated',
-          details: 'Emergency OSINT feed activation due to insufficient live data',
+          details: 'Emergency OSINT feed activation due to insufficient live data and Enhanced Intelligence mock contamination',
           user_email: 'system@aria.com'
         });
 
@@ -195,7 +224,8 @@ export class WeaponsGradeLiveEnforcer {
       { key: 'data_validation', value: 'NUCLEAR' },
       { key: 'simulation_tolerance', value: 'ZERO' },
       { key: 'live_enforcement_level', value: 'MAXIMUM' },
-      { key: 'osint_priority', value: 'EMERGENCY' }
+      { key: 'osint_priority', value: 'EMERGENCY' },
+      { key: 'block_enhanced_intelligence', value: 'TRUE' }
     ];
 
     for (const config of configs) {
@@ -223,7 +253,8 @@ export class WeaponsGradeLiveEnforcer {
         .from('scan_results')
         .select('id, platform, url, content')
         .eq('source_type', 'live_osint')
-        .gte('created_at', new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString()) // Last 6 hours
+        .not('platform', 'in', `(${this.BANNED_PLATFORMS.map(p => `"${p}"`).join(',')})`)
+        .gte('created_at', new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString())
         .limit(20);
 
       if (error || !recentLive) {
@@ -240,13 +271,15 @@ export class WeaponsGradeLiveEnforcer {
           item.url.includes('rss') ||
           item.platform === 'Reddit' ||
           item.platform === 'uk_news'
-        )
+        ) && !this.BANNED_PLATFORMS.includes(item.platform)
       );
 
-      // Also validate content has live indicators
+      // Also validate content has live indicators and doesn't contain mock data
       const validContent = recentLive.filter(item =>
         this.REQUIRED_LIVE_INDICATORS.some(indicator =>
           item.content?.toLowerCase().includes(indicator.toLowerCase())
+        ) && !this.BANNED_KEYWORDS.some(banned =>
+          item.content?.toLowerCase().includes(banned.toLowerCase())
         )
       );
 
@@ -256,7 +289,7 @@ export class WeaponsGradeLiveEnforcer {
       const overallIntegrity = (urlIntegrityScore + contentIntegrityScore) / 2;
       
       console.log(`🔥 Source integrity: ${(overallIntegrity * 100).toFixed(1)}%`);
-      return overallIntegrity >= 0.6; // 60% must be from verified sources with live indicators
+      return overallIntegrity >= 0.6;
 
     } catch (error) {
       console.error('🔥 Source integrity validation failed:', error);
@@ -267,11 +300,20 @@ export class WeaponsGradeLiveEnforcer {
   /**
    * REAL-TIME: Continuous threat scanning validation
    */
-  static async validateLiveDataInput(content: string, source: string): Promise<boolean> {
-    // 1. REJECT: Any banned keywords
+  static async validateLiveDataInput(content: string, source: string, platform?: string): Promise<boolean> {
+    // 1. REJECT: Banned platforms
+    if (platform && this.BANNED_PLATFORMS.includes(platform)) {
+      console.error('🔥 BLOCKED: Banned platform detected:', platform);
+      toast.error('WEAPONS GRADE: Mock platform blocked');
+      return false;
+    }
+
+    // 2. REJECT: Any banned keywords
     const contentLower = content.toLowerCase();
+    const sourceLower = source.toLowerCase();
+    
     const hasBannedContent = this.BANNED_KEYWORDS.some(keyword => 
-      contentLower.includes(keyword)
+      contentLower.includes(keyword) || sourceLower.includes(keyword)
     );
     
     if (hasBannedContent) {
@@ -280,10 +322,10 @@ export class WeaponsGradeLiveEnforcer {
       return false;
     }
 
-    // 2. REQUIRE: Live indicators
+    // 3. REQUIRE: Live indicators for substantial content
     const hasLiveIndicators = this.REQUIRED_LIVE_INDICATORS.some(indicator => 
       contentLower.includes(indicator.toLowerCase()) || 
-      source.toLowerCase().includes(indicator.toLowerCase())
+      sourceLower.includes(indicator.toLowerCase())
     );
 
     if (!hasLiveIndicators && content.length > 10) {
@@ -291,11 +333,12 @@ export class WeaponsGradeLiveEnforcer {
       return false;
     }
 
-    // 3. VALIDATE: Content characteristics
+    // 4. VALIDATE: Content characteristics
     const isRealContent = content.length > 20 && 
                          !content.includes('Lorem ipsum') &&
                          !content.match(/test\s*\d+/i) &&
-                         !content.includes('example.com');
+                         !content.includes('example.com') &&
+                         !content.includes('undefined');
 
     return isRealContent;
   }
@@ -313,18 +356,22 @@ export class WeaponsGradeLiveEnforcer {
     recommendations: string[];
   }> {
     try {
-      // Count live data from last 24 hours
+      // Count live data from last 24 hours (excluding banned platforms)
       const { data: liveData } = await supabase
         .from('scan_results')
         .select('id, platform, content')
         .eq('source_type', 'live_osint')
+        .not('platform', 'in', `(${this.BANNED_PLATFORMS.map(p => `"${p}"`).join(',')})`)
         .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
 
-      // Check for any remaining mock data
+      // Check for any remaining mock data including Enhanced Intelligence
       const { data: mockData } = await supabase
         .from('scan_results')
         .select('id, content, platform')
-        .or(this.BANNED_KEYWORDS.map(keyword => `content.ilike.%${keyword}%`).join(','));
+        .or([
+          ...this.BANNED_KEYWORDS.map(keyword => `content.ilike.%${keyword}%`),
+          ...this.BANNED_PLATFORMS.map(platform => `platform.eq."${platform}"`)
+        ].join(','));
 
       const liveDataCount = liveData?.length || 0;
       const mockDataBlocked = mockData?.length || 0;
@@ -335,8 +382,9 @@ export class WeaponsGradeLiveEnforcer {
 
       if (mockDataBlocked > 0) {
         status = 'COMPROMISED';
-        recommendations.push(`IMMEDIATE: Purge ${mockDataBlocked} remaining mock data entries`);
+        recommendations.push(`IMMEDIATE: Purge ${mockDataBlocked} remaining mock data entries (including Enhanced Intelligence)`);
         recommendations.push('Execute emergency mock data purge protocol');
+        recommendations.push('Block Enhanced Intelligence platform permanently');
       } else if (liveDataCount < 10) {
         status = 'DEGRADED';
         recommendations.push('URGENT: Activate emergency OSINT data collection');
@@ -352,7 +400,7 @@ export class WeaponsGradeLiveEnforcer {
         recommendations.push('CRITICAL: No live data detected - immediate OSINT activation required');
       }
 
-      const message = `WEAPONS GRADE: ${liveDataCount} live entries, ${mockDataBlocked} threats blocked. Integrity: ${liveDataIntegrity.toFixed(1)}%`;
+      const message = `WEAPONS GRADE: ${liveDataCount} live entries, ${mockDataBlocked} threats blocked (Enhanced Intelligence filtered). Integrity: ${liveDataIntegrity.toFixed(1)}%`;
 
       return {
         status,

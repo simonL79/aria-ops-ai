@@ -1,7 +1,9 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Zap, Clock } from 'lucide-react';
+import { Zap, Clock, Shield } from 'lucide-react';
+import { WeaponsGradeLiveEnforcer } from '@/services/ariaCore/weaponsGradeLiveEnforcer';
+import { toast } from 'sonner';
 
 interface KeywordSystemHeaderProps {
   liveDataCount: number;
@@ -14,6 +16,30 @@ const KeywordSystemHeader: React.FC<KeywordSystemHeaderProps> = ({
   isExecutingPipeline,
   onExecutePipeline
 }) => {
+  const [isEnforcingLiveData, setIsEnforcingLiveData] = React.useState(false);
+
+  const handleEnforceLiveData = async () => {
+    setIsEnforcingLiveData(true);
+    try {
+      toast.info('🔥 WEAPONS GRADE: Initiating live data enforcement...');
+      const result = await WeaponsGradeLiveEnforcer.enforceWeaponsGradeLiveData();
+      
+      if (result.systemSecure) {
+        toast.success(`🔥 ${result.message}`);
+      } else {
+        toast.warning(`⚠️ ${result.message}`);
+      }
+      
+      // Trigger a page refresh to show cleaned data
+      setTimeout(() => window.location.reload(), 2000);
+    } catch (error) {
+      console.error('Live data enforcement failed:', error);
+      toast.error('❌ Live data enforcement failed');
+    } finally {
+      setIsEnforcingLiveData(false);
+    }
+  };
+
   return (
     <div className="flex items-center justify-between">
       <div>
@@ -27,6 +53,24 @@ const KeywordSystemHeader: React.FC<KeywordSystemHeaderProps> = ({
           <div className="text-sm text-gray-400">Live Data Count</div>
           <div className="text-2xl font-bold text-corporate-accent">{liveDataCount}</div>
         </div>
+        <Button
+          onClick={handleEnforceLiveData}
+          disabled={isEnforcingLiveData}
+          variant="outline"
+          className="border-red-500 text-red-400 hover:bg-red-500 hover:text-white"
+        >
+          {isEnforcingLiveData ? (
+            <>
+              <Shield className="h-4 w-4 mr-2 animate-pulse" />
+              Enforcing...
+            </>
+          ) : (
+            <>
+              <Shield className="h-4 w-4 mr-2" />
+              Purge Mock Data
+            </>
+          )}
+        </Button>
         <Button
           onClick={onExecutePipeline}
           disabled={isExecutingPipeline}
