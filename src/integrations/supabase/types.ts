@@ -276,6 +276,53 @@ export type Database = {
         }
         Relationships: []
       }
+      anubis_recommendations: {
+        Row: {
+          client_id: string | null
+          confidence_score: number | null
+          generated_at: string | null
+          id: string
+          implementation_priority: string | null
+          recommendation_text: string
+          recommendation_type: string | null
+          status: string | null
+          supporting_data: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          client_id?: string | null
+          confidence_score?: number | null
+          generated_at?: string | null
+          id?: string
+          implementation_priority?: string | null
+          recommendation_text: string
+          recommendation_type?: string | null
+          status?: string | null
+          supporting_data?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          client_id?: string | null
+          confidence_score?: number | null
+          generated_at?: string | null
+          id?: string
+          implementation_priority?: string | null
+          recommendation_text?: string
+          recommendation_type?: string | null
+          status?: string | null
+          supporting_data?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "anubis_recommendations_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       anubis_watchtower_log: {
         Row: {
           company_name: string | null
@@ -422,6 +469,50 @@ export type Database = {
         }
         Relationships: []
       }
+      article_performance: {
+        Row: {
+          article_id: string | null
+          backlinks_gained: number | null
+          click_through_rate: number | null
+          clicks: number | null
+          id: string
+          impressions: number | null
+          recorded_at: string | null
+          search_rank: number | null
+          target_keyword: string | null
+        }
+        Insert: {
+          article_id?: string | null
+          backlinks_gained?: number | null
+          click_through_rate?: number | null
+          clicks?: number | null
+          id?: string
+          impressions?: number | null
+          recorded_at?: string | null
+          search_rank?: number | null
+          target_keyword?: string | null
+        }
+        Update: {
+          article_id?: string | null
+          backlinks_gained?: number | null
+          click_through_rate?: number | null
+          clicks?: number | null
+          id?: string
+          impressions?: number | null
+          recorded_at?: string | null
+          search_rank?: number | null
+          target_keyword?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "article_performance_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "deployed_articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       blog_posts: {
         Row: {
           author: string
@@ -479,6 +570,141 @@ export type Database = {
         }
         Relationships: []
       }
+      business_impact_metrics: {
+        Row: {
+          attribution_strength: number | null
+          campaign_id: string | null
+          client_id: string | null
+          confidence_level: string | null
+          created_at: string | null
+          detected_at: string | null
+          id: string
+          metric_type: string | null
+          quantified_value: number | null
+          source: string | null
+          supporting_evidence: Json | null
+          value: string
+          verified_at: string | null
+        }
+        Insert: {
+          attribution_strength?: number | null
+          campaign_id?: string | null
+          client_id?: string | null
+          confidence_level?: string | null
+          created_at?: string | null
+          detected_at?: string | null
+          id?: string
+          metric_type?: string | null
+          quantified_value?: number | null
+          source?: string | null
+          supporting_evidence?: Json | null
+          value: string
+          verified_at?: string | null
+        }
+        Update: {
+          attribution_strength?: number | null
+          campaign_id?: string | null
+          client_id?: string | null
+          confidence_level?: string | null
+          created_at?: string | null
+          detected_at?: string | null
+          id?: string
+          metric_type?: string | null
+          quantified_value?: number | null
+          source?: string | null
+          supporting_evidence?: Json | null
+          value?: string
+          verified_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_impact_metrics_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_effectiveness_dashboard"
+            referencedColumns: ["campaign_id"]
+          },
+          {
+            foreignKeyName: "business_impact_metrics_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_roi_dashboard"
+            referencedColumns: ["campaign_id"]
+          },
+          {
+            foreignKeyName: "business_impact_metrics_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "saturation_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_impact_metrics_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campaign_analytics: {
+        Row: {
+          baseline_value: number | null
+          campaign_id: string | null
+          created_at: string | null
+          id: string
+          measurement_date: string
+          metric_name: string
+          metric_type: string | null
+          metric_value: number
+          percentage_change: number | null
+        }
+        Insert: {
+          baseline_value?: number | null
+          campaign_id?: string | null
+          created_at?: string | null
+          id?: string
+          measurement_date: string
+          metric_name: string
+          metric_type?: string | null
+          metric_value: number
+          percentage_change?: number | null
+        }
+        Update: {
+          baseline_value?: number | null
+          campaign_id?: string | null
+          created_at?: string | null
+          id?: string
+          measurement_date?: string
+          metric_name?: string
+          metric_type?: string | null
+          metric_value?: number
+          percentage_change?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_analytics_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_effectiveness_dashboard"
+            referencedColumns: ["campaign_id"]
+          },
+          {
+            foreignKeyName: "campaign_analytics_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_roi_dashboard"
+            referencedColumns: ["campaign_id"]
+          },
+          {
+            foreignKeyName: "campaign_analytics_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "saturation_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_entities: {
         Row: {
           alias: string | null
@@ -516,6 +742,51 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_platform_credentials: {
+        Row: {
+          client_id: string | null
+          created_at: string | null
+          encrypted_credentials: string | null
+          id: string
+          is_active: boolean | null
+          last_used: string | null
+          platform_id: string | null
+        }
+        Insert: {
+          client_id?: string | null
+          created_at?: string | null
+          encrypted_credentials?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_used?: string | null
+          platform_id?: string | null
+        }
+        Update: {
+          client_id?: string | null
+          created_at?: string | null
+          encrypted_credentials?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_used?: string | null
+          platform_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_platform_credentials_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_platform_credentials_platform_id_fkey"
+            columns: ["platform_id"]
+            isOneToOne: false
+            referencedRelation: "deployment_platforms"
             referencedColumns: ["id"]
           },
         ]
@@ -601,6 +872,87 @@ export type Database = {
         }
         Relationships: []
       }
+      content_edit_sessions: {
+        Row: {
+          approval_timestamp: string | null
+          article_id: string | null
+          compliance_flags: Json | null
+          created_at: string | null
+          edit_diff: Json | null
+          edit_duration_minutes: number | null
+          edit_type: string | null
+          edited_at: string | null
+          edited_content: string | null
+          editor_email: string | null
+          editor_id: string | null
+          final_approved: boolean | null
+          id: string
+          legal_notes: string | null
+          legal_reviewed: boolean | null
+          legal_reviewer_id: string | null
+          original_content: string | null
+          recommendation_id: string | null
+          rejection_reason: string | null
+        }
+        Insert: {
+          approval_timestamp?: string | null
+          article_id?: string | null
+          compliance_flags?: Json | null
+          created_at?: string | null
+          edit_diff?: Json | null
+          edit_duration_minutes?: number | null
+          edit_type?: string | null
+          edited_at?: string | null
+          edited_content?: string | null
+          editor_email?: string | null
+          editor_id?: string | null
+          final_approved?: boolean | null
+          id?: string
+          legal_notes?: string | null
+          legal_reviewed?: boolean | null
+          legal_reviewer_id?: string | null
+          original_content?: string | null
+          recommendation_id?: string | null
+          rejection_reason?: string | null
+        }
+        Update: {
+          approval_timestamp?: string | null
+          article_id?: string | null
+          compliance_flags?: Json | null
+          created_at?: string | null
+          edit_diff?: Json | null
+          edit_duration_minutes?: number | null
+          edit_type?: string | null
+          edited_at?: string | null
+          edited_content?: string | null
+          editor_email?: string | null
+          editor_id?: string | null
+          final_approved?: boolean | null
+          id?: string
+          legal_notes?: string | null
+          legal_reviewed?: boolean | null
+          legal_reviewer_id?: string | null
+          original_content?: string | null
+          recommendation_id?: string | null
+          rejection_reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_edit_sessions_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "deployed_articles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_edit_sessions_recommendation_id_fkey"
+            columns: ["recommendation_id"]
+            isOneToOne: false
+            referencedRelation: "counter_narrative_recommendations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       content_sources: {
         Row: {
           created_at: string | null
@@ -639,6 +991,68 @@ export type Database = {
           url?: string
         }
         Relationships: []
+      }
+      counter_narrative_recommendations: {
+        Row: {
+          ai_confidence_score: number | null
+          content_theme: string
+          content_type: string | null
+          created_at: string | null
+          editor_changes: Json | null
+          expected_impact_score: number | null
+          feedback_timestamp: string | null
+          id: string
+          improvement_notes: string | null
+          is_selected: boolean | null
+          operator_feedback: string | null
+          optimization_focus: string | null
+          rejection_reason: string | null
+          seo_map_id: string | null
+          target_keywords: Json
+        }
+        Insert: {
+          ai_confidence_score?: number | null
+          content_theme: string
+          content_type?: string | null
+          created_at?: string | null
+          editor_changes?: Json | null
+          expected_impact_score?: number | null
+          feedback_timestamp?: string | null
+          id?: string
+          improvement_notes?: string | null
+          is_selected?: boolean | null
+          operator_feedback?: string | null
+          optimization_focus?: string | null
+          rejection_reason?: string | null
+          seo_map_id?: string | null
+          target_keywords?: Json
+        }
+        Update: {
+          ai_confidence_score?: number | null
+          content_theme?: string
+          content_type?: string | null
+          created_at?: string | null
+          editor_changes?: Json | null
+          expected_impact_score?: number | null
+          feedback_timestamp?: string | null
+          id?: string
+          improvement_notes?: string | null
+          is_selected?: boolean | null
+          operator_feedback?: string | null
+          optimization_focus?: string | null
+          rejection_reason?: string | null
+          seo_map_id?: string | null
+          target_keywords?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "counter_narrative_recommendations_seo_map_id_fkey"
+            columns: ["seo_map_id"]
+            isOneToOne: false
+            referencedRelation: "negative_seo_maps"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       counter_narratives: {
         Row: {
@@ -693,6 +1107,65 @@ export type Database = {
             columns: ["threat_id"]
             isOneToOne: false
             referencedRelation: "scan_results"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crawl_job_queue: {
+        Row: {
+          client_id: string | null
+          completed_at: string | null
+          created_at: string | null
+          error_message: string | null
+          id: string
+          job_parameters: Json | null
+          job_type: string | null
+          priority: number | null
+          results_summary: Json | null
+          scheduled_for: string | null
+          started_at: string | null
+          status: string | null
+          target_entity: string
+          target_platforms: Json
+        }
+        Insert: {
+          client_id?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          job_parameters?: Json | null
+          job_type?: string | null
+          priority?: number | null
+          results_summary?: Json | null
+          scheduled_for?: string | null
+          started_at?: string | null
+          status?: string | null
+          target_entity: string
+          target_platforms?: Json
+        }
+        Update: {
+          client_id?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          job_parameters?: Json | null
+          job_type?: string | null
+          priority?: number | null
+          results_summary?: Json | null
+          scheduled_for?: string | null
+          started_at?: string | null
+          status?: string | null
+          target_entity?: string
+          target_platforms?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crawl_job_queue_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
             referencedColumns: ["id"]
           },
         ]
@@ -1055,6 +1528,127 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      deployed_articles: {
+        Row: {
+          article_content: string
+          article_title: string
+          authority_gap_analysis: Json | null
+          campaign_id: string | null
+          competing_domains: Json | null
+          created_at: string | null
+          deployed_at: string | null
+          deployment_status: string | null
+          deployment_url: string
+          domain_authority_score: number | null
+          external_links: Json | null
+          http_status: number | null
+          id: string
+          indexed_at: string | null
+          last_verified: string | null
+          platform: string
+          schema_metadata: Json | null
+          target_keywords: Json
+        }
+        Insert: {
+          article_content: string
+          article_title: string
+          authority_gap_analysis?: Json | null
+          campaign_id?: string | null
+          competing_domains?: Json | null
+          created_at?: string | null
+          deployed_at?: string | null
+          deployment_status?: string | null
+          deployment_url: string
+          domain_authority_score?: number | null
+          external_links?: Json | null
+          http_status?: number | null
+          id?: string
+          indexed_at?: string | null
+          last_verified?: string | null
+          platform: string
+          schema_metadata?: Json | null
+          target_keywords?: Json
+        }
+        Update: {
+          article_content?: string
+          article_title?: string
+          authority_gap_analysis?: Json | null
+          campaign_id?: string | null
+          competing_domains?: Json | null
+          created_at?: string | null
+          deployed_at?: string | null
+          deployment_status?: string | null
+          deployment_url?: string
+          domain_authority_score?: number | null
+          external_links?: Json | null
+          http_status?: number | null
+          id?: string
+          indexed_at?: string | null
+          last_verified?: string | null
+          platform?: string
+          schema_metadata?: Json | null
+          target_keywords?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deployed_articles_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_effectiveness_dashboard"
+            referencedColumns: ["campaign_id"]
+          },
+          {
+            foreignKeyName: "deployed_articles_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_roi_dashboard"
+            referencedColumns: ["campaign_id"]
+          },
+          {
+            foreignKeyName: "deployed_articles_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "saturation_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deployment_platforms: {
+        Row: {
+          api_endpoint: string | null
+          authentication_method: string | null
+          configuration: Json | null
+          created_at: string | null
+          deployment_template: string | null
+          id: string
+          is_active: boolean | null
+          platform_name: string
+          rate_limits: Json | null
+        }
+        Insert: {
+          api_endpoint?: string | null
+          authentication_method?: string | null
+          configuration?: Json | null
+          created_at?: string | null
+          deployment_template?: string | null
+          id?: string
+          is_active?: boolean | null
+          platform_name: string
+          rate_limits?: Json | null
+        }
+        Update: {
+          api_endpoint?: string | null
+          authentication_method?: string | null
+          configuration?: Json | null
+          created_at?: string | null
+          deployment_template?: string | null
+          id?: string
+          is_active?: boolean | null
+          platform_name?: string
+          rate_limits?: Json | null
+        }
+        Relationships: []
       }
       disinfo_decoys: {
         Row: {
@@ -1589,6 +2183,56 @@ export type Database = {
           risk_profile?: Json | null
         }
         Relationships: []
+      }
+      entity_fingerprints: {
+        Row: {
+          alternate_names: string[] | null
+          client_id: string | null
+          controversial_topics: string[] | null
+          core_achievements: Json | null
+          created_at: string | null
+          entity_name: string
+          fingerprint_confidence: number | null
+          id: string
+          industries: string[] | null
+          known_associates: string[] | null
+          last_updated: string | null
+        }
+        Insert: {
+          alternate_names?: string[] | null
+          client_id?: string | null
+          controversial_topics?: string[] | null
+          core_achievements?: Json | null
+          created_at?: string | null
+          entity_name: string
+          fingerprint_confidence?: number | null
+          id?: string
+          industries?: string[] | null
+          known_associates?: string[] | null
+          last_updated?: string | null
+        }
+        Update: {
+          alternate_names?: string[] | null
+          client_id?: string | null
+          controversial_topics?: string[] | null
+          core_achievements?: Json | null
+          created_at?: string | null
+          entity_name?: string
+          fingerprint_confidence?: number | null
+          id?: string
+          industries?: string[] | null
+          known_associates?: string[] | null
+          last_updated?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "entity_fingerprints_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       entity_graph: {
         Row: {
@@ -2700,6 +3344,50 @@ export type Database = {
         }
         Relationships: []
       }
+      link_validation_log: {
+        Row: {
+          article_id: string | null
+          error_details: string | null
+          http_status: number | null
+          id: string
+          indexing_source: string | null
+          is_indexed: boolean | null
+          response_time_ms: number | null
+          validation_timestamp: string | null
+          validation_url: string
+        }
+        Insert: {
+          article_id?: string | null
+          error_details?: string | null
+          http_status?: number | null
+          id?: string
+          indexing_source?: string | null
+          is_indexed?: boolean | null
+          response_time_ms?: number | null
+          validation_timestamp?: string | null
+          validation_url: string
+        }
+        Update: {
+          article_id?: string | null
+          error_details?: string | null
+          http_status?: number | null
+          id?: string
+          indexing_source?: string | null
+          is_indexed?: boolean | null
+          response_time_ms?: number | null
+          validation_timestamp?: string | null
+          validation_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "link_validation_log_article_id_fkey"
+            columns: ["article_id"]
+            isOneToOne: false
+            referencedRelation: "deployed_articles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       live_status: {
         Row: {
           active_threats: number | null
@@ -3227,6 +3915,50 @@ export type Database = {
         }
         Relationships: []
       }
+      monitoring_schedules: {
+        Row: {
+          auto_response_enabled: boolean | null
+          client_id: string | null
+          crawl_interval: unknown | null
+          created_at: string | null
+          entity_name: string
+          id: string
+          is_active: boolean | null
+          last_crawl: string | null
+          next_crawl: string | null
+        }
+        Insert: {
+          auto_response_enabled?: boolean | null
+          client_id?: string | null
+          crawl_interval?: unknown | null
+          created_at?: string | null
+          entity_name: string
+          id?: string
+          is_active?: boolean | null
+          last_crawl?: string | null
+          next_crawl?: string | null
+        }
+        Update: {
+          auto_response_enabled?: boolean | null
+          client_id?: string | null
+          crawl_interval?: unknown | null
+          created_at?: string | null
+          entity_name?: string
+          id?: string
+          is_active?: boolean | null
+          last_crawl?: string | null
+          next_crawl?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "monitoring_schedules_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       monitoring_sources: {
         Row: {
           created_at: string | null
@@ -3390,6 +4122,53 @@ export type Database = {
           trend_direction?: string | null
         }
         Relationships: []
+      }
+      negative_seo_maps: {
+        Row: {
+          authority_mapping: Json
+          average_authority_score: number | null
+          client_id: string | null
+          entity_name: string
+          generated_at: string | null
+          id: string
+          keyword_graph: Json
+          sentiment_drivers: Json
+          total_negative_mentions: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          authority_mapping?: Json
+          average_authority_score?: number | null
+          client_id?: string | null
+          entity_name: string
+          generated_at?: string | null
+          id?: string
+          keyword_graph?: Json
+          sentiment_drivers?: Json
+          total_negative_mentions?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          authority_mapping?: Json
+          average_authority_score?: number | null
+          client_id?: string | null
+          entity_name?: string
+          generated_at?: string | null
+          id?: string
+          keyword_graph?: Json
+          sentiment_drivers?: Json
+          total_negative_mentions?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "negative_seo_maps_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       nexus_command_queue: {
         Row: {
@@ -4624,6 +5403,74 @@ export type Database = {
         }
         Relationships: []
       }
+      resaturation_pushes: {
+        Row: {
+          admin_approved: boolean | null
+          auto_generated: boolean | null
+          completed_at: string | null
+          created_at: string | null
+          id: string
+          original_campaign_id: string | null
+          push_volume: number
+          status: string | null
+          target_keywords: Json
+          threat_detection_id: string | null
+        }
+        Insert: {
+          admin_approved?: boolean | null
+          auto_generated?: boolean | null
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          original_campaign_id?: string | null
+          push_volume: number
+          status?: string | null
+          target_keywords?: Json
+          threat_detection_id?: string | null
+        }
+        Update: {
+          admin_approved?: boolean | null
+          auto_generated?: boolean | null
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          original_campaign_id?: string | null
+          push_volume?: number
+          status?: string | null
+          target_keywords?: Json
+          threat_detection_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resaturation_pushes_original_campaign_id_fkey"
+            columns: ["original_campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_effectiveness_dashboard"
+            referencedColumns: ["campaign_id"]
+          },
+          {
+            foreignKeyName: "resaturation_pushes_original_campaign_id_fkey"
+            columns: ["original_campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_roi_dashboard"
+            referencedColumns: ["campaign_id"]
+          },
+          {
+            foreignKeyName: "resaturation_pushes_original_campaign_id_fkey"
+            columns: ["original_campaign_id"]
+            isOneToOne: false
+            referencedRelation: "saturation_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resaturation_pushes_threat_detection_id_fkey"
+            columns: ["threat_detection_id"]
+            isOneToOne: false
+            referencedRelation: "threat_detections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       response_effectiveness: {
         Row: {
           ai_confidence_score: number | null
@@ -4952,6 +5799,62 @@ export type Database = {
           },
         ]
       }
+      saturation_campaigns: {
+        Row: {
+          campaign_name: string
+          client_id: string | null
+          created_at: string | null
+          custom_domains: Json | null
+          deployment_platforms: Json
+          entity_name: string
+          id: string
+          source_facts: Json | null
+          status: string | null
+          target_keywords: Json
+          tone: string | null
+          updated_at: string | null
+          volume_tier: number | null
+        }
+        Insert: {
+          campaign_name: string
+          client_id?: string | null
+          created_at?: string | null
+          custom_domains?: Json | null
+          deployment_platforms?: Json
+          entity_name: string
+          id?: string
+          source_facts?: Json | null
+          status?: string | null
+          target_keywords?: Json
+          tone?: string | null
+          updated_at?: string | null
+          volume_tier?: number | null
+        }
+        Update: {
+          campaign_name?: string
+          client_id?: string | null
+          created_at?: string | null
+          custom_domains?: Json | null
+          deployment_platforms?: Json
+          entity_name?: string
+          id?: string
+          source_facts?: Json | null
+          status?: string | null
+          target_keywords?: Json
+          tone?: string | null
+          updated_at?: string | null
+          volume_tier?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saturation_campaigns_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       scan_job_configs: {
         Row: {
           alert_channels: string[] | null
@@ -5233,6 +6136,56 @@ export type Database = {
             columns: ["memory_log_id"]
             isOneToOne: false
             referencedRelation: "sentience_memory_log"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sentiment_crawl_results: {
+        Row: {
+          authority_score: number | null
+          backlink_count: number | null
+          client_id: string | null
+          content_text: string
+          crawled_at: string | null
+          created_at: string | null
+          id: string
+          platform: string
+          sentiment_label: string | null
+          sentiment_score: number | null
+          source_url: string
+        }
+        Insert: {
+          authority_score?: number | null
+          backlink_count?: number | null
+          client_id?: string | null
+          content_text: string
+          crawled_at?: string | null
+          created_at?: string | null
+          id?: string
+          platform: string
+          sentiment_label?: string | null
+          sentiment_score?: number | null
+          source_url: string
+        }
+        Update: {
+          authority_score?: number | null
+          backlink_count?: number | null
+          client_id?: string | null
+          content_text?: string
+          crawled_at?: string | null
+          created_at?: string | null
+          id?: string
+          platform?: string
+          sentiment_label?: string | null
+          sentiment_score?: number | null
+          source_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sentiment_crawl_results_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
             referencedColumns: ["id"]
           },
         ]
@@ -5912,6 +6865,50 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_keyword_analysis: {
+        Row: {
+          crawl_result_id: string | null
+          created_at: string | null
+          difficulty_score: number | null
+          frequency: number | null
+          id: string
+          keyword: string
+          keyword_type: string | null
+          search_volume: number | null
+          tf_idf_score: number | null
+        }
+        Insert: {
+          crawl_result_id?: string | null
+          created_at?: string | null
+          difficulty_score?: number | null
+          frequency?: number | null
+          id?: string
+          keyword: string
+          keyword_type?: string | null
+          search_volume?: number | null
+          tf_idf_score?: number | null
+        }
+        Update: {
+          crawl_result_id?: string | null
+          created_at?: string | null
+          difficulty_score?: number | null
+          frequency?: number | null
+          id?: string
+          keyword?: string
+          keyword_type?: string | null
+          search_volume?: number | null
+          tf_idf_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seo_keyword_analysis_crawl_result_id_fkey"
+            columns: ["crawl_result_id"]
+            isOneToOne: false
+            referencedRelation: "sentiment_crawl_results"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sigma_scan_results: {
         Row: {
           confidence_score: number | null
@@ -5954,6 +6951,51 @@ export type Database = {
         }
         Relationships: []
       }
+      source_domain_authority: {
+        Row: {
+          authority_tier: string | null
+          average_page_rank: number | null
+          backlink_count: number | null
+          check_frequency: unknown | null
+          created_at: string | null
+          domain: string
+          domain_rating: number | null
+          id: string
+          is_blacklisted: boolean | null
+          last_checked: string | null
+          organic_traffic_estimate: number | null
+          spam_score: number | null
+        }
+        Insert: {
+          authority_tier?: string | null
+          average_page_rank?: number | null
+          backlink_count?: number | null
+          check_frequency?: unknown | null
+          created_at?: string | null
+          domain: string
+          domain_rating?: number | null
+          id?: string
+          is_blacklisted?: boolean | null
+          last_checked?: string | null
+          organic_traffic_estimate?: number | null
+          spam_score?: number | null
+        }
+        Update: {
+          authority_tier?: string | null
+          average_page_rank?: number | null
+          backlink_count?: number | null
+          check_frequency?: unknown | null
+          created_at?: string | null
+          domain?: string
+          domain_rating?: number | null
+          id?: string
+          is_blacklisted?: boolean | null
+          last_checked?: string | null
+          organic_traffic_estimate?: number | null
+          spam_score?: number | null
+        }
+        Relationships: []
+      }
       sovra_action_log: {
         Row: {
           action_type: string | null
@@ -5980,6 +7022,56 @@ export type Database = {
           threat_id?: string | null
         }
         Relationships: []
+      }
+      strategy_memory: {
+        Row: {
+          client_id: string | null
+          content_tone: string | null
+          deployment_platforms: Json
+          failure_points: Json | null
+          id: string
+          keyword_focus: Json
+          lessons_learned: string | null
+          overall_effectiveness_score: number | null
+          recorded_at: string | null
+          strategy_type: string
+          success_metrics: Json
+        }
+        Insert: {
+          client_id?: string | null
+          content_tone?: string | null
+          deployment_platforms?: Json
+          failure_points?: Json | null
+          id?: string
+          keyword_focus?: Json
+          lessons_learned?: string | null
+          overall_effectiveness_score?: number | null
+          recorded_at?: string | null
+          strategy_type: string
+          success_metrics?: Json
+        }
+        Update: {
+          client_id?: string | null
+          content_tone?: string | null
+          deployment_platforms?: Json
+          failure_points?: Json | null
+          id?: string
+          keyword_focus?: Json
+          lessons_learned?: string | null
+          overall_effectiveness_score?: number | null
+          recorded_at?: string | null
+          strategy_type?: string
+          success_metrics?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "strategy_memory_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       strike_requests: {
         Row: {
@@ -6214,6 +7306,56 @@ export type Database = {
           status?: string | null
         }
         Relationships: []
+      }
+      threat_detections: {
+        Row: {
+          auto_flagged: boolean | null
+          content_preview: string | null
+          detected_at: string | null
+          id: string
+          monitoring_schedule_id: string | null
+          requires_resaturation: boolean | null
+          resolved_at: string | null
+          severity_score: number | null
+          source_url: string | null
+          status: string | null
+          threat_type: string | null
+        }
+        Insert: {
+          auto_flagged?: boolean | null
+          content_preview?: string | null
+          detected_at?: string | null
+          id?: string
+          monitoring_schedule_id?: string | null
+          requires_resaturation?: boolean | null
+          resolved_at?: string | null
+          severity_score?: number | null
+          source_url?: string | null
+          status?: string | null
+          threat_type?: string | null
+        }
+        Update: {
+          auto_flagged?: boolean | null
+          content_preview?: string | null
+          detected_at?: string | null
+          id?: string
+          monitoring_schedule_id?: string | null
+          requires_resaturation?: boolean | null
+          resolved_at?: string | null
+          severity_score?: number | null
+          source_url?: string | null
+          status?: string | null
+          threat_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "threat_detections_monitoring_schedule_id_fkey"
+            columns: ["monitoring_schedule_id"]
+            isOneToOne: false
+            referencedRelation: "monitoring_schedules"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       threat_genomes: {
         Row: {
@@ -6795,6 +7937,41 @@ export type Database = {
         }
         Relationships: []
       }
+      campaign_effectiveness_dashboard: {
+        Row: {
+          articles_deployed: number | null
+          articles_indexed: number | null
+          avg_ctr: number | null
+          avg_search_rank: number | null
+          campaign_id: string | null
+          campaign_name: string | null
+          entity_name: string | null
+          last_updated: string | null
+          total_clicks: number | null
+          volume_tier: number | null
+        }
+        Relationships: []
+      }
+      campaign_roi_dashboard: {
+        Row: {
+          approved_edits: number | null
+          articles_deployed: number | null
+          articles_indexed: number | null
+          avg_ctr: number | null
+          avg_domain_authority: number | null
+          avg_search_rank: number | null
+          business_impacts: number | null
+          campaign_id: string | null
+          campaign_name: string | null
+          entity_name: string | null
+          last_business_impact: string | null
+          last_campaign_update: string | null
+          total_edits: number | null
+          total_quantified_value: number | null
+          volume_tier: number | null
+        }
+        Relationships: []
+      }
       cerebra_bias_dashboard: {
         Row: {
           avg_accuracy: number | null
@@ -6806,6 +7983,18 @@ export type Database = {
           last_checked: string | null
           model: string | null
           total_profiles: number | null
+        }
+        Relationships: []
+      }
+      domain_authority_competitive_analysis: {
+        Row: {
+          authority_tier: string | null
+          average_page_rank: number | null
+          avg_ranking_performance: number | null
+          domain: string | null
+          last_deployment: string | null
+          our_articles_on_domain: number | null
+          top_10_rankings: number | null
         }
         Relationships: []
       }
@@ -6828,6 +8017,30 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "memory_footprints_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      entity_intelligence_summary: {
+        Row: {
+          active_campaigns: number | null
+          associate_count: number | null
+          avg_content_authority: number | null
+          business_impacts_recorded: number | null
+          client_id: string | null
+          entity_name: string | null
+          industry_presence: number | null
+          known_aliases: number | null
+          last_business_impact: string | null
+          last_updated: string | null
+          total_threats_detected: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "entity_fingerprints_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
@@ -6997,6 +8210,17 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      threat_detection_summary: {
+        Row: {
+          avg_severity: number | null
+          entity_name: string | null
+          high_severity_threats: number | null
+          last_threat_detected: string | null
+          resolved_threats: number | null
+          total_threats: number | null
+        }
+        Relationships: []
       }
       verified_live_threats: {
         Row: {
