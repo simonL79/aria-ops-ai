@@ -14,6 +14,8 @@ import BlogPage from "./pages/BlogPage";
 import BlogPostPage from "./pages/BlogPostPage";
 import Authentication from "./pages/Authentication";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminLogin from "./pages/AdminLogin";
+import LegalOpsPage from "./pages/admin/LegalOpsPage";
 import ClientsPage from "./pages/admin/ClientsPage";
 import QATestPage from "./pages/QATestPage";
 import SentinelOperatorPage from "./pages/admin/SentinelOperatorPage";
@@ -53,12 +55,12 @@ function App() {
                   <Route path="/pricing" element={<PricingPage />} />
                   <Route path="/auth" element={<Authentication />} />
                   <Route path="/admin" element={<AdminDashboard />} />
-                  <Route path="/admin/login" element={<Authentication />} />
+                  <Route path="/admin/login" element={<AdminLogin />} />
                   <Route path="/admin/genesis-sentinel" element={<GenesisSentinel />} />
                   <Route path="/admin/persona-saturation" element={<PersonaSaturationPage />} />
                   <Route path="/admin/watchtower" element={<WatchtowerPage />} />
                   <Route path="/admin/intelligence-core" element={<IntelligenceCorePage />} />
-                  <Route path="/admin/legal-ops" element={<AdminDashboard />} />
+                  <Route path="/admin/legal-ops" element={<LegalOpsPage />} />
                   <Route path="/admin/clients" element={<ClientsPage />} />
                   <Route path="/admin/qa-testing" element={<QATestPage />} />
                   <Route path="/admin/settings" element={<SettingsPage />} />
