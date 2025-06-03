@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -185,7 +184,7 @@ const LiveKeywordIntelligence: React.FC<LiveKeywordIntelligenceProps> = ({
   const displayData = liveIntelligence.length > 0 ? liveIntelligence : keywordData;
 
   return (
-    <div className="space-y-6 relative z-0">
+    <div className="space-y-6">
       {/* Live Intelligence Scanner */}
       <Card className="bg-corporate-darkSecondary border-corporate-accent/30">
         <CardHeader>
@@ -210,7 +209,7 @@ const LiveKeywordIntelligence: React.FC<LiveKeywordIntelligenceProps> = ({
               <Button
                 onClick={executeLiveIntelligenceScan}
                 disabled={isScanning || !targetEntity.trim()}
-                className="bg-corporate-accent text-black hover:bg-corporate-accent/90 disabled:opacity-50 disabled:cursor-not-allowed shrink-0 relative z-10"
+                className="bg-corporate-accent text-black hover:bg-corporate-accent/90 disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
                 type="button"
               >
                 <Zap className={`h-4 w-4 mr-2 ${isScanning ? 'animate-pulse' : ''}`} />
@@ -292,7 +291,7 @@ const LiveKeywordIntelligence: React.FC<LiveKeywordIntelligenceProps> = ({
                     href={item.source_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-corporate-accent hover:text-corporate-accent/80 flex items-center gap-1 relative z-10"
+                    className="text-corporate-accent hover:text-corporate-accent/80 flex items-center gap-1"
                   >
                     <ExternalLink className="h-3 w-3" />
                     View
@@ -327,7 +326,7 @@ const LiveKeywordIntelligence: React.FC<LiveKeywordIntelligenceProps> = ({
             <Button
               onClick={() => setTargetEntity('sample entity')}
               variant="outline"
-              className="border-corporate-accent text-corporate-accent hover:bg-corporate-accent hover:text-black relative z-10"
+              className="border-corporate-accent text-corporate-accent hover:bg-corporate-accent hover:text-black"
               type="button"
             >
               Try Sample Scan
