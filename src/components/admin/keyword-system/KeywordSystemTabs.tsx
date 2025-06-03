@@ -19,38 +19,55 @@ interface KeywordSystemTabsProps {
 const KeywordSystemTabs = ({ keywordData, counterNarratives, onRefresh }: KeywordSystemTabsProps) => {
   return (
     <Tabs defaultValue="precision" className="space-y-6">
-      <TabsList className="grid w-full grid-cols-5">
-        <TabsTrigger value="precision" className="flex items-center gap-2">
-          <Target className="h-4 w-4" />
-          CIA Precision
+      <TabsList className="grid w-full grid-cols-5 bg-corporate-darkTertiary border border-corporate-border h-14">
+        <TabsTrigger 
+          value="precision" 
+          className="flex items-center gap-2 text-base font-medium data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray hover:text-white transition-colors"
+        >
+          <Target className="h-5 w-5" />
+          <span className="hidden sm:inline">CIA Precision</span>
         </TabsTrigger>
-        <TabsTrigger value="narratives" className="flex items-center gap-2">
-          <Zap className="h-4 w-4" />
-          Counter-Narratives
+        <TabsTrigger 
+          value="narratives" 
+          className="flex items-center gap-2 text-base font-medium data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray hover:text-white transition-colors"
+        >
+          <Zap className="h-5 w-5" />
+          <span className="hidden sm:inline">Counter-Narratives</span>
         </TabsTrigger>
-        <TabsTrigger value="articles" className="flex items-center gap-2">
-          <Bot className="h-4 w-4" />
-          Article Generation
+        <TabsTrigger 
+          value="articles" 
+          className="flex items-center gap-2 text-base font-medium data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray hover:text-white transition-colors"
+        >
+          <Bot className="h-5 w-5" />
+          <span className="hidden sm:inline">Article Generation</span>
         </TabsTrigger>
-        <TabsTrigger value="performance" className="flex items-center gap-2">
-          <BarChart3 className="h-4 w-4" />
-          Performance
+        <TabsTrigger 
+          value="performance" 
+          className="flex items-center gap-2 text-base font-medium data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray hover:text-white transition-colors"
+        >
+          <BarChart3 className="h-5 w-5" />
+          <span className="hidden sm:inline">Performance</span>
         </TabsTrigger>
-        <TabsTrigger value="deployment" className="flex items-center gap-2">
-          <Settings className="h-4 w-4" />
-          Deployment
+        <TabsTrigger 
+          value="deployment" 
+          className="flex items-center gap-2 text-base font-medium data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray hover:text-white transition-colors"
+        >
+          <Settings className="h-5 w-5" />
+          <span className="hidden sm:inline">Deployment</span>
         </TabsTrigger>
       </TabsList>
 
       <TabsContent value="precision">
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-semibold">CIA-Level Entity Precision</h3>
-              <p className="text-muted-foreground">Advanced entity disambiguation eliminates false positives like "Lindsay Lohan" for "Simon Lindsay"</p>
+        <div className="space-y-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div className="space-y-2">
+              <h3 className="text-2xl font-semibold text-white">CIA-Level Entity Precision</h3>
+              <p className="text-base text-corporate-lightGray leading-relaxed max-w-3xl">
+                Advanced entity disambiguation eliminates false positives like "Lindsay Lohan" for "Simon Lindsay"
+              </p>
             </div>
-            <Badge className="bg-blue-100 text-blue-800">
-              <Target className="h-3 w-3 mr-1" />
+            <Badge className="bg-blue-900/20 text-blue-300 border-blue-500/30 px-4 py-2 text-base font-medium w-fit">
+              <Target className="h-4 w-4 mr-2" />
               Advanced NER Active
             </Badge>
           </div>
@@ -59,13 +76,15 @@ const KeywordSystemTabs = ({ keywordData, counterNarratives, onRefresh }: Keywor
       </TabsContent>
 
       <TabsContent value="narratives">
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-semibold">Counter-Narrative Generation</h3>
-              <p className="text-muted-foreground">AI-powered strategic counter-narratives from live intelligence</p>
+        <div className="space-y-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div className="space-y-2">
+              <h3 className="text-2xl font-semibold text-white">Counter-Narrative Generation</h3>
+              <p className="text-base text-corporate-lightGray leading-relaxed max-w-3xl">
+                AI-powered strategic counter-narratives from live intelligence
+              </p>
             </div>
-            <Badge variant="outline">
+            <Badge variant="outline" className="border-corporate-border text-corporate-lightGray px-4 py-2 text-base font-medium w-fit">
               {counterNarratives.length} Active Narratives
             </Badge>
           </div>
@@ -78,13 +97,15 @@ const KeywordSystemTabs = ({ keywordData, counterNarratives, onRefresh }: Keywor
       </TabsContent>
 
       <TabsContent value="articles">
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-semibold">Article Generation Hub</h3>
-              <p className="text-muted-foreground">Transform counter-narratives into deployable content</p>
+        <div className="space-y-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div className="space-y-2">
+              <h3 className="text-2xl font-semibold text-white">Article Generation Hub</h3>
+              <p className="text-base text-corporate-lightGray leading-relaxed max-w-3xl">
+                Transform counter-narratives into deployable content
+              </p>
             </div>
-            <Badge variant="outline">
+            <Badge variant="outline" className="border-corporate-border text-corporate-lightGray px-4 py-2 text-base font-medium w-fit">
               Content Pipeline
             </Badge>
           </div>
@@ -96,13 +117,15 @@ const KeywordSystemTabs = ({ keywordData, counterNarratives, onRefresh }: Keywor
       </TabsContent>
 
       <TabsContent value="performance">
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-semibold">Performance Analytics</h3>
-              <p className="text-muted-foreground">Track keyword performance and content impact</p>
+        <div className="space-y-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div className="space-y-2">
+              <h3 className="text-2xl font-semibold text-white">Performance Analytics</h3>
+              <p className="text-base text-corporate-lightGray leading-relaxed max-w-3xl">
+                Track keyword performance and content impact
+              </p>
             </div>
-            <Badge variant="outline">
+            <Badge variant="outline" className="border-corporate-border text-corporate-lightGray px-4 py-2 text-base font-medium w-fit">
               Real-time Metrics
             </Badge>
           </div>
@@ -115,13 +138,15 @@ const KeywordSystemTabs = ({ keywordData, counterNarratives, onRefresh }: Keywor
       </TabsContent>
 
       <TabsContent value="deployment">
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-semibold">Deployment Center</h3>
-              <p className="text-muted-foreground">Configure and manage content deployment</p>
+        <div className="space-y-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div className="space-y-2">
+              <h3 className="text-2xl font-semibold text-white">Deployment Center</h3>
+              <p className="text-base text-corporate-lightGray leading-relaxed max-w-3xl">
+                Configure and manage content deployment
+              </p>
             </div>
-            <Badge variant="outline">
+            <Badge variant="outline" className="border-corporate-border text-corporate-lightGray px-4 py-2 text-base font-medium w-fit">
               Multi-Platform
             </Badge>
           </div>
