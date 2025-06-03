@@ -1,17 +1,18 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { LiveDataEnforcer } from '@/services/ariaCore/liveDataEnforcer';
 import type { ScanOptions, LiveScanResult } from '@/types/scan';
 import { 
-  generateEntityFingerprint, 
-  filterEntitySpecificResults, 
-  generateEntitySearchQueries,
-  logEntityMatchingStats,
-  type EntityFingerprint 
-} from './entityMatcher';
+  generateEnhancedEntityFingerprint, 
+  filterWithConfidenceThreshold, 
+  generateExpandedSearchQueries,
+  logEnhancedFilteringStats,
+  type EnhancedEntityFingerprint 
+} from './enhancedEntityMatcher';
 
 /**
- * CONSOLIDATED LIVE OSINT SCANNING - PRECISION ENTITY-SPECIFIC INTELLIGENCE
- * NO MOCK DATA - 100% LIVE INTELLIGENCE WITH EXACT ENTITY TARGETING
+ * ENHANCED A.R.I.A™ LIVE OSINT SCANNING - HIGH RECALL, HIGH PRECISION
+ * Broad-then-filtered approach with layered confidence scoring
  */
 
 /**
@@ -22,7 +23,8 @@ async function logScannerQuery(
   searchTerms: string[],
   platform: string,
   totalResults: number,
-  matchedResults: number
+  matchedResults: number,
+  stats: any
 ): Promise<void> {
   try {
     const { error } = await supabase.from('scanner_query_log').insert({
@@ -43,7 +45,7 @@ async function logScannerQuery(
 }
 
 /**
- * Perform real OSINT scan with precision entity targeting
+ * Perform enhanced real OSINT scan with layered confidence scoring
  */
 export const performRealScan = async (options: ScanOptions = {}): Promise<LiveScanResult[]> => {
   try {
@@ -54,17 +56,18 @@ export const performRealScan = async (options: ScanOptions = {}): Promise<LiveSc
       throw new Error('Live data enforcement failed. Mock data operations blocked.');
     }
 
-    const entityName = options.targetEntity || 'Simon Lindsay'; // Default for testing
-    console.log('🔍 A.R.I.A™ OSINT: Starting PRECISION entity-specific intelligence scan for:', entityName);
+    const entityName = options.targetEntity || 'Simon Lindsay';
+    console.log('🔍 A.R.I.A™ Enhanced OSINT: Starting HIGH RECALL, HIGH PRECISION scan for:', entityName);
 
-    // Generate entity fingerprint for precision matching
-    const entityFingerprint = generateEntityFingerprint(entityName);
-    const searchQueries = generateEntitySearchQueries(entityFingerprint);
+    // Generate enhanced entity fingerprint with expanded variations
+    const entityFingerprint = generateEnhancedEntityFingerprint(entityName);
+    const searchQueries = generateExpandedSearchQueries(entityFingerprint);
     
-    console.log('🎯 Entity Fingerprint Generated:', {
+    console.log('🎯 Enhanced Entity Fingerprint Generated:', {
       entity: entityFingerprint.entity_name,
       exact_phrases: entityFingerprint.exact_phrases,
-      search_queries: searchQueries
+      alias_variations: entityFingerprint.alias_variations,
+      search_queries_count: searchQueries.length
     });
 
     const scanFunctions = [
@@ -79,11 +82,11 @@ export const performRealScan = async (options: ScanOptions = {}): Promise<LiveSc
     
     for (const func of scanFunctions) {
       try {
-        console.log(`🔍 A.R.I.A™ OSINT: Executing ${func} with precision entity targeting`);
+        console.log(`🔍 A.R.I.A™ Enhanced OSINT: Executing ${func} with expanded search strategy`);
         
         const { data, error } = await supabase.functions.invoke(func, {
           body: { 
-            scanType: 'precision_entity_osint',
+            scanType: 'enhanced_entity_osint',
             fullScan: options.fullScan || true,
             targetEntity: entityName,
             entity: entityName,
@@ -94,7 +97,8 @@ export const performRealScan = async (options: ScanOptions = {}): Promise<LiveSc
             source: options.source || 'manual',
             blockMockData: true,
             enforceLiveOnly: true,
-            entityFocused: true
+            entityFocused: true,
+            confidenceThreshold: 0.6 // Configurable threshold
           }
         });
 
@@ -117,17 +121,21 @@ export const performRealScan = async (options: ScanOptions = {}): Promise<LiveSc
             }));
           }
 
-          // Apply PRECISION entity filtering - only results specifically about this entity
+          // Apply ENHANCED entity filtering with confidence scoring
           const beforeFilterCount = scanResults.length;
-          const { filtered: filteredResults, stats } = filterEntitySpecificResults(scanResults, entityFingerprint);
+          const { filtered: filteredResults, stats } = filterWithConfidenceThreshold(
+            scanResults, 
+            entityFingerprint,
+            0.4 // Lower threshold for broader recall
+          );
           
-          // Log matching statistics
-          logEntityMatchingStats(entityName, func, stats, searchQueries);
+          // Log comprehensive matching statistics
+          logEnhancedFilteringStats(entityName, func, stats, searchQueries);
           
           // Log the query for audit trail
-          await logScannerQuery(entityName, searchQueries, func, beforeFilterCount, filteredResults.length);
+          await logScannerQuery(entityName, searchQueries, func, beforeFilterCount, filteredResults.length, stats);
 
-          // Process filtered results
+          // Process filtered results with confidence preservation
           for (const result of filteredResults) {
             // Skip generic/template content
             if (isGenericContent(result.content || result.contextSnippet || '')) {
@@ -141,22 +149,26 @@ export const performRealScan = async (options: ScanOptions = {}): Promise<LiveSc
             
             if (isValidLiveData) {
               results.push({
-                id: result.id || `live-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+                id: result.id || `enhanced-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
                 platform: result.platform || 'Unknown',
                 content: result.content || result.contextSnippet || '',
                 url: result.url || result.sourceUrl || '',
                 severity: (result.severity as 'low' | 'medium' | 'high') || mapThreatLevelToSeverity(result.threatLevel),
                 status: (result.status as 'new' | 'read' | 'actioned' | 'resolved') || 'new',
-                threat_type: result.threat_type || 'precision_entity_threat',
+                threat_type: result.threat_type || 'enhanced_entity_threat',
                 sentiment: result.sentiment || 0,
-                confidence_score: result.confidence_score || result.matchConfidence * 100 || 85,
+                confidence_score: result.confidence_score || result.entity_match?.confidence_score || 85,
                 potential_reach: result.potential_reach || result.spreadVelocity * 1000 || 0,
                 detected_entities: [entityName],
-                source_type: 'live_osint',
+                source_type: 'enhanced_live_osint',
                 entity_name: entityName,
                 source_credibility_score: result.source_credibility_score || 75,
                 media_is_ai_generated: result.media_is_ai_generated || false,
-                ai_detection_confidence: result.ai_detection_confidence || 0
+                ai_detection_confidence: result.ai_detection_confidence || 0,
+                // Enhanced fields
+                match_type: result.entity_match?.match_type,
+                matched_alias: result.entity_match?.matched_alias,
+                context_keywords: result.entity_match?.context_keywords
               });
             } else {
               console.warn('🚫 BLOCKED: Mock data detected and filtered:', result.platform);
@@ -170,20 +182,30 @@ export const performRealScan = async (options: ScanOptions = {}): Promise<LiveSc
       }
     }
 
-    console.log(`✅ A.R.I.A™ OSINT: Precision entity scan complete - ${results.length} verified entity-specific results for "${entityName}"`);
+    console.log(`✅ A.R.I.A™ Enhanced OSINT: Scan complete - ${results.length} high-confidence entity results for "${entityName}"`);
     
     if (results.length === 0) {
-      console.log('ℹ️ No entity-specific threats detected. This could mean:');
-      console.log('   • The entity has a clean online presence');
-      console.log('   • No recent activity mentioning this entity');
+      console.log('ℹ️ No high-confidence entity matches detected. This could mean:');
+      console.log('   • No recent mentions above confidence threshold (0.4)');
       console.log('   • All mentions are positive/neutral');
       console.log('   • Content exists but doesn\'t meet threat criteria');
+      console.log('   • Consider lowering confidence threshold for broader recall');
+    } else {
+      // Log confidence distribution
+      const confidenceDistribution = results.reduce((acc, result) => {
+        const range = result.confidence_score >= 85 ? 'high' : 
+                     result.confidence_score >= 60 ? 'medium' : 'low';
+        acc[range] = (acc[range] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      
+      console.log('📊 Confidence Distribution:', confidenceDistribution);
     }
     
     return results;
 
   } catch (error) {
-    console.error('❌ Precision entity scan failed:', error);
+    console.error('❌ Enhanced entity scan failed:', error);
     throw error;
   }
 };

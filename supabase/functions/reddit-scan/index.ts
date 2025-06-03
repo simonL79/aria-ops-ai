@@ -8,7 +8,7 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  console.log('[REDDIT-SCAN] === PRECISION ENTITY-SPECIFIC SCAN REQUEST ===');
+  console.log('[REDDIT-SCAN] === ENHANCED HIGH RECALL, HIGH PRECISION SCAN ===');
   console.log('[REDDIT-SCAN] Method:', req.method);
   
   if (req.method === 'OPTIONS') {
@@ -22,47 +22,61 @@ serve(async (req) => {
       search_queries = [],
       entity_fingerprint = null,
       keywords = [], 
-      source = 'reddit' 
+      source = 'reddit',
+      confidenceThreshold = 0.6
     } = await req.json().catch(() => ({}));
     
-    const entityName = entity || targetEntity || 'Simon Lindsay'; // Default for testing
-    console.log('[REDDIT-SCAN] Starting PRECISION entity-specific Reddit scan for:', entityName);
-    console.log('[REDDIT-SCAN] Search queries:', search_queries);
-    console.log('[REDDIT-SCAN] Entity fingerprint:', entity_fingerprint);
+    const entityName = entity || targetEntity || 'Simon Lindsay';
+    console.log('[REDDIT-SCAN] Starting ENHANCED entity-specific Reddit scan for:', entityName);
+    console.log('[REDDIT-SCAN] Search queries count:', search_queries.length);
+    console.log('[REDDIT-SCAN] Confidence threshold:', confidenceThreshold);
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Use precision search queries - prioritize exact phrases
+    // Use EXPANDED search queries for broader recall
     const searchTerms = search_queries.length > 0 ? search_queries : [
-      `"${entityName}"`, // Exact phrase gets highest priority
+      `"${entityName}"`,
       entityName,
+      `${entityName} Glasgow`,
+      `${entityName} KSL Hair`,
+      `${entityName} fraud`,
+      `${entityName} scam`,
+      `${entityName} warrant`
     ];
     
     const rawResults = [];
+    const searchStats = {
+      queries_executed: 0,
+      total_entries_found: 0,
+      processing_errors: 0
+    };
     
+    // Execute broader search strategy
     for (const searchTerm of searchTerms) {
       try {
+        searchStats.queries_executed++;
         const encodedQuery = encodeURIComponent(searchTerm);
         const feedUrl = `https://www.reddit.com/search.rss?q=${encodedQuery}&sort=new&limit=25`;
         
-        console.log('[REDDIT-SCAN] Fetching RSS feed for term:', searchTerm);
-        console.log('[REDDIT-SCAN] URL:', feedUrl);
+        console.log('[REDDIT-SCAN] Executing broad search for term:', searchTerm);
 
         const response = await fetch(feedUrl, {
           headers: {
-            'User-Agent': 'ARIA-OSINT-PrecisionScan/1.0'
+            'User-Agent': 'ARIA-Enhanced-OSINT/2.0'
           }
         });
 
         if (!response.ok) {
           console.error(`[REDDIT-SCAN] RSS fetch failed for ${searchTerm}: ${response.status}`);
+          searchStats.processing_errors++;
           continue;
         }
 
         const xml = await response.text();
         const items = [...xml.matchAll(/<entry>(.*?)<\/entry>/gs)];
+        searchStats.total_entries_found += items.length;
         console.log('[REDDIT-SCAN] Found', items.length, 'raw entries for:', searchTerm);
 
         for (const item of items) {
@@ -76,130 +90,186 @@ serve(async (req) => {
             content,
             url: link,
             updated,
-            search_term: searchTerm
+            search_term: searchTerm,
+            platform: 'Reddit'
           });
         }
       } catch (error) {
         console.error(`[REDDIT-SCAN] Error processing search term ${searchTerm}:`, error);
+        searchStats.processing_errors++;
       }
     }
 
-    console.log(`[REDDIT-SCAN] Total raw results collected: ${rawResults.length}`);
+    console.log(`[REDDIT-SCAN] BROAD SEARCH COMPLETED:`);
+    console.log(`   Queries Executed: ${searchStats.queries_executed}`);
+    console.log(`   Total Raw Results: ${rawResults.length}`);
+    console.log(`   Processing Errors: ${searchStats.processing_errors}`);
 
-    // Apply PRECISION entity filtering
+    // Apply ENHANCED entity filtering with confidence scoring
     const entitySpecificResults = [];
+    const filteringStats = {
+      exact_matches: 0,
+      alias_matches: 0,
+      contextual_matches: 0,
+      fuzzy_matches: 0,
+      below_threshold: 0,
+      no_match: 0
+    };
     
     for (const result of rawResults) {
       const fullText = (result.title + ' ' + result.content).toLowerCase();
       
-      // PRECISION MATCHING: Require exact entity presence
-      let isEntitySpecificMatch = false;
+      // Enhanced layered matching
+      let matchFound = false;
+      let confidenceScore = 0;
+      let matchType = 'none';
+      let matchedAlias = '';
       
       if (entity_fingerprint) {
-        // Use fingerprint for precision matching
+        // Layer 1: Exact matches (1.0 confidence)
         const exactPhrases = entity_fingerprint.exact_phrases || [];
-        const contextualPhrases = entity_fingerprint.contextual_phrases || [];
-        const businessContexts = entity_fingerprint.business_contexts || [];
-        const locationContexts = entity_fingerprint.location_contexts || [];
+        for (const phrase of exactPhrases) {
+          if (fullText.includes(phrase.toLowerCase())) {
+            matchFound = true;
+            confidenceScore = 1.0;
+            matchType = 'exact';
+            matchedAlias = phrase;
+            filteringStats.exact_matches++;
+            break;
+          }
+        }
         
-        // Check exact phrases first (highest confidence)
-        const hasExactMatch = exactPhrases.some(phrase => fullText.includes(phrase.toLowerCase()));
-        
-        if (hasExactMatch) {
-          isEntitySpecificMatch = true;
-          console.log('[REDDIT-SCAN] ✅ EXACT entity match found:', result.title.substring(0, 50));
-        } else {
-          // Check contextual phrases with business/location context
-          const hasContextualMatch = contextualPhrases.some(phrase => {
-            if (fullText.includes(phrase.toLowerCase())) {
-              // Require additional context for partial name matches
-              const hasBusinessContext = businessContexts.some(context => 
-                fullText.includes(context.split(' ').slice(1).join(' ').toLowerCase())
-              );
-              const hasLocationContext = locationContexts.some(context => 
-                fullText.includes(context.split(' ').slice(1).join(' ').toLowerCase())
-              );
-              
-              return hasBusinessContext || hasLocationContext;
+        // Layer 2: Alias matches (0.85 confidence)
+        if (!matchFound) {
+          const aliasVariations = entity_fingerprint.alias_variations || [];
+          for (const alias of aliasVariations) {
+            if (fullText.includes(alias.toLowerCase())) {
+              matchFound = true;
+              confidenceScore = 0.85;
+              matchType = 'alias';
+              matchedAlias = alias;
+              filteringStats.alias_matches++;
+              break;
             }
-            return false;
-          });
+          }
+        }
+        
+        // Layer 3: Contextual matches (0.6 confidence)
+        if (!matchFound) {
+          const businessContexts = entity_fingerprint.business_contexts || [];
+          const locationContexts = entity_fingerprint.location_contexts || [];
+          const negativeKeywords = entity_fingerprint.negative_keywords || [];
           
-          if (hasContextualMatch) {
-            isEntitySpecificMatch = true;
-            console.log('[REDDIT-SCAN] ✅ CONTEXTUAL entity match found:', result.title.substring(0, 50));
+          const hasNameReference = fullText.includes(entityName.split(' ')[0].toLowerCase()) || 
+                                  fullText.includes(entityName.split(' ')[1].toLowerCase());
+          
+          if (hasNameReference) {
+            const contextMatches = [
+              ...businessContexts.filter(ctx => fullText.includes(ctx.toLowerCase())),
+              ...locationContexts.filter(loc => fullText.includes(loc.toLowerCase())),
+              ...negativeKeywords.filter(kw => fullText.includes(kw.toLowerCase()))
+            ];
+            
+            if (contextMatches.length > 0) {
+              matchFound = true;
+              confidenceScore = 0.6;
+              matchType = 'contextual';
+              matchedAlias = contextMatches.join(', ');
+              filteringStats.contextual_matches++;
+            }
+          }
+        }
+        
+        // Layer 4: Fuzzy matches (0.4 confidence)
+        if (!matchFound) {
+          const fuzzyVariations = entity_fingerprint.fuzzy_variations || [];
+          for (const fuzzy of fuzzyVariations) {
+            if (fullText.includes(fuzzy.toLowerCase())) {
+              matchFound = true;
+              confidenceScore = 0.4;
+              matchType = 'fuzzy';
+              matchedAlias = fuzzy;
+              filteringStats.fuzzy_matches++;
+              break;
+            }
           }
         }
       } else {
         // Fallback: Basic exact phrase matching
         const entityLower = entityName.toLowerCase();
-        const hasFullName = fullText.includes(entityLower);
-        const hasExactPhrase = fullText.includes(`"${entityLower}"`);
-        
-        isEntitySpecificMatch = hasFullName || hasExactPhrase;
-        
-        if (isEntitySpecificMatch) {
-          console.log('[REDDIT-SCAN] ✅ Basic entity match found:', result.title.substring(0, 50));
+        if (fullText.includes(entityLower) || fullText.includes(`"${entityLower}"`)) {
+          matchFound = true;
+          confidenceScore = 0.8;
+          matchType = 'basic';
+          matchedAlias = entityLower;
         }
       }
 
-      if (!isEntitySpecificMatch) {
-        console.log('[REDDIT-SCAN] ❌ Filtered out non-specific content:', result.title.substring(0, 50));
-        continue;
+      // Apply confidence threshold
+      if (matchFound && confidenceScore >= confidenceThreshold) {
+        console.log(`[REDDIT-SCAN] ✅ ${matchType.toUpperCase()} match (${confidenceScore}):`, result.title.substring(0, 50));
+        
+        // Calculate threat severity
+        let severity = 'low';
+        const contentLower = fullText;
+        const threatKeywords = ['fraud', 'scam', 'warrant', 'lawsuit', 'controversy', 'scandal'];
+        const highRiskKeywords = ['bench warrant', 'criminal', 'arrest', 'police'];
+        
+        if (highRiskKeywords.some(keyword => contentLower.includes(keyword))) {
+          severity = 'high';
+        } else if (threatKeywords.some(keyword => contentLower.includes(keyword))) {
+          severity = 'medium';
+        }
+
+        const processedResult = {
+          platform: 'Reddit',
+          content: result.title.substring(0, 500),
+          url: result.url,
+          severity: severity,
+          sentiment: Math.round((Math.random() * 0.4 - 0.2) * 1000) / 1000,
+          confidence_score: Math.round(confidenceScore * 100),
+          detected_entities: [entityName],
+          source_type: source,
+          entity_name: entityName,
+          created_at: result.updated || new Date().toISOString(),
+          potential_reach: Math.floor(Math.random() * 1000) + 100,
+          source_credibility_score: 75,
+          // Enhanced fields
+          match_type: matchType,
+          matched_alias: matchedAlias,
+          search_term: result.search_term
+        };
+
+        entitySpecificResults.push(processedResult);
+      } else if (matchFound) {
+        filteringStats.below_threshold++;
+        console.log(`[REDDIT-SCAN] ⚠️ Below threshold (${confidenceScore}):`, result.title.substring(0, 50));
+      } else {
+        filteringStats.no_match++;
       }
-
-      // Calculate threat severity based on content analysis
-      let severity = 'low';
-      const contentLower = fullText;
-      const threatKeywords = ['fraud', 'scam', 'warrant', 'lawsuit', 'controversy', 'scandal'];
-      const highRiskKeywords = ['bench warrant', 'criminal', 'arrest', 'police'];
-      
-      if (highRiskKeywords.some(keyword => contentLower.includes(keyword))) {
-        severity = 'high';
-      } else if (threatKeywords.some(keyword => contentLower.includes(keyword))) {
-        severity = 'medium';
-      }
-
-      // Ensure all numeric values are properly typed for database insertion
-      const processedResult = {
-        platform: 'Reddit',
-        content: result.title.substring(0, 500), // Limit content length
-        url: result.url,
-        severity: severity,
-        sentiment: Math.round((Math.random() * 0.4 - 0.2) * 1000) / 1000, // Ensure 3 decimal places
-        confidence_score: 85, // Higher confidence for entity-specific matches
-        detected_entities: [entityName],
-        source_type: source,
-        entity_name: entityName,
-        created_at: result.updated || new Date().toISOString(),
-        potential_reach: Math.floor(Math.random() * 1000) + 100, // Ensure integer
-        source_credibility_score: 75 // Use integer instead of decimal
-      };
-
-      entitySpecificResults.push(processedResult);
     }
 
-    console.log(`[REDDIT-SCAN] PRECISION FILTERING COMPLETE:`);
+    console.log(`[REDDIT-SCAN] ENHANCED FILTERING COMPLETE:`);
     console.log(`   Raw Results: ${rawResults.length}`);
     console.log(`   Entity-Specific Results: ${entitySpecificResults.length}`);
+    console.log(`   Filtering Stats:`, filteringStats);
     console.log(`   Precision Rate: ${rawResults.length > 0 ? ((entitySpecificResults.length / rawResults.length) * 100).toFixed(1) : 0}%`);
 
-    // Insert with proper error handling and data validation
+    // Insert with enhanced tracking
     if (entitySpecificResults.length > 0) {
       try {
         const { error } = await supabase.from('scan_results').insert(entitySpecificResults);
         if (error) {
           console.error('[REDDIT-SCAN] Database insert error:', error);
-          // Continue execution even if database insert fails
         } else {
-          console.log('[REDDIT-SCAN] Successfully inserted', entitySpecificResults.length, 'PRECISION entity-specific entries');
+          console.log('[REDDIT-SCAN] Successfully inserted', entitySpecificResults.length, 'enhanced entity-specific entries');
         }
       } catch (dbError) {
         console.error('[REDDIT-SCAN] Database operation failed:', dbError);
       }
     }
 
-    // Log the query for audit trail
+    // Enhanced audit logging
     try {
       await supabase.from('scanner_query_log').insert({
         entity_name: entityName,
@@ -217,14 +287,16 @@ serve(async (req) => {
       success: true,
       inserted: entitySpecificResults.length, 
       results: entitySpecificResults,
-      message: `Reddit PRECISION entity scan completed: ${entitySpecificResults.length} entity-specific items found for "${entityName}"`,
+      message: `Reddit ENHANCED entity scan completed: ${entitySpecificResults.length} high-confidence items found for "${entityName}"`,
       entity_name: entityName,
       search_terms: searchTerms,
-      dataSource: 'LIVE_REDDIT_RSS',
+      dataSource: 'ENHANCED_REDDIT_RSS',
       filtering_stats: {
         raw_results: rawResults.length,
         entity_specific: entitySpecificResults.length,
-        precision_rate: rawResults.length > 0 ? ((entitySpecificResults.length / rawResults.length) * 100).toFixed(1) + '%' : '0%'
+        precision_rate: rawResults.length > 0 ? ((entitySpecificResults.length / rawResults.length) * 100).toFixed(1) + '%' : '0%',
+        confidence_breakdown: filteringStats,
+        search_stats: searchStats
       }
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -234,7 +306,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('[REDDIT-SCAN] Error:', error);
     return new Response(JSON.stringify({
-      error: 'Reddit precision entity scan failed',
+      error: 'Reddit enhanced entity scan failed',
       details: error.message
     }), {
       status: 500,
