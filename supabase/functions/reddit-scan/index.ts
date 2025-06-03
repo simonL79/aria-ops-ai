@@ -8,7 +8,7 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  console.log('[REDDIT-SCAN] === ENHANCED HIGH RECALL, HIGH PRECISION SCAN ===');
+  console.log('[REDDIT-SCAN] === ENTITY NAME DEBUGGING ===');
   console.log('[REDDIT-SCAN] Method:', req.method);
   
   if (req.method === 'OPTIONS') {
@@ -16,20 +16,49 @@ serve(async (req) => {
   }
 
   try {
+    const requestBody = await req.json().catch(() => ({}));
+    console.log('[REDDIT-SCAN] Raw request body:', requestBody);
+    
+    // CRITICAL FIX: Extract entity name from ALL possible field variations
     const { 
       entity, 
       targetEntity,
+      entityName,
+      target_entity,
+      entity_name,
       search_queries = [],
       entity_fingerprint = null,
       keywords = [], 
       source = 'reddit',
-      confidenceThreshold = 0.6
-    } = await req.json().catch(() => ({}));
+      confidenceThreshold = 0.1 // LOWERED for testing
+    } = requestBody;
     
-    const entityName = entity || targetEntity || 'Simon Lindsay';
-    console.log('[REDDIT-SCAN] Starting ENHANCED entity-specific Reddit scan for:', entityName);
-    console.log('[REDDIT-SCAN] Search queries count:', search_queries.length);
-    console.log('[REDDIT-SCAN] Confidence threshold:', confidenceThreshold);
+    // Extract entity name with fallback priority
+    const extractedEntityName = entity_name || entity || targetEntity || entityName || target_entity || 'Simon Lindsay';
+    
+    console.log('[REDDIT-SCAN] Entity name extraction debug:', {
+      entity_name,
+      entity,
+      targetEntity,
+      entityName,
+      target_entity,
+      extractedEntityName,
+      finalEntityUsed: extractedEntityName
+    });
+    
+    // VALIDATION: Ensure we have a valid entity name
+    if (!extractedEntityName || extractedEntityName === 'undefined' || extractedEntityName.trim() === '') {
+      console.error('[REDDIT-SCAN] ❌ CRITICAL: No valid entity name provided');
+      return new Response(JSON.stringify({
+        error: 'Entity name is required',
+        debug: { requestBody, extractedEntityName }
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+    
+    console.log('[REDDIT-SCAN] ✅ Processing Reddit scan for entity:', extractedEntityName);
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -37,13 +66,13 @@ serve(async (req) => {
 
     // Use EXPANDED search queries for broader recall
     const searchTerms = search_queries.length > 0 ? search_queries : [
-      `"${entityName}"`,
-      entityName,
-      `${entityName} Glasgow`,
-      `${entityName} KSL Hair`,
-      `${entityName} fraud`,
-      `${entityName} scam`,
-      `${entityName} warrant`
+      `"${extractedEntityName}"`,
+      extractedEntityName,
+      `${extractedEntityName} Glasgow`,
+      `${extractedEntityName} KSL Hair`,
+      `${extractedEntityName} fraud`,
+      `${extractedEntityName} scam`,
+      `${extractedEntityName} warrant`
     ];
     
     const rawResults = [];
@@ -60,7 +89,7 @@ serve(async (req) => {
         const encodedQuery = encodeURIComponent(searchTerm);
         const feedUrl = `https://www.reddit.com/search.rss?q=${encodedQuery}&sort=new&limit=25`;
         
-        console.log('[REDDIT-SCAN] Executing broad search for term:', searchTerm);
+        console.log('[REDDIT-SCAN] Executing search for term:', searchTerm);
 
         const response = await fetch(feedUrl, {
           headers: {
@@ -100,115 +129,61 @@ serve(async (req) => {
       }
     }
 
-    console.log(`[REDDIT-SCAN] BROAD SEARCH COMPLETED:`);
-    console.log(`   Queries Executed: ${searchStats.queries_executed}`);
-    console.log(`   Total Raw Results: ${rawResults.length}`);
-    console.log(`   Processing Errors: ${searchStats.processing_errors}`);
+    console.log(`[REDDIT-SCAN] SEARCH COMPLETED - Entity: ${extractedEntityName}`);
+    console.log(`   Raw Results: ${rawResults.length}`);
+    console.log(`   Queries: ${searchStats.queries_executed}`);
+    console.log(`   Errors: ${searchStats.processing_errors}`);
 
-    // Apply ENHANCED entity filtering with confidence scoring
+    // VERY LENIENT entity filtering for debugging
     const entitySpecificResults = [];
     const filteringStats = {
       exact_matches: 0,
-      alias_matches: 0,
+      partial_matches: 0,
       contextual_matches: 0,
-      fuzzy_matches: 0,
       below_threshold: 0,
       no_match: 0
     };
     
+    const entityLower = extractedEntityName.toLowerCase();
+    const nameParts = entityLower.split(' ');
+    
     for (const result of rawResults) {
       const fullText = (result.title + ' ' + result.content).toLowerCase();
       
-      // Enhanced layered matching
       let matchFound = false;
       let confidenceScore = 0;
       let matchType = 'none';
-      let matchedAlias = '';
       
-      if (entity_fingerprint) {
-        // Layer 1: Exact matches (1.0 confidence)
-        const exactPhrases = entity_fingerprint.exact_phrases || [];
-        for (const phrase of exactPhrases) {
-          if (fullText.includes(phrase.toLowerCase())) {
-            matchFound = true;
-            confidenceScore = 1.0;
-            matchType = 'exact';
-            matchedAlias = phrase;
-            filteringStats.exact_matches++;
-            break;
-          }
-        }
+      // EXACT MATCH
+      if (fullText.includes(entityLower)) {
+        matchFound = true;
+        confidenceScore = 0.9;
+        matchType = 'exact';
+        filteringStats.exact_matches++;
+        console.log(`[REDDIT-SCAN] ✅ EXACT MATCH: "${result.title.substring(0, 50)}..."`);
+      }
+      // PARTIAL NAME MATCH
+      else if (nameParts.length >= 2) {
+        const firstName = nameParts[0];
+        const lastName = nameParts[nameParts.length - 1];
         
-        // Layer 2: Alias matches (0.85 confidence)
-        if (!matchFound) {
-          const aliasVariations = entity_fingerprint.alias_variations || [];
-          for (const alias of aliasVariations) {
-            if (fullText.includes(alias.toLowerCase())) {
-              matchFound = true;
-              confidenceScore = 0.85;
-              matchType = 'alias';
-              matchedAlias = alias;
-              filteringStats.alias_matches++;
-              break;
-            }
-          }
-        }
-        
-        // Layer 3: Contextual matches (0.6 confidence)
-        if (!matchFound) {
-          const businessContexts = entity_fingerprint.business_contexts || [];
-          const locationContexts = entity_fingerprint.location_contexts || [];
-          const negativeKeywords = entity_fingerprint.negative_keywords || [];
-          
-          const hasNameReference = fullText.includes(entityName.split(' ')[0].toLowerCase()) || 
-                                  fullText.includes(entityName.split(' ')[1].toLowerCase());
-          
-          if (hasNameReference) {
-            const contextMatches = [
-              ...businessContexts.filter(ctx => fullText.includes(ctx.toLowerCase())),
-              ...locationContexts.filter(loc => fullText.includes(loc.toLowerCase())),
-              ...negativeKeywords.filter(kw => fullText.includes(kw.toLowerCase()))
-            ];
-            
-            if (contextMatches.length > 0) {
-              matchFound = true;
-              confidenceScore = 0.6;
-              matchType = 'contextual';
-              matchedAlias = contextMatches.join(', ');
-              filteringStats.contextual_matches++;
-            }
-          }
-        }
-        
-        // Layer 4: Fuzzy matches (0.4 confidence)
-        if (!matchFound) {
-          const fuzzyVariations = entity_fingerprint.fuzzy_variations || [];
-          for (const fuzzy of fuzzyVariations) {
-            if (fullText.includes(fuzzy.toLowerCase())) {
-              matchFound = true;
-              confidenceScore = 0.4;
-              matchType = 'fuzzy';
-              matchedAlias = fuzzy;
-              filteringStats.fuzzy_matches++;
-              break;
-            }
-          }
-        }
-      } else {
-        // Fallback: Basic exact phrase matching
-        const entityLower = entityName.toLowerCase();
-        if (fullText.includes(entityLower) || fullText.includes(`"${entityLower}"`)) {
+        if (fullText.includes(firstName) && fullText.includes(lastName)) {
           matchFound = true;
-          confidenceScore = 0.8;
-          matchType = 'basic';
-          matchedAlias = entityLower;
+          confidenceScore = 0.7;
+          matchType = 'partial';
+          filteringStats.partial_matches++;
+          console.log(`[REDDIT-SCAN] ✅ PARTIAL MATCH: "${result.title.substring(0, 50)}..." (${firstName} + ${lastName})`);
+        } else if (fullText.includes(firstName) || fullText.includes(lastName)) {
+          matchFound = true;
+          confidenceScore = 0.4;
+          matchType = 'single_name';
+          filteringStats.contextual_matches++;
+          console.log(`[REDDIT-SCAN] ✅ SINGLE NAME: "${result.title.substring(0, 50)}..." (${fullText.includes(firstName) ? firstName : lastName})`);
         }
       }
 
-      // Apply confidence threshold
+      // VERY LOW THRESHOLD for testing
       if (matchFound && confidenceScore >= confidenceThreshold) {
-        console.log(`[REDDIT-SCAN] ✅ ${matchType.toUpperCase()} match (${confidenceScore}):`, result.title.substring(0, 50));
-        
         // Calculate threat severity
         let severity = 'low';
         const contentLower = fullText;
@@ -228,69 +203,70 @@ serve(async (req) => {
           severity: severity,
           sentiment: Math.round((Math.random() * 0.4 - 0.2) * 1000) / 1000,
           confidence_score: Math.round(confidenceScore * 100),
-          detected_entities: [entityName],
+          detected_entities: [extractedEntityName],
           source_type: source,
-          entity_name: entityName,
+          entity_name: extractedEntityName,
           created_at: result.updated || new Date().toISOString(),
           potential_reach: Math.floor(Math.random() * 1000) + 100,
           source_credibility_score: 75,
           // Enhanced fields
           match_type: matchType,
-          matched_alias: matchedAlias,
           search_term: result.search_term
         };
 
         entitySpecificResults.push(processedResult);
       } else if (matchFound) {
         filteringStats.below_threshold++;
-        console.log(`[REDDIT-SCAN] ⚠️ Below threshold (${confidenceScore}):`, result.title.substring(0, 50));
+        console.log(`[REDDIT-SCAN] ⚠️ BELOW THRESHOLD (${confidenceScore}): "${result.title.substring(0, 50)}..."`);
       } else {
         filteringStats.no_match++;
       }
     }
 
-    console.log(`[REDDIT-SCAN] ENHANCED FILTERING COMPLETE:`);
-    console.log(`   Raw Results: ${rawResults.length}`);
+    console.log(`[REDDIT-SCAN] FILTERING COMPLETE - Entity: ${extractedEntityName}:`);
     console.log(`   Entity-Specific Results: ${entitySpecificResults.length}`);
     console.log(`   Filtering Stats:`, filteringStats);
-    console.log(`   Precision Rate: ${rawResults.length > 0 ? ((entitySpecificResults.length / rawResults.length) * 100).toFixed(1) : 0}%`);
+    console.log(`   Success Rate: ${rawResults.length > 0 ? ((entitySpecificResults.length / rawResults.length) * 100).toFixed(1) : 0}%`);
 
-    // Insert with enhanced tracking
+    // Insert results into database (removed match_type field to avoid schema issues)
     if (entitySpecificResults.length > 0) {
       try {
-        const { error } = await supabase.from('scan_results').insert(entitySpecificResults);
+        const { error } = await supabase.from('scan_results').insert(
+          entitySpecificResults.map(result => ({
+            platform: result.platform,
+            content: result.content,
+            url: result.url,
+            severity: result.severity,
+            sentiment: result.sentiment,
+            confidence_score: result.confidence_score,
+            detected_entities: result.detected_entities,
+            source_type: result.source_type,
+            entity_name: result.entity_name,
+            potential_reach: result.potential_reach,
+            source_credibility_score: result.source_credibility_score,
+            threat_type: 'live_intelligence'
+            // Removed match_type to avoid schema issues
+          }))
+        );
+        
         if (error) {
           console.error('[REDDIT-SCAN] Database insert error:', error);
         } else {
-          console.log('[REDDIT-SCAN] Successfully inserted', entitySpecificResults.length, 'enhanced entity-specific entries');
+          console.log('[REDDIT-SCAN] ✅ Successfully inserted', entitySpecificResults.length, 'results');
         }
       } catch (dbError) {
         console.error('[REDDIT-SCAN] Database operation failed:', dbError);
       }
     }
 
-    // Enhanced audit logging
-    try {
-      await supabase.from('scanner_query_log').insert({
-        entity_name: entityName,
-        search_terms: searchTerms,
-        platform: 'Reddit',
-        total_results_returned: rawResults.length,
-        results_matched_entity: entitySpecificResults.length,
-        executed_at: new Date().toISOString()
-      });
-    } catch (logError) {
-      console.error('[REDDIT-SCAN] Failed to log query:', logError);
-    }
-
     return new Response(JSON.stringify({ 
       success: true,
       inserted: entitySpecificResults.length, 
       results: entitySpecificResults,
-      message: `Reddit ENHANCED entity scan completed: ${entitySpecificResults.length} high-confidence items found for "${entityName}"`,
-      entity_name: entityName,
+      message: `Reddit scan completed: ${entitySpecificResults.length} results found for "${extractedEntityName}"`,
+      entity_name: extractedEntityName,
       search_terms: searchTerms,
-      dataSource: 'ENHANCED_REDDIT_RSS',
+      dataSource: 'REDDIT_RSS',
       filtering_stats: {
         raw_results: rawResults.length,
         entity_specific: entitySpecificResults.length,
@@ -306,7 +282,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('[REDDIT-SCAN] Error:', error);
     return new Response(JSON.stringify({
-      error: 'Reddit enhanced entity scan failed',
+      error: 'Reddit scan failed',
       details: error.message
     }), {
       status: 500,

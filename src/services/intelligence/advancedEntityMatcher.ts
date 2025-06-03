@@ -140,7 +140,7 @@ export class AdvancedEntityMatcher {
   }
 
   /**
-   * Advanced entity matching with NER and contextual scoring - RELAXED FOR TESTING
+   * VERY LENIENT entity matching - designed to catch everything for debugging
    */
   static analyzeContentMatch(
     content: string, 
@@ -152,13 +152,12 @@ export class AdvancedEntityMatcher {
     const contextMatches: Record<string, number> = {};
     const nerEntities: string[] = [];
 
-    console.log(`🔍 Analyzing content for entity "${fingerprint.primary_name}"`);
-    console.log(`📝 Content preview: "${fullText.substring(0, 100)}..."`);
+    console.log(`🔍 ANALYZING: "${fullText.substring(0, 100)}..." for entity "${fingerprint.primary_name}"`);
 
-    // Hard filter for known false positives
+    // Hard filter for known false positives first
     const falsePositiveDetected = this.detectFalsePositive(fullText, fingerprint);
     if (falsePositiveDetected) {
-      console.log('🚫 False positive detected');
+      console.log('🚫 FALSE POSITIVE DETECTED');
       return {
         source_url: '',
         raw_title: title,
@@ -173,100 +172,105 @@ export class AdvancedEntityMatcher {
       };
     }
 
-    // Primary name exact match (highest score)
+    // PRIMARY NAME EXACT MATCH (highest score)
     if (fullText.includes(fingerprint.primary_name.toLowerCase())) {
       matchScore += 1.0;
       nerEntities.push(fingerprint.primary_name);
       contextMatches['primary_name'] = 1.0;
-      console.log('✅ Primary name exact match found');
+      console.log('✅ PRIMARY NAME EXACT MATCH');
     }
 
-    // Check for partial name matches (first name + last name separately)
+    // NAME PARTS MATCHING - very lenient
     const nameParts = fingerprint.primary_name.toLowerCase().split(' ');
     if (nameParts.length >= 2) {
       const firstName = nameParts[0];
       const lastName = nameParts[nameParts.length - 1];
       
-      if (fullText.includes(firstName) && fullText.includes(lastName)) {
-        matchScore += 0.8;
-        contextMatches['name_parts'] = 0.8;
-        console.log('✅ Name parts match found');
-      } else {
-        // RELAXED: Check for either first or last name appearing
-        if (fullText.includes(firstName) || fullText.includes(lastName)) {
-          matchScore += 0.4;
-          contextMatches['single_name_part'] = 0.4;
-          console.log('✅ Single name part match found');
-        }
+      const hasFirstName = fullText.includes(firstName);
+      const hasLastName = fullText.includes(lastName);
+      
+      if (hasFirstName && hasLastName) {
+        matchScore += 0.9; // Very high score for both names
+        contextMatches['both_names'] = 0.9;
+        console.log(`✅ BOTH NAMES FOUND: ${firstName} + ${lastName}`);
+      } else if (hasFirstName || hasLastName) {
+        matchScore += 0.5; // Moderate score for single name
+        contextMatches['single_name'] = 0.5;
+        console.log(`✅ SINGLE NAME FOUND: ${hasFirstName ? firstName : lastName}`);
       }
     }
 
-    // Alias matches
+    // ALIAS MATCHING
     for (const alias of fingerprint.aliases) {
       if (fullText.includes(alias.toLowerCase())) {
-        matchScore += 0.7;
+        matchScore += 0.8;
         nerEntities.push(alias);
-        contextMatches['alias_match'] = 0.7;
-        console.log(`✅ Alias match found: ${alias}`);
+        contextMatches['alias_match'] = 0.8;
+        console.log(`✅ ALIAS MATCH: ${alias}`);
         break;
       }
     }
 
-    // Organization context boost
+    // ORGANIZATION CONTEXT
     if (fingerprint.organization && fingerprint.organization !== 'Unknown' && 
         fullText.includes(fingerprint.organization.toLowerCase())) {
-      matchScore += 0.3;
-      contextMatches['organization'] = 0.3;
-      console.log('✅ Organization context found');
+      matchScore += 0.4;
+      contextMatches['organization'] = 0.4;
+      console.log(`✅ ORGANIZATION MATCH: ${fingerprint.organization}`);
     }
 
-    // Location context boost
+    // LOCATION CONTEXT
     for (const location of fingerprint.locations) {
       if (fullText.includes(location.toLowerCase())) {
-        matchScore += 0.2;
-        contextMatches['location'] = 0.2;
-        console.log(`✅ Location context found: ${location}`);
+        matchScore += 0.3;
+        contextMatches['location'] = 0.3;
+        console.log(`✅ LOCATION MATCH: ${location}`);
         break;
       }
     }
 
-    // Context tags boost (threat indicators)
+    // CONTEXT TAGS (threat indicators)
     for (const tag of fingerprint.context_tags) {
       if (fullText.includes(tag.toLowerCase())) {
-        matchScore += 0.1;
-        contextMatches['context_tag'] = 0.1;
-        console.log(`✅ Context tag found: ${tag}`);
+        matchScore += 0.2;
+        contextMatches['context_tag'] = 0.2;
+        console.log(`✅ CONTEXT TAG: ${tag}`);
         break;
       }
     }
 
-    // VERY RELAXED: If still no match, check for ANY word from the entity name
+    // VERY LENIENT: Even partial word matches
     if (matchScore === 0) {
       for (const part of nameParts) {
-        if (part.length > 2 && fullText.includes(part)) {
-          matchScore += 0.2;
-          contextMatches['word_match'] = 0.2;
-          console.log(`✅ Word match: ${part}`);
-          break;
+        if (part.length > 2) {
+          // Check for word boundaries to avoid false matches
+          const regex = new RegExp(`\\b${part}\\b`, 'i');
+          if (regex.test(fullText)) {
+            matchScore += 0.3;
+            contextMatches['partial_word'] = 0.3;
+            console.log(`✅ PARTIAL WORD MATCH: ${part}`);
+            break;
+          }
         }
       }
     }
 
-    // Determine decision based on score
+    // FINAL DECISION with very low thresholds for testing
     let decision: 'accepted' | 'rejected' | 'quarantined';
     let reasonDiscarded: string | undefined;
 
-    if (matchScore >= 0.6) {
+    if (matchScore >= 0.5) {
       decision = 'accepted';
-    } else if (matchScore >= 0.2) {  // VERY LOWERED from 0.4 for testing
+    } else if (matchScore >= 0.1) { // VERY LOW threshold for testing
       decision = 'quarantined';
-      reasonDiscarded = 'Medium confidence - requires review';
+      reasonDiscarded = 'Low confidence - requires review';
     } else {
       decision = 'rejected';
-      reasonDiscarded = `Low match score: ${matchScore.toFixed(2)} - insufficient entity evidence`;
+      reasonDiscarded = `No entity evidence found - score: ${matchScore.toFixed(2)}`;
     }
 
-    console.log(`📊 Match analysis complete: ${decision} (score: ${matchScore.toFixed(2)})`);
+    console.log(`📊 FINAL DECISION: ${decision} (score: ${matchScore.toFixed(2)})`);
+    console.log(`📊 CONTEXT MATCHES:`, contextMatches);
 
     return {
       source_url: '',

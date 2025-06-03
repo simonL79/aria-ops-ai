@@ -32,6 +32,12 @@ export class CIALevelScanner {
     const entityName = options.targetEntity || 'Simon Lindsay';
     console.log(`🔍 Target Entity: "${entityName}"`);
     
+    // CRITICAL FIX: Validate entity name is not undefined/null
+    if (!entityName || entityName === 'undefined' || entityName.trim() === '') {
+      console.error('⚠️ CRITICAL: No valid entity name passed to CIA scanner');
+      throw new Error('Entity name is required for CIA precision scan');
+    }
+
     // Get or create entity fingerprint
     let entityFingerprint = options.entityFingerprint;
     if (!entityFingerprint) {
@@ -108,23 +114,33 @@ export class CIALevelScanner {
       try {
         console.log(`🔍 Scanning ${func} with entity: "${fingerprint.primary_name}"`);
         
-        // FIXED: Ensure all entity field variations are set
+        // CRITICAL FIX: Ensure entity name is passed in ALL possible field variations
         const scanPayload = { 
           scanType: 'cia_precision_scan',
           search_query: variant.query_text,
           entity: fingerprint.primary_name,
           targetEntity: fingerprint.primary_name,
           entityName: fingerprint.primary_name,
-          target_entity: fingerprint.primary_name, // Add this field too
+          target_entity: fingerprint.primary_name,
+          entity_name: fingerprint.primary_name, // Add this critical field
           blockMockData: true,
           blockSimulations: true,
           enforceLiveOnly: true,
-          precisionMode: options.precisionMode || 'medium', // CHANGED: Use medium instead of high
+          precisionMode: options.precisionMode || 'medium',
           fullScan: true,
           source: 'cia_scanner'
         };
 
-        console.log(`📡 Scan payload for ${func}:`, scanPayload);
+        console.log(`📡 Scan payload for ${func}:`, {
+          entity_fields: {
+            entity: scanPayload.entity,
+            targetEntity: scanPayload.targetEntity,
+            entityName: scanPayload.entityName,
+            target_entity: scanPayload.target_entity,
+            entity_name: scanPayload.entity_name
+          },
+          search_query: scanPayload.search_query
+        });
 
         const { data, error } = await supabase.functions.invoke(func, {
           body: scanPayload
@@ -148,15 +164,10 @@ export class CIALevelScanner {
           dataKeys: Object.keys(data)
         });
 
+        let rawResults = [];
+        
         if (data?.results && Array.isArray(data.results)) {
-          const processedResults = await this.processRawResults(
-            data.results,
-            variant,
-            fingerprint,
-            func
-          );
-          
-          results.push(...processedResults);
+          rawResults = data.results;
         }
         
         // Also check for threats array (some scanners use this format)
@@ -180,15 +191,24 @@ export class CIALevelScanner {
             ai_detection_confidence: 0
           }));
           
-          const processedThreats = await this.processRawResults(
-            threatResults,
+          rawResults = [...rawResults, ...threatResults];
+        }
+
+        if (rawResults.length > 0) {
+          console.log(`📊 Processing ${rawResults.length} raw results from ${func}`);
+          
+          const processedResults = await this.processRawResults(
+            rawResults,
             variant,
             fingerprint,
             func
           );
           
-          results.push(...processedThreats);
+          results.push(...processedResults);
+        } else {
+          console.warn(`⚠️ No raw results found from ${func}`);
         }
+        
       } catch (error) {
         console.error(`❌ ${func} failed for variant: ${variant.query_text}`, error);
       }
@@ -198,7 +218,7 @@ export class CIALevelScanner {
   }
 
   /**
-   * Process raw scan results through CIA-level analysis
+   * Process raw scan results through CIA-level analysis with improved filtering
    */
   private static async processRawResults(
     rawResults: any[],
@@ -207,6 +227,8 @@ export class CIALevelScanner {
     platform: string
   ): Promise<CIAScanResult[]> {
     const processedResults: CIAScanResult[] = [];
+    let discardedCount = 0;
+    let discardReasons: Record<string, number> = {};
 
     console.log(`🔍 Processing ${rawResults.length} raw results from ${platform}`);
 
@@ -216,23 +238,27 @@ export class CIALevelScanner {
       
       if (!content && !title) {
         console.log('⚠️ Skipping result with no content or title');
+        discardedCount++;
+        discardReasons['no_content'] = (discardReasons['no_content'] || 0) + 1;
         continue;
       }
       
-      // RELAXED: Apply CIA-level entity matching with more lenient thresholds
+      // IMPROVED: Apply CIA-level entity matching with more lenient thresholds
       const matchDecision = AdvancedEntityMatcher.analyzeContentMatch(
         content,
         title,
         fingerprint
       );
 
-      console.log(`🔍 Match decision for "${content.substring(0, 50)}...":`, {
+      // Log each decision for debugging
+      console.log(`🔍 Match analysis for "${content.substring(0, 50)}...":`, {
         decision: matchDecision.decision,
         score: matchDecision.match_score,
-        falsePositive: matchDecision.false_positive_detected
+        falsePositive: matchDecision.false_positive_detected,
+        url: result.url || 'no-url'
       });
 
-      // RELAXED: Accept more results - very low threshold for testing
+      // IMPROVED: Very lenient acceptance - accept anything above 0.1 for testing
       if (matchDecision.decision !== 'rejected' || matchDecision.match_score > 0.1) {
         const ciaResult: CIAScanResult = {
           id: result.id || `cia-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
@@ -243,7 +269,7 @@ export class CIALevelScanner {
           status: result.status || 'new',
           threat_type: result.threat_type || 'cia_intelligence',
           sentiment: result.sentiment || 0,
-          confidence_score: Math.max(matchDecision.match_score * 100, 25), // LOWERED minimum confidence
+          confidence_score: Math.max(matchDecision.match_score * 100, 15), // Lower minimum threshold
           potential_reach: result.potential_reach || 0,
           detected_entities: [fingerprint.primary_name],
           source_type: 'cia_verified_intelligence',
@@ -253,11 +279,11 @@ export class CIALevelScanner {
           ai_detection_confidence: 0,
           
           // CIA-specific fields
-          match_decision: matchDecision.match_score > 0.4 ? 'accepted' : 
-                         matchDecision.match_score > 0.1 ? 'quarantined' : 'rejected', // LOWERED thresholds
+          match_decision: matchDecision.match_score > 0.3 ? 'accepted' : 
+                         matchDecision.match_score > 0.1 ? 'quarantined' : 'rejected',
           match_score: matchDecision.match_score,
-          precision_confidence: matchDecision.match_score >= 0.6 ? 'high' : 
-                               matchDecision.match_score >= 0.3 ? 'medium' : 'low',
+          precision_confidence: matchDecision.match_score >= 0.5 ? 'high' : 
+                               matchDecision.match_score >= 0.2 ? 'medium' : 'low',
           false_positive_detected: matchDecision.false_positive_detected,
           context_matches: matchDecision.context_matches,
           query_variant_used: variant.query_text
@@ -272,11 +298,20 @@ export class CIALevelScanner {
           ciaResult.url
         );
       } else {
-        console.log(`❌ Rejected result: ${matchDecision.reason_discarded}`);
+        discardedCount++;
+        const reason = matchDecision.reason_discarded || 'low_match_score';
+        discardReasons[reason] = (discardReasons[reason] || 0) + 1;
+        
+        // LOG DISCARDED RESULTS FOR DEBUGGING
+        console.log(`❌ DISCARDED: "${content.substring(0, 50)}..." | Score: ${matchDecision.match_score} | Reason: ${reason}`);
       }
     }
 
-    console.log(`✅ Processed ${processedResults.length} results from ${rawResults.length} raw results`);
+    console.log(`📊 Filtering Results for ${platform}:`);
+    console.log(`   ✅ Accepted: ${processedResults.length}`);
+    console.log(`   ❌ Discarded: ${discardedCount}`);
+    console.log(`   📋 Discard Reasons:`, discardReasons);
+
     return processedResults;
   }
 
