@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 /**
@@ -36,6 +35,12 @@ export interface MatchDecision {
   ner_entities: string[];
   context_matches: Record<string, number>;
 }
+
+// Helper function to safely convert JSON arrays to string arrays
+const jsonArrayToStringArray = (jsonArray: any): string[] => {
+  if (!Array.isArray(jsonArray)) return [];
+  return jsonArray.filter(item => typeof item === 'string');
+};
 
 export class AdvancedEntityMatcher {
   private static readonly FALSE_POSITIVE_PATTERNS = [
@@ -327,16 +332,16 @@ export class AdvancedEntityMatcher {
       return null;
     }
 
-    // Convert Supabase Json types to proper arrays
+    // Convert Supabase Json types to proper arrays with type safety
     return {
       id: data.id,
       entity_id: data.entity_id,
       primary_name: data.primary_name,
-      aliases: Array.isArray(data.aliases) ? data.aliases : [],
+      aliases: jsonArrayToStringArray(data.aliases),
       organization: data.organization,
-      locations: Array.isArray(data.locations) ? data.locations : [],
-      context_tags: Array.isArray(data.context_tags) ? data.context_tags : [],
-      false_positive_blocklist: Array.isArray(data.false_positive_blocklist) ? data.false_positive_blocklist : []
+      locations: jsonArrayToStringArray(data.locations),
+      context_tags: jsonArrayToStringArray(data.context_tags),
+      false_positive_blocklist: jsonArrayToStringArray(data.false_positive_blocklist)
     };
   }
 }

@@ -70,6 +70,8 @@ const KeywordSystemTabs = ({ keywordData, counterNarratives, onRefresh }: Keywor
             </Badge>
           </div>
           <CounterNarrativeEngine 
+            keywordData={keywordData}
+            narratives={counterNarratives}
             onRefresh={onRefresh}
           />
         </div>

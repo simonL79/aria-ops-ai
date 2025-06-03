@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -28,6 +27,12 @@ interface PrecisionStats {
   false_positive_rate: number;
 }
 
+// Helper function to safely convert JSON arrays to string arrays
+const jsonArrayToStringArray = (jsonArray: any): string[] => {
+  if (!Array.isArray(jsonArray)) return [];
+  return jsonArray.filter(item => typeof item === 'string');
+};
+
 const EntityPrecisionDashboard = () => {
   const [fingerprints, setFingerprints] = useState<EntityFingerprint[]>([]);
   const [stats, setStats] = useState<PrecisionStats | null>(null);
@@ -42,14 +47,19 @@ const EntityPrecisionDashboard = () => {
 
       if (error) throw error;
 
-      // Transform Supabase Json types to proper arrays
-      const transformedData = data?.map(item => ({
-        ...item,
-        aliases: Array.isArray(item.aliases) ? item.aliases : [],
-        locations: Array.isArray(item.locations) ? item.locations : [],
-        context_tags: Array.isArray(item.context_tags) ? item.context_tags : [],
-        false_positive_blocklist: Array.isArray(item.false_positive_blocklist) ? item.false_positive_blocklist : []
-      })) || [];
+      // Transform Supabase data with proper type conversion
+      const transformedData: EntityFingerprint[] = (data || []).map(item => ({
+        id: item.id,
+        entity_id: item.entity_id,
+        primary_name: item.primary_name,
+        aliases: jsonArrayToStringArray(item.aliases),
+        organization: item.organization || undefined,
+        locations: jsonArrayToStringArray(item.locations),
+        context_tags: jsonArrayToStringArray(item.context_tags),
+        false_positive_blocklist: jsonArrayToStringArray(item.false_positive_blocklist),
+        created_at: item.created_at,
+        updated_at: item.updated_at
+      }));
 
       setFingerprints(transformedData);
     } catch (error) {
