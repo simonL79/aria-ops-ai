@@ -1,6 +1,4 @@
-
 import { supabase } from '@/integrations/supabase/client';
-import { AdvancedThreatClassifier } from './advancedThreatClassifier';
 
 /**
  * A.R.I.A™ Real-time Threat Prediction Engine
@@ -344,9 +342,9 @@ export class ThreatPredictionEngine {
         entity_name: entityName,
         operation_data: {
           escalation_probability: escalationProbability,
-          timeline_prediction: timeline,
+          timeline_prediction: timeline as any,
           prediction_timestamp: new Date().toISOString()
-        }
+        } as any
       });
     } catch (error) {
       console.error('Failed to log prediction:', error);

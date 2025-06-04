@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import EntityScanTab from './EntityScanTab';
@@ -8,11 +9,20 @@ import ArticleGenerationTab from './ArticleGenerationTab';
 import PerformanceTab from './PerformanceTab';
 
 interface KeywordSystemTabsProps {
-  selectedClient: string | undefined;
-  entityName: string;
+  selectedClient?: string;
+  entityName?: string;
+  keywordData?: any[];
+  counterNarratives?: any[];
+  onRefresh?: () => Promise<void>;
 }
 
-const KeywordSystemTabs = ({ selectedClient, entityName }: KeywordSystemTabsProps) => {
+const KeywordSystemTabs = ({ 
+  selectedClient, 
+  entityName = 'Simon Lindsay', 
+  keywordData = [], 
+  counterNarratives = [], 
+  onRefresh = async () => {} 
+}: KeywordSystemTabsProps) => {
   const [activeTab, setActiveTab] = useState("entity-scan");
 
   return (
@@ -58,7 +68,7 @@ const KeywordSystemTabs = ({ selectedClient, entityName }: KeywordSystemTabsProp
         </TabsList>
 
         <TabsContent value="entity-scan" className="mt-6">
-          <EntityScanTab entityName={entityName} />
+          <EntityScanTab />
         </TabsContent>
 
         <TabsContent value="cia-precision" className="mt-6">
@@ -70,15 +80,19 @@ const KeywordSystemTabs = ({ selectedClient, entityName }: KeywordSystemTabsProp
         </TabsContent>
 
         <TabsContent value="counter-narrative" className="mt-6">
-          <CounterNarrativeTab entityName={entityName} />
+          <CounterNarrativeTab 
+            entityName={entityName} 
+            narratives={counterNarratives}
+            onRefresh={onRefresh}
+          />
         </TabsContent>
 
         <TabsContent value="article-generation" className="mt-6">
-          <ArticleGenerationTab />
+          <ArticleGenerationTab entityName={entityName} />
         </TabsContent>
 
         <TabsContent value="performance" className="mt-6">
-          <PerformanceTab />
+          <PerformanceTab entityName={entityName} />
         </TabsContent>
       </Tabs>
     </div>

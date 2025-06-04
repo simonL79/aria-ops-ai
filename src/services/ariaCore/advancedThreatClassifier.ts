@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { IntelligenceValidationCore } from './intelligenceValidationCore';
 
@@ -64,7 +63,7 @@ export class AdvancedThreatClassifier {
         agentAnalysis: {
           analyst: analystResult.assessment,
           validator: validatorResult.validation,
-          strategist: strategistResult.strategy
+          strategist: strategistResult.responseStrategy
         },
         ciaValidated: true,
         confidence: validation.confidence,
@@ -179,7 +178,7 @@ export class AdvancedThreatClassifier {
       timeline,
       resources,
       escalationRequired: priority >= 0.8,
-      strategy: `${strategy}_response`
+      responseStrategy: `${strategy}_response`
     };
   }
 
@@ -201,7 +200,7 @@ export class AdvancedThreatClassifier {
       sourceAuthority: validator.sourceAuthority,
       confidence: validator.validationConfidence,
       priority: strategist.priority,
-      responseStrategy: strategist.strategy
+      responseStrategy: strategist.responseStrategy
     };
   }
 
@@ -346,11 +345,11 @@ export class AdvancedThreatClassifier {
         success: true,
         entity_name: entityName,
         operation_data: {
-          threat_model: threatModel,
+          threat_model: threatModel as any,
           confidence,
           analysis_timestamp: new Date().toISOString(),
           cia_validated: true
-        }
+        } as any
       });
     } catch (error) {
       console.error('Failed to log threat analysis:', error);
@@ -393,6 +392,7 @@ interface StrategistResult {
   timeline: string;
   resources: string[];
   escalationRequired: boolean;
+  responseStrategy: string;
 }
 
 interface AgentAnalysis {

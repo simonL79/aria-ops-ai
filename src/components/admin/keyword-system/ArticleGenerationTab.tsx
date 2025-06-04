@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { FileText, Plus, Eye } from 'lucide-react';
+import { FileText, Plus, Target } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface ArticleGenerationTabProps {
@@ -12,9 +12,9 @@ interface ArticleGenerationTabProps {
 
 const ArticleGenerationTab: React.FC<ArticleGenerationTabProps> = ({ entityName }) => {
   const [isGenerating, setIsGenerating] = useState(false);
-  const [articleTemplates, setArticleTemplates] = useState<any[]>([]);
+  const [articles, setArticles] = useState<any[]>([]);
 
-  const generateArticleTemplates = async () => {
+  const generateArticles = async () => {
     if (!entityName) {
       toast.error('Please select an entity first');
       return;
@@ -22,58 +22,35 @@ const ArticleGenerationTab: React.FC<ArticleGenerationTabProps> = ({ entityName 
 
     setIsGenerating(true);
     try {
-      toast.info(`📄 Generating article templates for ${entityName}...`);
+      toast.info(`📝 Generating articles for ${entityName}...`);
 
-      // Create sample article templates
-      const templates = [
+      // Simulate article generation
+      const newArticles = [
         {
-          id: `template-1-${Date.now()}`,
-          title: `Understanding ${entityName}: A Comprehensive Profile`,
-          content_type: 'blog_post',
-          target_audience: 'general_public',
-          key_messages: ['Professional achievements', 'Industry expertise', 'Community impact'],
-          suggested_length: '1000-1500 words',
-          urgency: 'medium',
-          platforms: ['website', 'linkedin', 'medium']
+          id: Date.now(),
+          title: `Strategic Insights: ${entityName} Market Analysis`,
+          type: 'market_analysis',
+          status: 'draft',
+          keywords: ['market', 'analysis', entityName.toLowerCase()],
+          created_at: new Date().toISOString()
         },
         {
-          id: `template-2-${Date.now()}`,
-          title: `${entityName}: Setting the Record Straight`,
-          content_type: 'press_release',
-          target_audience: 'media',
-          key_messages: ['Factual clarification', 'Context provision', 'Expert perspectives'],
-          suggested_length: '500-800 words',
-          urgency: 'high',
-          platforms: ['press', 'website', 'social_media']
-        },
-        {
-          id: `template-3-${Date.now()}`,
-          title: `Social Media Response Strategy for ${entityName}`,
-          content_type: 'social_media',
-          target_audience: 'social_followers',
-          key_messages: ['Transparency', 'Accountability', 'Forward momentum'],
-          suggested_length: '280 characters',
-          urgency: 'high',
-          platforms: ['twitter', 'facebook', 'linkedin']
+          id: Date.now() + 1,
+          title: `Industry Leadership: ${entityName} Perspective`,
+          type: 'thought_leadership',
+          status: 'draft',
+          keywords: ['leadership', 'industry', entityName.toLowerCase()],
+          created_at: new Date().toISOString()
         }
       ];
 
-      setArticleTemplates(templates);
-      toast.success(`✅ Generated ${templates.length} article templates`);
+      setArticles(prev => [...prev, ...newArticles]);
+      toast.success(`✅ Generated ${newArticles.length} article concepts`);
     } catch (error) {
-      console.error('Failed to generate templates:', error);
-      toast.error('❌ Failed to generate article templates');
+      console.error('Failed to generate articles:', error);
+      toast.error('❌ Failed to generate articles');
     } finally {
       setIsGenerating(false);
-    }
-  };
-
-  const getUrgencyColor = (urgency: string) => {
-    switch (urgency) {
-      case 'high': return 'bg-red-500';
-      case 'medium': return 'bg-yellow-500';
-      case 'low': return 'bg-green-500';
-      default: return 'bg-gray-500';
     }
   };
 
@@ -83,7 +60,7 @@ const ArticleGenerationTab: React.FC<ArticleGenerationTabProps> = ({ entityName 
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
             <FileText className="h-5 w-5 text-corporate-accent" />
-            Article Generation Hub
+            Article Generation Engine
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -91,87 +68,56 @@ const ArticleGenerationTab: React.FC<ArticleGenerationTabProps> = ({ entityName 
             <div>
               <h4 className="text-white font-medium">Entity: {entityName}</h4>
               <p className="text-corporate-lightGray text-sm">
-                Content template creation and strategic article suggestions
+                AI-powered article generation and content strategy
               </p>
             </div>
             <Button
-              onClick={generateArticleTemplates}
+              onClick={generateArticles}
               disabled={isGenerating || !entityName}
               className="bg-corporate-accent text-black hover:bg-corporate-accent/90"
             >
               {isGenerating ? (
                 <>
-                  <FileText className="h-4 w-4 mr-2 animate-spin" />
+                  <Target className="h-4 w-4 mr-2 animate-spin" />
                   Generating...
                 </>
               ) : (
                 <>
                   <Plus className="h-4 w-4 mr-2" />
-                  Generate Templates
+                  Generate Articles
                 </>
               )}
             </Button>
           </div>
 
-          {articleTemplates.length > 0 && (
-            <div className="space-y-4">
+          {articles.length > 0 && (
+            <div className="space-y-3">
               <h4 className="text-white font-medium">
-                Article Templates ({articleTemplates.length})
+                Generated Articles ({articles.length})
               </h4>
-              <div className="space-y-4">
-                {articleTemplates.map((template) => (
-                  <div key={template.id} className="p-4 bg-corporate-darkSecondary rounded-lg">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex-1">
-                        <h5 className="text-white font-medium mb-2">{template.title}</h5>
-                        <div className="flex flex-wrap gap-2 mb-2">
-                          <Badge className="bg-corporate-accent text-black">
-                            {template.content_type}
-                          </Badge>
-                          <Badge className={getUrgencyColor(template.urgency)}>
-                            {template.urgency} priority
-                          </Badge>
-                          <Badge variant="outline" className="text-corporate-lightGray">
-                            {template.suggested_length}
-                          </Badge>
-                        </div>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-corporate-accent hover:bg-corporate-accent/10"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
+              <div className="space-y-3">
+                {articles.map((article) => (
+                  <div key={article.id} className="p-4 bg-corporate-darkSecondary rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <Badge className="bg-corporate-accent text-black">
+                        {article.type}
+                      </Badge>
+                      <Badge variant="outline" className="text-corporate-lightGray">
+                        {article.status}
+                      </Badge>
                     </div>
-
-                    <div className="space-y-2">
-                      <div>
-                        <span className="text-corporate-lightGray text-sm">Target Audience: </span>
-                        <span className="text-white text-sm">{template.target_audience}</span>
+                    <h5 className="text-white font-medium mb-2">{article.title}</h5>
+                    <div className="flex items-center justify-between">
+                      <div className="flex flex-wrap gap-1">
+                        {article.keywords.map((keyword: string, index: number) => (
+                          <Badge key={index} className="bg-blue-500/20 text-blue-300 text-xs">
+                            {keyword}
+                          </Badge>
+                        ))}
                       </div>
-                      
-                      <div>
-                        <span className="text-corporate-lightGray text-sm">Key Messages: </span>
-                        <div className="flex flex-wrap gap-1 mt-1">
-                          {template.key_messages.map((message: string, index: number) => (
-                            <Badge key={index} variant="secondary" className="text-xs">
-                              {message}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div>
-                        <span className="text-corporate-lightGray text-sm">Platforms: </span>
-                        <div className="flex flex-wrap gap-1 mt-1">
-                          {template.platforms.map((platform: string, index: number) => (
-                            <Badge key={index} variant="outline" className="text-xs text-corporate-lightGray">
-                              {platform}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
+                      <span className="text-corporate-lightGray text-sm">
+                        {new Date(article.created_at).toLocaleDateString()}
+                      </span>
                     </div>
                   </div>
                 ))}
@@ -179,14 +125,14 @@ const ArticleGenerationTab: React.FC<ArticleGenerationTabProps> = ({ entityName 
             </div>
           )}
 
-          {articleTemplates.length === 0 && (
+          {articles.length === 0 && (
             <div className="text-center py-8">
               <FileText className="h-12 w-12 text-corporate-lightGray mx-auto mb-4" />
               <p className="text-corporate-lightGray">
-                No article templates generated yet for {entityName}
+                No articles generated yet for {entityName}
               </p>
               <p className="text-corporate-lightGray text-sm">
-                Click "Generate Templates" to create content strategies
+                Click "Generate Articles" to create strategic content
               </p>
             </div>
           )}
