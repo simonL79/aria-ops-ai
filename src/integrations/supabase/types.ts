@@ -7385,6 +7385,60 @@ export type Database = {
           },
         ]
       }
+      strategy_responses: {
+        Row: {
+          actions: Json | null
+          created_at: string | null
+          description: string | null
+          entity_name: string
+          executed_at: string | null
+          execution_result: Json | null
+          id: string
+          priority: string
+          resources: string[] | null
+          status: string | null
+          strategy_id: string
+          strategy_type: string
+          timeframe: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          actions?: Json | null
+          created_at?: string | null
+          description?: string | null
+          entity_name: string
+          executed_at?: string | null
+          execution_result?: Json | null
+          id?: string
+          priority: string
+          resources?: string[] | null
+          status?: string | null
+          strategy_id: string
+          strategy_type: string
+          timeframe?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          actions?: Json | null
+          created_at?: string | null
+          description?: string | null
+          entity_name?: string
+          executed_at?: string | null
+          execution_result?: Json | null
+          id?: string
+          priority?: string
+          resources?: string[] | null
+          status?: string | null
+          strategy_id?: string
+          strategy_type?: string
+          timeframe?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       strike_requests: {
         Row: {
           approved_at: string | null
