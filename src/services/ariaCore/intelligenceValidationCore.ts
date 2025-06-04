@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { LiveDataEnforcer } from './liveDataEnforcer';
 
@@ -284,14 +283,31 @@ export class IntelligenceValidationCore {
         .gte('created_at', since);
 
       const validationData = validations || [];
-      const acceptedCount = validationData.filter(v => v.operation_data?.tier === 'accept').length;
-      const reviewCount = validationData.filter(v => v.operation_data?.tier === 'review').length;
-      const quarantinedCount = validationData.filter(v => v.operation_data?.tier === 'quarantine').length;
+      
+      // Safe type casting for operation_data
+      const acceptedCount = validationData.filter(v => {
+        const operationData = v.operation_data as any;
+        return operationData?.tier === 'accept';
+      }).length;
+      
+      const reviewCount = validationData.filter(v => {
+        const operationData = v.operation_data as any;
+        return operationData?.tier === 'review';
+      }).length;
+      
+      const quarantinedCount = validationData.filter(v => {
+        const operationData = v.operation_data as any;
+        return operationData?.tier === 'quarantine';
+      }).length;
+      
       const discardedCount = (rejections?.length || 0);
       
       const totalValidations = validationData.length + discardedCount;
       const avgConfidence = validationData.length > 0 
-        ? validationData.reduce((sum, v) => sum + (v.operation_data?.confidence || 0), 0) / validationData.length
+        ? validationData.reduce((sum, v) => {
+            const operationData = v.operation_data as any;
+            return sum + (operationData?.confidence || 0);
+          }, 0) / validationData.length
         : 0;
 
       return {
