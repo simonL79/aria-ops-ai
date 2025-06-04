@@ -1,8 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { MessageSquare } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { MessageSquare, Brain } from 'lucide-react';
 import AdvancedCounterNarrativeEngine from './AdvancedCounterNarrativeEngine';
+import IntelligenceLearningHub from '@/components/admin/intelligence/IntelligenceLearningHub';
 
 interface CounterNarrativeTabProps {
   entityName: string;
@@ -16,6 +18,7 @@ const CounterNarrativeTab: React.FC<CounterNarrativeTabProps> = ({
   onRefresh 
 }) => {
   const [keywordData, setKeywordData] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState('counter-narrative');
 
   useEffect(() => {
     // Simulate keyword data for demonstration
@@ -66,12 +69,38 @@ const CounterNarrativeTab: React.FC<CounterNarrativeTabProps> = ({
         </CardContent>
       </Card>
 
-      <AdvancedCounterNarrativeEngine
-        keywordData={keywordData}
-        narratives={narratives}
-        entityName={entityName}
-        onRefresh={onRefresh}
-      />
+      {/* Enhanced Tabs with Intelligence Learning */}
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid grid-cols-2 w-full bg-corporate-darkSecondary">
+          <TabsTrigger 
+            value="counter-narrative"
+            className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray"
+          >
+            <MessageSquare className="h-4 w-4 mr-2" />
+            Counter Narratives
+          </TabsTrigger>
+          <TabsTrigger 
+            value="intelligence-learning"
+            className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray"
+          >
+            <Brain className="h-4 w-4 mr-2" />
+            Intelligence Learning
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="counter-narrative" className="mt-6">
+          <AdvancedCounterNarrativeEngine
+            keywordData={keywordData}
+            narratives={narratives}
+            entityName={entityName}
+            onRefresh={onRefresh}
+          />
+        </TabsContent>
+
+        <TabsContent value="intelligence-learning" className="mt-6">
+          <IntelligenceLearningHub entityName={entityName} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
