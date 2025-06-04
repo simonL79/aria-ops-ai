@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -14,7 +13,8 @@ const KeywordToArticleSystem = () => {
     keywordIntelligence: 'ACTIVE',
     counterNarrative: 'STANDBY',
     articleGeneration: 'STANDBY',
-    ciaPrecision: 'STANDBY'
+    ciaPrecision: 'STANDBY',
+    pipelineCommunication: 'READY'
   });
   
   const [liveDataCount, setLiveDataCount] = useState(0);
@@ -100,7 +100,8 @@ const KeywordToArticleSystem = () => {
     }
 
     setIsExecutingPipeline(true);
-    toast.info(`🔥 A.R.I.A vX™: Executing full pipeline for ${clientCount} registered clients...`);
+    setSystemStatus(prev => ({ ...prev, pipelineCommunication: 'ACTIVE' }));
+    toast.info(`🔥 A.R.I.A vX™: Executing coordinated pipeline for ${clientCount} registered clients...`);
 
     try {
       // Get all registered clients
@@ -116,87 +117,58 @@ const KeywordToArticleSystem = () => {
         return;
       }
 
-      // Phase 1: CIA-Level Intelligence Gathering for All Clients
-      setSystemStatus(prev => ({ ...prev, keywordIntelligence: 'ACTIVE' }));
-      toast.info(`Phase 1: CIA-level precision intelligence gathering for ${clients.length} clients...`);
+      // Execute coordinated pipeline for each client using the new IntelligencePipeline
+      const { IntelligencePipeline } = await import('@/services/intelligence/intelligencePipeline');
       
       let totalResults = 0;
-      let totalPrecisionScore = 0;
-      let totalFalsePositivesBlocked = 0;
+      let avgPrecisionScore = 0;
+      let totalNarratives = 0;
+      let totalArticles = 0;
 
       for (const client of clients) {
         try {
-          toast.info(`🔍 Scanning client: ${client.name}`);
+          toast.info(`🔍 Executing coordinated pipeline for: ${client.name}`);
           
-          const keywords = client.keywordtargets ? 
-            client.keywordtargets.split(',').map(k => k.trim()).filter(k => k.length > 0) : 
-            [];
+          const pipelineResult = await IntelligencePipeline.executeFullPipeline(client.name);
+          
+          totalResults += pipelineResult.entityScan.threats_detected;
+          avgPrecisionScore += pipelineResult.ciaPrecision.precision_score;
+          totalNarratives += pipelineResult.counterNarratives.narratives_generated;
+          totalArticles += pipelineResult.articleGeneration.articles_suggested;
 
-          // Execute CIA-level scan for this client
-          const ciaResults = await KeywordCIAIntegration.executeKeywordPrecisionScan(client.name, {
-            precisionMode: 'high',
-            enableFalsePositiveFilter: true,
-            contextTags: keywords
-          });
-
-          totalResults += ciaResults.results.length;
-          totalPrecisionScore += ciaResults.precisionStats.avg_precision_score;
-          totalFalsePositivesBlocked += ciaResults.precisionStats.false_positives_blocked;
-
-          if (ciaResults.results.length > 0) {
-            toast.success(`✅ ${client.name}: ${ciaResults.results.length} CIA-verified items`);
-          }
+          toast.success(`✅ ${client.name}: Pipeline complete - ${pipelineResult.entityScan.threats_detected} threats → ${pipelineResult.ciaPrecision.verified_results.length} verified → ${pipelineResult.counterNarratives.narratives_generated} strategies → ${pipelineResult.articleGeneration.articles_suggested} articles`);
 
         } catch (error) {
-          console.error(`Error scanning client ${client.name}:`, error);
-          toast.error(`❌ Failed to scan ${client.name}`);
+          console.error(`Error processing client ${client.name}:`, error);
+          toast.error(`❌ Failed to process ${client.name}`);
         }
       }
 
       if (totalResults > 0) {
         setLiveDataCount(totalResults);
-        const avgPrecision = totalPrecisionScore / clients.length;
+        const finalAvgPrecision = avgPrecisionScore / clients.length;
         
-        // Show aggregated CIA precision stats
-        toast.success(`Phase 1 Complete: ${totalResults} total CIA-verified intelligence items`);
-        toast.info(`🎯 Average Precision: ${(avgPrecision * 100).toFixed(1)}% across ${clients.length} clients`);
-        toast.info(`🚫 Total False Positives Blocked: ${totalFalsePositivesBlocked}`);
-        
-        // Phase 2: Counter-Narrative Generation
+        // Update system status to reflect coordinated completion
         setSystemStatus(prev => ({ 
-          ...prev, 
+          ...prev,
           keywordIntelligence: 'COMPLETE',
-          counterNarrative: 'ACTIVE',
-          ciaPrecision: 'ACTIVE'
-        }));
-        toast.info('Phase 2: Generating strategic counter-narratives...');
-        
-        // Simulate counter-narrative generation
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        setSystemStatus(prev => ({ 
-          ...prev, 
+          ciaPrecision: 'ACTIVE',
           counterNarrative: 'COMPLETE',
-          articleGeneration: 'ACTIVE' 
-        }));
-        toast.info('Phase 3: Preparing article generation strategies...');
-        
-        // Phase 3: Article Generation Prep
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        setSystemStatus(prev => ({ 
-          ...prev, 
-          articleGeneration: 'READY' 
+          articleGeneration: 'READY',
+          pipelineCommunication: 'COMPLETE'
         }));
         
-        toast.success(`✅ A.R.I.A vX™: Full pipeline complete for ${clients.length} clients - zero false positives guaranteed`);
+        // Show coordinated pipeline success
+        toast.success(`🎯 Coordinated Pipeline Complete: ${totalResults} threats → ${finalAvgPrecision.toFixed(2)} avg precision → ${totalNarratives} strategies → ${totalArticles} articles`);
+        toast.info(`📊 All components now communicating: Entity Scan ↔ CIA Precision ↔ Counter Narratives ↔ Article Generation`);
+        
       } else {
-        toast.warning(`No CIA-verified intelligence found for ${clients.length} registered clients`);
+        toast.warning(`No coordinated intelligence found for ${clients.length} registered clients`);
       }
       
     } catch (error) {
-      console.error('Pipeline execution failed:', error);
-      toast.error('❌ A.R.I.A vX™: Pipeline execution failed');
+      console.error('Coordinated pipeline execution failed:', error);
+      toast.error('❌ A.R.I.A vX™: Coordinated pipeline execution failed');
     } finally {
       setIsExecutingPipeline(false);
       refreshData();

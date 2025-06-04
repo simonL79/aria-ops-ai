@@ -1,15 +1,14 @@
 
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Target, Zap, BarChart3, Settings, Bot, Search } from 'lucide-react';
-import CounterNarrativeEngine from './CounterNarrativeEngine';
-import ArticleGenerationHub from './ArticleGenerationHub';
-import PerformanceTracking from './PerformanceTracking';
-import DeploymentCenter from './DeploymentCenter';
-import EntityPrecisionDashboard from './EntityPrecisionDashboard';
-import EntityScanningPanel from './EntityScanningPanel';
+import { Target, Shield, MessageSquare, FileText, TrendingUp, ArrowRight } from 'lucide-react';
+import EntityScanTab from './EntityScanTab';
+import CIAPrecisionTab from './CIAPrecisionTab';
+import CounterNarrativeTab from './CounterNarrativeTab';
+import ArticleGenerationTab from './ArticleGenerationTab';
+import PerformanceTab from './PerformanceTab';
+import ClientControlPanel from './ClientControlPanel';
+import PipelineCommunicationPanel from './PipelineCommunicationPanel';
 
 interface KeywordSystemTabsProps {
   keywordData: any[];
@@ -17,172 +16,79 @@ interface KeywordSystemTabsProps {
   onRefresh: () => void;
 }
 
-const KeywordSystemTabs = ({ keywordData, counterNarratives, onRefresh }: KeywordSystemTabsProps) => {
+const KeywordSystemTabs: React.FC<KeywordSystemTabsProps> = ({
+  keywordData,
+  counterNarratives,
+  onRefresh
+}) => {
+  const [selectedEntity, setSelectedEntity] = React.useState('Simon Lindsay');
+
   return (
-    <Tabs defaultValue="entity-scan" className="space-y-6">
-      <TabsList className="grid w-full grid-cols-6 bg-corporate-darkTertiary border border-corporate-border h-14">
-        <TabsTrigger 
-          value="entity-scan" 
-          className="flex items-center gap-2 text-base font-medium data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray hover:text-white transition-colors"
-        >
-          <Search className="h-5 w-5" />
-          <span className="hidden sm:inline">Entity Scan</span>
-        </TabsTrigger>
-        <TabsTrigger 
-          value="precision" 
-          className="flex items-center gap-2 text-base font-medium data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray hover:text-white transition-colors"
-        >
-          <Target className="h-5 w-5" />
-          <span className="hidden sm:inline">CIA Precision</span>
-        </TabsTrigger>
-        <TabsTrigger 
-          value="narratives" 
-          className="flex items-center gap-2 text-base font-medium data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray hover:text-white transition-colors"
-        >
-          <Zap className="h-5 w-5" />
-          <span className="hidden sm:inline">Counter-Narratives</span>
-        </TabsTrigger>
-        <TabsTrigger 
-          value="articles" 
-          className="flex items-center gap-2 text-base font-medium data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray hover:text-white transition-colors"
-        >
-          <Bot className="h-5 w-5" />
-          <span className="hidden sm:inline">Article Generation</span>
-        </TabsTrigger>
-        <TabsTrigger 
-          value="performance" 
-          className="flex items-center gap-2 text-base font-medium data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray hover:text-white transition-colors"
-        >
-          <BarChart3 className="h-5 w-5" />
-          <span className="hidden sm:inline">Performance</span>
-        </TabsTrigger>
-        <TabsTrigger 
-          value="deployment" 
-          className="flex items-center gap-2 text-base font-medium data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray hover:text-white transition-colors"
-        >
-          <Settings className="h-5 w-5" />
-          <span className="hidden sm:inline">Deployment</span>
-        </TabsTrigger>
-      </TabsList>
+    <div className="space-y-6">
+      {/* Pipeline Communication Panel - NEW */}
+      <PipelineCommunicationPanel entityName={selectedEntity} />
+      
+      <Tabs defaultValue="entity-scan" className="space-y-6">
+        <TabsList className="grid grid-cols-3 lg:grid-cols-6 bg-corporate-dark">
+          <TabsTrigger value="entity-scan" className="flex items-center gap-2 data-[state=active]:bg-corporate-accent data-[state=active]:text-black">
+            <Target className="h-4 w-4" />
+            <span className="hidden sm:inline">Entity Scan</span>
+          </TabsTrigger>
+          <TabsTrigger value="cia-precision" className="flex items-center gap-2 data-[state=active]:bg-corporate-accent data-[state=active]:text-black">
+            <Shield className="h-4 w-4" />
+            <span className="hidden sm:inline">CIA Precision</span>
+          </TabsTrigger>
+          <TabsTrigger value="counter-narratives" className="flex items-center gap-2 data-[state=active]:bg-corporate-accent data-[state=active]:text-black">
+            <MessageSquare className="h-4 w-4" />
+            <span className="hidden sm:inline">Counter Narratives</span>
+          </TabsTrigger>
+          <TabsTrigger value="article-generation" className="flex items-center gap-2 data-[state=active]:bg-corporate-accent data-[state=active]:text-black">
+            <FileText className="h-4 w-4" />
+            <span className="hidden sm:inline">Article Generation</span>
+          </TabsTrigger>
+          <TabsTrigger value="performance" className="flex items-center gap-2 data-[state=active]:bg-corporate-accent data-[state=active]:text-black">
+            <TrendingUp className="h-4 w-4" />
+            <span className="hidden sm:inline">Performance</span>
+          </TabsTrigger>
+          <TabsTrigger value="client-control" className="flex items-center gap-2 data-[state=active]:bg-corporate-accent data-[state=active]:text-black">
+            <ArrowRight className="h-4 w-4" />
+            <span className="hidden sm:inline">Client Control</span>
+          </TabsTrigger>
+        </TabsList>
 
-      <TabsContent value="entity-scan">
-        <div className="space-y-6">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div className="space-y-2">
-              <h3 className="text-2xl font-semibold text-white">Entity Intelligence Scanning</h3>
-              <p className="text-base text-corporate-lightGray leading-relaxed max-w-3xl">
-                Scan prospects with CIA-level precision before adding them to your client database
-              </p>
-            </div>
-            <Badge className="bg-yellow-900/20 text-yellow-300 border-yellow-500/30 px-4 py-2 text-base font-medium w-fit">
-              <Search className="h-4 w-4 mr-2" />
-              Prospect Scanning
-            </Badge>
-          </div>
-          <EntityScanningPanel onEntityScanned={onRefresh} />
-        </div>
-      </TabsContent>
+        <TabsContent value="entity-scan">
+          <EntityScanTab onEntitySelect={setSelectedEntity} />
+        </TabsContent>
 
-      <TabsContent value="precision">
-        <div className="space-y-6">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div className="space-y-2">
-              <h3 className="text-2xl font-semibold text-white">CIA-Level Entity Precision</h3>
-              <p className="text-base text-corporate-lightGray leading-relaxed max-w-3xl">
-                Advanced entity disambiguation eliminates false positives like "Lindsay Lohan" for "Simon Lindsay"
-              </p>
-            </div>
-            <Badge className="bg-blue-900/20 text-blue-300 border-blue-500/30 px-4 py-2 text-base font-medium w-fit">
-              <Target className="h-4 w-4 mr-2" />
-              Advanced NER Active
-            </Badge>
-          </div>
-          <EntityPrecisionDashboard />
-        </div>
-      </TabsContent>
+        <TabsContent value="cia-precision">
+          <CIAPrecisionTab entityName={selectedEntity} />
+        </TabsContent>
 
-      <TabsContent value="narratives">
-        <div className="space-y-6">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div className="space-y-2">
-              <h3 className="text-2xl font-semibold text-white">Counter-Narrative Generation</h3>
-              <p className="text-base text-corporate-lightGray leading-relaxed max-w-3xl">
-                AI-powered strategic counter-narratives from live intelligence
-              </p>
-            </div>
-            <Badge variant="outline" className="border-corporate-border text-corporate-lightGray px-4 py-2 text-base font-medium w-fit">
-              {counterNarratives.length} Active Narratives
-            </Badge>
-          </div>
-          <CounterNarrativeEngine 
+        <TabsContent value="counter-narratives">
+          <CounterNarrativeTab 
+            entityName={selectedEntity}
+            narratives={counterNarratives}
+            onRefresh={onRefresh}
+          />
+        </TabsContent>
+
+        <TabsContent value="article-generation">
+          <ArticleGenerationTab entityName={selectedEntity} />
+        </TabsContent>
+
+        <TabsContent value="performance">
+          <PerformanceTab entityName={selectedEntity} />
+        </TabsContent>
+
+        <TabsContent value="client-control">
+          <ClientControlPanel 
             keywordData={keywordData}
             narratives={counterNarratives}
             onRefresh={onRefresh}
           />
-        </div>
-      </TabsContent>
-
-      <TabsContent value="articles">
-        <div className="space-y-6">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div className="space-y-2">
-              <h3 className="text-2xl font-semibold text-white">Article Generation Hub</h3>
-              <p className="text-base text-corporate-lightGray leading-relaxed max-w-3xl">
-                Transform counter-narratives into deployable content
-              </p>
-            </div>
-            <Badge variant="outline" className="border-corporate-border text-corporate-lightGray px-4 py-2 text-base font-medium w-fit">
-              Content Pipeline
-            </Badge>
-          </div>
-          <ArticleGenerationHub 
-            narratives={counterNarratives}
-            onRefresh={onRefresh}
-          />
-        </div>
-      </TabsContent>
-
-      <TabsContent value="performance">
-        <div className="space-y-6">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div className="space-y-2">
-              <h3 className="text-2xl font-semibold text-white">Performance Analytics</h3>
-              <p className="text-base text-corporate-lightGray leading-relaxed max-w-3xl">
-                Track keyword performance and content impact
-              </p>
-            </div>
-            <Badge variant="outline" className="border-corporate-border text-corporate-lightGray px-4 py-2 text-base font-medium w-fit">
-              Real-time Metrics
-            </Badge>
-          </div>
-          <PerformanceTracking 
-            articles={[]}
-            keywordData={keywordData}
-            onRefresh={onRefresh}
-          />
-        </div>
-      </TabsContent>
-
-      <TabsContent value="deployment">
-        <div className="space-y-6">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div className="space-y-2">
-              <h3 className="text-2xl font-semibold text-white">Deployment Center</h3>
-              <p className="text-base text-corporate-lightGray leading-relaxed max-w-3xl">
-                Configure and manage content deployment
-              </p>
-            </div>
-            <Badge variant="outline" className="border-corporate-border text-corporate-lightGray px-4 py-2 text-base font-medium w-fit">
-              Multi-Platform
-            </Badge>
-          </div>
-          <DeploymentCenter 
-            articles={[]}
-            onRefresh={onRefresh}
-          />
-        </div>
-      </TabsContent>
-    </Tabs>
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };
 
