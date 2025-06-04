@@ -4,60 +4,47 @@ import { toast } from 'sonner';
 
 /**
  * A.R.I.A™ Pattern Recognition Service
- * Advanced pattern learning and threat correlation
+ * Advanced pattern analysis and threat prediction engine
  */
 export class PatternRecognitionService {
 
   /**
-   * Analyze and store threat patterns
+   * Analyze patterns from intelligence memory and feedback
    */
-  static async analyzePatterns(
-    entityName: string,
-    threatData: any[],
-    contextData?: any
-  ): Promise<PatternAnalysis> {
+  static async analyzePatterns(entityName: string): Promise<PatternAnalysis> {
+    console.log(`🧠 A.R.I.A™: Analyzing patterns for ${entityName}`);
+    
     try {
-      console.log(`🔍 A.R.I.A™: Analyzing patterns for ${entityName}`);
+      // Get intelligence memory data
+      const { data: memoryData } = await supabase
+        .from('anubis_entity_memory')
+        .select('*')
+        .eq('entity_name', entityName)
+        .order('created_at', { ascending: false })
+        .limit(50);
 
-      const analysis = {
-        entityName,
-        patternsDetected: 0,
-        correlationScore: 0,
-        riskTrends: [],
-        recommendations: [],
-        timestamp: new Date().toISOString()
-      };
+      // Get feedback data
+      const { data: feedbackData } = await supabase
+        .from('anubis_feedback_memory')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(30);
 
-      // Analyze temporal patterns
-      const temporalPatterns = this.analyzeTemporalPatterns(threatData);
-      analysis.patternsDetected += temporalPatterns.length;
+      // Get pattern logs
+      const { data: patternLogs } = await supabase
+        .from('anubis_pattern_log')
+        .select('*')
+        .eq('entity_name', entityName)
+        .order('first_detected', { ascending: false })
+        .limit(20);
 
-      // Analyze platform patterns
-      const platformPatterns = this.analyzePlatformPatterns(threatData);
-      analysis.patternsDetected += platformPatterns.length;
-
-      // Analyze sentiment patterns
-      const sentimentPatterns = this.analyzeSentimentPatterns(threatData);
-      analysis.patternsDetected += sentimentPatterns.length;
-
-      // Calculate overall correlation score
-      analysis.correlationScore = this.calculateCorrelationScore(
-        temporalPatterns,
-        platformPatterns,
-        sentimentPatterns
+      const analysis = this.processPatternData(
+        memoryData || [],
+        feedbackData || [],
+        patternLogs || []
       );
 
-      // Generate risk trends
-      analysis.riskTrends = this.generateRiskTrends(threatData);
-
-      // Generate pattern-based recommendations
-      analysis.recommendations = this.generatePatternRecommendations(
-        temporalPatterns,
-        platformPatterns,
-        sentimentPatterns
-      );
-
-      // Store patterns in database
+      // Store analysis results
       await this.storePatternAnalysis(entityName, analysis);
 
       return analysis;
@@ -69,173 +56,66 @@ export class PatternRecognitionService {
   }
 
   /**
-   * Get historical pattern data for entity
+   * Process raw data into pattern insights
    */
-  static async getPatternHistory(
-    entityName: string,
-    timeRange?: string
-  ): Promise<PatternHistory[]> {
-    try {
-      const { data: patterns } = await supabase
-        .from('anubis_pattern_log')
-        .select('*')
-        .eq('entity_name', entityName)
-        .order('first_detected', { ascending: false })
-        .limit(50);
+  private static processPatternData(
+    memoryData: any[],
+    feedbackData: any[],
+    patternLogs: any[]
+  ): PatternAnalysis {
+    const patterns: PatternInsight[] = [];
+    const trends: TrendAnalysis[] = [];
+    const predictions: ThreatPrediction[] = [];
 
-      if (!patterns) return [];
+    // Analyze memory patterns
+    const memoryPatterns = this.extractMemoryPatterns(memoryData);
+    patterns.push(...memoryPatterns);
 
-      return patterns.map(pattern => ({
-        id: pattern.id,
-        patternFingerprint: pattern.pattern_fingerprint,
-        summary: pattern.pattern_summary,
-        confidence: pattern.confidence_score,
-        firstDetected: pattern.first_detected,
-        outcome: pattern.previous_outcome,
-        recommendedResponse: pattern.recommended_response
-      }));
+    // Analyze feedback patterns
+    const feedbackPatterns = this.extractFeedbackPatterns(feedbackData);
+    patterns.push(...feedbackPatterns);
 
-    } catch (error) {
-      console.error('Failed to get pattern history:', error);
-      return [];
-    }
+    // Generate trend analysis
+    trends.push(...this.analyzeTrends(memoryData, feedbackData));
+
+    // Generate predictions
+    predictions.push(...this.generatePredictions(patterns, trends));
+
+    return {
+      patterns,
+      trends,
+      predictions,
+      confidence: this.calculateOverallConfidence(patterns),
+      lastUpdated: new Date().toISOString()
+    };
   }
 
   /**
-   * Predict threat evolution based on patterns
+   * Extract patterns from memory data
    */
-  static async predictThreatEvolution(
-    entityName: string,
-    currentThreats: any[]
-  ): Promise<ThreatPrediction[]> {
-    try {
-      console.log(`🔮 A.R.I.A™: Predicting threat evolution for ${entityName}`);
+  private static extractMemoryPatterns(memoryData: any[]): PatternInsight[] {
+    const patterns: PatternInsight[] = [];
 
-      const patterns = await this.getPatternHistory(entityName);
-      const predictions: ThreatPrediction[] = [];
+    // Group by memory type
+    const groupedMemory = memoryData.reduce((groups, memory) => {
+      const type = memory.memory_type || 'unknown';
+      if (!groups[type]) groups[type] = [];
+      groups[type].push(memory);
+      return groups;
+    }, {} as Record<string, any[]>);
 
-      // Analyze each current threat against historical patterns
-      for (const threat of currentThreats) {
-        const matchingPatterns = patterns.filter(pattern => 
-          this.patternMatches(threat, pattern)
-        );
-
-        if (matchingPatterns.length > 0) {
-          const prediction = this.generateThreatPrediction(threat, matchingPatterns);
-          predictions.push(prediction);
-        }
-      }
-
-      return predictions.sort((a, b) => b.confidence - a.confidence);
-
-    } catch (error) {
-      console.error('Threat prediction failed:', error);
-      return [];
-    }
-  }
-
-  /**
-   * Learn from pattern outcomes
-   */
-  static async learnFromOutcome(
-    entityName: string,
-    patternId: string,
-    outcome: 'success' | 'failure' | 'partial',
-    effectiveness: number
-  ): Promise<boolean> {
-    try {
-      console.log(`📚 A.R.I.A™: Learning from pattern outcome`);
-
-      // Update pattern confidence based on outcome
-      const confidenceAdjustment = effectiveness > 0.7 ? 0.1 : -0.1;
-
-      const { error } = await supabase
-        .from('anubis_pattern_log')
-        .update({
-          previous_outcome: outcome,
-          confidence_score: supabase.raw(`LEAST(1.0, GREATEST(0.0, confidence_score + ${confidenceAdjustment}))`)
-        })
-        .eq('id', patternId);
-
-      if (error) throw error;
-
-      // Log learning event
-      await supabase.rpc('log_anubis_check', {
-        check_name: 'pattern_learning',
-        result: `Pattern learning: ${outcome} (effectiveness: ${effectiveness})`,
-        passed: outcome === 'success',
-        severity: outcome === 'failure' ? 'medium' : 'low',
-        notes: `Pattern ID: ${patternId}`
-      });
-
-      toast.success('🎯 Pattern learning updated');
-      return true;
-
-    } catch (error) {
-      console.error('Failed to learn from outcome:', error);
-      return false;
-    }
-  }
-
-  /**
-   * Analyze temporal patterns in threats
-   */
-  private static analyzeTemporalPatterns(threatData: any[]): TemporalPattern[] {
-    const patterns: TemporalPattern[] = [];
-    
-    // Group threats by time periods
-    const hourlyDistribution = this.groupByHour(threatData);
-    const dailyDistribution = this.groupByDay(threatData);
-    
-    // Detect peak activity periods
-    const peakHours = this.findPeaks(hourlyDistribution);
-    if (peakHours.length > 0) {
-      patterns.push({
-        type: 'peak_activity',
-        description: `Peak threat activity at hours: ${peakHours.join(', ')}`,
-        confidence: 0.8,
-        timeframe: 'hourly'
-      });
-    }
-
-    // Detect day-of-week patterns
-    const weekendActivity = this.analyzeWeekendActivity(dailyDistribution);
-    if (weekendActivity.isSignificant) {
-      patterns.push({
-        type: 'weekend_pattern',
-        description: weekendActivity.description,
-        confidence: weekendActivity.confidence,
-        timeframe: 'weekly'
-      });
-    }
-
-    return patterns;
-  }
-
-  /**
-   * Analyze platform distribution patterns
-   */
-  private static analyzePlatformPatterns(threatData: any[]): PlatformPattern[] {
-    const patterns: PlatformPattern[] = [];
-    
-    const platformDistribution = threatData.reduce((acc, threat) => {
-      const platform = threat.platform || 'unknown';
-      acc[platform] = (acc[platform] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
-
-    const totalThreats = threatData.length;
-    
-    Object.entries(platformDistribution).forEach(([platform, count]) => {
-      const percentage = count / totalThreats;
-      
-      if (percentage >= 0.4) { // Platform represents 40%+ of threats
+    // Analyze each group
+    Object.entries(groupedMemory).forEach(([type, memories]) => {
+      if (memories.length >= 2) {
         patterns.push({
-          type: 'platform_concentration',
-          platform,
-          percentage,
-          description: `High concentration on ${platform} (${Math.round(percentage * 100)}%)`,
-          confidence: 0.9
+          id: `memory_${type}_${Date.now()}`,
+          type: 'memory_pattern',
+          description: `Recurring ${type} memory pattern`,
+          confidence: Math.min(0.9, memories.length * 0.15),
+          frequency: memories.length,
+          lastSeen: memories[0]?.created_at || new Date().toISOString(),
+          indicators: memories.map(m => m.memory_summary).slice(0, 3),
+          riskLevel: memories.length > 5 ? 'high' : 'medium'
         });
       }
     });
@@ -244,37 +124,44 @@ export class PatternRecognitionService {
   }
 
   /**
-   * Analyze sentiment patterns
+   * Extract patterns from feedback data
    */
-  private static analyzeSentimentPatterns(threatData: any[]): SentimentPattern[] {
-    const patterns: SentimentPattern[] = [];
-    
-    const sentiments = threatData
-      .filter(t => t.sentiment_score !== undefined)
-      .map(t => t.sentiment_score);
+  private static extractFeedbackPatterns(feedbackData: any[]): PatternInsight[] {
+    const patterns: PatternInsight[] = [];
 
-    if (sentiments.length === 0) return patterns;
+    // Analyze successful feedback patterns
+    const successfulFeedback = feedbackData.filter(f => 
+      f.feedback_score && f.feedback_score >= 4
+    );
 
-    const avgSentiment = sentiments.reduce((a, b) => a + b, 0) / sentiments.length;
-    const sentimentVariance = this.calculateVariance(sentiments);
-
-    if (avgSentiment <= -0.6) {
+    if (successfulFeedback.length >= 3) {
       patterns.push({
-        type: 'highly_negative',
-        averageSentiment: avgSentiment,
-        variance: sentimentVariance,
-        description: `Consistently negative sentiment (avg: ${avgSentiment.toFixed(2)})`,
-        confidence: 0.85
+        id: `feedback_success_${Date.now()}`,
+        type: 'success_pattern',
+        description: 'High-effectiveness strategy pattern',
+        confidence: 0.8,
+        frequency: successfulFeedback.length,
+        lastSeen: successfulFeedback[0]?.created_at || new Date().toISOString(),
+        indicators: successfulFeedback.map(f => f.operator_action).filter(Boolean).slice(0, 3),
+        riskLevel: 'low'
       });
     }
 
-    if (sentimentVariance < 0.1) {
+    // Analyze failure patterns
+    const failedFeedback = feedbackData.filter(f => 
+      f.feedback_score && f.feedback_score <= 2
+    );
+
+    if (failedFeedback.length >= 2) {
       patterns.push({
-        type: 'sentiment_consistency',
-        averageSentiment: avgSentiment,
-        variance: sentimentVariance,
-        description: 'Consistent sentiment pattern detected',
-        confidence: 0.7
+        id: `feedback_failure_${Date.now()}`,
+        type: 'failure_pattern',
+        description: 'Low-effectiveness strategy pattern to avoid',
+        confidence: 0.7,
+        frequency: failedFeedback.length,
+        lastSeen: failedFeedback[0]?.created_at || new Date().toISOString(),
+        indicators: failedFeedback.map(f => f.operator_action).filter(Boolean).slice(0, 3),
+        riskLevel: 'medium'
       });
     }
 
@@ -282,289 +169,249 @@ export class PatternRecognitionService {
   }
 
   /**
-   * Calculate overall correlation score
+   * Analyze trends across data
    */
-  private static calculateCorrelationScore(
-    temporal: TemporalPattern[],
-    platform: PlatformPattern[],
-    sentiment: SentimentPattern[]
-  ): number {
-    const totalPatterns = temporal.length + platform.length + sentiment.length;
-    if (totalPatterns === 0) return 0;
+  private static analyzeTrends(memoryData: any[], feedbackData: any[]): TrendAnalysis[] {
+    const trends: TrendAnalysis[] = [];
 
-    const avgConfidence = [
-      ...temporal.map(p => p.confidence),
-      ...platform.map(p => p.confidence),
-      ...sentiment.map(p => p.confidence)
-    ].reduce((a, b) => a + b, 0) / totalPatterns;
+    // Memory volume trend
+    const memoryTrend = this.calculateMemoryTrend(memoryData);
+    if (memoryTrend) trends.push(memoryTrend);
 
-    return Math.min(1.0, avgConfidence * (totalPatterns / 10));
-  }
-
-  /**
-   * Generate risk trends
-   */
-  private static generateRiskTrends(threatData: any[]): RiskTrend[] {
-    const trends: RiskTrend[] = [];
-    
-    // Sort threats by date
-    const sortedThreats = threatData.sort((a, b) => 
-      new Date(a.created_at || a.detected_at).getTime() - 
-      new Date(b.created_at || b.detected_at).getTime()
-    );
-
-    // Analyze volume trend
-    const volumeTrend = this.analyzeVolumeTrend(sortedThreats);
-    if (volumeTrend) trends.push(volumeTrend);
-
-    // Analyze severity trend
-    const severityTrend = this.analyzeSeverityTrend(sortedThreats);
-    if (severityTrend) trends.push(severityTrend);
+    // Feedback quality trend
+    const feedbackTrend = this.calculateFeedbackTrend(feedbackData);
+    if (feedbackTrend) trends.push(feedbackTrend);
 
     return trends;
   }
 
   /**
-   * Generate pattern-based recommendations
+   * Calculate memory volume trend
    */
-  private static generatePatternRecommendations(
-    temporal: TemporalPattern[],
-    platform: PlatformPattern[],
-    sentiment: SentimentPattern[]
-  ): string[] {
-    const recommendations: string[] = [];
+  private static calculateMemoryTrend(memoryData: any[]): TrendAnalysis | null {
+    if (memoryData.length < 5) return null;
 
-    // Temporal recommendations
-    temporal.forEach(pattern => {
-      if (pattern.type === 'peak_activity') {
-        recommendations.push('Increase monitoring during peak activity hours');
-      }
-      if (pattern.type === 'weekend_pattern') {
-        recommendations.push('Adjust response team availability for weekend patterns');
-      }
+    const recentMemories = memoryData.filter(m => {
+      const created = new Date(m.created_at);
+      const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+      return created > weekAgo;
     });
 
-    // Platform recommendations
-    platform.forEach(pattern => {
-      if (pattern.type === 'platform_concentration') {
-        recommendations.push(`Focus counter-narrative efforts on ${pattern.platform}`);
-      }
+    const olderMemories = memoryData.filter(m => {
+      const created = new Date(m.created_at);
+      const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+      const twoWeeksAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
+      return created <= weekAgo && created > twoWeeksAgo;
     });
 
-    // Sentiment recommendations
-    sentiment.forEach(pattern => {
-      if (pattern.type === 'highly_negative') {
-        recommendations.push('Deploy empathetic response strategies for negative sentiment');
-      }
-      if (pattern.type === 'sentiment_consistency') {
-        recommendations.push('Consistent sentiment detected - prepare standardized responses');
-      }
-    });
+    const recentCount = recentMemories.length;
+    const olderCount = olderMemories.length;
 
-    return recommendations;
+    if (olderCount === 0) return null;
+
+    const changePercentage = ((recentCount - olderCount) / olderCount) * 100;
+
+    return {
+      id: `memory_trend_${Date.now()}`,
+      type: 'memory_volume',
+      direction: changePercentage > 10 ? 'increasing' : changePercentage < -10 ? 'decreasing' : 'stable',
+      magnitude: Math.abs(changePercentage),
+      description: `Memory generation ${changePercentage > 0 ? 'increased' : 'decreased'} by ${Math.abs(changePercentage).toFixed(1)}%`,
+      confidence: 0.7,
+      timeframe: '7 days'
+    };
   }
 
   /**
-   * Store pattern analysis in database
+   * Calculate feedback quality trend
+   */
+  private static calculateFeedbackTrend(feedbackData: any[]): TrendAnalysis | null {
+    const scoredFeedback = feedbackData.filter(f => f.feedback_score);
+    if (scoredFeedback.length < 5) return null;
+
+    const recentFeedback = scoredFeedback.slice(0, Math.floor(scoredFeedback.length / 2));
+    const olderFeedback = scoredFeedback.slice(Math.floor(scoredFeedback.length / 2));
+
+    const recentAvg = recentFeedback.reduce((sum, f) => sum + (f.feedback_score || 0), 0) / recentFeedback.length;
+    const olderAvg = olderFeedback.reduce((sum, f) => sum + (f.feedback_score || 0), 0) / olderFeedback.length;
+
+    const improvement = recentAvg - olderAvg;
+
+    return {
+      id: `feedback_trend_${Date.now()}`,
+      type: 'effectiveness',
+      direction: improvement > 0.2 ? 'increasing' : improvement < -0.2 ? 'decreasing' : 'stable',
+      magnitude: Math.abs(improvement * 20), // Convert to percentage
+      description: `Strategy effectiveness ${improvement > 0 ? 'improved' : 'declined'} by ${Math.abs(improvement * 20).toFixed(1)}%`,
+      confidence: 0.8,
+      timeframe: 'recent vs historical'
+    };
+  }
+
+  /**
+   * Generate threat predictions
+   */
+  private static generatePredictions(
+    patterns: PatternInsight[],
+    trends: TrendAnalysis[]
+  ): ThreatPrediction[] {
+    const predictions: ThreatPrediction[] = [];
+
+    // High-risk pattern prediction
+    const highRiskPatterns = patterns.filter(p => p.riskLevel === 'high');
+    if (highRiskPatterns.length > 0) {
+      predictions.push({
+        id: `prediction_high_risk_${Date.now()}`,
+        type: 'escalation_risk',
+        description: 'Multiple high-risk patterns detected - increased vigilance recommended',
+        probability: Math.min(0.9, highRiskPatterns.length * 0.2),
+        timeframe: '1-3 days',
+        confidence: 0.75,
+        recommendedActions: [
+          'Increase monitoring frequency',
+          'Prepare counter-narrative templates',
+          'Alert response team'
+        ]
+      });
+    }
+
+    // Effectiveness decline prediction
+    const decliningTrends = trends.filter(t => t.direction === 'decreasing');
+    if (decliningTrends.length > 0) {
+      predictions.push({
+        id: `prediction_decline_${Date.now()}`,
+        type: 'effectiveness_decline',
+        description: 'Current strategies showing declining effectiveness',
+        probability: 0.6,
+        timeframe: '1-2 weeks',
+        confidence: 0.7,
+        recommendedActions: [
+          'Review and update strategy templates',
+          'Collect additional feedback',
+          'Consider new approach methods'
+        ]
+      });
+    }
+
+    return predictions;
+  }
+
+  /**
+   * Calculate overall analysis confidence
+   */
+  private static calculateOverallConfidence(patterns: PatternInsight[]): number {
+    if (patterns.length === 0) return 0;
+    
+    const avgConfidence = patterns.reduce((sum, p) => sum + p.confidence, 0) / patterns.length;
+    return Math.round(avgConfidence * 100) / 100;
+  }
+
+  /**
+   * Store pattern analysis results
    */
   private static async storePatternAnalysis(
     entityName: string,
     analysis: PatternAnalysis
   ): Promise<void> {
     try {
-      await supabase.from('anubis_pattern_log').insert({
+      // Store significant patterns
+      for (const pattern of analysis.patterns) {
+        if (pattern.confidence >= 0.6) {
+          await supabase.from('anubis_pattern_log').insert({
+            entity_name: entityName,
+            pattern_fingerprint: pattern.id,
+            pattern_summary: pattern.description,
+            confidence_score: pattern.confidence,
+            recommended_response: JSON.stringify(pattern.indicators)
+          });
+        }
+      }
+
+      // Log the analysis
+      await supabase.from('aria_ops_log').insert({
+        operation_type: 'pattern_analysis',
+        module_source: 'pattern_recognition_service',
+        success: true,
         entity_name: entityName,
-        pattern_fingerprint: `analysis_${Date.now()}`,
-        pattern_summary: `Pattern analysis: ${analysis.patternsDetected} patterns detected`,
-        confidence_score: analysis.correlationScore,
-        recommended_response: JSON.stringify(analysis.recommendations)
+        operation_data: {
+          patterns_found: analysis.patterns.length,
+          trends_identified: analysis.trends.length,
+          predictions_generated: analysis.predictions.length,
+          overall_confidence: analysis.confidence
+        } as any
       });
+
     } catch (error) {
       console.error('Failed to store pattern analysis:', error);
     }
   }
 
-  // Helper methods
-  private static groupByHour(threats: any[]): Record<number, number> {
-    return threats.reduce((acc, threat) => {
-      const hour = new Date(threat.created_at || threat.detected_at).getHours();
-      acc[hour] = (acc[hour] || 0) + 1;
-      return acc;
-    }, {} as Record<number, number>);
-  }
+  /**
+   * Get recent pattern insights for entity
+   */
+  static async getRecentInsights(entityName: string): Promise<PatternInsight[]> {
+    try {
+      const { data } = await supabase
+        .from('anubis_pattern_log')
+        .select('*')
+        .eq('entity_name', entityName)
+        .order('first_detected', { ascending: false })
+        .limit(10);
 
-  private static groupByDay(threats: any[]): Record<number, number> {
-    return threats.reduce((acc, threat) => {
-      const day = new Date(threat.created_at || threat.detected_at).getDay();
-      acc[day] = (acc[day] || 0) + 1;
-      return acc;
-    }, {} as Record<number, number>);
-  }
+      return (data || []).map(log => ({
+        id: log.pattern_fingerprint,
+        type: 'stored_pattern',
+        description: log.pattern_summary || 'Stored pattern',
+        confidence: log.confidence_score || 0,
+        frequency: 1,
+        lastSeen: log.first_detected || new Date().toISOString(),
+        indicators: [],
+        riskLevel: log.confidence_score && log.confidence_score > 0.8 ? 'high' : 'medium'
+      }));
 
-  private static findPeaks(distribution: Record<number, number>): number[] {
-    const entries = Object.entries(distribution).map(([k, v]) => [parseInt(k), v]);
-    const avg = entries.reduce((sum, [, count]) => sum + count, 0) / entries.length;
-    
-    return entries
-      .filter(([, count]) => count > avg * 1.5)
-      .map(([hour]) => hour);
-  }
-
-  private static analyzeWeekendActivity(distribution: Record<number, number>) {
-    const weekdays = [1, 2, 3, 4, 5].reduce((sum, day) => sum + (distribution[day] || 0), 0);
-    const weekends = [0, 6].reduce((sum, day) => sum + (distribution[day] || 0), 0);
-    
-    const total = weekdays + weekends;
-    if (total === 0) return { isSignificant: false, description: '', confidence: 0 };
-    
-    const weekendPercentage = weekends / total;
-    
-    return {
-      isSignificant: weekendPercentage > 0.4,
-      description: `${Math.round(weekendPercentage * 100)}% of activity occurs on weekends`,
-      confidence: Math.min(0.9, weekendPercentage * 2)
-    };
-  }
-
-  private static calculateVariance(values: number[]): number {
-    const mean = values.reduce((a, b) => a + b) / values.length;
-    const squaredDiffs = values.map(value => Math.pow(value - mean, 2));
-    return squaredDiffs.reduce((a, b) => a + b) / values.length;
-  }
-
-  private static analyzeVolumeTrend(threats: any[]): RiskTrend | null {
-    // Simple trend analysis - could be enhanced
-    const recentThreats = threats.slice(-10);
-    const olderThreats = threats.slice(-20, -10);
-    
-    if (recentThreats.length < 5 || olderThreats.length < 5) return null;
-    
-    const recentAvg = recentThreats.length / 10;
-    const olderAvg = olderThreats.length / 10;
-    
-    const change = (recentAvg - olderAvg) / olderAvg;
-    
-    return {
-      type: 'volume',
-      direction: change > 0.2 ? 'increasing' : change < -0.2 ? 'decreasing' : 'stable',
-      magnitude: Math.abs(change),
-      description: `Threat volume ${change > 0.2 ? 'increasing' : change < -0.2 ? 'decreasing' : 'stable'}`,
-      confidence: Math.min(0.9, Math.abs(change) * 2)
-    };
-  }
-
-  private static analyzeSeverityTrend(threats: any[]): RiskTrend | null {
-    // Analyze severity progression
-    const recentSeverities = threats.slice(-10)
-      .map(t => this.normalizeSeverity(t.severity || t.threat_level))
-      .filter(s => s !== null);
-    
-    if (recentSeverities.length < 5) return null;
-    
-    const avgSeverity = recentSeverities.reduce((a, b) => a + b!, 0) / recentSeverities.length;
-    
-    return {
-      type: 'severity',
-      direction: avgSeverity > 0.7 ? 'increasing' : avgSeverity < 0.3 ? 'decreasing' : 'stable',
-      magnitude: avgSeverity,
-      description: `Average threat severity: ${avgSeverity.toFixed(2)}`,
-      confidence: 0.8
-    };
-  }
-
-  private static normalizeSeverity(severity: any): number | null {
-    if (typeof severity === 'number') return Math.min(1, severity / 10);
-    if (typeof severity === 'string') {
-      const severityMap = { low: 0.2, medium: 0.5, high: 0.8, critical: 1.0 };
-      return severityMap[severity.toLowerCase() as keyof typeof severityMap] || null;
+    } catch (error) {
+      console.error('Failed to get recent insights:', error);
+      return [];
     }
-    return null;
-  }
-
-  private static patternMatches(threat: any, pattern: PatternHistory): boolean {
-    // Simple pattern matching - could be enhanced with ML
-    const threatFingerprint = `${threat.platform}_${threat.threat_type || 'unknown'}_${threat.severity || 'unknown'}`;
-    return pattern.patternFingerprint.includes(threatFingerprint) || 
-           threatFingerprint.includes(pattern.patternFingerprint);
-  }
-
-  private static generateThreatPrediction(
-    threat: any,
-    patterns: PatternHistory[]
-  ): ThreatPrediction {
-    const bestPattern = patterns.reduce((prev, current) => 
-      prev.confidence > current.confidence ? prev : current
-    );
-
-    return {
-      threatId: threat.id,
-      predictedEvolution: 'escalation',
-      probability: bestPattern.confidence * 0.8,
-      timeframe: '24-48 hours',
-      confidence: bestPattern.confidence,
-      basedOnPattern: bestPattern.patternFingerprint,
-      recommendedActions: ['Monitor closely', 'Prepare response templates', 'Alert response team']
-    };
   }
 }
 
 // Type definitions
 interface PatternAnalysis {
-  entityName: string;
-  patternsDetected: number;
-  correlationScore: number;
-  riskTrends: RiskTrend[];
-  recommendations: string[];
-  timestamp: string;
+  patterns: PatternInsight[];
+  trends: TrendAnalysis[];
+  predictions: ThreatPrediction[];
+  confidence: number;
+  lastUpdated: string;
 }
 
-interface PatternHistory {
+interface PatternInsight {
   id: string;
-  patternFingerprint: string;
-  summary: string;
-  confidence: number;
-  firstDetected: string;
-  outcome?: string;
-  recommendedResponse?: string;
-}
-
-interface ThreatPrediction {
-  threatId: string;
-  predictedEvolution: string;
-  probability: number;
-  timeframe: string;
-  confidence: number;
-  basedOnPattern: string;
-  recommendedActions: string[];
-}
-
-interface TemporalPattern {
   type: string;
   description: string;
   confidence: number;
-  timeframe: string;
+  frequency: number;
+  lastSeen: string;
+  indicators: string[];
+  riskLevel: 'low' | 'medium' | 'high';
 }
 
-interface PlatformPattern {
+interface TrendAnalysis {
+  id: string;
   type: string;
-  platform: string;
-  percentage: number;
-  description: string;
-  confidence: number;
-}
-
-interface SentimentPattern {
-  type: string;
-  averageSentiment: number;
-  variance: number;
-  description: string;
-  confidence: number;
-}
-
-interface RiskTrend {
-  type: string;
-  direction: string;
+  direction: 'increasing' | 'decreasing' | 'stable';
   magnitude: number;
   description: string;
   confidence: number;
+  timeframe: string;
+}
+
+interface ThreatPrediction {
+  id: string;
+  type: string;
+  description: string;
+  probability: number;
+  timeframe: string;
+  confidence: number;
+  recommendedActions: string[];
 }
