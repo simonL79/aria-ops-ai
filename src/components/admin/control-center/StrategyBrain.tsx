@@ -1,10 +1,15 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Brain, Zap, Target, AlertTriangle } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Brain, Zap, Target, AlertTriangle, BarChart3, Settings } from 'lucide-react';
 import { toast } from 'sonner';
+import StrategyBrainPatterns from './StrategyBrainPatterns';
+import StrategyBrainResponses from './StrategyBrainResponses';
+import { analyzeEntityPatterns, PatternAnalysisResult } from '@/services/strategyBrain/patternAnalyzer';
+import { generateResponseStrategies, ResponseStrategy } from '@/services/strategyBrain/responseGenerator';
 
 interface StrategyBrainProps {
   selectedEntity: string;
@@ -15,81 +20,88 @@ const StrategyBrain: React.FC<StrategyBrainProps> = ({
   selectedEntity,
   entityMemory
 }) => {
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isGeneratingResponses, setIsGeneratingResponses] = useState(false);
+  const [patternResults, setPatternResults] = useState<PatternAnalysisResult | null>(null);
+  const [responseStrategies, setResponseStrategies] = useState<ResponseStrategy[]>([]);
+  const [activeTab, setActiveTab] = useState('patterns');
+
   const handlePatternAnalysis = async () => {
     if (!selectedEntity) {
       toast.error("No entity selected for pattern analysis");
       return;
     }
 
-    toast.info(`🧠 A.R.I.A™ Strategy Brain: Analyzing patterns for ${selectedEntity}`, {
-      description: "Processing live intelligence patterns - NO SIMULATIONS"
-    });
+    setIsAnalyzing(true);
+    toast.info(`🧠 A.R.I.A™ Strategy Brain: Analyzing patterns for ${selectedEntity}`);
 
     try {
-      // Call the pattern analysis function with live data enforcement
-      console.log(`🧠 Strategy Brain: Analyzing live patterns for ${selectedEntity}`);
+      const results = await analyzeEntityPatterns(selectedEntity);
+      setPatternResults(results);
       
-      // Simulate live pattern analysis
-      setTimeout(() => {
-        toast.success(`Pattern analysis completed for ${selectedEntity}`, {
-          description: "Live intelligence patterns identified"
-        });
-      }, 2000);
+      toast.success(`Pattern analysis completed for ${selectedEntity}`, {
+        description: `${results.patterns.length} patterns detected with ${(results.confidence * 100).toFixed(0)}% confidence`
+      });
+
+      // Auto-generate responses if significant patterns found
+      if (results.patterns.length > 0) {
+        await handleResponseGeneration(results.patterns);
+      }
       
     } catch (error) {
       console.error('Pattern analysis failed:', error);
-      toast.error("Pattern analysis failed");
+      toast.error("Pattern analysis failed", {
+        description: error instanceof Error ? error.message : "Unknown error occurred"
+      });
+    } finally {
+      setIsAnalyzing(false);
     }
   };
 
-  const handleToneControl = async () => {
+  const handleResponseGeneration = async (patterns?: any[]) => {
     if (!selectedEntity) {
-      toast.error("No entity selected for tone control");
+      toast.error("No entity selected for response generation");
       return;
     }
 
-    toast.info(`🎯 Tone Control: Adjusting narrative tone for ${selectedEntity}`, {
-      description: "Live tone adjustment - NO MOCK DATA"
-    });
+    const patternsToUse = patterns || patternResults?.patterns || [];
+    setIsGeneratingResponses(true);
+    
+    toast.info(`🎯 Generating response strategies for ${selectedEntity}`);
 
     try {
-      console.log(`🎯 Tone Control: Live adjustment for ${selectedEntity}`);
+      const strategies = await generateResponseStrategies(selectedEntity, patternsToUse);
+      setResponseStrategies(strategies);
       
-      setTimeout(() => {
-        toast.success(`Tone control activated for ${selectedEntity}`, {
-          description: "Narrative tone successfully adjusted"
-        });
-      }, 1500);
+      toast.success(`Response strategies generated for ${selectedEntity}`, {
+        description: `${strategies.length} strategies ready for deployment`
+      });
+
+      setActiveTab('responses');
       
     } catch (error) {
-      console.error('Tone control failed:', error);
-      toast.error("Tone control failed");
+      console.error('Response generation failed:', error);
+      toast.error("Response generation failed", {
+        description: error instanceof Error ? error.message : "Unknown error occurred"
+      });
+    } finally {
+      setIsGeneratingResponses(false);
     }
   };
 
-  const handleMemoryRecall = async () => {
-    if (!selectedEntity) {
-      toast.error("No entity selected for memory recall");
-      return;
-    }
+  const handleExecuteStrategy = async (strategyId: string) => {
+    const strategy = responseStrategies.find(s => s.id === strategyId);
+    if (!strategy) return;
 
-    toast.info(`🔍 Memory Recall: Accessing entity memory for ${selectedEntity}`, {
-      description: "Live memory retrieval - NO SIMULATIONS"
+    toast.success(`🚀 Strategy "${strategy.title}" deployment initiated`, {
+      description: `${strategy.actions.length} actions are being executed`
     });
 
-    try {
-      console.log(`🔍 Memory Recall: Live retrieval for ${selectedEntity}`);
-      
-      setTimeout(() => {
-        toast.success(`Memory recall completed for ${selectedEntity}`, {
-          description: `${entityMemory.length} memory entries retrieved`
-        });
-      }, 1000);
-      
-    } catch (error) {
-      console.error('Memory recall failed:', error);
-      toast.error("Memory recall failed");
-    }
+    // Here you would integrate with actual execution systems
+    // For now, we'll simulate the execution
+    setTimeout(() => {
+      toast.success(`✅ Strategy "${strategy.title}" executed successfully`);
+    }, 2000);
   };
 
   return (
@@ -109,10 +121,32 @@ const StrategyBrain: React.FC<StrategyBrainProps> = ({
                 <Badge className="bg-green-500/20 text-green-400 border-green-500/50">
                   Active Entity: {selectedEntity}
                 </Badge>
+                {patternResults && (
+                  <Badge className="bg-corporate-accent/20 text-corporate-accent">
+                    {patternResults.patterns.length} Patterns Detected
+                  </Badge>
+                )}
               </div>
               <p className="text-corporate-lightGray text-sm">
-                Memory entries: {entityMemory.length} | Status: Live Intelligence Active
+                Memory entries: {entityMemory.length} | Intelligence: {patternResults ? 'Analyzed' : 'Pending'}
               </p>
+              
+              {patternResults && (
+                <div className="grid grid-cols-3 gap-3 mt-4">
+                  <div className="text-center">
+                    <p className="text-corporate-accent font-bold text-lg">{patternResults.patterns.length}</p>
+                    <p className="text-xs text-corporate-lightGray">Patterns</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-corporate-accent font-bold text-lg">{(patternResults.confidence * 100).toFixed(0)}%</p>
+                    <p className="text-xs text-corporate-lightGray">Confidence</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-corporate-accent font-bold text-lg">{responseStrategies.length}</p>
+                    <p className="text-xs text-corporate-lightGray">Strategies</p>
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <div className="text-center py-4">
@@ -123,20 +157,29 @@ const StrategyBrain: React.FC<StrategyBrainProps> = ({
         </CardContent>
       </Card>
 
-      {/* Strategy Controls */}
+      {/* Main Controls */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="bg-corporate-dark border-corporate-border">
           <CardContent className="p-4">
             <Button
               onClick={handlePatternAnalysis}
-              disabled={!selectedEntity}
+              disabled={!selectedEntity || isAnalyzing}
               className="w-full bg-corporate-accent text-black hover:bg-corporate-accent/90"
             >
-              <Brain className="h-4 w-4 mr-2" />
-              Pattern Analysis
+              {isAnalyzing ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 mr-2 border-b-2 border-black"></div>
+                  Analyzing...
+                </>
+              ) : (
+                <>
+                  <Brain className="h-4 w-4 mr-2" />
+                  Pattern Analysis
+                </>
+              )}
             </Button>
             <p className="text-xs text-corporate-lightGray mt-2">
-              Analyze live intelligence patterns
+              Analyze intelligence patterns
             </p>
           </CardContent>
         </Card>
@@ -144,15 +187,24 @@ const StrategyBrain: React.FC<StrategyBrainProps> = ({
         <Card className="bg-corporate-dark border-corporate-border">
           <CardContent className="p-4">
             <Button
-              onClick={handleToneControl}
-              disabled={!selectedEntity}
+              onClick={() => handleResponseGeneration()}
+              disabled={!selectedEntity || isGeneratingResponses}
               className="w-full bg-corporate-accent text-black hover:bg-corporate-accent/90"
             >
-              <Target className="h-4 w-4 mr-2" />
-              Tone Control
+              {isGeneratingResponses ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 mr-2 border-b-2 border-black"></div>
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Target className="h-4 w-4 mr-2" />
+                  Generate Responses
+                </>
+              )}
             </Button>
             <p className="text-xs text-corporate-lightGray mt-2">
-              Adjust narrative tone
+              Create response strategies
             </p>
           </CardContent>
         </Card>
@@ -160,41 +212,101 @@ const StrategyBrain: React.FC<StrategyBrainProps> = ({
         <Card className="bg-corporate-dark border-corporate-border">
           <CardContent className="p-4">
             <Button
-              onClick={handleMemoryRecall}
+              onClick={() => toast.info("Strategy optimization coming soon")}
               disabled={!selectedEntity}
               className="w-full bg-corporate-accent text-black hover:bg-corporate-accent/90"
             >
-              <Zap className="h-4 w-4 mr-2" />
-              Memory Recall
+              <Settings className="h-4 w-4 mr-2" />
+              Optimize
             </Button>
             <p className="text-xs text-corporate-lightGray mt-2">
-              Access entity memory
+              Optimize strategies
             </p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Live Memory Display */}
-      {entityMemory.length > 0 && (
-        <Card className="bg-corporate-dark border-corporate-border">
-          <CardHeader>
-            <CardTitle className="text-white text-sm">Recent Entity Memory</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2 max-h-64 overflow-y-auto">
-              {entityMemory.slice(0, 5).map((memory, index) => (
-                <div key={index} className="p-3 bg-corporate-darkSecondary rounded border border-corporate-border">
-                  <p className="text-corporate-lightGray text-sm">
-                    {memory.memory_type}: {memory.content?.substring(0, 100)}...
-                  </p>
-                  <p className="text-xs text-corporate-lightGray opacity-75">
-                    {new Date(memory.created_at).toLocaleString()}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+      {/* Results Tabs */}
+      {(patternResults || responseStrategies.length > 0) && (
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-3 bg-corporate-darkSecondary">
+            <TabsTrigger 
+              value="patterns" 
+              className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black"
+            >
+              <BarChart3 className="h-4 w-4 mr-2" />
+              Patterns
+            </TabsTrigger>
+            <TabsTrigger 
+              value="responses"
+              className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black"
+            >
+              <Target className="h-4 w-4 mr-2" />
+              Strategies
+            </TabsTrigger>
+            <TabsTrigger 
+              value="insights"
+              className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black"
+            >
+              <Brain className="h-4 w-4 mr-2" />
+              Insights
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="patterns" className="mt-6">
+            <StrategyBrainPatterns
+              patterns={patternResults?.patterns || []}
+              isAnalyzing={isAnalyzing}
+            />
+          </TabsContent>
+
+          <TabsContent value="responses" className="mt-6">
+            <StrategyBrainResponses
+              strategies={responseStrategies}
+              isGenerating={isGeneratingResponses}
+              onExecuteStrategy={handleExecuteStrategy}
+            />
+          </TabsContent>
+
+          <TabsContent value="insights" className="mt-6">
+            <Card className="bg-corporate-darkSecondary border-corporate-border">
+              <CardHeader>
+                <CardTitle className="text-white">Intelligence Insights</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {patternResults ? (
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="text-white font-medium mb-2">Key Insights:</h4>
+                      <ul className="space-y-1">
+                        {patternResults.insights.map((insight, index) => (
+                          <li key={index} className="text-corporate-lightGray text-sm flex items-start gap-2">
+                            <Zap className="h-3 w-3 mt-1 text-corporate-accent flex-shrink-0" />
+                            {insight}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h4 className="text-white font-medium mb-2">Recommendations:</h4>
+                      <ul className="space-y-1">
+                        {patternResults.recommendations.map((rec, index) => (
+                          <li key={index} className="text-corporate-lightGray text-sm flex items-start gap-2">
+                            <Target className="h-3 w-3 mt-1 text-corporate-accent flex-shrink-0" />
+                            {rec}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-corporate-lightGray">Run pattern analysis to view insights</p>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       )}
     </div>
   );
