@@ -72,10 +72,6 @@ export class IntelligencePipeline {
     };
 
     this.results = pipelineResult;
-    
-    // Store pipeline results for cross-component access
-    await this.storePipelineResults(entityName, pipelineResult);
-
     console.log('✅ Intelligence Pipeline: Complete coordinated analysis finished');
     return pipelineResult;
   }
@@ -151,13 +147,13 @@ export class IntelligencePipeline {
     const strategies = [];
     
     // Analyze threat patterns to generate targeted strategies
-    const threatTypes = verifiedResults.reduce((acc, result) => {
+    const threatTypes = verifiedResults.reduce((acc: Record<string, number>, result) => {
       const type = result.threat_type || 'general';
       acc[type] = (acc[type] || 0) + 1;
       return acc;
     }, {});
 
-    const platforms = verifiedResults.reduce((acc, result) => {
+    const platforms = verifiedResults.reduce((acc: Record<string, number>, result) => {
       const platform = result.platform || 'unknown';
       acc[platform] = (acc[platform] || 0) + 1;
       return acc;
@@ -165,12 +161,13 @@ export class IntelligencePipeline {
 
     // Generate strategies based on detected patterns
     Object.entries(threatTypes).forEach(([type, count]) => {
+      const threatCount = count as number;
       strategies.push({
         id: `strategy-${type}-${Date.now()}`,
         threat_type: type,
         recommended_approach: this.getRecommendedApproach(type as string),
         target_platforms: Object.keys(platforms),
-        urgency: count > 3 ? 'high' : count > 1 ? 'medium' : 'low',
+        urgency: threatCount > 3 ? 'high' : threatCount > 1 ? 'medium' : 'low',
         suggested_tone: this.getSuggestedTone(type as string),
         content_themes: this.getContentThemes(entityName, type as string)
       });
@@ -256,18 +253,6 @@ export class IntelligencePipeline {
       ready_for_deployment: readyForDeployment,
       suggested_actions: suggestions
     };
-  }
-
-  private static async storePipelineResults(entityName: string, results: IntelligencePipelineResult) {
-    try {
-      await supabase.from('intelligence_pipeline_results').upsert({
-        entity_name: entityName,
-        pipeline_data: results,
-        executed_at: new Date().toISOString()
-      });
-    } catch (error) {
-      console.error('Failed to store pipeline results:', error);
-    }
   }
 
   private static getRecommendedApproach(threatType: string): string {

@@ -150,34 +150,34 @@ const PipelineCommunicationPanel: React.FC<PipelineCommunicationPanelProps> = ({
                     <div className="mt-2 text-xs">
                       {step.id === 'entity-scan' && (
                         <span className="text-green-400">
-                          {step.data.threats_detected} threats detected
+                          {(step.data as any).threats_detected} threats detected
                         </span>
                       )}
                       {step.id === 'cia-precision' && (
                         <span className="text-blue-400">
-                          {(step.data.precision_score * 100).toFixed(1)}% precision
+                          {((step.data as any).precision_score * 100).toFixed(1)}% precision
                         </span>
                       )}
                       {step.id === 'counter-narratives' && (
                         <span className="text-purple-400">
-                          {step.data.narratives_generated} strategies
+                          {(step.data as any).narratives_generated} strategies
                         </span>
                       )}
                       {step.id === 'article-generation' && (
                         <span className="text-yellow-400">
-                          {step.data.articles_suggested} templates
+                          {(step.data as any).articles_suggested} templates
                         </span>
                       )}
                       {step.id === 'performance' && (
                         <span className="text-orange-400">
-                          {step.data.pipeline_efficiency.toFixed(1)}% efficiency
+                          {(step.data as any).pipeline_efficiency.toFixed(1)}% efficiency
                         </span>
                       )}
                       {step.id === 'deployment' && (
                         <Badge className={`text-xs ${
-                          step.data.ready_for_deployment ? 'bg-green-500' : 'bg-yellow-500'
+                          (step.data as any).ready_for_deployment ? 'bg-green-500' : 'bg-yellow-500'
                         }`}>
-                          {step.data.ready_for_deployment ? 'Ready' : 'Pending'}
+                          {(step.data as any).ready_for_deployment ? 'Ready' : 'Pending'}
                         </Badge>
                       )}
                     </div>

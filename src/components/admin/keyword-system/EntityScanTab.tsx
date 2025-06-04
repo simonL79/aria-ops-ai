@@ -44,7 +44,10 @@ const EntityScanTab: React.FC<EntityScanTabProps> = ({ onEntitySelect }) => {
         .insert({
           name: newEntityName.trim(),
           keywordtargets: '',
-          status: 'active'
+          contactname: 'System Generated',
+          contactemail: 'system@example.com',
+          industry: 'General',
+          website: ''
         });
       
       if (error) throw error;
