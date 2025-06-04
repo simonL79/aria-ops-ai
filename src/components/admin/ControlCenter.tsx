@@ -246,6 +246,7 @@ const ControlCenter = () => {
                       <module.component
                         selectedEntity={selectedEntity}
                         serviceStatus={serviceStatus}
+                        entityMemory={entityMemory}
                       />
                     )}
                   </CardContent>
