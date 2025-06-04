@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,7 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { GenesisSystemHealthService } from '@/services/genesis/systemHealthService';
-import { Shield, Activity, AlertTriangle, CheckCircle, Clock, Target, Database, Zap, Globe, TrendingUp } from 'lucide-react';
+import { IntelligenceValidationCore } from '@/services/ariaCore/intelligenceValidationCore';
+import { Shield, Activity, AlertTriangle, CheckCircle, Clock, Target, Database, Zap, Globe, TrendingUp, Brain } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface HealthMetrics {
@@ -37,6 +37,7 @@ const GenesisSentinelPanel = () => {
     overallHealth: 'healthy' | 'degraded' | 'critical';
   } | null>(null);
   const [lastHealthCheck, setLastHealthCheck] = useState<string | null>(null);
+  const [ivcStats, setIvcStats] = useState<any>(null);
 
   // Single useEffect with proper dependencies
   useEffect(() => {
@@ -52,6 +53,10 @@ const GenesisSentinelPanel = () => {
       const results = await GenesisSystemHealthService.runFullSystemCheck();
       setHealthData(results);
       setLastHealthCheck(new Date().toISOString());
+      
+      // Get IVC statistics
+      const ivcValidationStats = await IntelligenceValidationCore.getValidationStats('24h');
+      setIvcStats(ivcValidationStats);
       
       const statusMessage = `✅ Health Check Complete: ${results.overallHealth.toUpperCase()} - ${results.components.length} components checked`;
       
@@ -172,7 +177,7 @@ const GenesisSentinelPanel = () => {
 
       {/* System Metrics Overview */}
       {healthData?.metrics && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <Card className="corporate-card">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm flex items-center gap-1 corporate-heading">
@@ -252,7 +257,75 @@ const GenesisSentinelPanel = () => {
               </p>
             </CardContent>
           </Card>
+
+          {/* New IVC Intelligence Card */}
+          <Card className="corporate-card border-corporate-accent/30">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center gap-1 corporate-heading">
+                <Brain className="h-4 w-4 text-corporate-accent" />
+                CIA Intelligence Core
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-white">
+                {ivcStats ? ivcStats.totalValidations : 0}
+              </div>
+              <Progress 
+                value={ivcStats ? (ivcStats.acceptedCount / (ivcStats.totalValidations || 1)) * 100 : 0} 
+                className="mt-2"
+              />
+              <p className="text-xs corporate-subtext mt-1">
+                {ivcStats ? `${ivcStats.acceptedCount} validated` : 'Initializing...'}
+              </p>
+            </CardContent>
+          </Card>
         </div>
+      )}
+
+      {/* New IVC Status Card */}
+      {ivcStats && (
+        <Card className="corporate-card border-corporate-accent/50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 corporate-heading">
+              <Brain className="h-5 w-5 text-corporate-accent" />
+              Intelligence Validation Core (IVC) - CIA Grade
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-400">{ivcStats.acceptedCount}</div>
+                <div className="text-xs corporate-subtext">Accepted (≥60%)</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-yellow-400">{ivcStats.reviewCount}</div>
+                <div className="text-xs corporate-subtext">Review (30-59%)</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-orange-400">{ivcStats.quarantinedCount}</div>
+                <div className="text-xs corporate-subtext">Quarantine (15-29%)</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-red-400">{ivcStats.discardedCount}</div>
+                <div className="text-xs corporate-subtext">Discarded (&lt;15%)</div>
+              </div>
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <span className="text-corporate-lightGray">Average Confidence Score</span>
+              <Badge className="bg-corporate-accent text-black">
+                {(ivcStats.avgConfidence * 100).toFixed(1)}%
+              </Badge>
+            </div>
+            
+            <div className="mt-2 w-full bg-corporate-darkTertiary rounded-full h-2">
+              <div 
+                className="bg-corporate-accent h-2 rounded-full" 
+                style={{ width: `${(ivcStats.avgConfidence * 100)}%` }}
+              />
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* Component Health Status by Category */}

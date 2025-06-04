@@ -1,329 +1,229 @@
-import { enforceLiveData, EnforcerOptions } from './liveEnforcer';
-import { CIALevelScanner } from '@/services/intelligence/ciaLevelScanner';
-import { performRealScan } from '@/services/monitoring/realScan';
+
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { IntelligenceValidationCore } from './intelligenceValidationCore';
 
 /**
- * A.R.I.A™ Enforced Intelligence Pipeline
- * All operations wrapped with live data enforcement
+ * A.R.I.A™ Enforced Intelligence Pipeline with CIA-Level Precision
+ * Enhanced with Intelligence Validation Core and Tiered Confidence System
  */
 export class EnforcedIntelligencePipeline {
   
   /**
-   * Enforced Entity Scanning
-   */
-  static async executeEntityScan(entityName: string): Promise<any[]> {
-    return await enforceLiveData(
-      async () => {
-        const results = await performRealScan({
-          targetEntity: entityName,
-          fullScan: true,
-          source: 'enforced_entity_scan'
-        });
-        
-        if (!results || results.length === 0) {
-          throw new Error('No scan results returned from real scan service');
-        }
-        
-        return results;
-      },
-      {
-        entityName,
-        serviceLabel: 'EntityScan',
-        requireMinimumResults: 1,
-        strictEntityMatching: false // Made more practical
-      }
-    );
-  }
-
-  /**
-   * Enforced CIA Precision Filtering - TIERED CONFIDENCE MODE
+   * Execute CIA-level precision scan with tiered confidence
    */
   static async executeCIAPrecisionScan(entityName: string): Promise<any[]> {
-    return await enforceLiveData(
-      async () => {
-        const results = await CIALevelScanner.executePrecisionScan({
-          targetEntity: entityName,
-          precisionMode: 'medium',
-          enableFalsePositiveFilter: true
-        });
-        
-        if (!results || results.length === 0) {
-          throw new Error('No results from CIA tiered scan');
-        }
-        
-        // Accept strong and moderate matches, log weak ones
-        const acceptedResults = results.filter(result => 
-          (result.matchQuality === 'strong' || result.matchQuality === 'moderate') &&
-          result.content && 
-          result.content.length > 10
-        );
-        
-        const quarantinedResults = results.filter(result => result.matchQuality === 'weak');
-        
-        if (acceptedResults.length === 0) {
-          // If no strong/moderate results, check for any weak matches with context boosts
-          const boostedWeakResults = results.filter(result => 
-            result.matchQuality === 'weak' && 
-            result.contextBoosts && 
-            result.contextBoosts.length > 0 &&
-            result.confidence_score >= 20 // Boost threshold to 20%
-          );
-          
-          if (boostedWeakResults.length > 0) {
-            console.log(`✅ CIA Scanner: Accepting ${boostedWeakResults.length} context-boosted weak results`);
-            return boostedWeakResults;
-          }
-          
-          throw new Error('No accepted results from CIA tiered scan');
-        }
-        
-        console.log(`✅ CIA Scanner: Tiered Results - Strong: ${results.filter(r => r.matchQuality === 'strong').length}, Moderate: ${results.filter(r => r.matchQuality === 'moderate').length}, Quarantined: ${quarantinedResults.length}`);
-        
-        // Log review statistics
-        const reviewRequired = results.filter(r => r.requiresReview).length;
-        if (reviewRequired > 0) {
-          console.log(`📝 CIA Scanner: ${reviewRequired} results flagged for manual review`);
-        }
-        
-        return acceptedResults;
-      },
-      {
-        entityName,
-        serviceLabel: 'CIATieredPrecision',
-        requireMinimumResults: 1,
-        strictEntityMatching: false,
-        allowEmpty: false
-      }
-    );
-  }
-
-  /**
-   * Enforced Counter Narrative Generation
-   */
-  static async generateCounterNarratives(entityName: string, threatContext?: string): Promise<any[]> {
-    return await enforceLiveData(
-      async () => {
-        const strategies = [
-          {
-            message: `Strategic response framework for ${entityName} reputation management`,
-            platform: 'general',
-            tone: 'professional',
-            status: 'pending',
-            entity_name: entityName,
-            context: threatContext || 'General reputation management'
-          },
-          {
-            message: `Proactive narrative control strategy for ${entityName}`,
-            platform: 'social_media',
-            tone: 'empathetic', 
-            status: 'pending',
-            entity_name: entityName,
-            context: threatContext || 'Social media engagement'
-          },
-          {
-            message: `Crisis communication protocol for ${entityName}`,
-            platform: 'media',
-            tone: 'confident',
-            status: 'pending',
-            entity_name: entityName,
-            context: threatContext || 'Media relations'
-          }
-        ];
-
-        // Store in database
-        const { data, error } = await supabase
-          .from('counter_narratives')
-          .insert(strategies)
-          .select();
-
-        if (error) {
-          throw new Error(`Failed to store counter narratives: ${error.message}`);
-        }
-
-        return data || strategies;
-      },
-      {
-        entityName,
-        serviceLabel: 'CounterNarratives',
-        requireMinimumResults: 1,
-        strictEntityMatching: true
-      }
-    );
-  }
-
-  /**
-   * Enforced Article Generation
-   */
-  static async generateArticleTemplates(entityName: string): Promise<any[]> {
-    return await enforceLiveData(
-      async () => {
-        const templates = [
-          {
-            id: `template-1-${Date.now()}`,
-            title: `Understanding ${entityName}: A Comprehensive Profile`,
-            content_type: 'blog_post',
-            target_audience: 'general_public',
-            key_messages: ['Professional achievements', 'Industry expertise', 'Community impact'],
-            suggested_length: '1000-1500 words',
-            urgency: 'medium',
-            platforms: ['website', 'linkedin', 'medium'],
-            entity_name: entityName,
-            created_at: new Date().toISOString()
-          },
-          {
-            id: `template-2-${Date.now()}`,
-            title: `${entityName}: Setting the Record Straight`,
-            content_type: 'press_release',
-            target_audience: 'media',
-            key_messages: ['Factual clarification', 'Context provision', 'Expert perspectives'],
-            suggested_length: '500-800 words',
-            urgency: 'high',
-            platforms: ['press', 'website', 'social_media'],
-            entity_name: entityName,
-            created_at: new Date().toISOString()
-          },
-          {
-            id: `template-3-${Date.now()}`,
-            title: `Social Media Response Strategy for ${entityName}`,
-            content_type: 'social_media',
-            target_audience: 'social_followers',
-            key_messages: ['Transparency', 'Accountability', 'Forward momentum'],
-            suggested_length: '280 characters',
-            urgency: 'high',
-            platforms: ['twitter', 'facebook', 'linkedin'],
-            entity_name: entityName,
-            created_at: new Date().toISOString()
-          }
-        ];
-
-        if (!templates.every(template => template.entity_name === entityName)) {
-          throw new Error('Generated templates do not properly reference target entity');
-        }
-
-        return templates;
-      },
-      {
-        entityName,
-        serviceLabel: 'ArticleGeneration',
-        requireMinimumResults: 1,
-        strictEntityMatching: true
-      }
-    );
-  }
-
-  /**
-   * Enforced Performance Analysis
-   */
-  static async analyzePerformance(entityName: string): Promise<any> {
-    return await enforceLiveData(
-      async () => {
-        // Get recent scan results for entity
-        const { data: scanResults } = await supabase
-          .from('scan_results')
-          .select('*')
-          .eq('entity_name', entityName)
-          .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
-
-        // Get counter narratives
-        const { data: narratives } = await supabase
-          .from('counter_narratives')
-          .select('*')
-          .ilike('message', `%${entityName}%`);
-
-        // Calculate performance metrics
-        const performance = {
-          entity_name: entityName,
-          pipeline_efficiency: scanResults?.length > 0 ? 87.5 : 0,
-          total_processing_time: 2340,
-          threats_detected: scanResults?.length || 0,
-          precision_rate: scanResults?.length > 0 ? 92.3 : 0,
-          narratives_generated: narratives?.length || 0,
-          articles_suggested: 15,
-          deployment_readiness: scanResults?.length > 0 && narratives?.length > 0 ? 85 : 0,
-          last_analysis: new Date().toISOString()
-        };
-
-        if (performance.pipeline_efficiency === 0) {
-          throw new Error(`No performance data available for ${entityName}`);
-        }
-
-        return performance;
-      },
-      {
-        entityName,
-        serviceLabel: 'PerformanceAnalysis',
-        allowEmpty: false,
-        strictEntityMatching: true
-      }
-    );
-  }
-
-  /**
-   * Full Pipeline Execution with Enforcement
-   */
-  static async executeFullPipeline(entityName: string): Promise<{
-    entityScan: any[];
-    ciaPrecision: any[];
-    counterNarratives: any[];
-    articleTemplates: any[];
-    performance: any;
-    pipelineSuccess: boolean;
-    executionTime: number;
-  }> {
-    const startTime = Date.now();
+    console.log(`🎯 CIA Precision Scan initiated for: ${entityName}`);
     
     try {
-      console.log(`🚀 [ENFORCED PIPELINE] Starting full pipeline execution for "${entityName}"`);
+      // Get recent scan results for this entity
+      const { data: rawResults, error } = await supabase
+        .from('scan_results')
+        .select('*')
+        .ilike('content', `%${entityName}%`)
+        .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+        .order('created_at', { ascending: false })
+        .limit(50);
 
-      // Stage 1: Entity Scan
-      console.log(`🔍 [STAGE 1] Entity Scanning for "${entityName}"`);
-      const entityScan = await this.executeEntityScan(entityName);
-      
-      // Stage 2: CIA Precision
-      console.log(`🛡️ [STAGE 2] CIA Precision filtering for "${entityName}"`);
-      const ciaPrecision = await this.executeCIAPrecisionScan(entityName);
-      
-      // Stage 3: Counter Narratives
-      console.log(`💬 [STAGE 3] Counter Narrative generation for "${entityName}"`);
-      const counterNarratives = await this.generateCounterNarratives(entityName);
-      
-      // Stage 4: Article Templates
-      console.log(`📝 [STAGE 4] Article template generation for "${entityName}"`);
-      const articleTemplates = await this.generateArticleTemplates(entityName);
-      
-      // Stage 5: Performance Analysis
-      console.log(`📊 [STAGE 5] Performance analysis for "${entityName}"`);
-      const performance = await this.analyzePerformance(entityName);
+      if (error) {
+        console.error('Failed to fetch scan results:', error);
+        return [];
+      }
 
-      const executionTime = Date.now() - startTime;
+      if (!rawResults || rawResults.length === 0) {
+        console.log('No scan results found for entity');
+        return [];
+      }
+
+      // Process each result through IVC
+      const processedResults = [];
       
-      console.log(`✅ [ENFORCED PIPELINE] Full pipeline completed for "${entityName}" in ${executionTime}ms`);
+      for (const result of rawResults) {
+        // Calculate base confidence score
+        const baseConfidence = this.calculateBaseConfidence(result, entityName);
+        
+        // Validate through IVC with CIA-level precision
+        const validation = await IntelligenceValidationCore.validateIntelligence(
+          result.content,
+          entityName,
+          result.platform,
+          baseConfidence,
+          'cia_precision_scan'
+        );
+
+        if (validation.isValid) {
+          processedResults.push({
+            ...result,
+            confidence_score: Math.round(validation.confidence * 100),
+            match_score: Math.round(validation.confidence * 100),
+            matchQuality: this.getMatchQuality(validation.tier),
+            requiresReview: validation.tier === 'review',
+            contextBoosts: validation.contextBoosts,
+            ciaValidated: true,
+            validationTier: validation.tier
+          });
+        } else {
+          console.log(`🚫 Result rejected by IVC: ${validation.rejectionReason}`);
+        }
+      }
+
+      console.log(`✅ CIA Precision Scan complete: ${processedResults.length}/${rawResults.length} results validated`);
+      return processedResults;
+
+    } catch (error) {
+      console.error('CIA Precision Scan failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Calculate base confidence score for scan result
+   */
+  private static calculateBaseConfidence(result: any, entityName: string): number {
+    let confidence = 0.5; // Base score
+    
+    // Platform authority boost
+    const platformBoosts = {
+      'uk_news': 0.2,
+      'bbc': 0.25,
+      'reddit': 0.1,
+      'youtube': 0.15,
+      'twitter': 0.12,
+      'instagram': 0.08
+    };
+    
+    confidence += platformBoosts[result.platform?.toLowerCase()] || 0.05;
+    
+    // Sentiment consideration
+    if (result.sentiment !== null) {
+      // Neutral sentiment often indicates factual content
+      if (Math.abs(result.sentiment) < 0.3) {
+        confidence += 0.1;
+      }
+    }
+    
+    // Content length consideration
+    if (result.content && result.content.length > 100) {
+      confidence += 0.05;
+    }
+    
+    // Threat type consideration
+    if (result.threat_type && result.threat_type !== 'low') {
+      confidence += 0.1;
+    }
+    
+    // Entity name prominence
+    const entityMentions = (result.content?.toLowerCase().match(new RegExp(entityName.toLowerCase(), 'g')) || []).length;
+    if (entityMentions > 1) {
+      confidence += 0.1;
+    }
+    
+    return Math.min(confidence, 1.0);
+  }
+
+  /**
+   * Convert validation tier to match quality
+   */
+  private static getMatchQuality(tier: string): string {
+    switch (tier) {
+      case 'accept':
+        return 'strong';
+      case 'review':
+        return 'moderate';
+      case 'quarantine':
+        return 'weak';
+      default:
+        return 'rejected';
+    }
+  }
+
+  /**
+   * Enhanced threat classification with CIA-level validation
+   */
+  static async classifyThreatWithCIA(
+    content: string,
+    entityName: string,
+    platform: string
+  ): Promise<any> {
+    try {
+      // Basic threat classification
+      const baseClassification = this.performBasicClassification(content, entityName);
       
-      toast.success(`Pipeline completed for ${entityName}`, {
-        description: `All stages validated and executed successfully in ${(executionTime/1000).toFixed(1)}s`
-      });
+      // Validate through IVC
+      const validation = await IntelligenceValidationCore.validateIntelligence(
+        content,
+        entityName,
+        platform,
+        baseClassification.confidence,
+        'threat_classification'
+      );
+
+      if (!validation.isValid) {
+        return {
+          category: 'Invalid Data',
+          severity: 0,
+          action: 'Discard',
+          explanation: validation.rejectionReason,
+          confidence: 0,
+          ciaValidated: false
+        };
+      }
 
       return {
-        entityScan,
-        ciaPrecision,
-        counterNarratives,
-        articleTemplates,
-        performance,
-        pipelineSuccess: true,
-        executionTime
+        ...baseClassification,
+        confidence: validation.confidence,
+        ciaValidated: true,
+        validationTier: validation.tier,
+        contextBoosts: validation.contextBoosts
       };
 
     } catch (error) {
-      const executionTime = Date.now() - startTime;
-      console.error(`❌ [ENFORCED PIPELINE] Pipeline failed for "${entityName}" after ${executionTime}ms:`, error);
-      
-      toast.error(`Pipeline failed for ${entityName}`, {
-        description: error.message
-      });
-      
+      console.error('CIA threat classification failed:', error);
       throw error;
     }
+  }
+
+  /**
+   * Basic threat classification logic
+   */
+  private static performBasicClassification(content: string, entityName: string): any {
+    const lowerContent = content.toLowerCase();
+    
+    // Threat detection patterns
+    const threatPatterns = {
+      legal: { keywords: ['lawsuit', 'legal action', 'court', 'sue'], severity: 8 },
+      reputation: { keywords: ['scam', 'fraud', 'fake', 'corrupt'], severity: 7 },
+      misinformation: { keywords: ['false', 'hoax', 'fake news', 'lie'], severity: 6 },
+      complaint: { keywords: ['complaint', 'issue', 'problem', 'disappointed'], severity: 4 }
+    };
+
+    let category = 'Neutral';
+    let severity = 1;
+    let confidence = 0.6;
+
+    // Check for threat patterns
+    for (const [type, pattern] of Object.entries(threatPatterns)) {
+      if (pattern.keywords.some(keyword => lowerContent.includes(keyword))) {
+        category = type.charAt(0).toUpperCase() + type.slice(1) + ' Threat';
+        severity = pattern.severity;
+        confidence = 0.8;
+        break;
+      }
+    }
+
+    // Check for positive indicators
+    const positiveKeywords = ['excellent', 'great', 'amazing', 'recommend', 'love'];
+    if (positiveKeywords.some(keyword => lowerContent.includes(keyword))) {
+      category = 'Positive';
+      severity = 1;
+      confidence = 0.7;
+    }
+
+    return {
+      category,
+      severity,
+      action: severity >= 6 ? 'Escalation' : severity >= 4 ? 'Human Review' : 'Monitor',
+      explanation: `CIA-validated classification: ${category} with severity ${severity}/10`,
+      confidence
+    };
   }
 }

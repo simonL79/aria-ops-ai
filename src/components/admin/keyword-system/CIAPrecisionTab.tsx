@@ -1,9 +1,11 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Shield, Target, CheckCircle, AlertTriangle, Info } from 'lucide-react';
+import { Shield, Target, CheckCircle, AlertTriangle, Info, Brain, Zap } from 'lucide-react';
 import { EnforcedIntelligencePipeline } from '@/services/ariaCore/enforcedIntelligencePipeline';
+import { IntelligenceValidationCore } from '@/services/ariaCore/intelligenceValidationCore';
 import { toast } from 'sonner';
 
 interface CIAPrecisionTabProps {
@@ -13,9 +15,8 @@ interface CIAPrecisionTabProps {
 const CIAPrecisionTab: React.FC<CIAPrecisionTabProps> = ({ entityName }) => {
   const [isScanning, setIsScanning] = useState(false);
   const [scanResults, setScanResults] = useState<any[]>([]);
+  const [validationStats, setValidationStats] = useState<any>(null);
   const [precisionScore, setPrecisionScore] = useState(0);
-  const [scanStats, setScanStats] = useState<any>(null);
-  const [tieredStats, setTieredStats] = useState<any>(null);
 
   const runCIAScan = async () => {
     if (!entityName) {
@@ -25,40 +26,23 @@ const CIAPrecisionTab: React.FC<CIAPrecisionTabProps> = ({ entityName }) => {
 
     setIsScanning(true);
     try {
-      toast.info(`🎯 Starting tiered CIA scan for ${entityName}...`);
+      toast.info(`🎯 Starting CIA-level precision scan for ${entityName}...`);
       
+      // Execute CIA precision scan with IVC validation
       const results = await EnforcedIntelligencePipeline.executeCIAPrecisionScan(entityName);
-
       setScanResults(results);
       
-      // Calculate tiered precision score
-      const totalScore = results.reduce((sum, r) => sum + (r.confidence_score || r.match_score || 0), 0);
-      const avgScore = results.length > 0 ? totalScore / results.length : 0;
-      setPrecisionScore(avgScore);
+      // Get validation statistics
+      const stats = await IntelligenceValidationCore.getValidationStats('24h');
+      setValidationStats(stats);
+      
+      // Calculate overall precision score
+      const avgConfidence = results.length > 0 
+        ? results.reduce((sum, r) => sum + (r.confidence_score || 0), 0) / results.length
+        : 0;
+      setPrecisionScore(avgConfidence);
 
-      // Calculate tiered statistics
-      const strong = results.filter(r => r.matchQuality === 'strong').length;
-      const moderate = results.filter(r => r.matchQuality === 'moderate').length;
-      const weak = results.filter(r => r.matchQuality === 'weak').length;
-      const reviewRequired = results.filter(r => r.requiresReview).length;
-
-      setTieredStats({
-        strong,
-        moderate,
-        weak,
-        reviewRequired,
-        total: results.length,
-        retentionRate: ((strong + moderate) / (strong + moderate + weak || 1) * 100).toFixed(1)
-      });
-
-      setScanStats({
-        total: results.length,
-        accepted: strong + moderate,
-        quarantined: weak,
-        rejected: 0
-      });
-
-      toast.success(`✅ Tiered CIA scan complete: ${results.length} results with ${tieredStats?.retentionRate || '0'}% retention rate`);
+      toast.success(`✅ CIA precision scan complete: ${results.length} validated results`);
     } catch (error) {
       console.error('CIA scan failed:', error);
       toast.error(`❌ CIA scan failed: ${error.message}`);
@@ -67,45 +51,21 @@ const CIAPrecisionTab: React.FC<CIAPrecisionTabProps> = ({ entityName }) => {
     }
   };
 
-  const getQualityBadgeColor = (quality: string) => {
-    switch (quality) {
-      case 'strong':
-        return 'bg-green-500';
-      case 'moderate':
-        return 'bg-yellow-500';
-      case 'weak':
-        return 'bg-orange-500';
-      default:
-        return 'bg-gray-500';
+  const getTierBadgeColor = (tier: string) => {
+    switch (tier) {
+      case 'accept': return 'bg-green-500';
+      case 'review': return 'bg-yellow-500';
+      case 'quarantine': return 'bg-orange-500';
+      default: return 'bg-red-500';
     }
   };
 
-  const getQualityBadge = (result: any) => {
-    const quality = result.matchQuality || 'unknown';
-    return (
-      <Badge className={getQualityBadgeColor(quality)}>
-        {quality.toUpperCase()}
-        {result.requiresReview && ' - REVIEW'}
-      </Badge>
-    );
-  };
-
-  const getConfidenceBadgeColor = (score: number) => {
-    if (score >= 50) return 'bg-green-500';
-    if (score >= 25) return 'bg-yellow-500';
-    return 'bg-orange-500';
-  };
-
-  const getDecisionBadge = (decision: string) => {
-    switch (decision) {
-      case 'accepted':
-        return <Badge className="bg-green-500">ACCEPTED</Badge>;
-      case 'quarantined':
-        return <Badge className="bg-yellow-500">QUARANTINED</Badge>;
-      case 'rejected':
-        return <Badge className="bg-red-500">REJECTED</Badge>;
-      default:
-        return <Badge className="bg-gray-500">UNKNOWN</Badge>;
+  const getTierIcon = (tier: string) => {
+    switch (tier) {
+      case 'accept': return <CheckCircle className="h-3 w-3" />;
+      case 'review': return <AlertTriangle className="h-3 w-3" />;
+      case 'quarantine': return <AlertTriangle className="h-3 w-3" />;
+      default: return <AlertTriangle className="h-3 w-3" />;
     }
   };
 
@@ -115,15 +75,18 @@ const CIAPrecisionTab: React.FC<CIAPrecisionTabProps> = ({ entityName }) => {
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
             <Shield className="h-5 w-5 text-corporate-accent" />
-            CIA-Level Tiered Precision Filtering
+            CIA-Level Intelligence Validation Core
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h4 className="text-white font-medium">Target Entity: {entityName}</h4>
+              <h4 className="text-white font-medium flex items-center gap-2">
+                <Brain className="h-4 w-4 text-corporate-accent" />
+                Target Entity: {entityName}
+              </h4>
               <p className="text-corporate-lightGray text-sm">
-                Tiered confidence system: Strong (60%+), Moderate (30-59%), Weak (15-29%)
+                CIA-grade validation: Zero tolerance + Tiered confidence system
               </p>
             </div>
             <Button
@@ -134,110 +97,127 @@ const CIAPrecisionTab: React.FC<CIAPrecisionTabProps> = ({ entityName }) => {
               {isScanning ? (
                 <>
                   <Target className="h-4 w-4 mr-2 animate-spin" />
-                  Scanning...
+                  CIA Scanning...
                 </>
               ) : (
                 <>
                   <Shield className="h-4 w-4 mr-2" />
-                  Run Tiered CIA Scan
+                  Run CIA Precision Scan
                 </>
               )}
             </Button>
           </div>
 
-          {tieredStats && (
-            <div className="p-4 bg-corporate-darkSecondary rounded-lg">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-white font-medium">Tiered Results Analysis</span>
-                <Badge className="bg-corporate-accent text-black">
-                  {tieredStats.retentionRate}% Retention
-                </Badge>
+          {/* Validation Statistics */}
+          {validationStats && (
+            <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+              <div className="p-3 bg-corporate-darkSecondary rounded-lg">
+                <div className="text-green-400 font-medium">{validationStats.acceptedCount}</div>
+                <div className="text-corporate-lightGray text-xs">Accepted</div>
               </div>
-              
-              <div className="grid grid-cols-5 gap-2 text-sm">
-                <div className="text-center">
-                  <div className="text-green-400 font-medium">{tieredStats.strong}</div>
-                  <div className="text-corporate-lightGray">Strong</div>
+              <div className="p-3 bg-corporate-darkSecondary rounded-lg">
+                <div className="text-yellow-400 font-medium">{validationStats.reviewCount}</div>
+                <div className="text-corporate-lightGray text-xs">Review Required</div>
+              </div>
+              <div className="p-3 bg-corporate-darkSecondary rounded-lg">
+                <div className="text-orange-400 font-medium">{validationStats.quarantinedCount}</div>
+                <div className="text-corporate-lightGray text-xs">Quarantined</div>
+              </div>
+              <div className="p-3 bg-corporate-darkSecondary rounded-lg">
+                <div className="text-red-400 font-medium">{validationStats.discardedCount}</div>
+                <div className="text-corporate-lightGray text-xs">Discarded</div>
+              </div>
+              <div className="p-3 bg-corporate-darkSecondary rounded-lg">
+                <div className="text-corporate-accent font-medium">
+                  {(validationStats.avgConfidence * 100).toFixed(1)}%
                 </div>
-                <div className="text-center">
-                  <div className="text-yellow-400 font-medium">{tieredStats.moderate}</div>
-                  <div className="text-corporate-lightGray">Moderate</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-orange-400 font-medium">{tieredStats.weak}</div>
-                  <div className="text-corporate-lightGray">Weak</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-blue-400 font-medium">{tieredStats.reviewRequired}</div>
-                  <div className="text-corporate-lightGray">Review</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-white font-medium">{tieredStats.total}</div>
-                  <div className="text-corporate-lightGray">Total</div>
-                </div>
+                <div className="text-corporate-lightGray text-xs">Avg Confidence</div>
               </div>
             </div>
           )}
 
+          {/* Precision Score Display */}
           {precisionScore > 0 && (
             <div className="p-4 bg-corporate-darkSecondary rounded-lg">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-white font-medium">Average Confidence Score</span>
-                <Badge className={getConfidenceBadgeColor(precisionScore)}>
-                  {precisionScore.toFixed(1)}%
+                <span className="text-white font-medium flex items-center gap-2">
+                  <Zap className="h-4 w-4 text-corporate-accent" />
+                  CIA Precision Score
+                </span>
+                <Badge className="bg-corporate-accent text-black">
+                  {precisionScore.toFixed(1)}% Validated
                 </Badge>
               </div>
               <div className="w-full bg-gray-700 rounded-full h-2">
                 <div 
-                  className={`h-2 rounded-full ${getConfidenceBadgeColor(precisionScore)}`}
+                  className="bg-corporate-accent h-2 rounded-full"
                   style={{ width: `${Math.min(precisionScore, 100)}%` }}
                 />
               </div>
             </div>
           )}
 
+          {/* CIA Validated Results */}
           {scanResults.length > 0 && (
             <div className="space-y-3">
               <div className="flex items-center gap-2">
-                <h4 className="text-white font-medium">Tiered CIA Results ({scanResults.length})</h4>
+                <h4 className="text-white font-medium">CIA Validated Results ({scanResults.length})</h4>
                 <Info className="h-4 w-4 text-corporate-accent" />
                 <span className="text-corporate-lightGray text-sm">
-                  Smart escalation with context boosting
+                  Intelligence Validation Core processed
                 </span>
               </div>
               <div className="max-h-96 overflow-y-auto space-y-2">
                 {scanResults.map((result, index) => (
                   <div key={index} className="p-3 bg-corporate-darkTertiary rounded-lg">
                     <div className="flex items-center justify-between mb-2">
-                      {getQualityBadge(result)}
+                      <div className="flex items-center gap-2">
+                        <Badge className={getTierBadgeColor(result.validationTier)}>
+                          {getTierIcon(result.validationTier)}
+                          {result.validationTier?.toUpperCase()}
+                        </Badge>
+                        {result.ciaValidated && (
+                          <Badge className="bg-corporate-accent text-black text-xs">
+                            CIA VALIDATED
+                          </Badge>
+                        )}
+                      </div>
                       <span className="text-corporate-lightGray text-sm">
-                        {result.confidence_score || result.match_score || 0}% confidence
+                        {result.confidence_score}% confidence
                       </span>
                     </div>
-                    <p className="text-white text-sm line-clamp-2">
+                    
+                    <p className="text-white text-sm line-clamp-2 mb-2">
                       {result.content ? result.content.substring(0, 150) + '...' : 'No content available'}
                     </p>
-                    <div className="flex items-center gap-2 mt-2 flex-wrap">
+                    
+                    <div className="flex items-center gap-2 mb-2 flex-wrap">
                       <span className="text-corporate-lightGray text-xs">
                         Platform: {result.platform}
                       </span>
                       <span className="text-corporate-accent text-xs">
                         Entity: {entityName}
                       </span>
-                      {result.contextBoosts && result.contextBoosts.length > 0 && (
-                        <Badge className="bg-blue-500 text-xs">
-                          +{result.contextBoosts.length} boosts
-                        </Badge>
-                      )}
                       {result.requiresReview && (
                         <Badge className="bg-purple-500 text-xs">
                           NEEDS REVIEW
                         </Badge>
                       )}
                     </div>
+                    
+                    {/* Context Boosts */}
                     {result.contextBoosts && result.contextBoosts.length > 0 && (
-                      <div className="mt-2 text-xs text-corporate-lightGray">
-                        Boosts: {result.contextBoosts.join(', ')}
+                      <div className="mt-2">
+                        <div className="text-xs text-corporate-lightGray mb-1">
+                          Context Boosts: +{result.contextBoosts.length}
+                        </div>
+                        <div className="flex flex-wrap gap-1">
+                          {result.contextBoosts.map((boost: string, i: number) => (
+                            <Badge key={i} className="bg-blue-500/20 text-blue-300 text-xs">
+                              {boost.replace(/_/g, ' ')}
+                            </Badge>
+                          ))}
+                        </div>
                       </div>
                     )}
                   </div>
