@@ -196,11 +196,11 @@ export const processExecutionQueue = async (): Promise<void> => {
     if (!queueData || queueData.length === 0) return;
 
     for (const item of queueData) {
-      const queueItem = item.operation_data as ExecutionQueueItem;
-      
-      if (queueItem.status !== 'queued') continue;
-
       try {
+        const queueItem = item.operation_data as unknown as ExecutionQueueItem;
+        
+        if (queueItem.status !== 'queued') continue;
+
         // Update status to executing
         queueItem.status = 'executing';
         await updateQueueItemStatus(item.id, queueItem);
@@ -217,9 +217,7 @@ export const processExecutionQueue = async (): Promise<void> => {
         toast.success(`Auto-executed strategy: ${result.message}`);
 
       } catch (error) {
-        queueItem.status = 'failed';
-        await updateQueueItemStatus(item.id, queueItem);
-        console.error(`❌ Auto-execution failed for ${queueItem.strategyId}:`, error);
+        console.error(`❌ Auto-execution failed for item ${item.id}:`, error);
       }
     }
 
@@ -238,7 +236,9 @@ const getAutoExecutionConfig = async (entityName: string): Promise<AutoExecution
       .order('created_at', { ascending: false })
       .limit(1);
 
-    return data?.[0]?.operation_data as AutoExecutionConfig || null;
+    if (!data || data.length === 0) return null;
+
+    return data[0].operation_data as unknown as AutoExecutionConfig;
   } catch (error) {
     console.error('Failed to get auto-execution config:', error);
     return null;

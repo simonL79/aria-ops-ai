@@ -128,7 +128,7 @@ const calculateTypeSuccessRate = (historicalData: any[], strategyType: string): 
 const calculateEntityRiskScore = (patterns: DetectedPattern[]): number => {
   if (patterns.length === 0) return 0;
 
-  const riskWeights = {
+  const riskWeights: Record<string, number> = {
     'coordinated_attack': 0.9,
     'viral_risk': 0.8,
     'sentiment_shift': 0.6,
@@ -155,7 +155,9 @@ const getTrainedPatterns = async (entityName: string): Promise<MLPattern[]> => {
       .order('created_at', { ascending: false })
       .limit(50);
 
-    return data?.map(d => d.operation_data as MLPattern) || [];
+    if (!data || data.length === 0) return [];
+
+    return data.map(d => d.operation_data as unknown as MLPattern);
   } catch (error) {
     console.error('Failed to get trained patterns:', error);
     return [];
