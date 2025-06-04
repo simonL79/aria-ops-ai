@@ -24,6 +24,11 @@ const KeywordSystemTabs = ({
   onRefresh = async () => {} 
 }: KeywordSystemTabsProps) => {
   const [activeTab, setActiveTab] = useState("entity-scan");
+  const [selectedEntity, setSelectedEntity] = useState(entityName);
+
+  const handleEntitySelect = (entityName: string) => {
+    setSelectedEntity(entityName);
+  };
 
   return (
     <div className="space-y-6">
@@ -68,31 +73,31 @@ const KeywordSystemTabs = ({
         </TabsList>
 
         <TabsContent value="entity-scan" className="mt-6">
-          <EntityScanTab />
+          <EntityScanTab onEntitySelect={handleEntitySelect} />
         </TabsContent>
 
         <TabsContent value="cia-precision" className="mt-6">
-          <CIAPrecisionTab entityName={entityName} />
+          <CIAPrecisionTab entityName={selectedEntity} />
         </TabsContent>
 
         <TabsContent value="advanced-analysis" className="mt-6">
-          <AdvancedThreatAnalysisTab entityName={entityName} />
+          <AdvancedThreatAnalysisTab entityName={selectedEntity} />
         </TabsContent>
 
         <TabsContent value="counter-narrative" className="mt-6">
           <CounterNarrativeTab 
-            entityName={entityName} 
+            entityName={selectedEntity} 
             narratives={counterNarratives}
             onRefresh={onRefresh}
           />
         </TabsContent>
 
         <TabsContent value="article-generation" className="mt-6">
-          <ArticleGenerationTab entityName={entityName} />
+          <ArticleGenerationTab entityName={selectedEntity} />
         </TabsContent>
 
         <TabsContent value="performance" className="mt-6">
-          <PerformanceTab entityName={entityName} />
+          <PerformanceTab entityName={selectedEntity} />
         </TabsContent>
       </Tabs>
     </div>
