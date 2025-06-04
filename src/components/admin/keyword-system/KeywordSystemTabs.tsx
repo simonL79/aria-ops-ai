@@ -1,91 +1,84 @@
-
-import React from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Target, Shield, MessageSquare, FileText, TrendingUp, ArrowRight } from 'lucide-react';
+import React, { useState } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import EntityScanTab from './EntityScanTab';
 import CIAPrecisionTab from './CIAPrecisionTab';
+import AdvancedThreatAnalysisTab from './AdvancedThreatAnalysisTab';
 import CounterNarrativeTab from './CounterNarrativeTab';
 import ArticleGenerationTab from './ArticleGenerationTab';
 import PerformanceTab from './PerformanceTab';
-import ClientControlPanel from './ClientControlPanel';
-import PipelineCommunicationPanel from './PipelineCommunicationPanel';
 
 interface KeywordSystemTabsProps {
-  keywordData: any[];
-  counterNarratives: any[];
-  onRefresh: () => void;
+  selectedClient: string | undefined;
+  entityName: string;
 }
 
-const KeywordSystemTabs: React.FC<KeywordSystemTabsProps> = ({
-  keywordData,
-  counterNarratives,
-  onRefresh
-}) => {
-  const [selectedEntity, setSelectedEntity] = React.useState('Simon Lindsay');
+const KeywordSystemTabs = ({ selectedClient, entityName }: KeywordSystemTabsProps) => {
+  const [activeTab, setActiveTab] = useState("entity-scan");
 
   return (
     <div className="space-y-6">
-      {/* Pipeline Communication Panel - NEW */}
-      <PipelineCommunicationPanel entityName={selectedEntity} />
-      
-      <Tabs defaultValue="entity-scan" className="space-y-6">
-        <TabsList className="grid grid-cols-3 lg:grid-cols-6 bg-corporate-dark">
-          <TabsTrigger value="entity-scan" className="flex items-center gap-2 data-[state=active]:bg-corporate-accent data-[state=active]:text-black">
-            <Target className="h-4 w-4" />
-            <span className="hidden sm:inline">Entity Scan</span>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid grid-cols-6 w-full bg-corporate-darkSecondary">
+          <TabsTrigger 
+            value="entity-scan" 
+            className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray"
+          >
+            Entity Scan
           </TabsTrigger>
-          <TabsTrigger value="cia-precision" className="flex items-center gap-2 data-[state=active]:bg-corporate-accent data-[state=active]:text-black">
-            <Shield className="h-4 w-4" />
-            <span className="hidden sm:inline">CIA Precision</span>
+          <TabsTrigger 
+            value="cia-precision" 
+            className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray"
+          >
+            CIA Precision
           </TabsTrigger>
-          <TabsTrigger value="counter-narratives" className="flex items-center gap-2 data-[state=active]:bg-corporate-accent data-[state=active]:text-black">
-            <MessageSquare className="h-4 w-4" />
-            <span className="hidden sm:inline">Counter Narratives</span>
+          <TabsTrigger 
+            value="advanced-analysis" 
+            className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray"
+          >
+            Advanced Analysis
           </TabsTrigger>
-          <TabsTrigger value="article-generation" className="flex items-center gap-2 data-[state=active]:bg-corporate-accent data-[state=active]:text-black">
-            <FileText className="h-4 w-4" />
-            <span className="hidden sm:inline">Article Generation</span>
+          <TabsTrigger 
+            value="counter-narrative" 
+            className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray"
+          >
+            Counter Narrative
           </TabsTrigger>
-          <TabsTrigger value="performance" className="flex items-center gap-2 data-[state=active]:bg-corporate-accent data-[state=active]:text-black">
-            <TrendingUp className="h-4 w-4" />
-            <span className="hidden sm:inline">Performance</span>
+          <TabsTrigger 
+            value="article-generation" 
+            className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray"
+          >
+            Article Generation
           </TabsTrigger>
-          <TabsTrigger value="client-control" className="flex items-center gap-2 data-[state=active]:bg-corporate-accent data-[state=active]:text-black">
-            <ArrowRight className="h-4 w-4" />
-            <span className="hidden sm:inline">Client Control</span>
+          <TabsTrigger 
+            value="performance" 
+            className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray"
+          >
+            Performance
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="entity-scan">
-          <EntityScanTab onEntitySelect={setSelectedEntity} />
+        <TabsContent value="entity-scan" className="mt-6">
+          <EntityScanTab entityName={entityName} />
         </TabsContent>
 
-        <TabsContent value="cia-precision">
-          <CIAPrecisionTab entityName={selectedEntity} />
+        <TabsContent value="cia-precision" className="mt-6">
+          <CIAPrecisionTab entityName={entityName} />
         </TabsContent>
 
-        <TabsContent value="counter-narratives">
-          <CounterNarrativeTab 
-            entityName={selectedEntity}
-            narratives={counterNarratives}
-            onRefresh={onRefresh}
-          />
+        <TabsContent value="advanced-analysis" className="mt-6">
+          <AdvancedThreatAnalysisTab entityName={entityName} />
         </TabsContent>
 
-        <TabsContent value="article-generation">
-          <ArticleGenerationTab entityName={selectedEntity} />
+        <TabsContent value="counter-narrative" className="mt-6">
+          <CounterNarrativeTab entityName={entityName} />
         </TabsContent>
 
-        <TabsContent value="performance">
-          <PerformanceTab entityName={selectedEntity} />
+        <TabsContent value="article-generation" className="mt-6">
+          <ArticleGenerationTab />
         </TabsContent>
 
-        <TabsContent value="client-control">
-          <ClientControlPanel 
-            keywordData={keywordData}
-            narratives={counterNarratives}
-            onRefresh={onRefresh}
-          />
+        <TabsContent value="performance" className="mt-6">
+          <PerformanceTab />
         </TabsContent>
       </Tabs>
     </div>
