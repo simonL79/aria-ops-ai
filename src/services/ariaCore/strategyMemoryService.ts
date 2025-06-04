@@ -119,7 +119,8 @@ export class StrategyMemoryService {
     // Group by strategy type
     const strategyGroups = memories.reduce((groups, memory) => {
       const findings = memory.key_findings || {};
-      const strategyType = findings.outcome_data?.strategyType || 'unknown';
+      const outcomeData = typeof findings === 'object' && findings !== null ? findings as any : {};
+      const strategyType = outcomeData.outcome_data?.strategyType || 'unknown';
       
       if (!groups[strategyType]) {
         groups[strategyType] = [];
@@ -130,9 +131,11 @@ export class StrategyMemoryService {
 
     // Generate recommendations based on successful patterns
     Object.entries(strategyGroups).forEach(([strategyType, group]) => {
-      if (group.length >= 2) { // Require at least 2 successes
+      if (Array.isArray(group) && group.length >= 2) { // Require at least 2 successes
         const avgSuccessScore = group.reduce((sum, memory) => {
-          return sum + (memory.key_findings?.outcome_data?.successScore || 0.5);
+          const findings = memory.key_findings || {};
+          const outcomeData = typeof findings === 'object' && findings !== null ? findings as any : {};
+          return sum + (outcomeData.outcome_data?.successScore || 0.5);
         }, 0) / group.length;
 
         if (avgSuccessScore >= 0.7) {
@@ -158,7 +161,10 @@ export class StrategyMemoryService {
     const factors = new Set<string>();
     
     strategyGroup.forEach(memory => {
-      const keyFactors = memory.key_findings?.outcome_data?.keySuccessFactors || [];
+      const findings = memory.key_findings || {};
+      const outcomeData = typeof findings === 'object' && findings !== null ? findings as any : {};
+      const keyFactors = Array.isArray(outcomeData.outcome_data?.keySuccessFactors) ? 
+        outcomeData.outcome_data.keySuccessFactors : [];
       keyFactors.forEach((factor: string) => factors.add(factor));
     });
 
@@ -243,9 +249,11 @@ export class StrategyMemoryService {
       }
 
       const totalStrategies = memories.length;
-      const successfulStrategies = memories.filter(m => 
-        m.key_findings?.outcome_data?.successScore >= 0.7
-      ).length;
+      const successfulStrategies = memories.filter(m => {
+        const findings = m.key_findings || {};
+        const outcomeData = typeof findings === 'object' && findings !== null ? findings as any : {};
+        return outcomeData.outcome_data?.successScore >= 0.7;
+      }).length;
       
       const successRate = successfulStrategies / totalStrategies;
 
@@ -274,10 +282,12 @@ export class StrategyMemoryService {
     let bestScore = 0;
 
     memories.forEach(memory => {
-      const score = memory.key_findings?.outcome_data?.successScore || 0;
+      const findings = memory.key_findings || {};
+      const outcomeData = typeof findings === 'object' && findings !== null ? findings as any : {};
+      const score = outcomeData.outcome_data?.successScore || 0;
       if (score > bestScore) {
         bestScore = score;
-        bestStrategy = memory.key_findings?.outcome_data?.strategyType || 'Unknown';
+        bestStrategy = outcomeData.outcome_data?.strategyType || 'Unknown';
       }
     });
 
@@ -288,7 +298,9 @@ export class StrategyMemoryService {
     const areas = [];
     
     const avgScore = memories.reduce((sum, memory) => {
-      return sum + (memory.key_findings?.outcome_data?.successScore || 0);
+      const findings = memory.key_findings || {};
+      const outcomeData = typeof findings === 'object' && findings !== null ? findings as any : {};
+      return sum + (outcomeData.outcome_data?.successScore || 0);
     }, 0) / memories.length;
 
     if (avgScore < 0.6) areas.push('Strategy selection optimization');
