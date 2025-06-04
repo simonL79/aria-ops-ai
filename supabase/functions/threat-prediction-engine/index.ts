@@ -208,26 +208,6 @@ async function generateThreatPredictions(
     });
   }
 
-  // Generate synthetic media threat prediction
-  if (riskFactors.includes('ai_generated_content')) {
-    predictions.push({
-      type: 'synthetic_media_threat',
-      confidence: 0.75,
-      timeframe: timeframe,
-      riskFactors: [
-        'AI-generated content detected',
-        'Deepfake risk indicators',
-        'Media manipulation patterns'
-      ],
-      mitigationStrategies: [
-        'Deploy media verification protocols',
-        'Activate synthetic detection systems',
-        'Prepare authenticity documentation',
-        'Monitor for distribution patterns'
-      ]
-    });
-  }
-
   return predictions;
 }
 

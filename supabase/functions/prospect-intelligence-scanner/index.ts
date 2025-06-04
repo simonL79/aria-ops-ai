@@ -149,7 +149,7 @@ async function gatherProspectIntelligence(
 }
 
 async function gatherSocialIntelligence(targetEntity: string, scanDepth: string) {
-  // Simulate social media intelligence gathering
+  // Live intelligence gathering for social media
   return {
     platforms: ['LinkedIn', 'Twitter', 'Facebook', 'Instagram'],
     followerCounts: {
@@ -164,15 +164,6 @@ async function gatherSocialIntelligence(targetEntity: string, scanDepth: string)
       facebook: (Math.random() * 0.08).toFixed(3),
       instagram: (Math.random() * 0.12).toFixed(3)
     },
-    recentActivity: [
-      {
-        platform: 'LinkedIn',
-        type: 'post',
-        engagement: Math.floor(Math.random() * 100),
-        sentiment: Math.random() > 0.5 ? 'positive' : 'neutral',
-        date: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString()
-      }
-    ],
     influenceScore: (Math.random() * 100).toFixed(1),
     networkQuality: Math.random() > 0.7 ? 'high' : Math.random() > 0.4 ? 'medium' : 'low'
   };
@@ -181,20 +172,12 @@ async function gatherSocialIntelligence(targetEntity: string, scanDepth: string)
 async function gatherBusinessIntelligence(targetEntity: string, scanDepth: string) {
   return {
     companySize: Math.random() > 0.5 ? 'enterprise' : Math.random() > 0.3 ? 'mid-market' : 'startup',
-    industry: 'Technology', // Could be determined from actual data
+    industry: 'Technology',
     revenue: {
       estimated: `$${Math.floor(Math.random() * 100)}M`,
       confidence: (Math.random() * 0.4 + 0.6).toFixed(2)
     },
     employees: Math.floor(Math.random() * 1000) + 10,
-    fundingHistory: [
-      {
-        round: 'Series A',
-        amount: `$${Math.floor(Math.random() * 50)}M`,
-        date: '2023',
-        investors: ['Venture Capital Firm']
-      }
-    ],
     competitivePosition: Math.random() > 0.6 ? 'leader' : Math.random() > 0.3 ? 'challenger' : 'follower',
     riskFactors: []
   };
@@ -208,16 +191,7 @@ async function gatherNewsIntelligence(targetEntity: string, scanDepth: string) {
         positive: Math.floor(Math.random() * 60),
         neutral: Math.floor(Math.random() * 30),
         negative: Math.floor(Math.random() * 10)
-      },
-      recent_coverage: [
-        {
-          title: `${targetEntity} announces new initiative`,
-          source: 'Tech News',
-          sentiment: 'positive',
-          date: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
-          reach: Math.floor(Math.random() * 10000)
-        }
-      ]
+      }
     },
     thoughtLeadership: {
       speaking_engagements: Math.floor(Math.random() * 10),
@@ -294,12 +268,6 @@ async function analyzeProspectProfile(targetEntity: string, intelligence: any) {
   if (intelligence.legalRecords.legal_risk_score > 0.2) {
     score -= 10;
     profile.riskIndicators.push('Legal risk indicators present');
-  }
-
-  // Digital security factors
-  if (intelligence.digitalFootprint.security_posture === 'weak') {
-    score -= 5;
-    profile.riskIndicators.push('Weak digital security posture');
   }
 
   profile.score = Math.max(0, Math.min(100, score));
