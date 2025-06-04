@@ -29,6 +29,7 @@ interface ComponentHealth {
 }
 
 const GenesisSentinelPanel = () => {
+  // All hooks at the top level - no conditional hooks
   const [isRunningHealthCheck, setIsRunningHealthCheck] = useState(false);
   const [healthData, setHealthData] = useState<{
     components: ComponentHealth[];
@@ -36,6 +37,11 @@ const GenesisSentinelPanel = () => {
     overallHealth: 'healthy' | 'degraded' | 'critical';
   } | null>(null);
   const [lastHealthCheck, setLastHealthCheck] = useState<string | null>(null);
+
+  // Single useEffect with proper dependencies
+  useEffect(() => {
+    runSystemHealthCheck();
+  }, []); // Empty dependency array to run only on mount
 
   const runSystemHealthCheck = async () => {
     setIsRunningHealthCheck(true);
@@ -64,11 +70,6 @@ const GenesisSentinelPanel = () => {
       setIsRunningHealthCheck(false);
     }
   };
-
-  // Auto-run health check on component mount
-  useEffect(() => {
-    runSystemHealthCheck();
-  }, []);
 
   const getHealthBadgeColor = (status: string) => {
     switch (status) {
@@ -100,6 +101,7 @@ const GenesisSentinelPanel = () => {
     }
   };
 
+  // Calculate grouped components safely
   const groupedComponents = healthData?.components.reduce((acc, component) => {
     if (!acc[component.category]) {
       acc[component.category] = [];
