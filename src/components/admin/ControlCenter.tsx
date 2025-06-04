@@ -235,10 +235,17 @@ const ControlCenter = () => {
                     </p>
                   </CardHeader>
                   <CardContent className="flex-1">
-                    <ActiveComponent
-                      selectedEntity={selectedEntity}
-                      serviceStatus={serviceStatus}
-                    />
+                    {module.id === 'strategy-brain' ? (
+                      <StrategyBrain
+                        selectedEntity={selectedEntity}
+                        entityMemory={entityMemory}
+                      />
+                    ) : (
+                      <ActiveComponent
+                        selectedEntity={selectedEntity}
+                        serviceStatus={serviceStatus}
+                      />
+                    )}
                   </CardContent>
                 </Card>
               </TabsContent>
