@@ -237,9 +237,7 @@ const ControlCenter = () => {
                   <CardContent className="flex-1">
                     <ActiveComponent
                       selectedEntity={selectedEntity}
-                      entityMemory={entityMemory}
                       serviceStatus={serviceStatus}
-                      onEntitySelect={handleEntitySelect}
                     />
                   </CardContent>
                 </Card>

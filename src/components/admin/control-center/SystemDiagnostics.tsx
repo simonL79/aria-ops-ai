@@ -120,7 +120,7 @@ const SystemDiagnostics: React.FC<SystemDiagnosticsProps> = ({
                   </span>
                 </div>
                 <Badge className={`text-xs ${getStatusColor(status as string)}`}>
-                  {status}
+                  {String(status)}
                 </Badge>
               </div>
             ))}
@@ -145,7 +145,7 @@ const SystemDiagnostics: React.FC<SystemDiagnosticsProps> = ({
                     </span>
                   </div>
                   <Badge className={`text-xs ${getStatusColor(status as string)}`}>
-                    {status}
+                    {String(status)}
                   </Badge>
                 </div>
               ))}
@@ -165,7 +165,7 @@ const SystemDiagnostics: React.FC<SystemDiagnosticsProps> = ({
                     {metric.replace(/([A-Z])/g, ' $1')}
                   </span>
                   <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/50">
-                    {value}
+                    {String(value)}
                   </Badge>
                 </div>
               ))}

@@ -157,16 +157,16 @@ const QuickCommandConsole: React.FC<QuickCommandConsoleProps> = ({
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
           {quickActions.map((action) => {
             const Icon = action.icon;
-            const isExecuting = isExecuting === action.id;
+            const actionIsExecuting = isExecuting === action.id;
             
             return (
               <Button
                 key={action.id}
                 onClick={() => executeQuickAction(action.action, action.id)}
-                disabled={isExecuting || !selectedEntity}
+                disabled={actionIsExecuting || !selectedEntity}
                 className="flex flex-col items-center gap-2 h-20 bg-corporate-dark hover:bg-corporate-accent hover:text-black border border-corporate-border"
               >
-                <Icon className={`h-5 w-5 ${isExecuting ? 'animate-spin' : ''}`} />
+                <Icon className={`h-5 w-5 ${actionIsExecuting ? 'animate-spin' : ''}`} />
                 <span className="text-xs">{action.label}</span>
               </Button>
             );
