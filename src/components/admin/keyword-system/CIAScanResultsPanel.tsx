@@ -29,6 +29,7 @@ const CIAScanResultsPanel = ({ entityName, onClose }: CIAScanResultsPanelProps) 
   const [results, setResults] = useState<ScanResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState<'all' | 'high' | 'medium' | 'low'>('all');
+  const [debugInfo, setDebugInfo] = useState<any>(null);
 
   useEffect(() => {
     if (entityName) {
@@ -41,15 +42,15 @@ const CIAScanResultsPanel = ({ entityName, onClose }: CIAScanResultsPanelProps) 
     
     setLoading(true);
     try {
-      console.log(`🔍 Loading CIA scan results for entity: "${entityName}"`);
+      console.log(`🔍 Loading scan results for entity: "${entityName}"`);
       
-      // Query with broader criteria to find any results for this entity
+      // Get ALL results for this entity to debug what's actually there
       const { data, error } = await supabase
         .from('scan_results')
         .select('*')
-        .eq('entity_name', entityName.trim())
+        .ilike('entity_name', `%${entityName.trim()}%`)
         .order('created_at', { ascending: false })
-        .limit(100);
+        .limit(50);
 
       if (error) {
         console.error('Database query error:', error);
@@ -57,20 +58,26 @@ const CIAScanResultsPanel = ({ entityName, onClose }: CIAScanResultsPanelProps) 
       }
       
       console.log(`📊 Found ${data?.length || 0} total scan results for "${entityName}"`);
+      console.log('Raw data sample:', data?.slice(0, 3));
       
-      // Filter for CIA-verified results or recent high-quality results
-      const ciaResults = (data || []).filter(item => {
-        const isCiaVerified = item.source_type === 'cia_verified';
-        const isHighConfidence = (item.confidence_score || 0) >= 60;
-        const isRecent = new Date(item.created_at) > new Date(Date.now() - 24 * 60 * 60 * 1000); // Last 24 hours
-        
-        return isCiaVerified || (isHighConfidence && isRecent);
-      });
+      // Debug: show what we found
+      const debugData = {
+        total: data?.length || 0,
+        bySourceType: data?.reduce((acc, item) => {
+          acc[item.source_type || 'null'] = (acc[item.source_type || 'null'] || 0) + 1;
+          return acc;
+        }, {} as Record<string, number>) || {},
+        confidenceScores: data?.map(item => item.confidence_score).filter(Boolean) || [],
+        recentCount: data?.filter(item => 
+          new Date(item.created_at) > new Date(Date.now() - 24 * 60 * 60 * 1000)
+        ).length || 0
+      };
       
-      console.log(`✅ Filtered to ${ciaResults.length} CIA-verified or high-confidence results`);
+      setDebugInfo(debugData);
+      console.log('Debug info:', debugData);
       
-      // Transform the data to match our ScanResult interface
-      const transformedResults: ScanResult[] = ciaResults.map(item => ({
+      // For now, show ALL results for this entity so we can see what's there
+      const transformedResults: ScanResult[] = (data || []).map(item => ({
         id: item.id,
         platform: item.platform,
         content: item.content,
@@ -86,7 +93,7 @@ const CIAScanResultsPanel = ({ entityName, onClose }: CIAScanResultsPanelProps) 
       
       setResults(transformedResults);
     } catch (error) {
-      console.error('Error loading CIA scan results:', error);
+      console.error('Error loading scan results:', error);
     } finally {
       setLoading(false);
     }
@@ -148,7 +155,7 @@ const CIAScanResultsPanel = ({ entityName, onClose }: CIAScanResultsPanelProps) 
       <Card className="corporate-card">
         <CardContent className="p-8 text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-corporate-accent mx-auto mb-4"></div>
-          <p className="text-white">Loading CIA scan results...</p>
+          <p className="text-white">Loading scan results...</p>
         </CardContent>
       </Card>
     );
@@ -160,7 +167,7 @@ const CIAScanResultsPanel = ({ entityName, onClose }: CIAScanResultsPanelProps) 
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-3 text-xl font-bold text-white">
             <TrendingUp className="h-6 w-6 text-corporate-accent" />
-            CIA Scan Results for "{entityName}"
+            Scan Results for "{entityName}"
           </CardTitle>
           {onClose && (
             <Button onClick={onClose} variant="outline" size="sm">
@@ -170,7 +177,7 @@ const CIAScanResultsPanel = ({ entityName, onClose }: CIAScanResultsPanelProps) 
         </div>
         <div className="flex items-center gap-4 mt-4">
           <div className="text-sm text-corporate-lightGray">
-            {results.length} CIA-verified results found
+            {results.length} total results found
           </div>
           <div className="flex gap-2">
             <Button
@@ -207,6 +214,19 @@ const CIAScanResultsPanel = ({ entityName, onClose }: CIAScanResultsPanelProps) 
             </Button>
           </div>
         </div>
+        
+        {/* Debug Information */}
+        {debugInfo && (
+          <div className="mt-4 p-3 bg-corporate-darkTertiary rounded-lg">
+            <h4 className="text-sm font-semibold text-white mb-2">Debug Info:</h4>
+            <div className="text-xs text-corporate-lightGray space-y-1">
+              <div>Total results: {debugInfo.total}</div>
+              <div>Source types: {JSON.stringify(debugInfo.bySourceType)}</div>
+              <div>Recent (24h): {debugInfo.recentCount}</div>
+              <div>Confidence scores: {debugInfo.confidenceScores.slice(0, 5).join(', ')}</div>
+            </div>
+          </div>
+        )}
       </CardHeader>
       <CardContent className="space-y-4">
         {filteredResults.length === 0 ? (
@@ -217,7 +237,7 @@ const CIAScanResultsPanel = ({ entityName, onClose }: CIAScanResultsPanelProps) 
             </h3>
             <p className="text-corporate-lightGray">
               {results.length === 0 
-                ? 'No CIA-verified intelligence found for this entity. Try running a new scan.'
+                ? 'No scan results found for this entity. Try running a new scan.'
                 : 'Try adjusting your filter to see more results.'}
             </p>
             {results.length === 0 && (
