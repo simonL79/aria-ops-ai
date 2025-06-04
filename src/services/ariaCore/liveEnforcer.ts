@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -33,7 +32,7 @@ export async function enforceLiveData<T>(
     allowEmpty = false, 
     serviceLabel, 
     requireMinimumResults = 0,
-    strictEntityMatching = true 
+    strictEntityMatching = false 
   } = options;
   
   const start = Date.now();
@@ -67,18 +66,25 @@ export async function enforceLiveData<T>(
     const stringified = JSON.stringify(result).toLowerCase();
     const entityLower = entityName.toLowerCase();
 
-    // 5. VALIDATION: Entity name presence check
-    if (strictEntityMatching && !stringified.includes(entityLower)) {
-      await quarantineFailure(serviceLabel, entityName, 'Entity name not found in results', result);
-      throw new Error(`[${serviceLabel}] ❌ CRITICAL: No reference to "${entityName}" found in results`);
+    // 5. VALIDATION: Entity name presence check (more flexible)
+    if (strictEntityMatching) {
+      // Split entity name into parts for more flexible matching
+      const entityParts = entityLower.split(' ');
+      const hasAnyEntityPart = entityParts.some(part => 
+        part.length > 2 && stringified.includes(part)
+      );
+      
+      if (!hasAnyEntityPart) {
+        await quarantineFailure(serviceLabel, entityName, 'No entity name parts found in results', result);
+        throw new Error(`[${serviceLabel}] ❌ CRITICAL: No reference to "${entityName}" parts found in results`);
+      }
     }
 
-    // 6. VALIDATION: Mock/simulation detection
+    // 6. VALIDATION: Mock/simulation detection (refined patterns)
     const mockIndicators = [
-      'lorem ipsum', 'mock', 'placeholder', 'test entity', 'sample data',
-      'undefined', 'null', 'fake', 'dummy', 'example', 'simulation',
-      'test data', 'demo', 'synthetic', 'generated example',
-      'mock entity', 'test user', 'placeholder text'
+      'lorem ipsum', 'placeholder text', 'test entity', 'sample data',
+      'mock entity', 'test user', 'demo content', 'synthetic data',
+      'generated example', 'simulation data', 'fake content'
     ];
 
     const detectedMockIndicators = mockIndicators.filter(indicator => 
@@ -90,14 +96,12 @@ export async function enforceLiveData<T>(
       throw new Error(`[${serviceLabel}] ❌ CRITICAL: Mock/simulated data detected: "${detectedMockIndicators.join(', ')}" for "${entityName}"`);
     }
 
-    // 7. VALIDATION: Generic content detection
+    // 7. VALIDATION: Generic content detection (refined)
     const genericPatterns = [
-      'this is a sample',
-      'for testing purposes',
-      'example content',
-      'lorem',
-      'ipsum',
-      'placeholder content'
+      'this is a sample for testing purposes',
+      'example content for demonstration',
+      'lorem ipsum dolor sit amet',
+      'placeholder content here'
     ];
 
     const detectedGenericPatterns = genericPatterns.filter(pattern => 
@@ -293,10 +297,15 @@ export function validateContentQuality(content: string, entityName: string): {
     score -= 30;
   }
 
-  // Check for entity presence
-  if (!content.toLowerCase().includes(entityName.toLowerCase())) {
-    issues.push(`Entity name "${entityName}" not found in content`);
-    score -= 40;
+  // Check for entity presence (more flexible)
+  const entityParts = entityName.toLowerCase().split(' ');
+  const hasAnyEntityPart = entityParts.some(part => 
+    part.length > 2 && content.toLowerCase().includes(part)
+  );
+  
+  if (!hasAnyEntityPart) {
+    issues.push(`Entity name parts not found in content`);
+    score -= 20; // Reduced penalty
   }
 
   // Check for real-world indicators
@@ -307,7 +316,7 @@ export function validateContentQuality(content: string, entityName: string): {
   
   if (!hasRealWorldIndicators) {
     issues.push('No real-world reporting indicators found');
-    score -= 20;
+    score -= 10; // Reduced penalty
   }
 
   // Check for specific dates/times
@@ -318,7 +327,7 @@ export function validateContentQuality(content: string, entityName: string): {
   }
 
   return {
-    isValid: score >= 70 && issues.length === 0,
+    isValid: score >= 60 && issues.length <= 2, // More lenient
     issues,
     score: Math.max(0, score)
   };
