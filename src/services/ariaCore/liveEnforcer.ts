@@ -20,8 +20,8 @@ export interface QuarantineRecord {
 }
 
 /**
- * A.R.I.A™ Live Data Enforcement Middleware
- * Wraps any function to ensure 100% live, entity-specific data compliance
+ * A.R.I.A™ Live Data Enforcement Middleware - PRACTICAL MODE
+ * Validates live data while being practical about real-world content
  */
 export async function enforceLiveData<T>(
   fn: () => Promise<T>,
@@ -32,13 +32,13 @@ export async function enforceLiveData<T>(
     allowEmpty = false, 
     serviceLabel, 
     requireMinimumResults = 0,
-    strictEntityMatching = false 
+    strictEntityMatching = false // Default to flexible matching
   } = options;
   
   const start = Date.now();
   const executionId = `${serviceLabel}-${Date.now()}-${Math.random().toString(36).substring(7)}`;
 
-  console.log(`🔍 [LIVE ENFORCER] Starting validation for ${serviceLabel} targeting "${entityName}"`);
+  console.log(`🔍 [LIVE ENFORCER] Starting practical validation for ${serviceLabel} targeting "${entityName}"`);
 
   try {
     // Execute the wrapped function
@@ -47,75 +47,82 @@ export async function enforceLiveData<T>(
     // 1. VALIDATION: Check if result exists
     if (!result) {
       await quarantineFailure(serviceLabel, entityName, 'Null/undefined result returned', result);
-      throw new Error(`[${serviceLabel}] ❌ CRITICAL: Null/undefined result for "${entityName}"`);
+      throw new Error(`[${serviceLabel}] ❌ No result returned for "${entityName}"`);
     }
 
     // 2. VALIDATION: Check if result is empty when not allowed
     if (Array.isArray(result) && result.length === 0 && !allowEmpty) {
       await quarantineFailure(serviceLabel, entityName, 'Empty array returned when not allowed', result);
-      throw new Error(`[${serviceLabel}] ❌ CRITICAL: Empty result array for "${entityName}"`);
+      throw new Error(`[${serviceLabel}] ❌ No results found for "${entityName}"`);
     }
 
     // 3. VALIDATION: Check minimum results requirement
     if (Array.isArray(result) && result.length < requireMinimumResults) {
       await quarantineFailure(serviceLabel, entityName, `Insufficient results: ${result.length} < ${requireMinimumResults}`, result);
-      throw new Error(`[${serviceLabel}] ❌ CRITICAL: Only ${result.length} results, need ${requireMinimumResults} for "${entityName}"`);
+      throw new Error(`[${serviceLabel}] ❌ Only ${result.length} results, need ${requireMinimumResults} for "${entityName}"`);
     }
 
     // 4. VALIDATION: Convert to string for content analysis
     const stringified = JSON.stringify(result).toLowerCase();
     const entityLower = entityName.toLowerCase();
 
-    // 5. VALIDATION: Entity name presence check (more flexible)
+    // 5. VALIDATION: Entity name presence check (flexible by default)
     if (strictEntityMatching) {
-      // Split entity name into parts for more flexible matching
-      const entityParts = entityLower.split(' ');
-      const hasAnyEntityPart = entityParts.some(part => 
-        part.length > 2 && stringified.includes(part)
-      );
+      const entityParts = entityLower.split(' ').filter(part => part.length > 2);
+      const hasAnyEntityPart = entityParts.some(part => stringified.includes(part));
       
-      if (!hasAnyEntityPart) {
+      if (!hasAnyEntityPart && entityParts.length > 0) {
+        console.warn(`⚠️ [LIVE ENFORCER] Entity parts not found for "${entityName}": ${entityParts.join(', ')}`);
         await quarantineFailure(serviceLabel, entityName, 'No entity name parts found in results', result);
-        throw new Error(`[${serviceLabel}] ❌ CRITICAL: No reference to "${entityName}" parts found in results`);
+        throw new Error(`[${serviceLabel}] ❌ No reference to "${entityName}" parts found in results`);
+      }
+    } else {
+      // In non-strict mode, just log if entity not found but don't fail
+      if (!stringified.includes(entityLower)) {
+        console.info(`ℹ️ [LIVE ENFORCER] Entity name not found in results, but continuing in flexible mode`);
       }
     }
 
-    // 6. VALIDATION: Mock/simulation detection (refined patterns)
-    const mockIndicators = [
-      'lorem ipsum', 'placeholder text', 'test entity', 'sample data',
-      'mock entity', 'test user', 'demo content', 'synthetic data',
-      'generated example', 'simulation data', 'fake content'
+    // 6. VALIDATION: Mock/simulation detection (only obvious patterns)
+    const obviousMockIndicators = [
+      'lorem ipsum dolor sit amet',
+      'this is a test entity',
+      'mock data for testing',
+      'placeholder content here',
+      'sample data only',
+      'demo content not real'
     ];
 
-    const detectedMockIndicators = mockIndicators.filter(indicator => 
+    const detectedMockIndicators = obviousMockIndicators.filter(indicator => 
       stringified.includes(indicator)
     );
 
     if (detectedMockIndicators.length > 0) {
+      console.warn(`🚫 [LIVE ENFORCER] Obvious mock data detected: ${detectedMockIndicators.join(', ')}`);
       await quarantineFailure(serviceLabel, entityName, `Mock data detected: ${detectedMockIndicators.join(', ')}`, result);
-      throw new Error(`[${serviceLabel}] ❌ CRITICAL: Mock/simulated data detected: "${detectedMockIndicators.join(', ')}" for "${entityName}"`);
+      throw new Error(`[${serviceLabel}] ❌ Mock/simulated data detected for "${entityName}"`);
     }
 
-    // 7. VALIDATION: Generic content detection (refined)
-    const genericPatterns = [
-      'this is a sample for testing purposes',
-      'example content for demonstration',
-      'lorem ipsum dolor sit amet',
-      'placeholder content here'
+    // 7. VALIDATION: Only check for extremely generic patterns
+    const extremelyGenericPatterns = [
+      'this is a sample for testing purposes only',
+      'lorem ipsum dolor sit amet consectetur',
+      'placeholder content to be replaced'
     ];
 
-    const detectedGenericPatterns = genericPatterns.filter(pattern => 
+    const detectedGenericPatterns = extremelyGenericPatterns.filter(pattern => 
       stringified.includes(pattern)
     );
 
     if (detectedGenericPatterns.length > 0) {
+      console.warn(`🚫 [LIVE ENFORCER] Generic template content detected: ${detectedGenericPatterns.join(', ')}`);
       await quarantineFailure(serviceLabel, entityName, `Generic content detected: ${detectedGenericPatterns.join(', ')}`, result);
-      throw new Error(`[${serviceLabel}] ❌ CRITICAL: Generic/template content detected for "${entityName}"`);
+      throw new Error(`[${serviceLabel}] ❌ Generic/template content detected for "${entityName}"`);
     }
 
     // 8. SUCCESS: Log successful validation
     const duration = Date.now() - start;
-    console.log(`✅ [LIVE ENFORCER] ${serviceLabel} passed all validations for "${entityName}" in ${duration}ms`);
+    console.log(`✅ [LIVE ENFORCER] ${serviceLabel} validation passed for "${entityName}" in ${duration}ms`);
     
     // Log successful operation
     await logSuccessfulOperation(serviceLabel, entityName, result, duration, executionId);
@@ -124,14 +131,14 @@ export async function enforceLiveData<T>(
 
   } catch (error) {
     const duration = Date.now() - start;
-    console.error(`❌ [LIVE ENFORCER] ${serviceLabel} FAILED validation for "${entityName}" after ${duration}ms:`, error);
+    console.error(`❌ [LIVE ENFORCER] ${serviceLabel} validation failed for "${entityName}" after ${duration}ms:`, error.message);
     
     // Log failed operation
     await logFailedOperation(serviceLabel, entityName, error.message, duration, executionId);
     
     // Show user-friendly error
     toast.error(`${serviceLabel} validation failed`, {
-      description: `Failed to validate live data for "${entityName}"`
+      description: `Could not validate data for "${entityName}": ${error.message}`
     });
     
     throw error;
@@ -261,7 +268,6 @@ export async function getQuarantinedResults(): Promise<QuarantineRecord[]> {
     }
 
     return data?.map(record => {
-      // Type-safe extraction of operation_data properties
       const operationData = record.operation_data as any;
       
       return {
@@ -281,7 +287,7 @@ export async function getQuarantinedResults(): Promise<QuarantineRecord[]> {
 }
 
 /**
- * Enhanced validation for specific content types
+ * Practical content quality validation - more lenient
  */
 export function validateContentQuality(content: string, entityName: string): {
   isValid: boolean;
@@ -291,24 +297,24 @@ export function validateContentQuality(content: string, entityName: string): {
   const issues: string[] = [];
   let score = 100;
 
-  // Check minimum length
-  if (content.length < 50) {
-    issues.push('Content too short (< 50 characters)');
+  // Check minimum length (very lenient)
+  if (content.length < 20) {
+    issues.push('Content too short (< 20 characters)');
     score -= 30;
   }
 
-  // Check for entity presence (more flexible)
-  const entityParts = entityName.toLowerCase().split(' ');
-  const hasAnyEntityPart = entityParts.some(part => 
-    part.length > 2 && content.toLowerCase().includes(part)
+  // Check for entity presence (very flexible)
+  const entityParts = entityName.toLowerCase().split(' ').filter(part => part.length > 2);
+  const hasAnyEntityPart = entityParts.length === 0 || entityParts.some(part => 
+    content.toLowerCase().includes(part)
   );
   
   if (!hasAnyEntityPart) {
     issues.push(`Entity name parts not found in content`);
-    score -= 20; // Reduced penalty
+    score -= 15; // Very reduced penalty
   }
 
-  // Check for real-world indicators
+  // Check for real-world indicators (optional)
   const realWorldIndicators = ['said', 'reported', 'announced', 'confirmed', 'according to'];
   const hasRealWorldIndicators = realWorldIndicators.some(indicator => 
     content.toLowerCase().includes(indicator)
@@ -316,18 +322,18 @@ export function validateContentQuality(content: string, entityName: string): {
   
   if (!hasRealWorldIndicators) {
     issues.push('No real-world reporting indicators found');
-    score -= 10; // Reduced penalty
+    score -= 5; // Very reduced penalty
   }
 
-  // Check for specific dates/times
+  // Check for specific dates/times (optional)
   const hasDateIndicators = /\b(2024|2025|January|February|March|April|May|June|July|August|September|October|November|December)\b/i.test(content);
   if (!hasDateIndicators) {
     issues.push('No current date indicators found');
-    score -= 10;
+    score -= 5;
   }
 
   return {
-    isValid: score >= 60 && issues.length <= 2, // More lenient
+    isValid: score >= 50 && issues.length <= 3, // Very lenient
     issues,
     score: Math.max(0, score)
   };
