@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -106,7 +105,7 @@ export class PatternRecognitionService {
 
     // Analyze each group
     Object.entries(groupedMemory).forEach(([type, memories]) => {
-      if (memories.length >= 2) {
+      if (Array.isArray(memories) && memories.length >= 2) {
         patterns.push({
           id: `memory_${type}_${Date.now()}`,
           type: 'memory_pattern',
@@ -114,7 +113,7 @@ export class PatternRecognitionService {
           confidence: Math.min(0.9, memories.length * 0.15),
           frequency: memories.length,
           lastSeen: memories[0]?.created_at || new Date().toISOString(),
-          indicators: memories.map(m => m.memory_summary).slice(0, 3),
+          indicators: memories.map(m => m.memory_summary).filter(Boolean).slice(0, 3),
           riskLevel: memories.length > 5 ? 'high' : 'medium'
         });
       }
