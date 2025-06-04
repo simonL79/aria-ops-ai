@@ -139,9 +139,6 @@ const ControlCenter = () => {
     }
   ];
 
-  const activeModuleData = modules.find(m => m.id === activeModule);
-  const ActiveComponent = activeModuleData?.component || StrategyBrain;
-
   return (
     <div className="h-screen bg-corporate-dark text-white flex">
       {/* Entity Context Panel - Collapsible Sidebar */}

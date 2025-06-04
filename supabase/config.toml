@@ -4,12 +4,25 @@ project_id = "ssvskbejfacmjemphmry"
 [api]
 enabled = true
 port = 54321
-schemas = ["public", "graphql_public"]
+schemas = ["public", "private"]
 extra_search_path = ["public", "extensions"]
 max_rows = 1000
 
 [db]
 port = 54322
+shadow_port = 54320
+major_version = 15
+
+[db.pooler]
+enabled = false
+port = 54329
+pool_mode = "transaction"
+default_pool_size = 20
+max_client_conn = 100
+
+[realtime]
+enabled = true
+ip_version = "ipv4"
 
 [studio]
 enabled = true
@@ -23,26 +36,205 @@ pop3_port = 54326
 
 [storage]
 enabled = true
-port = 54327
-file_size_limit = "50MiB"
 
 [auth]
 enabled = true
-port = 54328
-site_url = "http://localhost:3000"
-additional_redirect_urls = ["https://localhost:3000"]
+additional_redirect_urls = ["https://lvh.me:3000/**"]
 jwt_expiry = 3600
-refresh_token_rotation_enabled = true
-security_update_password_require_reauthentication = true
+enable_signup = true
+email_double_confirm_changes = true
+enable_manual_linking = false
 
-[functions.anubis-memory-store]
+[auth.email]
+enable_signup = true
+double_confirm_changes = true
+enable_confirmations = false
+
+[functions.legal-document-generator]
+verify_jwt = false
+
+[functions.threat-prediction-engine]
+verify_jwt = false
+
+[functions.prospect-intelligence-scanner]
+verify_jwt = false
+
+[functions.executive-reporting]
+verify_jwt = false
+
+[functions.aria-ingest]
+verify_jwt = false
+
+[functions.enhanced-intelligence]
+verify_jwt = false
+
+[functions.discovery-scanner]
+verify_jwt = false
+
+[functions.monitoring-scan]
+verify_jwt = false
+
+[functions.google-search-crawler]
+verify_jwt = false
+
+[functions.generate-response]
+verify_jwt = false
+
+[functions.executive-reports]
+verify_jwt = false
+
+[functions.health-check]
+verify_jwt = false
+
+[functions.recursive-ai-scanner]
+verify_jwt = false
+
+[functions.reputation-scan]
+verify_jwt = false
+
+[functions.serp-monitor]
+verify_jwt = false
+
+[functions.slack-alert]
+verify_jwt = false
+
+[functions.threat-classification]
+verify_jwt = false
+
+[functions.uk-news-scanner]
+verify_jwt = false
+
+[functions.watchtower-scan]
+verify_jwt = false
+
+[functions.zero-day-scanner]
+verify_jwt = false
+
+[functions.anubis-engine]
+verify_jwt = false
+
+[functions.anubis-escalation-check]
 verify_jwt = false
 
 [functions.anubis-memory-recall]
 verify_jwt = false
 
+[functions.anubis-memory-store]
+verify_jwt = false
+
 [functions.anubis-pattern-store]
 verify_jwt = false
 
-[functions.anubis-escalation-check]
+[functions.anubis-validator]
+verify_jwt = false
+
+[functions.aria-hypercore-dispatch]
+verify_jwt = false
+
+[functions.aria-scraper]
+verify_jwt = false
+
+[functions.classify-ai-command]
+verify_jwt = false
+
+[functions.column_exists]
+verify_jwt = false
+
+[functions.companies-house-daily-import]
+verify_jwt = false
+
+[functions.companies-house-scanner]
+verify_jwt = false
+
+[functions.contact-discovery]
+verify_jwt = false
+
+[functions.create-checkout]
+verify_jwt = false
+
+[functions.creeper-agent]
+verify_jwt = false
+
+[functions.entity-recognition]
+verify_jwt = false
+
+[functions.evidence-report-generator]
+verify_jwt = false
+
+[functions.execute-batch-strikes]
+verify_jwt = false
+
+[functions.execute-response]
+verify_jwt = false
+
+[functions.fixpath-ai]
+verify_jwt = false
+
+[functions.founder-reputation-scan]
+verify_jwt = false
+
+[functions.generate-outreach]
+verify_jwt = false
+
+[functions.generate-review-post]
+verify_jwt = false
+
+[functions.generate-rss]
+verify_jwt = false
+
+[functions.genesis-verify]
+verify_jwt = false
+
+[functions.get-prospect-entities]
+verify_jwt = false
+
+[functions.headless-scraper]
+verify_jwt = false
+
+[functions.intelligence-workbench]
+verify_jwt = false
+
+[functions.local-memory-search]
+verify_jwt = false
+
+[functions.local-threat-analysis]
+verify_jwt = false
+
+[functions.offensive-operations]
+verify_jwt = false
+
+[functions.persona-saturation]
+verify_jwt = false
+
+[functions.process-threat-ingestion]
+verify_jwt = false
+
+[functions.radar-news-scan]
+verify_jwt = false
+
+[functions.rsi-threat-simulator]
+verify_jwt = false
+
+[functions.scrape-and-enrich-threat]
+verify_jwt = false
+
+[functions.send-influencer-dm]
+verify_jwt = false
+
+[functions.send-influencer-email]
+verify_jwt = false
+
+[functions.send-outreach-email]
+verify_jwt = false
+
+[functions.sigmalive]
+verify_jwt = false
+
+[functions.sigmalive-enhanced]
+verify_jwt = false
+
+[functions.system-health-monitor]
+verify_jwt = false
+
+[functions.threat-summarization]
 verify_jwt = false
