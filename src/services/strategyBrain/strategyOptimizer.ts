@@ -112,6 +112,19 @@ const generateOptimizations = (strategy: DatabaseStrategy, historicalData: any[]
   };
 };
 
+// Map database strategy types to ResponseStrategy types
+const mapStrategyType = (dbStrategyType: string): ResponseStrategy['type'] => {
+  const typeMap: { [key: string]: ResponseStrategy['type'] } = {
+    'counter_narrative': 'counter_narrative',
+    'monitoring': 'defensive',
+    'platform_response': 'defensive',
+    'influencer_outreach': 'engagement',
+    'seo_suppression': 'proactive'
+  };
+  
+  return typeMap[dbStrategyType] || 'defensive';
+};
+
 const applyOptimizations = (originalStrategy: DatabaseStrategy, optimizations: any): ResponseStrategy => {
   const actions = Array.isArray(originalStrategy.actions) 
     ? originalStrategy.actions.map((action: any, index: number) => ({
@@ -124,7 +137,7 @@ const applyOptimizations = (originalStrategy: DatabaseStrategy, optimizations: a
 
   return {
     id: `${originalStrategy.strategy_id}-optimized`,
-    type: originalStrategy.strategy_type as 'counter_narrative' | 'monitoring' | 'platform_response' | 'influencer_outreach' | 'seo_suppression',
+    type: mapStrategyType(originalStrategy.strategy_type),
     title: `${originalStrategy.title} (Optimized)`,
     description: `${originalStrategy.description} - Enhanced with AI optimization`,
     actions,
