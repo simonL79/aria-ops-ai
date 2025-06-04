@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -50,11 +49,58 @@ const CIAScanResultsPanel = ({ entityName, onClose }: CIAScanResultsPanelProps) 
         .limit(50);
 
       if (error) throw error;
-      setResults(data || []);
+      
+      // Transform the data to match our ScanResult interface
+      const transformedResults: ScanResult[] = (data || []).map(item => ({
+        id: item.id,
+        platform: item.platform,
+        content: item.content,
+        url: item.url,
+        severity: item.severity,
+        confidence_score: item.confidence_score || 0,
+        detected_entities: parseDetectedEntities(item.detected_entities),
+        source_type: item.source_type,
+        entity_name: item.entity_name,
+        created_at: item.created_at,
+        threat_type: item.threat_type || 'intelligence'
+      }));
+      
+      setResults(transformedResults);
     } catch (error) {
       console.error('Error loading CIA scan results:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Helper function to parse detected_entities from various formats
+  const parseDetectedEntities = (entities: any): string[] => {
+    if (!entities) return [];
+    
+    try {
+      // If it's already an array
+      if (Array.isArray(entities)) {
+        return entities.map(e => typeof e === 'string' ? e : String(e));
+      }
+      
+      // If it's a JSON string, parse it
+      if (typeof entities === 'string') {
+        const parsed = JSON.parse(entities);
+        if (Array.isArray(parsed)) {
+          return parsed.map(e => typeof e === 'string' ? e : String(e));
+        }
+        return [entities]; // Single string
+      }
+      
+      // If it's an object, try to extract values
+      if (typeof entities === 'object') {
+        return Object.values(entities).map(e => String(e));
+      }
+      
+      return [];
+    } catch (error) {
+      console.error('Error parsing detected entities:', error);
+      return [];
     }
   };
 
