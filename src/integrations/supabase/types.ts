@@ -746,6 +746,78 @@ export type Database = {
           },
         ]
       }
+      client_intake_submissions: {
+        Row: {
+          amplification_topics: string[] | null
+          brand_or_alias: string | null
+          consent_to_process: boolean | null
+          content_types_to_remove: string[] | null
+          created_at: string | null
+          data_handling_pref: string | null
+          designated_contact_email: string | null
+          email: string
+          escalation_keywords: string[] | null
+          focus_scope: string | null
+          full_name: string
+          gdpr_agreed_at: string | null
+          id: string
+          known_aliases: string[] | null
+          operational_mode: string | null
+          prior_attacks: boolean | null
+          problematic_platforms: string[] | null
+          recent_achievements: string | null
+          status: string | null
+          suppression_targets: string[] | null
+          topics_to_flag: string[] | null
+        }
+        Insert: {
+          amplification_topics?: string[] | null
+          brand_or_alias?: string | null
+          consent_to_process?: boolean | null
+          content_types_to_remove?: string[] | null
+          created_at?: string | null
+          data_handling_pref?: string | null
+          designated_contact_email?: string | null
+          email: string
+          escalation_keywords?: string[] | null
+          focus_scope?: string | null
+          full_name: string
+          gdpr_agreed_at?: string | null
+          id?: string
+          known_aliases?: string[] | null
+          operational_mode?: string | null
+          prior_attacks?: boolean | null
+          problematic_platforms?: string[] | null
+          recent_achievements?: string | null
+          status?: string | null
+          suppression_targets?: string[] | null
+          topics_to_flag?: string[] | null
+        }
+        Update: {
+          amplification_topics?: string[] | null
+          brand_or_alias?: string | null
+          consent_to_process?: boolean | null
+          content_types_to_remove?: string[] | null
+          created_at?: string | null
+          data_handling_pref?: string | null
+          designated_contact_email?: string | null
+          email?: string
+          escalation_keywords?: string[] | null
+          focus_scope?: string | null
+          full_name?: string
+          gdpr_agreed_at?: string | null
+          id?: string
+          known_aliases?: string[] | null
+          operational_mode?: string | null
+          prior_attacks?: boolean | null
+          problematic_platforms?: string[] | null
+          recent_achievements?: string | null
+          status?: string | null
+          suppression_targets?: string[] | null
+          topics_to_flag?: string[] | null
+        }
+        Relationships: []
+      }
       client_platform_credentials: {
         Row: {
           client_id: string | null

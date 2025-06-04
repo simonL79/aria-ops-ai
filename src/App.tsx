@@ -1,81 +1,92 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { HelmetProvider } from "react-helmet-async";
-import { AuthProvider } from '@/hooks/useAuth';
-import { ThemeProvider } from '@/components/ui/theme-provider';
-import HomePage from "./pages/HomePage";
-import AboutPage from "./pages/AboutPage";
-import ScanPage from "./pages/ScanPage";
-import SimonLindsayPage from "./pages/SimonLindsayPage";
-import BlogPage from "./pages/BlogPage";
-import BlogPostPage from "./pages/BlogPostPage";
-import Authentication from "./pages/Authentication";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import AdminLogin from "./pages/AdminLogin";
-import LegalOpsPage from "./pages/admin/LegalOpsPage";
-import ClientsPage from "./pages/admin/ClientsPage";
-import QATestPage from "./pages/QATestPage";
-import SentinelOperatorPage from "./pages/admin/SentinelOperatorPage";
-import SettingsPage from "./pages/admin/SettingsPage";
-import SystemOptimizationPage from "./pages/admin/SystemOptimizationPage";
-import WatchtowerPage from "./pages/admin/WatchtowerPage";
-import IntelligenceCorePage from "./pages/admin/IntelligenceCorePage";
-import PersonaSaturationPage from "./pages/admin/PersonaSaturationPage";
-import Contact from "./pages/Contact";
-import ContactFormPage from "./pages/ContactFormPage";
-import PricingPage from "./pages/PricingPage";
-import GenesisSentinel from "@/pages/admin/GenesisSentinel";
-import KeywordToArticleSystemPage from "./pages/admin/KeywordToArticleSystemPage";
-import ControlCenterPage from "./pages/admin/ControlCenterPage";
 
-const queryClient = new QueryClient();
+import { Suspense, lazy } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from 'sonner';
+import { Helmet, HelmetProvider } from 'react-helmet-async';
+import HomePage from '@/pages/HomePage';
+import BlogPage from '@/pages/BlogPage';
+import BlogPostPage from '@/pages/BlogPostPage';
+import ContactPage from '@/pages/ContactPage';
+import AboutPage from '@/pages/AboutPage';
+import ReputationScanPage from '@/pages/ReputationScanPage';
+import AuthPage from '@/pages/AuthPage';
+import PasswordResetPage from '@/pages/PasswordResetPage';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
+
+// Lazy load dashboard and admin components
+const DashboardHomePage = lazy(() => import('@/pages/dashboard/DashboardHomePage'));
+const ClientsPage = lazy(() => import('@/pages/dashboard/ClientsPage'));
+const AiScrapingPage = lazy(() => import('@/pages/dashboard/AiScrapingPage'));
+const CompliancePage = lazy(() => import('@/pages/dashboard/CompliancePage'));
+const ScanSubmissionsPage = lazy(() => import('@/pages/dashboard/ScanSubmissionsPage'));
+const AdminDashboard = lazy(() => import('@/components/admin/AdminDashboard'));
+const ClientIntakePage = lazy(() => import('@/pages/ClientIntakePage'));
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 3,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  },
+});
 
 function App() {
-  console.log('🔄 App component rendering');
-  
   return (
-    <QueryClientProvider client={queryClient}>
-      <HelmetProvider>
-        <ThemeProvider defaultTheme="dark" storageKey="aria-ui-theme">
-          <AuthProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <Router>
-                <Routes>
-                  <Route path="/" element={<HomePage />} />
-                  <Route path="/about" element={<AboutPage />} />
-                  <Route path="/scan" element={<ScanPage />} />
-                  <Route path="/simon-lindsay" element={<SimonLindsayPage />} />
-                  <Route path="/blog" element={<BlogPage />} />
-                  <Route path="/blog/:slug" element={<BlogPostPage />} />
-                  <Route path="/contact" element={<Contact />} />
-                  <Route path="/contact-sales" element={<ContactFormPage />} />
-                  <Route path="/pricing" element={<PricingPage />} />
-                  <Route path="/auth" element={<Authentication />} />
-                  <Route path="/admin" element={<AdminDashboard />} />
-                  <Route path="/admin/login" element={<AdminLogin />} />
-                  <Route path="/admin/control-center" element={<ControlCenterPage />} />
-                  <Route path="/admin/genesis-sentinel" element={<GenesisSentinel />} />
-                  <Route path="/admin/keyword-to-article" element={<KeywordToArticleSystemPage />} />
-                  <Route path="/admin/watchtower" element={<WatchtowerPage />} />
-                  <Route path="/admin/intelligence-core" element={<IntelligenceCorePage />} />
-                  <Route path="/admin/persona-saturation" element={<PersonaSaturationPage />} />
-                  <Route path="/admin/legal-ops" element={<LegalOpsPage />} />
-                  <Route path="/admin/clients" element={<ClientsPage />} />
-                  <Route path="/admin/qa-testing" element={<QATestPage />} />
-                  <Route path="/admin/settings" element={<SettingsPage />} />
-                  <Route path="/admin/system-optimization" element={<SystemOptimizationPage />} />
-                </Routes>
-              </Router>
-            </TooltipProvider>
-          </AuthProvider>
-        </ThemeProvider>
-      </HelmetProvider>
-    </QueryClientProvider>
+    <HelmetProvider>
+      <QueryClientProvider client={queryClient}>
+        <Router>
+          <div className="min-h-screen bg-background">
+            <Helmet>
+              <title>Simon Lindsay | Reputation Management & Digital Intelligence</title>
+              <meta name="description" content="Advanced reputation management and digital intelligence services powered by A.R.I.A technology." />
+            </Helmet>
+            
+            <Suspense fallback={<LoadingSpinner />}>
+              <Routes>
+                {/* Public Routes */}
+                <Route path="/" element={<HomePage />} />
+                <Route path="/blog" element={<BlogPage />} />
+                <Route path="/blog/:slug" element={<BlogPostPage />} />
+                <Route path="/contact" element={<ContactPage />} />
+                <Route path="/about" element={<AboutPage />} />
+                <Route path="/reputation-scan" element={<ReputationScanPage />} />
+                <Route path="/auth" element={<AuthPage />} />
+                <Route path="/reset-password" element={<PasswordResetPage />} />
+                
+                {/* Hidden client intake route */}
+                <Route path="/client-intake" element={<ClientIntakePage />} />
+                
+                {/* Dashboard Routes */}
+                <Route path="/dashboard" element={<DashboardHomePage />} />
+                <Route path="/dashboard/clients" element={<ClientsPage />} />
+                <Route path="/dashboard/ai-scraping" element={<AiScrapingPage />} />
+                <Route path="/dashboard/compliance" element={<CompliancePage />} />
+                <Route path="/dashboard/scan-submissions" element={<ScanSubmissionsPage />} />
+                
+                {/* Admin Routes */}
+                <Route path="/admin/*" element={<AdminDashboard />} />
+              </Routes>
+            </Suspense>
+            
+            <Toaster 
+              position="top-right" 
+              expand={false} 
+              richColors 
+              closeButton
+              toastOptions={{
+                style: {
+                  background: '#1a1b23',
+                  color: '#ffffff',
+                  border: '1px solid #2a2b35'
+                }
+              }}
+            />
+          </div>
+        </Router>
+      </QueryClientProvider>
+    </HelmetProvider>
   );
 }
 
