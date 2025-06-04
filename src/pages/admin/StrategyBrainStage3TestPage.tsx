@@ -1,22 +1,47 @@
-
 import React, { useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, AlertCircle, Clock, Target } from 'lucide-react';
+import { CheckCircle, AlertCircle, Clock, Target, Brain, Zap, BarChart3, Globe } from 'lucide-react';
 import { toast } from 'sonner';
 import { predictStrategySuccess } from '@/services/strategyBrain/predictiveAnalytics';
-import { enableAutoExecution, evaluateForAutoExecution } from '@/services/strategyBrain/autoExecutionEngine';
-import { recommendStrategy } from '@/services/strategyBrain/patternRecognition';
-import { createCoordinationPlan } from '@/services/strategyBrain/crossPlatformCoordinator';
+import { enableAutoExecution, evaluateForAutoExecution, queueForAutoExecution } from '@/services/strategyBrain/autoExecutionEngine';
+import { recommendStrategy, trainMLModel } from '@/services/strategyBrain/patternRecognition';
+import { createCoordinationPlan, executeCoordinationPlan, getCoordinationMetrics } from '@/services/strategyBrain/crossPlatformCoordinator';
 import { analyzeEntityPatterns } from '@/services/strategyBrain/patternAnalyzer';
-import { generateResponseStrategies } from '@/services/strategyBrain/responseGenerator';
+import { ResponseStrategy } from '@/services/strategyBrain/responseGenerator';
 
 const StrategyBrainStage3TestPage = () => {
   const [testResults, setTestResults] = useState<any[]>([]);
   const [isRunningTests, setIsRunningTests] = useState(false);
-  const testEntity = "Stage3TestEntity-" + Date.now();
+  const testEntity = "TestEntity-Stage3-" + Date.now();
+
+  const mockStrategy: ResponseStrategy = {
+    id: 'test-strategy-123',
+    type: 'defensive',
+    title: 'Test Defensive Strategy',
+    description: 'Mock strategy for testing Stage 3 functionality',
+    actions: [
+      {
+        action: 'Monitor social media platforms',
+        platform: 'Twitter, Facebook',
+        timeline: '2 hours',
+        responsible: 'Social Media Team',
+        kpi: 'Response time'
+      },
+      {
+        action: 'Deploy counter-narrative content',
+        platform: 'LinkedIn',
+        timeline: '4 hours',
+        responsible: 'Content Team',
+        kpi: 'Engagement rate'
+      }
+    ],
+    priority: 'medium',
+    timeframe: '24 hours',
+    resources: ['Social Media Team', 'Content Team', 'Analytics']
+  };
 
   const runStage3Tests = async () => {
     setIsRunningTests(true);
@@ -30,18 +55,6 @@ const StrategyBrainStage3TestPage = () => {
       setTestResults([...results]);
 
       try {
-        const patternAnalysis = await analyzeEntityPatterns(testEntity);
-        const mockStrategy = {
-          id: `test-${Date.now()}`,
-          type: 'defensive' as const,
-          title: 'Test Strategy',
-          description: 'Test strategy for predictive analytics',
-          actions: [{ type: 'monitor', description: 'Test monitoring', timeline: '1 hour', responsible: 'AI', kpi: 'Test KPI' }],
-          priority: 'medium' as const,
-          timeframe: '24 hours',
-          resources: ['AI Assistant']
-        };
-
         const prediction = await predictStrategySuccess(mockStrategy, testEntity);
         results[results.length - 1] = { 
           test: "Predictive Analytics", 
@@ -66,35 +79,14 @@ const StrategyBrainStage3TestPage = () => {
       setTestResults([...results]);
 
       try {
-        await enableAutoExecution(testEntity, {
-          autoExecutionEnabled: true,
-          executionThresholds: {
-            minSuccessProbability: 0.7,
-            maxRiskLevel: 0.5,
-            maxResourceRequirement: 0.8,
-            minConfidenceScore: 0.6
-          },
-          allowedStrategyTypes: ['defensive', 'engagement'],
-          cooldownPeriod: 30,
-          maxDailyExecutions: 5
-        });
-
-        const mockStrategy = {
-          id: `auto-test-${Date.now()}`,
-          type: 'defensive' as const,
-          title: 'Auto-Execution Test Strategy',
-          description: 'Test strategy for auto-execution',
-          actions: [{ type: 'monitor', description: 'Test monitoring', timeline: '1 hour', responsible: 'AI', kpi: 'Test KPI' }],
-          priority: 'medium' as const,
-          timeframe: '24 hours',
-          resources: ['AI Assistant']
-        };
-
+        await enableAutoExecution(testEntity);
         const shouldExecute = await evaluateForAutoExecution(mockStrategy, testEntity);
+        const queueId = await queueForAutoExecution(mockStrategy, testEntity, 1);
+        
         results[results.length - 1] = { 
           test: "Auto-Execution Engine", 
           status: "passed", 
-          data: { autoExecutionEnabled: true, shouldExecute },
+          data: { shouldExecute, queueId },
           timestamp: new Date()
         };
         toast.success("✅ Auto-Execution Engine: PASSED");
@@ -114,16 +106,27 @@ const StrategyBrainStage3TestPage = () => {
       setTestResults([...results]);
 
       try {
-        const patternAnalysis = await analyzeEntityPatterns(testEntity);
-        const patterns = patternAnalysis.patterns || [];
+        const patternResults = await analyzeEntityPatterns(testEntity);
+        const patterns = patternResults.patterns || [];
         
-        const recommendation = await recommendStrategy(testEntity, patterns, []);
-        results[results.length - 1] = { 
-          test: "ML Pattern Recognition", 
-          status: "passed", 
-          data: { recommendation, patternsFound: patterns.length },
-          timestamp: new Date()
-        };
+        if (patterns.length > 0) {
+          const recommendation = await recommendStrategy(testEntity, patterns);
+          await trainMLModel(testEntity);
+          
+          results[results.length - 1] = { 
+            test: "ML Pattern Recognition", 
+            status: "passed", 
+            data: { recommendation, patternsFound: patterns.length },
+            timestamp: new Date()
+          };
+        } else {
+          results[results.length - 1] = { 
+            test: "ML Pattern Recognition", 
+            status: "passed", 
+            data: { message: "No patterns found - normal for new entity", patternsFound: 0 },
+            timestamp: new Date()
+          };
+        }
         toast.success("✅ ML Pattern Recognition: PASSED");
       } catch (error) {
         results[results.length - 1] = { 
@@ -141,25 +144,17 @@ const StrategyBrainStage3TestPage = () => {
       setTestResults([...results]);
 
       try {
-        const strategies = await generateResponseStrategies(testEntity, []);
-        if (strategies.length > 0) {
-          const coordinationPlan = await createCoordinationPlan(testEntity, strategies);
-          results[results.length - 1] = { 
-            test: "Cross-Platform Coordination", 
-            status: "passed", 
-            data: coordinationPlan,
-            timestamp: new Date()
-          };
-          toast.success("✅ Cross-Platform Coordination: PASSED");
-        } else {
-          results[results.length - 1] = { 
-            test: "Cross-Platform Coordination", 
-            status: "passed", 
-            data: { message: "No strategies available for coordination" },
-            timestamp: new Date()
-          };
-          toast.success("✅ Cross-Platform Coordination: PASSED (No strategies)");
-        }
+        const plan = await createCoordinationPlan(testEntity, [mockStrategy]);
+        await executeCoordinationPlan(plan.id);
+        const metrics = await getCoordinationMetrics(plan.id);
+        
+        results[results.length - 1] = { 
+          test: "Cross-Platform Coordination", 
+          status: "passed", 
+          data: { plan, metrics },
+          timestamp: new Date()
+        };
+        toast.success("✅ Cross-Platform Coordination: PASSED");
       } catch (error) {
         results[results.length - 1] = { 
           test: "Cross-Platform Coordination", 
@@ -177,8 +172,8 @@ const StrategyBrainStage3TestPage = () => {
       const total = results.length;
       
       if (passed === total) {
-        toast.success(`🎉 Stage 3 tests completed! (${passed}/${total})`, {
-          description: "Advanced Strategy Brain features are functional"
+        toast.success(`🎉 All Stage 3 tests passed! (${passed}/${total})`, {
+          description: "Advanced Strategy Brain features are fully operational"
         });
       } else {
         toast.warning(`⚠️ Stage 3 tests completed: ${passed}/${total} passed`, {
@@ -218,8 +213,8 @@ const StrategyBrainStage3TestPage = () => {
       <div className="p-6 space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-white">Strategy Brain Stage 3 - Advanced Intelligence</h1>
-            <p className="text-corporate-lightGray">Test predictive analytics, auto-execution, ML pattern recognition, and cross-platform coordination</p>
+            <h1 className="text-2xl font-bold text-white">Strategy Brain - Stage 3 Advanced Testing</h1>
+            <p className="text-corporate-lightGray">Test advanced intelligence features: Predictive Analytics, Auto-Execution, ML Recognition, Cross-Platform Coordination</p>
           </div>
           <Button
             onClick={runStage3Tests}
@@ -233,11 +228,70 @@ const StrategyBrainStage3TestPage = () => {
               </>
             ) : (
               <>
-                <Target className="h-4 w-4 mr-2" />
+                <Brain className="h-4 w-4 mr-2" />
                 Run Stage 3 Test Suite
               </>
             )}
           </Button>
+        </div>
+
+        {/* Stage 3 Features Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card className="bg-corporate-dark border-corporate-border">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-purple-500/20 rounded">
+                  <BarChart3 className="h-5 w-5 text-purple-400" />
+                </div>
+                <div>
+                  <h3 className="text-white font-medium">Predictive Analytics</h3>
+                  <p className="text-xs text-corporate-lightGray">Success prediction & optimization</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-corporate-dark border-corporate-border">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-blue-500/20 rounded">
+                  <Zap className="h-5 w-5 text-blue-400" />
+                </div>
+                <div>
+                  <h3 className="text-white font-medium">Auto-Execution</h3>
+                  <p className="text-xs text-corporate-lightGray">Intelligent strategy automation</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-corporate-dark border-corporate-border">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-green-500/20 rounded">
+                  <Brain className="h-5 w-5 text-green-400" />
+                </div>
+                <div>
+                  <h3 className="text-white font-medium">ML Recognition</h3>
+                  <p className="text-xs text-corporate-lightGray">Pattern learning & recommendations</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-corporate-dark border-corporate-border">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-orange-500/20 rounded">
+                  <Globe className="h-5 w-5 text-orange-400" />
+                </div>
+                <div>
+                  <h3 className="text-white font-medium">Cross-Platform</h3>
+                  <p className="text-xs text-corporate-lightGray">Multi-platform coordination</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Test Configuration */}
@@ -286,8 +340,8 @@ const StrategyBrainStage3TestPage = () => {
                       <div className="mt-3 p-3 bg-corporate-dark rounded">
                         <p className="text-xs text-corporate-lightGray mb-2">Test Data:</p>
                         <pre className="text-xs text-white overflow-x-auto">
-                          {JSON.stringify(result.data, null, 2).slice(0, 300)}
-                          {JSON.stringify(result.data, null, 2).length > 300 && '...'}
+                          {JSON.stringify(result.data, null, 2).slice(0, 400)}
+                          {JSON.stringify(result.data, null, 2).length > 400 && '...'}
                         </pre>
                       </div>
                     )}
@@ -310,19 +364,19 @@ const StrategyBrainStage3TestPage = () => {
         {/* Instructions */}
         <Card className="bg-corporate-dark border-corporate-border">
           <CardHeader>
-            <CardTitle className="text-white">Stage 3 Advanced Features</CardTitle>
+            <CardTitle className="text-white">Stage 3 Testing Instructions</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3 text-sm text-corporate-lightGray">
-              <p>This test suite validates the Stage 3 advanced Strategy Brain capabilities:</p>
+              <p>This advanced test suite validates Stage 3 Strategy Brain intelligence features:</p>
               <ol className="list-decimal list-inside space-y-1 ml-4">
-                <li><strong>Predictive Analytics:</strong> AI-powered success probability forecasting</li>
-                <li><strong>Auto-Execution Engine:</strong> Automated strategy deployment with safety thresholds</li>
-                <li><strong>ML Pattern Recognition:</strong> Machine learning-based strategy recommendations</li>
-                <li><strong>Cross-Platform Coordination:</strong> Multi-platform strategy orchestration</li>
+                <li><strong>Predictive Analytics:</strong> Tests success probability calculation and risk assessment</li>
+                <li><strong>Auto-Execution Engine:</strong> Tests autonomous strategy execution and queue management</li>
+                <li><strong>ML Pattern Recognition:</strong> Tests machine learning recommendations and training</li>
+                <li><strong>Cross-Platform Coordination:</strong> Tests multi-platform deployment and synchronization</li>
               </ol>
               <p className="mt-3 text-corporate-accent">
-                All Stage 3 tests should pass for full advanced functionality confirmation.
+                All Stage 3 tests should pass for full advanced intelligence functionality.
               </p>
             </div>
           </CardContent>
