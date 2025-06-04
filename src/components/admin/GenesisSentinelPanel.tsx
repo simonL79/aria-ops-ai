@@ -1,463 +1,305 @@
 
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
-import { 
-  Shield, 
-  Target, 
-  Activity, 
-  AlertTriangle, 
-  CheckCircle, 
-  Clock,
-  Zap,
-  Eye,
-  TrendingUp,
-  Database,
-  Server,
-  Globe
-} from 'lucide-react';
+import { GenesisSystemHealthService } from '@/services/genesis/systemHealthService';
+import { Shield, Activity, AlertTriangle, CheckCircle, Clock, Target, Database, Zap, Globe, TrendingUp } from 'lucide-react';
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
 
-interface SystemComponent {
+interface HealthMetrics {
+  liveDataCompliance: number;
+  entityLinkageRate: number;
+  systemUptime: number;
+  mockDataDetected: number;
+  confidencePipelineHealth: number;
+  totalThreatsProcessed: number;
+  avgResponseTime: number;
+}
+
+interface ComponentHealth {
   name: string;
-  status: 'healthy' | 'degraded' | 'down' | 'testing';
+  status: 'healthy' | 'degraded' | 'down';
   lastCheck: string;
   responseTime: number;
   details: string;
   category: 'core' | 'scanner' | 'edge_function' | 'database';
 }
 
-interface SystemMetrics {
-  liveDataCompliance: number;
-  entityLinkageRate: number;
-  systemUptime: number;
-  mockDataDetected: number;
-  confidencePipelineHealth: number;
-}
-
 const GenesisSentinelPanel = () => {
-  const [isRunning, setIsRunning] = useState(false);
-  const [systemComponents, setSystemComponents] = useState<SystemComponent[]>([]);
-  const [systemMetrics, setSystemMetrics] = useState<SystemMetrics>({
-    liveDataCompliance: 0,
-    entityLinkageRate: 0,
-    systemUptime: 0,
-    mockDataDetected: 0,
-    confidencePipelineHealth: 0
-  });
-  const [overallHealth, setOverallHealth] = useState<'healthy' | 'degraded' | 'critical'>('healthy');
+  const [isRunningHealthCheck, setIsRunningHealthCheck] = useState(false);
+  const [healthData, setHealthData] = useState<{
+    components: ComponentHealth[];
+    metrics: HealthMetrics;
+    overallHealth: 'healthy' | 'degraded' | 'critical';
+  } | null>(null);
+  const [lastHealthCheck, setLastHealthCheck] = useState<string | null>(null);
 
-  const runSystemIntegrityCheck = async () => {
-    setIsRunning(true);
-    console.log('🔥 Genesis Sentinel™: Running weapons-grade system integrity check');
-    
+  const runSystemHealthCheck = async () => {
+    setIsRunningHealthCheck(true);
     try {
-      // Check all A.R.I.A components
-      const components = await checkAllAriaComponents();
-      setSystemComponents(components);
+      console.log('🔥 Genesis Sentinel: Starting comprehensive system health check');
+      toast.info('Genesis Sentinel: Running comprehensive A.R.I.A system health check...');
       
-      // Calculate system metrics
-      const metrics = await calculateSystemMetrics();
-      setSystemMetrics(metrics);
+      const results = await GenesisSystemHealthService.runFullSystemCheck();
+      setHealthData(results);
+      setLastHealthCheck(new Date().toISOString());
       
-      // Determine overall health
-      const health = determineOverallHealth(components, metrics);
-      setOverallHealth(health);
+      const statusMessage = `✅ Health Check Complete: ${results.overallHealth.toUpperCase()} - ${results.components.length} components checked`;
       
-      toast.success(`Genesis Sentinel™ scan complete: ${components.length} components analyzed`);
+      if (results.overallHealth === 'critical') {
+        toast.error(statusMessage);
+      } else if (results.overallHealth === 'degraded') {
+        toast.warning(statusMessage);
+      } else {
+        toast.success(statusMessage);
+      }
       
     } catch (error) {
-      console.error('Genesis Sentinel error:', error);
-      toast.error('System integrity check failed');
+      console.error('❌ Genesis health check failed:', error);
+      toast.error(`Health check failed: ${error.message}`);
     } finally {
-      setIsRunning(false);
+      setIsRunningHealthCheck(false);
     }
   };
 
-  const checkAllAriaComponents = async (): Promise<SystemComponent[]> => {
-    const components: SystemComponent[] = [];
-    
-    // Core A.R.I.A Systems
-    const coreComponents = [
-      { name: 'Enforced Intelligence Pipeline', endpoint: '/api/intelligence/status' },
-      { name: 'CIA-Level Precision Filtering', endpoint: '/api/cia/status' },
-      { name: 'Live Data Enforcer', endpoint: '/api/enforcer/status' },
-      { name: 'Counter Narrative Engine', endpoint: '/api/narrative/status' },
-      { name: 'Article Generation Pipeline', endpoint: '/api/article/status' }
-    ];
+  // Auto-run health check on component mount
+  useEffect(() => {
+    runSystemHealthCheck();
+  }, []);
 
-    // Scanner Systems
-    const scannerComponents = [
-      { name: 'Reddit OSINT Scanner', function: 'reddit-scan' },
-      { name: 'UK News Intelligence', function: 'uk-news-scanner' },
-      { name: 'Enhanced Intelligence', function: 'enhanced-intelligence' },
-      { name: 'Monitoring Scan', function: 'monitoring-scan' },
-      { name: 'Watchtower Scan', function: 'watchtower-scan' }
-    ];
-
-    // Edge Functions
-    const edgeFunctions = [
-      { name: 'ARIA Ingest', function: 'aria-ingest' },
-      { name: 'Threat Classification', function: 'threat-classification' },
-      { name: 'System Health Monitor', function: 'system-health-monitor' },
-      { name: 'Threat Summarization', function: 'threat-summarization' }
-    ];
-
-    // Check core components
-    for (const component of coreComponents) {
-      const startTime = Date.now();
-      try {
-        // Simulate component check - in real implementation, would hit actual endpoints
-        const isHealthy = Math.random() > 0.1; // 90% healthy for demo
-        const responseTime = Date.now() - startTime + Math.floor(Math.random() * 100);
-        
-        components.push({
-          name: component.name,
-          status: isHealthy ? 'healthy' : 'degraded',
-          lastCheck: new Date().toISOString(),
-          responseTime,
-          details: isHealthy ? 'Operational' : 'Performance degraded',
-          category: 'core'
-        });
-      } catch (error) {
-        components.push({
-          name: component.name,
-          status: 'down',
-          lastCheck: new Date().toISOString(),
-          responseTime: -1,
-          details: 'Component unreachable',
-          category: 'core'
-        });
-      }
-    }
-
-    // Check scanners
-    for (const scanner of scannerComponents) {
-      const startTime = Date.now();
-      const isHealthy = Math.random() > 0.05; // 95% healthy for scanners
-      const responseTime = Date.now() - startTime + Math.floor(Math.random() * 200);
-      
-      components.push({
-        name: scanner.name,
-        status: isHealthy ? 'healthy' : 'degraded',
-        lastCheck: new Date().toISOString(),
-        responseTime,
-        details: isHealthy ? 'Scanning active' : 'Scan rate limited',
-        category: 'scanner'
-      });
-    }
-
-    // Check edge functions
-    for (const func of edgeFunctions) {
-      const startTime = Date.now();
-      const isHealthy = Math.random() > 0.08; // 92% healthy for edge functions
-      const responseTime = Date.now() - startTime + Math.floor(Math.random() * 150);
-      
-      components.push({
-        name: func.name,
-        status: isHealthy ? 'healthy' : 'degraded',
-        lastCheck: new Date().toISOString(),
-        responseTime,
-        details: isHealthy ? 'Function ready' : 'Cold start detected',
-        category: 'edge_function'
-      });
-    }
-
-    // Check database components
-    const dbComponents = [
-      'scan_results table',
-      'aria_ops_log table', 
-      'counter_narratives table',
-      'deployed_articles table'
-    ];
-
-    for (const dbComp of dbComponents) {
-      try {
-        const startTime = Date.now();
-        // Check table health
-        const { error } = await supabase.from(dbComp.split(' ')[0]).select('id').limit(1);
-        const responseTime = Date.now() - startTime;
-        
-        components.push({
-          name: dbComp,
-          status: error ? 'down' : 'healthy',
-          lastCheck: new Date().toISOString(),
-          responseTime,
-          details: error ? error.message : 'Table accessible',
-          category: 'database'
-        });
-      } catch (error) {
-        components.push({
-          name: dbComp,
-          status: 'down',
-          lastCheck: new Date().toISOString(),
-          responseTime: -1,
-          details: 'Database connection failed',
-          category: 'database'
-        });
-      }
-    }
-
-    return components;
-  };
-
-  const calculateSystemMetrics = async (): Promise<SystemMetrics> => {
-    try {
-      // Check for mock data contamination
-      const { data: mockResults } = await supabase
-        .from('scan_results')
-        .select('id')
-        .or('content.ilike.%mock%,content.ilike.%test%,content.ilike.%demo%')
-        .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
-
-      // Check entity linkage
-      const { data: totalResults } = await supabase
-        .from('scan_results')
-        .select('id')
-        .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
-
-      const { data: linkedResults } = await supabase
-        .from('scan_results')
-        .select('id')
-        .not('entity_name', 'is', null)
-        .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
-
-      // Check confidence pipeline health
-      const { data: confidenceResults } = await supabase
-        .from('scan_results')
-        .select('confidence_score')
-        .not('confidence_score', 'is', null)
-        .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
-
-      const totalCount = totalResults?.length || 0;
-      const linkedCount = linkedResults?.length || 0;
-      const mockCount = mockResults?.length || 0;
-      const avgConfidence = confidenceResults?.reduce((sum, r) => sum + (r.confidence_score || 0), 0) / (confidenceResults?.length || 1);
-
-      return {
-        liveDataCompliance: totalCount > 0 ? Math.max(0, (totalCount - mockCount) / totalCount * 100) : 100,
-        entityLinkageRate: totalCount > 0 ? (linkedCount / totalCount) * 100 : 0,
-        systemUptime: 98.7, // Would be calculated from actual uptime monitoring
-        mockDataDetected: mockCount,
-        confidencePipelineHealth: avgConfidence || 0
-      };
-    } catch (error) {
-      console.error('Metrics calculation error:', error);
-      return {
-        liveDataCompliance: 0,
-        entityLinkageRate: 0,
-        systemUptime: 0,
-        mockDataDetected: 999,
-        confidencePipelineHealth: 0
-      };
-    }
-  };
-
-  const determineOverallHealth = (components: SystemComponent[], metrics: SystemMetrics): 'healthy' | 'degraded' | 'critical' => {
-    const downComponents = components.filter(c => c.status === 'down').length;
-    const degradedComponents = components.filter(c => c.status === 'degraded').length;
-    
-    if (downComponents > 2 || metrics.liveDataCompliance < 95 || metrics.mockDataDetected > 10) {
-      return 'critical';
-    }
-    if (downComponents > 0 || degradedComponents > 3 || metrics.entityLinkageRate < 80) {
-      return 'degraded';
-    }
-    return 'healthy';
-  };
-
-  const getStatusIcon = (status: string) => {
+  const getHealthBadgeColor = (status: string) => {
     switch (status) {
-      case 'healthy': return <CheckCircle className="h-4 w-4 text-green-400" />;
-      case 'degraded': return <AlertTriangle className="h-4 w-4 text-yellow-400" />;
-      case 'down': return <AlertTriangle className="h-4 w-4 text-red-400" />;
-      case 'testing': return <Clock className="h-4 w-4 text-blue-400 animate-pulse" />;
-      default: return <Clock className="h-4 w-4 text-gray-400" />;
+      case 'healthy': return 'bg-green-500';
+      case 'degraded': return 'bg-yellow-500';
+      case 'critical': return 'bg-red-500';
+      case 'down': return 'bg-red-600';
+      default: return 'bg-gray-500';
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getHealthIcon = (status: string) => {
     switch (status) {
-      case 'healthy': return 'text-green-400';
-      case 'degraded': return 'text-yellow-400';
-      case 'down': return 'text-red-400';
-      case 'testing': return 'text-blue-400';
-      default: return 'text-gray-400';
+      case 'healthy': return <CheckCircle className="h-4 w-4" />;
+      case 'degraded': return <AlertTriangle className="h-4 w-4" />;
+      case 'critical': 
+      case 'down': return <AlertTriangle className="h-4 w-4" />;
+      default: return <Clock className="h-4 w-4" />;
     }
   };
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
-      case 'core': return <Shield className="h-4 w-4" />;
-      case 'scanner': return <Target className="h-4 w-4" />;
-      case 'edge_function': return <Zap className="h-4 w-4" />;
-      case 'database': return <Database className="h-4 w-4" />;
-      default: return <Server className="h-4 w-4" />;
+      case 'core': return <Shield className="h-4 w-4 text-corporate-accent" />;
+      case 'scanner': return <Target className="h-4 w-4 text-blue-400" />;
+      case 'edge_function': return <Zap className="h-4 w-4 text-purple-400" />;
+      case 'database': return <Database className="h-4 w-4 text-green-400" />;
+      default: return <Activity className="h-4 w-4" />;
     }
   };
 
-  // Auto-run on component mount
-  useEffect(() => {
-    runSystemIntegrityCheck();
-    // Set up periodic checks every 30 seconds
-    const interval = setInterval(runSystemIntegrityCheck, 30000);
-    return () => clearInterval(interval);
-  }, []);
+  const groupedComponents = healthData?.components.reduce((acc, component) => {
+    if (!acc[component.category]) {
+      acc[component.category] = [];
+    }
+    acc[component.category].push(component);
+    return acc;
+  }, {} as Record<string, ComponentHealth[]>) || {};
 
   return (
     <div className="space-y-6">
-      {/* Overall System Health */}
-      <Card className={`border-2 ${
-        overallHealth === 'healthy' ? 'border-green-500 bg-green-900/10' :
-        overallHealth === 'degraded' ? 'border-yellow-500 bg-yellow-900/10' :
-        'border-red-500 bg-red-900/10'
-      }`}>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Shield className="h-6 w-6 text-corporate-accent" />
-              <span className="text-white">A.R.I.A vX™ System Status</span>
-            </div>
-            <Badge className={
-              overallHealth === 'healthy' ? 'bg-green-500' :
-              overallHealth === 'degraded' ? 'bg-yellow-500' :
-              'bg-red-500'
-            }>
-              {overallHealth.toUpperCase()}
-            </Badge>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-white">
-                {systemMetrics.liveDataCompliance.toFixed(1)}%
-              </div>
-              <div className="text-sm text-corporate-lightGray">Live Data Compliance</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-white">
-                {systemMetrics.entityLinkageRate.toFixed(1)}%
-              </div>
-              <div className="text-sm text-corporate-lightGray">Entity Linkage</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-white">
-                {systemMetrics.systemUptime.toFixed(1)}%
-              </div>
-              <div className="text-sm text-corporate-lightGray">System Uptime</div>
-            </div>
-            <div className="text-center">
-              <div className={`text-2xl font-bold ${systemMetrics.mockDataDetected > 0 ? 'text-red-400' : 'text-green-400'}`}>
-                {systemMetrics.mockDataDetected}
-              </div>
-              <div className="text-sm text-corporate-lightGray">Mock Data Detected</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-white">
-                {systemMetrics.confidencePipelineHealth.toFixed(1)}%
-              </div>
-              <div className="text-sm text-corporate-lightGray">Confidence Pipeline</div>
-            </div>
-          </div>
-
-          <Button 
-            onClick={runSystemIntegrityCheck} 
-            disabled={isRunning}
-            className="w-full bg-corporate-accent text-black hover:bg-corporate-accent/90"
+      {/* Header Controls */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+            <Shield className="h-6 w-6 text-corporate-accent" />
+            A.R.I.A™ Genesis Sentinel
+          </h2>
+          <p className="text-corporate-lightGray">
+            Real-time system integrity monitoring and health validation
+          </p>
+        </div>
+        
+        <div className="flex items-center gap-3">
+          {lastHealthCheck && (
+            <span className="text-sm text-corporate-lightGray">
+              Last Check: {new Date(lastHealthCheck).toLocaleTimeString()}
+            </span>
+          )}
+          <Button
+            onClick={runSystemHealthCheck}
+            disabled={isRunningHealthCheck}
+            className="bg-corporate-accent text-black hover:bg-corporate-accent/90"
           >
-            {isRunning ? (
+            {isRunningHealthCheck ? (
               <>
                 <Activity className="h-4 w-4 mr-2 animate-spin" />
-                Running Genesis Sentinel™ Scan...
+                Scanning...
               </>
             ) : (
               <>
                 <Shield className="h-4 w-4 mr-2" />
-                Run Complete System Integrity Check
+                Run Health Check
               </>
             )}
           </Button>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      {/* Component Status Grid */}
-      {systemComponents.length > 0 && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {['core', 'scanner', 'edge_function', 'database'].map(category => {
-            const categoryComponents = systemComponents.filter(c => c.category === category);
-            const categoryName = category.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
-            
-            return (
-              <Card key={category} className="corporate-card">
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-lg corporate-heading">
-                    {getCategoryIcon(category)}
-                    {categoryName} Components ({categoryComponents.length})
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2 max-h-64 overflow-y-auto">
-                    {categoryComponents.map((component, index) => (
-                      <div key={index} className="flex items-center justify-between p-2 rounded bg-corporate-darkTertiary">
-                        <div className="flex items-center gap-3">
-                          {getStatusIcon(component.status)}
-                          <div>
-                            <div className="text-sm font-medium text-white">{component.name}</div>
-                            <div className="text-xs text-corporate-lightGray">{component.details}</div>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className={`text-sm ${getStatusColor(component.status)}`}>
-                            {component.status.toUpperCase()}
-                          </div>
-                          <div className="text-xs text-corporate-lightGray">
-                            {component.responseTime > 0 ? `${component.responseTime}ms` : 'N/A'}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+      {/* Overall System Status */}
+      {healthData && (
+        <Alert className={`border-2 ${
+          healthData.overallHealth === 'healthy' 
+            ? 'border-green-500 bg-green-950/20' 
+            : healthData.overallHealth === 'degraded'
+            ? 'border-yellow-500 bg-yellow-950/20'
+            : 'border-red-500 bg-red-950/20'
+        }`}>
+          <div className="flex items-center gap-2">
+            {getHealthIcon(healthData.overallHealth)}
+            <AlertDescription className="text-white">
+              <strong>System Status: {healthData.overallHealth.toUpperCase()}</strong>
+              {' - '}
+              {healthData.components.filter(c => c.status === 'healthy').length}/{healthData.components.length} components healthy
+            </AlertDescription>
+          </div>
+        </Alert>
+      )}
+
+      {/* System Metrics Overview */}
+      {healthData?.metrics && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card className="corporate-card">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center gap-1 corporate-heading">
+                <Globe className="h-4 w-4 text-corporate-accent" />
+                Live Data Compliance
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-white">
+                {healthData.metrics.liveDataCompliance.toFixed(1)}%
+              </div>
+              <Progress 
+                value={healthData.metrics.liveDataCompliance} 
+                className="mt-2"
+              />
+              <p className="text-xs corporate-subtext mt-1">
+                Mock data: {healthData.metrics.mockDataDetected}
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="corporate-card">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center gap-1 corporate-heading">
+                <Target className="h-4 w-4 text-corporate-accent" />
+                Entity Linkage
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-white">
+                {healthData.metrics.entityLinkageRate.toFixed(1)}%
+              </div>
+              <Progress 
+                value={healthData.metrics.entityLinkageRate} 
+                className="mt-2"
+              />
+              <p className="text-xs corporate-subtext mt-1">
+                Precision targeting
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="corporate-card">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center gap-1 corporate-heading">
+                <TrendingUp className="h-4 w-4 text-corporate-accent" />
+                System Uptime
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-white">
+                {healthData.metrics.systemUptime.toFixed(1)}%
+              </div>
+              <Progress 
+                value={healthData.metrics.systemUptime} 
+                className="mt-2"
+              />
+              <p className="text-xs corporate-subtext mt-1">
+                Operational status
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="corporate-card">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center gap-1 corporate-heading">
+                <Activity className="h-4 w-4 text-corporate-accent" />
+                Threats Processed
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-white">
+                {healthData.metrics.totalThreatsProcessed}
+              </div>
+              <p className="text-xs corporate-subtext mt-1">
+                Avg: {healthData.metrics.avgResponseTime.toFixed(0)}ms
+              </p>
+            </CardContent>
+          </Card>
         </div>
       )}
 
-      {/* Action Items */}
-      {(overallHealth !== 'healthy' || systemMetrics.mockDataDetected > 0) && (
-        <Card className="border-yellow-500 bg-yellow-900/10">
+      {/* Component Health Status by Category */}
+      {Object.keys(groupedComponents).map(category => (
+        <Card key={category} className="corporate-card">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-yellow-400">
-              <AlertTriangle className="h-5 w-5" />
-              Required Actions
+            <CardTitle className="flex items-center gap-2 corporate-heading">
+              {getCategoryIcon(category)}
+              {category.charAt(0).toUpperCase() + category.slice(1).replace('_', ' ')} Systems
+              <Badge className="ml-auto bg-corporate-darkSecondary text-corporate-lightGray">
+                {groupedComponents[category].length} components
+              </Badge>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
-              {systemMetrics.mockDataDetected > 0 && (
-                <div className="flex items-center gap-2 text-red-400">
-                  <AlertTriangle className="h-4 w-4" />
-                  <span>CRITICAL: {systemMetrics.mockDataDetected} mock data entries detected - immediate cleanup required</span>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {groupedComponents[category].map((component, index) => (
+                <div key={index} className="p-3 bg-corporate-darkSecondary rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-white truncate">
+                      {component.name}
+                    </span>
+                    <Badge className={`${getHealthBadgeColor(component.status)} text-white text-xs`}>
+                      {component.status}
+                    </Badge>
+                  </div>
+                  <div className="text-xs text-corporate-lightGray space-y-1">
+                    <div>Response: {component.responseTime}ms</div>
+                    <div className="truncate">{component.details}</div>
+                    <div>Checked: {new Date(component.lastCheck).toLocaleTimeString()}</div>
+                  </div>
                 </div>
-              )}
-              {systemMetrics.liveDataCompliance < 95 && (
-                <div className="flex items-center gap-2 text-yellow-400">
-                  <Eye className="h-4 w-4" />
-                  <span>Live data compliance below 95% - enhance validation pipeline</span>
-                </div>
-              )}
-              {systemMetrics.entityLinkageRate < 80 && (
-                <div className="flex items-center gap-2 text-yellow-400">
-                  <Target className="h-4 w-4" />
-                  <span>Entity linkage rate below 80% - improve entity recognition</span>
-                </div>
-              )}
+              ))}
             </div>
+          </CardContent>
+        </Card>
+      ))}
+
+      {/* No Data State */}
+      {!healthData && !isRunningHealthCheck && (
+        <Card className="corporate-card">
+          <CardContent className="text-center py-8">
+            <Shield className="h-12 w-12 text-corporate-accent mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-white mb-2">
+              Ready to Monitor A.R.I.A Systems
+            </h3>
+            <p className="text-corporate-lightGray mb-4">
+              Click "Run Health Check" to validate all system components
+            </p>
           </CardContent>
         </Card>
       )}

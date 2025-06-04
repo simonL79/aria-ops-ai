@@ -208,8 +208,9 @@ export class GenesisSystemHealthService {
     for (const tableName of tables) {
       const startTime = Date.now();
       try {
+        // Use type assertion to bypass TypeScript strict typing
         const { error } = await supabase
-          .from(tableName)
+          .from(tableName as any)
           .select('id')
           .limit(1);
         
@@ -359,6 +360,17 @@ export class GenesisSystemHealthService {
     overallHealth: string
   ): Promise<void> {
     try {
+      // Convert SystemMetrics to a Json-compatible object
+      const metricsJson = {
+        liveDataCompliance: metrics.liveDataCompliance,
+        entityLinkageRate: metrics.entityLinkageRate,
+        systemUptime: metrics.systemUptime,
+        mockDataDetected: metrics.mockDataDetected,
+        confidencePipelineHealth: metrics.confidencePipelineHealth,
+        totalThreatsProcessed: metrics.totalThreatsProcessed,
+        avgResponseTime: metrics.avgResponseTime
+      };
+
       await supabase.from('aria_ops_log').insert({
         operation_type: 'genesis_health_check',
         module_source: 'genesis_sentinel',
@@ -369,7 +381,7 @@ export class GenesisSystemHealthService {
           healthy_components: components.filter(c => c.status === 'healthy').length,
           degraded_components: components.filter(c => c.status === 'degraded').length,
           down_components: components.filter(c => c.status === 'down').length,
-          metrics,
+          metrics: metricsJson,
           timestamp: new Date().toISOString()
         }
       });
