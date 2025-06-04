@@ -38,53 +38,62 @@ export class EnforcedIntelligencePipeline {
   }
 
   /**
-   * Enforced CIA Precision Filtering - PRACTICAL MODE
+   * Enforced CIA Precision Filtering - TIERED CONFIDENCE MODE
    */
   static async executeCIAPrecisionScan(entityName: string): Promise<any[]> {
     return await enforceLiveData(
       async () => {
         const results = await CIALevelScanner.executePrecisionScan({
           targetEntity: entityName,
-          precisionMode: 'high',
+          precisionMode: 'medium',
           enableFalsePositiveFilter: true
         });
         
         if (!results || results.length === 0) {
-          throw new Error('No results from CIA precision scan');
+          throw new Error('No results from CIA tiered scan');
         }
         
-        // PRACTICAL validation - accept quarantined results too since they're still valid matches
-        const validResults = results.filter(result => 
-          (result.match_decision === 'accepted' || result.match_decision === 'quarantined') &&
+        // Accept strong and moderate matches, log weak ones
+        const acceptedResults = results.filter(result => 
+          (result.matchQuality === 'strong' || result.matchQuality === 'moderate') &&
           result.content && 
-          result.content.length > 20 // Much more practical threshold
+          result.content.length > 10
         );
         
-        if (validResults.length === 0) {
-          // If no accepted/quarantined results, check if we have any results with reasonable confidence
-          const anyValidResults = results.filter(result => 
-            result.confidence_score >= 15 && // Very low threshold - 15%
-            result.content && 
-            result.content.length > 10
+        const quarantinedResults = results.filter(result => result.matchQuality === 'weak');
+        
+        if (acceptedResults.length === 0) {
+          // If no strong/moderate results, check for any weak matches with context boosts
+          const boostedWeakResults = results.filter(result => 
+            result.matchQuality === 'weak' && 
+            result.contextBoosts && 
+            result.contextBoosts.length > 0 &&
+            result.confidence_score >= 20 // Boost threshold to 20%
           );
           
-          if (anyValidResults.length > 0) {
-            console.log(`✅ CIA Scanner: Accepting ${anyValidResults.length} results with practical confidence thresholds`);
-            return anyValidResults;
+          if (boostedWeakResults.length > 0) {
+            console.log(`✅ CIA Scanner: Accepting ${boostedWeakResults.length} context-boosted weak results`);
+            return boostedWeakResults;
           }
           
-          throw new Error('No practical results from CIA scan');
+          throw new Error('No accepted results from CIA tiered scan');
         }
         
-        console.log(`✅ CIA Scanner: Found ${validResults.length} valid results (accepted: ${results.filter(r => r.match_decision === 'accepted').length}, quarantined: ${results.filter(r => r.match_decision === 'quarantined').length})`);
+        console.log(`✅ CIA Scanner: Tiered Results - Strong: ${results.filter(r => r.matchQuality === 'strong').length}, Moderate: ${results.filter(r => r.matchQuality === 'moderate').length}, Quarantined: ${quarantinedResults.length}`);
         
-        return validResults;
+        // Log review statistics
+        const reviewRequired = results.filter(r => r.requiresReview).length;
+        if (reviewRequired > 0) {
+          console.log(`📝 CIA Scanner: ${reviewRequired} results flagged for manual review`);
+        }
+        
+        return acceptedResults;
       },
       {
         entityName,
-        serviceLabel: 'CIAPrecision',
+        serviceLabel: 'CIATieredPrecision',
         requireMinimumResults: 1,
-        strictEntityMatching: false, // More practical
+        strictEntityMatching: false,
         allowEmpty: false
       }
     );
