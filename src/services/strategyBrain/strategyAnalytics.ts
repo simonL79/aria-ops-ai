@@ -17,6 +17,13 @@ export interface StrategyAnalytics {
   }>;
 }
 
+interface ExecutionResult {
+  executed_actions?: number;
+  failed_actions?: number;
+  completed_at?: string;
+  details?: any[];
+}
+
 export const getStrategyAnalytics = async (entityName: string): Promise<StrategyAnalytics> => {
   try {
     // Get all strategies for entity
@@ -34,12 +41,17 @@ export const getStrategyAnalytics = async (entityName: string): Promise<Strategy
 
     // Calculate average execution time
     const executionTimes = completedStrategies
-      .filter(s => s.executed_at && s.execution_result?.completed_at)
+      .filter(s => s.executed_at && s.execution_result)
       .map(s => {
-        const start = new Date(s.executed_at!);
-        const end = new Date(s.execution_result.completed_at);
-        return (end.getTime() - start.getTime()) / (1000 * 60); // minutes
-      });
+        const executionResult = s.execution_result as ExecutionResult;
+        if (executionResult?.completed_at) {
+          const start = new Date(s.executed_at!);
+          const end = new Date(executionResult.completed_at);
+          return (end.getTime() - start.getTime()) / (1000 * 60); // minutes
+        }
+        return 0;
+      })
+      .filter(time => time > 0);
 
     const avgExecutionTime = executionTimes.length > 0 
       ? executionTimes.reduce((sum, time) => sum + time, 0) / executionTimes.length 

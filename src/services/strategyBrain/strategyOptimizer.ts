@@ -4,10 +4,24 @@ import { ResponseStrategy } from './responseGenerator';
 import { toast } from 'sonner';
 
 export interface OptimizationResult {
-  originalStrategy: ResponseStrategy;
+  originalStrategy: any;
   optimizedStrategy: ResponseStrategy;
   improvements: string[];
   confidence: number;
+}
+
+interface DatabaseStrategy {
+  strategy_id: string;
+  entity_name: string;
+  strategy_type: string;
+  title: string;
+  description: string;
+  actions: any;
+  priority: string;
+  timeframe: string;
+  resources: string[];
+  status: string;
+  execution_result?: any;
 }
 
 export const optimizeStrategy = async (strategyId: string): Promise<OptimizationResult> => {
@@ -25,27 +39,29 @@ export const optimizeStrategy = async (strategyId: string): Promise<Optimization
       throw new Error('Strategy not found for optimization');
     }
 
+    const dbStrategy = strategy as DatabaseStrategy;
+
     // Analyze historical performance data
     const { data: historicalData } = await supabase
       .from('strategy_responses')
       .select('*')
-      .eq('entity_name', strategy.entity_name)
-      .eq('strategy_type', strategy.strategy_type)
+      .eq('entity_name', dbStrategy.entity_name)
+      .eq('strategy_type', dbStrategy.strategy_type)
       .not('execution_result', 'is', null)
       .order('created_at', { ascending: false })
       .limit(10);
 
     // Generate optimizations based on historical performance
-    const optimizations = generateOptimizations(strategy, historicalData || []);
+    const optimizations = generateOptimizations(dbStrategy, historicalData || []);
     
     // Create optimized strategy
-    const optimizedStrategy = applyOptimizations(strategy, optimizations);
+    const optimizedStrategy = applyOptimizations(dbStrategy, optimizations);
     
     // Store optimization results
     await storeOptimizationResults(strategyId, optimizations);
 
     return {
-      originalStrategy: strategy,
+      originalStrategy: dbStrategy,
       optimizedStrategy,
       improvements: optimizations.improvements,
       confidence: optimizations.confidence
@@ -57,14 +73,15 @@ export const optimizeStrategy = async (strategyId: string): Promise<Optimization
   }
 };
 
-const generateOptimizations = (strategy: any, historicalData: any[]) => {
+const generateOptimizations = (strategy: DatabaseStrategy, historicalData: any[]) => {
   const improvements: string[] = [];
   let confidence = 0.7;
 
   // Analyze success patterns
-  const successfulStrategies = historicalData.filter(s => 
-    s.execution_result?.executed_actions > s.execution_result?.failed_actions
-  );
+  const successfulStrategies = historicalData.filter(s => {
+    const executionResult = s.execution_result as any;
+    return executionResult?.executed_actions > (executionResult?.failed_actions || 0);
+  });
 
   if (successfulStrategies.length > 0) {
     improvements.push('Optimized action sequence based on successful historical patterns');
@@ -95,21 +112,23 @@ const generateOptimizations = (strategy: any, historicalData: any[]) => {
   };
 };
 
-const applyOptimizations = (originalStrategy: any, optimizations: any): ResponseStrategy => {
-  const actions = originalStrategy.actions.map((action: any, index: number) => ({
-    ...action,
-    timeline: optimizeTimeline(action.timeline),
-    responsible: optimizeResponsible(action.responsible),
-    kpi: enhanceKPI(action.kpi)
-  }));
+const applyOptimizations = (originalStrategy: DatabaseStrategy, optimizations: any): ResponseStrategy => {
+  const actions = Array.isArray(originalStrategy.actions) 
+    ? originalStrategy.actions.map((action: any, index: number) => ({
+        ...action,
+        timeline: optimizeTimeline(action.timeline),
+        responsible: optimizeResponsible(action.responsible),
+        kpi: enhanceKPI(action.kpi)
+      }))
+    : [];
 
   return {
     id: `${originalStrategy.strategy_id}-optimized`,
-    type: originalStrategy.strategy_type,
+    type: originalStrategy.strategy_type as 'counter_narrative' | 'monitoring' | 'platform_response' | 'influencer_outreach' | 'seo_suppression',
     title: `${originalStrategy.title} (Optimized)`,
     description: `${originalStrategy.description} - Enhanced with AI optimization`,
     actions,
-    priority: optimizePriority(originalStrategy.priority),
+    priority: optimizePriority(originalStrategy.priority) as 'low' | 'medium' | 'high' | 'critical',
     timeframe: optimizeTimeframe(originalStrategy.timeframe),
     resources: optimizeResources(originalStrategy.resources)
   };
@@ -143,12 +162,12 @@ const enhanceKPI = (kpi: string): string => {
   return enhancements[kpi] || kpi;
 };
 
-const optimizePriority = (priority: string): 'low' | 'medium' | 'high' | 'critical' => {
-  const priorityMap: { [key: string]: 'low' | 'medium' | 'high' | 'critical' } = {
+const optimizePriority = (priority: string): string => {
+  const priorityMap: { [key: string]: string } = {
     'low': 'medium',
     'medium': 'high'
   };
-  return priorityMap[priority] as 'low' | 'medium' | 'high' | 'critical' || priority as 'low' | 'medium' | 'high' | 'critical';
+  return priorityMap[priority] || priority;
 };
 
 const optimizeTimeframe = (timeframe: string): string => {
@@ -167,14 +186,16 @@ const optimizeResources = (resources: string[]): string[] => {
 
 const storeOptimizationResults = async (strategyId: string, optimizations: any) => {
   try {
+    const optimizationData = {
+      improvements: optimizations.improvements,
+      confidence: optimizations.confidence,
+      optimized_at: new Date().toISOString()
+    };
+
     await supabase
       .from('strategy_responses')
       .update({
-        optimization_result: {
-          improvements: optimizations.improvements,
-          confidence: optimizations.confidence,
-          optimized_at: new Date().toISOString()
-        }
+        execution_result: optimizationData
       })
       .eq('strategy_id', strategyId);
   } catch (error) {
