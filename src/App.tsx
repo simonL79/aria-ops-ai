@@ -10,16 +10,10 @@ import BlogPostPage from '@/pages/BlogPostPage';
 import ContactPage from '@/pages/ContactPage';
 import AboutPage from '@/pages/AboutPage';
 import ReputationScanPage from '@/pages/ReputationScanPage';
-import AuthPage from '@/pages/AuthPage';
-import PasswordResetPage from '@/pages/PasswordResetPage';
+import Authentication from '@/pages/Authentication';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 
 // Lazy load dashboard and admin components
-const DashboardHomePage = lazy(() => import('@/pages/dashboard/DashboardHomePage'));
-const ClientsPage = lazy(() => import('@/pages/dashboard/ClientsPage'));
-const AiScrapingPage = lazy(() => import('@/pages/dashboard/AiScrapingPage'));
-const CompliancePage = lazy(() => import('@/pages/dashboard/CompliancePage'));
-const ScanSubmissionsPage = lazy(() => import('@/pages/dashboard/ScanSubmissionsPage'));
 const AdminDashboard = lazy(() => import('@/components/admin/AdminDashboard'));
 const ClientIntakePage = lazy(() => import('@/pages/ClientIntakePage'));
 
@@ -52,18 +46,11 @@ function App() {
                 <Route path="/contact" element={<ContactPage />} />
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/reputation-scan" element={<ReputationScanPage />} />
-                <Route path="/auth" element={<AuthPage />} />
-                <Route path="/reset-password" element={<PasswordResetPage />} />
+                <Route path="/auth" element={<Authentication />} />
+                <Route path="/reset-password" element={<Authentication />} />
                 
                 {/* Hidden client intake route */}
                 <Route path="/client-intake" element={<ClientIntakePage />} />
-                
-                {/* Dashboard Routes */}
-                <Route path="/dashboard" element={<DashboardHomePage />} />
-                <Route path="/dashboard/clients" element={<ClientsPage />} />
-                <Route path="/dashboard/ai-scraping" element={<AiScrapingPage />} />
-                <Route path="/dashboard/compliance" element={<CompliancePage />} />
-                <Route path="/dashboard/scan-submissions" element={<ScanSubmissionsPage />} />
                 
                 {/* Admin Routes */}
                 <Route path="/admin/*" element={<AdminDashboard />} />
