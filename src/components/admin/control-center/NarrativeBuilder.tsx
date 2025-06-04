@@ -5,10 +5,12 @@ import { FileText, Zap, Target } from 'lucide-react';
 
 interface NarrativeBuilderProps {
   selectedEntity: string;
+  serviceStatus: any;
 }
 
 const NarrativeBuilder: React.FC<NarrativeBuilderProps> = ({
-  selectedEntity
+  selectedEntity,
+  serviceStatus
 }) => {
   return (
     <div className="space-y-6">

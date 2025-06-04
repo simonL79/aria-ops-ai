@@ -5,10 +5,12 @@ import { Shield, FileText, Gavel } from 'lucide-react';
 
 interface ShieldhLegalProps {
   selectedEntity: string;
+  serviceStatus: any;
 }
 
 const ShieldhLegal: React.FC<ShieldhLegalProps> = ({
-  selectedEntity
+  selectedEntity,
+  serviceStatus
 }) => {
   return (
     <div className="space-y-6">

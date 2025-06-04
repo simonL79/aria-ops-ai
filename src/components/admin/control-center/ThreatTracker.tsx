@@ -5,10 +5,12 @@ import { AlertTriangle, Shield, Activity } from 'lucide-react';
 
 interface ThreatTrackerProps {
   selectedEntity: string;
+  serviceStatus: any;
 }
 
 const ThreatTracker: React.FC<ThreatTrackerProps> = ({
-  selectedEntity
+  selectedEntity,
+  serviceStatus
 }) => {
   return (
     <div className="space-y-6">

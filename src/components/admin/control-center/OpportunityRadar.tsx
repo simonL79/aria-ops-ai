@@ -5,10 +5,12 @@ import { Target, Users, TrendingUp } from 'lucide-react';
 
 interface OpportunityRadarProps {
   selectedEntity: string;
+  serviceStatus: any;
 }
 
 const OpportunityRadar: React.FC<OpportunityRadarProps> = ({
-  selectedEntity
+  selectedEntity,
+  serviceStatus
 }) => {
   return (
     <div className="space-y-6">

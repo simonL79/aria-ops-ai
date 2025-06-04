@@ -5,10 +5,12 @@ import { BarChart, TrendingUp, Target } from 'lucide-react';
 
 interface CommandReviewProps {
   selectedEntity: string;
+  serviceStatus: any;
 }
 
 const CommandReview: React.FC<CommandReviewProps> = ({
-  selectedEntity
+  selectedEntity,
+  serviceStatus
 }) => {
   return (
     <div className="space-y-6">
