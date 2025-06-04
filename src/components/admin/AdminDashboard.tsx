@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,6 +8,7 @@ import { Brain, Zap, Target, AlertTriangle, BarChart3, Settings, Activity, Trend
 import { toast } from 'sonner';
 import ControlCenterPage from '@/pages/admin/ControlCenterPage';
 import StrategyBrainTestPage from '@/pages/admin/StrategyBrainTestPage';
+import StrategyBrainStage3TestPage from '@/pages/admin/StrategyBrainStage3TestPage';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -23,6 +25,9 @@ const AdminDashboard = () => {
       
       {/* Strategy Brain Test Route */}
       <Route path="/strategy-brain-test" element={<StrategyBrainTestPage />} />
+      
+      {/* Strategy Brain Stage 3 Test Route */}
+      <Route path="/strategy-brain-stage3" element={<StrategyBrainStage3TestPage />} />
       
       {/* Default Route - Redirect to Control Center */}
       <Route path="*" element={<ControlCenterPage />} />
