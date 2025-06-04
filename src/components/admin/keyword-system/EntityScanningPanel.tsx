@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,9 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Search, Target, Plus, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Search, Target, Plus, CheckCircle, AlertTriangle, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import { KeywordCIAIntegration } from '@/services/intelligence/keywordCIAIntegration';
+import CIAScanResultsPanel from './CIAScanResultsPanel';
 
 interface EntityScanResult {
   entityName: string;
@@ -35,6 +35,7 @@ const EntityScanningPanel = ({ onEntityScanned }: EntityScanningPanelProps) => {
   const [isScanning, setIsScanning] = useState(false);
   const [scanResult, setScanResult] = useState<EntityScanResult | null>(null);
   const [showAddToClients, setShowAddToClients] = useState(false);
+  const [showDetailedResults, setShowDetailedResults] = useState(false);
 
   const handleScanEntity = async () => {
     if (!entityName.trim()) {
@@ -117,6 +118,12 @@ const EntityScanningPanel = ({ onEntityScanned }: EntityScanningPanelProps) => {
     }
   };
 
+  const handleViewDetailedResults = () => {
+    if (scanResult?.entityName) {
+      setShowDetailedResults(true);
+    }
+  };
+
   const getPrecisionColor = (level: string) => {
     switch (level) {
       case 'high': return 'bg-green-900/20 text-green-300 border-green-500/30';
@@ -125,6 +132,15 @@ const EntityScanningPanel = ({ onEntityScanned }: EntityScanningPanelProps) => {
       default: return 'bg-gray-900/20 text-gray-300 border-gray-500/30';
     }
   };
+
+  if (showDetailedResults && scanResult) {
+    return (
+      <CIAScanResultsPanel
+        entityName={scanResult.entityName}
+        onClose={() => setShowDetailedResults(false)}
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -194,7 +210,18 @@ const EntityScanningPanel = ({ onEntityScanned }: EntityScanningPanelProps) => {
           {/* Scan Results */}
           {scanResult && (
             <div className="space-y-4 pt-4 border-t border-corporate-border">
-              <h4 className="text-lg font-semibold text-white">Scan Results for "{scanResult.entityName}"</h4>
+              <div className="flex items-center justify-between">
+                <h4 className="text-lg font-semibold text-white">Scan Results for "{scanResult.entityName}"</h4>
+                <Button
+                  onClick={handleViewDetailedResults}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <Eye className="h-4 w-4" />
+                  View Detailed Results
+                </Button>
+              </div>
               
               {/* Precision Stats */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
