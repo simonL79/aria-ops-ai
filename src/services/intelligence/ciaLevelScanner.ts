@@ -144,6 +144,18 @@ export class CIALevelScanner {
             console.log(`❌ CIA Scanner: REJECTED low confidence in ${func} (${confidenceScore}%)`);
           }
 
+          // Determine match type based on score and content analysis
+          let matchType = 'unknown';
+          if (decision.match_score >= 0.9) {
+            matchType = 'exact';
+          } else if (decision.match_score >= 0.7) {
+            matchType = 'high_confidence';
+          } else if (decision.match_score >= 0.45) {
+            matchType = 'contextual';
+          } else {
+            matchType = 'low_confidence';
+          }
+
           const ciaResult: CIAScanResult = {
             id: result.id || `cia-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
             platform: result.platform || func,
@@ -153,7 +165,7 @@ export class CIALevelScanner {
             match_decision: finalDecision,
             false_positive_detected: decision.false_positive_detected,
             confidence_score: confidenceScore,
-            match_type: decision.match_type || 'unknown',
+            match_type: matchType,
             source_type: 'cia_verified'
           };
 
