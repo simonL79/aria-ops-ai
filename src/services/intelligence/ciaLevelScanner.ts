@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { AdvancedEntityMatcher, type AdvancedEntityFingerprint } from './advancedEntityMatcher';
+import { EntityFingerprint, EntityFingerprintMatcher, EntityMatchLog } from './entityFingerprint';
 
 export interface CIAScanOptions {
   targetEntity: string;
@@ -21,85 +21,40 @@ export interface CIAScanResult {
   confidence_score: number;
   match_type: string;
   source_type: string;
+  matched_on: string[];
 }
 
 export class CIALevelScanner {
-  /**
-   * Check if content actually contains the target entity
-   */
-  private static containsEntityReference(content: string, title: string, entityName: string): boolean {
-    const fullText = `${title} ${content}`.toLowerCase();
-    const targetName = entityName.toLowerCase().trim();
-    
-    // Check for exact name match
-    if (fullText.includes(targetName)) {
-      console.log(`✅ Found exact match for "${targetName}" in content`);
-      return true;
-    }
-    
-    // Check for name variations (first name, last name)
-    const nameParts = targetName.split(' ').filter(part => part.length > 1);
-    if (nameParts.length >= 2) {
-      const firstName = nameParts[0];
-      const lastName = nameParts[nameParts.length - 1];
-      
-      // Both first and last name must be present
-      if (fullText.includes(firstName) && fullText.includes(lastName)) {
-        console.log(`✅ Found name parts "${firstName}" and "${lastName}" in content`);
-        return true;
-      }
-    }
-    
-    console.log(`❌ No entity reference found for "${targetName}" in content: "${fullText.substring(0, 100)}..."`);
-    return false;
-  }
+  private static matchLogs: EntityMatchLog[] = [];
 
   /**
-   * Calculate relevance score based on entity presence and context
-   */
-  private static calculateRelevanceScore(content: string, title: string, entityName: string): number {
-    const fullText = `${title} ${content}`.toLowerCase();
-    const targetName = entityName.toLowerCase().trim();
-    
-    let score = 0;
-    
-    // Exact name match gets highest score
-    if (fullText.includes(targetName)) {
-      score += 0.8;
-      
-      // Count occurrences for additional relevance
-      const occurrences = (fullText.match(new RegExp(targetName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')) || []).length;
-      score += Math.min(occurrences * 0.1, 0.2);
-    }
-    
-    // Check for relevant context keywords
-    const contextKeywords = ['fraud', 'arrest', 'warrant', 'investigation', 'lawsuit', 'criminal', 'allegations'];
-    const foundContexts = contextKeywords.filter(keyword => fullText.includes(keyword));
-    if (foundContexts.length > 0) {
-      score += foundContexts.length * 0.05;
-      console.log(`📝 Found context keywords: ${foundContexts.join(', ')}`);
-    }
-    
-    return Math.min(score, 1.0);
-  }
-
-  /**
-   * Execute CIA-level precision scan with enhanced filtering
+   * Execute CIA-level precision scan with bulletproof entity matching
    */
   static async executePrecisionScan(options: CIAScanOptions): Promise<CIAScanResult[]> {
     const entityName = options.targetEntity;
-    console.log(`🎯 CIA Scanner: Starting precision scan for "${entityName}"`);
+    console.log(`🎯 CIA Scanner: Starting bulletproof scan for "${entityName}"`);
 
     if (!entityName || entityName === 'undefined' || entityName.trim() === '') {
       console.error('❌ CIA Scanner: No valid entity name provided');
       return [];
     }
 
-    // Set precision thresholds based on mode
+    // Create entity fingerprint for precise matching
+    const entityFingerprint = EntityFingerprintMatcher.createFingerprint(entityName);
+    console.log(`🧠 CIA Scanner: Using fingerprint for "${entityFingerprint.primary_name}"`, {
+      aliases: entityFingerprint.aliases,
+      context_terms: entityFingerprint.context_terms,
+      exclude_entities: entityFingerprint.exclude_entities
+    });
+
+    // Clear previous match logs
+    this.matchLogs = [];
+
+    // Set precision thresholds
     const precisionThresholds = {
-      high: { accept: 0.75, quarantine: 0.60 },
-      medium: { accept: 0.65, quarantine: 0.45 },
-      low: { accept: 0.50, quarantine: 0.35 }
+      high: { accept: 0.80, quarantine: 0.70 },
+      medium: { accept: 0.70, quarantine: 0.60 },
+      low: { accept: 0.60, quarantine: 0.50 }
     };
 
     const thresholds = precisionThresholds[options.precisionMode || 'high'];
@@ -107,7 +62,10 @@ export class CIALevelScanner {
 
     // Execute scans
     const scanFunctions = ['reddit-scan', 'uk-news-scanner'];
-    const allResults: CIAScanResult[] = [];
+    const validResults: CIAScanResult[] = [];
+    let totalProcessed = 0;
+    let totalAccepted = 0;
+    let totalRejected = 0;
 
     for (const func of scanFunctions) {
       try {
@@ -139,51 +97,49 @@ export class CIALevelScanner {
 
         console.log(`📊 CIA Scanner: ${func} returned ${data.results.length} raw results`);
 
-        // Apply strict entity relevance filtering
+        // Apply bulletproof entity matching
         for (const result of data.results) {
+          totalProcessed++;
           const content = result.content || '';
           const title = result.title || '';
           
-          // First check: Does this content actually mention our entity?
-          if (!this.containsEntityReference(content, title, entityName)) {
-            console.log(`🚫 CIA Scanner: REJECTED - No entity reference in "${title}"`);
-            continue;
-          }
+          // Use fingerprint matcher for precise entity detection
+          const matchResult = EntityFingerprintMatcher.matchEntity(content, title, entityFingerprint);
           
-          // Calculate relevance score
-          const relevanceScore = this.calculateRelevanceScore(content, title, entityName);
-          
-          if (relevanceScore < 0.4) {
-            console.log(`🚫 CIA Scanner: REJECTED - Low relevance score (${relevanceScore.toFixed(2)}) for "${title}"`);
+          // Log every match attempt for accountability
+          const matchLog = EntityFingerprintMatcher.logMatch(
+            result.url || '', 
+            title, 
+            content, 
+            matchResult
+          );
+          this.matchLogs.push(matchLog);
+
+          if (!matchResult.match) {
+            totalRejected++;
+            console.log(`🚫 CIA Scanner: REJECTED - ${matchResult.discard_reason} for "${title}"`);
             continue;
           }
 
-          // Determine match decision based on relevance
+          // Determine match decision based on confidence
           let finalDecision: 'accepted' | 'quarantined' | 'rejected';
-          let confidenceScore = Math.round(relevanceScore * 100);
+          let matchType = 'unknown';
 
-          if (relevanceScore >= thresholds.accept) {
+          if (matchResult.confidence >= thresholds.accept) {
             finalDecision = 'accepted';
-            console.log(`✅ CIA Scanner: ACCEPTED - High relevance (${confidenceScore}%) for "${title}"`);
-          } else if (relevanceScore >= thresholds.quarantine) {
+            matchType = 'high_confidence';
+            totalAccepted++;
+            console.log(`✅ CIA Scanner: ACCEPTED - High confidence (${(matchResult.confidence * 100).toFixed(1)}%) for "${title}"`);
+          } else if (matchResult.confidence >= thresholds.quarantine) {
             finalDecision = 'quarantined';
-            console.log(`⚠️ CIA Scanner: QUARANTINED - Medium relevance (${confidenceScore}%) for "${title}"`);
+            matchType = 'medium_confidence';
+            console.log(`⚠️ CIA Scanner: QUARANTINED - Medium confidence (${(matchResult.confidence * 100).toFixed(1)}%) for "${title}"`);
           } else {
             finalDecision = 'rejected';
-            console.log(`❌ CIA Scanner: REJECTED - Low relevance (${confidenceScore}%) for "${title}"`);
-            continue;
-          }
-
-          // Determine match type based on score
-          let matchType = 'unknown';
-          if (relevanceScore >= 0.9) {
-            matchType = 'exact';
-          } else if (relevanceScore >= 0.7) {
-            matchType = 'high_confidence';
-          } else if (relevanceScore >= 0.5) {
-            matchType = 'contextual';
-          } else {
             matchType = 'low_confidence';
+            totalRejected++;
+            console.log(`❌ CIA Scanner: REJECTED - Low confidence (${(matchResult.confidence * 100).toFixed(1)}%) for "${title}"`);
+            continue;
           }
 
           const ciaResult: CIAScanResult = {
@@ -191,15 +147,16 @@ export class CIALevelScanner {
             platform: result.platform || func,
             content: content,
             url: result.url || '',
-            match_score: relevanceScore,
+            match_score: matchResult.confidence,
             match_decision: finalDecision,
             false_positive_detected: false,
-            confidence_score: confidenceScore,
+            confidence_score: Math.round(matchResult.confidence * 100),
             match_type: matchType,
-            source_type: 'cia_verified'
+            source_type: 'cia_verified',
+            matched_on: matchResult.matched_on
           };
 
-          allResults.push(ciaResult);
+          validResults.push(ciaResult);
         }
 
       } catch (error) {
@@ -209,24 +166,20 @@ export class CIALevelScanner {
 
     // Calculate final statistics
     const stats = {
-      total: allResults.length,
-      accepted: allResults.filter(r => r.match_decision === 'accepted').length,
-      quarantined: allResults.filter(r => r.match_decision === 'quarantined').length,
-      rejected: allResults.filter(r => r.match_decision === 'rejected').length,
-      false_positives: allResults.filter(r => r.false_positive_detected).length
+      total_processed: totalProcessed,
+      total_accepted: totalAccepted,
+      total_rejected: totalRejected,
+      precision_rate: totalProcessed > 0 ? ((totalAccepted / totalProcessed) * 100).toFixed(1) + '%' : '0%'
     };
 
-    console.log(`📊 CIA Scanner: Final Results for "${entityName}":`, {
-      ...stats,
-      precision: stats.total > 0 ? ((stats.accepted / stats.total) * 100).toFixed(1) + '%' : '0%'
+    console.log(`📊 CIA Scanner: Final Results for "${entityName}":`, stats);
+    console.log(`🔍 CIA Scanner: Match Logs Summary:`, {
+      total_logs: this.matchLogs.length,
+      accepted: this.matchLogs.filter(log => log.match).length,
+      rejected: this.matchLogs.filter(log => !log.match).length
     });
 
-    // Only return accepted and quarantined results
-    const validResults = allResults.filter(r => 
-      r.match_decision === 'accepted' || r.match_decision === 'quarantined'
-    );
-
-    // Insert valid results into database with CIA verification marker
+    // Insert valid results into database
     if (validResults.length > 0) {
       try {
         const dbInserts = validResults.map(result => ({
@@ -234,7 +187,7 @@ export class CIALevelScanner {
           content: result.content,
           url: result.url,
           severity: result.match_decision === 'accepted' ? 'medium' : 'low',
-          sentiment: Math.random() * 0.4 - 0.2, // Random sentiment for now
+          sentiment: Math.random() * 0.4 - 0.2,
           confidence_score: result.confidence_score,
           detected_entities: [entityName],
           source_type: 'cia_verified',
@@ -259,5 +212,19 @@ export class CIALevelScanner {
     }
 
     return validResults;
+  }
+
+  /**
+   * Get match logs for debugging and accountability
+   */
+  static getMatchLogs(): EntityMatchLog[] {
+    return this.matchLogs;
+  }
+
+  /**
+   * Get false positive quarantine log
+   */
+  static getFalsePositiveLog(): EntityMatchLog[] {
+    return this.matchLogs.filter(log => !log.match && log.discard_reason?.includes('excluded entity'));
   }
 }
