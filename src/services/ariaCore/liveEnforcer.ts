@@ -256,15 +256,20 @@ export async function getQuarantinedResults(): Promise<QuarantineRecord[]> {
       return [];
     }
 
-    return data?.map(record => ({
-      id: record.id,
-      service_label: record.module_source,
-      entity_name: record.entity_name,
-      failure_reason: record.error_message,
-      raw_result: record.operation_data?.raw_result,
-      quarantined_at: record.created_at,
-      reviewed: record.operation_data?.reviewed || false
-    })) || [];
+    return data?.map(record => {
+      // Type-safe extraction of operation_data properties
+      const operationData = record.operation_data as any;
+      
+      return {
+        id: record.id,
+        service_label: record.module_source || '',
+        entity_name: record.entity_name || '',
+        failure_reason: record.error_message || '',
+        raw_result: operationData?.raw_result || null,
+        quarantined_at: record.created_at || '',
+        reviewed: operationData?.reviewed || false
+      };
+    }) || [];
   } catch (error) {
     console.error('Error fetching quarantined results:', error);
     return [];
