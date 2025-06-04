@@ -140,7 +140,7 @@ export class AdvancedEntityMatcher {
   }
 
   /**
-   * VERY LENIENT entity matching - designed to catch everything for debugging
+   * BALANCED entity matching with improved precision
    */
   static analyzeContentMatch(
     content: string, 
@@ -180,7 +180,7 @@ export class AdvancedEntityMatcher {
       console.log('✅ PRIMARY NAME EXACT MATCH');
     }
 
-    // NAME PARTS MATCHING - very lenient
+    // ENHANCED NAME PARTS MATCHING - more intelligent
     const nameParts = fingerprint.primary_name.toLowerCase().split(' ');
     if (nameParts.length >= 2) {
       const firstName = nameParts[0];
@@ -190,13 +190,37 @@ export class AdvancedEntityMatcher {
       const hasLastName = fullText.includes(lastName);
       
       if (hasFirstName && hasLastName) {
-        matchScore += 0.9; // Very high score for both names
-        contextMatches['both_names'] = 0.9;
-        console.log(`✅ BOTH NAMES FOUND: ${firstName} + ${lastName}`);
+        // Check if they appear close together (within 10 words)
+        const words = fullText.split(/\s+/);
+        const firstNameIndex = words.findIndex(word => word.includes(firstName));
+        const lastNameIndex = words.findIndex(word => word.includes(lastName));
+        
+        if (firstNameIndex !== -1 && lastNameIndex !== -1) {
+          const distance = Math.abs(firstNameIndex - lastNameIndex);
+          if (distance <= 10) {
+            matchScore += 0.85; // High score for names close together
+            contextMatches['both_names_close'] = 0.85;
+            console.log(`✅ BOTH NAMES CLOSE: ${firstName} + ${lastName} (distance: ${distance})`);
+          } else {
+            matchScore += 0.6; // Lower score for names far apart
+            contextMatches['both_names_distant'] = 0.6;
+            console.log(`⚠️ BOTH NAMES DISTANT: ${firstName} + ${lastName} (distance: ${distance})`);
+          }
+        }
       } else if (hasFirstName || hasLastName) {
-        matchScore += 0.5; // Moderate score for single name
-        contextMatches['single_name'] = 0.5;
-        console.log(`✅ SINGLE NAME FOUND: ${hasFirstName ? firstName : lastName}`);
+        // Single name only gets points if there's context
+        const hasContext = fingerprint.context_tags.some(tag => fullText.includes(tag.toLowerCase())) ||
+                          fingerprint.locations.some(loc => fullText.includes(loc.toLowerCase()));
+        
+        if (hasContext) {
+          matchScore += 0.5;
+          contextMatches['single_name_with_context'] = 0.5;
+          console.log(`✅ SINGLE NAME WITH CONTEXT: ${hasFirstName ? firstName : lastName}`);
+        } else {
+          matchScore += 0.2; // Very low score for isolated single names
+          contextMatches['single_name_no_context'] = 0.2;
+          console.log(`⚠️ SINGLE NAME NO CONTEXT: ${hasFirstName ? firstName : lastName}`);
+        }
       }
     }
 
@@ -211,62 +235,49 @@ export class AdvancedEntityMatcher {
       }
     }
 
-    // ORGANIZATION CONTEXT
+    // ORGANIZATION CONTEXT (boosted)
     if (fingerprint.organization && fingerprint.organization !== 'Unknown' && 
         fullText.includes(fingerprint.organization.toLowerCase())) {
-      matchScore += 0.4;
-      contextMatches['organization'] = 0.4;
+      matchScore += 0.6; // Increased from 0.4
+      contextMatches['organization'] = 0.6;
       console.log(`✅ ORGANIZATION MATCH: ${fingerprint.organization}`);
     }
 
     // LOCATION CONTEXT
     for (const location of fingerprint.locations) {
       if (fullText.includes(location.toLowerCase())) {
-        matchScore += 0.3;
-        contextMatches['location'] = 0.3;
+        matchScore += 0.4; // Increased from 0.3
+        contextMatches['location'] = 0.4;
         console.log(`✅ LOCATION MATCH: ${location}`);
         break;
       }
     }
 
     // CONTEXT TAGS (threat indicators)
+    let contextTagScore = 0;
     for (const tag of fingerprint.context_tags) {
       if (fullText.includes(tag.toLowerCase())) {
-        matchScore += 0.2;
-        contextMatches['context_tag'] = 0.2;
+        contextTagScore += 0.2;
         console.log(`✅ CONTEXT TAG: ${tag}`);
-        break;
       }
     }
-
-    // VERY LENIENT: Even partial word matches
-    if (matchScore === 0) {
-      for (const part of nameParts) {
-        if (part.length > 2) {
-          // Check for word boundaries to avoid false matches
-          const regex = new RegExp(`\\b${part}\\b`, 'i');
-          if (regex.test(fullText)) {
-            matchScore += 0.3;
-            contextMatches['partial_word'] = 0.3;
-            console.log(`✅ PARTIAL WORD MATCH: ${part}`);
-            break;
-          }
-        }
-      }
+    if (contextTagScore > 0) {
+      matchScore += Math.min(contextTagScore, 0.4); // Cap at 0.4
+      contextMatches['context_tags'] = Math.min(contextTagScore, 0.4);
     }
 
-    // FINAL DECISION with very low thresholds for testing
+    // FINAL DECISION with balanced thresholds
     let decision: 'accepted' | 'rejected' | 'quarantined';
     let reasonDiscarded: string | undefined;
 
-    if (matchScore >= 0.5) {
+    if (matchScore >= 0.75) {
       decision = 'accepted';
-    } else if (matchScore >= 0.1) { // VERY LOW threshold for testing
+    } else if (matchScore >= 0.45) {
       decision = 'quarantined';
-      reasonDiscarded = 'Low confidence - requires review';
+      reasonDiscarded = 'Medium confidence - requires review';
     } else {
       decision = 'rejected';
-      reasonDiscarded = `No entity evidence found - score: ${matchScore.toFixed(2)}`;
+      reasonDiscarded = `Low confidence - score: ${matchScore.toFixed(2)}`;
     }
 
     console.log(`📊 FINAL DECISION: ${decision} (score: ${matchScore.toFixed(2)})`);
