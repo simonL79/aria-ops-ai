@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -30,6 +29,7 @@ import ContactFormPage from "./pages/ContactFormPage";
 import PricingPage from "./pages/PricingPage";
 import GenesisSentinel from "@/pages/admin/GenesisSentinel";
 import KeywordToArticleSystemPage from "./pages/admin/KeywordToArticleSystemPage";
+import ControlCenterPage from "./pages/admin/ControlCenterPage";
 
 const queryClient = new QueryClient();
 
@@ -58,6 +58,7 @@ function App() {
                   <Route path="/auth" element={<Authentication />} />
                   <Route path="/admin" element={<AdminDashboard />} />
                   <Route path="/admin/login" element={<AdminLogin />} />
+                  <Route path="/admin/control-center" element={<ControlCenterPage />} />
                   <Route path="/admin/genesis-sentinel" element={<GenesisSentinel />} />
                   <Route path="/admin/keyword-to-article" element={<KeywordToArticleSystemPage />} />
                   <Route path="/admin/watchtower" element={<WatchtowerPage />} />

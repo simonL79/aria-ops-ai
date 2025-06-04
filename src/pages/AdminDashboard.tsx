@@ -37,6 +37,26 @@ const AdminDashboard = () => {
         <div className="mb-8">
           <h1 className="text-3xl font-bold">Admin Dashboard</h1>
           <p className="text-muted-foreground">Administrative controls and system management</p>
+          
+          {/* Quick Access to Control Center */}
+          <Card className="mt-4 bg-corporate-accent/10 border-corporate-accent">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-corporate-accent">A.R.I.A™ Control Center</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Unified command interface with entity context awareness and quick actions
+                  </p>
+                </div>
+                <Button 
+                  onClick={() => window.location.href = '/admin/control-center'}
+                  className="bg-corporate-accent text-black hover:bg-corporate-accent/90"
+                >
+                  Launch Control Center
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
         
         {/* Overview Cards */}
