@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { DetectedPattern } from './patternAnalyzer';
 
@@ -235,7 +234,7 @@ const storeStrategies = async (entityName: string, strategies: ResponseStrategy[
           description: strategy.description,
           priority: strategy.priority,
           timeframe: strategy.timeframe,
-          actions: strategy.actions,
+          actions: strategy.actions as any, // Cast to any to resolve Json type compatibility
           resources: strategy.resources,
           status: 'pending'
         }))
