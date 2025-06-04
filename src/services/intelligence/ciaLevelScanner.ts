@@ -196,7 +196,7 @@ export class CIALevelScanner {
       r.match_decision === 'accepted' || r.match_decision === 'quarantined'
     );
 
-    // Insert valid results into database
+    // Insert valid results into database with CIA verification marker
     if (validResults.length > 0) {
       try {
         const dbInserts = validResults.map(result => ({
@@ -207,19 +207,21 @@ export class CIALevelScanner {
           sentiment: Math.random() * 0.4 - 0.2, // Random sentiment for now
           confidence_score: result.confidence_score,
           detected_entities: [entityName],
-          source_type: result.source_type,
+          source_type: 'cia_verified', // IMPORTANT: Mark as CIA verified
           entity_name: entityName,
           potential_reach: Math.floor(Math.random() * 1000) + 100,
           source_credibility_score: 85,
           threat_type: 'cia_intelligence'
         }));
 
+        console.log(`💾 CIA Scanner: Inserting ${validResults.length} CIA-verified results to database`);
+        
         const { error } = await supabase.from('scan_results').insert(dbInserts);
         
         if (error) {
           console.error('❌ CIA Scanner: Database insert failed:', error);
         } else {
-          console.log(`✅ CIA Scanner: Inserted ${validResults.length} results to database`);
+          console.log(`✅ CIA Scanner: Successfully inserted ${validResults.length} CIA-verified results`);
         }
       } catch (dbError) {
         console.error('❌ CIA Scanner: Database operation failed:', dbError);

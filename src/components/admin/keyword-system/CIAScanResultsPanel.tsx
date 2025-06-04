@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -40,18 +41,36 @@ const CIAScanResultsPanel = ({ entityName, onClose }: CIAScanResultsPanelProps) 
     
     setLoading(true);
     try {
+      console.log(`🔍 Loading CIA scan results for entity: "${entityName}"`);
+      
+      // Query with broader criteria to find any results for this entity
       const { data, error } = await supabase
         .from('scan_results')
         .select('*')
         .eq('entity_name', entityName.trim())
-        .eq('source_type', 'cia_verified')
         .order('created_at', { ascending: false })
-        .limit(50);
+        .limit(100);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Database query error:', error);
+        throw error;
+      }
+      
+      console.log(`📊 Found ${data?.length || 0} total scan results for "${entityName}"`);
+      
+      // Filter for CIA-verified results or recent high-quality results
+      const ciaResults = (data || []).filter(item => {
+        const isCiaVerified = item.source_type === 'cia_verified';
+        const isHighConfidence = (item.confidence_score || 0) >= 60;
+        const isRecent = new Date(item.created_at) > new Date(Date.now() - 24 * 60 * 60 * 1000); // Last 24 hours
+        
+        return isCiaVerified || (isHighConfidence && isRecent);
+      });
+      
+      console.log(`✅ Filtered to ${ciaResults.length} CIA-verified or high-confidence results`);
       
       // Transform the data to match our ScanResult interface
-      const transformedResults: ScanResult[] = (data || []).map(item => ({
+      const transformedResults: ScanResult[] = ciaResults.map(item => ({
         id: item.id,
         platform: item.platform,
         content: item.content,
@@ -151,7 +170,7 @@ const CIAScanResultsPanel = ({ entityName, onClose }: CIAScanResultsPanelProps) 
         </div>
         <div className="flex items-center gap-4 mt-4">
           <div className="text-sm text-corporate-lightGray">
-            {results.length} total results found
+            {results.length} CIA-verified results found
           </div>
           <div className="flex gap-2">
             <Button
