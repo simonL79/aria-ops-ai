@@ -53,7 +53,9 @@ const ThreatDetectionDashboard = () => {
           : 'medium',
         status: item.status || 'new',
         created_at: item.created_at,
-        detected_entities: Array.isArray(item.detected_entities) ? item.detected_entities : [],
+        detected_entities: Array.isArray(item.detected_entities) 
+          ? item.detected_entities.map((entity: any) => String(entity))
+          : [],
         confidence_score: item.confidence_score || 0
       }));
 
