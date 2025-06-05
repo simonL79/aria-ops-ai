@@ -61,7 +61,7 @@ const LiveThreatProcessor: React.FC<LiveThreatProcessorProps> = ({
           id: narrative.id,
           type: 'narrative_cluster',
           severity: narrative.intent_label === 'attack' ? 'high' : 'medium',
-          content: narrative.cluster_summary,
+          content: narrative.narrative_snippet || 'No summary available',
           platform: narrative.source_platform,
           timestamp: narrative.created_at,
           threatLevel: narrative.intent_label === 'attack' ? 'high' : 'medium'

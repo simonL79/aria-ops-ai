@@ -8,7 +8,6 @@ import ThreatTracker from './ThreatTracker';
 import ServiceOrchestrator from './ServiceOrchestrator';
 import SystemDiagnostics from './SystemDiagnostics';
 import StrategyBrainMetrics from './StrategyBrainMetrics';
-import ClientExecutionPlan from '../client-onboarding/ClientExecutionPlan';
 
 interface ControlCenterModulesProps {
   activeModule: string;
@@ -92,11 +91,28 @@ const ControlCenterModules: React.FC<ControlCenterModulesProps> = ({
 
       <TabsContent value="execution-plan" className="space-y-6">
         {selectedEntity ? (
-          <ClientExecutionPlan 
-            entityName={selectedEntity}
-            clientName={selectedEntity}
-            threatLevel={currentThreatLevel}
-          />
+          <div className="bg-corporate-darkSecondary border-corporate-border rounded-lg p-6">
+            <h3 className="text-xl font-semibold text-corporate-accent mb-4">
+              Client Execution Plan: {selectedEntity}
+            </h3>
+            <p className="text-corporate-lightGray mb-4">
+              Threat Level: <span className="text-corporate-accent font-semibold">{currentThreatLevel.toUpperCase()}</span>
+            </p>
+            <div className="space-y-4">
+              <div className="p-4 bg-corporate-dark rounded border border-corporate-border">
+                <h4 className="font-medium text-white mb-2">Active Strategies</h4>
+                <p className="text-corporate-lightGray text-sm">
+                  Live strategy execution framework for {selectedEntity}
+                </p>
+              </div>
+              <div className="p-4 bg-corporate-dark rounded border border-corporate-border">
+                <h4 className="font-medium text-white mb-2">Deployment Status</h4>
+                <p className="text-corporate-lightGray text-sm">
+                  Real-time deployment monitoring and control
+                </p>
+              </div>
+            </div>
+          </div>
         ) : (
           <div className="bg-corporate-darkSecondary border-corporate-border rounded-lg p-8 text-center">
             <Target className="h-12 w-12 mx-auto mb-4 opacity-50 text-corporate-lightGray" />
