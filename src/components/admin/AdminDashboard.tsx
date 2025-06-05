@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Brain, Zap, Target, AlertTriangle, BarChart3, Settings, Activity, TrendingUp, LayoutDashboard, Users, ListChecks } from 'lucide-react';
 import { toast } from 'sonner';
 import ControlCenterPage from '@/pages/admin/ControlCenterPage';
+import KeywordToArticleSystemPage from '@/pages/admin/KeywordToArticleSystemPage';
 import StrategyBrainTestPage from '@/pages/admin/StrategyBrainTestPage';
 import StrategyBrainStage3TestPage from '@/pages/admin/StrategyBrainStage3TestPage';
 
@@ -20,6 +21,9 @@ const AdminDashboard = () => {
 
   return (
     <Routes>
+      {/* Keyword to Article System Route */}
+      <Route path="/keyword-to-article" element={<KeywordToArticleSystemPage />} />
+      
       {/* Control Center Route */}
       <Route path="/control-center" element={<ControlCenterPage />} />
       
