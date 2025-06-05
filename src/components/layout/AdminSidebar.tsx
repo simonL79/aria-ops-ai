@@ -20,7 +20,8 @@ import {
   Brain,
   Target,
   Lock,
-  Radar
+  Radar,
+  FileText
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -30,33 +31,45 @@ const AdminSidebar = () => {
 
   const primaryModules = [
     {
+      title: 'Control Center',
+      href: '/admin/control-center',
+      icon: Brain,
+      description: 'Unified command interface with entity context',
+      classification: 'COMMAND',
+      priority: 1
+    },
+    {
+      title: 'Client Onboarding',
+      href: '/admin/client-onboarding',
+      icon: Users,
+      description: 'Complete client setup and execution planning',
+      classification: 'CORE',
+      priority: 2
+    },
+    {
       title: 'A.R.I.A vX™ — Keyword-to-Article System',
       href: '/admin/keyword-to-article',
       icon: Target,
       description: 'Real-time reputation reshaping engine',
       classification: 'LIVE ENGINE',
-      isFeature: true
-    },
-    {
-      title: 'Control Center',
-      href: '/admin/control-center',
-      icon: Brain,
-      description: 'Unified command interface with entity context',
-      classification: 'COMMAND'
+      isFeature: true,
+      priority: 3
     },
     {
       title: 'Strategy Brain Test',
       href: '/admin/strategy-brain-test',
       icon: Zap,
       description: 'AI strategy testing & validation',
-      classification: 'TESTING'
+      classification: 'TESTING',
+      priority: 4
     },
     {
       title: 'Strategy Brain Stage 3',
       href: '/admin/strategy-brain-stage3',
       icon: Brain,
       description: 'Advanced AI intelligence testing',
-      classification: 'ADVANCED'
+      classification: 'ADVANCED',
+      priority: 5
     }
   ];
 
@@ -80,6 +93,9 @@ const AdminSidebar = () => {
       description: 'Configuration & preferences'
     }
   ];
+
+  // Sort primary modules by priority
+  const sortedPrimaryModules = [...primaryModules].sort((a, b) => a.priority - b.priority);
 
   const isActiveRoute = (href: string) => {
     if (href === '/admin') {
@@ -141,7 +157,7 @@ const AdminSidebar = () => {
             </div>
           )}
           
-          {primaryModules.map((item) => (
+          {sortedPrimaryModules.map((item) => (
             <Link key={item.href} to={item.href} className="block">
               <Button
                 variant="ghost"

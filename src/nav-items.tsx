@@ -1,56 +1,47 @@
 
-import DashboardPage from "@/pages/dashboard/DashboardPage";
-import { 
-  Home,
-  Users,
-  Settings,
-  Shield,
-  FileText,
-  Mail
-} from "lucide-react";
+import { HomeIcon, ShieldIcon, Users, BarChart3, Settings, Target, Brain, Zap, Activity } from "lucide-react";
+import Index from "./pages/Index.jsx";
+import Dashboard from "./pages/Dashboard.jsx";
+import RSI from "./pages/RSI";
+import AdminDashboard from "./pages/AdminDashboard";
+import ControlCenterPage from "./pages/admin/ControlCenterPage";
+import ClientOnboardingPage from "./pages/ClientOnboardingPage";
 
-export type NavItem = {
-  title: string;
-  to?: string;
-  url?: string;
-  icon: "home" | "users" | "settings" | "shield" | "fileText" | "mail";
-  page?: React.FC;
-  adminOnly?: boolean;
-};
-
-export const navItems: NavItem[] = [
+export const navItems = [
+  {
+    title: "Home",
+    to: "/",
+    icon: <HomeIcon className="h-4 w-4" />,
+    page: <Index />,
+  },
   {
     title: "Dashboard",
     to: "/dashboard",
-    icon: "home",
-    page: DashboardPage,
+    icon: <ShieldIcon className="h-4 w-4" />,
+    page: <Dashboard />,
   },
   {
-    title: "Genesis Sentinel",
-    to: "/admin/genesis-sentinel",
-    icon: "shield",
-    adminOnly: true,
+    title: "RSI",
+    to: "/rsi",
+    icon: <Activity className="h-4 w-4" />,
+    page: <RSI />,
   },
   {
-    title: "Clients",
-    to: "/admin/clients",
-    icon: "users",
-    adminOnly: true,
+    title: "Admin Dashboard",
+    to: "/admin",
+    icon: <BarChart3 className="h-4 w-4" />,
+    page: <AdminDashboard />,
   },
   {
-    title: "Blog",
-    to: "/blog",
-    icon: "fileText",
+    title: "Control Center",
+    to: "/admin/control-center",
+    icon: <Brain className="h-4 w-4" />,
+    page: <ControlCenterPage />,
   },
   {
-    title: "Contact",
-    to: "/contact",
-    icon: "mail",
-  },
-  {
-    title: "Settings",
-    to: "/admin/settings",
-    icon: "settings",
-    adminOnly: true,
+    title: "Client Onboarding",
+    to: "/admin/client-onboarding",
+    icon: <Users className="h-4 w-4" />,
+    page: <ClientOnboardingPage />,
   },
 ];

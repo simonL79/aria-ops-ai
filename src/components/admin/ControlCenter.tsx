@@ -1,350 +1,329 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Shield, Activity, Brain, Zap, Target, AlertTriangle, 
-  Server, Terminal, Eye, Settings, PlayCircle, PauseCircle 
-} from 'lucide-react';
-import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
-import LocalServerMonitor from '@/components/aria/LocalServerMonitor';
-import LocalModelManager from '@/components/aria/LocalModelManager';
-import ThreatDetectionDashboard from './modules/ThreatDetectionDashboard';
-import StrategyBrainControl from './modules/StrategyBrainControl';
-import AutoExecutionManager from './modules/AutoExecutionManager';
-import SystemHealthOverview from './modules/SystemHealthOverview';
-import LiveDataValidator from './modules/LiveDataValidator';
-import UnifiedAlertSystem from './modules/UnifiedAlertSystem';
 
-interface SystemStatus {
-  localServer: boolean;
-  threatDetection: boolean;
-  strategyBrain: boolean;
-  autoExecution: boolean;
-  liveDataCompliance: boolean;
-}
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  Shield, 
+  Search, 
+  Users, 
+  BarChart3, 
+  Settings, 
+  Target,
+  Brain,
+  Activity,
+  AlertTriangle,
+  CheckCircle,
+  Eye,
+  Zap,
+  Lock
+} from "lucide-react";
+import { toast } from "sonner";
+import { supabase } from '@/integrations/supabase/client';
+import LiveDataGuard from '@/components/dashboard/LiveDataGuard';
+import ServiceOrchestrator from './control-center/ServiceOrchestrator';
+import { useServiceStatus } from './control-center/useServiceStatus';
+import OnboardingWorkflow from '@/components/client-onboarding/OnboardingWorkflow';
+import ClientExecutionPlan from '@/components/client-onboarding/ClientExecutionPlan';
 
 const ControlCenter = () => {
-  const [activeTab, setActiveTab] = useState('overview');
-  const [systemStatus, setSystemStatus] = useState<SystemStatus>({
-    localServer: false,
-    threatDetection: false,
-    strategyBrain: false,
-    autoExecution: false,
-    liveDataCompliance: false
-  });
-  const [isRunningTests, setIsRunningTests] = useState(false);
+  const [selectedEntity, setSelectedEntity] = useState('');
+  const [activeModule, setActiveModule] = useState('overview');
+  const [liveStatus, setLiveStatus] = useState({ isLive: false, lastUpdate: null });
+  const { serviceStatus } = useServiceStatus();
 
   useEffect(() => {
-    checkSystemStatus();
-    const interval = setInterval(checkSystemStatus, 30000);
+    checkLiveStatus();
+    const interval = setInterval(checkLiveStatus, 30000);
     return () => clearInterval(interval);
   }, []);
 
-  const checkSystemStatus = async () => {
+  const checkLiveStatus = async () => {
     try {
-      // Check local server with timeout and better error handling
-      let localServerStatus = false;
-      try {
-        const response = await fetch('http://localhost:3001/api/tags', {
-          method: 'GET',
-          signal: AbortSignal.timeout(3000)
+      const { data, error } = await supabase
+        .from('live_status')
+        .select('*')
+        .eq('system_status', 'LIVE')
+        .order('last_report', { ascending: false })
+        .limit(1);
+
+      if (!error && data && data.length > 0) {
+        setLiveStatus({ 
+          isLive: true, 
+          lastUpdate: new Date(data[0].last_report).toLocaleTimeString() 
         });
-        localServerStatus = response.ok;
-      } catch (error) {
-        console.warn('Local AI server not available:', error);
-        localServerStatus = false;
       }
-
-      // Check threat detection system
-      const { data: threatData } = await supabase
-        .from('scan_results')
-        .select('id')
-        .gte('created_at', new Date(Date.now() - 60 * 60 * 1000).toISOString())
-        .limit(1);
-
-      // Check strategy brain
-      const { data: strategyData } = await supabase
-        .from('strategy_responses')
-        .select('id')
-        .limit(1);
-
-      // Check auto-execution
-      const { data: autoExecData } = await supabase
-        .from('aria_ops_log')
-        .select('id')
-        .eq('operation_type', 'auto_execution_config')
-        .limit(1);
-
-      // Check live data compliance
-      const liveDataCompliance = await validateLiveDataCompliance();
-
-      setSystemStatus({
-        localServer: localServerStatus,
-        threatDetection: Boolean(threatData?.length),
-        strategyBrain: Boolean(strategyData?.length),
-        autoExecution: Boolean(autoExecData?.length),
-        liveDataCompliance
-      });
-
     } catch (error) {
-      console.error('System status check failed:', error);
+      console.error('Live status check failed:', error);
     }
   };
 
-  const validateLiveDataCompliance = async (): Promise<boolean> => {
-    try {
-      // Check for any simulation/mock data patterns
-      const { data: mockCheck } = await supabase
-        .from('scan_results')
-        .select('id')
-        .or('content.ilike.%mock%,content.ilike.%test%,content.ilike.%demo%,content.ilike.%simulation%')
-        .limit(1);
+  const handleEntitySelect = (entity: string) => {
+    setSelectedEntity(entity);
+    toast.success(`Entity context switched to: ${entity}`);
+  };
 
-      return !mockCheck || mockCheck.length === 0;
-    } catch (error) {
-      console.error('Live data validation failed:', error);
-      return false;
+  const coreModules = [
+    {
+      id: 'client-onboarding',
+      title: 'Client Onboarding & Execution',
+      icon: Users,
+      description: 'Complete client setup and defense execution plan',
+      status: 'active',
+      classification: 'CORE'
+    },
+    {
+      id: 'keyword-system',
+      title: 'A.R.I.A vX™ Keyword System',
+      icon: Target,
+      description: 'Real-time reputation reshaping engine',
+      status: 'active',
+      classification: 'LIVE ENGINE'
+    },
+    {
+      id: 'threat-monitoring',
+      title: 'Threat Monitoring',
+      icon: Shield,
+      description: 'Live OSINT intelligence gathering',
+      status: serviceStatus.liveDataEnforcer || 'pending',
+      classification: 'LIVE'
+    },
+    {
+      id: 'strategy-brain',
+      title: 'Strategy Brain',
+      icon: Brain,
+      description: 'AI-powered response strategies',
+      status: serviceStatus.strategyMemory || 'pending',
+      classification: 'AI'
+    },
+    {
+      id: 'pattern-recognition',
+      title: 'ANUBIS™ Pattern Recognition',
+      icon: Eye,
+      description: 'Advanced threat pattern detection',
+      status: serviceStatus.patternRecognition || 'active',
+      classification: 'ANUBIS'
     }
-  };
-
-  const runSystemTests = async () => {
-    setIsRunningTests(true);
-    toast.info('Running comprehensive system tests...');
-
-    try {
-      const testResults = {
-        localServer: false,
-        database: false,
-        liveDataCompliance: false,
-        strategyBrain: false
-      };
-
-      // Test 1: Local AI Server Connection (non-critical)
-      try {
-        const serverTest = await fetch('http://localhost:3001/api/tags', {
-          method: 'GET',
-          signal: AbortSignal.timeout(5000)
-        });
-        testResults.localServer = serverTest.ok;
-      } catch (error) {
-        console.warn('Local AI server test failed (non-critical):', error);
-        testResults.localServer = false;
-      }
-
-      // Test 2: Database Connectivity (critical)
-      try {
-        const { data: dbTest, error: dbError } = await supabase
-          .from('scan_results')
-          .select('count')
-          .limit(1);
-
-        if (dbError) {
-          throw new Error(`Database connectivity failed: ${dbError.message}`);
-        }
-        testResults.database = true;
-      } catch (error) {
-        throw new Error(`Critical: Database connectivity failed: ${error.message}`);
-      }
-
-      // Test 3: Live Data Validation (critical)
-      try {
-        const liveDataTest = await validateLiveDataCompliance();
-        if (!liveDataTest) {
-          console.warn('Live data compliance warning - simulation data detected');
-        }
-        testResults.liveDataCompliance = liveDataTest;
-      } catch (error) {
-        console.warn('Live data validation failed:', error);
-        testResults.liveDataCompliance = false;
-      }
-
-      // Test 4: Strategy Brain Integration (non-critical)
-      try {
-        const { data: strategyTest } = await supabase
-          .from('strategy_responses')
-          .select('id')
-          .limit(1);
-        testResults.strategyBrain = Boolean(strategyTest?.length);
-      } catch (error) {
-        console.warn('Strategy brain test failed:', error);
-        testResults.strategyBrain = false;
-      }
-
-      // Log test results
-      await supabase.from('aria_ops_log').insert({
-        operation_type: 'system_test',
-        module_source: 'control_center',
-        success: testResults.database, // Core success based on database connectivity
-        operation_data: {
-          test_results: testResults,
-          timestamp: new Date().toISOString(),
-          notes: testResults.localServer ? 'All systems operational' : 'Local AI server offline (non-critical)'
-        }
-      });
-
-      // Provide appropriate feedback
-      if (!testResults.database) {
-        toast.error('Critical system test failed - Database connectivity issues');
-      } else if (!testResults.localServer) {
-        toast.success('Core systems operational', {
-          description: 'Local AI server offline but system functional'
-        });
-      } else {
-        toast.success('All system tests passed - A.R.I.A™ fully operational');
-      }
-
-      checkSystemStatus();
-
-    } catch (error) {
-      console.error('System tests failed:', error);
-      toast.error(`System test failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      
-      // Log failure
-      await supabase.from('aria_ops_log').insert({
-        operation_type: 'system_test',
-        module_source: 'control_center',
-        success: false,
-        operation_data: {
-          error: error instanceof Error ? error.message : 'Unknown error',
-          timestamp: new Date().toISOString()
-        }
-      });
-    } finally {
-      setIsRunningTests(false);
-    }
-  };
-
-  const getStatusColor = (status: boolean) => {
-    return status ? 'text-green-600' : 'text-red-600';
-  };
-
-  const getStatusBadge = (status: boolean) => {
-    return status ? 
-      <Badge className="bg-green-500 text-white">ONLINE</Badge> :
-      <Badge className="bg-red-500 text-white">OFFLINE</Badge>;
-  };
+  ];
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-3">
-            <Shield className="h-8 w-8 text-blue-600" />
-            A.R.I.A™ Control Center
-          </h1>
-          <p className="text-muted-foreground">Unified Command & Control Platform</p>
+    <LiveDataGuard enforceStrict={true}>
+      <div className="min-h-screen bg-corporate-dark text-white p-6">
+        <ServiceOrchestrator 
+          selectedEntity={selectedEntity} 
+          activeModule={activeModule} 
+        />
+        
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h1 className="text-3xl font-bold text-corporate-accent">A.R.I.A™ Control Center</h1>
+              <p className="text-corporate-lightGray">Unified command interface with entity context awareness</p>
+            </div>
+            
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <div className={`w-3 h-3 rounded-full ${liveStatus.isLive ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`} />
+                <span className="text-sm">
+                  {liveStatus.isLive ? 'LIVE' : 'OFFLINE'}
+                </span>
+                {liveStatus.lastUpdate && (
+                  <span className="text-xs text-corporate-lightGray">
+                    Last: {liveStatus.lastUpdate}
+                  </span>
+                )}
+              </div>
+              
+              <Badge className="bg-green-900 text-green-300 border-green-500">
+                100% Live Intelligence
+              </Badge>
+            </div>
+          </div>
+
+          {/* Entity Context Selector */}
+          <Card className="bg-corporate-darkSecondary border-corporate-border">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-4">
+                <div className="flex-1">
+                  <label className="text-sm font-medium text-corporate-lightGray mb-2 block">
+                    Active Entity Context
+                  </label>
+                  <Input
+                    placeholder="Enter entity name for context-aware operations..."
+                    value={selectedEntity}
+                    onChange={(e) => setSelectedEntity(e.target.value)}
+                    className="bg-corporate-dark border-corporate-border text-white"
+                  />
+                </div>
+                <Button 
+                  onClick={() => handleEntitySelect(selectedEntity)}
+                  disabled={!selectedEntity.trim()}
+                  className="bg-corporate-accent text-black hover:bg-corporate-accent/90"
+                >
+                  Set Context
+                </Button>
+              </div>
+              
+              {selectedEntity && (
+                <div className="mt-3 p-3 bg-corporate-accent/10 border border-corporate-accent/30 rounded">
+                  <div className="flex items-center gap-2">
+                    <Target className="h-4 w-4 text-corporate-accent" />
+                    <span className="text-sm text-corporate-accent">
+                      Active Context: <strong>{selectedEntity}</strong>
+                    </span>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
-        <div className="flex items-center gap-4">
-          <Button 
-            onClick={runSystemTests} 
-            disabled={isRunningTests}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
-          >
-            {isRunningTests ? (
-              <>
-                <Activity className="h-4 w-4 mr-2 animate-spin" />
-                Running Tests...
-              </>
-            ) : (
-              <>
-                <PlayCircle className="h-4 w-4 mr-2" />
-                Run System Tests
-              </>
-            )}
-          </Button>
+
+        {/* Core Modules Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          {coreModules.map((module) => (
+            <Card 
+              key={module.id} 
+              className={`bg-corporate-darkSecondary border-corporate-border hover:border-corporate-accent/50 transition-colors cursor-pointer ${
+                activeModule === module.id ? 'border-corporate-accent' : ''
+              }`}
+              onClick={() => setActiveModule(module.id)}
+            >
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <module.icon className="h-6 w-6 text-corporate-accent" />
+                  <Badge variant="outline" className="text-xs">
+                    {module.classification}
+                  </Badge>
+                </div>
+                <CardTitle className="text-lg text-white">{module.title}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-corporate-lightGray mb-3">
+                  {module.description}
+                </p>
+                <div className="flex items-center gap-2">
+                  {module.status === 'active' ? (
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                  ) : module.status === 'pending' ? (
+                    <Activity className="h-4 w-4 text-yellow-500 animate-pulse" />
+                  ) : (
+                    <AlertTriangle className="h-4 w-4 text-red-500" />
+                  )}
+                  <span className="text-xs capitalize">{module.status}</span>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Module Content */}
+        <div className="space-y-6">
+          {activeModule === 'client-onboarding' && (
+            <div className="space-y-6">
+              <Card className="bg-corporate-darkSecondary border-corporate-border">
+                <CardHeader>
+                  <CardTitle className="text-corporate-accent">Client Onboarding Workflow</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <OnboardingWorkflow />
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-corporate-darkSecondary border-corporate-border">
+                <CardHeader>
+                  <CardTitle className="text-corporate-accent">Defense Execution Plan</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ClientExecutionPlan entityName={selectedEntity} />
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {activeModule === 'keyword-system' && (
+            <Card className="bg-corporate-darkSecondary border-corporate-border">
+              <CardHeader>
+                <CardTitle className="text-corporate-accent">A.R.I.A vX™ Keyword to Article System</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8">
+                  <Target className="h-12 w-12 text-corporate-accent mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Real-time Reputation Reshaping Engine</h3>
+                  <p className="text-corporate-lightGray mb-4">
+                    Access the full keyword-to-article system for advanced reputation management
+                  </p>
+                  <Button 
+                    onClick={() => window.location.href = '/admin/keyword-to-article'}
+                    className="bg-corporate-accent text-black hover:bg-corporate-accent/90"
+                  >
+                    Launch Keyword System
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {activeModule === 'overview' && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card className="bg-corporate-darkSecondary border-corporate-border">
+                <CardHeader>
+                  <CardTitle className="text-white">System Status</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {Object.entries(serviceStatus).map(([service, status]) => (
+                      <div key={service} className="flex items-center justify-between">
+                        <span className="text-sm capitalize">{service.replace(/([A-Z])/g, ' $1')}</span>
+                        <Badge 
+                          variant={status === 'active' ? 'default' : status === 'pending' ? 'secondary' : 'destructive'}
+                        >
+                          {status}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-corporate-darkSecondary border-corporate-border">
+                <CardHeader>
+                  <CardTitle className="text-white">Quick Actions</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-start"
+                    onClick={() => setActiveModule('client-onboarding')}
+                  >
+                    <Users className="mr-2 h-4 w-4" />
+                    Client Onboarding
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-start"
+                    onClick={() => window.location.href = '/admin/keyword-to-article'}
+                  >
+                    <Target className="mr-2 h-4 w-4" />
+                    Keyword System
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-start"
+                    onClick={() => setActiveModule('threat-monitoring')}
+                  >
+                    <Shield className="mr-2 h-4 w-4" />
+                    Threat Monitoring
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </div>
       </div>
-
-      {/* System Status Overview */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Activity className="h-5 w-5 text-green-600" />
-            System Status Overview
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-5 gap-4">
-            <div className="text-center">
-              <Server className={`h-6 w-6 mx-auto mb-2 ${getStatusColor(systemStatus.localServer)}`} />
-              <div className="text-sm font-medium">Local AI Server</div>
-              {getStatusBadge(systemStatus.localServer)}
-              {!systemStatus.localServer && (
-                <p className="text-xs text-muted-foreground mt-1">Optional</p>
-              )}
-            </div>
-            <div className="text-center">
-              <AlertTriangle className={`h-6 w-6 mx-auto mb-2 ${getStatusColor(systemStatus.threatDetection)}`} />
-              <div className="text-sm font-medium">Threat Detection</div>
-              {getStatusBadge(systemStatus.threatDetection)}
-            </div>
-            <div className="text-center">
-              <Brain className={`h-6 w-6 mx-auto mb-2 ${getStatusColor(systemStatus.strategyBrain)}`} />
-              <div className="text-sm font-medium">Strategy Brain</div>
-              {getStatusBadge(systemStatus.strategyBrain)}
-            </div>
-            <div className="text-center">
-              <Zap className={`h-6 w-6 mx-auto mb-2 ${getStatusColor(systemStatus.autoExecution)}`} />
-              <div className="text-sm font-medium">Auto-Execution</div>
-              {getStatusBadge(systemStatus.autoExecution)}
-            </div>
-            <div className="text-center">
-              <Eye className={`h-6 w-6 mx-auto mb-2 ${getStatusColor(systemStatus.liveDataCompliance)}`} />
-              <div className="text-sm font-medium">Live Data Only</div>
-              {getStatusBadge(systemStatus.liveDataCompliance)}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Main Control Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-7 w-full">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="local-ai">Local AI</TabsTrigger>
-          <TabsTrigger value="threats">Threats</TabsTrigger>
-          <TabsTrigger value="strategy">Strategy</TabsTrigger>
-          <TabsTrigger value="execution">Execution</TabsTrigger>
-          <TabsTrigger value="alerts">Alerts</TabsTrigger>
-          <TabsTrigger value="validation">Data Validation</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="overview" className="space-y-6">
-          <SystemHealthOverview systemStatus={systemStatus} />
-        </TabsContent>
-
-        <TabsContent value="local-ai" className="space-y-6">
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            <LocalServerMonitor />
-            <LocalModelManager />
-          </div>
-        </TabsContent>
-
-        <TabsContent value="threats" className="space-y-6">
-          <ThreatDetectionDashboard />
-        </TabsContent>
-
-        <TabsContent value="strategy" className="space-y-6">
-          <StrategyBrainControl />
-        </TabsContent>
-
-        <TabsContent value="execution" className="space-y-6">
-          <AutoExecutionManager />
-        </TabsContent>
-
-        <TabsContent value="alerts" className="space-y-6">
-          <UnifiedAlertSystem />
-        </TabsContent>
-
-        <TabsContent value="validation" className="space-y-6">
-          <LiveDataValidator />
-        </TabsContent>
-      </Tabs>
-    </div>
+    </LiveDataGuard>
   );
 };
 
