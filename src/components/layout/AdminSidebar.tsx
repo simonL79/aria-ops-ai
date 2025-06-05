@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -36,7 +35,8 @@ const AdminSidebar = () => {
       icon: Brain,
       description: 'Unified command interface with entity context',
       classification: 'COMMAND',
-      priority: 1
+      priority: 1,
+      isLive: true
     },
     {
       title: 'Client Onboarding',
@@ -44,7 +44,8 @@ const AdminSidebar = () => {
       icon: Users,
       description: 'Complete client setup and execution planning',
       classification: 'CORE',
-      priority: 2
+      priority: 2,
+      isLive: true
     },
     {
       title: 'A.R.I.A vX™ — Keyword-to-Article System',
@@ -53,7 +54,8 @@ const AdminSidebar = () => {
       description: 'Real-time reputation reshaping engine',
       classification: 'LIVE ENGINE',
       isFeature: true,
-      priority: 3
+      priority: 3,
+      isLive: true
     },
     {
       title: 'Strategy Brain Test',
@@ -61,7 +63,8 @@ const AdminSidebar = () => {
       icon: Zap,
       description: 'AI strategy testing & validation',
       classification: 'TESTING',
-      priority: 4
+      priority: 4,
+      isLive: true
     },
     {
       title: 'Strategy Brain Stage 3',
@@ -69,7 +72,8 @@ const AdminSidebar = () => {
       icon: Brain,
       description: 'Advanced AI intelligence testing',
       classification: 'ADVANCED',
-      priority: 5
+      priority: 5,
+      isLive: true
     }
   ];
 
@@ -175,7 +179,10 @@ const AdminSidebar = () => {
                       <span className={cn("font-medium truncate", item.isFeature && "text-corporate-accent")}>
                         {item.isFeature ? 'A.R.I.A vX™' : item.title}
                       </span>
-                      <span className="text-xs opacity-60 shrink-0 ml-2">{item.classification}</span>
+                      <div className="flex items-center gap-1">
+                        {item.isLive && <div className="w-2 h-2 bg-green-500 rounded-full" />}
+                        <span className="text-xs opacity-60 shrink-0">{item.classification}</span>
+                      </div>
                     </div>
                     <p className="text-xs opacity-70 mt-0.5 truncate">
                       {item.isFeature ? 'Keyword-to-Article System' : item.description}

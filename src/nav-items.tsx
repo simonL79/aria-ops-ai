@@ -6,6 +6,7 @@ import RSI from "./pages/RSI";
 import AdminDashboard from "./pages/AdminDashboard";
 import ControlCenterPage from "./pages/admin/ControlCenterPage";
 import ClientOnboardingPage from "./pages/ClientOnboardingPage";
+import KeywordToArticleSystemPage from "./pages/admin/KeywordToArticleSystemPage";
 
 export const navItems = [
   {
@@ -43,5 +44,23 @@ export const navItems = [
     to: "/admin/client-onboarding",
     icon: <Users className="h-4 w-4" />,
     page: <ClientOnboardingPage />,
+  },
+  {
+    title: "A.R.I.A vX™ Keyword System",
+    to: "/admin/keyword-to-article",
+    icon: <Target className="h-4 w-4" />,
+    page: <KeywordToArticleSystemPage />,
+  },
+  {
+    title: "Strategy Brain Test",
+    to: "/admin/strategy-brain-test",
+    icon: <Zap className="h-4 w-4" />,
+    page: <KeywordToArticleSystemPage />, // Reusing existing page for now
+  },
+  {
+    title: "Strategy Brain Stage 3",
+    to: "/admin/strategy-brain-stage3",
+    icon: <Brain className="h-4 w-4" />,
+    page: <KeywordToArticleSystemPage />, // Reusing existing page for now
   },
 ];
