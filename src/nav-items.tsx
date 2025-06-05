@@ -1,7 +1,7 @@
 
 import { HomeIcon, ShieldIcon, Users, BarChart3, Settings, Target, Brain, Zap, Activity } from "lucide-react";
 import Index from "./pages/Index.jsx";
-import Dashboard from "./pages/Dashboard.jsx";
+import Dashboard from "./pages/Dashboard.tsx";
 import RSI from "./pages/RSI";
 import AdminDashboard from "./pages/AdminDashboard";
 import ControlCenterPage from "./pages/admin/ControlCenterPage";
