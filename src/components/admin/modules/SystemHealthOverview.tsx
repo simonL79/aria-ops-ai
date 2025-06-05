@@ -176,7 +176,12 @@ const SystemHealthOverview: React.FC<SystemHealthOverviewProps> = ({ systemStatu
                   }
                 </span>
                 {serverHealth?.errorDetails && (
-                  <AlertCircle className="h-4 w-4 text-orange-500" title={serverHealth.errorDetails} />
+                  <div className="relative group">
+                    <AlertCircle className="h-4 w-4 text-orange-500 cursor-help" />
+                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-black text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                      {serverHealth.errorDetails}
+                    </div>
+                  </div>
                 )}
               </div>
             </div>
