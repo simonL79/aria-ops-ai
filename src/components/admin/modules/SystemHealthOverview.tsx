@@ -3,8 +3,9 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { Activity, Server, Brain, Shield, Zap, TrendingUp } from 'lucide-react';
+import { Activity, Server, Brain, Shield, Zap, TrendingUp, AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { checkServerHealth, ServerHealth } from '@/services/localInference/serverMonitor';
 
 interface SystemHealthOverviewProps {
   systemStatus: {
@@ -32,10 +33,26 @@ const SystemHealthOverview: React.FC<SystemHealthOverviewProps> = ({ systemStatu
     executedActions: 0,
     systemUptime: 99.8
   });
+  const [serverHealth, setServerHealth] = useState<ServerHealth | null>(null);
 
   useEffect(() => {
     loadSystemMetrics();
+    checkLocalServerHealth();
+    
+    // Check server health every 30 seconds
+    const interval = setInterval(checkLocalServerHealth, 30000);
+    return () => clearInterval(interval);
   }, []);
+
+  const checkLocalServerHealth = async () => {
+    try {
+      const health = await checkServerHealth();
+      setServerHealth(health);
+      console.log('🔍 Server health updated:', health);
+    } catch (error) {
+      console.error('Failed to check server health:', error);
+    }
+  };
 
   const loadSystemMetrics = async () => {
     try {
@@ -149,12 +166,18 @@ const SystemHealthOverview: React.FC<SystemHealthOverviewProps> = ({ systemStatu
                 <span className="font-medium">Local AI Server</span>
               </div>
               <div className="flex items-center gap-2">
-                <Badge className={systemStatus.localServer ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}>
-                  {systemStatus.localServer ? 'OPERATIONAL' : 'OFFLINE'}
+                <Badge className={serverHealth?.isOnline ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}>
+                  {serverHealth?.isOnline ? 'ONLINE' : 'OFFLINE'}
                 </Badge>
                 <span className="text-sm text-muted-foreground">
-                  {systemStatus.localServer ? 'Models loaded and ready' : 'Server unreachable'}
+                  {serverHealth?.isOnline 
+                    ? `${serverHealth.serverType} • ${serverHealth.modelsLoaded} models • ${serverHealth.responseTime}ms`
+                    : serverHealth?.errorDetails || 'Server unreachable'
+                  }
                 </span>
+                {serverHealth?.errorDetails && (
+                  <AlertCircle className="h-4 w-4 text-orange-500" title={serverHealth.errorDetails} />
+                )}
               </div>
             </div>
 
@@ -220,6 +243,28 @@ const SystemHealthOverview: React.FC<SystemHealthOverviewProps> = ({ systemStatu
           </div>
         </CardContent>
       </Card>
+
+      {/* Server Debug Info (only show when server is offline) */}
+      {serverHealth && !serverHealth.isOnline && (
+        <Card className="border-orange-200 bg-orange-50">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-orange-800">
+              <AlertCircle className="h-5 w-5" />
+              Server Connection Debug
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2 text-sm">
+              <p><strong>Target:</strong> http://localhost:3001</p>
+              <p><strong>Response Time:</strong> {serverHealth.responseTime}ms</p>
+              <p><strong>Error:</strong> {serverHealth.errorDetails}</p>
+              <p className="text-orange-700">
+                Make sure Ollama is running with: <code className="bg-orange-100 px-1 rounded">$env:OLLAMA_HOST="0.0.0.0:3001"; ollama serve</code>
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
