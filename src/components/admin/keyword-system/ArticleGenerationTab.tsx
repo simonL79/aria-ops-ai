@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,8 +10,12 @@ import { toast } from "sonner";
 import { KeywordCIAIntegration } from '@/services/intelligence/keywordCIAIntegration';
 import { LiveDataEnforcer } from '@/services/ariaCore/liveDataEnforcer';
 
-const ArticleGenerationTab = () => {
-  const [selectedEntity, setSelectedEntity] = useState('');
+interface ArticleGenerationTabProps {
+  entityName?: string;
+}
+
+const ArticleGenerationTab: React.FC<ArticleGenerationTabProps> = ({ entityName: propEntityName }) => {
+  const [selectedEntity, setSelectedEntity] = useState(propEntityName || '');
   const [keyword, setKeyword] = useState('');
   const [keywords, setKeywords] = useState<string[]>([]);
   const [analyzing, setAnalyzing] = useState(false);
