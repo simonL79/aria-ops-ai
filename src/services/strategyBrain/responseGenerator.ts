@@ -51,6 +51,38 @@ export const generateResponseStrategies = async (
   }
 };
 
+export const generateStrategy = async (
+  entityName: string,
+  threatType: string,
+  priority: 'low' | 'medium' | 'high' | 'critical'
+): Promise<ResponseStrategy> => {
+  const strategyId = `strategy-${Date.now()}`;
+  
+  return {
+    id: strategyId,
+    type: 'defensive',
+    title: `${threatType} Response Strategy`,
+    description: `Automated response strategy for ${threatType} threat affecting ${entityName}`,
+    priority,
+    timeframe: priority === 'critical' ? '1-4 hours' : '24-48 hours',
+    resources: ['Content Team', 'Social Media Manager', 'Analytics Team'],
+    actions: [
+      {
+        action: 'Monitor threat evolution',
+        timeline: '1 hour',
+        responsible: 'Analytics Team',
+        kpi: 'Threat status tracking'
+      },
+      {
+        action: 'Deploy counter-narrative content',
+        timeline: priority === 'critical' ? '2 hours' : '4 hours',
+        responsible: 'Content Team',
+        kpi: 'Positive sentiment increase'
+      }
+    ]
+  };
+};
+
 const generateStrategyForPattern = async (
   pattern: DetectedPattern,
   entityName: string
