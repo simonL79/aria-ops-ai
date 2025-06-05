@@ -1,519 +1,286 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Brain, PlayCircle, CheckCircle, AlertTriangle, XCircle, Zap, Target, Shield, Activity } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { 
+  Brain, 
+  Zap, 
+  Target, 
+  CheckCircle, 
+  AlertTriangle, 
+  TrendingUp 
+} from 'lucide-react';
+import { analyzeEntityPatterns } from '@/services/strategyBrain/patternAnalyzer';
+import { generateResponseStrategies, generateStrategy, ResponseStrategy } from '@/services/strategyBrain/responseGenerator';
+import { predictStrategySuccess, StrategyPrediction } from '@/services/strategyBrain/predictiveAnalytics';
+import { evaluateForAutoExecution, AutoExecutionConfig } from '@/services/strategyBrain/autoExecutionEngine';
+import { executeStrategy } from '@/services/strategyBrain/strategyExecutor';
 import { toast } from 'sonner';
-import DashboardLayout from '@/components/layout/DashboardLayout';
 
-// Import services with correct function names
-import { analyzeEntityPatterns, DetectedPattern } from '@/services/strategyBrain/patternAnalyzer';
-import { generateStrategy, ResponseStrategy } from '@/services/strategyBrain/responseGenerator';
-import { executeStrategy, StrategyExecutionResult } from '@/services/strategyBrain/strategyExecutor';
-import { predictStrategyOutcomes, StrategyPrediction } from '@/services/strategyBrain/predictiveAnalytics';
-import { evaluateAutoExecution, AutoExecutionDecision } from '@/services/strategyBrain/autoExecutionEngine';
-
-// Define proper types for test results
 interface TestResult {
-  strategy: string;
-  prediction: StrategyPrediction;
-  status: 'success' | 'warning' | 'failed';
-  confidence: number;
+  step: string;
+  success: boolean;
+  message?: string;
+  data?: any;
 }
 
-interface AutoExecutionResult {
-  strategy: string;
-  canAutoExecute: boolean;
-  status: 'approved' | 'rejected';
-  reason: string;
-}
-
-interface ExecutionResult {
-  strategy: string;
-  result: StrategyExecutionResult;
-  status: 'success' | 'failed';
-}
-
-const StrategyBrainStage3TestPage = () => {
-  const [isRunning, setIsRunning] = useState(false);
-  const [patterns, setPatterns] = useState<DetectedPattern[]>([]);
-  const [strategies, setStrategies] = useState<ResponseStrategy[]>([]);
+const StrategyBrainStage3TestPage: React.FC = () => {
+  const [entityName, setEntityName] = useState('TestEntity');
   const [testResults, setTestResults] = useState<TestResult[]>([]);
-  const [autoExecutionResults, setAutoExecutionResults] = useState<AutoExecutionResult[]>([]);
-  const [executionResults, setExecutionResults] = useState<ExecutionResult[]>([]);
+  const [isTesting, setIsTesting] = useState(false);
 
-  const mockPatterns: DetectedPattern[] = [
-    {
-      type: 'sentiment_shift',
-      confidence: 0.85,
-      sources: ['twitter', 'reddit'],
-      timeframe: '24h',
-      impact: 'medium',
-      description: 'Detected negative sentiment increase for target entity'
-    },
-    {
-      type: 'coordinated_attack',
-      confidence: 0.92,
-      sources: ['facebook', 'instagram'],
-      timeframe: '6h',
-      impact: 'high',
-      description: 'Coordinated negative messaging campaign detected'
-    }
-  ];
-
-  const mockStrategies: ResponseStrategy[] = [
-    {
-      id: 'strategy-1',
-      title: 'Sentiment Recovery Campaign',
-      type: 'defensive',
-      priority: 'high',
-      description: 'Counter negative sentiment with positive content deployment',
-      timeframe: '24-48 hours',
-      resources: ['Content Team', 'Social Media Manager'],
-      actions: [
-        {
-          action: 'Deploy positive content',
-          platform: 'twitter',
-          timeline: '4 hours',
-          responsible: 'Content Team',
-          kpi: 'Sentiment improvement'
-        },
-        {
-          action: 'Engage with community',
-          platform: 'reddit',
-          timeline: '2 hours',
-          responsible: 'Social Media Manager',
-          kpi: 'Engagement increase'
-        }
-      ]
-    },
-    {
-      id: 'strategy-2',
-      title: 'Coordinated Attack Response',
-      type: 'defensive',
-      priority: 'critical',
-      description: 'Rapid response to coordinated attack',
-      timeframe: '2-6 hours',
-      resources: ['Crisis Team', 'Legal Team'],
-      actions: [
-        {
-          action: 'File platform reports',
-          platform: 'facebook',
-          timeline: '1 hour',
-          responsible: 'Legal Team',
-          kpi: 'Reports filed'
-        },
-        {
-          action: 'Crisis communication',
-          timeline: '2 hours',
-          responsible: 'Crisis Team',
-          kpi: 'Response deployment'
-        }
-      ]
-    }
-  ];
-
-  // Test 1: Pattern Analysis
-  const runPatternAnalysisTest = async () => {
-    try {
-      toast.info('🔍 Testing Pattern Analysis...');
-      
-      // Simulate pattern analysis
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      setPatterns(mockPatterns);
-      
-      toast.success('✅ Pattern Analysis: PASSED');
-    } catch (error) {
-      toast.error('❌ Pattern Analysis: FAILED');
-      console.error('Pattern analysis test failed:', error);
-    }
-  };
-
-  // Test 2: Strategy Generation
-  const runStrategyGenerationTest = async () => {
-    try {
-      toast.info('🎯 Testing Strategy Generation...');
-      
-      const generatedStrategies = [];
-      
-      for (const pattern of mockPatterns) {
-        // Use the correct function with proper parameters
-        const strategy = await generateStrategy(
-          'Test Entity',
-          pattern.type,
-          pattern.impact === 'high' ? 'critical' : 'high'
-        );
-        generatedStrategies.push(strategy);
-      }
-      
-      setStrategies([...mockStrategies, ...generatedStrategies]);
-      toast.success('✅ Strategy Generation: PASSED');
-    } catch (error) {
-      toast.error('❌ Strategy Generation: FAILED');
-      console.error('Strategy generation test failed:', error);
-    }
-  };
-
-  // Test 3: Predictive Analysis
-  const runPredictiveAnalysisTest = async () => {
-    try {
-      toast.info('🔮 Testing Predictive Analysis...');
-      
-      const predictions = await Promise.all(
-        mockStrategies.map(async (strategy) => {
-          const prediction = await predictStrategyOutcomes(strategy, mockPatterns);
-          
-          return {
-            strategy: strategy.title,
-            prediction,
-            status: (prediction.metrics.confidenceScore > 0.7 ? 'success' : 'warning') as 'success' | 'warning' | 'failed',
-            confidence: prediction.metrics.confidenceScore
-          };
-        })
-      );
-      
-      setTestResults(predictions);
-      toast.success('✅ Predictive Analysis: PASSED');
-    } catch (error) {
-      toast.error('❌ Predictive Analysis: FAILED');
-      console.error('Predictive analysis test failed:', error);
-    }
-  };
-
-  // Test 4: Auto-Execution Evaluation
-  const runAutoExecutionTest = async () => {
-    try {
-      toast.info('⚡ Testing Auto-Execution Engine...');
-      
-      const autoResults = await Promise.all(
-        mockStrategies.map(async (strategy) => {
-          const decision = await evaluateAutoExecution(strategy, mockPatterns);
-          
-          return {
-            strategy: strategy.title,
-            canAutoExecute: decision.canExecute,
-            status: (decision.canExecute ? 'approved' : 'rejected') as 'approved' | 'rejected',
-            reason: decision.reason
-          };
-        })
-      );
-      
-      setAutoExecutionResults(autoResults);
-      toast.success('✅ Auto-Execution Evaluation: PASSED');
-    } catch (error) {
-      toast.error('❌ Auto-Execution Evaluation: FAILED');
-      console.error('Auto-execution test failed:', error);
-    }
-  };
-
-  // Test 5: Strategy Execution Simulation
-  const runExecutionSimulationTest = async () => {
-    try {
-      toast.info('🚀 Testing Strategy Execution...');
-      
-      const execResults = await Promise.all(
-        mockStrategies.slice(0, 2).map(async (strategy) => {
-          const result = await executeStrategy(strategy.id);
-          
-          return {
-            strategy: strategy.title,
-            result,
-            status: (result.success ? 'success' : 'failed') as 'success' | 'failed'
-          };
-        })
-      );
-      
-      setExecutionResults(execResults);
-      toast.success('✅ Strategy Execution: PASSED');
-    } catch (error) {
-      toast.error('❌ Strategy Execution: FAILED');
-      console.error('Execution simulation test failed:', error);
-    }
-  };
-
-  // Run all tests
   const runAllTests = async () => {
-    setIsRunning(true);
-    
+    setIsTesting(true);
+    setTestResults([]);
+
+    const addResult = (result: TestResult) => {
+      setTestResults(prev => [...prev, result]);
+    };
+
     try {
-      await runPatternAnalysisTest();
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      await runStrategyGenerationTest();
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      await runPredictiveAnalysisTest();
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      await runAutoExecutionTest();
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      await runExecutionSimulationTest();
-      
-      toast.success('🎉 All Strategy Brain Stage 3 Tests Completed!', {
-        description: 'Advanced analytics and predictive systems validated'
+      // Step 1: Pattern Analysis
+      addResult(await testPatternAnalysis(entityName));
+
+      // Step 2: Strategy Generation
+      const strategyGenerationResult = await testStrategyGeneration(entityName);
+      addResult(strategyGenerationResult);
+
+      // Proceed only if strategy generation was successful
+      if (strategyGenerationResult.success) {
+        const strategies: ResponseStrategy[] = strategyGenerationResult.data;
+
+        // Step 3: Predictive Analysis (run on the first strategy)
+        if (strategies.length > 0) {
+          addResult(await testPredictiveAnalysis(entityName, strategies[0]));
+
+          // Step 4: Auto-Execution Evaluation (run on the first strategy)
+          addResult(await testAutoExecutionEvaluation(entityName, strategies[0]));
+
+          // Step 5: Strategy Execution (run on the first strategy)
+          addResult(await testStrategyExecution(strategies[0].id));
+        } else {
+          addResult({
+            step: 'Predictive Analysis, Auto-Execution Evaluation, and Strategy Execution',
+            success: false,
+            message: 'No strategies available to test.'
+          });
+        }
+      }
+    } catch (error: any) {
+      addResult({
+        step: 'Overall Test',
+        success: false,
+        message: `Test failed with error: ${error.message}`
       });
-    } catch (error) {
-      toast.error('❌ Test Suite Failed');
-      console.error('Test suite error:', error);
     } finally {
-      setIsRunning(false);
+      setIsTesting(false);
     }
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'success':
-      case 'approved':
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case 'warning':
-        return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
-      case 'failed':
-      case 'rejected':
-        return <XCircle className="h-4 w-4 text-red-500" />;
-      default:
-        return <Activity className="h-4 w-4 text-blue-500" />;
+  const testPatternAnalysis = async (entityName: string): Promise<TestResult> => {
+    try {
+      const patterns = await analyzeEntityPatterns(entityName);
+      if (patterns && patterns.length > 0) {
+        return {
+          step: 'Pattern Analysis',
+          success: true,
+          message: `Detected ${patterns.length} patterns.`,
+          data: patterns
+        };
+      } else {
+        return {
+          step: 'Pattern Analysis',
+          success: false,
+          message: 'No patterns detected.'
+        };
+      }
+    } catch (error: any) {
+      return {
+        step: 'Pattern Analysis',
+        success: false,
+        message: `Failed to analyze patterns: ${error.message}`
+      };
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'success':
-      case 'approved':
-        return 'text-green-600 bg-green-50 border-green-200';
-      case 'warning':
-        return 'text-yellow-600 bg-yellow-50 border-yellow-200';
-      case 'failed':
-      case 'rejected':
-        return 'text-red-600 bg-red-50 border-red-200';
-      default:
-        return 'text-blue-600 bg-blue-50 border-blue-200';
+  const testStrategyGeneration = async (entityName: string): Promise<TestResult> => {
+    try {
+      // Mock detected patterns for testing purposes
+      const mockPatterns = [
+        {
+          id: 'mock-pattern-1',
+          type: 'sentiment_shift',
+          entityName: entityName,
+          sources: ['Twitter', 'Facebook'],
+          startTime: new Date().toISOString(),
+          endTime: new Date().toISOString(),
+          impact: 'high',
+          urgency: 'urgent',
+          details: 'Sudden negative sentiment increase.',
+          raw_data: [{ source: 'Twitter', content: 'Example tweet' }],
+          analyzed_data: { sentimentScore: -0.8 },
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }
+      ];
+  
+      const strategies = await generateResponseStrategies(entityName, mockPatterns);
+      if (strategies && strategies.length > 0) {
+        return {
+          step: 'Strategy Generation',
+          success: true,
+          message: `Generated ${strategies.length} strategies.`,
+          data: strategies
+        };
+      } else {
+        return {
+          step: 'Strategy Generation',
+          success: false,
+          message: 'No strategies generated.'
+        };
+      }
+    } catch (error: any) {
+      return {
+        step: 'Strategy Generation',
+        success: false,
+        message: `Failed to generate strategies: ${error.message}`
+      };
+    }
+  };
+
+  const testPredictiveAnalysis = async (entityName: string, strategy: ResponseStrategy): Promise<TestResult> => {
+    try {
+      const prediction: StrategyPrediction = await predictStrategySuccess(strategy, entityName);
+      if (prediction) {
+        return {
+          step: 'Predictive Analysis',
+          success: true,
+          message: `Prediction generated: ${prediction.predictedOutcome}`,
+          data: prediction
+        };
+      } else {
+        return {
+          step: 'Predictive Analysis',
+          success: false,
+          message: 'No prediction generated.'
+        };
+      }
+    } catch (error: any) {
+      return {
+        step: 'Predictive Analysis',
+        success: false,
+        message: `Failed to generate prediction: ${error.message}`
+      };
+    }
+  };
+
+  const testAutoExecutionEvaluation = async (entityName: string, strategy: ResponseStrategy): Promise<TestResult> => {
+    try {
+      const decision: boolean = await evaluateForAutoExecution(strategy, entityName);
+      return {
+        step: 'Auto-Execution Evaluation',
+        success: true,
+        message: `Auto-execution ${decision ? 'approved' : 'rejected'}.`,
+        data: decision
+      };
+    } catch (error: any) {
+      return {
+        step: 'Auto-Execution Evaluation',
+        success: false,
+        message: `Failed to evaluate auto-execution: ${error.message}`
+      };
+    }
+  };
+
+  const testStrategyExecution = async (strategyId: string): Promise<TestResult> => {
+    try {
+      const result = await executeStrategy(strategyId);
+      if (result.success) {
+        return {
+          step: 'Strategy Execution',
+          success: true,
+          message: `Strategy executed successfully: ${result.message}`,
+          data: result
+        };
+      } else {
+        return {
+          step: 'Strategy Execution',
+          success: false,
+          message: `Strategy execution failed: ${result.message}`
+        };
+      }
+    } catch (error: any) {
+      return {
+        step: 'Strategy Execution',
+        success: false,
+        message: `Failed to execute strategy: ${error.message}`
+      };
     }
   };
 
   return (
-    <DashboardLayout>
-      <div className="bg-corporate-dark min-h-screen p-6">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-                <Brain className="h-8 w-8 text-purple-400" />
-                Strategy Brain Stage 3 Testing
-              </h1>
-              <p className="text-corporate-lightGray mt-2">
-                Advanced Analytics & Predictive Intelligence Validation
-              </p>
-            </div>
-            <Button 
-              onClick={runAllTests} 
-              disabled={isRunning}
-              className="bg-purple-600 hover:bg-purple-700"
-            >
-              {isRunning ? (
-                <>
-                  <Activity className="h-4 w-4 mr-2 animate-spin" />
-                  Running Tests...
-                </>
-              ) : (
-                <>
-                  <PlayCircle className="h-4 w-4 mr-2" />
-                  Run All Tests
-                </>
-              )}
-            </Button>
+    <div className="p-4">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold">Strategy Brain Stage 3 Test Page</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="mb-4">
+            <label htmlFor="entityName" className="block text-sm font-medium text-gray-700">Entity Name:</label>
+            <input
+              type="text"
+              id="entityName"
+              className="mt-1 p-2 border rounded-md w-full"
+              value={entityName}
+              onChange={(e) => setEntityName(e.target.value)}
+            />
           </div>
-        </div>
+          <Button onClick={runAllTests} disabled={isTesting}>
+            {isTesting ? (
+              <>
+                <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                Running Tests...
+              </>
+            ) : (
+              <>
+                <Brain className="mr-2 h-4 w-4" />
+                Run All Tests
+              </>
+            )}
+          </Button>
 
-        {/* Test Results Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Pattern Analysis Results */}
-          <Card className="bg-corporate-darkSecondary border-corporate-border">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <Target className="h-5 w-5 text-blue-400" />
-                Pattern Analysis Results
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {patterns.length === 0 ? (
-                <p className="text-corporate-lightGray">No patterns detected yet...</p>
-              ) : (
-                <div className="space-y-3">
-                  {patterns.map((pattern, index) => (
-                    <div key={index} className="border border-corporate-border rounded p-3">
-                      <div className="flex justify-between items-start mb-2">
-                        <span className="font-medium text-white capitalize">
-                          {pattern.type.replace('_', ' ')}
-                        </span>
-                        <Badge className={`${getStatusColor('success')}`}>
-                          {Math.round(pattern.confidence * 100)}% confidence
-                        </Badge>
-                      </div>
-                      <p className="text-corporate-lightGray text-sm mb-2">
-                        {pattern.description}
-                      </p>
-                      <div className="flex gap-2">
-                        <Badge variant="outline" className="text-xs">
-                          {pattern.timeframe}
-                        </Badge>
-                        <Badge variant="outline" className={`text-xs ${
-                          pattern.impact === 'high' ? 'text-red-400' : 
-                          pattern.impact === 'medium' ? 'text-yellow-400' : 'text-green-400'
-                        }`}>
-                          {pattern.impact} impact
-                        </Badge>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Predictive Analysis Results */}
-          <Card className="bg-corporate-darkSecondary border-corporate-border">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <Zap className="h-5 w-5 text-yellow-400" />
-                Predictive Analysis
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {testResults.length === 0 ? (
-                <p className="text-corporate-lightGray">No predictions generated yet...</p>
-              ) : (
-                <div className="space-y-3">
-                  {testResults.map((result, index) => (
-                    <div key={index} className="border border-corporate-border rounded p-3">
-                      <div className="flex justify-between items-start mb-2">
-                        <span className="font-medium text-white">{result.strategy}</span>
-                        {getStatusIcon(result.status)}
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-corporate-lightGray text-sm">
-                          Success Probability: {Math.round(result.prediction.metrics.confidenceScore * 100)}%
-                        </span>
-                        <Badge className={getStatusColor(result.status)}>
-                          {result.status}
-                        </Badge>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Auto-Execution Results */}
-          <Card className="bg-corporate-darkSecondary border-corporate-border">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <Shield className="h-5 w-5 text-green-400" />
-                Auto-Execution Evaluation
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {autoExecutionResults.length === 0 ? (
-                <p className="text-corporate-lightGray">No execution evaluations yet...</p>
-              ) : (
-                <div className="space-y-3">
-                  {autoExecutionResults.map((result, index) => (
-                    <div key={index} className="border border-corporate-border rounded p-3">
-                      <div className="flex justify-between items-start mb-2">
-                        <span className="font-medium text-white">{result.strategy}</span>
-                        {getStatusIcon(result.status)}
-                      </div>
-                      <p className="text-corporate-lightGray text-sm mb-2">
-                        {result.reason}
-                      </p>
-                      <Badge className={getStatusColor(result.status)}>
-                        {result.canAutoExecute ? 'Approved for Auto-Execution' : 'Manual Review Required'}
-                      </Badge>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Execution Simulation Results */}
-          <Card className="bg-corporate-darkSecondary border-corporate-border">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <PlayCircle className="h-5 w-5 text-purple-400" />
-                Execution Simulation
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {executionResults.length === 0 ? (
-                <p className="text-corporate-lightGray">No execution results yet...</p>
-              ) : (
-                <div className="space-y-3">
-                  {executionResults.map((result, index) => (
-                    <div key={index} className="border border-corporate-border rounded p-3">
-                      <div className="flex justify-between items-start mb-2">
-                        <span className="font-medium text-white">{result.strategy}</span>
-                        {getStatusIcon(result.status)}
-                      </div>
-                      <div className="text-corporate-lightGray text-sm space-y-1">
-                        <div>Executed Actions: {result.result.executedActions}</div>
-                        <div>Failed Actions: {result.result.failedActions}</div>
-                        <div className="mt-2">
-                          <Badge className={getStatusColor(result.status)}>
-                            {result.result.message}
-                          </Badge>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Generated Strategies Overview */}
-        {strategies.length > 0 && (
-          <Card className="bg-corporate-darkSecondary border-corporate-border mt-6">
-            <CardHeader>
-              <CardTitle className="text-white">Generated Strategies Overview</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {strategies.map((strategy) => (
-                  <div key={strategy.id} className="border border-corporate-border rounded p-4">
-                    <div className="flex justify-between items-start mb-3">
-                      <h3 className="font-medium text-white">{strategy.title}</h3>
-                      <Badge className={`${
-                        strategy.priority === 'critical' ? 'bg-red-500' :
-                        strategy.priority === 'high' ? 'bg-orange-500' :
-                        strategy.priority === 'medium' ? 'bg-yellow-500' : 'bg-blue-500'
-                      } text-white`}>
-                        {strategy.priority}
-                      </Badge>
-                    </div>
-                    <p className="text-corporate-lightGray text-sm mb-3">
-                      {strategy.description}
-                    </p>
-                    <div className="space-y-2">
-                      <div className="text-xs text-corporate-lightGray">
-                        Type: {strategy.type} • Timeframe: {strategy.timeframe}
-                      </div>
-                      <div className="text-xs text-corporate-lightGray">
-                        Actions: {strategy.actions.length} • Resources: {strategy.resources.join(', ')}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-    </DashboardLayout>
+          <div className="mt-6">
+            {testResults.map((result, index) => (
+              <Card key={index} className="mb-2">
+                <CardHeader className="flex items-center justify-between">
+                  <CardTitle>
+                    {result.success ? (
+                      <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
+                    ) : (
+                      <AlertTriangle className="mr-2 h-4 w-4 text-red-500" />
+                    )}
+                    {result.step}
+                  </CardTitle>
+                  <Badge variant={result.success ? 'outline' : 'destructive'}>
+                    {result.success ? 'Success' : 'Failed'}
+                  </Badge>
+                </CardHeader>
+                <CardContent>
+                  <p>{result.message}</p>
+                  {result.data && (
+                    <details>
+                      <summary>Data</summary>
+                      <pre>{JSON.stringify(result.data, null, 2)}</pre>
+                    </details>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
