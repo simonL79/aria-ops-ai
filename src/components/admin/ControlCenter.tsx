@@ -19,9 +19,36 @@ const ControlCenter = () => {
   const [selectedEntity, setSelectedEntity] = useState('');
   const [activeModule, setActiveModule] = useState('overview');
   const [systemStatus, setSystemStatus] = useState('operational');
+  const [showConsole, setShowConsole] = useState(false);
 
   // Sample threat level - in real implementation, this would be determined by A.R.I.A™ analysis
   const currentThreatLevel = 'medium' as 'low' | 'medium' | 'high' | 'critical';
+
+  // Mock service status - would be real in production
+  const serviceStatus = {
+    legalDocumentGenerator: 'active',
+    threatPredictionEngine: 'active',
+    prospectScanner: 'active',
+    execReporting: 'active',
+    liveDataEnforcer: 'active',
+    counterNarrativeEngine: 'active',
+    patternRecognition: 'active',
+    strategyMemory: 'active'
+  };
+
+  // Mock entity memory - would be real in production
+  const entityMemory = selectedEntity ? [
+    {
+      id: '1',
+      content: `Intelligence data for ${selectedEntity}`,
+      created_at: new Date().toISOString(),
+      entity_name: selectedEntity
+    }
+  ] : [];
+
+  const handleEntitySelect = (entityName: string) => {
+    setSelectedEntity(entityName);
+  };
 
   return (
     <div className="min-h-screen bg-corporate-dark text-white p-6">
@@ -62,6 +89,7 @@ const ControlCenter = () => {
               <Button 
                 variant="outline" 
                 className="text-corporate-accent border-corporate-accent hover:bg-corporate-accent hover:text-black"
+                onClick={() => handleEntitySelect(selectedEntity)}
               >
                 Load Context
               </Button>
@@ -100,8 +128,31 @@ const ControlCenter = () => {
 
           <TabsContent value="overview" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <EntityContextPanel entityName={selectedEntity} />
-              <QuickCommandConsole />
+              <EntityContextPanel 
+                selectedEntity={selectedEntity}
+                entityMemory={entityMemory}
+                onEntitySelect={handleEntitySelect}
+                serviceStatus={serviceStatus}
+              />
+              {showConsole ? (
+                <QuickCommandConsole 
+                  selectedEntity={selectedEntity}
+                  onClose={() => setShowConsole(false)}
+                  serviceStatus={serviceStatus}
+                />
+              ) : (
+                <Card className="bg-corporate-darkSecondary border-corporate-border">
+                  <CardContent className="p-6 text-center">
+                    <Button
+                      onClick={() => setShowConsole(true)}
+                      className="bg-corporate-accent text-black hover:bg-corporate-accent/90"
+                    >
+                      <Zap className="h-4 w-4 mr-2" />
+                      Open Command Console
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </TabsContent>
 
@@ -125,19 +176,38 @@ const ControlCenter = () => {
           </TabsContent>
 
           <TabsContent value="threats" className="space-y-6">
-            <ThreatTracker />
+            <ThreatTracker 
+              selectedEntity={selectedEntity}
+              serviceStatus={serviceStatus}
+              entityMemory={entityMemory}
+            />
           </TabsContent>
 
           <TabsContent value="services" className="space-y-6">
-            <ServiceOrchestrator />
+            <ServiceOrchestrator 
+              selectedEntity={selectedEntity}
+              activeModule={activeModule}
+            />
+            <Card className="bg-corporate-darkSecondary border-corporate-border">
+              <CardContent className="py-8">
+                <div className="text-center text-corporate-lightGray">
+                  <Zap className="h-8 w-8 mx-auto mb-2" />
+                  <p>Service orchestration running in background</p>
+                  <p className="text-xs mt-1">Check console for service logs</p>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="brain" className="space-y-6">
-            <StrategyBrainMetrics />
+            <StrategyBrainMetrics selectedEntity={selectedEntity} />
           </TabsContent>
 
           <TabsContent value="diagnostics" className="space-y-6">
-            <SystemDiagnostics />
+            <SystemDiagnostics 
+              selectedEntity={selectedEntity}
+              serviceStatus={serviceStatus}
+            />
           </TabsContent>
         </Tabs>
       </div>
