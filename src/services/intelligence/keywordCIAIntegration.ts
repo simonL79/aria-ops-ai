@@ -52,33 +52,37 @@ export class KeywordCIAIntegration {
       fullScan: true,
       source: 'cia_keyword_system_live',
       precisionMode: options.precisionMode || 'high',
-      enableFalsePositiveFilter: options.enableFalsePositiveFilter !== false
+      enableFalsePositiveFilter: options.enableFalsePositiveFilter !== false,
+      liveDataOnly: true, // CRITICAL: Force live data only
+      blockSimulations: true // CRITICAL: Block any simulation attempts
     };
 
     // Execute CIA-level scan with live enforcement
     const results = await CIALevelScanner.executePrecisionScan(scanOptions);
 
     // Validate all results are live data
+    const validatedResults = [];
     for (const result of results) {
-      if (!await LiveDataEnforcer.validateDataInput(result.content || '', result.platform)) {
+      if (await LiveDataEnforcer.validateDataInput(result.content || '', result.platform)) {
+        validatedResults.push(result);
+      } else {
         console.warn('🚫 FILTERED: Non-live result detected and removed');
-        continue;
       }
     }
 
     // Calculate precision statistics only on verified live data
-    const precisionStats = this.calculatePrecisionStats(results);
+    const precisionStats = this.calculatePrecisionStats(validatedResults);
 
     console.log('✅ CIA Keyword Integration Complete - LIVE DATA VERIFIED:', {
       entity: entityName,
-      results: results.length,
+      results: validatedResults.length,
       precision: precisionStats.avg_precision_score,
       confidence: precisionStats.confidence_level,
       liveDataCompliant: true
     });
 
     return {
-      results,
+      results: validatedResults,
       precisionStats
     };
   }
