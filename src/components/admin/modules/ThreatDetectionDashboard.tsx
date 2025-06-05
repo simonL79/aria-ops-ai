@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -44,7 +43,21 @@ const ThreatDetectionDashboard = () => {
 
       if (error) throw error;
 
-      setThreats(data || []);
+      // Transform the data to match our interface
+      const transformedThreats: ThreatData[] = (data || []).map(item => ({
+        id: item.id,
+        content: item.content || '',
+        platform: item.platform || '',
+        severity: ['low', 'medium', 'high', 'critical'].includes(item.severity) 
+          ? item.severity as 'low' | 'medium' | 'high' | 'critical'
+          : 'medium',
+        status: item.status || 'new',
+        created_at: item.created_at,
+        detected_entities: Array.isArray(item.detected_entities) ? item.detected_entities : [],
+        confidence_score: item.confidence_score || 0
+      }));
+
+      setThreats(transformedThreats);
     } catch (error) {
       console.error('Failed to load threats:', error);
     }

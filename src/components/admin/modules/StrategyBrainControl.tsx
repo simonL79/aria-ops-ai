@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,6 +16,11 @@ interface Strategy {
   status: string;
   created_at: string;
   actions: any[];
+  resources: string[];
+  timeframe?: string;
+  executed_at?: string;
+  execution_result?: any;
+  updated_at: string;
 }
 
 const StrategyBrainControl = () => {
@@ -36,7 +40,26 @@ const StrategyBrainControl = () => {
         .limit(20);
 
       if (error) throw error;
-      setStrategies(data || []);
+      
+      // Transform the data to match our interface
+      const transformedStrategies: Strategy[] = (data || []).map(item => ({
+        id: item.id,
+        entity_name: item.entity_name,
+        strategy_type: item.strategy_type,
+        title: item.title,
+        description: item.description,
+        priority: item.priority,
+        status: item.status,
+        created_at: item.created_at,
+        actions: Array.isArray(item.actions) ? item.actions : [],
+        resources: Array.isArray(item.resources) ? item.resources : [],
+        timeframe: item.timeframe,
+        executed_at: item.executed_at,
+        execution_result: item.execution_result,
+        updated_at: item.updated_at
+      }));
+
+      setStrategies(transformedStrategies);
     } catch (error) {
       console.error('Failed to load strategies:', error);
     }
