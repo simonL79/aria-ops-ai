@@ -1,4 +1,3 @@
-
 import { CIALevelScanner, type CIAScanOptions, type CIAScanResult } from './ciaLevelScanner';
 import { AdvancedEntityMatcher, type AdvancedEntityFingerprint } from './advancedEntityMatcher';
 import { LiveDataEnforcer } from '@/services/ariaCore/liveDataEnforcer';
@@ -53,9 +52,7 @@ export class KeywordCIAIntegration {
       fullScan: true,
       source: 'cia_keyword_system_live',
       precisionMode: options.precisionMode || 'high',
-      enableFalsePositiveFilter: options.enableFalsePositiveFilter !== false,
-      liveDataOnly: true, // CRITICAL: Force live data only
-      blockSimulations: true // CRITICAL: Block any simulation attempts
+      enableFalsePositiveFilter: options.enableFalsePositiveFilter !== false
     };
 
     // Execute CIA-level scan with live enforcement
