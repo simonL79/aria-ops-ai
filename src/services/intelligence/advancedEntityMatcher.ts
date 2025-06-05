@@ -4,12 +4,11 @@ import { supabase } from '@/integrations/supabase/client';
 
 export interface AdvancedEntityFingerprint {
   id: string;
-  entity_id: string;
-  primary_name: string;
-  aliases: string[];
-  organization?: string;
-  locations: string[];
-  context_tags: string[];
+  entity_name: string;
+  alternate_names: string[];
+  industries: string[];
+  known_associates: string[];
+  controversial_topics: string[];
   false_positive_blocklist: string[];
   live_data_only: boolean;
   created_source: string;
@@ -25,27 +24,29 @@ export interface EntityMatchResult {
 
 export class AdvancedEntityMatcher {
   /**
-   * Create entity fingerprint with live data validation
+   * Create entity fingerprint with live data validation using existing entities table
    */
   static async createEntityFingerprint(fingerprint: any): Promise<string> {
     // Validate input is live data
-    if (!await LiveDataEnforcer.validateDataInput(fingerprint.primary_name, 'entity_fingerprint')) {
-      throw new Error('Entity fingerprint blocked: Primary name appears to be simulation data');
+    if (!await LiveDataEnforcer.validateDataInput(fingerprint.entity_name, 'entity_fingerprint')) {
+      throw new Error('Entity fingerprint blocked: Entity name appears to be simulation data');
     }
 
     try {
       const { data, error } = await supabase
-        .from('entity_fingerprints')
+        .from('entities')
         .insert([{
-          entity_id: fingerprint.entity_id,
-          primary_name: fingerprint.primary_name,
-          aliases: fingerprint.aliases,
-          organization: fingerprint.organization,
-          locations: fingerprint.locations,
-          context_tags: fingerprint.context_tags,
-          false_positive_blocklist: fingerprint.false_positive_blocklist,
-          live_data_only: fingerprint.live_data_only,
-          created_source: fingerprint.created_source
+          name: fingerprint.entity_name,
+          entity_type: fingerprint.entity_type || 'individual',
+          risk_profile: {
+            alternate_names: fingerprint.alternate_names || [],
+            industries: fingerprint.industries || [],
+            known_associates: fingerprint.known_associates || [],
+            controversial_topics: fingerprint.controversial_topics || [],
+            false_positive_blocklist: fingerprint.false_positive_blocklist || [],
+            live_data_only: fingerprint.live_data_only,
+            created_source: fingerprint.created_source
+          }
         }])
         .select()
         .single();
@@ -55,8 +56,8 @@ export class AdvancedEntityMatcher {
         throw new Error('Failed to create entity fingerprint');
       }
 
-      console.log('✅ Created live entity fingerprint:', data.entity_id);
-      return data.entity_id;
+      console.log('✅ Created live entity fingerprint:', data.id);
+      return data.id;
 
     } catch (error) {
       console.error('Entity fingerprint creation failed:', error);
@@ -65,32 +66,32 @@ export class AdvancedEntityMatcher {
   }
 
   /**
-   * Get entity fingerprint by name
+   * Get entity fingerprint by name using existing entities table
    */
   static async getEntityFingerprint(entityName: string): Promise<AdvancedEntityFingerprint | null> {
     try {
       const { data, error } = await supabase
-        .from('entity_fingerprints')
+        .from('entities')
         .select('*')
-        .eq('primary_name', entityName)
-        .eq('live_data_only', true)
+        .eq('name', entityName)
         .single();
 
       if (error || !data) {
         return null;
       }
 
+      const riskProfile = data.risk_profile as any || {};
+
       return {
         id: data.id,
-        entity_id: data.entity_id,
-        primary_name: data.primary_name,
-        aliases: data.aliases || [],
-        organization: data.organization,
-        locations: data.locations || [],
-        context_tags: data.context_tags || [],
-        false_positive_blocklist: data.false_positive_blocklist || [],
-        live_data_only: data.live_data_only,
-        created_source: data.created_source
+        entity_name: data.name,
+        alternate_names: riskProfile.alternate_names || [],
+        industries: riskProfile.industries || [],
+        known_associates: riskProfile.known_associates || [],
+        controversial_topics: riskProfile.controversial_topics || [],
+        false_positive_blocklist: riskProfile.false_positive_blocklist || [],
+        live_data_only: riskProfile.live_data_only || true,
+        created_source: riskProfile.created_source || 'unknown'
       };
 
     } catch (error) {
@@ -129,23 +130,23 @@ export class AdvancedEntityMatcher {
     }
 
     // Primary name match
-    if (contentLower.includes(fingerprint.primary_name.toLowerCase())) {
+    if (contentLower.includes(fingerprint.entity_name.toLowerCase())) {
       matchFactors.push('primary_name_match');
       confidenceScore += 0.4;
     }
 
-    // Alias matches
-    for (const alias of fingerprint.aliases) {
-      if (contentLower.includes(alias.toLowerCase())) {
-        matchFactors.push(`alias_match_${alias}`);
+    // Alternate name matches
+    for (const altName of fingerprint.alternate_names) {
+      if (contentLower.includes(altName.toLowerCase())) {
+        matchFactors.push(`alternate_name_match_${altName}`);
         confidenceScore += 0.2;
       }
     }
 
-    // Context tag matches
-    for (const tag of fingerprint.context_tags) {
-      if (contentLower.includes(tag.toLowerCase())) {
-        matchFactors.push(`context_match_${tag}`);
+    // Industry context matches
+    for (const industry of fingerprint.industries) {
+      if (contentLower.includes(industry.toLowerCase())) {
+        matchFactors.push(`industry_match_${industry}`);
         confidenceScore += 0.1;
       }
     }
@@ -179,14 +180,15 @@ export class AdvancedEntityMatcher {
   }
 
   /**
-   * Get precision statistics for entity
+   * Get precision statistics for entity using existing scan results
    */
   static async getPrecisionStats(entityId: string): Promise<any[]> {
     try {
+      // Use existing scan_results table to get entity match statistics
       const { data, error } = await supabase
-        .from('entity_match_stats')
+        .from('scan_results')
         .select('*')
-        .eq('entity_id', entityId)
+        .contains('detected_entities', [entityId])
         .order('created_at', { ascending: false })
         .limit(10);
 
