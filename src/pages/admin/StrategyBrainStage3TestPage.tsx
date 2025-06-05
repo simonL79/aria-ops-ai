@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,7 +10,8 @@ import {
   Target, 
   CheckCircle, 
   AlertTriangle, 
-  TrendingUp 
+  TrendingUp,
+  RefreshCw 
 } from 'lucide-react';
 import { analyzeEntityPatterns } from '@/services/strategyBrain/patternAnalyzer';
 import { generateResponseStrategies, generateStrategy, ResponseStrategy } from '@/services/strategyBrain/responseGenerator';
@@ -80,13 +82,13 @@ const StrategyBrainStage3TestPage: React.FC = () => {
 
   const testPatternAnalysis = async (entityName: string): Promise<TestResult> => {
     try {
-      const patterns = await analyzeEntityPatterns(entityName);
-      if (patterns && patterns.length > 0) {
+      const analysisResult = await analyzeEntityPatterns(entityName);
+      if (analysisResult && analysisResult.patterns && analysisResult.patterns.length > 0) {
         return {
           step: 'Pattern Analysis',
           success: true,
-          message: `Detected ${patterns.length} patterns.`,
-          data: patterns
+          message: `Detected ${analysisResult.patterns.length} patterns.`,
+          data: analysisResult.patterns
         };
       } else {
         return {
@@ -109,19 +111,12 @@ const StrategyBrainStage3TestPage: React.FC = () => {
       // Mock detected patterns for testing purposes
       const mockPatterns = [
         {
-          id: 'mock-pattern-1',
-          type: 'sentiment_shift',
-          entityName: entityName,
-          sources: ['Twitter', 'Facebook'],
-          startTime: new Date().toISOString(),
-          endTime: new Date().toISOString(),
-          impact: 'high',
-          urgency: 'urgent',
-          details: 'Sudden negative sentiment increase.',
-          raw_data: [{ source: 'Twitter', content: 'Example tweet' }],
-          analyzed_data: { sentimentScore: -0.8 },
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          type: 'sentiment_shift' as const,
+          description: 'Sudden negative sentiment increase.',
+          confidence: 0.8,
+          timeframe: '7 days',
+          impact: 'high' as const,
+          sources: ['Twitter', 'Facebook']
         }
       ];
   
