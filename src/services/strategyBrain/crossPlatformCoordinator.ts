@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { ResponseStrategy } from './responseGenerator';
 
@@ -283,5 +282,48 @@ export const getCoordinationPlanStatus = async (planId: string): Promise<Coordin
   } catch (error) {
     console.error('Failed to get coordination plan status:', error);
     return null;
+  }
+};
+
+/**
+ * Get coordination metrics for analytics
+ */
+export const getCoordinationMetrics = async (): Promise<{
+  totalPlans: number;
+  activePlans: number;
+  completedPlans: number;
+  successRate: number;
+}> => {
+  try {
+    const { data, error } = await supabase
+      .from('aria_ops_log')
+      .select('operation_data')
+      .eq('operation_type', 'coordination_plan');
+
+    if (error) {
+      console.error('Failed to get coordination metrics:', error);
+      throw error;
+    }
+
+    const plans = data?.map(item => item.operation_data as unknown as CoordinationPlan) || [];
+    const totalPlans = plans.length;
+    const activePlans = plans.filter(p => p.status === 'executing').length;
+    const completedPlans = plans.filter(p => p.status === 'completed').length;
+    const successRate = totalPlans > 0 ? (completedPlans / totalPlans) * 100 : 0;
+
+    return {
+      totalPlans,
+      activePlans,
+      completedPlans,
+      successRate
+    };
+  } catch (error) {
+    console.error('Failed to get coordination metrics:', error);
+    return {
+      totalPlans: 0,
+      activePlans: 0,
+      completedPlans: 0,
+      successRate: 0
+    };
   }
 };

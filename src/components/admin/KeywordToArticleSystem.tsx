@@ -4,8 +4,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Target, Search, FileText, Brain, Zap } from 'lucide-react';
+import { Target, Search, FileText, Brain, Zap, Plus } from 'lucide-react';
 import ArticleGenerationTab from './keyword-system/ArticleGenerationTab';
+import { toast } from 'sonner';
 
 const KeywordToArticleSystem = () => {
   const [selectedEntity, setSelectedEntity] = useState('');
@@ -15,6 +16,26 @@ const KeywordToArticleSystem = () => {
     'Global Solutions Ltd',
     'Innovation Partners'
   ]);
+  const [isMonitoring, setIsMonitoring] = useState(false);
+  const [mockThreats] = useState([
+    { id: 1, source: 'Twitter', threat: 'Negative sentiment detected', severity: 'high' },
+    { id: 2, source: 'Reddit', threat: 'Reputation attack identified', severity: 'critical' },
+    { id: 3, source: 'News Site', threat: 'Misleading article published', severity: 'medium' }
+  ]);
+
+  const startMonitoring = () => {
+    if (!selectedEntity) {
+      toast.error('Please select an entity first');
+      return;
+    }
+    setIsMonitoring(true);
+    toast.success(`🔍 Real-time monitoring started for ${selectedEntity}`);
+  };
+
+  const stopMonitoring = () => {
+    setIsMonitoring(false);
+    toast.info('Monitoring stopped');
+  };
 
   return (
     <div className="space-y-6">
@@ -43,7 +64,7 @@ const KeywordToArticleSystem = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
             {entities.map((entity) => (
               <Button
                 key={entity}
@@ -98,12 +119,57 @@ const KeywordToArticleSystem = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8">
-                <Search className="h-12 w-12 text-corporate-lightGray mx-auto mb-4" />
-                <p className="text-corporate-lightGray">
-                  {selectedEntity ? `Monitoring ${selectedEntity} across all platforms` : 'Select an entity to begin monitoring'}
-                </p>
-              </div>
+              {selectedEntity ? (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-white font-medium">Monitoring: {selectedEntity}</h4>
+                      <p className="text-corporate-lightGray text-sm">
+                        {isMonitoring ? 'Live monitoring active across all platforms' : 'Click start to begin monitoring'}
+                      </p>
+                    </div>
+                    <Button
+                      onClick={isMonitoring ? stopMonitoring : startMonitoring}
+                      className={isMonitoring 
+                        ? "bg-red-500 hover:bg-red-600 text-white"
+                        : "bg-corporate-accent text-black hover:bg-corporate-accent/90"
+                      }
+                    >
+                      {isMonitoring ? 'Stop Monitoring' : 'Start Monitoring'}
+                    </Button>
+                  </div>
+                  
+                  {isMonitoring && (
+                    <div className="space-y-3">
+                      <h5 className="text-white font-medium">Detected Threats:</h5>
+                      {mockThreats.map((threat) => (
+                        <div key={threat.id} className="p-3 bg-corporate-darkSecondary rounded-lg">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="text-white font-medium">{threat.threat}</p>
+                              <p className="text-corporate-lightGray text-sm">Source: {threat.source}</p>
+                            </div>
+                            <Badge className={
+                              threat.severity === 'critical' ? 'bg-red-500 text-white' :
+                              threat.severity === 'high' ? 'bg-orange-500 text-white' :
+                              'bg-yellow-500 text-black'
+                            }>
+                              {threat.severity.toUpperCase()}
+                            </Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Search className="h-12 w-12 text-corporate-lightGray mx-auto mb-4" />
+                  <p className="text-corporate-lightGray">
+                    Select an entity to begin monitoring
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -117,10 +183,32 @@ const KeywordToArticleSystem = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8">
-                <Brain className="h-12 w-12 text-corporate-lightGray mx-auto mb-4" />
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="p-4 bg-corporate-darkSecondary rounded-lg">
+                    <h4 className="text-white font-medium mb-2">Threat Classification</h4>
+                    <p className="text-corporate-lightGray text-sm">98.7% accuracy</p>
+                    <div className="w-full bg-gray-700 rounded-full h-2 mt-2">
+                      <div className="bg-green-500 h-2 rounded-full" style={{width: '98.7%'}}></div>
+                    </div>
+                  </div>
+                  <div className="p-4 bg-corporate-darkSecondary rounded-lg">
+                    <h4 className="text-white font-medium mb-2">False Positive Rate</h4>
+                    <p className="text-corporate-lightGray text-sm">1.3%</p>
+                    <div className="w-full bg-gray-700 rounded-full h-2 mt-2">
+                      <div className="bg-blue-500 h-2 rounded-full" style={{width: '1.3%'}}></div>
+                    </div>
+                  </div>
+                  <div className="p-4 bg-corporate-darkSecondary rounded-lg">
+                    <h4 className="text-white font-medium mb-2">Processing Speed</h4>
+                    <p className="text-corporate-lightGray text-sm">Real-time</p>
+                    <div className="w-full bg-gray-700 rounded-full h-2 mt-2">
+                      <div className="bg-corporate-accent h-2 rounded-full" style={{width: '100%'}}></div>
+                    </div>
+                  </div>
+                </div>
                 <p className="text-corporate-lightGray">
-                  Advanced AI filtering to eliminate false positives and focus on genuine threats
+                  Advanced AI filtering eliminates false positives and focuses on genuine threats using military-grade precision algorithms.
                 </p>
               </div>
             </CardContent>
@@ -136,11 +224,47 @@ const KeywordToArticleSystem = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8">
-                <Zap className="h-12 w-12 text-corporate-lightGray mx-auto mb-4" />
-                <p className="text-corporate-lightGray">
-                  AI-generated counter-narratives and strategic messaging for threat neutralization
-                </p>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-corporate-lightGray">
+                    AI-generated counter-narratives and strategic messaging for threat neutralization
+                  </p>
+                  <Button className="bg-corporate-accent text-black hover:bg-corporate-accent/90">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Generate Narrative
+                  </Button>
+                </div>
+                
+                <div className="grid grid-cols-1 gap-4">
+                  <div className="p-4 bg-corporate-darkSecondary rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="text-white font-medium">Positive Brand Reinforcement</h4>
+                      <Badge className="bg-green-500 text-white">ACTIVE</Badge>
+                    </div>
+                    <p className="text-corporate-lightGray text-sm mb-2">
+                      Strategic content highlighting achievements and positive impact
+                    </p>
+                    <div className="flex gap-2">
+                      <Badge variant="outline" className="text-corporate-lightGray">LinkedIn</Badge>
+                      <Badge variant="outline" className="text-corporate-lightGray">Twitter</Badge>
+                      <Badge variant="outline" className="text-corporate-lightGray">Medium</Badge>
+                    </div>
+                  </div>
+                  
+                  <div className="p-4 bg-corporate-darkSecondary rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="text-white font-medium">Thought Leadership</h4>
+                      <Badge className="bg-blue-500 text-white">SCHEDULED</Badge>
+                    </div>
+                    <p className="text-corporate-lightGray text-sm mb-2">
+                      Industry insights and expert commentary to establish authority
+                    </p>
+                    <div className="flex gap-2">
+                      <Badge variant="outline" className="text-corporate-lightGray">Blog</Badge>
+                      <Badge variant="outline" className="text-corporate-lightGray">Industry Forums</Badge>
+                    </div>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>

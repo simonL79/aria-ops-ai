@@ -38,35 +38,29 @@ const AdminSidebar = () => {
       isFeature: true
     },
     {
-      title: 'Genesis Sentinel™',
-      href: '/admin/genesis-sentinel',
-      icon: Crosshair,
-      description: 'Weapons-grade threat detection & entity discovery',
-      classification: 'LIVE OSINT'
-    },
-    {
-      title: 'Watchtower',
-      href: '/admin/watchtower',
-      icon: Eye,
-      description: 'Real-time monitoring & alerting',
-      classification: 'MONITORING'
-    },
-    {
-      title: 'Intelligence Core',
-      href: '/admin/intelligence-core',
+      title: 'Control Center',
+      href: '/admin/control-center',
       icon: Brain,
-      description: 'Central intelligence processing',
-      classification: 'ANALYSIS'
+      description: 'Unified command interface with entity context',
+      classification: 'COMMAND'
+    },
+    {
+      title: 'Strategy Brain Test',
+      href: '/admin/strategy-brain-test',
+      icon: Zap,
+      description: 'AI strategy testing & validation',
+      classification: 'TESTING'
+    },
+    {
+      title: 'Strategy Brain Stage 3',
+      href: '/admin/strategy-brain-stage3',
+      icon: Brain,
+      description: 'Advanced AI intelligence testing',
+      classification: 'ADVANCED'
     }
   ];
 
   const operationalModules = [
-    {
-      title: 'System Optimization',
-      href: '/admin/system-optimization',
-      icon: Zap,
-      description: 'Live data integrity & optimization'
-    },
     {
       title: 'Admin Dashboard',
       href: '/admin',
