@@ -1,323 +1,298 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Brain, Zap, Target, AlertTriangle, BarChart3, Settings, Activity, TrendingUp, LayoutDashboard, Users, ListChecks, Cpu, Server } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { 
+  Shield, Activity, Brain, Zap, Target, AlertTriangle, 
+  Server, Terminal, Eye, Settings, PlayCircle, PauseCircle 
+} from 'lucide-react';
 import { toast } from 'sonner';
-import SecurityCenter from '@/components/aria/SecurityCenter';
-import IntelligenceHub from '@/components/aria/IntelligenceHub';
-import LocalModelManager from '@/components/aria/LocalModelManager';
+import { supabase } from '@/integrations/supabase/client';
 import LocalServerMonitor from '@/components/aria/LocalServerMonitor';
+import LocalModelManager from '@/components/aria/LocalModelManager';
+import ThreatDetectionDashboard from './modules/ThreatDetectionDashboard';
+import StrategyBrainControl from './modules/StrategyBrainControl';
+import AutoExecutionManager from './modules/AutoExecutionManager';
+import SystemHealthOverview from './modules/SystemHealthOverview';
+import LiveDataValidator from './modules/LiveDataValidator';
+import UnifiedAlertSystem from './modules/UnifiedAlertSystem';
+
+interface SystemStatus {
+  localServer: boolean;
+  threatDetection: boolean;
+  strategyBrain: boolean;
+  autoExecution: boolean;
+  liveDataCompliance: boolean;
+}
 
 const ControlCenter = () => {
-  const [activeSection, setActiveSection] = useState<'overview' | 'security' | 'intelligence' | 'models' | 'server'>('overview');
+  const [activeTab, setActiveTab] = useState('overview');
+  const [systemStatus, setSystemStatus] = useState<SystemStatus>({
+    localServer: false,
+    threatDetection: false,
+    strategyBrain: false,
+    autoExecution: false,
+    liveDataCompliance: false
+  });
+  const [isRunningTests, setIsRunningTests] = useState(false);
 
-  const systemStats = {
-    activeThreats: 3,
-    totalEntities: 127,
-    intelligenceItems: 45,
-    systemHealth: 98
-  };
+  useEffect(() => {
+    checkSystemStatus();
+    const interval = setInterval(checkSystemStatus, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
-  const handleQuickAction = (action: string) => {
-    switch (action) {
-      case 'threat_scan':
-        toast.info('🔍 Initiating threat scan...');
-        setTimeout(() => toast.success('✅ Threat scan completed'), 2000);
-        break;
-      case 'intelligence_sweep':
-        toast.info('🧠 Starting intelligence sweep...');
-        setTimeout(() => toast.success('✅ Intelligence sweep completed'), 2500);
-        break;
-      case 'security_check':
-        toast.info('🛡️ Running security check...');
-        setTimeout(() => toast.success('✅ Security check passed'), 1500);
-        break;
-      default:
-        toast.info(`Executing ${action}...`);
+  const checkSystemStatus = async () => {
+    try {
+      // Check local server
+      const localServerStatus = await fetch('http://localhost:3001/api/tags', {
+        method: 'GET',
+        signal: AbortSignal.timeout(3000)
+      }).then(res => res.ok).catch(() => false);
+
+      // Check threat detection system
+      const { data: threatData } = await supabase
+        .from('scan_results')
+        .select('id')
+        .gte('created_at', new Date(Date.now() - 60 * 60 * 1000).toISOString())
+        .limit(1);
+
+      // Check strategy brain
+      const { data: strategyData } = await supabase
+        .from('strategy_responses')
+        .select('id')
+        .limit(1);
+
+      // Check auto-execution
+      const { data: autoExecData } = await supabase
+        .from('aria_ops_log')
+        .select('id')
+        .eq('operation_type', 'auto_execution_config')
+        .limit(1);
+
+      // Check live data compliance
+      const liveDataCompliance = await validateLiveDataCompliance();
+
+      setSystemStatus({
+        localServer: localServerStatus,
+        threatDetection: Boolean(threatData?.length),
+        strategyBrain: Boolean(strategyData?.length),
+        autoExecution: Boolean(autoExecData?.length),
+        liveDataCompliance
+      });
+
+    } catch (error) {
+      console.error('System status check failed:', error);
     }
   };
 
-  if (activeSection === 'security') {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="bg-white border-b border-gray-200 px-6 py-4">
-          <Button
-            onClick={() => setActiveSection('overview')}
-            variant="ghost"
-            className="mb-2"
-          >
-            ← Back to Control Center
-          </Button>
-        </div>
-        <div className="container mx-auto px-6 py-8">
-          <SecurityCenter />
-        </div>
-      </div>
-    );
-  }
+  const validateLiveDataCompliance = async (): Promise<boolean> => {
+    try {
+      // Check for any simulation/mock data patterns
+      const { data: mockCheck } = await supabase
+        .from('scan_results')
+        .select('id')
+        .or('content.ilike.%mock%,content.ilike.%test%,content.ilike.%demo%,content.ilike.%simulation%')
+        .limit(1);
 
-  if (activeSection === 'intelligence') {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="bg-white border-b border-gray-200 px-6 py-4">
-          <Button
-            onClick={() => setActiveSection('overview')}
-            variant="ghost"
-            className="mb-2"
-          >
-            ← Back to Control Center
-          </Button>
-        </div>
-        <div className="container mx-auto px-6 py-8">
-          <IntelligenceHub />
-        </div>
-      </div>
-    );
-  }
+      return !mockCheck || mockCheck.length === 0;
+    } catch (error) {
+      console.error('Live data validation failed:', error);
+      return false;
+    }
+  };
 
-  if (activeSection === 'models') {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="bg-white border-b border-gray-200 px-6 py-4">
-          <Button
-            onClick={() => setActiveSection('overview')}
-            variant="ghost"
-            className="mb-2"
-          >
-            ← Back to Control Center
-          </Button>
-        </div>
-        <div className="container mx-auto px-6 py-8">
-          <LocalModelManager />
-        </div>
-      </div>
-    );
-  }
+  const runSystemTests = async () => {
+    setIsRunningTests(true);
+    toast.info('Running comprehensive system tests...');
 
-  if (activeSection === 'server') {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="bg-white border-b border-gray-200 px-6 py-4">
-          <Button
-            onClick={() => setActiveSection('overview')}
-            variant="ghost"
-            className="mb-2"
-          >
-            ← Back to Control Center
-          </Button>
-        </div>
-        <div className="container mx-auto px-6 py-8">
-          <LocalServerMonitor />
-        </div>
-      </div>
-    );
-  }
+    try {
+      // Test 1: Local AI Server Connection
+      const serverTest = await fetch('http://localhost:3001/api/tags', {
+        method: 'GET',
+        signal: AbortSignal.timeout(5000)
+      }).then(res => res.ok).catch(() => false);
+
+      if (!serverTest) {
+        throw new Error('Local AI server connection failed');
+      }
+
+      // Test 2: Live Data Validation
+      const liveDataTest = await validateLiveDataCompliance();
+      if (!liveDataTest) {
+        throw new Error('Live data compliance validation failed - simulation data detected');
+      }
+
+      // Test 3: Database Connectivity
+      const { data: dbTest, error: dbError } = await supabase
+        .from('scan_results')
+        .select('count')
+        .limit(1);
+
+      if (dbError) {
+        throw new Error(`Database connectivity failed: ${dbError.message}`);
+      }
+
+      // Test 4: Strategy Brain Integration
+      const { data: strategyTest } = await supabase
+        .from('aria_ops_log')
+        .select('id')
+        .eq('module_source', 'strategy_brain')
+        .limit(1);
+
+      // Log successful test completion
+      await supabase.from('aria_ops_log').insert({
+        operation_type: 'system_test',
+        module_source: 'control_center',
+        success: true,
+        operation_data: {
+          tests_passed: {
+            local_server: serverTest,
+            live_data_compliance: liveDataTest,
+            database_connectivity: true,
+            strategy_brain: Boolean(strategyTest?.length)
+          },
+          timestamp: new Date().toISOString()
+        }
+      });
+
+      toast.success('All system tests passed - A.R.I.A™ fully operational');
+      checkSystemStatus();
+
+    } catch (error) {
+      console.error('System tests failed:', error);
+      toast.error(`System test failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsRunningTests(false);
+    }
+  };
+
+  const getStatusColor = (status: boolean) => {
+    return status ? 'text-green-600' : 'text-red-600';
+  };
+
+  const getStatusBadge = (status: boolean) => {
+    return status ? 
+      <Badge className="bg-green-500 text-white">ONLINE</Badge> :
+      <Badge className="bg-red-500 text-white">OFFLINE</Badge>;
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-6 py-8 space-y-8">
-        {/* Header */}
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">A.R.I.A™ Control Center</h1>
-          <p className="text-gray-600">Advanced Reputation Intelligence Assistant - Command & Control</p>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold flex items-center gap-3">
+            <Shield className="h-8 w-8 text-blue-600" />
+            A.R.I.A™ Control Center
+          </h1>
+          <p className="text-muted-foreground">Unified Command & Control Platform</p>
         </div>
-
-        {/* System Status */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Threats</CardTitle>
-              <AlertTriangle className="h-4 w-4 text-red-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-600">{systemStats.activeThreats}</div>
-              <p className="text-xs text-muted-foreground">Requires attention</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Monitored Entities</CardTitle>
-              <Users className="h-4 w-4 text-blue-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-blue-600">{systemStats.totalEntities}</div>
-              <p className="text-xs text-muted-foreground">Under surveillance</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Intelligence Items</CardTitle>
-              <Brain className="h-4 w-4 text-purple-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-purple-600">{systemStats.intelligenceItems}</div>
-              <p className="text-xs text-muted-foreground">New insights</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">System Health</CardTitle>
-              <Activity className="h-4 w-4 text-green-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">{systemStats.systemHealth}%</div>
-              <p className="text-xs text-muted-foreground">All systems operational</p>
-            </CardContent>
-          </Card>
+        <div className="flex items-center gap-4">
+          <Button 
+            onClick={runSystemTests} 
+            disabled={isRunningTests}
+            className="bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            {isRunningTests ? (
+              <>
+                <Activity className="h-4 w-4 mr-2 animate-spin" />
+                Running Tests...
+              </>
+            ) : (
+              <>
+                <PlayCircle className="h-4 w-4 mr-2" />
+                Run System Tests
+              </>
+            )}
+          </Button>
         </div>
-
-        {/* Quick Actions */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Button
-                onClick={() => handleQuickAction('threat_scan')}
-                className="h-16 bg-red-600 hover:bg-red-700 text-white"
-              >
-                <Target className="h-6 w-6 mr-2" />
-                Run Threat Scan
-              </Button>
-              <Button
-                onClick={() => handleQuickAction('intelligence_sweep')}
-                className="h-16 bg-purple-600 hover:bg-purple-700 text-white"
-              >
-                <Brain className="h-6 w-6 mr-2" />
-                Intelligence Sweep
-              </Button>
-              <Button
-                onClick={() => handleQuickAction('security_check')}
-                className="h-16 bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                <AlertTriangle className="h-6 w-6 mr-2" />
-                Security Check
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Main Modules */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-          <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setActiveSection('security')}>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5 text-red-600" />
-                Security Center
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">
-                Real-time security monitoring and threat analysis
-              </p>
-              <Badge className="bg-red-100 text-red-700">3 Active Alerts</Badge>
-            </CardContent>
-          </Card>
-
-          <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setActiveSection('intelligence')}>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Brain className="h-5 w-5 text-purple-600" />
-                Intelligence Hub
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">
-                AI-powered threat intelligence and pattern analysis
-              </p>
-              <Badge className="bg-purple-100 text-purple-700">45 Insights</Badge>
-            </CardContent>
-          </Card>
-
-          <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setActiveSection('models')}>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Cpu className="h-5 w-5 text-blue-600" />
-                AI Model Manager
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">
-                Monitor and manage local AI inference models
-              </p>
-              <Badge className="bg-blue-100 text-blue-700">4 Models Active</Badge>
-            </CardContent>
-          </Card>
-
-          <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setActiveSection('server')}>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Server className="h-5 w-5 text-green-600" />
-                Server Monitor
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">
-                Real-time local AI server health and performance
-              </p>
-              <Badge className="bg-green-100 text-green-700">Port 3001</Badge>
-            </CardContent>
-          </Card>
-
-          <Card className="cursor-pointer hover:shadow-lg transition-shadow">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5 text-orange-600" />
-                Analytics Dashboard
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">
-                Comprehensive reporting and trend analysis
-              </p>
-              <Badge className="bg-orange-100 text-orange-700">Coming Soon</Badge>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Recent Activity */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent System Activity</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 p-3 bg-red-50 rounded-lg">
-                <AlertTriangle className="h-4 w-4 text-red-600" />
-                <div className="flex-1">
-                  <p className="text-sm font-medium">High-priority threat detected</p>
-                  <p className="text-xs text-muted-foreground">2 minutes ago</p>
-                </div>
-                <Badge className="bg-red-100 text-red-700">CRITICAL</Badge>
-              </div>
-              
-              <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-lg">
-                <Brain className="h-4 w-4 text-purple-600" />
-                <div className="flex-1">
-                  <p className="text-sm font-medium">AI analysis completed</p>
-                  <p className="text-xs text-muted-foreground">5 minutes ago</p>
-                </div>
-                <Badge className="bg-purple-100 text-purple-700">ANALYSIS</Badge>
-              </div>
-              
-              <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
-                <Activity className="h-4 w-4 text-green-600" />
-                <div className="flex-1">
-                  <p className="text-sm font-medium">System health check passed</p>
-                  <p className="text-xs text-muted-foreground">10 minutes ago</p>
-                </div>
-                <Badge className="bg-green-100 text-green-700">SUCCESS</Badge>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
+
+      {/* System Status Overview */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Activity className="h-5 w-5 text-green-600" />
+            System Status Overview
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-5 gap-4">
+            <div className="text-center">
+              <Server className={`h-6 w-6 mx-auto mb-2 ${getStatusColor(systemStatus.localServer)}`} />
+              <div className="text-sm font-medium">Local AI Server</div>
+              {getStatusBadge(systemStatus.localServer)}
+            </div>
+            <div className="text-center">
+              <AlertTriangle className={`h-6 w-6 mx-auto mb-2 ${getStatusColor(systemStatus.threatDetection)}`} />
+              <div className="text-sm font-medium">Threat Detection</div>
+              {getStatusBadge(systemStatus.threatDetection)}
+            </div>
+            <div className="text-center">
+              <Brain className={`h-6 w-6 mx-auto mb-2 ${getStatusColor(systemStatus.strategyBrain)}`} />
+              <div className="text-sm font-medium">Strategy Brain</div>
+              {getStatusBadge(systemStatus.strategyBrain)}
+            </div>
+            <div className="text-center">
+              <Zap className={`h-6 w-6 mx-auto mb-2 ${getStatusColor(systemStatus.autoExecution)}`} />
+              <div className="text-sm font-medium">Auto-Execution</div>
+              {getStatusBadge(systemStatus.autoExecution)}
+            </div>
+            <div className="text-center">
+              <Eye className={`h-6 w-6 mx-auto mb-2 ${getStatusColor(systemStatus.liveDataCompliance)}`} />
+              <div className="text-sm font-medium">Live Data Only</div>
+              {getStatusBadge(systemStatus.liveDataCompliance)}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Main Control Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid grid-cols-7 w-full">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="local-ai">Local AI</TabsTrigger>
+          <TabsTrigger value="threats">Threats</TabsTrigger>
+          <TabsTrigger value="strategy">Strategy</TabsTrigger>
+          <TabsTrigger value="execution">Execution</TabsTrigger>
+          <TabsTrigger value="alerts">Alerts</TabsTrigger>
+          <TabsTrigger value="validation">Data Validation</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview" className="space-y-6">
+          <SystemHealthOverview systemStatus={systemStatus} />
+        </TabsContent>
+
+        <TabsContent value="local-ai" className="space-y-6">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <LocalServerMonitor />
+            <LocalModelManager />
+          </div>
+        </TabsContent>
+
+        <TabsContent value="threats" className="space-y-6">
+          <ThreatDetectionDashboard />
+        </TabsContent>
+
+        <TabsContent value="strategy" className="space-y-6">
+          <StrategyBrainControl />
+        </TabsContent>
+
+        <TabsContent value="execution" className="space-y-6">
+          <AutoExecutionManager />
+        </TabsContent>
+
+        <TabsContent value="alerts" className="space-y-6">
+          <UnifiedAlertSystem />
+        </TabsContent>
+
+        <TabsContent value="validation" className="space-y-6">
+          <LiveDataValidator />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
