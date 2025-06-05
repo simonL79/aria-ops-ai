@@ -3,345 +3,354 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Brain, Zap, Target, Activity, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Brain, Zap, Target, Activity, AlertTriangle, CheckCircle, Clock, TrendingUp } from 'lucide-react';
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
 import { predictStrategySuccess } from '@/services/strategyBrain/predictiveAnalytics';
 import { evaluateForAutoExecution } from '@/services/strategyBrain/autoExecutionEngine';
 import { analyzeEntityPatterns } from '@/services/strategyBrain/patternAnalyzer';
-import { createCoordinationPlan, getCoordinationMetrics } from '@/services/strategyBrain/crossPlatformCoordinator';
-
-interface TestResult {
-  name: string;
-  status: 'running' | 'passed' | 'failed';
-  data?: any;
-  error?: string;
-  timestamp?: string;
-}
+import { createCoordinationPlan, executeCoordinationPlan, getCoordinationMetrics } from '@/services/strategyBrain/crossPlatformCoordinator';
+import { generateResponseStrategies } from '@/services/strategyBrain/responseGenerator';
 
 const StrategyBrainStage3TestPage = () => {
-  const [testResults, setTestResults] = useState<TestResult[]>([
-    { name: 'Predictive Analytics', status: 'running' },
-    { name: 'Auto-Execution Engine', status: 'running' },
-    { name: 'ML Pattern Recognition', status: 'running' },
-    { name: 'Cross-Platform Coordination', status: 'running' }
-  ]);
-  const [isRunning, setIsRunning] = useState(false);
+  const [isTestRunning, setIsTestRunning] = useState(false);
+  const [testResults, setTestResults] = useState<any[]>([]);
+  const [metrics, setMetrics] = useState<any>(null);
 
-  const updateTestResult = (index: number, result: Partial<TestResult>) => {
-    setTestResults(prev => prev.map((test, i) => 
-      i === index ? { ...test, ...result, timestamp: new Date().toLocaleTimeString() } : test
-    ));
-  };
-
-  const runStage3Tests = async () => {
-    setIsRunning(true);
-    toast.info('Running Stage 3 Strategy Brain tests...');
-
+  const runAdvancedTests = async () => {
+    setIsTestRunning(true);
+    setTestResults([]);
+    
     try {
+      console.log('🧠 Starting Strategy Brain Stage 3 Advanced Tests...');
+      toast.info('Running Advanced Strategy Brain Tests');
+
+      const results = [];
+
       // Test 1: Predictive Analytics
-      updateTestResult(0, { status: 'running' });
       try {
         const testStrategy = {
-          id: 'test-strategy-123',
+          id: 'test-strategy-1',
           type: 'defensive' as const,
-          priority: 'high' as const,
-          title: 'Test Strategy',
-          description: 'Test strategy for Stage 3',
+          title: 'Test Defensive Strategy',
+          description: 'A test strategy for predictive analysis',
           actions: [
             {
-              id: 'action-1',
-              description: 'Monitor mentions',
-              platform: 'twitter',
-              content: 'Test content',
-              timing: 'immediate'
+              action: 'Monitor social media platforms',
+              platform: 'Twitter',
+              timeline: '2 hours',
+              responsible: 'Social Media Team',
+              kpi: 'Response time < 2 hours'
             },
             {
-              id: 'action-2', 
-              description: 'Respond to negative content',
-              platform: 'facebook',
-              content: 'Test response',
-              timing: 'within 1 hour'
+              action: 'Deploy counter-narrative content',
+              platform: 'Facebook',
+              timeline: '4 hours',
+              responsible: 'Content Team',
+              kpi: 'Reach 10K+ users'
             }
           ],
-          resources: ['social_media_team', 'legal_review'],
-          timeframe: 'immediate',
-          successMetrics: ['engagement_rate', 'sentiment_improvement'],
-          riskLevel: 'medium' as const,
+          priority: 'high' as const,
+          timeframe: '24 hours',
+          resources: ['Social Media Team', 'Content Team'],
+          successMetrics: ['Response time', 'Reach metrics'],
+          riskLevel: 'medium',
           createdAt: new Date().toISOString()
         };
 
-        const entityName = `TestEntity-Stage3-${Date.now()}`;
-        const prediction = await predictStrategySuccess(testStrategy, entityName);
-        
-        updateTestResult(0, { 
-          status: 'passed', 
-          data: prediction
+        const prediction = await predictStrategySuccess(testStrategy);
+        results.push({
+          test: 'Predictive Analytics',
+          status: 'success',
+          data: prediction,
+          message: `Success probability: ${prediction.successProbability}%`
         });
       } catch (error) {
-        updateTestResult(0, { 
-          status: 'failed', 
-          error: error instanceof Error ? error.message : 'Unknown error'
+        results.push({
+          test: 'Predictive Analytics',
+          status: 'error',
+          message: error instanceof Error ? error.message : 'Unknown error'
         });
       }
 
       // Test 2: Auto-Execution Engine
-      updateTestResult(1, { status: 'running' });
       try {
-        const testStrategy = {
-          id: 'auto-test-strategy',
+        const testStrategy2 = {
+          id: 'test-strategy-2',
           type: 'engagement' as const,
-          priority: 'medium' as const,
-          title: 'Auto Test Strategy',
-          description: 'Strategy for auto-execution testing',
+          title: 'Test Engagement Strategy',
+          description: 'A test strategy for auto-execution evaluation',
           actions: [
             {
-              id: 'auto-action-1',
-              description: 'Automated response',
-              platform: 'twitter',
-              content: 'Automated content',
-              timing: 'immediate'
+              action: 'Engage with positive mentions',
+              platform: 'Instagram',
+              timeline: '1 hour',
+              responsible: 'Community Manager',
+              kpi: 'Engagement rate increase'
+            },
+            {
+              action: 'Share user-generated content',
+              platform: 'LinkedIn',
+              timeline: '6 hours',
+              responsible: 'Marketing Team',
+              kpi: 'Viral coefficient > 1.2'
             }
           ],
-          resources: ['automation_tools'],
-          timeframe: '1 hour',
-          successMetrics: ['response_time'],
-          riskLevel: 'low' as const,
+          priority: 'medium' as const,
+          timeframe: '12 hours',
+          resources: ['Community Manager', 'Marketing Team'],
+          successMetrics: ['Engagement rate', 'Viral coefficient'],
+          riskLevel: 'low',
           createdAt: new Date().toISOString()
         };
 
-        const entityName = `TestEntity-AutoExec-${Date.now()}`;
-        const shouldExecute = await evaluateForAutoExecution(testStrategy, entityName);
-        
-        // For testing, also create a mock queue entry
-        const queueId = `auto-exec-${Date.now()}`;
-        
-        updateTestResult(1, { 
-          status: 'passed', 
-          data: { shouldExecute, queueId }
+        const autoExecution = await evaluateForAutoExecution(testStrategy2);
+        results.push({
+          test: 'Auto-Execution Engine',
+          status: 'success',
+          data: autoExecution,
+          message: `Auto-execution ${autoExecution.canAutoExecute ? 'approved' : 'requires manual review'}`
         });
       } catch (error) {
-        updateTestResult(1, { 
-          status: 'failed', 
-          error: error instanceof Error ? error.message : 'Unknown error'
+        results.push({
+          test: 'Auto-Execution Engine',
+          status: 'error',
+          message: error instanceof Error ? error.message : 'Unknown error'
         });
       }
 
-      // Test 3: ML Pattern Recognition
-      updateTestResult(2, { status: 'running' });
+      // Test 3: Pattern Analysis
       try {
-        const entityName = `TestEntity-Patterns-${Date.now()}`;
-        
-        try {
-          const patterns = await analyzeEntityPatterns(entityName);
-          updateTestResult(2, { 
-            status: 'passed', 
-            data: { 
-              message: patterns.patterns.length > 0 ? `Found ${patterns.patterns.length} patterns` : 'No patterns found - normal for new entity',
-              patternsFound: patterns.patterns.length
-            }
-          });
-        } catch (error) {
-          // For new entities, pattern analysis might return empty results - this is normal
-          updateTestResult(2, { 
-            status: 'passed', 
-            data: { 
-              message: 'No patterns found - normal for new entity',
-              patternsFound: 0
-            }
-          });
-        }
+        const testEntity = 'TestCorp Inc';
+        const patterns = await analyzeEntityPatterns(testEntity);
+        results.push({
+          test: 'Pattern Analysis',
+          status: 'success',
+          data: patterns,
+          message: `Detected ${patterns.length} patterns for ${testEntity}`
+        });
       } catch (error) {
-        updateTestResult(2, { 
-          status: 'failed', 
-          error: error instanceof Error ? error.message : 'Unknown error'
+        results.push({
+          test: 'Pattern Analysis',
+          status: 'error',
+          message: error instanceof Error ? error.message : 'Unknown error'
         });
       }
 
       // Test 4: Cross-Platform Coordination
-      updateTestResult(3, { status: 'running' });
       try {
-        const testStrategies = [
+        const coordinationStrategies = [
           {
-            id: 'coord-strategy-1',
+            id: 'coord-test-1',
             type: 'defensive' as const,
-            priority: 'critical' as const,
-            title: 'Primary Defense Strategy',
-            description: 'Main coordination strategy',
+            title: 'Coordinated Defense Strategy',
+            description: 'Multi-platform defensive response coordination',
             actions: [
               {
-                id: 'coord-action-1',
-                description: 'Cross-platform monitoring',
-                platform: 'twitter',
-                content: 'Monitoring content',
-                timing: 'immediate'
+                action: 'File platform violation reports',
+                platform: 'Twitter, Facebook',
+                timeline: '30 minutes',
+                responsible: 'Legal Team',
+                kpi: 'Reports filed within 30 min'
               },
               {
-                id: 'coord-action-2',
-                description: 'Response coordination',
-                platform: 'facebook', 
-                content: 'Response content',
-                timing: 'within 30 minutes'
+                action: 'Deploy crisis communication',
+                platform: 'All platforms',
+                timeline: '1 hour',
+                responsible: 'Crisis Team',
+                kpi: 'Message consistency across platforms'
               }
             ],
-            resources: ['social_media_team', 'pr_team'],
+            priority: 'critical' as const,
             timeframe: '2 hours',
-            successMetrics: ['coordination_efficiency'],
-            riskLevel: 'medium' as const,
+            resources: ['Legal Team', 'Crisis Team', 'Platform Relations'],
+            successMetrics: ['Response time', 'Message consistency'],
+            riskLevel: 'medium',
             createdAt: new Date().toISOString()
           }
         ];
 
-        const entityName = `TestEntity-Coordination-${Date.now()}`;
-        const plan = await createCoordinationPlan(entityName, testStrategies);
-        const metrics = await getCoordinationMetrics();
+        const coordinationPlan = await createCoordinationPlan('TestCorp Inc', coordinationStrategies);
+        const executionResult = await executeCoordinationPlan(coordinationPlan.id);
         
-        updateTestResult(3, { 
-          status: 'passed', 
-          data: { planId: plan.id, metrics }
+        results.push({
+          test: 'Cross-Platform Coordination',
+          status: 'success',
+          data: { coordinationPlan, executionResult },
+          message: `Plan executed: ${executionResult.success ? 'Success' : 'Partial success'}`
         });
       } catch (error) {
-        updateTestResult(3, { 
-          status: 'failed', 
-          error: error instanceof Error ? error.message : 'Unknown error'
+        results.push({
+          test: 'Cross-Platform Coordination',
+          status: 'error',
+          message: error instanceof Error ? error.message : 'Unknown error'
         });
       }
 
-      toast.success('Stage 3 tests completed');
+      // Get coordination metrics
+      try {
+        const coordinationMetrics = await getCoordinationMetrics();
+        setMetrics(coordinationMetrics);
+      } catch (error) {
+        console.warn('Could not fetch coordination metrics:', error);
+      }
+
+      setTestResults(results);
+      toast.success('Advanced Strategy Brain Tests Completed');
+
     } catch (error) {
-      toast.error('Stage 3 testing failed');
-      console.error('Stage 3 test error:', error);
+      console.error('Advanced test execution failed:', error);
+      toast.error('Advanced tests failed');
     } finally {
-      setIsRunning(false);
+      setIsTestRunning(false);
     }
   };
 
-  const getStatusIcon = (status: TestResult['status']) => {
+  const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'running':
-        return <Clock className="h-4 w-4 text-blue-500 animate-spin" />;
-      case 'passed':
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case 'failed':
-        return <XCircle className="h-4 w-4 text-red-500" />;
-      default:
-        return <Clock className="h-4 w-4 text-gray-500" />;
+      case 'success': return <CheckCircle className="h-4 w-4 text-green-600" />;
+      case 'error': return <AlertTriangle className="h-4 w-4 text-red-600" />;
+      default: return <Clock className="h-4 w-4 text-yellow-600" />;
     }
   };
 
-  const getStatusBadge = (status: TestResult['status']) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
-      case 'running':
-        return <Badge variant="outline" className="text-blue-600">RUNNING</Badge>;
-      case 'passed':
-        return <Badge className="bg-green-500 text-white">PASSED</Badge>;
-      case 'failed':
-        return <Badge variant="destructive">FAILED</Badge>;
-      default:
-        return <Badge variant="outline">PENDING</Badge>;
+      case 'success': return 'text-green-600 bg-green-50 border-green-200';
+      case 'error': return 'text-red-600 bg-red-50 border-red-200';
+      default: return 'text-yellow-600 bg-yellow-50 border-yellow-200';
     }
   };
 
   return (
-    <div className="min-h-screen bg-corporate-dark text-white p-6">
-      <div className="max-w-6xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold flex items-center gap-3">
-              <Brain className="h-8 w-8 text-corporate-accent" />
-              Strategy Brain Stage 3 Testing
-            </h1>
-            <p className="text-corporate-lightGray mt-2">
-              Advanced AI Intelligence & Coordination Testing Suite
-            </p>
-          </div>
-          <Button 
-            onClick={runStage3Tests}
-            disabled={isRunning}
-            className="bg-corporate-accent text-black hover:bg-corporate-accent/90"
-          >
-            {isRunning ? (
-              <>
-                <Activity className="h-4 w-4 mr-2 animate-spin" />
-                Running Tests...
-              </>
-            ) : (
-              <>
-                <Zap className="h-4 w-4 mr-2" />
-                Run Stage 3 Tests
-              </>
-            )}
-          </Button>
+    <div className="container mx-auto p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold flex items-center gap-3">
+            <Brain className="h-8 w-8 text-purple-600" />
+            Strategy Brain Stage 3 Testing
+          </h1>
+          <p className="text-muted-foreground mt-2">
+            Advanced AI strategy testing with predictive analytics and coordination systems
+          </p>
         </div>
+        
+        <Button 
+          onClick={runAdvancedTests}
+          disabled={isTestRunning}
+          className="bg-purple-600 hover:bg-purple-700"
+        >
+          {isTestRunning ? (
+            <>
+              <Activity className="mr-2 h-4 w-4 animate-spin" />
+              Running Tests...
+            </>
+          ) : (
+            <>
+              <Zap className="mr-2 h-4 w-4" />
+              Run Advanced Tests
+            </>
+          )}
+        </Button>
+      </div>
 
-        {/* Test Results */}
-        <div className="grid grid-cols-1 gap-4">
-          {testResults.map((test, index) => (
-            <Card key={test.name} className="bg-corporate-darkSecondary border-corporate-border">
-              <CardHeader className="pb-4">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-3">
-                    {getStatusIcon(test.status)}
-                    {test.name}
-                  </CardTitle>
-                  <div className="flex items-center gap-2">
-                    {getStatusBadge(test.status)}
-                    {test.timestamp && (
-                      <span className="text-xs text-corporate-lightGray">
-                        {test.timestamp}
-                      </span>
+      <Tabs defaultValue="results" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="results">Test Results</TabsTrigger>
+          <TabsTrigger value="metrics">Coordination Metrics</TabsTrigger>
+          <TabsTrigger value="analysis">Pattern Analysis</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="results">
+          <div className="grid gap-4">
+            {testResults.length === 0 ? (
+              <Card>
+                <CardContent className="p-8 text-center">
+                  <Brain className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-medium mb-2">No Test Results</h3>
+                  <p className="text-muted-foreground">Run advanced tests to see results here</p>
+                </CardContent>
+              </Card>
+            ) : (
+              testResults.map((result, index) => (
+                <Card key={index}>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg">{result.test}</CardTitle>
+                      <Badge className={getStatusColor(result.status)}>
+                        {getStatusIcon(result.status)}
+                        <span className="ml-1">{result.status}</span>
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground mb-3">{result.message}</p>
+                    {result.data && (
+                      <details className="bg-muted p-3 rounded text-xs">
+                        <summary className="cursor-pointer font-medium">View Data</summary>
+                        <pre className="mt-2 overflow-auto">
+                          {JSON.stringify(result.data, null, 2)}
+                        </pre>
+                      </details>
                     )}
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="metrics">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5" />
+                Coordination System Metrics
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {metrics ? (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="text-center p-4 bg-blue-50 rounded-lg">
+                    <div className="text-2xl font-bold text-blue-600">{metrics.totalPlans}</div>
+                    <div className="text-sm text-blue-600">Total Plans</div>
+                  </div>
+                  <div className="text-center p-4 bg-green-50 rounded-lg">
+                    <div className="text-2xl font-bold text-green-600">{metrics.activePlans}</div>
+                    <div className="text-sm text-green-600">Active Plans</div>
+                  </div>
+                  <div className="text-center p-4 bg-purple-50 rounded-lg">
+                    <div className="text-2xl font-bold text-purple-600">{metrics.completedPlans}</div>
+                    <div className="text-sm text-purple-600">Completed</div>
+                  </div>
+                  <div className="text-center p-4 bg-orange-50 rounded-lg">
+                    <div className="text-2xl font-bold text-orange-600">{metrics.successRate.toFixed(1)}%</div>
+                    <div className="text-sm text-orange-600">Success Rate</div>
                   </div>
                 </div>
-              </CardHeader>
-              <CardContent>
-                {test.error && (
-                  <div className="mb-4">
-                    <h4 className="font-semibold text-red-400 mb-2">Error Details:</h4>
-                    <pre className="text-sm bg-red-900/20 p-3 rounded border border-red-500/30 text-red-300">
-                      {test.error}
-                    </pre>
-                  </div>
-                )}
-                
-                {test.data && (
-                  <div>
-                    <h4 className="font-semibold text-corporate-accent mb-2">Test Data:</h4>
-                    <pre className="text-sm bg-corporate-dark p-3 rounded border border-corporate-border text-corporate-lightGray overflow-x-auto">
-                      {JSON.stringify(test.data, null, 2)}
-                    </pre>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+              ) : (
+                <p className="text-muted-foreground">No metrics available. Run tests to generate data.</p>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-        {/* Instructions */}
-        <Card className="bg-corporate-darkSecondary border-corporate-border">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Target className="h-5 w-5 text-corporate-accent" />
-              Stage 3 Testing Instructions
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2 text-corporate-lightGray">
-              <p>This advanced test suite validates Stage 3 Strategy Brain intelligence features:</p>
-              <ul className="list-disc list-inside space-y-1 ml-4">
-                <li><strong>Predictive Analytics:</strong> Tests success probability calculation and risk assessment</li>
-                <li><strong>Auto-Execution Engine:</strong> Tests autonomous strategy execution and queue management</li>
-                <li><strong>ML Pattern Recognition:</strong> Tests machine learning recommendations and training</li>
-                <li><strong>Cross-Platform Coordination:</strong> Tests multi-platform deployment and synchronization</li>
-              </ul>
-              <p className="mt-4 text-corporate-accent">
-                All Stage 3 tests should pass for full advanced intelligence functionality.
+        <TabsContent value="analysis">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Target className="h-5 w-5" />
+                Advanced Pattern Analysis
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">
+                Advanced pattern analysis results will appear here after running tests.
               </p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
