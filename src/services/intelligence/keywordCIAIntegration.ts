@@ -4,13 +4,13 @@ import { LiveDataEnforcer } from '@/services/ariaCore/liveDataEnforcer';
 
 /**
  * CIA-Level Integration for Keyword-to-Article System
- * LIVE DATA ONLY - NO SIMULATIONS PERMITTED
+ * LIVE DATA ONLY - ALL SIMULATIONS PERMANENTLY BLOCKED
  */
 
 export class KeywordCIAIntegration {
   /**
    * Execute CIA-level precision scan specifically for keyword system
-   * ENFORCES 100% LIVE DATA COMPLIANCE
+   * ENFORCES 100% LIVE DATA COMPLIANCE - ZERO TOLERANCE FOR SIMULATIONS
    */
   static async executeKeywordPrecisionScan(
     entityName: string,
@@ -31,55 +31,97 @@ export class KeywordCIAIntegration {
       confidence_level: 'high' | 'medium' | 'low';
     };
   }> {
-    console.log('🎯 CIA Keyword Integration: LIVE DATA ONLY - Starting precision scan for:', entityName);
+    console.log('🎯 CIA Keyword Integration: LIVE DATA ENFORCEMENT - Starting precision scan for:', entityName);
 
-    // MANDATORY: Validate live data compliance before proceeding
+    // MANDATORY STEP 1: Validate system-wide live data compliance
+    console.log('🔒 STEP 1: System-wide live data compliance validation...');
     const compliance = await LiveDataEnforcer.validateLiveDataCompliance();
     if (!compliance.isCompliant || compliance.simulationDetected) {
-      console.error('🚫 BLOCKED: Simulation detected in keyword system:', compliance.message);
-      throw new Error('Keyword system blocked: Live data compliance failure - no simulations permitted');
+      console.error('🚫 SYSTEM BLOCKED: Simulation detected in keyword system:', compliance.message);
+      throw new Error(`Keyword system blocked: Live data compliance failure - ${compliance.message}`);
     }
+    console.log('✅ System-wide compliance verified');
 
-    // Validate entity name is not a simulation placeholder
+    // MANDATORY STEP 2: Validate entity name is not simulation placeholder
+    console.log('🔒 STEP 2: Entity name validation...');
     if (!await LiveDataEnforcer.validateDataInput(entityName, 'keyword_system')) {
-      console.error('🚫 BLOCKED: Entity name appears to be simulation data:', entityName);
-      throw new Error('Entity name rejected: Appears to be simulation/test data');
+      console.error('🚫 ENTITY BLOCKED: Entity name appears to be simulation data:', entityName);
+      throw new Error(`Entity name rejected: "${entityName}" appears to be simulation/test data`);
     }
+    console.log('✅ Entity name validated as live data');
 
-    // Enhanced scan options for keyword system - LIVE ONLY
+    // MANDATORY STEP 3: Enhanced scan options with ZERO SIMULATION TOLERANCE
+    console.log('🔒 STEP 3: Configuring CIA-level scan options...');
     const scanOptions: CIAScanOptions = {
       targetEntity: entityName,
       fullScan: true,
-      source: 'cia_keyword_system_live',
+      source: 'cia_keyword_system_live_enforcement',
       precisionMode: options.precisionMode || 'high',
       enableFalsePositiveFilter: options.enableFalsePositiveFilter !== false,
       liveDataOnly: true, // CRITICAL: Force live data only
       blockSimulations: true // CRITICAL: Block any simulation attempts
     };
 
-    // Execute CIA-level scan with live enforcement
-    const results = await CIALevelScanner.executePrecisionScan(scanOptions);
+    console.log('🎯 Scan configuration:', scanOptions);
 
-    // Validate all results are live data
+    // MANDATORY STEP 4: Execute CIA-level scan with live enforcement
+    console.log('🔒 STEP 4: Executing CIA-level scan...');
+    let results: CIAScanResult[];
+    try {
+      results = await CIALevelScanner.executePrecisionScan(scanOptions);
+      console.log(`📊 CIA scan completed: ${results.length} raw results`);
+    } catch (error: any) {
+      console.error('❌ CIA scan failed:', error);
+      if (error.message.includes('simulation') || error.message.includes('blocked')) {
+        throw error; // Re-throw simulation blocks immediately
+      }
+      throw new Error(`CIA Scanner failed: ${error.message}`);
+    }
+
+    // MANDATORY STEP 5: Validate ALL results are live data - ZERO TOLERANCE
+    console.log('🔒 STEP 5: Validating all results are live data...');
     const validatedResults = [];
+    let blockedCount = 0;
+    
     for (const result of results) {
-      if (await LiveDataEnforcer.validateDataInput(result.content || '', result.platform)) {
+      const isLiveData = await LiveDataEnforcer.validateDataInput(
+        result.content || '', 
+        result.platform || 'unknown'
+      );
+      
+      if (isLiveData) {
         validatedResults.push(result);
+        console.log('✅ Result validated as live data:', result.platform);
       } else {
-        console.warn('🚫 FILTERED: Non-live result detected and removed');
+        blockedCount++;
+        console.warn('🚫 FILTERED: Non-live result detected and removed:', result.platform);
       }
     }
 
-    // Calculate precision statistics only on verified live data
+    if (blockedCount > 0) {
+      console.warn(`🚫 BLOCKED ${blockedCount} non-live results from final output`);
+    }
+
+    // MANDATORY STEP 6: Calculate precision statistics only on verified live data
+    console.log('🔒 STEP 6: Calculating precision statistics...');
     const precisionStats = this.calculatePrecisionStats(validatedResults);
 
+    // MANDATORY STEP 7: Final validation and logging
     console.log('✅ CIA Keyword Integration Complete - LIVE DATA VERIFIED:', {
       entity: entityName,
-      results: validatedResults.length,
-      precision: precisionStats.avg_precision_score,
-      confidence: precisionStats.confidence_level,
-      liveDataCompliant: true
+      totalScanned: results.length,
+      liveResultsValidated: validatedResults.length,
+      simulationResultsBlocked: blockedCount,
+      avgPrecision: precisionStats.avg_precision_score,
+      confidenceLevel: precisionStats.confidence_level,
+      liveDataCompliant: true,
+      simulationsBlocked: true,
+      zeroToleranceEnforced: true
     });
+
+    if (validatedResults.length === 0) {
+      console.warn('⚠️ No live intelligence results after validation - this may indicate system issues');
+    }
 
     return {
       results: validatedResults,
@@ -88,7 +130,7 @@ export class KeywordCIAIntegration {
   }
 
   /**
-   * Create entity fingerprint with live data validation
+   * Create entity fingerprint with mandatory live data validation
    */
   static async createKeywordEntityFingerprint(
     entityName: string,
@@ -100,9 +142,12 @@ export class KeywordCIAIntegration {
       blocklist?: string[];
     }
   ): Promise<string> {
-    // Validate entity name is not simulation data
+    console.log('🔒 Creating entity fingerprint with live data validation...');
+    
+    // MANDATORY: Validate entity name is not simulation data
     if (!await LiveDataEnforcer.validateDataInput(entityName, 'keyword_fingerprint')) {
-      throw new Error('Entity fingerprint blocked: Entity name appears to be simulation data');
+      console.error('🚫 FINGERPRINT BLOCKED: Entity name appears to be simulation data:', entityName);
+      throw new Error(`Entity fingerprint blocked: "${entityName}" appears to be simulation data`);
     }
 
     const fingerprint = {
@@ -114,15 +159,25 @@ export class KeywordCIAIntegration {
       context_tags: keywordContext.threatKeywords || [],
       false_positive_blocklist: [
         ...(keywordContext.blocklist || []),
-        // Enhanced simulation blockers
+        // ENHANCED simulation detection blockers
         'mock', 'test', 'demo', 'sample', 'simulation', 'synthetic',
-        'placeholder', 'example', 'template', 'undefined'
+        'placeholder', 'example', 'template', 'undefined', 'null',
+        'test data', 'mock data', 'dummy data', 'fake data',
+        'simulation data', 'generated data', 'artificial data',
+        'staging', 'development', 'dev', 'sandbox'
       ],
       live_data_only: true,
-      created_source: 'live_keyword_system'
+      created_source: 'live_keyword_system_enforcement'
     };
 
-    return await AdvancedEntityMatcher.createEntityFingerprint(fingerprint);
+    try {
+      const fingerprintId = await AdvancedEntityMatcher.createEntityFingerprint(fingerprint);
+      console.log('✅ Live entity fingerprint created:', fingerprintId);
+      return fingerprintId;
+    } catch (error: any) {
+      console.error('❌ Entity fingerprint creation failed:', error);
+      throw error;
+    }
   }
 
   /**
@@ -209,7 +264,7 @@ export class KeywordCIAIntegration {
   }
 
   /**
-   * Calculate precision statistics from verified live data only
+   * Calculate precision statistics from VERIFIED LIVE DATA ONLY
    */
   private static calculatePrecisionStats(results: CIAScanResult[]) {
     const total = results.length;
@@ -226,6 +281,10 @@ export class KeywordCIAIntegration {
     if (avgScore >= 0.85) confidenceLevel = 'high'; // Higher threshold for live data
     else if (avgScore >= 0.7) confidenceLevel = 'medium';
     else confidenceLevel = 'low';
+
+    console.log('📊 Precision Statistics (Live Data Only):', {
+      total, accepted, quarantined, rejected, falsePositives, avgScore, confidenceLevel
+    });
 
     return {
       total_scanned: total,
@@ -277,7 +336,7 @@ export class KeywordCIAIntegration {
           false_positive_blocklist: [
             'celebrity', 'unrelated', 'confusion', 'generic mention',
             'breaking news', 'similar named', 'public figure',
-            // Enhanced simulation blockers
+            // ENHANCED simulation blockers
             'mock', 'test', 'demo', 'sample', 'simulation'
           ],
           live_data_only: true,

@@ -21,20 +21,30 @@ const ArticleGenerationTab: React.FC<ArticleGenerationTabProps> = ({ entityName 
   React.useEffect(() => {
     const checkCompliance = async () => {
       try {
+        console.log('🔍 Checking live data compliance for keyword system...');
         const compliance = await LiveDataEnforcer.validateLiveDataCompliance();
+        console.log('Compliance result:', compliance);
+        
         setLiveDataStatus(compliance.isCompliant ? 'compliant' : 'non-compliant');
         
-        if (!compliance.isCompliant) {
-          toast.error('🚫 Live data compliance failure detected - simulation mode blocked');
+        if (!compliance.isCompliant || compliance.simulationDetected) {
+          console.error('🚫 COMPLIANCE FAILURE:', compliance.message);
+          toast.error('🚫 Live data compliance failure - simulation mode blocked');
+        } else {
+          console.log('✅ Live data compliance verified');
+          toast.success('✅ Live data compliance verified');
         }
       } catch (error) {
+        console.error('❌ Compliance check failed:', error);
         setLiveDataStatus('non-compliant');
-        console.error('Compliance check failed:', error);
+        toast.error('❌ Compliance check failed');
       }
     };
 
-    checkCompliance();
-  }, []);
+    if (entityName) {
+      checkCompliance();
+    }
+  }, [entityName]);
 
   const generateArticles = async () => {
     if (!entityName) {
@@ -42,71 +52,104 @@ const ArticleGenerationTab: React.FC<ArticleGenerationTabProps> = ({ entityName 
       return;
     }
 
-    // Validate live data compliance before generation
-    const compliance = await LiveDataEnforcer.validateLiveDataCompliance();
-    if (!compliance.isCompliant || compliance.simulationDetected) {
-      toast.error('🚫 BLOCKED: Article generation requires live data compliance');
-      return;
-    }
-
-    // Validate entity name is not simulation data
-    if (!await LiveDataEnforcer.validateDataInput(entityName, 'article_generation')) {
-      toast.error('🚫 BLOCKED: Entity name appears to be simulation data');
-      return;
-    }
-
+    console.log('🎯 Starting LIVE article generation for:', entityName);
+    
     setIsGenerating(true);
     try {
-      toast.info(`📝 Generating LIVE articles for ${entityName}...`);
+      // STEP 1: Validate live data compliance before ANY operations
+      console.log('🔒 STEP 1: Validating live data compliance...');
+      const compliance = await LiveDataEnforcer.validateLiveDataCompliance();
+      if (!compliance.isCompliant || compliance.simulationDetected) {
+        console.error('🚫 BLOCKED: Live data compliance failure:', compliance.message);
+        toast.error('🚫 BLOCKED: Article generation requires live data compliance');
+        return;
+      }
+      console.log('✅ Live data compliance verified');
 
-      // Use CIA-level integration for live article generation
+      // STEP 2: Validate entity name is not simulation data
+      console.log('🔒 STEP 2: Validating entity name...');
+      const isLiveEntity = await LiveDataEnforcer.validateDataInput(entityName, 'article_generation');
+      if (!isLiveEntity) {
+        console.error('🚫 BLOCKED: Entity name appears to be simulation data:', entityName);
+        toast.error('🚫 BLOCKED: Entity name appears to be simulation data');
+        return;
+      }
+      console.log('✅ Entity name validated as live data');
+
+      // STEP 3: Execute CIA-level precision scan with LIVE DATA ONLY
+      console.log('🎯 STEP 3: Executing CIA-level precision scan...');
+      toast.info(`🎯 Generating LIVE articles for ${entityName} - NO SIMULATIONS`);
+
       const scanResult = await KeywordCIAIntegration.executeKeywordPrecisionScan(entityName, {
         precisionMode: 'high',
         enableFalsePositiveFilter: true,
-        contextTags: ['article_generation', 'content_strategy']
+        contextTags: ['article_generation', 'content_strategy', 'live_intelligence']
+      });
+
+      console.log('📊 CIA scan result:', {
+        resultsCount: scanResult.results.length,
+        avgConfidence: scanResult.precisionStats.avg_precision_score,
+        confidenceLevel: scanResult.precisionStats.confidence_level
       });
 
       if (scanResult.results.length === 0) {
+        console.warn('⚠️ No live intelligence found for article generation');
         toast.warning('No live intelligence found for article generation');
         return;
       }
 
-      // Generate articles based on live intelligence
+      // STEP 4: Generate articles based ONLY on verified live intelligence
+      console.log('📝 STEP 4: Generating articles from live intelligence...');
       const newArticles = scanResult.results.slice(0, 3).map((result, index) => ({
         id: `live-${Date.now()}-${index}`,
-        title: `Strategic Intelligence: ${entityName} - ${result.match_type || 'Analysis'}`,
-        type: 'live_intelligence',
-        status: 'live_draft',
+        title: `Live Intelligence Report: ${entityName} - ${result.threat_type || 'Strategic Analysis'}`,
+        type: 'live_intelligence_report',
+        status: 'live_verified',
         keywords: [
           entityName.toLowerCase(),
-          result.match_type || 'intelligence',
+          result.threat_type || 'intelligence',
           'strategic_analysis',
-          'live_data'
+          'live_data_verified',
+          'cia_level_scan'
         ],
         created_at: new Date().toISOString(),
         confidence_score: result.match_score,
         platform: result.platform,
         live_verified: true,
-        source_intelligence: result.content?.substring(0, 100) + '...'
+        cia_verified: true,
+        source_intelligence: result.content?.substring(0, 150) + '...',
+        threat_analysis: result.threat_type,
+        severity_level: result.severity,
+        precision_stats: {
+          confidence_level: scanResult.precisionStats.confidence_level,
+          precision_score: scanResult.precisionStats.avg_precision_score
+        }
       }));
 
       setArticles(prev => [...prev, ...newArticles]);
-      toast.success(`✅ Generated ${newArticles.length} live intelligence articles`);
-
-      // Log live data operation
-      console.log('✅ Live article generation completed:', {
+      
+      console.log('✅ LIVE article generation completed successfully:', {
         entity: entityName,
-        articles: newArticles.length,
+        articlesGenerated: newArticles.length,
         avgConfidence: scanResult.precisionStats.avg_precision_score,
-        liveDataCompliant: true
+        confidenceLevel: scanResult.precisionStats.confidence_level,
+        liveDataCompliant: true,
+        simulationsBlocked: true
       });
 
+      toast.success(`✅ Generated ${newArticles.length} LIVE intelligence articles - NO MOCK DATA`);
+
     } catch (error: any) {
-      console.error('Live article generation failed:', error);
+      console.error('❌ Live article generation failed:', error);
       
       if (error.message.includes('simulation') || error.message.includes('blocked')) {
+        console.error('🚫 SIMULATION DETECTED:', error.message);
         toast.error('🚫 Article generation blocked: Simulation data detected');
+      } else if (error.message.includes('Live data compliance')) {
+        console.error('🚫 COMPLIANCE FAILURE:', error.message);
+        toast.error('🚫 Live data compliance failure - operation blocked');
       } else {
+        console.error('❌ GENERAL ERROR:', error.message);
         toast.error('❌ Failed to generate live articles');
       }
     } finally {
@@ -127,25 +170,25 @@ const ArticleGenerationTab: React.FC<ArticleGenerationTabProps> = ({ entityName 
         <CardContent>
           <div className="flex items-center gap-3">
             {liveDataStatus === 'checking' && (
-              <Badge className="bg-yellow-500 text-black">
-                Checking Compliance...
+              <Badge className="bg-yellow-500 text-black animate-pulse">
+                🔍 Checking Compliance...
               </Badge>
             )}
             {liveDataStatus === 'compliant' && (
               <Badge className="bg-green-500 text-black">
-                ✅ Live Data Compliant
+                ✅ LIVE DATA VERIFIED
               </Badge>
             )}
             {liveDataStatus === 'non-compliant' && (
               <Badge className="bg-red-500 text-white">
-                🚫 Non-Compliant - Simulation Detected
+                🚫 SIMULATION DETECTED
               </Badge>
             )}
             <span className="text-corporate-lightGray text-sm">
               {liveDataStatus === 'compliant' 
-                ? 'System verified for live intelligence operations'
+                ? 'System verified for live intelligence operations - NO SIMULATIONS'
                 : liveDataStatus === 'non-compliant'
-                ? 'Simulation data detected - article generation blocked'
+                ? 'Simulation data detected - all operations blocked until resolved'
                 : 'Verifying live data compliance...'
               }
             </span>
@@ -157,21 +200,24 @@ const ArticleGenerationTab: React.FC<ArticleGenerationTabProps> = ({ entityName 
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
             <FileText className="h-5 w-5 text-corporate-accent" />
-            Live Intelligence Article Generation
+            CIA-Level Live Intelligence Article Generation
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h4 className="text-white font-medium">Entity: {entityName}</h4>
+              <h4 className="text-white font-medium">Target Entity: {entityName}</h4>
               <p className="text-corporate-lightGray text-sm">
-                CIA-level precision article generation from live intelligence
+                CIA-level precision article generation from verified live intelligence only
+              </p>
+              <p className="text-green-400 text-xs mt-1">
+                ✅ All simulations permanently blocked - Live data enforcement active
               </p>
               {liveDataStatus === 'non-compliant' && (
                 <div className="flex items-center gap-2 mt-2">
                   <AlertTriangle className="h-4 w-4 text-red-500" />
                   <span className="text-red-400 text-sm">
-                    Live data compliance required for generation
+                    Live data compliance required - simulation contamination detected
                   </span>
                 </div>
               )}
@@ -189,7 +235,7 @@ const ArticleGenerationTab: React.FC<ArticleGenerationTabProps> = ({ entityName 
               ) : (
                 <>
                   <Plus className="h-4 w-4 mr-2" />
-                  Generate Live Articles
+                  Generate LIVE Articles
                 </>
               )}
             </Button>
@@ -198,7 +244,7 @@ const ArticleGenerationTab: React.FC<ArticleGenerationTabProps> = ({ entityName 
           {articles.length > 0 && (
             <div className="space-y-3">
               <h4 className="text-white font-medium">
-                Live Intelligence Articles ({articles.length})
+                CIA-Level Live Intelligence Articles ({articles.length})
               </h4>
               <div className="space-y-3">
                 {articles.map((article) => (
@@ -209,8 +255,13 @@ const ArticleGenerationTab: React.FC<ArticleGenerationTabProps> = ({ entityName 
                           {article.type}
                         </Badge>
                         {article.live_verified && (
-                          <Badge className="bg-corporate-accent text-black">
+                          <Badge className="bg-blue-500 text-white">
                             ✅ LIVE VERIFIED
+                          </Badge>
+                        )}
+                        {article.cia_verified && (
+                          <Badge className="bg-corporate-accent text-black">
+                            🎯 CIA PRECISION
                           </Badge>
                         )}
                       </div>
@@ -224,6 +275,20 @@ const ArticleGenerationTab: React.FC<ArticleGenerationTabProps> = ({ entityName 
                       <div className="mb-3 p-2 bg-green-500/10 rounded text-sm">
                         <span className="text-green-400 font-medium">Live Intelligence Source:</span>
                         <p className="text-green-300 mt-1">{article.source_intelligence}</p>
+                      </div>
+                    )}
+
+                    {article.precision_stats && (
+                      <div className="mb-3 p-2 bg-blue-500/10 rounded text-sm">
+                        <span className="text-blue-400 font-medium">CIA Precision Stats:</span>
+                        <div className="flex gap-4 mt-1">
+                          <span className="text-blue-300">
+                            Confidence: {article.precision_stats.confidence_level}
+                          </span>
+                          <span className="text-blue-300">
+                            Precision: {(article.precision_stats.precision_score * 100).toFixed(1)}%
+                          </span>
+                        </div>
                       </div>
                     )}
                     
@@ -260,8 +325,8 @@ const ArticleGenerationTab: React.FC<ArticleGenerationTabProps> = ({ entityName 
               </p>
               <p className="text-corporate-lightGray text-sm">
                 {liveDataStatus === 'compliant' 
-                  ? 'Click "Generate Live Articles" to create content from live intelligence'
-                  : 'Live data compliance required before article generation'
+                  ? 'Click "Generate LIVE Articles" to create content from verified live intelligence'
+                  : 'Live data compliance required - all simulations permanently blocked'
                 }
               </p>
             </div>
