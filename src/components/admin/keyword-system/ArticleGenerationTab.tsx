@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, Search, FileText, AlertTriangle } from "lucide-react";
+import { Loader2, Search, FileText, AlertTriangle, Shield } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import { KeywordCIAIntegration } from '@/services/intelligence/keywordCIAIntegration';
 import { LiveDataEnforcer } from '@/services/ariaCore/liveDataEnforcer';
 
