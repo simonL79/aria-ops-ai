@@ -7,6 +7,8 @@ import AdminDashboard from "./pages/AdminDashboard";
 import ControlCenterPage from "./pages/admin/ControlCenterPage";
 import ClientOnboardingPage from "./pages/ClientOnboardingPage";
 import KeywordToArticleSystemPage from "./pages/admin/KeywordToArticleSystemPage";
+import StrategyBrainTestPage from "./pages/admin/StrategyBrainTestPage";
+import StrategyBrainStage3Page from "./pages/admin/StrategyBrainStage3Page";
 
 export const navItems = [
   {
@@ -55,12 +57,12 @@ export const navItems = [
     title: "Strategy Brain Test",
     to: "/admin/strategy-brain-test",
     icon: <Zap className="h-4 w-4" />,
-    page: <KeywordToArticleSystemPage />, // Reusing existing page for now
+    page: <StrategyBrainTestPage />,
   },
   {
     title: "Strategy Brain Stage 3",
     to: "/admin/strategy-brain-stage3",
     icon: <Brain className="h-4 w-4" />,
-    page: <KeywordToArticleSystemPage />, // Reusing existing page for now
+    page: <StrategyBrainStage3Page />,
   },
 ];

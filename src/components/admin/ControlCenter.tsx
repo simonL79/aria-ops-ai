@@ -1,19 +1,11 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { AlertTriangle, Shield, Brain, Target, Activity, Zap, Users, Settings } from "lucide-react";
-import EntityContextPanel from './control-center/EntityContextPanel';
-import QuickCommandConsole from './control-center/QuickCommandConsole';
-import ThreatTracker from './control-center/ThreatTracker';
-import ServiceOrchestrator from './control-center/ServiceOrchestrator';
-import SystemDiagnostics from './control-center/SystemDiagnostics';
-import StrategyBrainMetrics from './control-center/StrategyBrainMetrics';
-import ClientExecutionPlan from '../client-onboarding/ClientExecutionPlan';
+import { Activity } from "lucide-react";
+import ControlCenterModules from './control-center/ControlCenterModules';
 
 const ControlCenter = () => {
   const [selectedEntity, setSelectedEntity] = useState('');
@@ -97,119 +89,18 @@ const ControlCenter = () => {
           </CardContent>
         </Card>
 
-        {/* Main Control Tabs */}
-        <Tabs value={activeModule} onValueChange={setActiveModule} className="space-y-6">
-          <TabsList className="bg-corporate-darkSecondary border-corporate-border">
-            <TabsTrigger value="overview" className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black">
-              <Shield className="h-4 w-4 mr-2" />
-              Overview
-            </TabsTrigger>
-            <TabsTrigger value="execution-plan" className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black">
-              <Target className="h-4 w-4 mr-2" />
-              Client Execution
-            </TabsTrigger>
-            <TabsTrigger value="threats" className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black">
-              <AlertTriangle className="h-4 w-4 mr-2" />
-              Threat Tracker
-            </TabsTrigger>
-            <TabsTrigger value="services" className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black">
-              <Zap className="h-4 w-4 mr-2" />
-              Services
-            </TabsTrigger>
-            <TabsTrigger value="brain" className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black">
-              <Brain className="h-4 w-4 mr-2" />
-              Strategy Brain
-            </TabsTrigger>
-            <TabsTrigger value="diagnostics" className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black">
-              <Settings className="h-4 w-4 mr-2" />
-              Diagnostics
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <EntityContextPanel 
-                selectedEntity={selectedEntity}
-                entityMemory={entityMemory}
-                onEntitySelect={handleEntitySelect}
-                serviceStatus={serviceStatus}
-              />
-              {showConsole ? (
-                <QuickCommandConsole 
-                  selectedEntity={selectedEntity}
-                  onClose={() => setShowConsole(false)}
-                  serviceStatus={serviceStatus}
-                />
-              ) : (
-                <Card className="bg-corporate-darkSecondary border-corporate-border">
-                  <CardContent className="p-6 text-center">
-                    <Button
-                      onClick={() => setShowConsole(true)}
-                      className="bg-corporate-accent text-black hover:bg-corporate-accent/90"
-                    >
-                      <Zap className="h-4 w-4 mr-2" />
-                      Open Command Console
-                    </Button>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="execution-plan" className="space-y-6">
-            {selectedEntity ? (
-              <ClientExecutionPlan 
-                entityName={selectedEntity}
-                clientName={selectedEntity}
-                threatLevel={currentThreatLevel}
-              />
-            ) : (
-              <Card className="bg-corporate-darkSecondary border-corporate-border">
-                <CardContent className="py-8">
-                  <div className="text-center text-corporate-lightGray">
-                    <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>Please select an entity to view the execution plan</p>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-
-          <TabsContent value="threats" className="space-y-6">
-            <ThreatTracker 
-              selectedEntity={selectedEntity}
-              serviceStatus={serviceStatus}
-              entityMemory={entityMemory}
-            />
-          </TabsContent>
-
-          <TabsContent value="services" className="space-y-6">
-            <ServiceOrchestrator 
-              selectedEntity={selectedEntity}
-              activeModule={activeModule}
-            />
-            <Card className="bg-corporate-darkSecondary border-corporate-border">
-              <CardContent className="py-8">
-                <div className="text-center text-corporate-lightGray">
-                  <Zap className="h-8 w-8 mx-auto mb-2" />
-                  <p>Service orchestration running in background</p>
-                  <p className="text-xs mt-1">Check console for service logs</p>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="brain" className="space-y-6">
-            <StrategyBrainMetrics selectedEntity={selectedEntity} />
-          </TabsContent>
-
-          <TabsContent value="diagnostics" className="space-y-6">
-            <SystemDiagnostics 
-              selectedEntity={selectedEntity}
-              serviceStatus={serviceStatus}
-            />
-          </TabsContent>
-        </Tabs>
+        {/* Main Control Modules */}
+        <ControlCenterModules
+          activeModule={activeModule}
+          onModuleChange={setActiveModule}
+          selectedEntity={selectedEntity}
+          onEntitySelect={handleEntitySelect}
+          showConsole={showConsole}
+          onToggleConsole={() => setShowConsole(!showConsole)}
+          serviceStatus={serviceStatus}
+          entityMemory={entityMemory}
+          currentThreatLevel={currentThreatLevel}
+        />
       </div>
     </div>
   );
