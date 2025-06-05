@@ -3,14 +3,15 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Brain, Zap, Target, AlertTriangle, BarChart3, Settings, Activity, TrendingUp, LayoutDashboard, Users, ListChecks, Cpu } from 'lucide-react';
+import { Brain, Zap, Target, AlertTriangle, BarChart3, Settings, Activity, TrendingUp, LayoutDashboard, Users, ListChecks, Cpu, Server } from 'lucide-react';
 import { toast } from 'sonner';
 import SecurityCenter from '@/components/aria/SecurityCenter';
 import IntelligenceHub from '@/components/aria/IntelligenceHub';
 import LocalModelManager from '@/components/aria/LocalModelManager';
+import LocalServerMonitor from '@/components/aria/LocalServerMonitor';
 
 const ControlCenter = () => {
-  const [activeSection, setActiveSection] = useState<'overview' | 'security' | 'intelligence' | 'models'>('overview');
+  const [activeSection, setActiveSection] = useState<'overview' | 'security' | 'intelligence' | 'models' | 'server'>('overview');
 
   const systemStats = {
     activeThreats: 3,
@@ -90,6 +91,25 @@ const ControlCenter = () => {
         </div>
         <div className="container mx-auto px-6 py-8">
           <LocalModelManager />
+        </div>
+      </div>
+    );
+  }
+
+  if (activeSection === 'server') {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="bg-white border-b border-gray-200 px-6 py-4">
+          <Button
+            onClick={() => setActiveSection('overview')}
+            variant="ghost"
+            className="mb-2"
+          >
+            ← Back to Control Center
+          </Button>
+        </div>
+        <div className="container mx-auto px-6 py-8">
+          <LocalServerMonitor />
         </div>
       </div>
     );
@@ -184,7 +204,7 @@ const ControlCenter = () => {
         </Card>
 
         {/* Main Modules */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
           <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setActiveSection('security')}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -230,10 +250,25 @@ const ControlCenter = () => {
             </CardContent>
           </Card>
 
+          <Card className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setActiveSection('server')}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Server className="h-5 w-5 text-green-600" />
+                Server Monitor
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-4">
+                Real-time local AI server health and performance
+              </p>
+              <Badge className="bg-green-100 text-green-700">Port 3001</Badge>
+            </CardContent>
+          </Card>
+
           <Card className="cursor-pointer hover:shadow-lg transition-shadow">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5 text-green-600" />
+                <BarChart3 className="h-5 w-5 text-orange-600" />
                 Analytics Dashboard
               </CardTitle>
             </CardHeader>
@@ -241,7 +276,7 @@ const ControlCenter = () => {
               <p className="text-sm text-muted-foreground mb-4">
                 Comprehensive reporting and trend analysis
               </p>
-              <Badge className="bg-green-100 text-green-700">Coming Soon</Badge>
+              <Badge className="bg-orange-100 text-orange-700">Coming Soon</Badge>
             </CardContent>
           </Card>
         </div>
