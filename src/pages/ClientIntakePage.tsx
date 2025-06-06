@@ -51,27 +51,31 @@ const ClientIntakePage = () => {
         return;
       }
 
-      // Submit to Supabase with correct field mapping
-      const { error } = await supabase
+      console.log('Submitting form data:', formData);
+
+      // Submit to Supabase with exact field mapping
+      const { data, error } = await supabase
         .from('client_intake_submissions')
-        .insert([{
+        .insert({
           full_name: formData.full_name,
           email: formData.email,
-          brand_or_alias: formData.brand_or_alias,
+          brand_or_alias: formData.brand_or_alias || null,
           concern_areas: formData.concern_areas,
-          risk_tolerance: formData.risk_tolerance,
-          urgency_level: formData.urgency_level,
-          additional_information: formData.additional_information,
+          risk_tolerance: formData.risk_tolerance || null,
+          urgency_level: formData.urgency_level || null,
+          additional_information: formData.additional_information || null,
           consent_to_process: true,
-          created_at: new Date().toISOString()
-        }]);
+          status: 'new'
+        })
+        .select();
 
       if (error) {
-        console.error('Submission error:', error);
-        toast.error('Failed to submit intake form. Please try again.');
+        console.error('Database error:', error);
+        toast.error(`Database error: ${error.message}`);
         return;
       }
 
+      console.log('Submission successful:', data);
       toast.success('Intake form submitted successfully! We will contact you within 24 hours.');
       
       // Reset form
