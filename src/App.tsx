@@ -19,10 +19,15 @@ const App = () => (
         <Toaster />
         <BrowserRouter>
           <Routes>
+            {/* Protected Public Routes - DO NOT MODIFY */}
             <Route path="/" element={<Index />} />
             <Route path="/home" element={<HomePage />} />
+            
+            {/* Admin/Backend Routes - Safe to modify */}
             <Route path="/secure-intake" element={<SecureClientIntakePage />} />
             <Route path="/admin/keyword-to-article" element={<KeywordToArticleSystemPage />} />
+            
+            {/* Dynamic Routes */}
             {navItems.map(({ to, page }) => (
               <Route key={to} path={to} element={page} />
             ))}
