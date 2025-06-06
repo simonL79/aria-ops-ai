@@ -82,16 +82,10 @@ export const ThreatDrivenGenerator = ({
         const { error: insertError } = await supabase
           .from('activity_logs')
           .insert({
-            activity_type: 'content_generation',
-            description: `Generated ${contentType} content from live threat intelligence`,
-            metadata: {
-              client_id: clientId,
-              content_type: contentType,
-              source_threat: selectedThreat,
-              generation_source: 'threat_driven',
-              content_preview: content.substring(0, 200) + '...',
-              word_count: content.split(' ').length
-            }
+            action: 'content_generation',
+            details: `Generated ${contentType} content from live threat intelligence`,
+            entity_type: 'content',
+            entity_id: clientId
           });
 
         if (insertError) {
