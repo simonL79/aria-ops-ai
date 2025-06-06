@@ -76,6 +76,21 @@ export class LiveDataEnforcer {
   }
   
   /**
+   * Enforce system-wide live data requirements
+   */
+  static async enforceSystemWideLiveData(): Promise<void> {
+    const compliance = await this.validateLiveDataCompliance();
+    
+    if (!compliance.isCompliant) {
+      toast.error("Live Data Enforcement", {
+        description: "System blocked non-compliant data sources",
+        duration: 5000
+      });
+      throw new Error(compliance.message);
+    }
+  }
+  
+  /**
    * Validate that input data is from live sources
    */
   static async validateDataInput(data: string, source: string): Promise<boolean> {

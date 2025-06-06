@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -16,10 +17,12 @@ import AdminLogin from "./pages/AdminLogin";
 import Authentication from "./pages/Authentication";
 import RSI from "./pages/RSI";
 import ClientOnboardingPage from "./pages/ClientOnboardingPage";
+import ClientIntakePage from "./pages/ClientIntakePage";
 import AdminGuard from "@/components/auth/AdminGuard";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import AdminDashboard from "@/components/admin/AdminDashboard";
 import DashboardLayout from "@/components/layout/DashboardLayout";
+import SystemAuditPage from "./pages/admin/SystemAuditPage";
 import "./App.css";
 
 const queryClient = new QueryClient();
@@ -31,6 +34,7 @@ function App() {
         console.log('🚀 Starting A.R.I.A/EX™ System...');
         
         // Initialize A.R.I.A™ Core with live data enforcement
+        const { initializeARIACore } = await import('@/services/ariaCore');
         await initializeARIACore();
         
         console.log('✅ A.R.I.A™ Core Services initialized successfully');
@@ -61,6 +65,9 @@ function App() {
                 <Route path="/pricing" element={<PricingPage />} />
                 <Route path="/simon-lindsay" element={<SimonLindsayPage />} />
                 
+                {/* Client Intake - Public but hidden */}
+                <Route path="/client-intake" element={<ClientIntakePage />} />
+                
                 {/* Authentication Routes */}
                 <Route path="/auth" element={<Authentication />} />
                 <Route path="/admin-login" element={<AdminLogin />} />
@@ -78,6 +85,13 @@ function App() {
                     <DashboardLayout>
                       <AdminDashboard />
                     </DashboardLayout>
+                  </AdminGuard>
+                } />
+                
+                {/* Admin System Audit */}
+                <Route path="/admin/system-audit" element={
+                  <AdminGuard>
+                    <SystemAuditPage />
                   </AdminGuard>
                 } />
                 
