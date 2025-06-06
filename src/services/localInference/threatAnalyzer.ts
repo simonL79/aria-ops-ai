@@ -231,13 +231,12 @@ export const searchEntityMemories = async (
   try {
     console.log(`🔍 Searching memories for ${entityName} with query: ${query}`);
     
-    // For now, we'll implement a simple text-based search
-    // In a production system, you'd want to implement proper vector embeddings
+    // Use the correct table name from the database schema
     const { data, error } = await supabase
-      .from('entity_memory')
-      .select('id, entity_name, content, created_at')
+      .from('anubis_entity_memory')
+      .select('memory_id, entity_name, memory_summary, created_at')
       .ilike('entity_name', `%${entityName}%`)
-      .ilike('content', `%${query}%`)
+      .ilike('memory_summary', `%${query}%`)
       .limit(3);
     
     if (error) {
@@ -246,9 +245,9 @@ export const searchEntityMemories = async (
     }
     
     const results = (data || []).map(item => ({
-      id: item.id,
+      id: item.memory_id,
       entity_name: item.entity_name,
-      content: item.content,
+      content: item.memory_summary,
       similarity: 0.8, // Simulated similarity score
       created_at: item.created_at
     }));
