@@ -1,526 +1,513 @@
-
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
 
 export interface SystemAuditResult {
   component: string;
   status: 'LIVE_VERIFIED' | 'MOCK_DETECTED' | 'SIMULATION_FOUND' | 'ERROR';
+  complianceScore: number;
   details: string;
   issues: string[];
   recommendations: string[];
-  complianceScore: number;
 }
 
 export interface ComprehensiveAuditReport {
-  overallCompliance: boolean;
+  timestamp: string;
+  auditResults: SystemAuditResult[];
   totalComponents: number;
   liveComponents: number;
   issueComponents: number;
-  auditResults: SystemAuditResult[];
   criticalIssues: string[];
+  overallCompliance: boolean;
   executiveSummary: string;
-  timestamp: string;
 }
 
-/**
- * A.R.I.A™ System-Wide Live Data Compliance Audit
- * ZERO TOLERANCE for mock data in production client environment
- */
 export class ARIASystemAudit {
   
-  static async executeFullSystemAudit(): Promise<ComprehensiveAuditReport> {
-    console.log('🔍 A.R.I.A™ CRITICAL AUDIT: Starting comprehensive live data compliance check');
+  /**
+   * Execute comprehensive system audit for live data compliance
+   */
+  static async executeComprehensiveAudit(): Promise<ComprehensiveAuditReport> {
+    console.log('🔍 Starting A.R.I.A™ comprehensive system audit...');
     
     const auditResults: SystemAuditResult[] = [];
     const criticalIssues: string[] = [];
+    let totalComponents = 0;
+    let liveComponents = 0;
+    let issueComponents = 0;
     
     try {
-      // 1. Database Content Audit
-      const dbAudit = await this.auditDatabaseContent();
+      // Audit Core Services
+      const coreAudit = await this.auditCoreServices();
+      auditResults.push(coreAudit);
+      totalComponents++;
+      if (coreAudit.status === 'LIVE_VERIFIED') liveComponents++;
+      else issueComponents++;
+      
+      // Audit Database Integrity
+      const dbAudit = await this.auditDatabaseIntegrity();
       auditResults.push(dbAudit);
-      if (dbAudit.status !== 'LIVE_VERIFIED') {
-        criticalIssues.push(`Database Content: ${dbAudit.details}`);
-      }
+      totalComponents++;
+      if (dbAudit.status === 'LIVE_VERIFIED') liveComponents++;
+      else issueComponents++;
       
-      // 2. Scanning Services Audit
-      const scanAudit = await this.auditScanningServices();
-      auditResults.push(scanAudit);
-      if (scanAudit.status !== 'LIVE_VERIFIED') {
-        criticalIssues.push(`Scanning Services: ${scanAudit.details}`);
-      }
+      // Audit Monitoring Systems
+      const monitoringAudit = await this.auditMonitoringSystems();
+      auditResults.push(monitoringAudit);
+      totalComponents++;
+      if (monitoringAudit.status === 'LIVE_VERIFIED') liveComponents++;
+      else issueComponents++;
       
-      // 3. Edge Functions Audit
-      const edgeFunctionAudit = await this.auditEdgeFunctions();
-      auditResults.push(edgeFunctionAudit);
-      if (edgeFunctionAudit.status !== 'LIVE_VERIFIED') {
-        criticalIssues.push(`Edge Functions: ${edgeFunctionAudit.details}`);
-      }
+      // Audit Edge Functions
+      const edgeFunctionsAudit = await this.auditEdgeFunctions();
+      auditResults.push(edgeFunctionsAudit);
+      totalComponents++;
+      if (edgeFunctionsAudit.status === 'LIVE_VERIFIED') liveComponents++;
+      else issueComponents++;
       
-      // 4. Content Sources Audit
-      const contentAudit = await this.auditContentSources();
-      auditResults.push(contentAudit);
-      if (contentAudit.status !== 'LIVE_VERIFIED') {
-        criticalIssues.push(`Content Sources: ${contentAudit.details}`);
-      }
+      // Audit OSINT Sources
+      const osintAudit = await this.auditOSINTSources();
+      auditResults.push(osintAudit);
+      totalComponents++;
+      if (osintAudit.status === 'LIVE_VERIFIED') liveComponents++;
+      else issueComponents++;
       
-      // 5. Client Onboarding Audit
-      const onboardingAudit = await this.auditClientOnboarding();
-      auditResults.push(onboardingAudit);
-      if (onboardingAudit.status !== 'LIVE_VERIFIED') {
-        criticalIssues.push(`Client Onboarding: ${onboardingAudit.details}`);
-      }
-      
-      // 6. Intelligence Services Audit
-      const intelligenceAudit = await this.auditIntelligenceServices();
-      auditResults.push(intelligenceAudit);
-      if (intelligenceAudit.status !== 'LIVE_VERIFIED') {
-        criticalIssues.push(`Intelligence Services: ${intelligenceAudit.details}`);
-      }
-      
-      // 7. Dashboard Data Sources Audit
-      const dashboardAudit = await this.auditDashboardSources();
-      auditResults.push(dashboardAudit);
-      if (dashboardAudit.status !== 'LIVE_VERIFIED') {
-        criticalIssues.push(`Dashboard Sources: ${dashboardAudit.details}`);
-      }
-      
-      // 8. System Configuration Audit
-      const configAudit = await this.auditSystemConfiguration();
-      auditResults.push(configAudit);
-      if (configAudit.status !== 'LIVE_VERIFIED') {
-        criticalIssues.push(`System Configuration: ${configAudit.details}`);
-      }
-      
-      // Calculate compliance metrics
-      const liveComponents = auditResults.filter(r => r.status === 'LIVE_VERIFIED').length;
-      const totalComponents = auditResults.length;
-      const overallCompliance = criticalIssues.length === 0;
-      
+      // Audit Client Systems
+      const clientAudit = await this.auditClientSystems();
+      auditResults.push(clientAudit);
+      totalComponents++;
+      if (clientAudit.status === 'LIVE_VERIFIED') liveComponents++;
+      else issueComponents++;
+
+      // Collect critical issues
+      auditResults.forEach(result => {
+        if (result.status === 'MOCK_DETECTED' || result.status === 'SIMULATION_FOUND') {
+          criticalIssues.push(`${result.component}: ${result.details}`);
+        }
+      });
+
+      const overallCompliance = issueComponents === 0;
       const executiveSummary = overallCompliance 
-        ? `✅ FULL COMPLIANCE ACHIEVED: All ${totalComponents} A.R.I.A™ components verified as 100% live data sources`
-        : `🚨 COMPLIANCE FAILURE: ${criticalIssues.length} critical issues detected requiring immediate resolution`;
-      
-      const report: ComprehensiveAuditReport = {
-        overallCompliance,
+        ? `✅ A.R.I.A™ System Audit PASSED: All ${totalComponents} components verified using 100% live data sources. Zero mock/simulation contamination detected.`
+        : `❌ A.R.I.A™ System Audit FAILED: ${issueComponents}/${totalComponents} components have critical issues requiring immediate remediation.`;
+
+      // Log audit completion to activity logs
+      try {
+        await supabase.from('activity_logs').insert({
+          entity_type: 'system_audit',
+          action: 'comprehensive_audit_completed',
+          details: `Audit completed with ${criticalIssues.length} critical issues`,
+          user_email: 'system@aria.com'
+        });
+      } catch (logError) {
+        console.warn('Failed to log audit completion:', logError);
+      }
+
+      return {
+        timestamp: new Date().toISOString(),
+        auditResults,
         totalComponents,
         liveComponents,
-        issueComponents: totalComponents - liveComponents,
-        auditResults,
+        issueComponents,
         criticalIssues,
-        executiveSummary,
-        timestamp: new Date().toISOString()
+        overallCompliance,
+        executiveSummary
       };
-      
-      // Store audit results in database
-      await this.storeAuditResults(report);
-      
-      console.log('🔍 A.R.I.A™ AUDIT COMPLETE:', report.executiveSummary);
-      
-      if (overallCompliance) {
-        toast.success("A.R.I.A™ System Audit: 100% Live Data Compliance Verified", {
-          description: `All ${totalComponents} components confirmed as live data sources`
-        });
-      } else {
-        toast.error("A.R.I.A™ System Audit: Critical Issues Detected", {
-          description: `${criticalIssues.length} compliance failures require immediate attention`
-        });
-      }
-      
-      return report;
-      
+
     } catch (error) {
-      console.error('🚨 CRITICAL AUDIT FAILURE:', error);
-      throw new Error(`A.R.I.A™ system audit failed: ${error.message}`);
+      console.error('❌ System audit failed:', error);
+      throw new Error(`System audit execution failed: ${error.message}`);
     }
   }
-  
-  private static async auditDatabaseContent(): Promise<SystemAuditResult> {
-    console.log('🔍 Auditing database content for mock data contamination...');
-    
+
+  /**
+   * Audit core A.R.I.A™ services
+   */
+  private static async auditCoreServices(): Promise<SystemAuditResult> {
     try {
-      const issues: string[] = [];
-      const recommendations: string[] = [];
+      console.log('🔍 Auditing A.R.I.A™ Core Services...');
       
-      // Check scan_results for mock content
-      const { data: mockScanResults, error: scanError } = await supabase
-        .from('scan_results')
-        .select('id, content, platform, source_type')
-        .or('content.ilike.%mock%,content.ilike.%test%,content.ilike.%demo%,content.ilike.%sample%')
-        .limit(10);
+      // Check live data enforcer status
+      const { LiveDataEnforcer } = await import('./liveDataEnforcer');
+      const compliance = await LiveDataEnforcer.validateLiveDataCompliance();
       
-      if (scanError) {
+      if (!compliance.isCompliant) {
         return {
-          component: 'Database Content',
-          status: 'ERROR',
-          details: `Database query failed: ${scanError.message}`,
-          issues: [`Database access error: ${scanError.message}`],
-          recommendations: ['Check database connectivity and permissions'],
-          complianceScore: 0
+          component: 'A.R.I.A™ Core Services',
+          status: 'SIMULATION_FOUND',
+          complianceScore: 0,
+          details: `Core services compliance failed: ${compliance.message}`,
+          issues: [compliance.message],
+          recommendations: ['Restart A.R.I.A™ Core with enforced live data mode']
         };
       }
-      
-      if (mockScanResults && mockScanResults.length > 0) {
-        issues.push(`${mockScanResults.length} mock/test entries found in scan_results`);
-        recommendations.push('Purge all mock data from scan_results table');
-      }
-      
-      // Check entities for test names
-      const { data: mockEntities } = await supabase
-        .from('entities')
-        .select('id, name')
-        .or('name.ilike.%test%,name.ilike.%mock%,name.ilike.%demo%')
-        .limit(5);
-      
-      if (mockEntities && mockEntities.length > 0) {
-        issues.push(`${mockEntities.length} test entities found`);
-        recommendations.push('Remove all test entities');
-      }
-      
-      // Check content_sources for mock URLs
-      const { data: mockSources } = await supabase
-        .from('content_sources')
-        .select('id, url, title')
-        .or('url.ilike.%example.com%,url.ilike.%test.%,title.ilike.%mock%')
-        .limit(5);
-      
-      if (mockSources && mockSources.length > 0) {
-        issues.push(`${mockSources.length} mock content sources found`);
-        recommendations.push('Replace mock sources with live data sources');
-      }
-      
-      // Verify live data sources are active
-      const { data: liveSources } = await supabase
-        .from('scan_results')
-        .select('count')
-        .eq('source_type', 'live_osint')
-        .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
-      
-      const liveCount = liveSources?.[0]?.count || 0;
-      if (liveCount < 10) {
-        issues.push(`Only ${liveCount} live OSINT results in last 24 hours - insufficient activity`);
-        recommendations.push('Verify live data ingestion is functioning');
-      }
-      
-      const complianceScore = issues.length === 0 ? 100 : Math.max(0, 100 - (issues.length * 25));
-      
-      return {
-        component: 'Database Content',
-        status: issues.length === 0 ? 'LIVE_VERIFIED' : 'MOCK_DETECTED',
-        details: issues.length === 0 
-          ? `Database verified clean: ${liveCount} live OSINT entries, no mock data detected`
-          : `${issues.length} database compliance issues detected`,
-        issues,
-        recommendations,
-        complianceScore
-      };
-      
-    } catch (error) {
-      return {
-        component: 'Database Content',
-        status: 'ERROR',
-        details: `Audit failed: ${error.message}`,
-        issues: [`Database audit error: ${error.message}`],
-        recommendations: ['Check database connectivity'],
-        complianceScore: 0
-      };
-    }
-  }
-  
-  private static async auditScanningServices(): Promise<SystemAuditResult> {
-    console.log('🔍 Auditing scanning services for simulation dependencies...');
-    
-    const issues: string[] = [];
-    const recommendations: string[] = [];
-    
-    // Check if performRealScan is configured correctly
-    try {
-      const { performRealScan } = await import('@/services/monitoring/realScan');
-      
-      // Test real scan functionality
-      const testResults = await performRealScan({
-        fullScan: false,
-        targetEntity: 'system_audit_test',
-        source: 'audit_verification'
-      });
-      
-      if (testResults.length === 0) {
-        issues.push('Real scan service returned no results - may not be properly configured');
-        recommendations.push('Verify edge function connectivity and API keys');
-      } else {
-        console.log(`✅ Real scan verified: ${testResults.length} results returned`);
-      }
-      
-    } catch (error) {
-      issues.push(`Real scan service error: ${error.message}`);
-      recommendations.push('Check real scan service configuration');
-    }
-    
-    const complianceScore = issues.length === 0 ? 100 : Math.max(0, 100 - (issues.length * 50));
-    
-    return {
-      component: 'Scanning Services',
-      status: issues.length === 0 ? 'LIVE_VERIFIED' : 'ERROR',
-      details: issues.length === 0 
-        ? 'All scanning services verified as live data sources'
-        : `${issues.length} scanning service issues detected`,
-      issues,
-      recommendations,
-      complianceScore
-    };
-  }
-  
-  private static async auditEdgeFunctions(): Promise<SystemAuditResult> {
-    console.log('🔍 Auditing edge functions for live data compliance...');
-    
-    const issues: string[] = [];
-    const recommendations: string[] = [];
-    
-    // Test key edge functions
-    const functionTests = [
-      'reddit-scan',
-      'uk-news-scanner', 
-      'discovery-scanner',
-      'monitoring-scan'
-    ];
-    
-    let successfulFunctions = 0;
-    
-    for (const functionName of functionTests) {
-      try {
-        const { data, error } = await supabase.functions.invoke(functionName, {
-          body: { test: true, audit: true }
-        });
+
+      // Check system configuration
+      const { data: configs } = await supabase
+        .from('system_config')
+        .select('config_key, config_value')
+        .in('config_key', ['allow_mock_data', 'system_mode', 'live_enforcement']);
+
+      const issues: string[] = [];
+      const recommendations: string[] = [];
+
+      if (configs) {
+        const configMap = new Map(configs.map(c => [c.config_key, c.config_value]));
         
-        if (error) {
-          issues.push(`Edge function ${functionName} returned error: ${error.message}`);
-        } else if (data) {
-          successfulFunctions++;
-          console.log(`✅ Edge function ${functionName} responded successfully`);
+        if (configMap.get('allow_mock_data') === 'enabled') {
+          issues.push('Mock data is enabled in production');
+          recommendations.push('Disable mock data in system configuration');
         }
         
-      } catch (error) {
-        issues.push(`Edge function ${functionName} failed to respond: ${error.message}`);
+        if (configMap.get('system_mode') !== 'live') {
+          issues.push('System not in live mode');
+          recommendations.push('Set system_mode to live');
+        }
+        
+        if (configMap.get('live_enforcement') !== 'enabled') {
+          issues.push('Live enforcement is disabled');
+          recommendations.push('Enable live enforcement');
+        }
       }
-    }
-    
-    if (successfulFunctions < functionTests.length) {
-      recommendations.push(`${functionTests.length - successfulFunctions} edge functions need attention`);
-    }
-    
-    const complianceScore = (successfulFunctions / functionTests.length) * 100;
-    
-    return {
-      component: 'Edge Functions',
-      status: successfulFunctions === functionTests.length ? 'LIVE_VERIFIED' : 'ERROR',
-      details: `${successfulFunctions}/${functionTests.length} edge functions verified`,
-      issues,
-      recommendations,
-      complianceScore
-    };
-  }
-  
-  private static async auditContentSources(): Promise<SystemAuditResult> {
-    console.log('🔍 Auditing content sources for live data feeds...');
-    
-    const issues: string[] = [];
-    const recommendations: string[] = [];
-    
-    // Check content sources table for live vs mock ratios
-    const { data: allSources } = await supabase
-      .from('content_sources')
-      .select('source_type, url')
-      .limit(100);
-    
-    if (!allSources || allSources.length === 0) {
-      issues.push('No content sources found in database');
-      recommendations.push('Configure live content sources');
-    } else {
-      const mockSources = allSources.filter(s => 
-        s.url?.includes('example.com') || 
-        s.url?.includes('test.') ||
-        s.source_type?.includes('mock')
-      );
-      
-      if (mockSources.length > 0) {
-        issues.push(`${mockSources.length} mock content sources detected`);
-        recommendations.push('Replace all mock sources with live feeds');
-      }
-    }
-    
-    const complianceScore = issues.length === 0 ? 100 : Math.max(0, 100 - (issues.length * 30));
-    
-    return {
-      component: 'Content Sources',
-      status: issues.length === 0 ? 'LIVE_VERIFIED' : 'MOCK_DETECTED',
-      details: issues.length === 0 
-        ? 'All content sources verified as live feeds'
-        : `${issues.length} content source issues detected`,
-      issues,
-      recommendations,
-      complianceScore
-    };
-  }
-  
-  private static async auditClientOnboarding(): Promise<SystemAuditResult> {
-    console.log('🔍 Auditing client onboarding process for simulation usage...');
-    
-    const issues: string[] = [];
-    const recommendations: string[] = [];
-    
-    // Check recent client intake submissions for test data
-    const { data: intakeSubmissions } = await supabase
-      .from('client_intake_submissions')
-      .select('full_name, email, brand_or_alias')
-      .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
-      .limit(50);
-    
-    if (intakeSubmissions) {
-      const testSubmissions = intakeSubmissions.filter(s => 
-        s.full_name?.toLowerCase().includes('test') ||
-        s.email?.includes('test') ||
-        s.brand_or_alias?.toLowerCase().includes('test')
-      );
-      
-      if (testSubmissions.length > 0) {
-        issues.push(`${testSubmissions.length} test client submissions found`);
-        recommendations.push('Remove test client data');
-      }
-    }
-    
-    const complianceScore = issues.length === 0 ? 100 : Math.max(0, 100 - (issues.length * 40));
-    
-    return {
-      component: 'Client Onboarding',
-      status: issues.length === 0 ? 'LIVE_VERIFIED' : 'MOCK_DETECTED',
-      details: issues.length === 0 
-        ? 'Client onboarding verified clean of test data'
-        : `${issues.length} onboarding issues detected`,
-      issues,
-      recommendations,
-      complianceScore
-    };
-  }
-  
-  private static async auditIntelligenceServices(): Promise<SystemAuditResult> {
-    console.log('🔍 Auditing intelligence services for live data usage...');
-    
-    const issues: string[] = [];
-    const recommendations: string[] = [];
-    
-    // Test AI search service if OpenAI key is available
-    try {
-      const { hasOpenAIKey } = await import('@/services/api/openaiClient');
-      
-      if (!hasOpenAIKey()) {
-        issues.push('OpenAI API key not configured - AI services may not function');
-        recommendations.push('Configure OpenAI API key for live AI intelligence');
-      }
+
+      return {
+        component: 'A.R.I.A™ Core Services',
+        status: issues.length === 0 ? 'LIVE_VERIFIED' : 'MOCK_DETECTED',
+        complianceScore: issues.length === 0 ? 100 : 25,
+        details: issues.length === 0 
+          ? 'Core services operating with 100% live data compliance'
+          : `${issues.length} configuration issues detected`,
+        issues,
+        recommendations
+      };
+
     } catch (error) {
-      issues.push(`Intelligence service check failed: ${error.message}`);
+      console.error('Core services audit failed:', error);
+      return {
+        component: 'A.R.I.A™ Core Services',
+        status: 'ERROR',
+        complianceScore: 0,
+        details: `Audit failed: ${error.message}`,
+        issues: [`Core services audit error: ${error.message}`],
+        recommendations: ['Check A.R.I.A™ Core Services configuration and restart']
+      };
     }
-    
-    const complianceScore = issues.length === 0 ? 100 : Math.max(0, 100 - (issues.length * 50));
-    
-    return {
-      component: 'Intelligence Services',
-      status: issues.length === 0 ? 'LIVE_VERIFIED' : 'ERROR',
-      details: issues.length === 0 
-        ? 'Intelligence services verified for live operation'
-        : `${issues.length} intelligence service issues detected`,
-      issues,
-      recommendations,
-      complianceScore
-    };
   }
-  
-  private static async auditDashboardSources(): Promise<SystemAuditResult> {
-    console.log('🔍 Auditing dashboard data sources...');
-    
-    const issues: string[] = [];
-    const recommendations: string[] = [];
-    
-    // Check for recent live activity
-    const { data: recentActivity } = await supabase
-      .from('activity_logs')
-      .select('count')
-      .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
-    
-    const activityCount = recentActivity?.[0]?.count || 0;
-    if (activityCount < 5) {
-      issues.push(`Low dashboard activity: only ${activityCount} entries in 24 hours`);
-      recommendations.push('Verify live data ingestion pipeline');
-    }
-    
-    const complianceScore = issues.length === 0 ? 100 : Math.max(0, 100 - (issues.length * 30));
-    
-    return {
-      component: 'Dashboard Sources',
-      status: issues.length === 0 ? 'LIVE_VERIFIED' : 'ERROR',
-      details: issues.length === 0 
-        ? `Dashboard sources active: ${activityCount} recent activities`
-        : `${issues.length} dashboard source issues detected`,
-      issues,
-      recommendations,
-      complianceScore
-    };
-  }
-  
-  private static async auditSystemConfiguration(): Promise<SystemAuditResult> {
-    console.log('🔍 Auditing system configuration for mock data allowances...');
-    
-    const issues: string[] = [];
-    const recommendations: string[] = [];
-    
-    // Check system config for mock data settings
-    const { data: systemConfig } = await supabase
-      .from('system_config')
-      .select('config_key, config_value')
-      .eq('config_key', 'allow_mock_data');
-    
-    if (systemConfig && systemConfig.length > 0) {
-      const mockDataSetting = systemConfig[0]?.config_value;
-      if (mockDataSetting === 'enabled') {
-        issues.push('System configuration allows mock data - PRODUCTION RISK');
-        recommendations.push('Disable mock data allowance in system configuration');
-      }
-    }
-    
-    const complianceScore = issues.length === 0 ? 100 : 0; // Zero tolerance for mock data config
-    
-    return {
-      component: 'System Configuration',
-      status: issues.length === 0 ? 'LIVE_VERIFIED' : 'MOCK_DETECTED',
-      details: issues.length === 0 
-        ? 'System configuration verified - mock data disabled'
-        : 'CRITICAL: System allows mock data in production',
-      issues,
-      recommendations,
-      complianceScore
-    };
-  }
-  
-  private static async storeAuditResults(report: ComprehensiveAuditReport): Promise<void> {
+
+  /**
+   * Audit database integrity and live data sources
+   */
+  private static async auditDatabaseIntegrity(): Promise<SystemAuditResult> {
     try {
-      await supabase
-        .from('aria_validation_log')
-        .insert({
-          check_type: 'COMPREHENSIVE_SYSTEM_AUDIT',
-          result_count: report.liveComponents,
-          timestamp: report.timestamp,
-          compliance_status: report.overallCompliance,
-          audit_details: report
-        });
+      console.log('🔍 Auditing Database Integrity...');
       
-      console.log('✅ Audit results stored in database');
+      const issues: string[] = [];
+      const recommendations: string[] = [];
+
+      // Check for recent live scan results
+      const { data: recentScans, count: scanCount } = await supabase
+        .from('scan_results')
+        .select('*', { count: 'exact' })
+        .eq('source_type', 'live_osint')
+        .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
+
+      if (!scanCount || scanCount === 0) {
+        issues.push('No live OSINT scan results in last 24 hours');
+        recommendations.push('Verify OSINT scanning services are active');
+      }
+
+      // Check for mock data contamination
+      const { count: mockCount } = await supabase
+        .from('scan_results')
+        .select('*', { count: 'exact', head: true })
+        .or('content.ilike.%mock%,content.ilike.%test%,content.ilike.%demo%');
+
+      if (mockCount && mockCount > 0) {
+        issues.push(`${mockCount} records contain mock/test data`);
+        recommendations.push('Purge mock data from scan results');
+      }
+
+      // Check live threat ingestion
+      const { count: threatCount } = await supabase
+        .from('threats')
+        .select('*', { count: 'exact', head: true })
+        .eq('is_live', true)
+        .gte('detected_at', new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString());
+
+      if (!threatCount || threatCount === 0) {
+        issues.push('No live threats ingested in last 12 hours');
+        recommendations.push('Check threat ingestion pipeline');
+      }
+
+      return {
+        component: 'Database Integrity',
+        status: issues.length === 0 ? 'LIVE_VERIFIED' : 'MOCK_DETECTED',
+        complianceScore: Math.max(0, 100 - (issues.length * 25)),
+        details: issues.length === 0 
+          ? `Database contains ${scanCount} live scan results and ${threatCount} live threats`
+          : `Database integrity issues detected: ${issues.join(', ')}`,
+        issues,
+        recommendations
+      };
+
     } catch (error) {
-      console.error('❌ Failed to store audit results:', error);
+      console.error('Database audit failed:', error);
+      return {
+        component: 'Database Integrity',
+        status: 'ERROR',
+        complianceScore: 0,
+        details: `Database audit failed: ${error.message}`,
+        issues: [`Database audit error: ${error.message}`],
+        recommendations: ['Check database connectivity and permissions']
+      };
+    }
+  }
+
+  /**
+   * Audit monitoring systems and real-time feeds
+   */
+  private static async auditMonitoringSystems(): Promise<SystemAuditResult> {
+    try {
+      console.log('🔍 Auditing Monitoring Systems...');
+      
+      const issues: string[] = [];
+      const recommendations: string[] = [];
+
+      // Check monitoring status
+      const { data: monitoringStatus } = await supabase
+        .from('monitoring_status')
+        .select('*')
+        .order('last_run', { ascending: false })
+        .limit(1);
+
+      if (!monitoringStatus || monitoringStatus.length === 0) {
+        issues.push('No monitoring status records found');
+        recommendations.push('Initialize monitoring system');
+      } else {
+        const lastRun = new Date(monitoringStatus[0].last_run);
+        const hoursSinceLastRun = (Date.now() - lastRun.getTime()) / (1000 * 60 * 60);
+        
+        if (hoursSinceLastRun > 2) {
+          issues.push(`Monitoring system last run ${hoursSinceLastRun.toFixed(1)} hours ago`);
+          recommendations.push('Restart monitoring services');
+        }
+      }
+
+      // Check active platforms
+      const { data: platforms } = await supabase
+        .from('monitored_platforms')
+        .select('*')
+        .eq('status', 'active');
+
+      if (!platforms || platforms.length === 0) {
+        issues.push('No active monitoring platforms');
+        recommendations.push('Configure and activate monitoring platforms');
+      }
+
+      return {
+        component: 'Monitoring Systems',
+        status: issues.length === 0 ? 'LIVE_VERIFIED' : 'MOCK_DETECTED',
+        complianceScore: Math.max(0, 100 - (issues.length * 30)),
+        details: issues.length === 0 
+          ? `Monitoring systems active with ${platforms?.length || 0} platforms`
+          : `Monitoring system issues: ${issues.join(', ')}`,
+        issues,
+        recommendations
+      };
+
+    } catch (error) {
+      console.error('Monitoring systems audit failed:', error);
+      return {
+        component: 'Monitoring Systems',
+        status: 'ERROR',
+        complianceScore: 0,
+        details: `Monitoring audit failed: ${error.message}`,
+        issues: [`Monitoring audit error: ${error.message}`],
+        recommendations: ['Check monitoring system configuration']
+      };
+    }
+  }
+
+  /**
+   * Audit edge functions and external integrations
+   */
+  private static async auditEdgeFunctions(): Promise<SystemAuditResult> {
+    try {
+      console.log('🔍 Auditing Edge Functions...');
+      
+      const issues: string[] = [];
+      const recommendations: string[] = [];
+
+      // Check recent edge function activity
+      const { count: functionCount } = await supabase
+        .from('edge_function_events')
+        .select('*', { count: 'exact', head: true })
+        .gte('executed_at', new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString());
+
+      if (!functionCount || functionCount === 0) {
+        issues.push('No edge function activity in last 6 hours');
+        recommendations.push('Check edge function deployments and triggers');
+      }
+
+      // Check for function errors
+      const { count: errorCount } = await supabase
+        .from('edge_function_events')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'error')
+        .gte('executed_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
+
+      if (errorCount && errorCount > 0) {
+        issues.push(`${errorCount} edge function errors in last 24 hours`);
+        recommendations.push('Review edge function logs and fix errors');
+      }
+
+      return {
+        component: 'Edge Functions',
+        status: issues.length === 0 ? 'LIVE_VERIFIED' : 'MOCK_DETECTED',
+        complianceScore: Math.max(0, 100 - (issues.length * 25)),
+        details: issues.length === 0 
+          ? `Edge functions active with ${functionCount} recent executions`
+          : `Edge function issues: ${issues.join(', ')}`,
+        issues,
+        recommendations
+      };
+
+    } catch (error) {
+      console.error('Edge functions audit failed:', error);
+      return {
+        component: 'Edge Functions',
+        status: 'ERROR',
+        complianceScore: 0,
+        details: `Edge functions audit failed: ${error.message}`,
+        issues: [`Edge functions audit error: ${error.message}`],
+        recommendations: ['Check edge function deployment status']
+      };
+    }
+  }
+
+  /**
+   * Audit OSINT sources and live intelligence feeds
+   */
+  private static async auditOSINTSources(): Promise<SystemAuditResult> {
+    try {
+      console.log('🔍 Auditing OSINT Sources...');
+      
+      const issues: string[] = [];
+      const recommendations: string[] = [];
+
+      // Check content sources
+      const { count: sourceCount } = await supabase
+        .from('content_sources')
+        .select('*', { count: 'exact', head: true })
+        .gte('updated_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
+
+      if (!sourceCount || sourceCount === 0) {
+        issues.push('No content sources updated in last 24 hours');
+        recommendations.push('Verify OSINT source feeds are active');
+      }
+
+      // Check for live intelligence gathering
+      const platforms = ['Reddit', 'Twitter', 'Google News', 'RSS'];
+      for (const platform of platforms) {
+        const { count: platformCount } = await supabase
+          .from('scan_results')
+          .select('*', { count: 'exact', head: true })
+          .eq('platform', platform)
+          .eq('source_type', 'live_osint')
+          .gte('created_at', new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString());
+
+        if (!platformCount || platformCount === 0) {
+          issues.push(`No live intelligence from ${platform} in last 6 hours`);
+          recommendations.push(`Check ${platform} integration and API credentials`);
+        }
+      }
+
+      return {
+        component: 'OSINT Sources',
+        status: issues.length === 0 ? 'LIVE_VERIFIED' : 'MOCK_DETECTED',
+        complianceScore: Math.max(0, 100 - (issues.length * 15)),
+        details: issues.length === 0 
+          ? 'All OSINT sources actively gathering live intelligence'
+          : `OSINT source issues: ${issues.slice(0, 3).join(', ')}`,
+        issues,
+        recommendations
+      };
+
+    } catch (error) {
+      console.error('OSINT sources audit failed:', error);
+      return {
+        component: 'OSINT Sources',
+        status: 'ERROR',
+        complianceScore: 0,
+        details: `OSINT audit failed: ${error.message}`,
+        issues: [`OSINT audit error: ${error.message}`],
+        recommendations: ['Check OSINT source configurations and API access']
+      };
+    }
+  }
+
+  /**
+   * Audit client systems and data integrity
+   */
+  private static async auditClientSystems(): Promise<SystemAuditResult> {
+    try {
+      console.log('🔍 Auditing Client Systems...');
+      
+      const issues: string[] = [];
+      const recommendations: string[] = [];
+
+      // Check client entities for mock data
+      const { count: mockEntities } = await supabase
+        .from('client_entities')
+        .select('*', { count: 'exact', head: true })
+        .or('entity_name.ilike.%test%,entity_name.ilike.%mock%,entity_name.ilike.%demo%');
+
+      if (mockEntities && mockEntities > 0) {
+        issues.push(`${mockEntities} client entities contain test/mock names`);
+        recommendations.push('Remove mock entities from client database');
+      }
+
+      // Check recent client activity
+      const { count: activeClients } = await supabase
+        .from('clients')
+        .select('*', { count: 'exact', head: true })
+        .gte('updated_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString());
+
+      if (!activeClients || activeClients === 0) {
+        issues.push('No client activity in last 7 days');
+        recommendations.push('Verify client onboarding and monitoring systems');
+      }
+
+      // Check intake submissions
+      const { count: intakeCount } = await supabase
+        .from('client_intake_submissions')
+        .select('*', { count: 'exact', head: true })
+        .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
+
+      return {
+        component: 'Client Systems',
+        status: issues.length === 0 ? 'LIVE_VERIFIED' : 'MOCK_DETECTED',
+        complianceScore: Math.max(0, 100 - (issues.length * 30)),
+        details: issues.length === 0 
+          ? `Client systems operational with ${activeClients} active clients and ${intakeCount} recent intakes`
+          : `Client system issues: ${issues.join(', ')}`,
+        issues,
+        recommendations
+      };
+
+    } catch (error) {
+      console.error('Client systems audit failed:', error);
+      return {
+        component: 'Client Systems',
+        status: 'ERROR',
+        complianceScore: 0,
+        details: `Client systems audit failed: ${error.message}`,
+        issues: [`Client systems audit error: ${error.message}`],
+        recommendations: ['Check client database connectivity and data integrity']
+      };
     }
   }
 }
 
 /**
- * Execute immediate system audit
+ * Execute comprehensive system audit
  */
-export const executeSystemAudit = async (): Promise<ComprehensiveAuditReport> => {
-  return await ARIASystemAudit.executeFullSystemAudit();
-};
+export const executeSystemAudit = ARIASystemAudit.executeComprehensiveAudit.bind(ARIASystemAudit);

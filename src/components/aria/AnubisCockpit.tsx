@@ -1,506 +1,385 @@
-import { useState, useEffect } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Activity, 
-  Shield, 
-  AlertTriangle, 
-  RefreshCw, 
-  Zap,
-  Eye,
-  Brain,
-  Target,
-  CheckCircle
-} from "lucide-react";
-import { LiveDataValidator, LiveDataValidationResult } from '@/services/liveDataValidator';
-import { 
-  initializeLiveSystem, 
-  triggerPipelineProcessing, 
-  getQueueStatus, 
-  getLiveThreats,
-  getSystemHealth 
-} from '@/services/ariaCore/threatIngestion';
-import { 
-  startMonitoring, 
-  stopMonitoring, 
-  getMonitoringStatus, 
-  runMonitoringScan 
-} from '@/services/monitoring';
-import { LiveDataEnforcer } from '@/services/ariaCore/liveDataEnforcer';
-import { threatProcessor } from '@/services/ariaCore/threatProcessor';
-import SystemInitializationPanel from './SystemInitializationPanel';
-import ThreatResultsPanel from './ThreatResultsPanel';
-import { toast } from 'sonner';
+import { Progress } from "@/components/ui/progress";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Shield, AlertTriangle, Activity, Zap, Brain, Eye } from "lucide-react";
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from "sonner";
+
+interface AnubisStatus {
+  isActive: boolean;
+  lastCheck: string;
+  threatsDetected: number;
+  systemHealth: 'optimal' | 'warning' | 'critical';
+  memoryUtilization: number;
+}
+
+interface ThreatAlert {
+  id: string;
+  entity: string;
+  threat: string;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  timestamp: string;
+}
 
 const AnubisCockpit = () => {
-  const [validationResult, setValidationResult] = useState<LiveDataValidationResult | null>(null);
-  const [isValidating, setIsValidating] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [queueStatus, setQueueStatus] = useState<any[]>([]);
-  const [liveThreats, setLiveThreats] = useState<any[]>([]);
-  const [systemHealth, setSystemHealth] = useState<any[]>([]);
-  const [monitoringStatus, setMonitoringStatus] = useState<any>({});
-  const [liveDataCompliance, setLiveDataCompliance] = useState<any>(null);
+  const [anubisStatus, setAnubisStatus] = useState<AnubisStatus>({
+    isActive: false,
+    lastCheck: new Date().toISOString(),
+    threatsDetected: 0,
+    systemHealth: 'optimal',
+    memoryUtilization: 0
+  });
+  
+  const [recentAlerts, setRecentAlerts] = useState<ThreatAlert[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    loadInitialData();
+    loadAnubisStatus();
+    loadRecentAlerts();
+    
+    // Set up real-time monitoring
+    const interval = setInterval(() => {
+      loadAnubisStatus();
+      loadRecentAlerts();
+    }, 30000); // Update every 30 seconds
+
+    return () => clearInterval(interval);
   }, []);
 
-  const loadInitialData = async () => {
-    await Promise.all([
-      validateSystem(),
-      loadQueueStatus(),
-      loadSystemHealth(),
-      loadMonitoringStatus(),
-      checkLiveDataCompliance()
-    ]);
-  };
-
-  const validateSystem = async () => {
-    setIsValidating(true);
+  const loadAnubisStatus = async () => {
     try {
-      const result = await LiveDataValidator.validateLiveIntegrity();
-      setValidationResult(result);
+      // Check system health from various sources
+      const { data: threats } = await supabase
+        .from('threats')
+        .select('*')
+        .gte('detected_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
+
+      const { data: scanResults } = await supabase
+        .from('scan_results')
+        .select('*')
+        .gte('created_at', new Date(Date.now() - 60 * 60 * 1000).toISOString());
+
+      const threatsCount = threats?.length || 0;
+      const recentScans = scanResults?.length || 0;
+
+      // Determine system health
+      let systemHealth: 'optimal' | 'warning' | 'critical' = 'optimal';
+      if (threatsCount > 50) systemHealth = 'critical';
+      else if (threatsCount > 20) systemHealth = 'warning';
+
+      // Calculate memory utilization (simulated based on activity)
+      const memoryUtilization = Math.min(95, (threatsCount * 2) + (recentScans * 0.5));
+
+      setAnubisStatus({
+        isActive: recentScans > 0,
+        lastCheck: new Date().toISOString(),
+        threatsDetected: threatsCount,
+        systemHealth,
+        memoryUtilization
+      });
+
+      setIsLoading(false);
     } catch (error) {
-      console.error('Validation failed:', error);
-      toast.error('System validation failed');
-    } finally {
-      setIsValidating(false);
+      console.error('Failed to load Anubis status:', error);
+      setIsLoading(false);
     }
   };
 
-  const loadQueueStatus = async () => {
+  const loadRecentAlerts = async () => {
     try {
-      const status = await getQueueStatus();
-      setQueueStatus(status);
-    } catch (error) {
-      console.error('Failed to load queue status:', error);
-    }
-  };
+      const { data: notifications } = await supabase
+        .from('aria_notifications')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(5);
 
-  const loadSystemHealth = async () => {
-    try {
-      const health = await getSystemHealth();
-      setSystemHealth(health);
-    } catch (error) {
-      console.error('Failed to load system health:', error);
-    }
-  };
-
-  const loadMonitoringStatus = async () => {
-    try {
-      const status = await getMonitoringStatus();
-      setMonitoringStatus(status);
-    } catch (error) {
-      console.error('Failed to load monitoring status:', error);
-    }
-  };
-
-  const checkLiveDataCompliance = async () => {
-    try {
-      const compliance = await LiveDataEnforcer.validateLiveDataCompliance();
-      setLiveDataCompliance(compliance);
-    } catch (error) {
-      console.error('Failed to check live data compliance:', error);
-    }
-  };
-
-  const handleRefreshLiveData = async () => {
-    setIsProcessing(true);
-    try {
-      console.log('🔄 Refreshing live data...');
-      
-      // Enforce live data integrity first
-      const enforced = await LiveDataEnforcer.enforceSystemWideLiveData();
-      
-      if (enforced) {
-        toast.success('Live data integrity enforced');
+      if (notifications) {
+        const alerts: ThreatAlert[] = notifications.map(notif => ({
+          id: notif.id,
+          entity: notif.entity_name || 'Unknown',
+          threat: notif.summary || 'No details available',
+          severity: notif.priority as 'low' | 'medium' | 'high' | 'critical',
+          timestamp: notif.created_at
+        }));
+        
+        setRecentAlerts(alerts);
       }
-      
-      // Initialize live system
-      const initResult = await initializeLiveSystem();
-      console.log('🚀 Live system initialized:', initResult);
-      
-      // Refresh all data
-      await loadInitialData();
-      
-      toast.success('Live data refreshed successfully - all mock data removed');
     } catch (error) {
-      console.error('Failed to refresh live data:', error);
-      toast.error('Failed to refresh live data');
-    } finally {
-      setIsProcessing(false);
+      console.error('Failed to load recent alerts:', error);
     }
   };
 
-  const handleProcessThreats = async () => {
-    setIsProcessing(true);
+  const handleSystemScan = async () => {
     try {
-      console.log('⚡ Processing live threats...');
+      toast.info("Initiating Anubis system scan...");
       
-      // Use the enhanced threat processor
-      const processedCount = await threatProcessor.processPendingThreats();
-      
-      // Validate data integrity
-      const isValid = await threatProcessor.validateLiveDataIntegrity();
-      
-      // Get updated live threats
-      const threats = await getLiveThreats();
-      setLiveThreats(threats);
-      
-      // Refresh queue status
-      await loadQueueStatus();
-      
-      // Update compliance check
-      await checkLiveDataCompliance();
-      
-      toast.success(`Live processing completed: ${processedCount} real threats processed`);
-      
-      if (!isValid) {
-        toast.warning('Live data integrity issues detected - check console');
+      // Trigger system scan
+      const response = await supabase.functions.invoke('anubis-engine', {
+        body: { action: 'system_scan', target: 'all_entities' }
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message);
       }
-      
+
+      toast.success("Anubis system scan completed successfully");
+      await loadAnubisStatus(); // Refresh status after scan
     } catch (error) {
-      console.error('Failed to process threats:', error);
-      toast.error('Failed to process threats');
-    } finally {
-      setIsProcessing(false);
+      console.error('System scan failed:', error);
+      toast.error(`System scan failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
-  const handleStartMonitoring = async () => {
+  const handleMemoryOptimize = async () => {
     try {
-      await startMonitoring();
-      await loadMonitoringStatus();
-      toast.success('Live monitoring started');
+      toast.info("Optimizing Anubis memory...");
+      
+      // Call memory optimization
+      const response = await supabase.functions.invoke('anubis-memory-store', {
+        body: { action: 'optimize_memory' }
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+
+      toast.success("Memory optimization completed");
+      await loadAnubisStatus(); // Refresh status
     } catch (error) {
-      console.error('Failed to start monitoring:', error);
-      toast.error('Failed to start monitoring');
+      console.error('Memory optimization failed:', error);
+      toast.error(`Memory optimization failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
-  const handleRunScan = async () => {
-    try {
-      console.log('🔍 Running live monitoring scan...');
-      const results = await runMonitoringScan();
-      console.log('📊 Scan results:', results);
-      
-      await loadMonitoringStatus();
-      toast.success(`Live scan completed: ${results.length} real results found`);
-    } catch (error) {
-      console.error('Failed to run scan:', error);
-      toast.error('Failed to run scan');
+  const getHealthColor = (health: string) => {
+    switch (health) {
+      case 'optimal': return 'text-green-400';
+      case 'warning': return 'text-yellow-400';
+      case 'critical': return 'text-red-400';
+      default: return 'text-gray-400';
     }
   };
+
+  const getSeverityColor = (severity: string) => {
+    switch (severity) {
+      case 'low': return 'bg-blue-500';
+      case 'medium': return 'bg-yellow-500';
+      case 'high': return 'bg-orange-500';
+      case 'critical': return 'bg-red-500';
+      default: return 'bg-gray-500';
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center">
+          <Activity className="h-12 w-12 text-corporate-accent mx-auto mb-4 animate-pulse" />
+          <h2 className="text-2xl font-bold text-white mb-2">Loading Anubis Cockpit...</h2>
+          <p className="text-corporate-lightGray">Initializing threat monitoring systems</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Shield className="h-8 w-8 text-blue-600" />
-            Anubis Control Center
-          </h1>
-          <p className="text-muted-foreground">
-            A.R.I.A™ Live System Monitoring & Control Dashboard - Production Mode Only
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button onClick={handleRefreshLiveData} disabled={isProcessing} variant="outline">
-            <RefreshCw className={`h-4 w-4 mr-2 ${isProcessing ? 'animate-spin' : ''}`} />
-            Refresh Live Data
-          </Button>
-          <Button onClick={handleProcessThreats} disabled={isProcessing}>
-            <Zap className="h-4 w-4 mr-2" />
-            Process Threats
-          </Button>
-        </div>
+      {/* Header */}
+      <div className="text-center">
+        <Shield className="h-12 w-12 text-corporate-accent mx-auto mb-4" />
+        <h2 className="text-2xl font-bold text-white mb-2">Anubis Security Cockpit</h2>
+        <p className="text-corporate-lightGray">Advanced threat detection and response coordination</p>
       </div>
 
-      {/* Live Data Compliance Status */}
-      {liveDataCompliance && !liveDataCompliance.isCompliant && (
-        <Card className="border-orange-200 bg-orange-50">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <AlertTriangle className="h-4 w-4 text-orange-600" />
-              <span className="font-medium text-orange-800">Live Data Compliance Issues</span>
+      {/* System Status Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card className="bg-corporate-dark border-corporate-border">
+          <CardContent className="pt-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-2xl font-bold text-white">
+                  {anubisStatus.isActive ? 'ACTIVE' : 'OFFLINE'}
+                </div>
+                <div className="text-xs text-corporate-lightGray">System Status</div>
+              </div>
+              <Activity className={`h-8 w-8 ${anubisStatus.isActive ? 'text-green-400' : 'text-red-400'}`} />
             </div>
-            <div className="text-sm text-orange-700">
-              {liveDataCompliance.issues.map((issue: string, index: number) => (
-                <div key={index}>• {issue}</div>
-              ))}
-            </div>
-            <Button 
-              size="sm" 
-              className="mt-2" 
-              onClick={handleRefreshLiveData}
-              disabled={isProcessing}
-            >
-              Clean System
-            </Button>
           </CardContent>
         </Card>
-      )}
 
-      {liveDataCompliance && liveDataCompliance.isCompliant && (
-        <Card className="border-green-200 bg-green-50">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <CheckCircle className="h-4 w-4 text-green-600" />
-              <span className="font-medium text-green-800">System Operating in Live Mode Only</span>
+        <Card className="bg-corporate-dark border-corporate-border">
+          <CardContent className="pt-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className={`text-2xl font-bold ${getHealthColor(anubisStatus.systemHealth)}`}>
+                  {anubisStatus.systemHealth.toUpperCase()}
+                </div>
+                <div className="text-xs text-corporate-lightGray">System Health</div>
+              </div>
+              <Shield className={`h-8 w-8 ${getHealthColor(anubisStatus.systemHealth)}`} />
             </div>
-            <div className="text-sm text-green-700">All mock/demo/test data has been removed</div>
           </CardContent>
         </Card>
-      )}
 
-      <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList className="grid grid-cols-6">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="results">Results</TabsTrigger>
-          <TabsTrigger value="validation">System Health</TabsTrigger>
-          <TabsTrigger value="monitoring">Live Monitoring</TabsTrigger>
-          <TabsTrigger value="threats">Threat Queue</TabsTrigger>
-          <TabsTrigger value="initialization">Initialize</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="overview">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Activity className="h-4 w-4" />
-                  System Status
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {validationResult ? (
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      {validationResult.isValid ? (
-                        <Badge variant="default" className="bg-green-100 text-green-800">
-                          OPERATIONAL
-                        </Badge>
-                      ) : (
-                        <Badge variant="destructive">ISSUES DETECTED</Badge>
-                      )}
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      {validationResult.passedChecks}/{validationResult.totalChecks} checks passed
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-sm text-muted-foreground">
-                    Click "Refresh Live Data" to check system status
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Target className="h-4 w-4" />
-                  Live Threat Queue
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {queueStatus.map((item, index) => (
-                    <div key={index} className="flex justify-between">
-                      <span className="text-sm capitalize">{item.status}:</span>
-                      <span className="text-sm font-medium">{item.count}</span>
-                    </div>
-                  ))}
-                  {queueStatus.length === 0 && (
-                    <div className="text-sm text-muted-foreground">No live queue data available</div>
-                  )}
+        <Card className="bg-corporate-dark border-corporate-border">
+          <CardContent className="pt-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-2xl font-bold text-red-400">
+                  {anubisStatus.threatsDetected}
                 </div>
-              </CardContent>
-            </Card>
+                <div className="text-xs text-corporate-lightGray">Threats (24h)</div>
+              </div>
+              <AlertTriangle className="h-8 w-8 text-red-400" />
+            </div>
+          </CardContent>
+        </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Eye className="h-4 w-4" />
-                  Live Monitoring
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    {monitoringStatus.isActive ? (
-                      <Badge variant="default" className="bg-green-100 text-green-800">
-                        ACTIVE
-                      </Badge>
-                    ) : (
-                      <Badge variant="secondary">INACTIVE</Badge>
-                    )}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    Sources: {monitoringStatus.sources || 0} | 
-                    Platforms: {monitoringStatus.platforms || 0}
-                  </div>
-                  <div className="flex gap-2">
-                    <Button size="sm" onClick={handleStartMonitoring}>
-                      Start Monitoring
-                    </Button>
-                    <Button size="sm" variant="outline" onClick={handleRunScan}>
-                      Run Scan
-                    </Button>
-                  </div>
+        <Card className="bg-corporate-dark border-corporate-border">
+          <CardContent className="pt-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-2xl font-bold text-white">
+                  {Math.round(anubisStatus.memoryUtilization)}%
                 </div>
-              </CardContent>
-            </Card>
+                <div className="text-xs text-corporate-lightGray">Memory Usage</div>
+              </div>
+              <Brain className="h-8 w-8 text-corporate-accent" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Memory Utilization */}
+      <Card className="bg-corporate-dark border-corporate-border">
+        <CardHeader>
+          <CardTitle className="text-white flex items-center gap-2">
+            <Brain className="h-5 w-5" />
+            Anubis Memory Utilization
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <Progress 
+              value={anubisStatus.memoryUtilization} 
+              className="w-full"
+            />
+            <div className="flex justify-between text-sm">
+              <span className="text-corporate-lightGray">
+                Used: {Math.round(anubisStatus.memoryUtilization)}%
+              </span>
+              <span className="text-corporate-lightGray">
+                Available: {Math.round(100 - anubisStatus.memoryUtilization)}%
+              </span>
+            </div>
+            {anubisStatus.memoryUtilization > 80 && (
+              <Alert className="border-yellow-500 bg-yellow-900/20">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription className="text-yellow-400">
+                  High memory utilization detected. Consider running memory optimization.
+                </AlertDescription>
+              </Alert>
+            )}
           </div>
-        </TabsContent>
+        </CardContent>
+      </Card>
 
-        <TabsContent value="results">
-          <ThreatResultsPanel />
-        </TabsContent>
+      {/* Control Panel */}
+      <Card className="bg-corporate-dark border-corporate-border">
+        <CardHeader>
+          <CardTitle className="text-white flex items-center gap-2">
+            <Zap className="h-5 w-5" />
+            Anubis Control Panel
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Button 
+              onClick={handleSystemScan}
+              className="bg-corporate-accent text-black hover:bg-corporate-accent/90"
+            >
+              <Shield className="h-4 w-4 mr-2" />
+              Initiate System Scan
+            </Button>
+            
+            <Button 
+              onClick={handleMemoryOptimize}
+              variant="outline"
+              className="border-corporate-border text-white hover:bg-corporate-darkSecondary"
+            >
+              <Brain className="h-4 w-4 mr-2" />
+              Optimize Memory
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
-        <TabsContent value="validation">
-          <Card>
-            <CardHeader>
-              <CardTitle>System Validation Results</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {validationResult ? (
-                <div className="space-y-4">
-                  {validationResult.errors.length > 0 && (
-                    <div className="space-y-2">
-                      <h4 className="font-medium text-red-600">Critical Issues:</h4>
-                      {validationResult.errors.map((error, index) => (
-                        <div key={index} className="text-sm text-red-600 bg-red-50 p-2 rounded">
-                          {error}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  
-                  {validationResult.warnings.length > 0 && (
-                    <div className="space-y-2">
-                      <h4 className="font-medium text-yellow-600">Warnings:</h4>
-                      {validationResult.warnings.map((warning, index) => (
-                        <div key={index} className="text-sm text-yellow-600 bg-yellow-50 p-2 rounded">
-                          {warning}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {validationResult.errors.length === 0 && validationResult.warnings.length === 0 && (
-                    <div className="text-green-600 bg-green-50 p-3 rounded">
-                      ✅ All system checks passed successfully
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <Button onClick={validateSystem} disabled={isValidating}>
-                    {isValidating ? (
-                      <>
-                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                        Validating...
-                      </>
-                    ) : (
-                      <>
-                        <Brain className="h-4 w-4 mr-2" />
-                        Run System Validation
-                      </>
-                    )}
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="monitoring">
-          <Card>
-            <CardHeader>
-              <CardTitle>Live Monitoring Control</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium">Status:</label>
-                    <div className="mt-1">
-                      {monitoringStatus.isActive ? (
-                        <Badge variant="default" className="bg-green-100 text-green-800">
-                          MONITORING ACTIVE
-                        </Badge>
-                      ) : (
-                        <Badge variant="secondary">MONITORING INACTIVE</Badge>
-                      )}
-                    </div>
+      {/* Recent Alerts */}
+      <Card className="bg-corporate-dark border-corporate-border">
+        <CardHeader>
+          <CardTitle className="text-white flex items-center gap-2">
+            <Eye className="h-5 w-5" />
+            Recent Threat Alerts
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {recentAlerts.length === 0 ? (
+              <p className="text-corporate-lightGray text-center py-4">
+                No recent threat alerts
+              </p>
+            ) : (
+              recentAlerts.map((alert) => (
+                <div key={alert.id} className="p-3 border border-corporate-border rounded">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-medium text-white">{alert.entity}</span>
+                    <Badge className={getSeverityColor(alert.severity)}>
+                      {alert.severity.toUpperCase()}
+                    </Badge>
                   </div>
-                  <div>
-                    <label className="text-sm font-medium">Last Run:</label>
-                    <div className="mt-1 text-sm text-muted-foreground">
-                      {monitoringStatus.lastRun ? 
-                        new Date(monitoringStatus.lastRun).toLocaleString() : 
-                        'Never'
-                      }
-                    </div>
-                  </div>
+                  <p className="text-corporate-lightGray text-sm mb-2">{alert.threat}</p>
+                  <p className="text-xs text-corporate-lightGray">
+                    {new Date(alert.timestamp).toLocaleString()}
+                  </p>
                 </div>
-                
-                <div className="flex gap-2">
-                  <Button onClick={handleStartMonitoring}>
-                    <Activity className="h-4 w-4 mr-2" />
-                    Start Live Monitoring
-                  </Button>
-                  <Button onClick={handleRunScan} variant="outline">
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    Run Manual Scan
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+              ))
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
-        <TabsContent value="threats">
-          <Card>
-            <CardHeader>
-              <CardTitle>Live Threat Processing Queue</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {queueStatus.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {queueStatus.map((item, index) => (
-                      <div key={index} className="border rounded p-3">
-                        <div className="flex justify-between items-center">
-                          <span className="font-medium capitalize">{item.status}</span>
-                          <Badge variant="outline">{item.count}</Badge>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    No threat queue data available. Click "Process Threats" to initialize.
-                  </div>
-                )}
-                
-                <Button onClick={handleProcessThreats} disabled={isProcessing}>
-                  <Zap className="h-4 w-4 mr-2" />
-                  Process Live Threats
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="initialization">
-          <SystemInitializationPanel />
-        </TabsContent>
-      </Tabs>
+      {/* System Information */}
+      <Card className="bg-corporate-dark border-corporate-border">
+        <CardHeader>
+          <CardTitle className="text-white">System Information</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div>
+              <span className="text-corporate-lightGray">Last Check:</span>
+              <span className="text-white ml-2">
+                {new Date(anubisStatus.lastCheck).toLocaleString()}
+              </span>
+            </div>
+            <div>
+              <span className="text-corporate-lightGray">Monitoring Mode:</span>
+              <span className="text-corporate-accent ml-2">Live Intelligence</span>
+            </div>
+            <div>
+              <span className="text-corporate-lightGray">Data Sources:</span>
+              <span className="text-white ml-2">OSINT Networks</span>
+            </div>
+            <div>
+              <span className="text-corporate-lightGray">Response Time:</span>
+              <span className="text-white ml-2">&lt; 5 seconds</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

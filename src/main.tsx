@@ -4,7 +4,7 @@ import ReactDOM from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 import { HelmetProvider } from "react-helmet-async";
-import { initializeAriaCore } from "@/services/ariaCore";
+import { initializeARIACore } from "@/services/ariaCore";
 import { initializeDatabase } from "@/utils/initializeMonitoring";
 
 // Apply initial theme styles immediately to prevent flash
@@ -32,7 +32,7 @@ applyInitialTheme();
 console.log('🚀 Starting A.R.I.A/EX™ System...');
 
 // Initialize core services
-initializeAriaCore().then((success) => {
+initializeARIACore().then((success) => {
   if (success) {
     console.log('✅ A.R.I.A™ Core Services initialized successfully');
   } else {
