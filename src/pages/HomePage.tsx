@@ -10,6 +10,8 @@ import AddOnServicesSection from '@/components/sections/AddOnServicesSection';
 import ErrorBoundary from '@/components/error/ErrorBoundary';
 
 const HomePage = () => {
+  console.log('HomePage component rendering...');
+  
   return (
     <ErrorBoundary>
       <PublicLayout>
