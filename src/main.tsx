@@ -33,11 +33,13 @@ console.log('🚀 Starting A.R.I.A/EX™ System...');
 
 // Initialize core services
 initializeARIACore().then((success) => {
-  if (success) {
+  if (success !== undefined && success) {
     console.log('✅ A.R.I.A™ Core Services initialized successfully');
   } else {
     console.warn('⚠️ A.R.I.A™ Core Services had initialization issues');
   }
+}).catch((error) => {
+  console.error('❌ A.R.I.A™ Core initialization failed:', error);
 });
 
 // Initialize database monitoring
