@@ -11,6 +11,7 @@ import SecureClientIntakePage from "./pages/SecureClientIntakePage";
 import SmartIntakePage from "./pages/SmartIntakePage";
 import ContentGenerationPage from "./pages/ContentGenerationPage";
 import KeywordToArticleSystemPage from "./pages/admin/KeywordToArticleSystemPage";
+import ControlCenterPage from "./pages/admin/ControlCenterPage";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="/smart-intake" element={<SmartIntakePage />} />
             <Route path="/content-generation" element={<ContentGenerationPage />} />
             <Route path="/admin/keyword-to-article" element={<KeywordToArticleSystemPage />} />
+            <Route path="/control-center" element={<ControlCenterPage />} />
             
             {/* Dynamic Routes */}
             {navItems.map(({ to, page }) => (
