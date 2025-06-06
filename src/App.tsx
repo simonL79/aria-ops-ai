@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -14,6 +13,10 @@ import KeywordToArticleSystemPage from "./pages/admin/KeywordToArticleSystemPage
 import ControlCenterPage from "./pages/admin/ControlCenterPage";
 import ClientOnboardingPage from "./pages/ClientOnboardingPage";
 import StrategyBrainStage3Page from "./pages/admin/StrategyBrainStage3Page";
+import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
+import ClientManagementPage from "./pages/admin/ClientManagementPage";
+import SystemSettingsPage from "./pages/admin/SystemSettingsPage";
+import StrategyBrainTestPage from "./pages/admin/StrategyBrainTestPage";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +39,12 @@ const App = () => (
             <Route path="/admin/control-center" element={<ControlCenterPage />} />
             <Route path="/admin/client-onboarding" element={<ClientOnboardingPage />} />
             <Route path="/admin/strategy-brain-stage3" element={<StrategyBrainStage3Page />} />
+            
+            {/* New Admin Routes */}
+            <Route path="/admin" element={<AdminDashboardPage />} />
+            <Route path="/admin/clients" element={<ClientManagementPage />} />
+            <Route path="/admin/settings" element={<SystemSettingsPage />} />
+            <Route path="/admin/strategy-brain-test" element={<StrategyBrainTestPage />} />
             
             {/* Dynamic Routes */}
             {navItems.map(({ to, page }) => (
