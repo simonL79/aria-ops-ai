@@ -356,6 +356,78 @@ export type Database = {
         }
         Relationships: []
       }
+      aria_client_intakes: {
+        Row: {
+          client_name: string
+          consent_timestamp: string | null
+          contact_email: string
+          created_at: string
+          data_processing_consent: boolean
+          entity_keywords: string[] | null
+          gdpr_consent_given: boolean
+          id: string
+          identity_verified: boolean
+          intake_status: string
+          phone_number: string | null
+          processed_to_client_entity: boolean | null
+          processing_notes: string | null
+          public_handles: string[] | null
+          reputation_context: Json
+          submission_source: string
+          threat_level: string | null
+          updated_at: string
+          verification_method: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          client_name: string
+          consent_timestamp?: string | null
+          contact_email: string
+          created_at?: string
+          data_processing_consent?: boolean
+          entity_keywords?: string[] | null
+          gdpr_consent_given?: boolean
+          id?: string
+          identity_verified?: boolean
+          intake_status?: string
+          phone_number?: string | null
+          processed_to_client_entity?: boolean | null
+          processing_notes?: string | null
+          public_handles?: string[] | null
+          reputation_context?: Json
+          submission_source?: string
+          threat_level?: string | null
+          updated_at?: string
+          verification_method?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          client_name?: string
+          consent_timestamp?: string | null
+          contact_email?: string
+          created_at?: string
+          data_processing_consent?: boolean
+          entity_keywords?: string[] | null
+          gdpr_consent_given?: boolean
+          id?: string
+          identity_verified?: boolean
+          intake_status?: string
+          phone_number?: string | null
+          processed_to_client_entity?: boolean | null
+          processing_notes?: string | null
+          public_handles?: string[] | null
+          reputation_context?: Json
+          submission_source?: string
+          threat_level?: string | null
+          updated_at?: string
+          verification_method?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: []
+      }
       aria_notifications: {
         Row: {
           created_at: string | null

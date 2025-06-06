@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -35,6 +34,13 @@ const Header = ({ variant = 'default' }: HeaderProps) => {
             <Link to="/about" className="text-gray-300 hover:text-white transition-colors">About</Link>
             <Link to="/blog" className="text-gray-300 hover:text-white transition-colors">Blog</Link>
             <Link to="/simon-lindsay" className="text-gray-300 hover:text-white transition-colors">Simon Lindsay</Link>
+            
+            <Link
+              to="/secure-intake"
+              className="text-gray-300 hover:text-corporate-accent transition-colors"
+            >
+              A.R.I.A™ Intake
+            </Link>
             
             {isAuthenticated ? (
               <Button 
