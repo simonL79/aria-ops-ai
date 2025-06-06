@@ -7,10 +7,11 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Shield, Bot, User, CheckCircle, AlertTriangle, Loader2 } from 'lucide-react';
+import { Shield, Bot, User, CheckCircle, AlertTriangle, Loader2, Eye } from 'lucide-react';
 import { LiveEntityValidator } from './LiveEntityValidator';
 import { AliasGenerator } from './AliasGenerator';
 import { SmartFieldAutofill } from './SmartFieldAutofill';
+import { OSINTScanner } from './OSINTScanner';
 import { supabase } from '@/integrations/supabase/client';
 
 interface ClientData {
@@ -27,10 +28,16 @@ interface ClientData {
     confidence: number;
     sources: string[];
   };
+  osintData?: {
+    threats: any[];
+    sentiment: number;
+    riskScore: number;
+  };
 }
 
 const SmartClientIntakeWizard = () => {
   const [isManualMode, setIsManualMode] = useState(false);
+  const [enableOSINT, setEnableOSINT] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [clientData, setClientData] = useState<ClientData>({
@@ -58,6 +65,21 @@ const SmartClientIntakeWizard = () => {
 
   const handleEntityValidation = (validation: any) => {
     updateClientData('entityValidation', validation);
+    
+    // If OSINT data is included, store it
+    if (validation.osintData) {
+      updateClientData('osintData', validation.osintData);
+    }
+  };
+
+  const handleOSINTResults = (osintData: any) => {
+    updateClientData('osintData', osintData);
+    
+    // Update notes with OSINT summary
+    const osintSummary = `OSINT Scan Results: ${osintData.threats.length} threats detected, Risk Score: ${Math.round(osintData.riskScore * 100)}%`;
+    const currentNotes = clientData.notes;
+    const updatedNotes = currentNotes ? `${currentNotes}\n\n${osintSummary}` : osintSummary;
+    updateClientData('notes', updatedNotes);
   };
 
   const handleAliasesGenerated = (aliases: string[]) => {
@@ -84,6 +106,18 @@ const SmartClientIntakeWizard = () => {
     );
   };
 
+  const toggleOSINT = () => {
+    setEnableOSINT(!enableOSINT);
+    toast.info(
+      enableOSINT ? 'OSINT scanning disabled' : 'OSINT scanning enabled',
+      {
+        description: enableOSINT 
+          ? 'Basic entity validation only'
+          : 'Live threat intelligence gathering activated'
+      }
+    );
+  };
+
   const handleSubmit = async () => {
     if (!clientData.name || !clientData.contactEmail) {
       toast.error('Please fill in required fields');
@@ -99,6 +133,13 @@ const SmartClientIntakeWizard = () => {
 
     setIsSubmitting(true);
     try {
+      // Prepare notes with OSINT data if available
+      let enhancedNotes = clientData.notes;
+      if (clientData.osintData && clientData.osintData.threats.length > 0) {
+        const threatSummary = `\n\nA.R.I.A™ OSINT Intelligence:\n- ${clientData.osintData.threats.length} threats detected\n- Risk Score: ${Math.round(clientData.osintData.riskScore * 100)}%\n- Sentiment: ${clientData.osintData.sentiment > 0 ? 'Positive' : clientData.osintData.sentiment < 0 ? 'Negative' : 'Neutral'}`;
+        enhancedNotes += threatSummary;
+      }
+
       const { data, error } = await supabase
         .from('clients')
         .insert({
@@ -107,7 +148,7 @@ const SmartClientIntakeWizard = () => {
           contactname: clientData.contactName,
           contactemail: clientData.contactEmail,
           website: clientData.website || null,
-          notes: clientData.notes || null,
+          notes: enhancedNotes || null,
           keywordtargets: clientData.keywordTargets || null,
           client_type: 'brand',
           eidetic_enabled: true
@@ -117,8 +158,33 @@ const SmartClientIntakeWizard = () => {
 
       if (error) throw error;
 
+      // Store OSINT data in scan_results if available
+      if (clientData.osintData && clientData.osintData.threats.length > 0) {
+        const osintEntries = clientData.osintData.threats.map(threat => ({
+          platform: threat.source,
+          content: threat.content,
+          url: threat.url,
+          severity: threat.severity,
+          sentiment: threat.sentiment,
+          confidence_score: clientData.entityValidation.confidence,
+          detected_entities: [clientData.name],
+          source_type: 'live_osint',
+          threat_type: 'reputation_risk',
+          entity_name: clientData.name,
+          status: 'new'
+        }));
+
+        const { error: osintError } = await supabase
+          .from('scan_results')
+          .insert(osintEntries);
+
+        if (osintError) {
+          console.error('Failed to store OSINT data:', osintError);
+        }
+      }
+
       toast.success('Client intake completed successfully!', {
-        description: `${clientData.name} added to A.R.I.A™ monitoring system`
+        description: `${clientData.name} added to A.R.I.A™ monitoring system with live validation`
       });
 
       // Reset form
@@ -156,6 +222,7 @@ const SmartClientIntakeWizard = () => {
                 <CardTitle>A.R.I.A™ Smart Client Intake</CardTitle>
                 <p className="text-sm text-muted-foreground">
                   {isManualMode ? 'Manual Override Mode' : 'Live Data Validation Mode'}
+                  {enableOSINT && !isManualMode ? ' + OSINT Intelligence' : ''}
                 </p>
               </div>
             </div>
@@ -164,6 +231,12 @@ const SmartClientIntakeWizard = () => {
                 {isManualMode ? <User className="h-3 w-3 mr-1" /> : <Bot className="h-3 w-3 mr-1" />}
                 {isManualMode ? 'Manual' : 'Smart'}
               </Badge>
+              {!isManualMode && (
+                <Badge variant={enableOSINT ? 'default' : 'outline'}>
+                  <Eye className="h-3 w-3 mr-1" />
+                  OSINT
+                </Badge>
+              )}
               <Button 
                 variant="outline" 
                 size="sm"
@@ -171,6 +244,15 @@ const SmartClientIntakeWizard = () => {
               >
                 {isManualMode ? 'Enable Smart Mode' : 'Manual Override'}
               </Button>
+              {!isManualMode && (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={toggleOSINT}
+                >
+                  {enableOSINT ? 'Disable OSINT' : 'Enable OSINT'}
+                </Button>
+              )}
             </div>
           </div>
         </CardHeader>
@@ -207,6 +289,15 @@ const SmartClientIntakeWizard = () => {
               <LiveEntityValidator
                 entityName={clientData.name}
                 onValidation={handleEntityValidation}
+                enableOSINT={enableOSINT}
+              />
+            )}
+
+            {/* Dedicated OSINT Scanner */}
+            {!isManualMode && enableOSINT && clientData.name && (
+              <OSINTScanner
+                entityName={clientData.name}
+                onResults={handleOSINTResults}
               />
             )}
 
@@ -275,8 +366,8 @@ const SmartClientIntakeWizard = () => {
                 id="notes"
                 value={clientData.notes}
                 onChange={(e) => updateClientData('notes', e.target.value)}
-                placeholder="Special requirements, VIP status, etc."
-                rows={3}
+                placeholder="Special requirements, VIP status, OSINT findings..."
+                rows={4}
               />
             </div>
           </div>
@@ -291,7 +382,7 @@ const SmartClientIntakeWizard = () => {
                   <AlertTriangle className="h-5 w-5 text-yellow-600" />
                 )}
                 <span className="font-medium">
-                  Entity Validation: {clientData.entityValidation.isValid ? 'Verified' : 'Pending'}
+                  Entity Validation: {clientData.entityValidation.isValid ? 'Verified (Live)' : 'Pending'}
                 </span>
               </div>
               {clientData.entityValidation.confidence > 0 && (
@@ -301,6 +392,16 @@ const SmartClientIntakeWizard = () => {
                     ` | Sources: ${clientData.entityValidation.sources.join(', ')}`
                   }
                 </p>
+              )}
+              
+              {/* OSINT Summary */}
+              {clientData.osintData && (
+                <div className="mt-2 p-2 bg-orange-50 rounded border border-orange-200">
+                  <p className="text-sm text-orange-800">
+                    OSINT: {clientData.osintData.threats.length} threats detected, 
+                    Risk Score: {Math.round(clientData.osintData.riskScore * 100)}%
+                  </p>
+                </div>
               )}
             </div>
           )}
