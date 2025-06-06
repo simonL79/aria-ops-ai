@@ -1,10 +1,10 @@
 
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import HomePage from './HomePage';
 
-// Redirect to HomePage component
+// Render HomePage component directly instead of redirect
 const Index = () => {
-  return <Navigate to="/" replace />;
+  return <HomePage />;
 };
 
 export default Index;
