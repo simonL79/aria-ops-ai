@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -58,12 +59,21 @@ const AdminSidebar = () => {
       isLive: true
     },
     {
+      title: 'Content Generation Engine',
+      href: '/content-generation',
+      icon: FileText,
+      description: 'Automated threat-driven content creation',
+      classification: 'CONTENT',
+      priority: 4,
+      isLive: true
+    },
+    {
       title: 'Strategy Brain Test',
       href: '/admin/strategy-brain-test',
       icon: Zap,
       description: 'AI strategy testing & validation',
       classification: 'TESTING',
-      priority: 4,
+      priority: 5,
       isLive: true
     },
     {
@@ -72,7 +82,7 @@ const AdminSidebar = () => {
       icon: Brain,
       description: 'Advanced AI intelligence testing',
       classification: 'ADVANCED',
-      priority: 5,
+      priority: 6,
       isLive: true
     }
   ];

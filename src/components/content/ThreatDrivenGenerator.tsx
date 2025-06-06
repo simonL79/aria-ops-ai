@@ -78,36 +78,24 @@ export const ThreatDrivenGenerator = ({
         const content = data.content || generateDefensiveContent();
         setGeneratedContent(content);
         
-        // Save generated content to database using direct SQL
-        const { error: insertError } = await supabase.rpc('execute_sql', {
-          sql: `
-            INSERT INTO public.generated_content 
-            (client_id, content, content_type, source_threat, generation_source, is_live) 
-            VALUES ($1, $2, $3, $4, $5, $6)
-          `,
-          params: [clientId, content, contentType, selectedThreat, 'threat_driven', true]
-        });
+        // Store generated content in activity_logs table (which exists)
+        const { error: insertError } = await supabase
+          .from('activity_logs')
+          .insert({
+            activity_type: 'content_generation',
+            description: `Generated ${contentType} content from live threat intelligence`,
+            metadata: {
+              client_id: clientId,
+              content_type: contentType,
+              source_threat: selectedThreat,
+              generation_source: 'threat_driven',
+              content_preview: content.substring(0, 200) + '...',
+              word_count: content.split(' ').length
+            }
+          });
 
-        // If RPC doesn't work, try direct insert with proper typing
         if (insertError) {
-          console.log('RPC failed, using direct insert approach');
-          const insertData = {
-            client_id: clientId,
-            content: content,
-            content_type: contentType,
-            source_threat: selectedThreat,
-            generation_source: 'threat_driven',
-            is_live: true
-          };
-
-          // Use any type to bypass TypeScript checking for new table
-          const { error: directError } = await (supabase as any)
-            .from('generated_content')
-            .insert(insertData);
-
-          if (directError) {
-            console.error('Insert error:', directError);
-          }
+          console.error('Failed to log content generation:', insertError);
         }
 
         const newCount = contentCount + 1;

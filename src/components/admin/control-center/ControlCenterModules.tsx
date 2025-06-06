@@ -1,13 +1,14 @@
 
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Shield, Target, AlertTriangle, Zap, Brain, Settings } from "lucide-react";
+import { Shield, Target, AlertTriangle, Zap, Brain, Settings, FileText } from "lucide-react";
 import EntityContextPanel from './EntityContextPanel';
 import QuickCommandConsole from './QuickCommandConsole';
 import ThreatTracker from './ThreatTracker';
 import ServiceOrchestrator from './ServiceOrchestrator';
 import SystemDiagnostics from './SystemDiagnostics';
 import StrategyBrainMetrics from './StrategyBrainMetrics';
+import ContentGenerationModule from './ContentGenerationModule';
 
 interface ControlCenterModulesProps {
   activeModule: string;
@@ -42,6 +43,10 @@ const ControlCenterModules: React.FC<ControlCenterModulesProps> = ({
         <TabsTrigger value="execution-plan" className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black">
           <Target className="h-4 w-4 mr-2" />
           Client Execution
+        </TabsTrigger>
+        <TabsTrigger value="content-generation" className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black">
+          <FileText className="h-4 w-4 mr-2" />
+          Content Engine
         </TabsTrigger>
         <TabsTrigger value="threats" className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black">
           <AlertTriangle className="h-4 w-4 mr-2" />
@@ -119,6 +124,13 @@ const ControlCenterModules: React.FC<ControlCenterModulesProps> = ({
             <p className="text-corporate-lightGray">Please select an entity to view the execution plan</p>
           </div>
         )}
+      </TabsContent>
+
+      <TabsContent value="content-generation" className="space-y-6">
+        <ContentGenerationModule 
+          selectedEntity={selectedEntity}
+          serviceStatus={serviceStatus}
+        />
       </TabsContent>
 
       <TabsContent value="threats" className="space-y-6">
