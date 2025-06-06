@@ -1,4 +1,3 @@
-
 import { HomeIcon, Users, Calendar, Settings, BarChart3, Shield, Eye, Brain, Zap, Search, AlertTriangle, FileText, UserPlus, Building, Radar, MessageSquare, Lock, Activity, Gavel, Database, Globe, Target, TrendingUp, Cpu, BookOpen, Phone, HelpCircle, DollarSign, CreditCard, UserCheck, Clock, Briefcase, Headphones, Mail, FileImage, Megaphone, Lightbulb, CheckSquare, Layers, Command, Bot, Network, Gauge } from "lucide-react";
 
 import Index from "./pages/Index";
@@ -23,7 +22,7 @@ import Reports from "./pages/Reports";
 import ReportsPage from "./pages/ReportsPage";
 import Clients from "./pages/Clients";
 import ClientsPage from "./pages/ClientsPage";
-import Settings from "./pages/Settings";
+import SettingsPage from "./pages/Settings";
 import Contact from "./pages/Contact";
 import Terms from "./pages/Terms";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
@@ -112,9 +111,9 @@ import OffensiveOperationsPage from "./pages/intelligence/OffensiveOperations";
 export const navItems = [
   {
     title: "Home",
-    to: "/",
+    to: "/home",
     icon: <HomeIcon className="h-4 w-4" />,
-    page: <Index />,
+    page: <HomePage />,
   },
   {
     title: "About",
@@ -137,13 +136,13 @@ export const navItems = [
   {
     title: "Features",
     to: "/features",
-    icon: <CheckSquare className="h-4 w-4" />,
+    icon: <Cpu className="h-4 w-4" />,
     page: <Features />,
   },
   {
-    title: "How It Works",
+    title: "How it Works",
     to: "/how-it-works",
-    icon: <HelpCircle className="h-4 w-4" />,
+    icon: <Lightbulb className="h-4 w-4" />,
     page: <HowItWorksPage />,
   },
   {
@@ -154,38 +153,38 @@ export const navItems = [
   },
   {
     title: "Admin Dashboard",
-    to: "/admin",
-    icon: <Shield className="h-4 w-4" />,
+    to: "/admin/dashboard",
+    icon: <Command className="h-4 w-4" />,
     page: <AdminDashboard />,
   },
   {
     title: "Authentication",
-    to: "/auth",
-    icon: <UserCheck className="h-4 w-4" />,
+    to: "/authentication",
+    icon: <Lock className="h-4 w-4" />,
     page: <Authentication />,
   },
   {
     title: "Admin Login",
-    to: "/admin-login",
-    icon: <Lock className="h-4 w-4" />,
+    to: "/admin/login",
+    icon: <UserCheck className="h-4 w-4" />,
     page: <AdminLogin />,
   },
   {
-    title: "Scan",
+    title: "Free Scan",
     to: "/scan",
     icon: <Search className="h-4 w-4" />,
     page: <ScanPage />,
   },
   {
     title: "Free Scan Results",
-    to: "/free-scan-results",
-    icon: <FileText className="h-4 w-4" />,
+    to: "/scan-results",
+    icon: <AlertTriangle className="h-4 w-4" />,
     page: <FreeScanResults />,
   },
   {
     title: "Reputation Scan",
     to: "/reputation-scan",
-    icon: <Target className="h-4 w-4" />,
+    icon: <Eye className="h-4 w-4" />,
     page: <ReputationScanPage />,
   },
   {
@@ -203,13 +202,13 @@ export const navItems = [
   {
     title: "Monitor",
     to: "/monitor",
-    icon: <Eye className="h-4 w-4" />,
+    icon: <Activity className="h-4 w-4" />,
     page: <Monitor />,
   },
   {
     title: "Monitoring",
     to: "/monitoring",
-    icon: <Activity className="h-4 w-4" />,
+    icon: <Clock className="h-4 w-4" />,
     page: <MonitoringPage />,
   },
   {
@@ -233,23 +232,23 @@ export const navItems = [
   {
     title: "Clients Page",
     to: "/clients-page",
-    icon: <Building className="h-4 w-4" />,
+    icon: <UserPlus className="h-4 w-4" />,
     page: <ClientsPage />,
   },
   {
     title: "Settings",
     to: "/settings",
     icon: <Settings className="h-4 w-4" />,
-    page: <Settings />,
+    page: <SettingsPage />,
   },
   {
-    title: "Contact Form",
-    to: "/contact-form",
+    title: "Contact Us",
+    to: "/contact-us",
     icon: <Mail className="h-4 w-4" />,
     page: <Contact />,
   },
   {
-    title: "Terms",
+    title: "Terms of Service",
     to: "/terms",
     icon: <FileText className="h-4 w-4" />,
     page: <Terms />,
@@ -269,7 +268,7 @@ export const navItems = [
   {
     title: "Simon Lindsay",
     to: "/simon-lindsay",
-    icon: <Users className="h-4 w-4" />,
+    icon: <UserPlus className="h-4 w-4" />,
     page: <SimonLindsayPage />,
   },
   {
@@ -281,25 +280,25 @@ export const navItems = [
   {
     title: "Blog",
     to: "/blog",
-    icon: <BookOpen className="h-4 w-4" />,
+    icon: <Megaphone className="h-4 w-4" />,
     page: <BlogPage />,
   },
   {
     title: "Blog Post",
-    to: "/blog/:slug",
+    to: "/blog-post",
     icon: <FileText className="h-4 w-4" />,
     page: <BlogPostPage />,
   },
   {
     title: "Blog Admin",
     to: "/blog-admin",
-    icon: <Settings className="h-4 w-4" />,
+    icon: <Command className="h-4 w-4" />,
     page: <BlogAdminPage />,
   },
   {
     title: "Client Intake",
     to: "/client-intake",
-    icon: <UserPlus className="h-4 w-4" />,
+    icon: <FileText className="h-4 w-4" />,
     page: <ClientIntakePage />,
   },
   {
@@ -327,21 +326,21 @@ export const navItems = [
     page: <PaymentPage />,
   },
   {
-    title: "Contact Form Page",
-    to: "/contact-form-page",
+    title: "Contact Form",
+    to: "/contact-form",
     icon: <Mail className="h-4 w-4" />,
     page: <ContactFormPage />,
   },
   {
     title: "Clean Launch",
     to: "/clean-launch",
-    icon: <Lightbulb className="h-4 w-4" />,
+    icon: <Zap className="h-4 w-4" />,
     page: <CleanLaunchPage />,
   },
   {
-    title: "Clean Launch Alt",
-    to: "/clean-launch-alt",
-    icon: <Globe className="h-4 w-4" />,
+    title: "Clean Launch Page",
+    to: "/clean-launch-page",
+    icon: <Zap className="h-4 w-4" />,
     page: <CleanLaunch />,
   },
   {
@@ -377,13 +376,13 @@ export const navItems = [
   {
     title: "Outreach Pipeline",
     to: "/outreach-pipeline",
-    icon: <Megaphone className="h-4 w-4" />,
+    icon: <TrendingUp className="h-4 w-4" />,
     page: <OutreachPipelinePage />,
   },
   {
     title: "RSI",
     to: "/rsi",
-    icon: <Shield className="h-4 w-4" />,
+    icon: <TrendingUp className="h-4 w-4" />,
     page: <RSI />,
   },
   {
@@ -395,37 +394,37 @@ export const navItems = [
   {
     title: "Graveyard",
     to: "/graveyard",
-    icon: <Eye className="h-4 w-4" />,
+    icon: <Gavel className="h-4 w-4" />,
     page: <GraveyardPage />,
   },
   {
     title: "Sovra",
     to: "/sovra",
-    icon: <Zap className="h-4 w-4" />,
+    icon: <Globe className="h-4 w-4" />,
     page: <SovraPage />,
   },
   {
     title: "Emergency Strike",
     to: "/emergency-strike",
-    icon: <AlertTriangle className="h-4 w-4" />,
+    icon: <Zap className="h-4 w-4" />,
     page: <EmergencyStrikePage />,
   },
   {
     title: "Strike Management",
     to: "/strike-management",
-    icon: <Gavel className="h-4 w-4" />,
+    icon: <Target className="h-4 w-4" />,
     page: <StrikeManagementPage />,
   },
   {
     title: "Employee Brand Risk",
     to: "/employee-brand-risk",
-    icon: <Briefcase className="h-4 w-4" />,
+    icon: <AlertTriangle className="h-4 w-4" />,
     page: <EmployeeBrandRiskPage />,
   },
   {
     title: "SEO Center",
     to: "/seo-center",
-    icon: <TrendingUp className="h-4 w-4" />,
+    icon: <Search className="h-4 w-4" />,
     page: <SeoCenterPage />,
   },
   {
@@ -435,15 +434,15 @@ export const navItems = [
     page: <OperatorConsole />,
   },
   {
-    title: "ARIA Command",
+    title: "Aria Command",
     to: "/aria-command",
-    icon: <Bot className="h-4 w-4" />,
+    icon: <Command className="h-4 w-4" />,
     page: <AriaCommand />,
   },
   {
     title: "HyperCore",
     to: "/hypercore",
-    icon: <Cpu className="h-4 w-4" />,
+    icon: <Network className="h-4 w-4" />,
     page: <HyperCorePage />,
   },
   {
@@ -461,7 +460,7 @@ export const navItems = [
   {
     title: "AI Scraping",
     to: "/ai-scraping",
-    icon: <Network className="h-4 w-4" />,
+    icon: <Zap className="h-4 w-4" />,
     page: <AiScrapingPage />,
   },
   {
@@ -473,14 +472,20 @@ export const navItems = [
   {
     title: "Intelligence Workbench",
     to: "/intelligence-workbench",
-    icon: <Layers className="h-4 w-4" />,
+    icon: <Brain className="h-4 w-4" />,
     page: <IntelligenceWorkbench />,
   },
   {
     title: "Offensive Operations",
     to: "/offensive-operations",
-    icon: <Target className="h-4 w-4" />,
+    icon: <Gavel className="h-4 w-4" />,
     page: <OffensiveOperations />,
+  },
+  {
+    title: "Not Found",
+    to: "/404",
+    icon: <HelpCircle className="h-4 w-4" />,
+    page: <NotFound />,
   },
   {
     title: "Executive Reports",
@@ -491,7 +496,7 @@ export const navItems = [
   {
     title: "System Check",
     to: "/system-check",
-    icon: <Settings className="h-4 w-4" />,
+    icon: <CheckSquare className="h-4 w-4" />,
     page: <SystemCheckPage />,
   },
   {
@@ -500,7 +505,7 @@ export const navItems = [
     icon: <CheckSquare className="h-4 w-4" />,
     page: <QATestPage />,
   },
-  {
+    {
     title: "Client Onboarding",
     to: "/client-onboarding",
     icon: <UserPlus className="h-4 w-4" />,
@@ -512,28 +517,27 @@ export const navItems = [
     icon: <Users className="h-4 w-4" />,
     page: <UsersPage />,
   },
-
-  // Admin routes
+  // Admin Routes
   {
     title: "Admin Dashboard",
-    to: "/admin/dashboard",
-    icon: <Shield className="h-4 w-4" />,
+    to: "/admin/admin-dashboard",
+    icon: <Command className="h-4 w-4" />,
     page: <AdminDashboardPage />,
   },
   {
     title: "Client Management",
     to: "/admin/client-management",
-    icon: <Users className="h-4 w-4" />,
+    icon: <Briefcase className="h-4 w-4" />,
     page: <ClientManagementPage />,
   },
   {
-    title: "Admin Clients",
+    title: "Clients Admin",
     to: "/admin/clients",
-    icon: <Building className="h-4 w-4" />,
+    icon: <Headphones className="h-4 w-4" />,
     page: <ClientsPageAdmin />,
   },
   {
-    title: "Admin Settings",
+    title: "Settings Admin",
     to: "/admin/settings",
     icon: <Settings className="h-4 w-4" />,
     page: <SettingsPageAdmin />,
@@ -541,7 +545,7 @@ export const navItems = [
   {
     title: "System Settings",
     to: "/admin/system-settings",
-    icon: <Cpu className="h-4 w-4" />,
+    icon: <Layers className="h-4 w-4" />,
     page: <SystemSettingsPage />,
   },
   {
@@ -553,7 +557,7 @@ export const navItems = [
   {
     title: "System Audit",
     to: "/admin/system-audit",
-    icon: <Activity className="h-4 w-4" />,
+    icon: <FileText className="h-4 w-4" />,
     page: <SystemAuditPage />,
   },
   {
@@ -571,7 +575,7 @@ export const navItems = [
   {
     title: "Strategy Brain Stage 3",
     to: "/admin/strategy-brain-stage3",
-    icon: <Layers className="h-4 w-4" />,
+    icon: <Brain className="h-4 w-4" />,
     page: <StrategyBrainStage3Page />,
   },
   {
@@ -589,133 +593,123 @@ export const navItems = [
   {
     title: "Keyword to Article System",
     to: "/admin/keyword-to-article-system",
-    icon: <Target className="h-4 w-4" />,
+    icon: <FileText className="h-4 w-4" />,
     page: <KeywordToArticleSystemPage />,
+  },
+  {
+    title: "Genesis Sentinel Page",
+    to: "/admin/genesis-sentinel-page",
+    icon: <Shield className="h-4 w-4" />,
+    page: <GenesisSentinelPage />,
   },
   {
     title: "Genesis Sentinel",
     to: "/admin/genesis-sentinel",
-    icon: <Eye className="h-4 w-4" />,
-    page: <GenesisSentinelPage />,
-  },
-  {
-    title: "Genesis Sentinel Alt",
-    to: "/admin/genesis-sentinel-alt",
     icon: <Shield className="h-4 w-4" />,
     page: <GenesisSentinel />,
   },
   {
-    title: "Sentinel",
-    to: "/admin/sentinel",
-    icon: <Eye className="h-4 w-4" />,
+    title: "Sentinel Page",
+    to: "/admin/sentinel-page",
+    icon: <Shield className="h-4 w-4" />,
     page: <SentinelPage />,
   },
   {
-    title: "Sentinel Operator",
-    to: "/admin/sentinel-operator",
-    icon: <Command className="h-4 w-4" />,
+    title: "Sentinel Operator Page",
+    to: "/admin/sentinel-operator-page",
+    icon: <Shield className="h-4 w-4" />,
     page: <SentinelOperatorPage />,
   },
-  {
-    title: "Intelligence Core",
-    to: "/admin/intelligence-core",
+   {
+    title: "Intelligence Core Page",
+    to: "/admin/intelligence-core-page",
     icon: <Brain className="h-4 w-4" />,
     page: <IntelligenceCorePage />,
   },
   {
-    title: "Control Center",
-    to: "/admin/control-center",
+    title: "Control Center Page",
+    to: "/admin/control-center-page",
     icon: <Command className="h-4 w-4" />,
     page: <ControlCenterPage />,
   },
   {
-    title: "Legal Ops",
-    to: "/admin/legal-ops",
+    title: "Legal Ops Page",
+    to: "/admin/legal-ops-page",
     icon: <Gavel className="h-4 w-4" />,
     page: <LegalOpsPage />,
   },
   {
-    title: "Anubis Memory",
-    to: "/admin/anubis-memory",
+    title: "Anubis Memory Page",
+    to: "/admin/anubis-memory-page",
     icon: <Database className="h-4 w-4" />,
     page: <AnubisMemoryPage />,
   },
-
-  // Dashboard routes
+  // Dashboard Routes
   {
-    title: "Dashboard Main",
-    to: "/dashboard/main",
-    icon: <BarChart3 className="h-4 w-4" />,
+    title: "Dashboard Page",
+    to: "/dashboard/dashboard-page",
+    icon: <HomeIcon className="h-4 w-4" />,
     page: <DashboardPage />,
   },
   {
-    title: "ARIA Ingest",
-    to: "/dashboard/aria-ingest",
-    icon: <Database className="h-4 w-4" />,
+    title: "Aria Ingest Page",
+    to: "/dashboard/aria-ingest-page",
+    icon: <Zap className="h-4 w-4" />,
     page: <AriaIngestPage />,
   },
   {
-    title: "Analytics",
-    to: "/dashboard/analytics",
+    title: "Analytics Page",
+    to: "/dashboard/analytics-page",
     icon: <BarChart3 className="h-4 w-4" />,
     page: <AnalyticsPage />,
   },
   {
-    title: "Command Center",
-    to: "/dashboard/command-center",
+    title: "Command Center Page",
+    to: "/dashboard/command-center-page",
     icon: <Command className="h-4 w-4" />,
     page: <CommandCenterPage />,
   },
   {
-    title: "Intelligence",
-    to: "/dashboard/intelligence",
+    title: "Intelligence Page",
+    to: "/dashboard/intelligence-page",
     icon: <Brain className="h-4 w-4" />,
     page: <IntelligencePage />,
   },
   {
-    title: "Threat Response",
-    to: "/dashboard/threat-response",
+    title: "Threat Response Page",
+    to: "/dashboard/threat-response-page",
     icon: <AlertTriangle className="h-4 w-4" />,
     page: <ThreatResponsePage />,
   },
   {
-    title: "Scan Submissions",
-    to: "/dashboard/scan-submissions",
-    icon: <Search className="h-4 w-4" />,
+    title: "Scan Submissions Page",
+    to: "/dashboard/scan-submissions-page",
+    icon: <FileText className="h-4 w-4" />,
     page: <ScanSubmissionsPage />,
   },
   {
-    title: "Mentions",
-    to: "/dashboard/mentions",
+    title: "Mentions Page",
+    to: "/dashboard/mentions-page",
     icon: <MessageSquare className="h-4 w-4" />,
     page: <MentionsPage />,
   },
   {
-    title: "Radar",
-    to: "/dashboard/radar",
+    title: "Radar Page",
+    to: "/dashboard/radar-page",
     icon: <Radar className="h-4 w-4" />,
     page: <RadarPage />,
   },
-
-  // Intelligence routes
+  // Intelligence Routes
   {
-    title: "Intelligence Workbench Alt",
-    to: "/intelligence/workbench",
-    icon: <Layers className="h-4 w-4" />,
+    title: "Intelligence Workbench Page",
+    to: "/intelligence/intelligence-workbench-page",
+    icon: <Brain className="h-4 w-4" />,
     page: <IntelligenceWorkbenchPage />,
   },
   {
-    title: "Offensive Operations Alt",
-    to: "/intelligence/offensive-operations",
-    icon: <Target className="h-4 w-4" />,
+    title: "Offensive Operations Page",
+    to: "/intelligence/offensive-operations-page",
+    icon: <Gavel className="h-4 w-4" />,
     page: <OffensiveOperationsPage />,
-  },
-
-  // 404 route should be last
-  {
-    title: "Not Found",
-    to: "*",
-    icon: <AlertTriangle className="h-4 w-4" />,
-    page: <NotFound />,
   },
 ];
