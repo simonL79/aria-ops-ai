@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HelmetProvider } from 'react-helmet-async';
+import { AuthProvider } from '@/hooks/useAuth';
 import HomePage from "./pages/HomePage";
 import "./App.css";
 
@@ -15,15 +16,17 @@ const App = () => {
   return (
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <Toaster />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/index" element={<HomePage />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/index" element={<HomePage />} />
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
+        </AuthProvider>
       </QueryClientProvider>
     </HelmetProvider>
   );
