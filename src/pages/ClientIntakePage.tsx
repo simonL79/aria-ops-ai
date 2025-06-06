@@ -13,10 +13,10 @@ import { Shield, Building, User, AlertTriangle } from 'lucide-react';
 
 const ClientIntakePage = () => {
   const [formData, setFormData] = useState({
-    company_name: '',
-    contact_name: '',
+    full_name: '',
     email: '',
     phone: '',
+    brand_or_alias: '',
     industry: '',
     company_size: '',
     threat_description: '',
@@ -25,7 +25,7 @@ const ClientIntakePage = () => {
     urgency_level: '',
     budget_range: '',
     preferred_contact_method: 'email',
-    additional_notes: ''
+    additional_information: ''
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -52,18 +52,24 @@ const ClientIntakePage = () => {
 
     try {
       // Basic validation
-      if (!formData.company_name || !formData.contact_name || !formData.email) {
+      if (!formData.full_name || !formData.email) {
         toast.error('Please fill in all required fields');
         return;
       }
 
-      // Submit to Supabase
+      // Submit to Supabase with correct field mapping
       const { error } = await supabase
         .from('client_intake_submissions')
         .insert([{
-          ...formData,
-          concern_areas: formData.concern_areas.join(','),
-          submitted_at: new Date().toISOString()
+          full_name: formData.full_name,
+          email: formData.email,
+          brand_or_alias: formData.brand_or_alias,
+          concern_areas: formData.concern_areas, // This is already an array
+          risk_tolerance: formData.risk_tolerance,
+          urgency_level: formData.urgency_level,
+          additional_information: formData.additional_information,
+          consent_to_process: true, // Required field
+          created_at: new Date().toISOString()
         }]);
 
       if (error) {
@@ -76,10 +82,10 @@ const ClientIntakePage = () => {
       
       // Reset form
       setFormData({
-        company_name: '',
-        contact_name: '',
+        full_name: '',
         email: '',
         phone: '',
+        brand_or_alias: '',
         industry: '',
         company_size: '',
         threat_description: '',
@@ -88,7 +94,7 @@ const ClientIntakePage = () => {
         urgency_level: '',
         budget_range: '',
         preferred_contact_method: 'email',
-        additional_notes: ''
+        additional_information: ''
       });
 
     } catch (error) {
@@ -118,44 +124,14 @@ const ClientIntakePage = () => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Company Information */}
+              {/* Basic Information */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="company_name" className="text-white">Company Name *</Label>
+                  <Label htmlFor="full_name" className="text-white">Full Name *</Label>
                   <Input
-                    id="company_name"
-                    value={formData.company_name}
-                    onChange={(e) => handleInputChange('company_name', e.target.value)}
-                    className="bg-corporate-darkTertiary border-corporate-border text-white"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="industry" className="text-white">Industry</Label>
-                  <Select value={formData.industry} onValueChange={(value) => handleInputChange('industry', value)}>
-                    <SelectTrigger className="bg-corporate-darkTertiary border-corporate-border text-white">
-                      <SelectValue placeholder="Select industry" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="technology">Technology</SelectItem>
-                      <SelectItem value="finance">Finance</SelectItem>
-                      <SelectItem value="healthcare">Healthcare</SelectItem>
-                      <SelectItem value="retail">Retail</SelectItem>
-                      <SelectItem value="manufacturing">Manufacturing</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              {/* Contact Information */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="contact_name" className="text-white">Contact Name *</Label>
-                  <Input
-                    id="contact_name"
-                    value={formData.contact_name}
-                    onChange={(e) => handleInputChange('contact_name', e.target.value)}
+                    id="full_name"
+                    value={formData.full_name}
+                    onChange={(e) => handleInputChange('full_name', e.target.value)}
                     className="bg-corporate-darkTertiary border-corporate-border text-white"
                     required
                   />
@@ -169,6 +145,27 @@ const ClientIntakePage = () => {
                     onChange={(e) => handleInputChange('email', e.target.value)}
                     className="bg-corporate-darkTertiary border-corporate-border text-white"
                     required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="brand_or_alias" className="text-white">Brand/Company Name</Label>
+                  <Input
+                    id="brand_or_alias"
+                    value={formData.brand_or_alias}
+                    onChange={(e) => handleInputChange('brand_or_alias', e.target.value)}
+                    className="bg-corporate-darkTertiary border-corporate-border text-white"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="phone" className="text-white">Phone</Label>
+                  <Input
+                    id="phone"
+                    value={formData.phone}
+                    onChange={(e) => handleInputChange('phone', e.target.value)}
+                    className="bg-corporate-darkTertiary border-corporate-border text-white"
                   />
                 </div>
               </div>
@@ -243,13 +240,13 @@ const ClientIntakePage = () => {
                 </div>
               </div>
 
-              {/* Additional Notes */}
+              {/* Additional Information */}
               <div>
-                <Label htmlFor="additional_notes" className="text-white">Additional Notes</Label>
+                <Label htmlFor="additional_information" className="text-white">Additional Information</Label>
                 <Textarea
-                  id="additional_notes"
-                  value={formData.additional_notes}
-                  onChange={(e) => handleInputChange('additional_notes', e.target.value)}
+                  id="additional_information"
+                  value={formData.additional_information}
+                  onChange={(e) => handleInputChange('additional_information', e.target.value)}
                   className="bg-corporate-darkTertiary border-corporate-border text-white"
                   placeholder="Any additional information or special requirements..."
                   rows={3}
