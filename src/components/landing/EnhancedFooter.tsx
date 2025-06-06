@@ -19,9 +19,15 @@ const EnhancedFooter = () => {
   };
 
   const scrollToServices = () => {
-    const servicesElement = document.getElementById('services');
-    if (servicesElement) {
-      servicesElement.scrollIntoView({ behavior: 'smooth' });
+    // Check if we're on the home page
+    if (window.location.pathname === '/') {
+      const servicesElement = document.getElementById('services');
+      if (servicesElement) {
+        servicesElement.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      // Navigate to home page with services hash
+      navigate('/#services');
     }
   };
 
