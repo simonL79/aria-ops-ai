@@ -12,6 +12,7 @@ import SmartIntakePage from "./pages/SmartIntakePage";
 import ContentGenerationPage from "./pages/ContentGenerationPage";
 import KeywordToArticleSystemPage from "./pages/admin/KeywordToArticleSystemPage";
 import ControlCenterPage from "./pages/admin/ControlCenterPage";
+import ClientOnboardingPage from "./pages/ClientOnboardingPage";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,7 @@ const App = () => (
             <Route path="/content-generation" element={<ContentGenerationPage />} />
             <Route path="/admin/keyword-to-article" element={<KeywordToArticleSystemPage />} />
             <Route path="/admin/control-center" element={<ControlCenterPage />} />
+            <Route path="/admin/client-onboarding" element={<ClientOnboardingPage />} />
             
             {/* Dynamic Routes */}
             {navItems.map(({ to, page }) => (
