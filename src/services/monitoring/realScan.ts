@@ -13,17 +13,19 @@ export interface RealScanResult {
   detected_entities: string[];
   source_type: string;
   threat_type: string;
-  status: string;
+  status: 'new' | 'read' | 'actioned' | 'resolved';
   potential_reach: number;
   source_credibility_score: number;
   media_is_ai_generated: boolean;
   ai_detection_confidence: number;
+  entity_name?: string; // Add this to match LiveScanResult
 }
 
 export interface RealScanOptions {
   fullScan?: boolean;
   targetEntity?: string | null;
   source: string;
+  scan_depth?: string; // Add this property
 }
 
 /**
@@ -103,11 +105,12 @@ export const performRealScan = async (options: RealScanOptions): Promise<RealSca
             detected_entities: item.detected_entities || [options.targetEntity].filter(Boolean),
             source_type: 'live_osint',
             threat_type: 'live_intelligence',
-            status: 'new',
+            status: 'new' as const,
             potential_reach: item.potential_reach || 1000,
             source_credibility_score: item.source_credibility_score || 0.7,
             media_is_ai_generated: false,
-            ai_detection_confidence: 0
+            ai_detection_confidence: 0,
+            entity_name: options.targetEntity || ''
           })));
         } else if (data.content) {
           // Single result format
@@ -122,11 +125,12 @@ export const performRealScan = async (options: RealScanOptions): Promise<RealSca
             detected_entities: data.detected_entities || [options.targetEntity].filter(Boolean),
             source_type: 'live_osint',
             threat_type: 'live_intelligence',
-            status: 'new',
+            status: 'new' as const,
             potential_reach: data.potential_reach || 1000,
             source_credibility_score: 0.7,
             media_is_ai_generated: false,
-            ai_detection_confidence: 0
+            ai_detection_confidence: 0,
+            entity_name: options.targetEntity || ''
           });
         }
         
@@ -221,11 +225,12 @@ const attemptDirectRSSParsing = async (targetEntity?: string | null): Promise<Re
         detected_entities: [targetEntity],
         source_type: 'live_osint',
         threat_type: 'live_intelligence',
-        status: 'new',
+        status: 'new' as const,
         potential_reach: 500,
         source_credibility_score: 0.8,
         media_is_ai_generated: false,
-        ai_detection_confidence: 0
+        ai_detection_confidence: 0,
+        entity_name: targetEntity
       };
       
       results.push(liveResult);
