@@ -150,7 +150,7 @@ const AdminDashboardPage = () => {
                 </div>
                 <div className="flex items-center justify-between">
                   <span>Response Time</span>
-                  <span className="text-sm text-muted-foreground">< 500ms</span>
+                  <span className="text-sm text-muted-foreground">{'< 500ms'}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span>Models Loaded</span>
