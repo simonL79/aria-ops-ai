@@ -8,7 +8,7 @@ const PricingPage = () => {
   const plans = [
     {
       name: "Individual",
-      price: "£2,500",
+      price: "£97",
       period: "/month",
       description: "Personal reputation monitoring",
       features: [
@@ -23,8 +23,8 @@ const PricingPage = () => {
       popular: false
     },
     {
-      name: "Executive",
-      price: "£7,500",
+      name: "PRO",
+      price: "£297",
       period: "/month", 
       description: "Executive protection suite",
       features: [
