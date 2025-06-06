@@ -12,6 +12,14 @@ import BlogPage from "./pages/BlogPage";
 import ContactPage from "./pages/ContactPage";
 import PricingPage from "./pages/PricingPage";
 import SimonLindsayPage from "./pages/SimonLindsayPage";
+import AdminLogin from "./pages/AdminLogin";
+import Authentication from "./pages/Authentication";
+import RSI from "./pages/RSI";
+import ClientOnboardingPage from "./pages/ClientOnboardingPage";
+import AdminGuard from "@/components/auth/AdminGuard";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import AdminDashboard from "@/components/admin/AdminDashboard";
+import DashboardLayout from "@/components/layout/DashboardLayout";
 import "./App.css";
 
 const queryClient = new QueryClient();
@@ -27,6 +35,7 @@ const App = () => {
             <Toaster />
             <BrowserRouter>
               <Routes>
+                {/* Public Routes */}
                 <Route path="/" element={<HomePage />} />
                 <Route path="/index" element={<HomePage />} />
                 <Route path="/about" element={<AboutPage />} />
@@ -35,6 +44,33 @@ const App = () => {
                 <Route path="/contact" element={<ContactPage />} />
                 <Route path="/pricing" element={<PricingPage />} />
                 <Route path="/simon-lindsay" element={<SimonLindsayPage />} />
+                
+                {/* Authentication Routes */}
+                <Route path="/auth" element={<Authentication />} />
+                <Route path="/admin-login" element={<AdminLogin />} />
+                
+                {/* Protected User Routes */}
+                <Route path="/dashboard" element={
+                  <ProtectedRoute>
+                    <RSI />
+                  </ProtectedRoute>
+                } />
+                
+                {/* Admin Protected Routes */}
+                <Route path="/admin/*" element={
+                  <AdminGuard>
+                    <DashboardLayout>
+                      <AdminDashboard />
+                    </DashboardLayout>
+                  </AdminGuard>
+                } />
+                
+                {/* Client Onboarding - Admin Only */}
+                <Route path="/client-onboarding" element={
+                  <AdminGuard>
+                    <ClientOnboardingPage />
+                  </AdminGuard>
+                } />
               </Routes>
             </BrowserRouter>
           </TooltipProvider>

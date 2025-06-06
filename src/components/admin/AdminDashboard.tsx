@@ -10,6 +10,9 @@ import ControlCenterPage from '@/pages/admin/ControlCenterPage';
 import KeywordToArticleSystemPage from '@/pages/admin/KeywordToArticleSystemPage';
 import StrategyBrainTestPage from '@/pages/admin/StrategyBrainTestPage';
 import StrategyBrainStage3TestPage from '@/pages/admin/StrategyBrainStage3TestPage';
+import ClientManagementPage from '@/pages/admin/ClientManagementPage';
+import SystemSettingsPage from '@/pages/admin/SystemSettingsPage';
+import ClientOnboardingPage from '@/pages/ClientOnboardingPage';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -21,17 +24,26 @@ const AdminDashboard = () => {
 
   return (
     <Routes>
-      {/* Keyword to Article System Route */}
-      <Route path="/keyword-to-article" element={<KeywordToArticleSystemPage />} />
-      
       {/* Control Center Route */}
       <Route path="/control-center" element={<ControlCenterPage />} />
+      
+      {/* Client Onboarding Route */}
+      <Route path="/client-onboarding" element={<ClientOnboardingPage />} />
+      
+      {/* Keyword to Article System Route */}
+      <Route path="/keyword-to-article" element={<KeywordToArticleSystemPage />} />
       
       {/* Strategy Brain Test Route */}
       <Route path="/strategy-brain-test" element={<StrategyBrainTestPage />} />
       
       {/* Strategy Brain Stage 3 Test Route */}
       <Route path="/strategy-brain-stage3" element={<StrategyBrainStage3TestPage />} />
+      
+      {/* Client Management Route */}
+      <Route path="/clients" element={<ClientManagementPage />} />
+      
+      {/* System Settings Route */}
+      <Route path="/settings" element={<SystemSettingsPage />} />
       
       {/* Default Route - Redirect to Control Center */}
       <Route path="*" element={<ControlCenterPage />} />
