@@ -8,6 +8,7 @@ import { navItems } from "./nav-items";
 import Index from "./pages/Index";
 import HomePage from "./pages/HomePage";
 import SecureClientIntakePage from "./pages/SecureClientIntakePage";
+import SmartIntakePage from "./pages/SmartIntakePage";
 import KeywordToArticleSystemPage from "./pages/admin/KeywordToArticleSystemPage";
 
 const queryClient = new QueryClient();
@@ -25,6 +26,7 @@ const App = () => (
             
             {/* Admin/Backend Routes - Safe to modify */}
             <Route path="/secure-intake" element={<SecureClientIntakePage />} />
+            <Route path="/smart-intake" element={<SmartIntakePage />} />
             <Route path="/admin/keyword-to-article" element={<KeywordToArticleSystemPage />} />
             
             {/* Dynamic Routes */}
