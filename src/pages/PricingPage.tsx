@@ -100,7 +100,7 @@ const PricingPage = () => {
                     ))}
                   </ul>
                   
-                  <Link to="/contact-form">
+                  <Link to="/contact">
                     <button 
                       className={`w-full py-3 px-6 rounded-lg font-semibold transition-colors ${
                         plan.popular 
@@ -119,7 +119,7 @@ const PricingPage = () => {
               <p className="text-gray-300 mb-4">
                 Need a custom solution? We offer bespoke packages for unique requirements.
               </p>
-              <Link to="/contact-form">
+              <Link to="/contact">
                 <button className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-lg font-semibold transition-colors">
                   Contact Us
                 </button>
