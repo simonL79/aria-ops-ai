@@ -2841,6 +2841,50 @@ export type Database = {
         }
         Relationships: []
       }
+      generated_content: {
+        Row: {
+          client_id: string | null
+          content: string
+          content_type: string
+          created_at: string | null
+          generation_source: string | null
+          id: string
+          is_live: boolean | null
+          source_threat: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          client_id?: string | null
+          content: string
+          content_type: string
+          created_at?: string | null
+          generation_source?: string | null
+          id?: string
+          is_live?: boolean | null
+          source_threat?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          client_id?: string | null
+          content?: string
+          content_type?: string
+          created_at?: string | null
+          generation_source?: string | null
+          id?: string
+          is_live?: boolean | null
+          source_threat?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "generated_content_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       generated_reports: {
         Row: {
           created_at: string | null
