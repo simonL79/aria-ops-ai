@@ -18,7 +18,7 @@ export interface RealScanResult {
   source_credibility_score: number;
   media_is_ai_generated: boolean;
   ai_detection_confidence: number;
-  entity_name?: string; // Add this to match LiveScanResult
+  entity_name: string; // Make this required to match LiveScanResult
 }
 
 export interface RealScanOptions {
@@ -110,7 +110,7 @@ export const performRealScan = async (options: RealScanOptions): Promise<RealSca
             source_credibility_score: item.source_credibility_score || 0.7,
             media_is_ai_generated: false,
             ai_detection_confidence: 0,
-            entity_name: options.targetEntity || ''
+            entity_name: options.targetEntity || 'Unknown Entity'
           })));
         } else if (data.content) {
           // Single result format
@@ -130,7 +130,7 @@ export const performRealScan = async (options: RealScanOptions): Promise<RealSca
             source_credibility_score: 0.7,
             media_is_ai_generated: false,
             ai_detection_confidence: 0,
-            entity_name: options.targetEntity || ''
+            entity_name: options.targetEntity || 'Unknown Entity'
           });
         }
         
@@ -164,7 +164,7 @@ export const performRealScan = async (options: RealScanOptions): Promise<RealSca
               detected_entities: result.detected_entities,
               source_type: 'live_osint',
               threat_type: 'live_intelligence',
-              entity_name: options.targetEntity,
+              entity_name: result.entity_name,
               status: 'new'
             }))
           );
