@@ -6,7 +6,7 @@ import { performRealScan } from "@/services/monitoring/realScan";
 
 /**
  * A.R.I.A™ Live OSINT Dashboard Scanner - 100% Real Data Only
- * Uses consolidated scanning logic
+ * Updated to ensure live data connection
  */
 export const useDashboardScan = (
   alerts: ContentAlert[],
@@ -23,16 +23,16 @@ export const useDashboardScan = (
     setIsScanning(true);
     
     try {
-      console.log('🔍 A.R.I.A™ OSINT: Starting live dashboard scan - NO SIMULATIONS');
-      toast.info("Starting live OSINT intelligence sweep...", {
-        description: "Crawling live Reddit RSS, News feeds, and Forums - NO MOCK DATA"
+      console.log('🔍 A.R.I.A™ OSINT: Starting enhanced live dashboard scan');
+      toast.info("Initiating live OSINT intelligence sweep...", {
+        description: "Connecting to live Reddit RSS, News feeds, and Discovery scanners"
       });
 
-      // Use consolidated real scanning
+      // Force live data scan with explicit targeting
       const liveResults = await performRealScan({
         fullScan: true,
         targetEntity: query || null,
-        source: 'dashboard_scan'
+        source: 'dashboard_scan_enhanced'
       });
       
       console.log(`🔍 A.R.I.A™ OSINT: ${liveResults.length} live intelligence items processed`);
@@ -47,12 +47,13 @@ export const useDashboardScan = (
           severity: result.severity,
           status: 'new' as const,
           threatType: 'live_intelligence',
-          confidenceScore: result.confidence_score,
+          confidenceScore: Math.round(result.confidence_score * 100),
           sourceType: 'live_osint',
           sentiment: result.sentiment > 0 ? 'positive' : result.sentiment < 0 ? 'negative' : 'neutral',
           potentialReach: result.potential_reach,
           detectedEntities: result.detected_entities,
-          url: result.url
+          url: result.url,
+          category: 'Live Intelligence'
         }));
 
         // Add new live results to existing alerts, avoiding duplicates
@@ -64,25 +65,25 @@ export const useDashboardScan = (
         if (uniqueNewAlerts.length > 0) {
           setAlerts([...uniqueNewAlerts, ...alerts]);
           toast.success(`Live OSINT scan completed`, {
-            description: `${uniqueNewAlerts.length} new verified live intelligence items - NO MOCK DATA`
+            description: `${uniqueNewAlerts.length} new verified live intelligence items found`
           });
         } else {
           toast.info("Live scan completed", {
-            description: "No new live intelligence items detected"
+            description: "Results received but duplicates filtered out"
           });
         }
       } else {
-        toast.info("Live scan completed", {
-          description: "No new intelligence items detected from live sources"
+        toast.warning("Live scan completed", {
+          description: "No new intelligence items detected from live sources - check edge function status"
         });
       }
 
-      console.log('✅ A.R.I.A™ OSINT: Live dashboard scan completed - 100% live data verified');
+      console.log('✅ A.R.I.A™ OSINT: Enhanced live dashboard scan completed');
 
     } catch (error) {
-      console.error('❌ Live dashboard scan failed:', error);
+      console.error('❌ Enhanced live dashboard scan failed:', error);
       toast.error("Live OSINT scan failed", {
-        description: "Error executing live intelligence gathering"
+        description: "Error connecting to live intelligence sources - check edge function configuration"
       });
     } finally {
       setIsScanning(false);
