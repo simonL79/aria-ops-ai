@@ -1,4 +1,4 @@
-
+import React, { useEffect } from 'react';
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -24,9 +24,25 @@ import "./App.css";
 
 const queryClient = new QueryClient();
 
-const App = () => {
-  console.log('App component rendering...');
-  
+function App() {
+  useEffect(() => {
+    const initializeSystem = async () => {
+      try {
+        console.log('🚀 Starting A.R.I.A/EX™ System...');
+        
+        // Initialize A.R.I.A™ Core with live data enforcement
+        await initializeARIACore();
+        
+        console.log('✅ A.R.I.A™ Core Services initialized successfully');
+        
+      } catch (error) {
+        console.error('❌ A.R.I.A™ System initialization failed:', error);
+      }
+    };
+    
+    initializeSystem();
+  }, []);
+
   return (
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
@@ -78,6 +94,6 @@ const App = () => {
       </QueryClientProvider>
     </HelmetProvider>
   );
-};
+}
 
 export default App;

@@ -1,33 +1,28 @@
 
-// Re-export all core services
-export { threatProcessor, AriaCoreThreatProcessor } from './threatProcessor';
-export { LiveDataEnforcer } from './liveDataEnforcer';
-export { ThreatIngestionService } from './threatIngestion';
+// A.R.I.A™ Core Services - Live Data Enforcement and System Compliance
 
-// Initialize core services
-export const initializeAriaCore = async () => {
+export { LiveDataEnforcer, type LiveDataCompliance } from './liveDataEnforcer';
+export { ARIASystemAudit, executeSystemAudit, type SystemAuditResult, type ComprehensiveAuditReport } from './systemAudit';
+
+/**
+ * Initialize A.R.I.A™ Core Services with mandatory live data compliance
+ */
+export const initializeARIACore = async (): Promise<void> => {
   console.log('🚀 Initializing A.R.I.A™ Core Services...');
   
   try {
-    // Import here to avoid circular dependency
+    // Validate live data compliance
     const { LiveDataEnforcer } = await import('./liveDataEnforcer');
+    const compliance = await LiveDataEnforcer.validateLiveDataCompliance();
     
-    // Enforce live data integrity
-    const isCompliant = await LiveDataEnforcer.enforceSystemWideLiveData();
-    
-    if (!isCompliant) {
-      console.warn('⚠️ Live data enforcement had issues, but continuing...');
+    if (!compliance.isCompliant) {
+      throw new Error(`A.R.I.A™ Core initialization failed: ${compliance.message}`);
     }
     
-    // Validate compliance
-    const validation = await LiveDataEnforcer.validateLiveDataCompliance();
-    console.log('📊 Live data compliance:', validation);
-    
     console.log('✅ A.R.I.A™ Core Services initialized with 100% live data compliance');
-    return true;
     
   } catch (error) {
-    console.error('❌ Failed to initialize A.R.I.A™ Core Services:', error);
-    return false;
+    console.error('❌ A.R.I.A™ Core initialization failed:', error);
+    throw error;
   }
 };
