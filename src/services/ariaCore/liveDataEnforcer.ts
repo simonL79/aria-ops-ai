@@ -65,7 +65,7 @@ export class LiveDataEnforcer {
   }
 
   /**
-   * Enforce system-wide live data compliance (missing method)
+   * Enforce system-wide live data compliance
    */
   static async enforceSystemWideLiveData(): Promise<boolean> {
     try {
@@ -150,10 +150,12 @@ export class LiveDataEnforcer {
         block_reason: 'Simulation data detected',
         block_timestamp: new Date().toISOString()
       }
-    }).then(() => {
-      console.log('Simulation block logged to database');
-    }).catch((error) => {
-      console.error('Failed to log simulation block:', error);
+    }).then((result) => {
+      if (result.error) {
+        console.error('Failed to log simulation block:', result.error);
+      } else {
+        console.log('Simulation block logged to database');
+      }
     });
 
     throw new Error(`SIMULATION BLOCKED: ${functionName} - A.R.I.A™ operates exclusively with live data`);

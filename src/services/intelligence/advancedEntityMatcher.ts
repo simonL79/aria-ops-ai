@@ -27,7 +27,7 @@ export interface EntityMatchResult {
 export class AdvancedEntityMatcher {
   
   /**
-   * Get entity fingerprint by name
+   * Get entity fingerprint by name - using actual database schema
    */
   static async getEntityFingerprint(entityName: string): Promise<AdvancedEntityFingerprint | null> {
     try {
@@ -42,7 +42,7 @@ export class AdvancedEntityMatcher {
         return null;
       }
 
-      // Transform database result to match interface
+      // Transform database result to match interface using actual column names
       return {
         id: data.id,
         entity_name: data.entity_name,
@@ -52,7 +52,7 @@ export class AdvancedEntityMatcher {
         known_associates: data.known_associates || [],
         controversial_topics: data.controversial_topics || [],
         false_positive_blocklist: data.false_positive_blocklist || [],
-        live_data_only: data.live_data_only || true,
+        live_data_only: data.live_data_only !== false,
         created_source: data.created_source || 'unknown',
         last_updated: data.last_updated,
         created_at: data.created_at
@@ -64,7 +64,7 @@ export class AdvancedEntityMatcher {
   }
 
   /**
-   * Create new entity fingerprint
+   * Create new entity fingerprint using correct database schema
    */
   static async createEntityFingerprint(fingerprintData: Omit<AdvancedEntityFingerprint, 'id' | 'last_updated' | 'created_at'>): Promise<string> {
     try {
