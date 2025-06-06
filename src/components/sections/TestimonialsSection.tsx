@@ -1,57 +1,52 @@
 
 import React from 'react';
+import { Card } from '@/components/ui/card';
 import { Star } from 'lucide-react';
 
 const TestimonialsSection = () => {
   const testimonials = [
     {
-      name: "Sarah Chen",
-      title: "STARTUP FOUNDER & CEO",
-      quote: "ARIA's intelligence platform helped us identify and neutralize a coordinated attack before it reached mainstream media. Their proactive approach saved our Series A funding round.",
-      initials: "SC",
+      text: "This intelligence platform helped us identify and neutralize a coordinated attack before it reached mainstream media. I don't know what we would have done without them.",
+      author: "Sarah Chen",
+      role: "Chief Marketing Officer",
       rating: 5
     },
     {
-      name: "Michael Rodriguez", 
-      title: "MANAGING PARTNER, HEALTHCARE",
-      quote: "The speed of their analysis and speed of response is unmatched. They don't just monitor - they predict and prevent. Essential for any serious organization.",
-      initials: "MR",
+      text: "The speed of their analysis and speed of response is unmatched. They don't just monitor – they predict and prevent. Incredible for our adviser team safety.",
+      author: "Michael Rodriguez",
+      role: "Managing Partner",
       rating: 5
     }
   ];
 
   return (
-    <section className="py-24 bg-black">
+    <section className="bg-black py-16">
       <div className="container mx-auto px-6">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-light mb-8 text-white">
-            What Our Clients Say
-          </h2>
-        </div>
+        <h2 className="text-3xl font-bold text-white text-center mb-12">What Our Clients Say</h2>
         
-        <div className="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
           {testimonials.map((testimonial, index) => (
-            <div key={index} className="bg-gray-900 p-8 rounded-lg border border-gray-700 shadow-lg">
+            <Card key={index} className="bg-gray-900 border-gray-800 p-8 text-white">
               <div className="flex items-center mb-4">
                 {[...Array(testimonial.rating)].map((_, i) => (
                   <Star key={i} className="h-5 w-5 fill-orange-500 text-orange-500" />
                 ))}
               </div>
               
-              <blockquote className="text-lg text-gray-300 leading-relaxed mb-6">
-                "{testimonial.quote}"
-              </blockquote>
+              <p className="text-gray-300 mb-6 italic">"{testimonial.text}"</p>
               
               <div className="flex items-center">
-                <div className="w-14 h-14 bg-orange-500 rounded-full mr-4 flex items-center justify-center">
-                  <span className="text-white font-semibold text-lg">{testimonial.initials}</span>
+                <div className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center mr-4">
+                  <span className="text-white font-bold">
+                    {testimonial.author.split(' ').map(n => n[0]).join('')}
+                  </span>
                 </div>
                 <div>
-                  <h4 className="text-white font-semibold text-lg">{testimonial.name}</h4>
-                  <p className="text-gray-400 text-sm uppercase tracking-wide">{testimonial.title}</p>
+                  <p className="font-semibold text-white">{testimonial.author}</p>
+                  <p className="text-gray-400 text-sm">{testimonial.role}</p>
                 </div>
               </div>
-            </div>
+            </Card>
           ))}
         </div>
       </div>

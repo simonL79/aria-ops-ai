@@ -2,22 +2,24 @@
 import React from 'react';
 import PublicLayout from '@/components/layout/PublicLayout';
 import HeroSection from '@/components/sections/HeroSection';
-import TrustedCompaniesSection from '@/components/sections/TrustedCompaniesSection';
 import ServicesSection from '@/components/sections/ServicesSection';
 import TestimonialsSection from '@/components/sections/TestimonialsSection';
-import CTASection from '@/components/sections/CTASection';
+import ContactFormSection from '@/components/sections/ContactFormSection';
+import SocialLinksSection from '@/components/sections/SocialLinksSection';
+import AddOnServicesSection from '@/components/sections/AddOnServicesSection';
 import ErrorBoundary from '@/components/error/ErrorBoundary';
 
 const HomePage = () => {
   return (
     <ErrorBoundary>
       <PublicLayout>
-        <div className="bg-background text-foreground min-h-screen">
+        <div className="bg-black text-white min-h-screen">
           <HeroSection />
-          <TrustedCompaniesSection />
+          <SocialLinksSection />
           <ServicesSection />
+          <AddOnServicesSection />
           <TestimonialsSection />
-          <CTASection />
+          <ContactFormSection />
         </div>
       </PublicLayout>
     </ErrorBoundary>

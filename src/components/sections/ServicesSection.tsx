@@ -1,146 +1,101 @@
 
 import React from 'react';
-import { Shield, MessageSquare, Users } from 'lucide-react';
+import { Card } from '@/components/ui/card';
+import { Shield, Eye, Users } from 'lucide-react';
 
 const ServicesSection = () => {
-  const scrollToCTAForm = () => {
-    const ctaSection = document.querySelector('#cta-section') || document.querySelector('[data-section="cta"]');
-    if (ctaSection) {
-      ctaSection.scrollIntoView({ behavior: 'smooth' });
-    } else {
-      // Fallback: scroll to bottom of page where CTA typically is
-      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+  const services = [
+    {
+      icon: Shield,
+      title: "Social Media Protection",
+      description: "What We Do:",
+      details: [
+        "• Monitor & respond to negative Twitter mentions",
+        "• Instagram brand protection & reputation",
+        "• LinkedIn professional presence management",
+        "• Facebook reputation crisis response"
+      ],
+      mission: "Why It Matters:",
+      missionText: "Social media moves fast. Negative content spreads at light speed and can cause severe reputational damage within hours."
+    },
+    {
+      icon: Eye,
+      title: "Influence & Creator Shield",
+      description: "What We Do:",
+      details: [
+        "• Monitor influencer mentions and collaborations",
+        "• Proactive content against upcoming threats",
+        "• Creator network relationship management",
+        "• Digital footprint analysis and protection"
+      ],
+      mission: "Why It Matters:",
+      missionText: "Influencers and creators shape public opinion and their followers can be mobilized to defend reputations when done right."
+    },
+    {
+      icon: Users,
+      title: "Executive Protection",
+      description: "What We Do:",
+      details: [
+        "• High-level threat identification & suppression",
+        "• Personal brand protection for executives",
+        "• Crisis communication strategy development",
+        "• Reputation recovery and reconstruction"
+      ],
+      mission: "Why It Matters:",
+      missionText: "Executives need to maintain a threat-free environment. Whether it's pre-IPO due diligence or personal brand threats."
     }
-  };
+  ];
 
   return (
-    <section id="services" data-section="services" className="py-24 bg-black">
+    <section className="bg-black py-16" id="services">
       <div className="container mx-auto px-6">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-light mb-8 text-white">
-            Reputation Management Services – Powered by A.R.I.A™
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+            Reputation Management Services – Powered by <span className="text-orange-500">A.R.I.A™</span>
           </h2>
-          <p className="text-xl text-gray-300 max-w-4xl mx-auto leading-relaxed">
-            A.R.I.A™ isn't just for individuals, CEOs, or global brands. Reputation is personal – and everyone 
+          <p className="text-gray-300 max-w-4xl mx-auto">
+            A.R.I.A™ isn't just for individuals, CEOs, or global brands. Reputation is personal — and everyone 
             deserves protection. Whether you're facing online abuse, negative press, or algorithmic bias, we've 
             built elite tools for every type of modern digital reality.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-12 max-w-7xl mx-auto">
-          {/* Social Media Protection */}
-          <div className="text-center space-y-6">
-            <div className="bg-gray-900 p-6 rounded-lg border border-gray-700">
-              <div className="w-16 h-16 bg-orange-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Shield className="h-8 w-8 text-orange-500" />
-              </div>
-              <h3 className="text-2xl font-semibold mb-4 text-white">Social Media Protection</h3>
-              <div className="text-left space-y-3 text-gray-300">
-                <div>
-                  <strong className="text-white">What We Do:</strong>
-                  <ul className="mt-2 space-y-1 text-sm">
-                    <li>• Monitor reputation across Facebook, Twitter, Instagram, LinkedIn, TikTok</li>
-                    <li>• Neutralize hostile content and toxic harassment</li>
-                    <li>• Amplify positive social signals and user testimonials</li>
-                    <li>• Crisis response activation for harassment or content storms</li>
-                  </ul>
+        <div className="grid md:grid-cols-3 gap-8 mb-16">
+          {services.map((service, index) => (
+            <Card key={index} className="bg-gray-900 border-gray-800 p-8 text-white">
+              <div className="flex items-center mb-6">
+                <div className="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center mr-4">
+                  <service.icon className="h-6 w-6 text-white" />
                 </div>
-                <div className="border border-gray-600 rounded-lg p-3 bg-gray-800/50">
-                  <strong className="text-white">Why It Matters:</strong>
-                  <p className="text-sm mt-1">Your digital footprint shapes perception. Every hostile comment gets seen. Social platforms decide who gets amplified and who gets buried.</p>
-                </div>
+                <h3 className="text-xl font-bold">{service.title}</h3>
               </div>
-            </div>
-          </div>
+              
+              <div className="mb-6">
+                <h4 className="text-orange-500 font-semibold mb-2">{service.description}</h4>
+                <ul className="text-gray-300 space-y-1">
+                  {service.details.map((detail, idx) => (
+                    <li key={idx} className="text-sm">{detail}</li>
+                  ))}
+                </ul>
+              </div>
 
-          {/* Influencer & Creator Shield */}
-          <div className="text-center space-y-6">
-            <div className="bg-gray-900 p-6 rounded-lg border border-gray-700">
-              <div className="w-16 h-16 bg-orange-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                <MessageSquare className="h-8 w-8 text-orange-500" />
+              <div>
+                <h4 className="text-orange-500 font-semibold mb-2">{service.mission}</h4>
+                <p className="text-gray-300 text-sm">{service.missionText}</p>
               </div>
-              <h3 className="text-2xl font-semibold mb-4 text-white">Influencer & Creator Shield</h3>
-              <div className="text-left space-y-3 text-gray-300">
-                <div>
-                  <strong className="text-white">What We Do:</strong>
-                  <ul className="mt-2 space-y-1 text-sm">
-                    <li>• Real-time monitoring for emerging threats and mentions</li>
-                    <li>• De-amplification against algorithmic penalties</li>
-                    <li>• It tactics influence strategies to neutralize harassment</li>
-                    <li>• Strategic content optimization and placement</li>
-                  </ul>
-                </div>
-                <div className="border border-gray-600 rounded-lg p-3 bg-gray-800/50">
-                  <strong className="text-white">Why It Matters:</strong>
-                  <p className="text-sm mt-1">One coordinated attack can destroy years of audience building. Your creativity gets monetized by platforms designed to exploit creators, and bias gets you.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Everyday People Protection */}
-          <div className="text-center space-y-6">
-            <div className="bg-gray-900 p-6 rounded-lg border border-gray-700">
-              <div className="w-16 h-16 bg-orange-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Users className="h-8 w-8 text-orange-500" />
-              </div>
-              <h3 className="text-2xl font-semibold mb-4 text-white">Everyday People Protection</h3>
-              <div className="text-left space-y-3 text-gray-300">
-                <div>
-                  <strong className="text-white">What We Do:</strong>
-                  <ul className="mt-2 space-y-1 text-sm">
-                    <li>• Clean search results tied to fraud investigations</li>
-                    <li>• Protect families from doxxing and digital abuse</li>
-                    <li>• Privacy protection from algorithmic monitoring</li>
-                    <li>• Right to be forgotten coaching and advocacy</li>
-                  </ul>
-                </div>
-                <div className="border border-gray-600 rounded-lg p-3 bg-gray-800/50">
-                  <strong className="text-white">Why It Matters:</strong>
-                  <p className="text-sm mt-1">You don't need to be famous to become a target. Ex. If you've had a vindictive roommate, if you've made a political post someone didn't like, you're at risk.</p>
-                </div>
-              </div>
-            </div>
-          </div>
+            </Card>
+          ))}
         </div>
 
-        <div className="text-center mt-16">
-          <h3 className="text-2xl font-semibold mb-6 text-white">Ready to Get Started?</h3>
-          <p className="text-lg text-gray-300 mb-8 max-w-3xl mx-auto">
-            Get a comprehensive assessment of your digital risk profile. Our experts will identify vulnerabilities and provide a strategic roadmap.
+        <div className="text-center">
+          <h3 className="text-2xl font-bold text-white mb-4">Ready to Get Started?</h3>
+          <p className="text-gray-300 mb-8 max-w-2xl mx-auto">
+            Get a comprehensive assessment of your digital risk profile. Our experts will identify 
+            vulnerabilities and provide a strategic roadmap.
           </p>
-          
-          <button 
-            onClick={scrollToCTAForm}
-            className="bg-orange-500 hover:bg-orange-600 text-white px-12 py-4 text-lg font-medium rounded-lg transition-colors mb-16"
-          >
-            Request Your Assessment →
+          <button className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-lg font-semibold transition-colors">
+            Request Risk Assessment
           </button>
-
-          {/* Add-On Services Box */}
-          <div className="max-w-7xl mx-auto">
-            <div className="bg-gray-900 p-8 rounded-lg border border-gray-700">
-              <h4 className="text-2xl font-semibold mb-8 text-orange-500">Add-On Services</h4>
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="text-left">
-                  <h5 className="text-lg font-medium mb-2 text-white">Dark Web Leak Monitoring</h5>
-                  <p className="text-gray-300 text-sm">Get notified if your name, photos, or documents appear on black market sites</p>
-                </div>
-                <div className="text-left">
-                  <h5 className="text-lg font-medium mb-2 text-white">AI Disinfo Watchdog</h5>
-                  <p className="text-gray-300 text-sm">Find out if hostile LLMs (like ChatGPT clones) are referencing you unfairly</p>
-                </div>
-                <div className="text-left">
-                  <h5 className="text-lg font-medium mb-2 text-white">Family Reputation Package</h5>
-                  <p className="text-gray-300 text-sm">Protect your children or family members across online platforms</p>
-                </div>
-                <div className="text-left">
-                  <h5 className="text-lg font-medium mb-2 text-white">Full Service Takedowns</h5>
-                  <p className="text-gray-300 text-sm">We do the work — no forms or back-and-forth with platforms</p>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </section>
