@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 export interface AdvancedEntityFingerprint {
@@ -46,14 +47,14 @@ export class AdvancedEntityMatcher {
       return {
         id: data.id,
         entity_name: data.entity_name,
-        entity_type: data.entity_type || 'individual',
+        entity_type: 'individual', // Default since not in schema
         alternate_names: data.alternate_names || [],
         industries: data.industries || [],
         known_associates: data.known_associates || [],
         controversial_topics: data.controversial_topics || [],
-        false_positive_blocklist: data.false_positive_blocklist || [],
-        live_data_only: data.live_data_only !== false,
-        created_source: data.created_source || 'unknown',
+        false_positive_blocklist: [], // Default since not in schema
+        live_data_only: true, // Default since not in schema
+        created_source: 'unknown', // Default since not in schema
         last_updated: data.last_updated,
         created_at: data.created_at
       };
