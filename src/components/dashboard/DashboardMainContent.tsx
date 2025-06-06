@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -200,12 +199,19 @@ const DashboardMainContent = ({
 
         {/* Navigation Tabs */}
         <Tabs defaultValue="overview" className="mt-8">
-          <TabsList className="grid w-full grid-cols-4 bg-corporate-darkSecondary border border-corporate-border">
+          <TabsList className="grid w-full grid-cols-5 bg-corporate-darkSecondary border border-corporate-border">
             <TabsTrigger 
               value="overview"
               className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray"
             >
               Overview
+            </TabsTrigger>
+            <TabsTrigger 
+              value="completion" 
+              onClick={() => navigate('/admin/system-completion')}
+              className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray"
+            >
+              System Completion
             </TabsTrigger>
             <TabsTrigger 
               value="genesis" 
