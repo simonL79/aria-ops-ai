@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export interface ServerHealth {
@@ -27,23 +26,23 @@ export interface ModelStatus {
 }
 
 /**
- * Check local AI server health with improved connection testing
+ * Check local AI server health with correct Ollama port
  */
 export const checkServerHealth = async (): Promise<ServerHealth> => {
   const startTime = Date.now();
   const connectionAttempts: string[] = [];
   
   try {
-    console.log('🔍 Checking Ollama server health...');
+    console.log('🔍 Checking Ollama server health on port 11434...');
     
-    // Try multiple endpoints and protocols
+    // Try Ollama's default endpoints on port 11434
     const endpoints = [
-      'http://localhost:3001/api/tags',
-      'http://127.0.0.1:3001/api/tags',
-      'http://localhost:3001/api/version',
-      'http://127.0.0.1:3001/api/version',
-      'http://localhost:3001/',
-      'http://127.0.0.1:3001/'
+      'http://localhost:11434/api/tags',
+      'http://127.0.0.1:11434/api/tags',
+      'http://localhost:11434/api/version',
+      'http://127.0.0.1:11434/api/version',
+      'http://localhost:11434/',
+      'http://127.0.0.1:11434/'
     ];
     
     let response;
@@ -61,7 +60,7 @@ export const checkServerHealth = async (): Promise<ServerHealth> => {
             'Content-Type': 'application/json',
           },
           mode: 'cors',
-          signal: AbortSignal.timeout(3000)
+          signal: AbortSignal.timeout(5000)
         });
         
         if (response.ok) {
@@ -94,7 +93,7 @@ export const checkServerHealth = async (): Promise<ServerHealth> => {
           memorySearch: false
         },
         serverType: 'Ollama (Connection Failed)',
-        errorDetails: `All connection attempts failed. Tried ${endpoints.length} endpoints.`,
+        errorDetails: `All connection attempts failed. Make sure Ollama is running on port 11434 (default port).`,
         connectionAttempts
       };
       
@@ -117,11 +116,11 @@ export const checkServerHealth = async (): Promise<ServerHealth> => {
       
       // Try to get models from the /api/tags endpoint specifically
       try {
-        const tagsResponse = await fetch('http://localhost:3001/api/tags', {
+        const tagsResponse = await fetch('http://localhost:11434/api/tags', {
           method: 'GET',
           headers: { 'Accept': 'application/json' },
           mode: 'cors',
-          signal: AbortSignal.timeout(2000)
+          signal: AbortSignal.timeout(3000)
         });
         
         if (tagsResponse.ok) {
@@ -193,14 +192,14 @@ const checkOllamaEndpoints = async () => {
       console.log(`🔍 Testing ${testType} capability...`);
       
       // Test with a lightweight API call
-      const response = await fetch('http://localhost:3001/api/version', {
+      const response = await fetch('http://localhost:11434/api/version', {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
         },
         mode: 'cors',
-        signal: AbortSignal.timeout(2000)
+        signal: AbortSignal.timeout(3000)
       });
       
       const result = response.ok;
@@ -228,14 +227,14 @@ export const getModelStatuses = async (): Promise<ModelStatus[]> => {
   try {
     console.log('📋 Fetching model list from Ollama...');
     
-    const response = await fetch('http://localhost:3001/api/tags', {
+    const response = await fetch('http://localhost:11434/api/tags', {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
       },
       mode: 'cors',
-      signal: AbortSignal.timeout(3000)
+      signal: AbortSignal.timeout(5000)
     });
     
     if (!response.ok) {

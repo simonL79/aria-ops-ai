@@ -1,172 +1,152 @@
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
 
 export interface LocalThreatAnalysis {
-  threatLevel: number;
-  category: string;
-  explanation: string;
-  confidence: number;
-  provider: 'local_ollama' | 'openai_fallback';
-  analysisTime: number;
+  platform: string;
+  entityName: string;
+  threatLevel: string;
+  reasoning: string;
+  suggestedActions: string[];
+  rawAnalysis: string;
+  timestamp: string;
 }
 
 export interface MemorySearchResult {
+  id: string;
+  entity_name: string;
   content: string;
   similarity: number;
-  metadata: {
-    entityName: string;
-    timestamp: string;
-    source: string;
-  };
+  created_at: string;
 }
 
 /**
- * Check if local inference server is available - Updated for Ollama
+ * Send inference request to local Ollama server
  */
-const checkLocalServer = async (): Promise<boolean> => {
+const sendOllamaRequest = async (prompt: string, model: string = 'llama3.2:3b'): Promise<any> => {
   try {
-    // Use the correct Ollama endpoint that works
-    const response = await fetch('http://localhost:3001/api/tags', {
-      method: 'GET',
-      signal: AbortSignal.timeout(3000)
+    console.log(`🧠 Sending request to Ollama (${model})...`);
+    
+    const response = await fetch('http://localhost:11434/api/generate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        model: model,
+        prompt: prompt,
+        stream: false,
+        options: {
+          temperature: 0.7,
+          max_tokens: 1000,
+        }
+      }),
     });
-    return response.ok;
-  } catch {
-    return false;
+
+    if (!response.ok) {
+      throw new Error(`Ollama request failed: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    console.log('🧠 Ollama response received:', data);
+    
+    return data.response || data.text || 'No response generated';
+  } catch (error) {
+    console.error('❌ Ollama request failed:', error);
+    throw error;
   }
 };
 
 /**
- * Analyze threats using local Ollama inference with fallback
+ * Analyze content for potential threats using local inference
  */
 export const analyzeWithLocalInference = async (
   content: string,
   platform: string,
   entityName: string,
-  analysisType: 'classify' | 'summarize' | 'legal-analysis' = 'classify'
+  analysisType: string = 'classify'
 ): Promise<LocalThreatAnalysis | null> => {
   try {
-    const startTime = Date.now();
+    console.log(`🔍 Analyzing content from ${platform} for ${entityName}...`);
     
-    console.log(`Starting local threat analysis for ${entityName}`);
+    let prompt;
     
-    // Check if local server is available first
-    const isServerAvailable = await checkLocalServer();
-    if (!isServerAvailable) {
-      console.warn('Local inference server not available, returning fallback analysis');
-      return {
-        threatLevel: 3,
-        category: 'general',
-        explanation: 'Local inference server unavailable - using fallback analysis',
-        confidence: 0.6,
-        provider: 'local_ollama',
-        analysisTime: Date.now() - startTime
-      };
+    if (analysisType === 'classify') {
+      prompt = `Analyze the following content from ${platform} about ${entityName} and classify the threat level as high, medium, or low.
+      Also provide reasoning for the classification and suggest actions to mitigate the threat.
+      
+      Content: ${content}
+      
+      Respond in JSON format:
+      {
+        "threatLevel": "high|medium|low",
+        "reasoning": "Explanation of the threat level",
+        "suggestedActions": ["action1", "action2"]
+      }`;
+    } else if (analysisType === 'summarize') {
+      prompt = `Summarize the following content from ${platform} about ${entityName} in a concise manner.
+      
+      Content: ${content}
+      `;
+    } else {
+      console.warn('❌ Unknown analysis type:', analysisType);
+      return null;
     }
-
-    const { data, error } = await supabase.functions.invoke('local-threat-analysis', {
-      body: {
-        content,
+    
+    const rawAnalysis = await sendOllamaRequest(prompt);
+    
+    let analysisResult;
+    
+    if (analysisType === 'classify') {
+      try {
+        analysisResult = JSON.parse(rawAnalysis);
+      } catch (error) {
+        console.error('❌ Failed to parse JSON response:', error);
+        analysisResult = {
+          threatLevel: 'unknown',
+          reasoning: 'Failed to parse analysis',
+          suggestedActions: []
+        };
+      }
+      
+      const threatAnalysis: LocalThreatAnalysis = {
         platform,
         entityName,
-        analysisType
-      }
-    });
-
-    if (error) {
-      console.error('Local inference error:', error);
-      return {
-        threatLevel: 2,
-        category: 'analysis_error',
-        explanation: 'Local analysis encountered an error',
-        confidence: 0.5,
-        provider: 'local_ollama',
-        analysisTime: Date.now() - startTime
+        threatLevel: analysisResult.threatLevel || 'unknown',
+        reasoning: analysisResult.reasoning || 'No reasoning provided',
+        suggestedActions: analysisResult.suggestedActions || [],
+        rawAnalysis,
+        timestamp: new Date().toISOString()
       };
-    }
-
-    if (!data?.success) {
-      console.warn('Local analysis failed:', data?.error);
-      return {
-        threatLevel: 2,
-        category: 'service_unavailable', 
-        explanation: data?.error || 'Local analysis service unavailable',
-        confidence: 0.5,
-        provider: 'local_ollama',
-        analysisTime: Date.now() - startTime
-      };
-    }
-
-    const analysisTime = Date.now() - startTime;
-    const result = data.result;
-    
-    console.log(`Local analysis completed in ${analysisTime}ms`);
-    
-    return {
-      threatLevel: result.threatLevel || result.severity || 3,
-      category: result.category || 'general',
-      explanation: result.explanation || result.summary || 'Local analysis completed successfully',
-      confidence: result.confidence || 0.75,
-      provider: 'local_ollama',
-      analysisTime
-    };
-
-  } catch (error) {
-    console.error('Local threat analysis error:', error);
-    return {
-      threatLevel: 2,
-      category: 'error',
-      explanation: 'Local threat analysis failed with error',
-      confidence: 0.3,
-      provider: 'local_ollama',
-      analysisTime: 0
-    };
-  }
-};
-
-/**
- * Search entity memories using vector search with fallback
- */
-export const searchEntityMemories = async (
-  query: string,
-  entityName: string,
-  searchType: string = 'threat_patterns',
-  limit: number = 5
-): Promise<MemorySearchResult[]> => {
-  try {
-    console.log(`Searching memories for entity: ${entityName}, query: ${query}`);
-    
-    const { data, error } = await supabase.functions.invoke('local-memory-search', {
-      body: {
-        query,
+      
+      console.log('✅ Threat analysis complete:', threatAnalysis);
+      return threatAnalysis;
+    } else if (analysisType === 'summarize') {
+      analysisResult = { summary: rawAnalysis };
+      
+      const threatAnalysis: LocalThreatAnalysis = {
+        platform,
         entityName,
-        searchType,
-        limit
-      }
-    });
-
-    if (error) {
-      console.error('Memory search error:', error);
-      return [];
+        threatLevel: 'informational',
+        reasoning: analysisResult.summary || 'No summary provided',
+        suggestedActions: [],
+        rawAnalysis,
+        timestamp: new Date().toISOString()
+      };
+      
+      console.log('✅ Content summarization complete:', threatAnalysis);
+      return threatAnalysis;
+    } else {
+      return null;
     }
-
-    if (!data?.success) {
-      console.warn('Memory search returned no results');
-      return [];
-    }
-
-    console.log(`Found ${data.resultsCount} relevant memories`);
     
-    return data.results || [];
-
   } catch (error) {
-    console.error('Memory search error:', error);
-    return [];
+    console.error('❌ Local threat analysis failed:', error);
+    return null;
   }
 };
 
 /**
- * Enhanced threat analysis with memory context and fallback
+ * Analyze content with memory context
  */
 export const analyzeWithMemoryContext = async (
   content: string,
@@ -174,48 +154,109 @@ export const analyzeWithMemoryContext = async (
   entityName: string
 ): Promise<LocalThreatAnalysis | null> => {
   try {
-    // First search for relevant memories
-    const memories = await searchEntityMemories(content, entityName, 'threat_patterns', 3);
+    console.log(`🔍 Analyzing content from ${platform} for ${entityName} with memory context...`);
     
-    // Enhance content with memory context if available
-    let enhancedContent = content;
+    // 1. Search for relevant memories
+    const memories = await searchEntityMemories(content, entityName, 'similarity');
+    
+    // 2. Prepare the prompt with memory context
+    let prompt = `You are an expert threat analyst. Analyze the following content from ${platform} about ${entityName},
+    considering the following information about the entity:
+    
+    Content: ${content}\n\n`;
+    
     if (memories.length > 0) {
-      const memoryContext = memories.map(m => `Context: ${m.content}`).join('\n');
-      enhancedContent = `${content}\n\nRelevant context:\n${memoryContext}`;
+      prompt += 'Relevant Memory Context:\n';
+      memories.forEach((memory, index) => {
+        prompt += `Memory ${index + 1}: ${memory.content}\n`;
+      });
+    } else {
+      prompt += 'No relevant memory context found.\n';
     }
     
-    // Perform analysis with enhanced context
-    const analysis = await analyzeWithLocalInference(
-      enhancedContent,
+    prompt += `\nClassify the threat level as high, medium, or low.
+    Provide reasoning for the classification and suggest actions to mitigate the threat.
+    
+    Respond in JSON format:
+    {
+      "threatLevel": "high|medium|low",
+      "reasoning": "Explanation of the threat level",
+      "suggestedActions": ["action1", "action2"]
+    }`;
+    
+    // 3. Send to Ollama for analysis
+    const rawAnalysis = await sendOllamaRequest(prompt);
+    
+    // 4. Parse and return the result
+    let analysisResult;
+    try {
+      analysisResult = JSON.parse(rawAnalysis);
+    } catch (error) {
+      console.error('❌ Failed to parse JSON response:', error);
+      analysisResult = {
+        threatLevel: 'unknown',
+        reasoning: 'Failed to parse analysis',
+        suggestedActions: []
+      };
+    }
+    
+    const threatAnalysis: LocalThreatAnalysis = {
       platform,
       entityName,
-      'classify'
-    );
+      threatLevel: analysisResult.threatLevel || 'unknown',
+      reasoning: analysisResult.reasoning || 'No reasoning provided',
+      suggestedActions: analysisResult.suggestedActions || [],
+      rawAnalysis,
+      timestamp: new Date().toISOString()
+    };
     
-    if (analysis) {
-      // Store this analysis as a new memory
-      try {
-        await supabase.from('anubis_entity_memory').insert({
-          entity_name: entityName,
-          memory_type: 'threat_analysis',
-          memory_summary: `Threat level ${analysis.threatLevel}: ${analysis.category}`,
-          context_reference: platform,
-          key_findings: {
-            threatLevel: analysis.threatLevel,
-            category: analysis.category,
-            confidence: analysis.confidence,
-            memoriesUsed: memories.length
-          }
-        });
-      } catch (memoryError) {
-        console.warn('Failed to store analysis memory:', memoryError);
-      }
-    }
+    console.log('✅ Threat analysis with memory context complete:', threatAnalysis);
+    return threatAnalysis;
     
-    return analysis;
-
   } catch (error) {
-    console.error('Enhanced analysis error:', error);
+    console.error('❌ Local threat analysis with memory context failed:', error);
     return null;
+  }
+};
+
+/**
+ * Search entity memories using Supabase
+ */
+export const searchEntityMemories = async (
+  query: string,
+  entityName: string,
+  searchType: string = 'similarity'
+): Promise<MemorySearchResult[]> => {
+  try {
+    console.log(`🔍 Searching memories for ${entityName} with query: ${query}`);
+    
+    if (searchType === 'similarity') {
+      const { data, error } = await supabase.rpc('match_entity_memories', {
+        query_embedding: `[${Array(1536).fill(0).join(',')}]`, // Replace with actual embedding generation
+        match_threshold: 0.75,
+        match_count: 3,
+        entity_name: entityName
+      });
+      
+      if (error) {
+        throw error;
+      }
+      
+      console.log('✅ Memory search complete:', data);
+      return (data || []).map(item => ({
+        id: item.id,
+        entity_name: item.entity_name,
+        content: item.content,
+        similarity: item.similarity,
+        created_at: item.created_at
+      }));
+    } else {
+      // Implement keyword-based search if needed
+      console.warn('❌ Keyword search not implemented yet.');
+      return [];
+    }
+  } catch (error) {
+    console.error('❌ Failed to search entity memories:', error);
+    return [];
   }
 };
