@@ -1,3 +1,4 @@
+
 import { LiveDataEnforcer } from '@/services/ariaCore/liveDataEnforcer';
 import { AdvancedEntityMatcher, type AdvancedEntityFingerprint, type EntityMatchResult } from './advancedEntityMatcher';
 import { CIALevelScanner, type CIAScanOptions, type CIAScanResult } from './ciaLevelScanner';
@@ -61,7 +62,7 @@ export class KeywordCIAIntegration {
         console.log('Creating new entity fingerprint with live validation');
         const fingerprintId = await AdvancedEntityMatcher.createEntityFingerprint({
           entity_name: options.entityName,
-          entity_type: 'individual', // Required field with default
+          entity_type: 'individual',
           alternate_names: [],
           industries: [],
           known_associates: [],
@@ -222,21 +223,8 @@ export class KeywordCIAIntegration {
       throw new Error('Enhanced fingerprint blocked: Entity name appears to be simulation data');
     }
 
-    // Ensure required fields are present
-    const completeEntityData = {
-      entity_name: entityData.entity_name,
-      entity_type: entityData.entity_type || 'individual',
-      alternate_names: entityData.alternate_names || [],
-      industries: entityData.industries || [],
-      known_associates: entityData.known_associates || [],
-      controversial_topics: entityData.controversial_topics || [],
-      false_positive_blocklist: entityData.false_positive_blocklist || ['mock', 'test', 'demo', 'simulation'],
-      live_data_only: entityData.live_data_only !== false,
-      created_source: entityData.created_source
-    };
-
     // Create the fingerprint
-    const fingerprintId = await AdvancedEntityMatcher.createEntityFingerprint(completeEntityData);
+    const fingerprintId = await AdvancedEntityMatcher.createEntityFingerprint(entityData);
     
     // Retrieve the created fingerprint
     const fingerprint = await AdvancedEntityMatcher.getEntityFingerprint(entityData.entity_name);

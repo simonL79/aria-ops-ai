@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { LiveDataEnforcer } from '@/services/ariaCore/liveDataEnforcer';
 
@@ -111,14 +112,12 @@ export class CIALevelScanner {
       });
 
       console.log(`✅ CIA Scanner: Found ${filteredResults.length} precision results`);
-      
-      // Fix severity type mapping
       return filteredResults.map(result => ({
         id: result.id,
         content: result.content,
         platform: result.platform,
         url: result.url,
-        severity: this.mapSeverity(result.severity),
+        severity: result.severity,
         threat_type: result.threat_type || 'reputation_risk',
         confidence_score: result.confidence_score || 0,
         source_type: result.source_type,
@@ -131,19 +130,6 @@ export class CIALevelScanner {
         throw error; // Re-throw simulation blocks
       }
       throw new Error('CIA Scanner: Live precision scan failed');
-    }
-  }
-
-  /**
-   * Map database severity to typed severity
-   */
-  private static mapSeverity(severity: string): 'low' | 'medium' | 'high' | 'critical' {
-    switch (severity) {
-      case 'critical': return 'critical';
-      case 'high': return 'high';
-      case 'medium': return 'medium';
-      case 'low': return 'low';
-      default: return 'medium';
     }
   }
 
@@ -202,11 +188,7 @@ export class CIALevelScanner {
       }
 
       const totalScans = data?.length || 0;
-      // Fix JSON access with proper type checking
-      const totalResults = data?.reduce((sum, log) => {
-        const operationData = log.operation_data as any;
-        return sum + (operationData?.results_found || 0);
-      }, 0) || 0;
+      const totalResults = data?.reduce((sum, log) => sum + (log.operation_data?.results_found || 0), 0) || 0;
       const avgResultsPerScan = totalScans > 0 ? totalResults / totalScans : 0;
 
       return {

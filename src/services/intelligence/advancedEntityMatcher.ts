@@ -28,7 +28,7 @@ export interface EntityMatchResult {
 export class AdvancedEntityMatcher {
   
   /**
-   * Get entity fingerprint by name - using actual database schema
+   * Get entity fingerprint by name
    */
   static async getEntityFingerprint(entityName: string): Promise<AdvancedEntityFingerprint | null> {
     try {
@@ -43,21 +43,7 @@ export class AdvancedEntityMatcher {
         return null;
       }
 
-      // Transform database result to match interface using actual column names
-      return {
-        id: data.id,
-        entity_name: data.entity_name,
-        entity_type: 'individual', // Default since not in schema
-        alternate_names: data.alternate_names || [],
-        industries: data.industries || [],
-        known_associates: data.known_associates || [],
-        controversial_topics: data.controversial_topics || [],
-        false_positive_blocklist: [], // Default since not in schema
-        live_data_only: true, // Default since not in schema
-        created_source: 'unknown', // Default since not in schema
-        last_updated: data.last_updated,
-        created_at: data.created_at
-      };
+      return data;
     } catch (error) {
       console.error('Failed to get entity fingerprint:', error);
       return null;
@@ -65,23 +51,13 @@ export class AdvancedEntityMatcher {
   }
 
   /**
-   * Create new entity fingerprint using correct database schema
+   * Create new entity fingerprint
    */
   static async createEntityFingerprint(fingerprintData: Omit<AdvancedEntityFingerprint, 'id' | 'last_updated' | 'created_at'>): Promise<string> {
     try {
       const { data, error } = await supabase
         .from('entity_fingerprints')
-        .insert({
-          entity_name: fingerprintData.entity_name,
-          entity_type: fingerprintData.entity_type,
-          alternate_names: fingerprintData.alternate_names,
-          industries: fingerprintData.industries,
-          known_associates: fingerprintData.known_associates,
-          controversial_topics: fingerprintData.controversial_topics,
-          false_positive_blocklist: fingerprintData.false_positive_blocklist,
-          live_data_only: fingerprintData.live_data_only,
-          created_source: fingerprintData.created_source
-        })
+        .insert(fingerprintData)
         .select('id')
         .single();
 

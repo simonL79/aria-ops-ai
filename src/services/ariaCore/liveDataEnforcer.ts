@@ -65,35 +65,6 @@ export class LiveDataEnforcer {
   }
 
   /**
-   * Enforce system-wide live data compliance
-   */
-  static async enforceSystemWideLiveData(): Promise<boolean> {
-    try {
-      // Update system configuration to disable mock data
-      await supabase
-        .from('system_config')
-        .upsert({
-          config_key: 'allow_mock_data',
-          config_value: 'disabled'
-        });
-
-      // Update system configuration for live mode
-      await supabase
-        .from('system_config')
-        .upsert({
-          config_key: 'system_mode',
-          config_value: 'live'
-        });
-
-      console.log('✅ Live Data Enforcer: System-wide live data enforced');
-      return true;
-    } catch (error) {
-      console.error('Failed to enforce system-wide live data:', error);
-      return false;
-    }
-  }
-
-  /**
    * Validate that input data is live (not simulation)
    */
   static async validateDataInput(inputData: string, source: string): Promise<boolean> {
@@ -140,7 +111,7 @@ export class LiveDataEnforcer {
   static blockSimulation(functionName: string): never {
     console.error(`🚫 SIMULATION BLOCKED: ${functionName} attempted to execute with simulation data`);
     
-    // Log the violation (fix Promise issue)
+    // Log the violation
     supabase.from('aria_ops_log').insert({
       operation_type: 'simulation_blocked',
       module_source: 'live_data_enforcer',
@@ -150,12 +121,10 @@ export class LiveDataEnforcer {
         block_reason: 'Simulation data detected',
         block_timestamp: new Date().toISOString()
       }
-    }).then((result) => {
-      if (result.error) {
-        console.error('Failed to log simulation block:', result.error);
-      } else {
-        console.log('Simulation block logged to database');
-      }
+    }).then(() => {
+      console.log('Simulation block logged to database');
+    }).catch(error => {
+      console.error('Failed to log simulation block:', error);
     });
 
     throw new Error(`SIMULATION BLOCKED: ${functionName} - A.R.I.A™ operates exclusively with live data`);
