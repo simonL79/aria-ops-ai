@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 export interface LocalThreatAnalysis {
@@ -220,7 +221,7 @@ export const analyzeWithMemoryContext = async (
 };
 
 /**
- * Search entity memories using Supabase
+ * Search entity memories using text search (simplified version without vector embeddings)
  */
 export const searchEntityMemories = async (
   query: string,
@@ -230,31 +231,30 @@ export const searchEntityMemories = async (
   try {
     console.log(`🔍 Searching memories for ${entityName} with query: ${query}`);
     
-    if (searchType === 'similarity') {
-      const { data, error } = await supabase.rpc('match_entity_memories', {
-        query_embedding: `[${Array(1536).fill(0).join(',')}]`, // Replace with actual embedding generation
-        match_threshold: 0.75,
-        match_count: 3,
-        entity_name: entityName
-      });
-      
-      if (error) {
-        throw error;
-      }
-      
-      console.log('✅ Memory search complete:', data);
-      return (data || []).map(item => ({
-        id: item.id,
-        entity_name: item.entity_name,
-        content: item.content,
-        similarity: item.similarity,
-        created_at: item.created_at
-      }));
-    } else {
-      // Implement keyword-based search if needed
-      console.warn('❌ Keyword search not implemented yet.');
+    // For now, we'll implement a simple text-based search
+    // In a production system, you'd want to implement proper vector embeddings
+    const { data, error } = await supabase
+      .from('entity_memory')
+      .select('id, entity_name, content, created_at')
+      .ilike('entity_name', `%${entityName}%`)
+      .ilike('content', `%${query}%`)
+      .limit(3);
+    
+    if (error) {
+      console.error('❌ Memory search error:', error);
       return [];
     }
+    
+    const results = (data || []).map(item => ({
+      id: item.id,
+      entity_name: item.entity_name,
+      content: item.content,
+      similarity: 0.8, // Simulated similarity score
+      created_at: item.created_at
+    }));
+    
+    console.log('✅ Memory search complete:', results);
+    return results;
   } catch (error) {
     console.error('❌ Failed to search entity memories:', error);
     return [];
