@@ -9,22 +9,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { Shield, Building, User, AlertTriangle } from 'lucide-react';
+import { Shield } from 'lucide-react';
 
 const ClientIntakePage = () => {
   const [formData, setFormData] = useState({
     full_name: '',
     email: '',
-    phone: '',
     brand_or_alias: '',
-    industry: '',
-    company_size: '',
-    threat_description: '',
     concern_areas: [] as string[],
     risk_tolerance: '',
     urgency_level: '',
-    budget_range: '',
-    preferred_contact_method: 'email',
     additional_information: ''
   });
 
@@ -64,11 +58,11 @@ const ClientIntakePage = () => {
           full_name: formData.full_name,
           email: formData.email,
           brand_or_alias: formData.brand_or_alias,
-          concern_areas: formData.concern_areas, // This is already an array
+          concern_areas: formData.concern_areas,
           risk_tolerance: formData.risk_tolerance,
           urgency_level: formData.urgency_level,
           additional_information: formData.additional_information,
-          consent_to_process: true, // Required field
+          consent_to_process: true,
           created_at: new Date().toISOString()
         }]);
 
@@ -84,16 +78,10 @@ const ClientIntakePage = () => {
       setFormData({
         full_name: '',
         email: '',
-        phone: '',
         brand_or_alias: '',
-        industry: '',
-        company_size: '',
-        threat_description: '',
         concern_areas: [],
         risk_tolerance: '',
         urgency_level: '',
-        budget_range: '',
-        preferred_contact_method: 'email',
         additional_information: ''
       });
 
@@ -106,19 +94,19 @@ const ClientIntakePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-corporate-dark p-6">
+    <div className="min-h-screen bg-background p-6">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">Client Intake Form</h1>
-          <p className="text-corporate-lightGray">
+          <h1 className="text-3xl font-bold mb-2">Client Intake Form</h1>
+          <p className="text-muted-foreground">
             Secure consultation request for A.R.I.A™ reputation protection services
           </p>
         </div>
 
-        <Card className="bg-corporate-darkSecondary border-corporate-border">
+        <Card>
           <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <Shield className="h-5 w-5 text-corporate-accent" />
+            <CardTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5" />
               Confidential Client Information
             </CardTitle>
           </CardHeader>
@@ -127,65 +115,38 @@ const ClientIntakePage = () => {
               {/* Basic Information */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="full_name" className="text-white">Full Name *</Label>
+                  <Label htmlFor="full_name">Full Name *</Label>
                   <Input
                     id="full_name"
                     value={formData.full_name}
                     onChange={(e) => handleInputChange('full_name', e.target.value)}
-                    className="bg-corporate-darkTertiary border-corporate-border text-white"
                     required
                   />
                 </div>
                 <div>
-                  <Label htmlFor="email" className="text-white">Email *</Label>
+                  <Label htmlFor="email">Email *</Label>
                   <Input
                     id="email"
                     type="email"
                     value={formData.email}
                     onChange={(e) => handleInputChange('email', e.target.value)}
-                    className="bg-corporate-darkTertiary border-corporate-border text-white"
                     required
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="brand_or_alias" className="text-white">Brand/Company Name</Label>
-                  <Input
-                    id="brand_or_alias"
-                    value={formData.brand_or_alias}
-                    onChange={(e) => handleInputChange('brand_or_alias', e.target.value)}
-                    className="bg-corporate-darkTertiary border-corporate-border text-white"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="phone" className="text-white">Phone</Label>
-                  <Input
-                    id="phone"
-                    value={formData.phone}
-                    onChange={(e) => handleInputChange('phone', e.target.value)}
-                    className="bg-corporate-darkTertiary border-corporate-border text-white"
-                  />
-                </div>
-              </div>
-
-              {/* Threat Description */}
               <div>
-                <Label htmlFor="threat_description" className="text-white">Threat Description</Label>
-                <Textarea
-                  id="threat_description"
-                  value={formData.threat_description}
-                  onChange={(e) => handleInputChange('threat_description', e.target.value)}
-                  className="bg-corporate-darkTertiary border-corporate-border text-white"
-                  placeholder="Describe the reputation threat or concern..."
-                  rows={4}
+                <Label htmlFor="brand_or_alias">Brand/Company Name</Label>
+                <Input
+                  id="brand_or_alias"
+                  value={formData.brand_or_alias}
+                  onChange={(e) => handleInputChange('brand_or_alias', e.target.value)}
                 />
               </div>
 
               {/* Concern Areas */}
               <div>
-                <Label className="text-white mb-3 block">Areas of Concern</Label>
+                <Label className="mb-3 block">Areas of Concern</Label>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                   {[
                     'Social Media',
@@ -201,7 +162,7 @@ const ClientIntakePage = () => {
                         checked={formData.concern_areas.includes(area)}
                         onCheckedChange={(checked) => handleConcernAreaChange(area, !!checked)}
                       />
-                      <Label htmlFor={area} className="text-corporate-lightGray text-sm">
+                      <Label htmlFor={area} className="text-sm">
                         {area}
                       </Label>
                     </div>
@@ -212,9 +173,9 @@ const ClientIntakePage = () => {
               {/* Risk and Urgency */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-white">Risk Tolerance</Label>
+                  <Label>Risk Tolerance</Label>
                   <Select value={formData.risk_tolerance} onValueChange={(value) => handleInputChange('risk_tolerance', value)}>
-                    <SelectTrigger className="bg-corporate-darkTertiary border-corporate-border text-white">
+                    <SelectTrigger>
                       <SelectValue placeholder="Select risk tolerance" />
                     </SelectTrigger>
                     <SelectContent>
@@ -225,9 +186,9 @@ const ClientIntakePage = () => {
                   </Select>
                 </div>
                 <div>
-                  <Label className="text-white">Urgency Level</Label>
+                  <Label>Urgency Level</Label>
                   <Select value={formData.urgency_level} onValueChange={(value) => handleInputChange('urgency_level', value)}>
-                    <SelectTrigger className="bg-corporate-darkTertiary border-corporate-border text-white">
+                    <SelectTrigger>
                       <SelectValue placeholder="Select urgency" />
                     </SelectTrigger>
                     <SelectContent>
@@ -242,12 +203,11 @@ const ClientIntakePage = () => {
 
               {/* Additional Information */}
               <div>
-                <Label htmlFor="additional_information" className="text-white">Additional Information</Label>
+                <Label htmlFor="additional_information">Additional Information</Label>
                 <Textarea
                   id="additional_information"
                   value={formData.additional_information}
                   onChange={(e) => handleInputChange('additional_information', e.target.value)}
-                  className="bg-corporate-darkTertiary border-corporate-border text-white"
                   placeholder="Any additional information or special requirements..."
                   rows={3}
                 />
@@ -256,7 +216,7 @@ const ClientIntakePage = () => {
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-corporate-accent hover:bg-corporate-accentDark text-black font-semibold"
+                className="w-full"
               >
                 {isSubmitting ? 'Submitting...' : 'Submit Confidential Intake Form'}
               </Button>
