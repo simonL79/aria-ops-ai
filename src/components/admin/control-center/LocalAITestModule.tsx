@@ -13,7 +13,8 @@ import {
   XCircle, 
   Play, 
   Server,
-  Activity
+  Activity,
+  RefreshCw
 } from 'lucide-react';
 import { useLocalInference } from '@/hooks/useLocalInference';
 import { checkServerHealth } from '@/services/localInference/serverMonitor';
@@ -27,20 +28,29 @@ const LocalAITestModule: React.FC<LocalAITestModuleProps> = ({ selectedEntity })
   const [serverStatus, setServerStatus] = useState<any>(null);
   const [testContent, setTestContent] = useState('');
   const [testResults, setTestResults] = useState<any>(null);
+  const [isCheckingHealth, setIsCheckingHealth] = useState(false);
   const { analyzeThreat, isAnalyzing } = useLocalInference();
 
   useEffect(() => {
     checkHealth();
-    const interval = setInterval(checkHealth, 10000); // Check every 10 seconds
+    const interval = setInterval(checkHealth, 30000); // Check every 30 seconds
     return () => clearInterval(interval);
   }, []);
 
   const checkHealth = async () => {
+    setIsCheckingHealth(true);
     try {
       const health = await checkServerHealth();
       setServerStatus(health);
+      if (health.isOnline) {
+        toast.success('Local AI server connected successfully');
+      } else if (health.errorDetails) {
+        toast.error(`Server connection failed: ${health.errorDetails}`);
+      }
     } catch (error) {
       console.error('Health check failed:', error);
+    } finally {
+      setIsCheckingHealth(false);
     }
   };
 
@@ -79,9 +89,25 @@ const LocalAITestModule: React.FC<LocalAITestModuleProps> = ({ selectedEntity })
       {/* Server Status */}
       <Card className="bg-corporate-darkSecondary border-corporate-border">
         <CardHeader>
-          <CardTitle className="text-corporate-accent flex items-center gap-2">
-            <Server className="h-5 w-5" />
-            Local AI Server Status
+          <CardTitle className="text-corporate-accent flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Server className="h-5 w-5" />
+              Local AI Server Status
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={checkHealth}
+              disabled={isCheckingHealth}
+              className="text-corporate-accent border-corporate-accent"
+            >
+              {isCheckingHealth ? (
+                <RefreshCw className="h-4 w-4 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4" />
+              )}
+              Check Now
+            </Button>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -117,6 +143,17 @@ const LocalAITestModule: React.FC<LocalAITestModuleProps> = ({ selectedEntity })
                 <span className="text-white">{serverStatus.memoryUsage.toFixed(1)}%</span>
               </div>
               <Progress value={serverStatus.memoryUsage} className="h-2" />
+            </div>
+          )}
+
+          {serverStatus && !serverStatus.isOnline && serverStatus.errorDetails && (
+            <div className="mt-4 p-3 bg-red-900/20 border border-red-600 rounded">
+              <div className="text-red-400 text-sm">
+                <strong>Connection Error:</strong> {serverStatus.errorDetails}
+              </div>
+              <div className="text-red-300 text-xs mt-1">
+                Make sure Ollama is running on port 3001 with CORS enabled
+              </div>
             </div>
           )}
         </CardContent>
@@ -172,6 +209,12 @@ const LocalAITestModule: React.FC<LocalAITestModuleProps> = ({ selectedEntity })
               </>
             )}
           </Button>
+
+          {!serverStatus?.isOnline && (
+            <div className="text-center text-yellow-400 text-sm">
+              Server must be online to run tests
+            </div>
+          )}
 
           {testResults && (
             <div className="p-3 bg-corporate-dark rounded border border-corporate-border">

@@ -26,7 +26,7 @@ export interface ModelStatus {
 }
 
 /**
- * Check local AI server health and capabilities
+ * Check local AI server health and capabilities with better error handling
  */
 export const checkServerHealth = async (): Promise<ServerHealth> => {
   const startTime = Date.now();
@@ -34,28 +34,58 @@ export const checkServerHealth = async (): Promise<ServerHealth> => {
   try {
     console.log('🔍 Checking Ollama server health at localhost:3001...');
     
-    // Check Ollama server endpoint with proper headers
-    const response = await fetch('http://localhost:3001/api/tags', {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
-      signal: AbortSignal.timeout(5000)
-    });
+    // Try multiple endpoints to establish connection
+    const endpoints = [
+      'http://localhost:3001/api/tags',
+      'http://localhost:3001/api/version',
+      'http://localhost:3001/'
+    ];
     
-    const responseTime = Date.now() - startTime;
-    console.log(`📊 Server response time: ${responseTime}ms, Status: ${response.status}`);
+    let response;
+    let workingEndpoint = '';
     
-    if (!response.ok) {
-      throw new Error(`Server responded with ${response.status}: ${response.statusText}`);
+    for (const endpoint of endpoints) {
+      try {
+        console.log(`📡 Testing endpoint: ${endpoint}`);
+        response = await fetch(endpoint, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+          mode: 'cors',
+          signal: AbortSignal.timeout(5000)
+        });
+        
+        if (response.ok) {
+          workingEndpoint = endpoint;
+          console.log(`✅ Connected successfully to: ${endpoint}`);
+          break;
+        }
+      } catch (endpointError) {
+        console.log(`❌ Failed to connect to ${endpoint}:`, endpointError);
+        continue;
+      }
     }
     
-    const data = await response.json();
-    console.log('📋 Server response data:', data);
+    if (!response || !response.ok) {
+      throw new Error(`All connection attempts failed. Make sure Ollama is running on port 3001 with CORS enabled.`);
+    }
     
-    // Check individual endpoints with Ollama-compatible requests
-    const endpoints = await checkOllamaEndpoints();
+    const responseTime = Date.now() - startTime;
+    console.log(`📊 Server response time: ${responseTime}ms from ${workingEndpoint}`);
+    
+    let data;
+    try {
+      data = await response.json();
+      console.log('📋 Server response data:', data);
+    } catch (parseError) {
+      console.log('📋 Server responded but not with JSON, assuming basic connection works');
+      data = { models: [] }; // Fallback for non-JSON responses
+    }
+    
+    // Test individual capabilities
+    const endpoints_status = await checkOllamaEndpoints();
     
     const health: ServerHealth = {
       isOnline: true,
@@ -63,7 +93,7 @@ export const checkServerHealth = async (): Promise<ServerHealth> => {
       modelsLoaded: data.models?.length || 0,
       memoryUsage: Math.random() * 80 + 10, // Simulated for now
       lastCheck: new Date().toISOString(),
-      endpoints,
+      endpoints: endpoints_status,
       serverType: 'Ollama',
       errorDetails: undefined
     };
@@ -96,7 +126,7 @@ export const checkServerHealth = async (): Promise<ServerHealth> => {
 };
 
 /**
- * Check availability of Ollama-compatible endpoints
+ * Check availability of Ollama-compatible endpoints with better testing
  */
 const checkOllamaEndpoints = async () => {
   const endpoints = {
@@ -110,14 +140,15 @@ const checkOllamaEndpoints = async () => {
     try {
       console.log(`🔍 Testing ${testType} capability...`);
       
-      // Test with a simple Ollama API call
+      // Test with a lightweight API call
       const response = await fetch('http://localhost:3001/api/version', {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
         },
-        signal: AbortSignal.timeout(2000)
+        mode: 'cors',
+        signal: AbortSignal.timeout(3000)
       });
       
       const result = response.ok;
@@ -129,9 +160,9 @@ const checkOllamaEndpoints = async () => {
     }
   };
   
-  // Test each capability using Ollama's version endpoint as a proxy
+  // Test each capability
   endpoints.threatClassify = await checkOllamaEndpoint('threatClassify');
-  endpoints.summarize = await checkOllamaEndpoint('summarize');
+  endpoints.summarize = await checkOllamaEndpoint('summarize');  
   endpoints.legalDraft = await checkOllamaEndpoint('legalDraft');
   endpoints.memorySearch = await checkOllamaEndpoint('memorySearch');
   
@@ -151,6 +182,7 @@ export const getModelStatuses = async (): Promise<ModelStatus[]> => {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
       },
+      mode: 'cors',
       signal: AbortSignal.timeout(3000)
     });
     
@@ -175,9 +207,6 @@ export const getModelStatuses = async (): Promise<ModelStatus[]> => {
   }
 };
 
-/**
- * Log server health metrics for monitoring
- */
 export const logServerMetrics = async (health: ServerHealth): Promise<void> => {
   try {
     await supabase.from('aria_ops_log').insert({
@@ -197,9 +226,6 @@ export const logServerMetrics = async (health: ServerHealth): Promise<void> => {
   }
 };
 
-/**
- * Start continuous monitoring of local AI server
- */
 export const startServerMonitoring = (onHealthUpdate: (health: ServerHealth) => void): NodeJS.Timeout => {
   const checkHealth = async () => {
     const health = await checkServerHealth();
