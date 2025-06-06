@@ -16,25 +16,25 @@ const ContactPage = () => {
             </p>
             
             <div className="grid md:grid-cols-2 gap-12">
-              <div className="space-y-8">
-                <div className="flex items-start space-x-4">
-                  <Mail className="h-6 w-6 text-orange-500 mt-1" />
+              <div className="space-y-8 text-center">
+                <div className="flex flex-col items-center space-y-4">
+                  <Mail className="h-6 w-6 text-orange-500" />
                   <div>
                     <h3 className="text-lg font-semibold mb-2">Email Us</h3>
                     <p className="text-gray-300">contact@aria-intelligence.com</p>
                   </div>
                 </div>
                 
-                <div className="flex items-start space-x-4">
-                  <Phone className="h-6 w-6 text-orange-500 mt-1" />
+                <div className="flex flex-col items-center space-y-4">
+                  <Phone className="h-6 w-6 text-orange-500" />
                   <div>
                     <h3 className="text-lg font-semibold mb-2">Call Us</h3>
                     <p className="text-gray-300">Available upon request</p>
                   </div>
                 </div>
                 
-                <div className="flex items-start space-x-4">
-                  <MapPin className="h-6 w-6 text-orange-500 mt-1" />
+                <div className="flex flex-col items-center space-y-4">
+                  <MapPin className="h-6 w-6 text-orange-500" />
                   <div>
                     <h3 className="text-lg font-semibold mb-2">Location</h3>
                     <p className="text-gray-300">United Kingdom</p>
