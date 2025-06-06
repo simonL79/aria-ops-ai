@@ -2,6 +2,7 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { Shield, Eye, Users } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const ServicesSection = () => {
   const services = [
@@ -93,9 +94,11 @@ const ServicesSection = () => {
             Get a comprehensive assessment of your digital risk profile. Our experts will identify 
             vulnerabilities and provide a strategic roadmap.
           </p>
-          <button className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-lg font-semibold transition-colors">
-            Request Risk Assessment
-          </button>
+          <Link to="/scan">
+            <button className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-lg font-semibold transition-colors">
+              Request Risk Assessment
+            </button>
+          </Link>
         </div>
       </div>
     </section>
