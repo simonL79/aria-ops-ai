@@ -31,7 +31,7 @@ const App = () => (
             <Route path="/smart-intake" element={<SmartIntakePage />} />
             <Route path="/content-generation" element={<ContentGenerationPage />} />
             <Route path="/admin/keyword-to-article" element={<KeywordToArticleSystemPage />} />
-            <Route path="/control-center" element={<ControlCenterPage />} />
+            <Route path="/admin/control-center" element={<ControlCenterPage />} />
             
             {/* Dynamic Routes */}
             {navItems.map(({ to, page }) => (
