@@ -14,7 +14,8 @@ import {
   Play, 
   Server,
   Activity,
-  RefreshCw
+  RefreshCw,
+  AlertCircle
 } from 'lucide-react';
 import { useLocalInference } from '@/hooks/useLocalInference';
 import { checkServerHealth } from '@/services/localInference/serverMonitor';
@@ -29,6 +30,7 @@ const LocalAITestModule: React.FC<LocalAITestModuleProps> = ({ selectedEntity })
   const [testContent, setTestContent] = useState('');
   const [testResults, setTestResults] = useState<any>(null);
   const [isCheckingHealth, setIsCheckingHealth] = useState(false);
+  const [showConnectionDetails, setShowConnectionDetails] = useState(false);
   const { analyzeThreat, isAnalyzing } = useLocalInference();
 
   useEffect(() => {
@@ -42,13 +44,16 @@ const LocalAITestModule: React.FC<LocalAITestModuleProps> = ({ selectedEntity })
     try {
       const health = await checkServerHealth();
       setServerStatus(health);
+      
       if (health.isOnline) {
-        toast.success('Local AI server connected successfully');
-      } else if (health.errorDetails) {
+        toast.success(`Local AI server connected successfully! ${health.modelsLoaded} models loaded`);
+      } else {
         toast.error(`Server connection failed: ${health.errorDetails}`);
+        setShowConnectionDetails(true); // Auto-show details on failure
       }
     } catch (error) {
       console.error('Health check failed:', error);
+      toast.error('Health check failed');
     } finally {
       setIsCheckingHealth(false);
     }
@@ -94,20 +99,33 @@ const LocalAITestModule: React.FC<LocalAITestModuleProps> = ({ selectedEntity })
               <Server className="h-5 w-5" />
               Local AI Server Status
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={checkHealth}
-              disabled={isCheckingHealth}
-              className="text-corporate-accent border-corporate-accent"
-            >
-              {isCheckingHealth ? (
-                <RefreshCw className="h-4 w-4 animate-spin" />
-              ) : (
-                <RefreshCw className="h-4 w-4" />
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={checkHealth}
+                disabled={isCheckingHealth}
+                className="text-corporate-accent border-corporate-accent"
+              >
+                {isCheckingHealth ? (
+                  <RefreshCw className="h-4 w-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-4 w-4" />
+                )}
+                Check Now
+              </Button>
+              {serverStatus && !serverStatus.isOnline && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowConnectionDetails(!showConnectionDetails)}
+                  className="text-yellow-400"
+                >
+                  <AlertCircle className="h-4 w-4 mr-1" />
+                  Details
+                </Button>
               )}
-              Check Now
-            </Button>
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -146,14 +164,51 @@ const LocalAITestModule: React.FC<LocalAITestModuleProps> = ({ selectedEntity })
             </div>
           )}
 
-          {serverStatus && !serverStatus.isOnline && serverStatus.errorDetails && (
+          {/* Connection Error Details */}
+          {serverStatus && !serverStatus.isOnline && (
             <div className="mt-4 p-3 bg-red-900/20 border border-red-600 rounded">
               <div className="text-red-400 text-sm">
                 <strong>Connection Error:</strong> {serverStatus.errorDetails}
               </div>
               <div className="text-red-300 text-xs mt-1">
-                Make sure Ollama is running on port 3001 with CORS enabled
+                Server Type: {serverStatus.serverType}
               </div>
+              
+              {showConnectionDetails && serverStatus.connectionAttempts && (
+                <div className="mt-3 p-2 bg-red-950/30 rounded border border-red-700">
+                  <div className="text-red-300 text-xs font-medium mb-2">Connection Attempts:</div>
+                  <div className="space-y-1">
+                    {serverStatus.connectionAttempts.map((attempt: string, index: number) => (
+                      <div key={index} className="text-xs font-mono text-red-200">
+                        {attempt}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              <div className="mt-2 text-yellow-300 text-xs">
+                <strong>Troubleshooting:</strong>
+                <ul className="list-disc list-inside mt-1 space-y-1">
+                  <li>Ensure Ollama is running: <code className="bg-black/30 px-1">ollama serve</code></li>
+                  <li>Check CORS origins include Lovable domains</li>
+                  <li>Verify server is on port 3001: <code className="bg-black/30 px-1">OLLAMA_HOST=0.0.0.0:3001</code></li>
+                </ul>
+              </div>
+            </div>
+          )}
+
+          {/* Success Details */}
+          {serverStatus && serverStatus.isOnline && serverStatus.connectionAttempts && (
+            <div className="mt-4 p-3 bg-green-900/20 border border-green-600 rounded">
+              <div className="text-green-400 text-sm">
+                <strong>✅ Connection Successful!</strong> Server: {serverStatus.serverType}
+              </div>
+              {showConnectionDetails && (
+                <div className="mt-2 text-green-300 text-xs">
+                  Working endpoint found in {serverStatus.connectionAttempts.length} attempts
+                </div>
+              )}
             </div>
           )}
         </CardContent>

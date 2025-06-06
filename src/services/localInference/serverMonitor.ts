@@ -15,6 +15,7 @@ export interface ServerHealth {
   };
   serverType?: string;
   errorDetails?: string;
+  connectionAttempts?: string[];
 }
 
 export interface ModelStatus {
@@ -26,19 +27,23 @@ export interface ModelStatus {
 }
 
 /**
- * Check local AI server health and capabilities with better error handling
+ * Check local AI server health with improved connection testing
  */
 export const checkServerHealth = async (): Promise<ServerHealth> => {
   const startTime = Date.now();
+  const connectionAttempts: string[] = [];
   
   try {
-    console.log('🔍 Checking Ollama server health at localhost:3001...');
+    console.log('🔍 Checking Ollama server health...');
     
-    // Try multiple endpoints to establish connection
+    // Try multiple endpoints and protocols
     const endpoints = [
       'http://localhost:3001/api/tags',
+      'http://127.0.0.1:3001/api/tags',
       'http://localhost:3001/api/version',
-      'http://localhost:3001/'
+      'http://127.0.0.1:3001/api/version',
+      'http://localhost:3001/',
+      'http://127.0.0.1:3001/'
     ];
     
     let response;
@@ -47,6 +52,8 @@ export const checkServerHealth = async (): Promise<ServerHealth> => {
     for (const endpoint of endpoints) {
       try {
         console.log(`📡 Testing endpoint: ${endpoint}`);
+        connectionAttempts.push(`Testing ${endpoint}`);
+        
         response = await fetch(endpoint, {
           method: 'GET',
           headers: {
@@ -54,34 +61,77 @@ export const checkServerHealth = async (): Promise<ServerHealth> => {
             'Content-Type': 'application/json',
           },
           mode: 'cors',
-          signal: AbortSignal.timeout(5000)
+          signal: AbortSignal.timeout(3000)
         });
         
         if (response.ok) {
           workingEndpoint = endpoint;
+          connectionAttempts.push(`✅ SUCCESS: ${endpoint} - Status: ${response.status}`);
           console.log(`✅ Connected successfully to: ${endpoint}`);
           break;
+        } else {
+          connectionAttempts.push(`❌ Failed: ${endpoint} - Status: ${response.status}`);
         }
       } catch (endpointError) {
-        console.log(`❌ Failed to connect to ${endpoint}:`, endpointError);
+        const errorMsg = endpointError instanceof Error ? endpointError.message : 'Unknown error';
+        connectionAttempts.push(`❌ Error: ${endpoint} - ${errorMsg}`);
+        console.log(`❌ Failed to connect to ${endpoint}:`, errorMsg);
         continue;
       }
     }
     
     if (!response || !response.ok) {
-      throw new Error(`All connection attempts failed. Make sure Ollama is running on port 3001 with CORS enabled.`);
+      const health: ServerHealth = {
+        isOnline: false,
+        responseTime: Date.now() - startTime,
+        modelsLoaded: 0,
+        memoryUsage: 0,
+        lastCheck: new Date().toISOString(),
+        endpoints: {
+          threatClassify: false,
+          summarize: false,
+          legalDraft: false,
+          memorySearch: false
+        },
+        serverType: 'Ollama (Connection Failed)',
+        errorDetails: `All connection attempts failed. Tried ${endpoints.length} endpoints.`,
+        connectionAttempts
+      };
+      
+      console.log('❌ All connection attempts failed:', connectionAttempts);
+      return health;
     }
     
     const responseTime = Date.now() - startTime;
     console.log(`📊 Server response time: ${responseTime}ms from ${workingEndpoint}`);
     
     let data;
+    let modelsCount = 0;
+    
     try {
       data = await response.json();
       console.log('📋 Server response data:', data);
+      modelsCount = data.models?.length || 0;
     } catch (parseError) {
-      console.log('📋 Server responded but not with JSON, assuming basic connection works');
-      data = { models: [] }; // Fallback for non-JSON responses
+      console.log('📋 Server responded but not with JSON, checking for models separately');
+      
+      // Try to get models from the /api/tags endpoint specifically
+      try {
+        const tagsResponse = await fetch('http://localhost:3001/api/tags', {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' },
+          mode: 'cors',
+          signal: AbortSignal.timeout(2000)
+        });
+        
+        if (tagsResponse.ok) {
+          const tagsData = await tagsResponse.json();
+          modelsCount = tagsData.models?.length || 0;
+          connectionAttempts.push(`✅ Models endpoint working: ${modelsCount} models found`);
+        }
+      } catch (tagsError) {
+        connectionAttempts.push(`❌ Models endpoint failed: ${tagsError instanceof Error ? tagsError.message : 'Unknown'}`);
+      }
     }
     
     // Test individual capabilities
@@ -90,12 +140,13 @@ export const checkServerHealth = async (): Promise<ServerHealth> => {
     const health: ServerHealth = {
       isOnline: true,
       responseTime,
-      modelsLoaded: data.models?.length || 0,
+      modelsLoaded: modelsCount,
       memoryUsage: Math.random() * 80 + 10, // Simulated for now
       lastCheck: new Date().toISOString(),
       endpoints: endpoints_status,
       serverType: 'Ollama',
-      errorDetails: undefined
+      errorDetails: undefined,
+      connectionAttempts
     };
     
     console.log('✅ Server health check successful:', health);
@@ -117,7 +168,8 @@ export const checkServerHealth = async (): Promise<ServerHealth> => {
         memorySearch: false
       },
       serverType: 'Unknown',
-      errorDetails: error instanceof Error ? error.message : 'Unknown error'
+      errorDetails: error instanceof Error ? error.message : 'Unknown error',
+      connectionAttempts
     };
     
     console.log('❌ Server health result:', errorHealth);
@@ -126,7 +178,7 @@ export const checkServerHealth = async (): Promise<ServerHealth> => {
 };
 
 /**
- * Check availability of Ollama-compatible endpoints with better testing
+ * Check availability of Ollama-compatible endpoints
  */
 const checkOllamaEndpoints = async () => {
   const endpoints = {
@@ -148,7 +200,7 @@ const checkOllamaEndpoints = async () => {
           'Content-Type': 'application/json',
         },
         mode: 'cors',
-        signal: AbortSignal.timeout(3000)
+        signal: AbortSignal.timeout(2000)
       });
       
       const result = response.ok;
