@@ -2,12 +2,14 @@
 import React from 'react';
 import PublicLayout from '@/components/layout/PublicLayout';
 import { useBlogPosts } from '@/hooks/useBlogPosts';
+import { useAuth } from '@/hooks/useAuth';
 import { Link } from 'react-router-dom';
 import MediumImportButton from '@/components/blog/MediumImportButton';
 import { Loader2 } from 'lucide-react';
 
 const BlogPage = () => {
   const { blogPosts, loading, error } = useBlogPosts();
+  const { isAuthenticated, isAdmin } = useAuth();
 
   return (
     <PublicLayout>
@@ -21,7 +23,7 @@ const BlogPage = () => {
                   Insights, analysis, and updates from the world of digital reputation management
                 </p>
               </div>
-              <MediumImportButton />
+              {isAuthenticated && isAdmin && <MediumImportButton />}
             </div>
             
             {loading && (
@@ -88,7 +90,9 @@ const BlogPage = () => {
                 {!loading && !error && blogPosts.length === 0 && (
                   <div className="text-center py-12">
                     <p className="text-gray-400 mb-4">No blog posts available at the moment.</p>
-                    <p className="text-gray-500 text-sm">Use the import button above to import Medium articles.</p>
+                    {isAuthenticated && isAdmin && (
+                      <p className="text-gray-500 text-sm">Use the import button above to import Medium articles.</p>
+                    )}
                   </div>
                 )}
               </div>
