@@ -748,8 +748,10 @@ export type Database = {
       }
       client_intake_submissions: {
         Row: {
+          additional_information: string | null
           amplification_topics: string[] | null
           brand_or_alias: string | null
+          concern_areas: string[] | null
           consent_to_process: boolean | null
           content_types_to_remove: string[] | null
           created_at: string | null
@@ -766,13 +768,17 @@ export type Database = {
           prior_attacks: boolean | null
           problematic_platforms: string[] | null
           recent_achievements: string | null
+          risk_tolerance: string | null
           status: string | null
           suppression_targets: string[] | null
           topics_to_flag: string[] | null
+          urgency_level: string | null
         }
         Insert: {
+          additional_information?: string | null
           amplification_topics?: string[] | null
           brand_or_alias?: string | null
+          concern_areas?: string[] | null
           consent_to_process?: boolean | null
           content_types_to_remove?: string[] | null
           created_at?: string | null
@@ -789,13 +795,17 @@ export type Database = {
           prior_attacks?: boolean | null
           problematic_platforms?: string[] | null
           recent_achievements?: string | null
+          risk_tolerance?: string | null
           status?: string | null
           suppression_targets?: string[] | null
           topics_to_flag?: string[] | null
+          urgency_level?: string | null
         }
         Update: {
+          additional_information?: string | null
           amplification_topics?: string[] | null
           brand_or_alias?: string | null
+          concern_areas?: string[] | null
           consent_to_process?: boolean | null
           content_types_to_remove?: string[] | null
           created_at?: string | null
@@ -812,9 +822,11 @@ export type Database = {
           prior_attacks?: boolean | null
           problematic_platforms?: string[] | null
           recent_achievements?: string | null
+          risk_tolerance?: string | null
           status?: string | null
           suppression_targets?: string[] | null
           topics_to_flag?: string[] | null
+          urgency_level?: string | null
         }
         Relationships: []
       }
