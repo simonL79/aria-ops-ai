@@ -65,6 +65,35 @@ export class LiveDataEnforcer {
   }
 
   /**
+   * Enforce system-wide live data compliance (missing method)
+   */
+  static async enforceSystemWideLiveData(): Promise<boolean> {
+    try {
+      // Update system configuration to disable mock data
+      await supabase
+        .from('system_config')
+        .upsert({
+          config_key: 'allow_mock_data',
+          config_value: 'disabled'
+        });
+
+      // Update system configuration for live mode
+      await supabase
+        .from('system_config')
+        .upsert({
+          config_key: 'system_mode',
+          config_value: 'live'
+        });
+
+      console.log('✅ Live Data Enforcer: System-wide live data enforced');
+      return true;
+    } catch (error) {
+      console.error('Failed to enforce system-wide live data:', error);
+      return false;
+    }
+  }
+
+  /**
    * Validate that input data is live (not simulation)
    */
   static async validateDataInput(inputData: string, source: string): Promise<boolean> {
@@ -111,7 +140,7 @@ export class LiveDataEnforcer {
   static blockSimulation(functionName: string): never {
     console.error(`🚫 SIMULATION BLOCKED: ${functionName} attempted to execute with simulation data`);
     
-    // Log the violation
+    // Log the violation (fix Promise issue)
     supabase.from('aria_ops_log').insert({
       operation_type: 'simulation_blocked',
       module_source: 'live_data_enforcer',
@@ -123,7 +152,7 @@ export class LiveDataEnforcer {
       }
     }).then(() => {
       console.log('Simulation block logged to database');
-    }).catch(error => {
+    }).catch((error) => {
       console.error('Failed to log simulation block:', error);
     });
 

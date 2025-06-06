@@ -1,10 +1,9 @@
-
 import { useState, useEffect } from 'react';
 import { AlertTriangle, Shield, CheckCircle, Ban } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { LiveDataEnforcer } from '@/services/ariaCore/liveDataEnforcer';
+import { LiveDataEnforcer, type LiveDataCompliance } from '@/services/ariaCore/liveDataEnforcer';
 
 interface LiveDataValidationResult {
   isCompliant: boolean;
@@ -35,7 +34,17 @@ export const LiveDataGuard = ({ children, enforceStrict = true }: LiveDataGuardP
     setIsValidating(true);
     try {
       const result = await LiveDataEnforcer.validateLiveDataCompliance();
-      setValidationResult(result);
+      
+      // Transform LiveDataCompliance to LiveDataValidationResult
+      const transformedResult: LiveDataValidationResult = {
+        isCompliant: result.isCompliant,
+        mockDataBlocked: !result.simulationDetected,
+        liveDataOnly: result.isCompliant,
+        simulationDetected: result.simulationDetected,
+        message: result.details || (result.isCompliant ? 'System operating with live data' : 'Issues detected with live data compliance')
+      };
+      
+      setValidationResult(transformedResult);
       
       if (result.simulationDetected) {
         console.error('🚨 WEAPONS-GRADE ALERT: Simulation detected in live system');

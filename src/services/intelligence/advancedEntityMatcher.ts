@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export interface AdvancedEntityFingerprint {
@@ -43,7 +42,21 @@ export class AdvancedEntityMatcher {
         return null;
       }
 
-      return data;
+      // Transform database result to match interface
+      return {
+        id: data.id,
+        entity_name: data.entity_name,
+        entity_type: data.entity_type || 'individual',
+        alternate_names: data.alternate_names || [],
+        industries: data.industries || [],
+        known_associates: data.known_associates || [],
+        controversial_topics: data.controversial_topics || [],
+        false_positive_blocklist: data.false_positive_blocklist || [],
+        live_data_only: data.live_data_only || true,
+        created_source: data.created_source || 'unknown',
+        last_updated: data.last_updated,
+        created_at: data.created_at
+      };
     } catch (error) {
       console.error('Failed to get entity fingerprint:', error);
       return null;
@@ -57,7 +70,17 @@ export class AdvancedEntityMatcher {
     try {
       const { data, error } = await supabase
         .from('entity_fingerprints')
-        .insert(fingerprintData)
+        .insert({
+          entity_name: fingerprintData.entity_name,
+          entity_type: fingerprintData.entity_type,
+          alternate_names: fingerprintData.alternate_names,
+          industries: fingerprintData.industries,
+          known_associates: fingerprintData.known_associates,
+          controversial_topics: fingerprintData.controversial_topics,
+          false_positive_blocklist: fingerprintData.false_positive_blocklist,
+          live_data_only: fingerprintData.live_data_only,
+          created_source: fingerprintData.created_source
+        })
         .select('id')
         .single();
 
