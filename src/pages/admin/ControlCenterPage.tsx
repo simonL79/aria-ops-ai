@@ -1,9 +1,14 @@
 
 import React from 'react';
+import DashboardLayout from '@/components/layout/DashboardLayout';
 import ControlCenter from '@/components/admin/ControlCenter';
 
 const ControlCenterPage = () => {
-  return <ControlCenter />;
+  return (
+    <DashboardLayout>
+      <ControlCenter />
+    </DashboardLayout>
+  );
 };
 
 export default ControlCenterPage;
