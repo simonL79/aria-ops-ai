@@ -1,38 +1,47 @@
 
-import { supabase } from '@/integrations/supabase/client';
 import { LiveDataEnforcer } from '@/services/ariaCore/liveDataEnforcer';
 
 export interface CIAScanOptions {
   targetEntity: string;
-  fullScan: boolean;
+  fullScan?: boolean;
   source: string;
-  precisionMode: 'high' | 'medium' | 'low';
-  enableFalsePositiveFilter: boolean;
-  liveDataOnly: boolean;
-  blockSimulations: boolean;
+  precisionMode?: 'high' | 'medium' | 'low';
+  enableFalsePositiveFilter?: boolean;
+  liveDataOnly?: boolean;
+  blockSimulations?: boolean;
 }
 
 export interface CIAScanResult {
   id: string;
-  content: string;
+  content?: string;
   platform: string;
   url?: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
-  threat_type: string;
-  confidence_score: number;
-  source_type: string;
+  match_score: number;
+  match_decision: 'accepted' | 'quarantined' | 'rejected';
+  match_type?: string;
+  false_positive_detected: boolean;
   created_at: string;
+  confidence_score: number;
+  severity: 'low' | 'medium' | 'high';
+  status: string;
+  threat_type: string;
+  sentiment: number;
+  detected_entities: string[];
+  source_type: string;
+  potential_reach: number;
+  source_credibility_score: number;
+  media_is_ai_generated: boolean;
+  ai_detection_confidence: number;
 }
 
 export class CIALevelScanner {
-  
   /**
-   * Execute CIA-precision scan with advanced filtering
+   * Execute CIA-level precision scan with mandatory live data enforcement
    */
   static async executePrecisionScan(options: CIAScanOptions): Promise<CIAScanResult[]> {
-    console.log('🎯 CIA-Level Scanner: Initiating precision scan');
+    console.log('🎯 CIA Scanner: Starting precision scan with live enforcement');
     
-    // MANDATORY: Block simulation attempts
+    // MANDATORY: Block if simulation detected
     if (options.blockSimulations !== false) {
       const compliance = await LiveDataEnforcer.validateLiveDataCompliance();
       if (!compliance.isCompliant || compliance.simulationDetected) {
@@ -41,167 +50,59 @@ export class CIALevelScanner {
       }
     }
 
-    // Validate entity input is live data
+    // Validate target entity is not simulation data
     if (options.liveDataOnly !== false) {
-      const entityValidation = await LiveDataEnforcer.validateDataInput(options.targetEntity, options.source);
-      if (!entityValidation) {
-        throw new Error('CIA Scanner blocked: Target entity appears to be simulation data');
+      const isLiveData = await LiveDataEnforcer.validateDataInput(options.targetEntity, options.source);
+      if (!isLiveData) {
+        console.error('🚫 CIA Scanner BLOCKED: Target entity appears to be simulation data');
+        throw new Error('CIA Scanner blocked: Target entity rejected as simulation data');
       }
     }
 
     try {
-      let query = supabase
-        .from('scan_results')
-        .select('*')
-        .ilike('content', `%${options.targetEntity}%`)
-        .eq('source_type', 'live_osint')
-        .order('created_at', { ascending: false });
-
-      // Apply precision mode filters
-      switch (options.precisionMode) {
-        case 'high':
-          query = query
-            .gte('confidence_score', 0.8)
-            .gte('created_at', new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString())
-            .limit(50);
-          break;
-        case 'medium':
-          query = query
-            .gte('confidence_score', 0.6)
-            .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
-            .limit(100);
-          break;
-        case 'low':
-          query = query
-            .gte('confidence_score', 0.4)
-            .gte('created_at', new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString())
-            .limit(200);
-          break;
-      }
-
-      const { data: scanResults, error } = await query;
-
-      if (error) {
-        console.error('CIA Scanner database error:', error);
-        throw new Error(`CIA Scanner failed: ${error.message}`);
-      }
-
-      // Apply false positive filtering if enabled
-      let filteredResults = scanResults || [];
+      // Import the real scanning function
+      const { performRealScan } = await import('@/services/monitoring/realScan');
       
-      if (options.enableFalsePositiveFilter) {
-        filteredResults = filteredResults.filter(result => 
-          !this.isFalsePositive(result.content, options.targetEntity)
-        );
-      }
-
-      // Log scan execution
-      await supabase.from('aria_ops_log').insert({
-        operation_type: 'cia_precision_scan',
-        entity_name: options.targetEntity,
-        module_source: 'cia_level_scanner',
-        success: true,
-        operation_data: {
-          precision_mode: options.precisionMode,
-          full_scan: options.fullScan,
-          results_found: filteredResults.length,
-          false_positive_filter: options.enableFalsePositiveFilter,
-          live_data_only: options.liveDataOnly,
-          scan_timestamp: new Date().toISOString()
-        }
+      const liveResults = await performRealScan({
+        fullScan: options.fullScan || false,
+        targetEntity: options.targetEntity,
+        source: options.source
       });
 
-      console.log(`✅ CIA Scanner: Found ${filteredResults.length} precision results`);
-      return filteredResults.map(result => ({
+      // Convert to CIA scan result format
+      const ciaResults: CIAScanResult[] = liveResults.map(result => ({
         id: result.id,
         content: result.content,
         platform: result.platform,
         url: result.url,
+        match_score: result.confidence_score,
+        match_decision: result.confidence_score > 0.7 ? 'accepted' : 
+                       result.confidence_score > 0.4 ? 'quarantined' : 'rejected',
+        match_type: result.threat_type,
+        false_positive_detected: result.confidence_score < 0.3,
+        created_at: new Date().toISOString(),
+        confidence_score: result.confidence_score,
         severity: result.severity,
-        threat_type: result.threat_type || 'reputation_risk',
-        confidence_score: result.confidence_score || 0,
+        status: result.status,
+        threat_type: result.threat_type,
+        sentiment: result.sentiment,
+        detected_entities: result.detected_entities,
         source_type: result.source_type,
-        created_at: result.created_at
+        potential_reach: result.potential_reach,
+        source_credibility_score: result.source_credibility_score || 0.5,
+        media_is_ai_generated: result.media_is_ai_generated || false,
+        ai_detection_confidence: result.ai_detection_confidence || 0
       }));
 
+      console.log(`✅ CIA Scanner: ${ciaResults.length} live results processed`);
+      return ciaResults;
+
     } catch (error) {
-      console.error('❌ CIA Scanner execution failed:', error);
+      console.error('❌ CIA Scanner failed:', error);
       if (error.message.includes('simulation') || error.message.includes('blocked')) {
         throw error; // Re-throw simulation blocks
       }
-      throw new Error('CIA Scanner: Live precision scan failed');
-    }
-  }
-
-  /**
-   * Detect false positives using advanced pattern matching
-   */
-  private static isFalsePositive(content: string, entityName: string): boolean {
-    const contentLower = content.toLowerCase();
-    const entityLower = entityName.toLowerCase();
-
-    // Common false positive indicators
-    const falsePositivePatterns = [
-      'mock', 'test', 'demo', 'sample', 'example',
-      'lorem ipsum', 'placeholder', 'dummy',
-      'fictional', 'hypothetical', 'not real'
-    ];
-
-    // Check for false positive patterns
-    for (const pattern of falsePositivePatterns) {
-      if (contentLower.includes(pattern)) {
-        return true;
-      }
-    }
-
-    // Check for entity name in clearly non-relevant contexts
-    const irrelevantContexts = [
-      'username', 'handle', 'tag', 'label',
-      'variable', 'function', 'class', 'id'
-    ];
-
-    for (const context of irrelevantContexts) {
-      if (contentLower.includes(`${context}:`) && contentLower.includes(entityLower)) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  /**
-   * Get scan statistics for performance monitoring
-   */
-  static async getScanStatistics(entityName: string, days: number = 7): Promise<any> {
-    try {
-      const { data, error } = await supabase
-        .from('aria_ops_log')
-        .select('operation_data, created_at')
-        .eq('operation_type', 'cia_precision_scan')
-        .eq('entity_name', entityName)
-        .gte('created_at', new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString())
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching scan statistics:', error);
-        return null;
-      }
-
-      const totalScans = data?.length || 0;
-      const totalResults = data?.reduce((sum, log) => sum + (log.operation_data?.results_found || 0), 0) || 0;
-      const avgResultsPerScan = totalScans > 0 ? totalResults / totalScans : 0;
-
-      return {
-        total_scans: totalScans,
-        total_results: totalResults,
-        avg_results_per_scan: Math.round(avgResultsPerScan * 100) / 100,
-        scan_period_days: days,
-        last_scan: data?.[0]?.created_at || null
-      };
-
-    } catch (error) {
-      console.error('Failed to get scan statistics:', error);
-      return null;
+      throw new Error('CIA Scanner: Live intelligence gathering failed');
     }
   }
 

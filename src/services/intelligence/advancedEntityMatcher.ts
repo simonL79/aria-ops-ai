@@ -1,10 +1,10 @@
 
+import { LiveDataEnforcer } from '@/services/ariaCore/liveDataEnforcer';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface AdvancedEntityFingerprint {
   id: string;
   entity_name: string;
-  entity_type: string;
   alternate_names: string[];
   industries: string[];
   known_associates: string[];
@@ -12,38 +12,88 @@ export interface AdvancedEntityFingerprint {
   false_positive_blocklist: string[];
   live_data_only: boolean;
   created_source: string;
-  last_updated: string;
-  created_at: string;
 }
 
 export interface EntityMatchResult {
-  entity_name: string;
-  content_snippet: string;
-  match_score: number;
-  decision: 'accepted' | 'rejected' | 'pending';
+  decision: 'accepted' | 'quarantined' | 'rejected';
+  confidence_score: number;
+  match_factors: string[];
   false_positive_detected: boolean;
   reasoning: string;
 }
 
 export class AdvancedEntityMatcher {
-  
   /**
-   * Get entity fingerprint by name
+   * Create entity fingerprint with live data validation using existing entities table
+   */
+  static async createEntityFingerprint(fingerprint: any): Promise<string> {
+    // Validate input is live data
+    if (!await LiveDataEnforcer.validateDataInput(fingerprint.entity_name, 'entity_fingerprint')) {
+      throw new Error('Entity fingerprint blocked: Entity name appears to be simulation data');
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('entities')
+        .insert([{
+          name: fingerprint.entity_name,
+          entity_type: fingerprint.entity_type || 'individual',
+          risk_profile: {
+            alternate_names: fingerprint.alternate_names || [],
+            industries: fingerprint.industries || [],
+            known_associates: fingerprint.known_associates || [],
+            controversial_topics: fingerprint.controversial_topics || [],
+            false_positive_blocklist: fingerprint.false_positive_blocklist || [],
+            live_data_only: fingerprint.live_data_only,
+            created_source: fingerprint.created_source
+          }
+        }])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Failed to create entity fingerprint:', error);
+        throw new Error('Failed to create entity fingerprint');
+      }
+
+      console.log('✅ Created live entity fingerprint:', data.id);
+      return data.id;
+
+    } catch (error) {
+      console.error('Entity fingerprint creation failed:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get entity fingerprint by name using existing entities table
    */
   static async getEntityFingerprint(entityName: string): Promise<AdvancedEntityFingerprint | null> {
     try {
       const { data, error } = await supabase
-        .from('entity_fingerprints')
+        .from('entities')
         .select('*')
-        .eq('entity_name', entityName)
+        .eq('name', entityName)
         .single();
 
-      if (error) {
-        console.error('Error fetching entity fingerprint:', error);
+      if (error || !data) {
         return null;
       }
 
-      return data;
+      const riskProfile = data.risk_profile as any || {};
+
+      return {
+        id: data.id,
+        entity_name: data.name,
+        alternate_names: riskProfile.alternate_names || [],
+        industries: riskProfile.industries || [],
+        known_associates: riskProfile.known_associates || [],
+        controversial_topics: riskProfile.controversial_topics || [],
+        false_positive_blocklist: riskProfile.false_positive_blocklist || [],
+        live_data_only: riskProfile.live_data_only || true,
+        created_source: riskProfile.created_source || 'unknown'
+      };
+
     } catch (error) {
       console.error('Failed to get entity fingerprint:', error);
       return null;
@@ -51,168 +101,107 @@ export class AdvancedEntityMatcher {
   }
 
   /**
-   * Create new entity fingerprint
-   */
-  static async createEntityFingerprint(fingerprintData: Omit<AdvancedEntityFingerprint, 'id' | 'last_updated' | 'created_at'>): Promise<string> {
-    try {
-      const { data, error } = await supabase
-        .from('entity_fingerprints')
-        .insert(fingerprintData)
-        .select('id')
-        .single();
-
-      if (error) {
-        throw new Error(`Failed to create entity fingerprint: ${error.message}`);
-      }
-
-      console.log('✅ Entity fingerprint created successfully');
-      return data.id;
-    } catch (error) {
-      console.error('Failed to create entity fingerprint:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Analyze content for entity matches with advanced precision
+   * Analyze content match against entity fingerprint
    */
   static analyzeContentMatch(
-    content: string, 
-    url: string, 
+    content: string,
+    url: string,
     fingerprint: AdvancedEntityFingerprint
   ): EntityMatchResult {
     const contentLower = content.toLowerCase();
-    const entityLower = fingerprint.entity_name.toLowerCase();
-    
-    let matchScore = 0;
-    let reasoning = '';
-    let falsePositiveDetected = false;
+    const matchFactors: string[] = [];
+    let confidenceScore = 0;
 
-    // Check for false positive blocklist
-    for (const blockedTerm of fingerprint.false_positive_blocklist) {
-      if (contentLower.includes(blockedTerm.toLowerCase())) {
-        falsePositiveDetected = true;
-        reasoning += `False positive detected: "${blockedTerm}". `;
-        break;
+    // Check for simulation content first
+    const simulationKeywords = fingerprint.false_positive_blocklist.filter(keyword => 
+      ['mock', 'test', 'demo', 'simulation', 'fake'].some(sim => keyword.includes(sim))
+    );
+
+    for (const simKeyword of simulationKeywords) {
+      if (contentLower.includes(simKeyword.toLowerCase())) {
+        return {
+          decision: 'rejected',
+          confidence_score: 0,
+          match_factors: ['simulation_detected'],
+          false_positive_detected: true,
+          reasoning: `Simulation keyword detected: ${simKeyword}`
+        };
       }
     }
 
-    // Exact name match
-    if (contentLower.includes(entityLower)) {
-      matchScore += 0.4;
-      reasoning += 'Exact entity name match found. ';
+    // Primary name match
+    if (contentLower.includes(fingerprint.entity_name.toLowerCase())) {
+      matchFactors.push('primary_name_match');
+      confidenceScore += 0.4;
     }
 
-    // Alternate names check
+    // Alternate name matches
     for (const altName of fingerprint.alternate_names) {
       if (contentLower.includes(altName.toLowerCase())) {
-        matchScore += 0.3;
-        reasoning += `Alternate name "${altName}" matched. `;
-        break;
+        matchFactors.push(`alternate_name_match_${altName}`);
+        confidenceScore += 0.2;
       }
     }
 
-    // Context relevance (industry keywords)
+    // Industry context matches
     for (const industry of fingerprint.industries) {
       if (contentLower.includes(industry.toLowerCase())) {
-        matchScore += 0.1;
-        reasoning += `Industry context "${industry}" found. `;
+        matchFactors.push(`industry_match_${industry}`);
+        confidenceScore += 0.1;
       }
     }
 
-    // Known associates check
-    for (const associate of fingerprint.known_associates) {
-      if (contentLower.includes(associate.toLowerCase())) {
-        matchScore += 0.1;
-        reasoning += `Known associate "${associate}" mentioned. `;
+    // False positive check
+    for (const blockword of fingerprint.false_positive_blocklist) {
+      if (contentLower.includes(blockword.toLowerCase())) {
+        return {
+          decision: 'rejected',
+          confidence_score: Math.max(0, confidenceScore - 0.5),
+          match_factors: matchFactors,
+          false_positive_detected: true,
+          reasoning: `False positive detected: ${blockword}`
+        };
       }
     }
 
-    // Controversial topics check
-    for (const topic of fingerprint.controversial_topics) {
-      if (contentLower.includes(topic.toLowerCase())) {
-        matchScore += 0.1;
-        reasoning += `Controversial topic "${topic}" detected. `;
-      }
-    }
-
-    // Determine decision
-    let decision: 'accepted' | 'rejected' | 'pending' = 'pending';
-    
-    if (falsePositiveDetected) {
-      decision = 'rejected';
-      reasoning += 'Rejected due to false positive detection.';
-    } else if (matchScore >= 0.7) {
-      decision = 'accepted';
-      reasoning += 'High confidence match accepted.';
-    } else if (matchScore >= 0.4) {
-      decision = 'pending';
-      reasoning += 'Medium confidence - requires review.';
-    } else {
-      decision = 'rejected';
-      reasoning += 'Low confidence match rejected.';
-    }
+    // Decision logic
+    let decision: 'accepted' | 'quarantined' | 'rejected';
+    if (confidenceScore >= 0.7) decision = 'accepted';
+    else if (confidenceScore >= 0.4) decision = 'quarantined';
+    else decision = 'rejected';
 
     return {
-      entity_name: fingerprint.entity_name,
-      content_snippet: content.substring(0, 200),
-      match_score: Math.min(matchScore, 1.0),
       decision,
-      false_positive_detected: falsePositiveDetected,
-      reasoning: reasoning.trim()
+      confidence_score: Math.min(1, confidenceScore),
+      match_factors: matchFactors,
+      false_positive_detected: false,
+      reasoning: `Score: ${confidenceScore.toFixed(2)}, Factors: ${matchFactors.join(', ')}`
     };
   }
 
   /**
-   * Get precision statistics for an entity fingerprint
+   * Get precision statistics for entity using existing scan results
    */
-  static async getPrecisionStats(fingerprintId: string): Promise<any[]> {
+  static async getPrecisionStats(entityId: string): Promise<any[]> {
     try {
+      // Use existing scan_results table to get entity match statistics
       const { data, error } = await supabase
-        .from('entity_precision_stats')
+        .from('scan_results')
         .select('*')
-        .eq('entity_fingerprint_id', fingerprintId)
-        .order('scan_date', { ascending: false })
-        .limit(30);
+        .contains('detected_entities', [entityId])
+        .order('created_at', { ascending: false })
+        .limit(10);
 
       if (error) {
-        console.error('Error fetching precision stats:', error);
+        console.error('Failed to get precision stats:', error);
         return [];
       }
 
       return data || [];
+
     } catch (error) {
-      console.error('Failed to get precision stats:', error);
+      console.error('Precision stats error:', error);
       return [];
-    }
-  }
-
-  /**
-   * Update entity fingerprint with new data
-   */
-  static async updateEntityFingerprint(
-    entityName: string, 
-    updates: Partial<AdvancedEntityFingerprint>
-  ): Promise<boolean> {
-    try {
-      const { error } = await supabase
-        .from('entity_fingerprints')
-        .update({
-          ...updates,
-          last_updated: new Date().toISOString()
-        })
-        .eq('entity_name', entityName);
-
-      if (error) {
-        console.error('Error updating entity fingerprint:', error);
-        return false;
-      }
-
-      console.log('✅ Entity fingerprint updated successfully');
-      return true;
-    } catch (error) {
-      console.error('Failed to update entity fingerprint:', error);
-      return false;
     }
   }
 }
