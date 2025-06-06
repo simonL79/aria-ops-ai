@@ -53,7 +53,7 @@ const ClientIntakePage = () => {
 
       console.log('Submitting form data:', formData);
 
-      // Submit to Supabase with exact field mapping
+      // Submit to Supabase - removing the problematic status field that might be causing the trigger
       const { data, error } = await supabase
         .from('client_intake_submissions')
         .insert({
@@ -64,8 +64,8 @@ const ClientIntakePage = () => {
           risk_tolerance: formData.risk_tolerance || null,
           urgency_level: formData.urgency_level || null,
           additional_information: formData.additional_information || null,
-          consent_to_process: true,
-          status: 'new'
+          consent_to_process: true
+          // Removed status field as it might be causing the trigger issue
         })
         .select();
 
