@@ -1,14 +1,22 @@
 
 import React from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Shield, Target, AlertTriangle, Zap, Brain, Settings, FileText } from "lucide-react";
-import EntityContextPanel from './EntityContextPanel';
-import QuickCommandConsole from './QuickCommandConsole';
-import ThreatTracker from './ThreatTracker';
-import ServiceOrchestrator from './ServiceOrchestrator';
-import SystemDiagnostics from './SystemDiagnostics';
-import StrategyBrainMetrics from './StrategyBrainMetrics';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { 
+  Shield, 
+  Brain, 
+  FileText, 
+  Users, 
+  Activity, 
+  Database,
+  Settings,
+  Zap,
+  Server
+} from 'lucide-react';
 import ContentGenerationModule from './ContentGenerationModule';
+import LocalAITestModule from './LocalAITestModule';
 
 interface ControlCenterModulesProps {
   activeModule: string;
@@ -34,134 +42,177 @@ const ControlCenterModules: React.FC<ControlCenterModulesProps> = ({
   currentThreatLevel
 }) => {
   return (
-    <Tabs value={activeModule} onValueChange={onModuleChange} className="space-y-6">
-      <TabsList className="bg-corporate-darkSecondary border-corporate-border">
-        <TabsTrigger value="overview" className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black">
-          <Shield className="h-4 w-4 mr-2" />
+    <Tabs value={activeModule} onValueChange={onModuleChange} className="space-y-4">
+      <TabsList className="grid grid-cols-6 gap-1 bg-corporate-darkSecondary border border-corporate-border">
+        <TabsTrigger value="overview" className="text-corporate-lightGray data-[state=active]:text-corporate-accent">
+          <Shield className="h-4 w-4 mr-1" />
           Overview
         </TabsTrigger>
-        <TabsTrigger value="execution-plan" className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black">
-          <Target className="h-4 w-4 mr-2" />
-          Client Execution
+        <TabsTrigger value="local-ai" className="text-corporate-lightGray data-[state=active]:text-corporate-accent">
+          <Brain className="h-4 w-4 mr-1" />
+          Local AI
         </TabsTrigger>
-        <TabsTrigger value="content-generation" className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black">
-          <FileText className="h-4 w-4 mr-2" />
-          Content Engine
+        <TabsTrigger value="content" className="text-corporate-lightGray data-[state=active]:text-corporate-accent">
+          <FileText className="h-4 w-4 mr-1" />
+          Content
         </TabsTrigger>
-        <TabsTrigger value="threats" className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black">
-          <AlertTriangle className="h-4 w-4 mr-2" />
-          Threat Tracker
+        <TabsTrigger value="clients" className="text-corporate-lightGray data-[state=active]:text-corporate-accent">
+          <Users className="h-4 w-4 mr-1" />
+          Clients
         </TabsTrigger>
-        <TabsTrigger value="services" className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black">
-          <Zap className="h-4 w-4 mr-2" />
-          Services
+        <TabsTrigger value="monitoring" className="text-corporate-lightGray data-[state=active]:text-corporate-accent">
+          <Activity className="h-4 w-4 mr-1" />
+          Monitor
         </TabsTrigger>
-        <TabsTrigger value="brain" className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black">
-          <Brain className="h-4 w-4 mr-2" />
-          Strategy Brain
-        </TabsTrigger>
-        <TabsTrigger value="diagnostics" className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black">
-          <Settings className="h-4 w-4 mr-2" />
-          Diagnostics
+        <TabsTrigger value="settings" className="text-corporate-lightGray data-[state=active]:text-corporate-accent">
+          <Settings className="h-4 w-4 mr-1" />
+          Settings
         </TabsTrigger>
       </TabsList>
 
-      <TabsContent value="overview" className="space-y-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <EntityContextPanel 
-            selectedEntity={selectedEntity}
-            entityMemory={entityMemory}
-            onEntitySelect={onEntitySelect}
-            serviceStatus={serviceStatus}
-          />
-          {showConsole ? (
-            <QuickCommandConsole 
-              selectedEntity={selectedEntity}
-              onClose={onToggleConsole}
-              serviceStatus={serviceStatus}
-            />
-          ) : (
-            <div className="bg-corporate-darkSecondary border-corporate-border rounded-lg p-6 text-center">
-              <button
-                onClick={onToggleConsole}
-                className="bg-corporate-accent text-black hover:bg-corporate-accent/90 px-4 py-2 rounded"
+      <TabsContent value="overview" className="space-y-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {/* System Status */}
+          <Card className="bg-corporate-darkSecondary border-corporate-border">
+            <CardHeader>
+              <CardTitle className="text-corporate-accent flex items-center gap-2">
+                <Activity className="h-5 w-5" />
+                System Status
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-corporate-lightGray">Threat Level</span>
+                  <Badge variant={currentThreatLevel === 'critical' ? 'destructive' : 'outline'}>
+                    {currentThreatLevel.toUpperCase()}
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-corporate-lightGray">Active Entity</span>
+                  <span className="text-white text-sm">{selectedEntity || 'None'}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-corporate-lightGray">Live Data</span>
+                  <Badge variant="outline" className="text-green-400 border-green-400">Active</Badge>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Quick Actions */}
+          <Card className="bg-corporate-darkSecondary border-corporate-border">
+            <CardHeader>
+              <CardTitle className="text-corporate-accent">Quick Actions</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="w-full text-corporate-accent border-corporate-accent"
+                onClick={() => onModuleChange('local-ai')}
               >
-                <Zap className="h-4 w-4 mr-2 inline" />
-                Open Command Console
-              </button>
-            </div>
-          )}
+                <Brain className="h-3 w-3 mr-1" />
+                Test Local AI
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="w-full text-corporate-accent border-corporate-accent"
+                onClick={() => onModuleChange('content')}
+              >
+                <FileText className="h-3 w-3 mr-1" />
+                Generate Content
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="w-full text-corporate-accent border-corporate-accent"
+                onClick={onToggleConsole}
+              >
+                <Server className="h-3 w-3 mr-1" />
+                {showConsole ? 'Hide' : 'Show'} Console
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Entity Memory */}
+          <Card className="bg-corporate-darkSecondary border-corporate-border">
+            <CardHeader>
+              <CardTitle className="text-corporate-accent flex items-center gap-2">
+                <Database className="h-5 w-5" />
+                Entity Memory
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {entityMemory.length > 0 ? (
+                <div className="space-y-2">
+                  {entityMemory.slice(0, 3).map((memory, index) => (
+                    <div key={index} className="text-xs p-2 bg-corporate-dark rounded border border-corporate-border">
+                      <div className="text-corporate-accent">{memory.entity_name}</div>
+                      <div className="text-corporate-lightGray truncate">{memory.content}</div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center text-corporate-lightGray text-sm py-4">
+                  No entity context loaded
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
       </TabsContent>
 
-      <TabsContent value="execution-plan" className="space-y-6">
-        {selectedEntity ? (
-          <div className="bg-corporate-darkSecondary border-corporate-border rounded-lg p-6">
-            <h3 className="text-xl font-semibold text-corporate-accent mb-4">
-              Client Execution Plan: {selectedEntity}
-            </h3>
-            <p className="text-corporate-lightGray mb-4">
-              Threat Level: <span className="text-corporate-accent font-semibold">{currentThreatLevel.toUpperCase()}</span>
-            </p>
-            <div className="space-y-4">
-              <div className="p-4 bg-corporate-dark rounded border border-corporate-border">
-                <h4 className="font-medium text-white mb-2">Active Strategies</h4>
-                <p className="text-corporate-lightGray text-sm">
-                  Live strategy execution framework for {selectedEntity}
-                </p>
-              </div>
-              <div className="p-4 bg-corporate-dark rounded border border-corporate-border">
-                <h4 className="font-medium text-white mb-2">Deployment Status</h4>
-                <p className="text-corporate-lightGray text-sm">
-                  Real-time deployment monitoring and control
-                </p>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="bg-corporate-darkSecondary border-corporate-border rounded-lg p-8 text-center">
-            <Target className="h-12 w-12 mx-auto mb-4 opacity-50 text-corporate-lightGray" />
-            <p className="text-corporate-lightGray">Please select an entity to view the execution plan</p>
-          </div>
-        )}
+      <TabsContent value="local-ai">
+        <LocalAITestModule selectedEntity={selectedEntity} />
       </TabsContent>
 
-      <TabsContent value="content-generation" className="space-y-6">
+      <TabsContent value="content">
         <ContentGenerationModule 
           selectedEntity={selectedEntity}
           serviceStatus={serviceStatus}
         />
       </TabsContent>
 
-      <TabsContent value="threats" className="space-y-6">
-        <ThreatTracker 
-          selectedEntity={selectedEntity}
-          serviceStatus={serviceStatus}
-          entityMemory={entityMemory}
-        />
+      <TabsContent value="clients" className="space-y-4">
+        <Card className="bg-corporate-darkSecondary border-corporate-border">
+          <CardHeader>
+            <CardTitle className="text-corporate-accent">Client Management</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-corporate-lightGray">Client management features will be integrated here.</p>
+            <Button 
+              variant="outline" 
+              className="mt-4 text-corporate-accent border-corporate-accent"
+              onClick={() => window.location.href = '/admin/clients'}
+            >
+              Open Full Client Management
+            </Button>
+          </CardContent>
+        </Card>
       </TabsContent>
 
-      <TabsContent value="services" className="space-y-6">
-        <ServiceOrchestrator 
-          selectedEntity={selectedEntity}
-          activeModule={activeModule}
-        />
-        <div className="bg-corporate-darkSecondary border-corporate-border rounded-lg p-8 text-center">
-          <Zap className="h-8 w-8 mx-auto mb-2 text-corporate-lightGray" />
-          <p className="text-corporate-lightGray">Service orchestration running in background</p>
-          <p className="text-xs mt-1 text-corporate-lightGray">Check console for service logs</p>
-        </div>
+      <TabsContent value="monitoring" className="space-y-4">
+        <Card className="bg-corporate-darkSecondary border-corporate-border">
+          <CardHeader>
+            <CardTitle className="text-corporate-accent">Live Monitoring</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-corporate-lightGray">Real-time monitoring dashboard will be integrated here.</p>
+          </CardContent>
+        </Card>
       </TabsContent>
 
-      <TabsContent value="brain" className="space-y-6">
-        <StrategyBrainMetrics selectedEntity={selectedEntity} />
-      </TabsContent>
-
-      <TabsContent value="diagnostics" className="space-y-6">
-        <SystemDiagnostics 
-          selectedEntity={selectedEntity}
-          serviceStatus={serviceStatus}
-        />
+      <TabsContent value="settings" className="space-y-4">
+        <Card className="bg-corporate-darkSecondary border-corporate-border">
+          <CardHeader>
+            <CardTitle className="text-corporate-accent">System Settings</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-corporate-lightGray">System configuration options will be integrated here.</p>
+          </CardContent>
+        </Card>
       </TabsContent>
     </Tabs>
   );
