@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { deployToGitHubPages } from '@/services/deployment/automatedGitDeployment';
 
 interface DeploymentJob {
   id: string;
@@ -35,7 +36,7 @@ interface DeploymentJob {
 }
 
 const BulkDeploymentManager = () => {
-  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
+  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['github-pages']);
   const [batchSize, setBatchSize] = useState(50);
   const [entityName, setEntityName] = useState('');
   const [keywords, setKeywords] = useState('');
@@ -45,11 +46,6 @@ const BulkDeploymentManager = () => {
 
   const platforms = [
     { id: 'github-pages', name: 'GitHub Pages', status: 'active' },
-    { id: 'netlify', name: 'Netlify', status: 'active' },
-    { id: 'vercel', name: 'Vercel', status: 'active' },
-    { id: 'cloudflare', name: 'Cloudflare Pages', status: 'active' },
-    { id: 'firebase', name: 'Firebase Hosting', status: 'active' },
-    { id: 'surge', name: 'Surge.sh', status: 'active' },
   ];
 
   const handlePlatformToggle = (platformId: string) => {
@@ -75,47 +71,68 @@ const BulkDeploymentManager = () => {
     setProgress(0);
     
     try {
-      console.log('🚀 Starting bulk deployment to platforms:', selectedPlatforms);
+      console.log('🚀 Starting LIVE bulk deployment to GitHub Pages...');
       
       const keywordArray = keywords.split(',').map(k => k.trim()).filter(k => k);
+      const successfulDeployments: string[] = [];
+      const failedDeployments: string[] = [];
       
-      const { data, error } = await supabase.functions.invoke('persona-saturation', {
-        body: {
-          entityName,
-          targetKeywords: keywordArray,
-          contentCount: batchSize,
-          deploymentTargets: selectedPlatforms,
-          saturationMode: 'aggressive'
+      // Deploy multiple articles to GitHub Pages
+      for (let i = 0; i < batchSize; i++) {
+        try {
+          setProgress((i / batchSize) * 100);
+          
+          const articleTitle = `${entityName} - Professional Excellence Article ${i + 1}`;
+          const articleContent = `This is a professional article about ${entityName} focusing on ${keywordArray.join(', ')}. Article ${i + 1} of ${batchSize} in the bulk deployment series.`;
+          
+          const result = await deployToGitHubPages({
+            title: articleTitle,
+            content: articleContent,
+            entity: entityName,
+            keywords: keywordArray,
+            contentType: 'positive_profile'
+          });
+
+          if (result.success && result.url) {
+            successfulDeployments.push(result.url);
+            console.log(`✅ Article ${i + 1} deployed: ${result.url}`);
+          } else {
+            failedDeployments.push(`Article ${i + 1}: ${result.error}`);
+            console.error(`❌ Article ${i + 1} failed: ${result.error}`);
+          }
+          
+          // Small delay to avoid rate limiting
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+        } catch (error) {
+          failedDeployments.push(`Article ${i + 1}: ${error.message}`);
+          console.error(`❌ Article ${i + 1} error:`, error);
         }
-      });
-
-      if (error) {
-        console.error('❌ Bulk deployment error:', error);
-        throw error;
       }
-
-      console.log('✅ Bulk deployment successful:', data);
 
       // Create job entries from the deployment results
-      if (data?.deploymentUrls && data.deploymentUrls.length > 0) {
-        const newJobs: DeploymentJob[] = selectedPlatforms.map((platform, index) => ({
-          id: `bulk-${Date.now()}-${index}`,
-          name: `Bulk Deployment - ${entityName}`,
-          platform,
-          status: 'completed' as const,
-          progress: 100,
-          articles: Math.floor(batchSize / selectedPlatforms.length),
-          entityName,
-          keywords: keywordArray,
-          startedAt: new Date().toISOString(),
-          url: data.deploymentUrls[index]
-        }));
+      const newJob: DeploymentJob = {
+        id: `bulk-${Date.now()}`,
+        name: `Live Bulk Deployment - ${entityName}`,
+        platform: 'github-pages',
+        status: 'completed' as const,
+        progress: 100,
+        articles: batchSize,
+        entityName,
+        keywords: keywordArray,
+        startedAt: new Date().toISOString(),
+        url: successfulDeployments[0] || undefined
+      };
 
-        setCurrentJobs(prev => [...newJobs, ...prev].slice(0, 10));
-      }
-
+      setCurrentJobs(prev => [newJob, ...prev].slice(0, 10));
       setProgress(100);
-      toast.success(`✅ Bulk deployment completed! ${data?.campaign?.deploymentsSuccessful || 0} articles deployed successfully.`);
+      
+      toast.success(`✅ LIVE bulk deployment completed! ${successfulDeployments.length}/${batchSize} articles deployed successfully.`);
+      
+      if (failedDeployments.length > 0) {
+        console.error('Failed deployments:', failedDeployments);
+        toast.error(`${failedDeployments.length} deployments failed. Check console for details.`);
+      }
       
     } catch (error: any) {
       console.error('❌ Bulk deployment failed:', error);
@@ -149,12 +166,27 @@ const BulkDeploymentManager = () => {
 
   return (
     <div className="space-y-6">
+      {/* Live Deployment Notice */}
+      <Card className="corporate-card border-green-500/30 bg-green-500/5">
+        <CardContent className="pt-6">
+          <div className="flex items-center gap-3">
+            <CheckCircle className="h-8 w-8 text-green-400" />
+            <div>
+              <h3 className="text-lg font-semibold text-green-400">LIVE GitHub Deployment Active</h3>
+              <p className="text-sm text-green-300">
+                ✅ Real repositories will be created with live GitHub Pages deployment - NO SIMULATION
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Bulk Deployment Configuration */}
       <Card className="corporate-card">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 corporate-heading">
             <Globe className="h-5 w-5 text-corporate-accent" />
-            Bulk Deployment Configuration
+            Live Bulk Deployment Configuration
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -204,7 +236,7 @@ const BulkDeploymentManager = () => {
                     onCheckedChange={() => handlePlatformToggle(platform.id)}
                   />
                   <label htmlFor={platform.id} className="text-sm text-white cursor-pointer">
-                    {platform.name}
+                    {platform.name} (LIVE)
                   </label>
                 </div>
               ))}
@@ -230,12 +262,12 @@ const BulkDeploymentManager = () => {
               {isDeploying ? (
                 <>
                   <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                  Deploying...
+                  LIVE Deploying...
                 </>
               ) : (
                 <>
                   <Play className="h-4 w-4 mr-2" />
-                  Start Bulk Deployment
+                  Start LIVE Bulk Deployment
                 </>
               )}
             </Button>
@@ -259,7 +291,7 @@ const BulkDeploymentManager = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 corporate-heading">
             <FileText className="h-5 w-5 text-corporate-accent" />
-            Recent Deployment Jobs
+            Recent LIVE Deployment Jobs
           </CardTitle>
         </CardHeader>
         <CardContent>

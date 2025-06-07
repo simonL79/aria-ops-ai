@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Brain, Zap, Target, Globe } from 'lucide-react';
+import { Brain, Zap, Target, Globe, CheckCircle } from 'lucide-react';
 
 interface CampaignConfigurationProps {
   entityName: string;
@@ -39,12 +39,7 @@ const CampaignConfiguration: React.FC<CampaignConfigurationProps> = ({
   onExecute
 }) => {
   const platforms = [
-    { id: 'github-pages', name: 'GitHub Pages', description: 'Static site hosting via Git' },
-    { id: 'netlify', name: 'Netlify', description: 'JAMstack deployment platform' },
-    { id: 'vercel', name: 'Vercel', description: 'Frontend cloud platform' },
-    { id: 'cloudflare', name: 'Cloudflare Pages', description: 'Edge-optimized hosting' },
-    { id: 'firebase', name: 'Firebase Hosting', description: 'Google cloud hosting' },
-    { id: 'surge', name: 'Surge.sh', description: 'Static web publishing' }
+    { id: 'github-pages', name: 'GitHub Pages (LIVE)', description: 'Real GitHub repositories with live deployment' }
   ];
 
   const handlePlatformToggle = (platformId: string) => {
@@ -58,11 +53,11 @@ const CampaignConfiguration: React.FC<CampaignConfigurationProps> = ({
   const getSaturationDescription = (mode: string) => {
     switch (mode) {
       case 'defensive':
-        return 'Conservative approach - 10-25 articles across 2-3 platforms';
+        return 'Conservative approach - 10-25 LIVE articles across GitHub Pages';
       case 'aggressive':
-        return 'Comprehensive deployment - 25-50 articles across 4-6 platforms';
+        return 'Comprehensive deployment - 25-50 LIVE articles across GitHub Pages';
       case 'nuclear':
-        return 'Maximum saturation - 50+ articles across all available platforms';
+        return 'Maximum saturation - 50+ LIVE articles across GitHub Pages';
       default:
         return '';
     }
@@ -70,15 +65,15 @@ const CampaignConfiguration: React.FC<CampaignConfigurationProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Local AI Notice */}
+      {/* LIVE Deployment Notice */}
       <Card className="corporate-card border-green-500/30 bg-green-500/5">
         <CardContent className="pt-6">
           <div className="flex items-center gap-3">
-            <Brain className="h-8 w-8 text-green-400" />
+            <CheckCircle className="h-8 w-8 text-green-400" />
             <div>
-              <h3 className="text-lg font-semibold text-green-400">Local AI Inference Active</h3>
+              <h3 className="text-lg font-semibold text-green-400">LIVE GitHub Deployment Active</h3>
               <p className="text-sm text-green-300">
-                No API keys required - using advanced local content generation and deployment
+                ✅ Real GitHub repositories will be created - NO SIMULATIONS
               </p>
             </div>
           </div>
@@ -126,7 +121,7 @@ const CampaignConfiguration: React.FC<CampaignConfigurationProps> = ({
         <CardHeader>
           <CardTitle className="flex items-center gap-2 corporate-heading">
             <Zap className="h-5 w-5 text-corporate-accent" />
-            Saturation Mode
+            LIVE Saturation Mode
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -138,7 +133,7 @@ const CampaignConfiguration: React.FC<CampaignConfigurationProps> = ({
             <div className="flex items-center space-x-2 p-3 bg-corporate-darkSecondary rounded">
               <RadioGroupItem value="defensive" id="defensive" />
               <div className="flex-1">
-                <Label htmlFor="defensive" className="text-white font-medium">Defensive</Label>
+                <Label htmlFor="defensive" className="text-white font-medium">Defensive (LIVE)</Label>
                 <p className="text-sm text-corporate-lightGray">{getSaturationDescription('defensive')}</p>
               </div>
               <Badge variant="outline" className="text-green-400 border-green-400">Recommended</Badge>
@@ -147,7 +142,7 @@ const CampaignConfiguration: React.FC<CampaignConfigurationProps> = ({
             <div className="flex items-center space-x-2 p-3 bg-corporate-darkSecondary rounded">
               <RadioGroupItem value="aggressive" id="aggressive" />
               <div className="flex-1">
-                <Label htmlFor="aggressive" className="text-white font-medium">Aggressive</Label>
+                <Label htmlFor="aggressive" className="text-white font-medium">Aggressive (LIVE)</Label>
                 <p className="text-sm text-corporate-lightGray">{getSaturationDescription('aggressive')}</p>
               </div>
               <Badge variant="outline" className="text-yellow-400 border-yellow-400">Advanced</Badge>
@@ -156,7 +151,7 @@ const CampaignConfiguration: React.FC<CampaignConfigurationProps> = ({
             <div className="flex items-center space-x-2 p-3 bg-corporate-darkSecondary rounded">
               <RadioGroupItem value="nuclear" id="nuclear" />
               <div className="flex-1">
-                <Label htmlFor="nuclear" className="text-white font-medium">Nuclear</Label>
+                <Label htmlFor="nuclear" className="text-white font-medium">Nuclear (LIVE)</Label>
                 <p className="text-sm text-corporate-lightGray">{getSaturationDescription('nuclear')}</p>
               </div>
               <Badge variant="outline" className="text-red-400 border-red-400">Maximum</Badge>
@@ -197,7 +192,7 @@ const CampaignConfiguration: React.FC<CampaignConfigurationProps> = ({
         <CardHeader>
           <CardTitle className="flex items-center gap-2 corporate-heading">
             <Globe className="h-5 w-5 text-corporate-accent" />
-            Deployment Platforms
+            LIVE Deployment Platforms
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -216,7 +211,7 @@ const CampaignConfiguration: React.FC<CampaignConfigurationProps> = ({
             ))}
           </div>
           <p className="text-sm text-corporate-lightGray mt-3">
-            Selected: {deploymentTargets.length} platform{deploymentTargets.length !== 1 ? 's' : ''}
+            Selected: {deploymentTargets.length} LIVE platform{deploymentTargets.length !== 1 ? 's' : ''}
           </p>
         </CardContent>
       </Card>
@@ -233,17 +228,17 @@ const CampaignConfiguration: React.FC<CampaignConfigurationProps> = ({
             {isExecuting ? (
               <>
                 <Brain className="h-5 w-5 mr-2 animate-pulse" />
-                Generating Content with Local AI...
+                Executing LIVE Deployment...
               </>
             ) : (
               <>
                 <Zap className="h-5 w-5 mr-2" />
-                Execute Persona Saturation (Local AI)
+                Execute LIVE Persona Saturation
               </>
             )}
           </Button>
           <p className="text-xs text-center text-corporate-lightGray mt-2">
-            ✅ No API keys required - Using advanced local inference
+            ✅ LIVE GitHub deployment - Real repositories will be created
           </p>
         </CardContent>
       </Card>
