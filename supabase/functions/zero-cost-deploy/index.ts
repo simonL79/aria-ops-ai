@@ -8,11 +8,13 @@ const corsHeaders = {
 
 // Generate JSON-LD schema for SEO
 function generateJsonLD(title: string, content: string, entity: string) {
+  const contentText = typeof content === 'string' ? content : (content?.content || '');
+  
   return {
     "@context": "https://schema.org",
     "@type": "NewsArticle",
     "headline": title,
-    "articleBody": content.substring(0, 500) + "...",
+    "articleBody": contentText.substring(0, 500) + "...",
     "author": {
       "@type": "Organization",
       "name": "A.R.I.A Intelligence Platform"
@@ -39,9 +41,12 @@ function generateJsonLD(title: string, content: string, entity: string) {
 }
 
 // Generate HTML content with SEO optimization
-function generateSEOContent(title: string, content: string, entity: string, keywords: string[]) {
-  const jsonLD = generateJsonLD(title, content, entity);
-  const metaDescription = content.substring(0, 160).replace(/\n/g, ' ');
+function generateSEOContent(title: string, content: any, entity: string, keywords: string[]) {
+  // Extract content text from object or use as string
+  const contentText = typeof content === 'string' ? content : (content?.content || JSON.stringify(content));
+  
+  const jsonLD = generateJsonLD(title, contentText, entity);
+  const metaDescription = contentText.substring(0, 160).replace(/\n/g, ' ');
   const timestamp = Date.now();
   const slug = title.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-');
 
@@ -159,7 +164,7 @@ function generateSEOContent(title: string, content: string, entity: string, keyw
     </div>
     
     <div class="content">
-        ${content.split('\n').map(paragraph => 
+        ${contentText.split('\n').map(paragraph => 
           paragraph.trim() ? `<p>${paragraph}</p>` : ''
         ).join('')}
     </div>
@@ -305,6 +310,7 @@ serve(async (req) => {
     const { platform } = payload;
 
     console.log(`[ZERO-COST-DEPLOY] Deploying to platform: ${platform}`);
+    console.log(`[ZERO-COST-DEPLOY] Payload content type:`, typeof payload.content);
 
     let result;
     
