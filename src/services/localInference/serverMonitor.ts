@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 export interface ServerHealth {
@@ -26,24 +27,25 @@ export interface ModelStatus {
 }
 
 /**
- * Check local AI server health with correct Ollama port including 11435
+ * Check local AI server health with priority on port 11435
  */
 export const checkServerHealth = async (): Promise<ServerHealth> => {
   const startTime = Date.now();
   const connectionAttempts: string[] = [];
   
   try {
-    console.log('🔍 Checking Ollama server health on ports 11434, 11435, and 3001...');
+    console.log('🔍 Checking Ollama server health - prioritizing port 11435...');
     
-    // Try all possible Ollama ports including the new 11435
+    // Prioritize 11435 since that's where Ollama is actually running
     const endpoints = [
       'http://localhost:11435/api/tags',
+      'http://localhost:11435/api/version',
+      'http://127.0.0.1:11435/api/tags',
+      'http://127.0.0.1:11435/api/version',
       'http://localhost:11434/api/tags',
       'http://localhost:3001/api/tags',
-      'http://127.0.0.1:11435/api/tags',
       'http://127.0.0.1:11434/api/tags', 
       'http://127.0.0.1:3001/api/tags',
-      'http://localhost:11435/api/version',
       'http://localhost:11434/api/version',
       'http://localhost:3001/api/version'
     ];
@@ -63,7 +65,7 @@ export const checkServerHealth = async (): Promise<ServerHealth> => {
             'Content-Type': 'application/json',
           },
           mode: 'cors',
-          signal: AbortSignal.timeout(8000) // Longer timeout
+          signal: AbortSignal.timeout(5000) // Shorter timeout for faster detection
         });
         
         if (response.ok) {
@@ -99,7 +101,7 @@ export const checkServerHealth = async (): Promise<ServerHealth> => {
         errorDetails: `All connection attempts failed. 
         
 TROUBLESHOOTING:
-1. Check if Ollama is running: Run 'ollama serve' in PowerShell
+1. Check if Ollama is running: Run 'OLLAMA_ORIGINS=* ollama serve' in PowerShell
 2. Test direct access: Open http://localhost:11435 or http://localhost:11434 in your browser
 3. Test proxy access: Open http://localhost:3001 in your browser
 4. Check port proxy: Run 'netsh interface portproxy show all' in PowerShell
@@ -132,7 +134,7 @@ Connection attempts: ${connectionAttempts.length}`,
           method: 'GET',
           headers: { 'Accept': 'application/json' },
           mode: 'cors',
-          signal: AbortSignal.timeout(5000)
+          signal: AbortSignal.timeout(3000)
         });
         
         if (tagsResponse.ok) {
@@ -161,6 +163,10 @@ Connection attempts: ${connectionAttempts.length}`,
     };
     
     console.log('✅ Server health check successful:', health);
+    
+    // Update system status in database to reflect successful connection
+    await updateSystemStatus(health);
+    
     return health;
     
   } catch (error) {
@@ -189,6 +195,33 @@ Connection attempts: ${connectionAttempts.length}`,
 };
 
 /**
+ * Update system status in database
+ */
+const updateSystemStatus = async (health: ServerHealth) => {
+  try {
+    await supabase
+      .from('system_config')
+      .upsert({
+        key: 'ai_integration_status',
+        value: health.isOnline ? 'active' : 'blocked',
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'key' });
+    
+    await supabase
+      .from('system_config')
+      .upsert({
+        key: 'ollama_server_health',
+        value: JSON.stringify(health),
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'key' });
+    
+    console.log('📊 System status updated in database');
+  } catch (error) {
+    console.warn('Failed to update system status:', error);
+  }
+};
+
+/**
  * Check availability of Ollama-compatible endpoints
  */
 const checkOllamaEndpoints = async (workingEndpoint?: string) => {
@@ -213,7 +246,7 @@ const checkOllamaEndpoints = async (workingEndpoint?: string) => {
           'Content-Type': 'application/json',
         },
         mode: 'cors',
-        signal: AbortSignal.timeout(5000)
+        signal: AbortSignal.timeout(3000)
       });
       
       const result = response.ok;
@@ -241,7 +274,7 @@ export const getModelStatuses = async (): Promise<ModelStatus[]> => {
   try {
     console.log('📋 Fetching model list from Ollama...');
     
-    // Try all ports including 11435
+    // Try all ports with priority on 11435
     const endpoints = [
       'http://localhost:11435/api/tags',
       'http://localhost:11434/api/tags',
