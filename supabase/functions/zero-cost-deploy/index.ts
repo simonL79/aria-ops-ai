@@ -7,8 +7,14 @@ const corsHeaders = {
 };
 
 // Generate JSON-LD schema for SEO
-function generateJsonLD(title: string, content: string, entity: string) {
-  const contentText = typeof content === 'string' ? content : (content?.content || '');
+function generateJsonLD(title: string, content: any, entity: string) {
+  // Safely extract content text
+  let contentText = '';
+  if (typeof content === 'string') {
+    contentText = content;
+  } else if (content && typeof content === 'object') {
+    contentText = content.content || content.title || JSON.stringify(content);
+  }
   
   return {
     "@context": "https://schema.org",
@@ -43,9 +49,14 @@ function generateJsonLD(title: string, content: string, entity: string) {
 // Generate HTML content with SEO optimization
 function generateSEOContent(title: string, content: any, entity: string, keywords: string[]) {
   // Extract content text from object or use as string
-  const contentText = typeof content === 'string' ? content : (content?.content || JSON.stringify(content));
+  let contentText = '';
+  if (typeof content === 'string') {
+    contentText = content;
+  } else if (content && typeof content === 'object') {
+    contentText = content.content || content.title || JSON.stringify(content);
+  }
   
-  const jsonLD = generateJsonLD(title, contentText, entity);
+  const jsonLD = generateJsonLD(title, content, entity);
   const metaDescription = contentText.substring(0, 160).replace(/\n/g, ' ');
   const timestamp = Date.now();
   const slug = title.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-');
@@ -310,7 +321,7 @@ serve(async (req) => {
     const { platform } = payload;
 
     console.log(`[ZERO-COST-DEPLOY] Deploying to platform: ${platform}`);
-    console.log(`[ZERO-COST-DEPLOY] Payload content type:`, typeof payload.content);
+    console.log(`[ZERO-COST-DEPLOY] Payload:`, JSON.stringify(payload, null, 2));
 
     let result;
     
