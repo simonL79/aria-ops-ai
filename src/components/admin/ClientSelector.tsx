@@ -2,13 +2,11 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Users, Plus, Search, Building, User, Mail } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Plus, Users, Building } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { fetchClients, addClient } from '@/services/clientsService';
 import type { Client } from '@/types/clients';
 
 interface ClientEntity {
@@ -21,285 +19,193 @@ interface ClientEntity {
 interface ClientSelectorProps {
   selectedClient: Client | null;
   onClientSelect: (client: Client | null) => void;
-  onEntitiesLoad: (entities: ClientEntity[]) => void;
+  onEntitiesLoad?: (entities: ClientEntity[]) => void;
 }
 
 const ClientSelector = ({ selectedClient, onClientSelect, onEntitiesLoad }: ClientSelectorProps) => {
   const [clients, setClients] = useState<Client[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedClientId, setSelectedClientId] = useState<string>('none');
-
-  // Add client form state
-  const [newClient, setNewClient] = useState({
-    name: '',
-    industry: 'Technology',
-    contactName: '',
-    contactEmail: '',
-    website: '',
-    notes: '',
-    keywordTargets: ''
-  });
+  const [clientEntities, setClientEntities] = useState<ClientEntity[]>([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     loadClients();
   }, []);
 
-  useEffect(() => {
-    if (selectedClient) {
-      setSelectedClientId(selectedClient.id);
-    } else {
-      setSelectedClientId('none');
-    }
-  }, [selectedClient]);
-
   const loadClients = async () => {
-    setIsLoading(true);
+    setLoading(true);
     try {
-      const fetchedClients = await fetchClients();
-      setClients(fetchedClients);
+      const { data, error } = await supabase
+        .from('clients')
+        .select('*')
+        .order('name');
+
+      if (error) throw error;
+
+      const mappedClients: Client[] = (data || []).map(client => ({
+        id: client.id,
+        name: client.name,
+        industry: client.industry,
+        contactName: client.contactname,
+        contactEmail: client.contactemail,
+        website: client.website || '',
+        notes: client.notes || '',
+        keywordTargets: client.keywordtargets || '',
+        created_at: client.created_at,
+        updated_at: client.updated_at || client.created_at
+      }));
+
+      setClients(mappedClients);
     } catch (error) {
-      console.error('Failed to load clients:', error);
+      console.error('Error loading clients:', error);
       toast.error('Failed to load clients');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  const handleClientSelect = (clientId: string) => {
-    console.log('Client selected:', clientId);
-    setSelectedClientId(clientId);
-    
-    if (clientId === 'none') {
+  const loadClientEntities = async (clientId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('client_entities')
+        .select('*')
+        .eq('client_id', clientId);
+
+      if (error) throw error;
+
+      const entities: ClientEntity[] = (data || []).map(entity => ({
+        id: entity.id,
+        entity_name: entity.entity_name,
+        entity_type: entity.entity_type,
+        alias: entity.alias
+      }));
+
+      setClientEntities(entities);
+      if (onEntitiesLoad) {
+        onEntitiesLoad(entities);
+      }
+    } catch (error) {
+      console.error('Error loading client entities:', error);
+      toast.error('Failed to load client entities');
+    }
+  };
+
+  const handleClientChange = (value: string) => {
+    if (value === 'none' || value === '') {
       onClientSelect(null);
-      onEntitiesLoad([]);
+      setClientEntities([]);
+      if (onEntitiesLoad) {
+        onEntitiesLoad([]);
+      }
       return;
     }
 
-    const client = clients.find(c => c.id === clientId);
+    const client = clients.find(c => c.id === value);
     if (client) {
       onClientSelect(client);
-      
-      // Mock entities for now - in real implementation, fetch from client_entities table
-      const mockEntities: ClientEntity[] = [
-        {
-          id: '1',
-          entity_name: client.name,
-          entity_type: 'organization'
-        }
-      ];
-      onEntitiesLoad(mockEntities);
-      
+      loadClientEntities(client.id);
       toast.success(`Selected client: ${client.name}`);
     }
   };
 
-  const handleAddClient = async () => {
-    if (!newClient.name || !newClient.contactEmail) {
-      toast.error('Please fill in required fields');
-      return;
-    }
-
-    try {
-      const addedClient = await addClient(newClient);
-      if (addedClient) {
-        setClients([...clients, addedClient]);
-        setNewClient({
-          name: '',
-          industry: 'Technology',
-          contactName: '',
-          contactEmail: '',
-          website: '',
-          notes: '',
-          keywordTargets: ''
-        });
-        setShowAddForm(false);
-        toast.success('Client added successfully');
-      }
-    } catch (error) {
-      console.error('Failed to add client:', error);
-      toast.error('Failed to add client');
-    }
-  };
-
-  const filteredClients = clients.filter(client =>
-    client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    client.industry.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  if (isLoading) {
-    return (
-      <Card className="bg-corporate-darkSecondary border-corporate-border">
-        <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
-            <Users className="h-5 w-5 text-corporate-accent" />
-            Loading Clients...
-          </CardTitle>
-        </CardHeader>
-      </Card>
-    );
-  }
-
   return (
     <Card className="bg-corporate-darkSecondary border-corporate-border">
       <CardHeader>
-        <CardTitle className="text-white flex items-center gap-2">
-          <Users className="h-5 w-5 text-corporate-accent" />
-          Client Selection & Management
+        <CardTitle className="flex items-center gap-2 text-white">
+          <Building className="h-5 w-5 text-corporate-accent" />
+          Client Context Selection
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Client Selection */}
         <div className="space-y-2">
-          <Label className="text-corporate-lightGray">Select Active Client</Label>
-          <div className="flex gap-2">
-            <Select value={selectedClientId} onValueChange={handleClientSelect}>
-              <SelectTrigger className="flex-1 bg-corporate-dark border-corporate-border text-white">
-                <SelectValue placeholder="Choose a client..." />
-              </SelectTrigger>
-              <SelectContent className="bg-corporate-dark border-corporate-border">
+          <label className="text-sm font-medium text-corporate-lightGray">Select Active Client</label>
+          <Select 
+            value={selectedClient?.id || 'none'} 
+            onValueChange={handleClientChange}
+            disabled={loading}
+          >
+            <SelectTrigger className="bg-corporate-dark border-corporate-border text-white">
+              <SelectValue placeholder={loading ? "Loading clients..." : "Choose a client"} />
+            </SelectTrigger>
+            <SelectContent className="bg-corporate-dark border-corporate-border">
+              <SelectItem value="none" className="text-corporate-lightGray">
+                No client selected
+              </SelectItem>
+              {clients.map((client) => (
                 <SelectItem 
-                  value="none" 
-                  className="text-corporate-lightGray hover:bg-corporate-darkSecondary"
+                  key={client.id} 
+                  value={client.id}
+                  className="text-white hover:bg-corporate-darkSecondary cursor-pointer"
                 >
-                  No client selected
+                  <div className="flex items-center gap-2">
+                    <Users className="h-4 w-4" />
+                    <span>{client.name}</span>
+                    <Badge variant="secondary" className="text-xs">
+                      {client.industry}
+                    </Badge>
+                  </div>
                 </SelectItem>
-                {filteredClients.map((client) => (
-                  <SelectItem 
-                    key={client.id} 
-                    value={client.id}
-                    className="text-white hover:bg-corporate-darkSecondary"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Building className="h-4 w-4 text-corporate-accent" />
-                      <span>{client.name}</span>
-                      <Badge variant="secondary" className="text-xs">
-                        {client.industry}
-                      </Badge>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button
-              onClick={() => setShowAddForm(!showAddForm)}
-              className="bg-corporate-accent text-black hover:bg-corporate-accent/90"
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
-          </div>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
-        {/* Search */}
-        <div className="flex items-center gap-2">
-          <Search className="h-4 w-4 text-corporate-lightGray" />
-          <Input
-            placeholder="Search clients..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-corporate-dark border-corporate-border text-white placeholder:text-corporate-lightGray"
-          />
-        </div>
-
-        {/* Selected Client Details */}
         {selectedClient && (
-          <div className="bg-corporate-dark rounded p-4 border border-corporate-border">
-            <h3 className="text-white font-medium mb-2 flex items-center gap-2">
-              <Building className="h-4 w-4 text-corporate-accent" />
-              {selectedClient.name}
-            </h3>
+          <div className="space-y-3 p-3 bg-corporate-dark rounded border border-corporate-border">
+            <div className="flex items-center justify-between">
+              <h4 className="font-medium text-white">{selectedClient.name}</h4>
+              <Badge className="bg-green-500/20 text-green-400">Active</Badge>
+            </div>
             <div className="space-y-1 text-sm">
-              <div className="flex items-center gap-2 text-corporate-lightGray">
-                <User className="h-3 w-3" />
-                <span>{selectedClient.contactName}</span>
-              </div>
-              <div className="flex items-center gap-2 text-corporate-lightGray">
-                <Mail className="h-3 w-3" />
-                <span>{selectedClient.contactEmail}</span>
-              </div>
-              <Badge className="bg-corporate-accent/20 text-corporate-accent">
-                {selectedClient.industry}
-              </Badge>
+              <p className="text-corporate-lightGray">
+                <span className="font-medium">Contact:</span> {selectedClient.contactName}
+              </p>
+              <p className="text-corporate-lightGray">
+                <span className="font-medium">Email:</span> {selectedClient.contactEmail}
+              </p>
+              <p className="text-corporate-lightGray">
+                <span className="font-medium">Industry:</span> {selectedClient.industry}
+              </p>
+              {selectedClient.keywordTargets && (
+                <p className="text-corporate-lightGray">
+                  <span className="font-medium">Keywords:</span> {selectedClient.keywordTargets}
+                </p>
+              )}
             </div>
+            
+            {clientEntities.length > 0 && (
+              <div className="space-y-2">
+                <h5 className="text-sm font-medium text-white">Associated Entities</h5>
+                <div className="flex flex-wrap gap-1">
+                  {clientEntities.map((entity) => (
+                    <Badge key={entity.id} variant="outline" className="text-xs">
+                      {entity.entity_name}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
-        {/* Add Client Form */}
-        {showAddForm && (
-          <div className="bg-corporate-dark rounded p-4 border border-corporate-border space-y-3">
-            <h3 className="text-white font-medium">Add New Client</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div>
-                <Label className="text-corporate-lightGray text-xs">Client Name *</Label>
-                <Input
-                  value={newClient.name}
-                  onChange={(e) => setNewClient({...newClient, name: e.target.value})}
-                  className="bg-corporate-darkSecondary border-corporate-border text-white"
-                  placeholder="Enter client name"
-                />
-              </div>
-              <div>
-                <Label className="text-corporate-lightGray text-xs">Contact Email *</Label>
-                <Input
-                  type="email"
-                  value={newClient.contactEmail}
-                  onChange={(e) => setNewClient({...newClient, contactEmail: e.target.value})}
-                  className="bg-corporate-darkSecondary border-corporate-border text-white"
-                  placeholder="contact@client.com"
-                />
-              </div>
-              <div>
-                <Label className="text-corporate-lightGray text-xs">Contact Name</Label>
-                <Input
-                  value={newClient.contactName}
-                  onChange={(e) => setNewClient({...newClient, contactName: e.target.value})}
-                  className="bg-corporate-darkSecondary border-corporate-border text-white"
-                  placeholder="Contact person"
-                />
-              </div>
-              <div>
-                <Label className="text-corporate-lightGray text-xs">Industry</Label>
-                <Select value={newClient.industry} onValueChange={(value) => setNewClient({...newClient, industry: value})}>
-                  <SelectTrigger className="bg-corporate-darkSecondary border-corporate-border text-white">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-corporate-dark border-corporate-border">
-                    <SelectItem value="Technology" className="text-white">Technology</SelectItem>
-                    <SelectItem value="Finance" className="text-white">Finance</SelectItem>
-                    <SelectItem value="Healthcare" className="text-white">Healthcare</SelectItem>
-                    <SelectItem value="Legal" className="text-white">Legal</SelectItem>
-                    <SelectItem value="Entertainment" className="text-white">Entertainment</SelectItem>
-                    <SelectItem value="Real Estate" className="text-white">Real Estate</SelectItem>
-                    <SelectItem value="Other" className="text-white">Other</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <Button
-                onClick={handleAddClient}
-                className="bg-corporate-accent text-black hover:bg-corporate-accent/90"
-              >
-                Add Client
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setShowAddForm(false)}
-                className="border-corporate-border text-corporate-lightGray hover:bg-corporate-dark"
-              >
-                Cancel
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {/* Stats */}
-        <div className="flex items-center justify-between text-sm text-corporate-lightGray">
-          <span>{clients.length} total clients</span>
-          {searchQuery && (
-            <span>{filteredClients.length} filtered results</span>
-          )}
+        <div className="flex gap-2">
+          <Button 
+            onClick={loadClients}
+            variant="outline" 
+            size="sm"
+            disabled={loading}
+            className="flex-1"
+          >
+            {loading ? 'Loading...' : 'Refresh Clients'}
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => window.open('/admin/clients', '_blank')}
+            className="flex items-center gap-1"
+          >
+            <Plus className="h-3 w-3" />
+            Manage
+          </Button>
         </div>
       </CardContent>
     </Card>
