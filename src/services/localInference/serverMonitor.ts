@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export interface ServerHealth {
@@ -202,18 +201,18 @@ const updateSystemStatus = async (health: ServerHealth) => {
     await supabase
       .from('system_config')
       .upsert({
-        key: 'ai_integration_status',
-        value: health.isOnline ? 'active' : 'blocked',
+        config_key: 'ai_integration_status',
+        config_value: health.isOnline ? 'active' : 'blocked',
         updated_at: new Date().toISOString()
-      }, { onConflict: 'key' });
+      }, { onConflict: 'config_key' });
     
     await supabase
       .from('system_config')
       .upsert({
-        key: 'ollama_server_health',
-        value: JSON.stringify(health),
+        config_key: 'ollama_server_health',
+        config_value: JSON.stringify(health),
         updated_at: new Date().toISOString()
-      }, { onConflict: 'key' });
+      }, { onConflict: 'config_key' });
     
     console.log('📊 System status updated in database');
   } catch (error) {
