@@ -1,8 +1,21 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Eye, Edit, CheckCircle, X, Search, TrendingUp, Link, Image, Star } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { 
+  Eye, 
+  Edit, 
+  Check, 
+  X, 
+  Globe, 
+  Hash, 
+  Link2, 
+  Image,
+  TrendingUp,
+  Award
+} from 'lucide-react';
 
 interface ContentPreviewProps {
   content: {
@@ -14,68 +27,45 @@ interface ContentPreviewProps {
     sourceUrl?: string;
     metaDescription?: string;
     urlSlug?: string;
-    hashtags?: string;
-    internalLinks?: string;
+    hashtags?: string[];
+    internalLinks?: string[];
     imageAlt?: string;
-    schemaData?: string;
+    schemaData?: object;
     seoKeywords?: string[];
-    keywordDensity?: any;
+    keywordDensity?: number;
     seoScore?: number;
   };
   onApprove: () => void;
-  onReject: () => void;
   onEdit: () => void;
-  onContentUpdate?: (updatedContent: any) => void;
+  onReject: () => void;
+  onContentUpdate: (content: any) => void;
 }
 
-export const ContentPreview = ({ content, onApprove, onReject, onEdit, onContentUpdate }: ContentPreviewProps) => {
+export const ContentPreview = ({ 
+  content, 
+  onApprove, 
+  onEdit, 
+  onReject, 
+  onContentUpdate 
+}: ContentPreviewProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(content.title);
   const [editedBody, setEditedBody] = useState(content.body);
 
   const handleSaveEdit = () => {
-    // Recalculate keyword density for edited content
-    const updatedKeywordDensity = content.seoKeywords ? 
-      analyzeKeywordDensity(editedBody, content.seoKeywords) : 
-      content.keywordDensity;
-
-    const updatedContent = {
+    onContentUpdate({
       ...content,
       title: editedTitle,
-      body: editedBody,
-      keywordDensity: updatedKeywordDensity
-    };
-
-    if (onContentUpdate) {
-      onContentUpdate(updatedContent);
-    }
+      body: editedBody
+    });
     setIsEditing(false);
   };
 
-  const analyzeKeywordDensity = (text: string, keywords: string[]) => {
-    const wordCount = text.split(/\s+/).length;
-    const analysis: any = {};
-
-    keywords.forEach(keyword => {
-      const keywordRegex = new RegExp(keyword.toLowerCase(), 'gi');
-      const matches = text.toLowerCase().match(keywordRegex) || [];
-      const density = wordCount > 0 ? ((matches.length / wordCount) * 100).toFixed(2) + '%' : '0%';
-      
-      analysis[keyword] = {
-        count: matches.length,
-        density,
-        exactMatches: matches.length,
-        partialMatches: 0
-      };
-    });
-
-    return analysis;
-  };
-
-  const getSeoScoreColor = (score: number) => {
-    if (score >= 80) return 'text-green-400';
-    if (score >= 60) return 'text-yellow-400';
-    return 'text-red-400';
+  const getSeoScoreColor = (score?: number) => {
+    if (!score) return 'text-gray-500';
+    if (score >= 80) return 'text-green-600';
+    if (score >= 60) return 'text-yellow-600';
+    return 'text-red-600';
   };
 
   return (
@@ -83,219 +73,103 @@ export const ContentPreview = ({ content, onApprove, onReject, onEdit, onContent
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-white">
           <Eye className="h-5 w-5 text-corporate-accent" />
-          Content Preview
-        </CardTitle>
-        <div className="flex items-center gap-2 flex-wrap">
-          <Badge variant="outline" className="text-corporate-accent">
-            {content.contentType}
-          </Badge>
-          {content.responseAngle && (
-            <Badge variant="outline" className="text-blue-400">
-              {content.responseAngle}
-            </Badge>
-          )}
-          <Badge variant="outline" className="text-green-400">
-            <Search className="h-3 w-3 mr-1" />
-            SEO Optimized
-          </Badge>
+          Content Preview & SEO Analysis
           {content.seoScore && (
-            <Badge variant="outline" className={getSeoScoreColor(content.seoScore)}>
-              <Star className="h-3 w-3 mr-1" />
+            <Badge className={`ml-auto ${getSeoScoreColor(content.seoScore)}`}>
               SEO Score: {content.seoScore}/100
             </Badge>
           )}
-        </div>
+        </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {content.sourceUrl && (
-          <div className="p-3 bg-corporate-dark/50 rounded border border-corporate-accent/30">
-            <p className="text-xs text-corporate-lightGray mb-1">Response to:</p>
-            <a 
-              href={content.sourceUrl} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-corporate-accent hover:underline text-sm"
-            >
-              {content.sourceUrl}
-            </a>
+      <CardContent className="space-y-6">
+        {/* Content Type & Strategy Info */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-corporate-dark/50 rounded border border-corporate-accent/30">
+          <div>
+            <span className="text-xs text-gray-500 uppercase">Content Type</span>
+            <p className="text-white font-medium">{content.contentType}</p>
           </div>
-        )}
-
-        {/* Advanced SEO Elements */}
-        <div className="space-y-3 p-4 bg-green-500/10 border border-green-500/30 rounded">
-          <div className="flex items-center gap-2 text-green-400">
-            <TrendingUp className="h-4 w-4" />
-            <span className="font-medium">Advanced SEO Elements</span>
-          </div>
-          
-          <div className="space-y-3">
+          {content.responseAngle && (
             <div>
-              <p className="text-xs text-corporate-lightGray mb-1">SEO-Optimized Headline:</p>
-              <p className="text-white font-medium">{content.title}</p>
+              <span className="text-xs text-gray-500 uppercase">Response Angle</span>
+              <p className="text-white font-medium">{content.responseAngle}</p>
             </div>
-            
+          )}
+          {content.sourceUrl && (
+            <div>
+              <span className="text-xs text-gray-500 uppercase">Source Article</span>
+              <a 
+                href={content.sourceUrl} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-corporate-accent hover:underline text-sm flex items-center gap-1"
+              >
+                View Source <Link2 className="h-3 w-3" />
+              </a>
+            </div>
+          )}
+        </div>
+
+        {/* Title */}
+        <div className="space-y-2">
+          <label className="text-white font-medium">Article Title</label>
+          {isEditing ? (
+            <Textarea
+              value={editedTitle}
+              onChange={(e) => setEditedTitle(e.target.value)}
+              className="bg-corporate-dark border-corporate-border text-white"
+              rows={2}
+            />
+          ) : (
+            <div className="p-3 bg-corporate-dark border border-corporate-border rounded">
+              <h3 className="text-white font-bold text-lg">{content.title}</h3>
+            </div>
+          )}
+        </div>
+
+        {/* SEO Metadata */}
+        {(content.metaDescription || content.urlSlug) && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {content.metaDescription && (
               <div>
-                <p className="text-xs text-corporate-lightGray mb-1">Meta Description ({content.metaDescription.length} chars):</p>
-                <p className="text-sm text-corporate-lightGray italic">"{content.metaDescription}"</p>
+                <label className="text-white font-medium text-sm">Meta Description</label>
+                <p className="text-gray-300 text-sm mt-1">{content.metaDescription}</p>
               </div>
             )}
-
             {content.urlSlug && (
               <div>
-                <p className="text-xs text-corporate-lightGray mb-1">URL Slug:</p>
-                <p className="text-sm text-blue-400 font-mono">/{content.urlSlug}</p>
-              </div>
-            )}
-
-            {content.keywordDensity && (
-              <div>
-                <p className="text-xs text-corporate-lightGray mb-2">Advanced Keyword Analysis:</p>
-                <div className="space-y-2">
-                  {Object.entries(content.keywordDensity).map(([keyword, data]: [string, any]) => (
-                    <div key={keyword} className="bg-corporate-dark/50 p-2 rounded">
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="text-white font-medium">{keyword}</span>
-                        <span className="text-green-400">{data.density}</span>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2 text-xs">
-                        <div className="text-corporate-lightGray">
-                          Exact: {data.exactMatches || data.count || 0}x
-                        </div>
-                        <div className="text-corporate-lightGray">
-                          Partial: {data.partialMatches || 0}x
-                        </div>
-                        {data.placement && (
-                          <div className="col-span-2 flex flex-wrap gap-1 mt-1">
-                            {data.placement.inFirstSentence && (
-                              <Badge variant="outline" className="text-xs text-green-400">First sentence</Badge>
-                            )}
-                            {data.placement.inHeadings && (
-                              <Badge variant="outline" className="text-xs text-blue-400">In headings</Badge>
-                            )}
-                            {data.placement.earlyPlacement && (
-                              <Badge variant="outline" className="text-xs text-yellow-400">Early placement</Badge>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <label className="text-white font-medium text-sm">URL Slug</label>
+                <p className="text-corporate-accent text-sm mt-1">/{content.urlSlug}</p>
               </div>
             )}
           </div>
-        </div>
+        )}
 
-        {/* Editable Content Section */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h4 className="text-sm font-medium text-white">Article Content</h4>
-            <Button
-              onClick={() => setIsEditing(!isEditing)}
-              variant="outline"
-              size="sm"
-              className="text-corporate-accent border-corporate-accent"
-            >
-              <Edit className="h-3 w-3 mr-1" />
-              {isEditing ? 'Cancel Edit' : 'Edit Content'}
-            </Button>
-          </div>
-
+        {/* Content Body */}
+        <div className="space-y-2">
+          <label className="text-white font-medium">Article Content</label>
           {isEditing ? (
-            <div className="space-y-3">
-              <div>
-                <label className="text-xs text-corporate-lightGray mb-1 block">Headline:</label>
-                <input
-                  type="text"
-                  value={editedTitle}
-                  onChange={(e) => setEditedTitle(e.target.value)}
-                  className="w-full p-2 bg-corporate-dark border border-corporate-border rounded text-white"
-                />
-              </div>
-              <div>
-                <label className="text-xs text-corporate-lightGray mb-1 block">Article Body:</label>
-                <textarea
-                  value={editedBody}
-                  onChange={(e) => setEditedBody(e.target.value)}
-                  className="w-full h-96 p-3 bg-corporate-dark border border-corporate-border rounded text-white resize-none"
-                />
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  onClick={handleSaveEdit}
-                  className="bg-green-600 hover:bg-green-700 text-white"
-                >
-                  Save Changes
-                </Button>
-                <Button
-                  onClick={() => setIsEditing(false)}
-                  variant="outline"
-                  className="text-corporate-lightGray border-corporate-border"
-                >
-                  Cancel
-                </Button>
-              </div>
-            </div>
+            <Textarea
+              value={editedBody}
+              onChange={(e) => setEditedBody(e.target.value)}
+              className="bg-corporate-dark border-corporate-border text-white min-h-[300px]"
+            />
           ) : (
-            <div className="bg-corporate-dark p-4 rounded border border-corporate-border max-h-96 overflow-y-auto">
-              <div className="prose prose-invert max-w-none">
-                <h2 className="text-xl font-bold text-white mb-4">{editedTitle}</h2>
-                {editedBody.split('\n').map((paragraph, index) => (
-                  <p key={index} className="text-corporate-lightGray mb-3 leading-relaxed">
-                    {paragraph}
-                  </p>
-                ))}
-              </div>
+            <div className="p-4 bg-corporate-dark border border-corporate-border rounded max-h-96 overflow-y-auto">
+              <div className="text-gray-300 whitespace-pre-wrap">{content.body}</div>
             </div>
           )}
         </div>
 
-        {/* Additional SEO Elements */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {content.internalLinks && (
-            <div className="p-3 bg-blue-500/10 border border-blue-500/30 rounded">
-              <div className="flex items-center gap-2 mb-2">
-                <Link className="h-4 w-4 text-blue-400" />
-                <p className="text-sm font-medium text-blue-400">Internal Link Suggestions:</p>
-              </div>
-              <p className="text-xs text-corporate-lightGray whitespace-pre-wrap">{content.internalLinks}</p>
-            </div>
-          )}
-
-          {content.imageAlt && (
-            <div className="p-3 bg-purple-500/10 border border-purple-500/30 rounded">
-              <div className="flex items-center gap-2 mb-2">
-                <Image className="h-4 w-4 text-purple-400" />
-                <p className="text-sm font-medium text-purple-400">Image Alt Text:</p>
-              </div>
-              <p className="text-xs text-corporate-lightGray">{content.imageAlt}</p>
-            </div>
-          )}
-        </div>
-
-        {content.schemaData && (
-          <div className="p-3 bg-orange-500/10 border border-orange-500/30 rounded">
-            <p className="text-sm font-medium text-orange-400 mb-2">Schema Markup Data:</p>
-            <pre className="text-xs text-corporate-lightGray whitespace-pre-wrap overflow-x-auto">
-              {content.schemaData}
-            </pre>
-          </div>
-        )}
-
-        {content.hashtags && (
-          <div>
-            <p className="text-sm text-corporate-lightGray mb-2">Social Media Hashtags:</p>
-            <p className="text-sm text-blue-400">{content.hashtags}</p>
-          </div>
-        )}
-
-        {content.keywords.length > 0 && (
-          <div>
-            <p className="text-sm text-corporate-lightGray mb-2">Target Keywords:</p>
+        {/* SEO Keywords */}
+        {content.seoKeywords && content.seoKeywords.length > 0 && (
+          <div className="space-y-2">
+            <label className="text-white font-medium flex items-center gap-2">
+              <TrendingUp className="h-4 w-4" />
+              SEO Keywords
+            </label>
             <div className="flex flex-wrap gap-1">
-              {content.keywords.map((keyword, index) => (
-                <Badge key={index} variant="outline" className="text-xs">
+              {content.seoKeywords.map((keyword, index) => (
+                <Badge key={index} variant="outline" className="text-green-400 border-green-400/50">
                   {keyword}
                 </Badge>
               ))}
@@ -303,30 +177,135 @@ export const ContentPreview = ({ content, onApprove, onReject, onEdit, onContent
           </div>
         )}
 
-        <div className="flex gap-3 pt-4 border-t border-corporate-border">
-          <Button
-            onClick={onApprove}
-            className="flex-1 bg-green-600 hover:bg-green-700 text-white"
-          >
-            <CheckCircle className="h-4 w-4 mr-2" />
-            Approve & Deploy
-          </Button>
-          <Button
-            onClick={onEdit}
-            variant="outline"
-            className="flex-1 border-corporate-accent text-corporate-accent"
-          >
-            <Edit className="h-4 w-4 mr-2" />
-            Edit Content
-          </Button>
-          <Button
-            onClick={onReject}
-            variant="outline"
-            className="text-red-400 border-red-400 hover:bg-red-400/10"
-          >
-            <X className="h-4 w-4" />
-            Reject
-          </Button>
+        {/* Hashtags */}
+        {content.hashtags && content.hashtags.length > 0 && (
+          <div className="space-y-2">
+            <label className="text-white font-medium flex items-center gap-2">
+              <Hash className="h-4 w-4" />
+              Social Media Hashtags
+            </label>
+            <div className="flex flex-wrap gap-1">
+              {content.hashtags.map((tag, index) => (
+                <Badge key={index} className="bg-blue-500/20 text-blue-400 border-blue-500/50">
+                  #{tag}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Internal Links */}
+        {content.internalLinks && content.internalLinks.length > 0 && (
+          <div className="space-y-2">
+            <label className="text-white font-medium flex items-center gap-2">
+              <Link2 className="h-4 w-4" />
+              Internal Links
+            </label>
+            <div className="space-y-1">
+              {content.internalLinks.map((link, index) => (
+                <p key={index} className="text-corporate-accent text-sm">{link}</p>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Image Alt Text */}
+        {content.imageAlt && (
+          <div className="space-y-2">
+            <label className="text-white font-medium flex items-center gap-2">
+              <Image className="h-4 w-4" />
+              Image Alt Text
+            </label>
+            <p className="text-gray-300 text-sm">{content.imageAlt}</p>
+          </div>
+        )}
+
+        {/* Schema Data */}
+        {content.schemaData && (
+          <div className="space-y-2">
+            <label className="text-white font-medium flex items-center gap-2">
+              <Globe className="h-4 w-4" />
+              Schema.org Structured Data
+            </label>
+            <div className="p-3 bg-corporate-dark border border-corporate-border rounded">
+              <pre className="text-gray-300 text-xs overflow-x-auto">
+                {JSON.stringify(content.schemaData, null, 2)}
+              </pre>
+            </div>
+          </div>
+        )}
+
+        {/* SEO Metrics */}
+        {(content.keywordDensity || content.seoScore) && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-green-500/10 border border-green-500/30 rounded">
+            <div className="flex items-center gap-2">
+              <Award className="h-5 w-5 text-green-400" />
+              <div>
+                <p className="text-green-400 font-medium">SEO Optimization</p>
+                <p className="text-gray-300 text-sm">Advanced content analysis complete</p>
+              </div>
+            </div>
+            <div className="space-y-1">
+              {content.keywordDensity && (
+                <p className="text-gray-300 text-sm">
+                  Keyword Density: {(content.keywordDensity * 100).toFixed(1)}%
+                </p>
+              )}
+              {content.seoScore && (
+                <p className={`text-sm font-medium ${getSeoScoreColor(content.seoScore)}`}>
+                  SEO Score: {content.seoScore}/100
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Action Buttons */}
+        <div className="flex gap-3 pt-4 border-t border-gray-700">
+          {isEditing ? (
+            <>
+              <Button
+                onClick={handleSaveEdit}
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                <Check className="mr-2 h-4 w-4" />
+                Save Changes
+              </Button>
+              <Button
+                onClick={() => setIsEditing(false)}
+                variant="outline"
+                className="border-gray-600 text-gray-300 hover:bg-gray-700"
+              >
+                Cancel
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                onClick={onApprove}
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                <Check className="mr-2 h-4 w-4" />
+                Approve for Deployment
+              </Button>
+              <Button
+                onClick={() => setIsEditing(true)}
+                variant="outline"
+                className="border-corporate-accent text-corporate-accent hover:bg-corporate-accent/10"
+              >
+                <Edit className="mr-2 h-4 w-4" />
+                Edit Content
+              </Button>
+              <Button
+                onClick={onReject}
+                variant="outline"
+                className="border-red-500 text-red-500 hover:bg-red-500/10"
+              >
+                <X className="mr-2 h-4 w-4" />
+                Reject
+              </Button>
+            </>
+          )}
         </div>
       </CardContent>
     </Card>
