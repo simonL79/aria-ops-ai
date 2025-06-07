@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export interface ServerHealth {
@@ -27,21 +26,24 @@ export interface ModelStatus {
 }
 
 /**
- * Check local AI server health with correct Ollama port
+ * Check local AI server health with correct Ollama port including 11435
  */
 export const checkServerHealth = async (): Promise<ServerHealth> => {
   const startTime = Date.now();
   const connectionAttempts: string[] = [];
   
   try {
-    console.log('🔍 Checking Ollama server health on BOTH ports 11434 and 3001...');
+    console.log('🔍 Checking Ollama server health on ports 11434, 11435, and 3001...');
     
-    // Try both the native Ollama port (11434) and your proxied port (3001)
+    // Try all possible Ollama ports including the new 11435
     const endpoints = [
+      'http://localhost:11435/api/tags',
       'http://localhost:11434/api/tags',
       'http://localhost:3001/api/tags',
+      'http://127.0.0.1:11435/api/tags',
       'http://127.0.0.1:11434/api/tags', 
       'http://127.0.0.1:3001/api/tags',
+      'http://localhost:11435/api/version',
       'http://localhost:11434/api/version',
       'http://localhost:3001/api/version'
     ];
@@ -98,7 +100,7 @@ export const checkServerHealth = async (): Promise<ServerHealth> => {
         
 TROUBLESHOOTING:
 1. Check if Ollama is running: Run 'ollama serve' in PowerShell
-2. Test direct access: Open http://localhost:11434 in your browser
+2. Test direct access: Open http://localhost:11435 or http://localhost:11434 in your browser
 3. Test proxy access: Open http://localhost:3001 in your browser
 4. Check port proxy: Run 'netsh interface portproxy show all' in PowerShell
         
@@ -197,7 +199,7 @@ const checkOllamaEndpoints = async (workingEndpoint?: string) => {
     memorySearch: false
   };
   
-  const baseUrl = workingEndpoint ? workingEndpoint.replace(/\/api\/(tags|version)/, '') : 'http://localhost:11434';
+  const baseUrl = workingEndpoint ? workingEndpoint.replace(/\/api\/(tags|version)/, '') : 'http://localhost:11435';
   
   const checkOllamaEndpoint = async (testType: string): Promise<boolean> => {
     try {
@@ -239,8 +241,9 @@ export const getModelStatuses = async (): Promise<ModelStatus[]> => {
   try {
     console.log('📋 Fetching model list from Ollama...');
     
-    // Try both ports
+    // Try all ports including 11435
     const endpoints = [
+      'http://localhost:11435/api/tags',
       'http://localhost:11434/api/tags',
       'http://localhost:3001/api/tags'
     ];
