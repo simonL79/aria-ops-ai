@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { ContentTypeSelector } from './ContentTypeSelector';
 import { ContentPreview } from './ContentPreview';
@@ -91,6 +90,11 @@ export const ContentGenerationHub = () => {
     setDeploymentResults(results);
   };
 
+  const handleContentUpdate = (updatedContent: any) => {
+    setGeneratedContent(updatedContent);
+    toast.success('Content updated successfully');
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -168,6 +172,7 @@ export const ContentGenerationHub = () => {
           onApprove={handleApproveContent}
           onEdit={handleEditContent}
           onReject={handleRejectContent}
+          onContentUpdate={handleContentUpdate}
         />
       )}
 

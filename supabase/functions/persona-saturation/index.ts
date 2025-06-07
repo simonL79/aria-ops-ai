@@ -1,421 +1,395 @@
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { serve } from 'std/server';
+import { corsHeaders } from '../_shared/cors.ts';
+import { contentSafetyCheck } from '../_shared/contentSafety.ts';
 
-const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+interface GenerateContentParams {
+  entity: string;
+  contentType: string;
+  customContent?: string;
+  followUpSource?: string;
+  responseAngle?: string;
+  targetKeywords: string[];
+  clientId?: string;
+  clientName?: string;
+  timestamp?: string;
+  previewOnly?: boolean;
+  deploymentTargets?: string[];
+  liveDeployment?: boolean;
+  platformEndpoint?: string;
+}
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
-
-serve(async (req) => {
+export default async function handler(req: Request) {
+  // Handle CORS preflight request
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, {
+      status: 204,
+      headers: corsHeaders
+    });
+  }
+
+  // Only allow POST requests
+  if (req.method !== 'POST') {
+    return new Response(JSON.stringify({ error: 'Method Not Allowed' }), {
+      status: 405,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
   }
 
   try {
-    const requestData = await req.json();
-    console.log('📝 Content generation request:', requestData);
+    const body = await req.json();
+    console.log('📝 Content generation request:', body);
 
-    // Generate the article content using OpenAI
-    const articleContent = await generateArticleContent(requestData);
-    
-    // If this is preview only, return just the content
-    if (requestData.previewOnly) {
-      return new Response(JSON.stringify(articleContent), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    // Extract parameters from the request body
+    const {
+      entity,
+      contentType,
+      customContent,
+      followUpSource,
+      responseAngle,
+      targetKeywords
+    } = body as GenerateContentParams;
+
+    if (!entity || !contentType || !targetKeywords) {
+      return new Response(JSON.stringify({ error: 'Missing required parameters' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
 
-    // For live deployment, continue with the existing deployment logic
-    const deploymentResults = await deployToLivePlatforms(articleContent, requestData);
+    // Prepare the entity and keywords
+    const entityCleaned = entity.replace(/[^a-zA-Z0-9\s]/g, '');
+    const targetKeywordsCleaned = targetKeywords.map(keyword =>
+      keyword.replace(/[^a-zA-Z0-9\s]/g, '')
+    );
+
+    // OpenAI API Key (use environment variable)
+    const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
+    if (!openaiApiKey) {
+      throw new Error('Missing OpenAI API Key');
+    }
+
+    // Generate SEO-optimized content with natural flow
+    const contentPrompt = `You are an expert content writer creating a professional news article about ${entity}. 
+
+CRITICAL FORMATTING REQUIREMENTS:
+- Write in natural, flowing paragraphs WITHOUT any markdown formatting
+- NO bold text (**text**) 
+- NO headings (# or ##)
+- NO bullet points or lists
+- Write like a professional journalist for a major publication
+- Use proper paragraph structure with natural transitions
+- Make it sound completely human-written, not AI-generated
+
+CONTENT REQUIREMENTS:
+- Professional, objective tone
+- 800-1000 words
+- Include the following target keywords naturally: ${targetKeywords.join(', ')}
+- ${responseAngle ? `Response angle: ${responseAngle}` : ''}
+- ${followUpSource ? `This is a response to: ${followUpSource}` : ''}
+
+SEO OPTIMIZATION REQUIREMENTS:
+- Create a Google News-compliant headline that includes primary keywords
+- Strategic keyword placement (2-3% density)
+- Use semantic variations of keywords
+- Include related terms and entities
+- Natural, readable flow that doesn't sound over-optimized
+
+${customContent ? `Additional context: ${customContent}` : ''}
+
+Write a complete, professional article that flows naturally and could be published in any major publication.`;
+
+    // Call OpenAI API
+    console.log('🤖 Calling OpenAI API...');
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openaiApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are an expert content writer and SEO specialist. Create professional, natural-flowing content that ranks well in search engines while maintaining journalistic quality.'
+          },
+          {
+            role: 'user',
+            content: contentPrompt
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 2000
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`OpenAI API error: ${response.status}`);
+    }
+
+    const aiResponse = await response.json();
+    const generatedContent = aiResponse.choices[0]?.message?.content || '';
+
+    // Generate SEO elements
+    const headline = await generateSEOHeadline(entity, targetKeywords, contentType, responseAngle);
+    const metaDescription = await generateMetaDescription(generatedContent, targetKeywords);
+    const urlSlug = generateUrlSlug(headline);
+    const keywordAnalysis = analyzeKeywordDensity(generatedContent, targetKeywords);
+    const seoScore = calculateSEOScore(generatedContent, headline, metaDescription, targetKeywords);
+
+    // Generate social media hashtags
+    const socialHashtags = generateSocialMediaHashtags(targetKeywords, entity);
+
+    // Suggest internal links
+    const internalLinkSuggestions = suggestInternalLinks(generatedContent, entity);
+
+    // Generate image alt text
+    const imageAltText = generateImageAltText(entity, targetKeywords[0]);
+
+    // Generate schema markup
+    const schemaMarkup = generateSchemaMarkup(entity, contentType, generatedContent);
 
     return new Response(JSON.stringify({
-      ...articleContent,
-      deploymentResults,
-      message: 'Content generated and deployed successfully'
+      success: true,
+      content: generatedContent,
+      title: headline,
+      metaDescription,
+      urlSlug,
+      hashtags: socialHashtags,
+      internalLinks: internalLinkSuggestions,
+      imageAlt: imageAltText,
+      schemaData: schemaMarkup,
+      seoKeywords: targetKeywords,
+      keywordDensity: keywordAnalysis,
+      seoScore,
+      timestamp: new Date().toISOString()
     }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
 
   } catch (error) {
-    console.error('❌ Error in persona-saturation:', error);
-    return new Response(JSON.stringify({ 
-      error: error.message,
-      details: 'Content generation failed'
-    }), {
+    console.error('🔥 Error generating content:', error);
+    return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
   }
-});
+}
 
-async function generateArticleContent(config: any) {
-  if (!openAIApiKey) {
-    throw new Error('OpenAI API key not configured');
-  }
+async function generateSEOHeadline(entity: string, keywords: string[], contentType: string, responseAngle?: string): Promise<string> {
+  const headlinePrompt = `Create a professional, Google News-compliant headline for an article about ${entity}. 
 
-  // Enhanced SEO-focused prompt system with advanced optimization
-  let systemPrompt = '';
-  let userPrompt = '';
+Requirements:
+- Include primary keywords: ${keywords.slice(0, 3).join(', ')}
+- 50-60 characters max
+- Professional journalism style
+- ${responseAngle ? `Angle: ${responseAngle}` : ''}
+- No quotation marks around the headline
+- Format: "Subject: Main Topic Details"
 
-  const keywords = config.targetKeywords || [];
-  const entityName = config.entity || config.clientName;
+Return ONLY the headline, nothing else.`;
 
-  if (config.contentType === 'follow_up_response' && config.followUpSource) {
-    systemPrompt = `You are an expert SEO content strategist and professional writer creating a strategic follow-up article with maximum search visibility and professional journalism standards.
-
-CRITICAL SEO REQUIREMENTS:
-- Headline must follow Google News format: [Entity] + [Legal/Industry Action] + [Authority/Publication] + [Key Term]
-- Include meta description (150-160 characters exactly) for maximum CTR
-- Strategic keyword placement: primary keyword in first 100 words, secondary keywords throughout
-- Use semantic keyword variations and LSI keywords naturally
-- Professional tone that passes AI detection tools
-- Structure for featured snippets and voice search optimization
-- Include internal linking opportunities and backlink anchor text suggestions
-
-Entity: ${entityName}
-Response angle: ${config.responseAngle}
-Target keywords: ${keywords.join(', ')}
-Source URL: ${config.followUpSource}
-
-HEADLINE FORMULA (Google News Optimized):
-[Entity Name] + [Action/Legal Term] + [Authority/Publication] + [Key Legal/Industry Term]
-Example: "Noel Clarke Lawsuit: Guardian Defamation Case Heads to UK High Court"
-
-META DESCRIPTION REQUIREMENTS:
-- Exactly 150-160 characters
-- Include primary keyword and entity name
-- Action-oriented language with emotional hook
-- Include current year/timeframe for freshness
-- Clear value proposition for click-through
-
-CONTENT STRUCTURE & SEO OPTIMIZATION:
-1. SEO-optimized headline (Google News format)
-2. Meta description (150-160 characters)
-3. URL slug suggestion (4-6 words, hyphen-separated)
-4. Opening paragraph with primary keyword in first 25 words
-5. Strategic keyword integration throughout (2-3% density)
-6. Semantic keyword variations and related terms
-7. Professional conclusion with call-to-action
-8. Internal linking suggestions
-9. Image alt text suggestions
-10. Schema markup data
-
-KEYWORD INTEGRATION STRATEGY:
-- Primary keyword: First paragraph, H1, meta description
-- Secondary keywords: H2 tags, throughout body (natural placement)
-- Long-tail variations: Naturally woven into sentences
-- LSI keywords: Related terms and synonyms
-
-Guidelines:
-- Write naturally without obvious AI patterns
-- Use proper journalistic attribution and sourcing
-- Include relevant achievements and context for authority
-- End with 3-5 strategically chosen hashtags for social SEO
-- Suggest internal linking opportunities to boost domain authority`;
-
-    userPrompt = `Create an SEO-optimized follow-up response article for ${entityName} responding to: ${config.followUpSource}
-
-TARGET KEYWORDS TO EMBED STRATEGICALLY:
-${keywords.map(keyword => `- ${keyword} (target density: 2-3%)`).join('\n')}
-
-${config.customContent ? `Additional context: ${config.customContent}` : ''}
-
-Generate complete article with advanced SEO optimization:
-1. Google News-format headline with primary keywords
-2. Meta description (150-160 characters for maximum CTR)
-3. URL slug suggestion (SEO-friendly)
-4. Well-structured content with strategic keyword placement
-5. H2/H3 subheadings with secondary keywords
-6. Semantic keyword variations throughout
-7. Professional conclusion with industry context
-8. Internal linking suggestions
-9. Image alt text suggestions
-10. Schema markup data for Google News
-11. Social media hashtags (end only)
-
-FORMAT RESPONSE AS:
-HEADLINE: [SEO-optimized Google News format headline]
-
-META_DESCRIPTION: [150-160 character meta description]
-
-URL_SLUG: [seo-friendly-url-slug]
-
-CONTENT:
-[Full article content with strategic keyword integration and H2/H3 subheadings]
-
-INTERNAL_LINKS: [Suggested internal linking opportunities]
-
-IMAGE_ALT: [Suggested alt text for images]
-
-SCHEMA_DATA: [Key information for schema markup]
-
-HASHTAGS: [3-5 strategic hashtags]`;
-  } else {
-    // Handle other content types with advanced SEO focus
-    const contentTypeMap = {
-      'positive_profile': 'professional achievement and expertise showcase',
-      'industry_analysis': 'thought leadership and market insights',
-      'expert_commentary': 'professional opinions and expert analysis',
-      'company_news': 'business milestones and corporate updates',
-      'innovation_showcase': 'technology and innovation highlights',
-      'strategic_narrative': 'targeted response to specific concerns'
-    };
-
-    systemPrompt = `You are an expert SEO content strategist creating ${contentTypeMap[config.contentType] || 'professional content'} with maximum search visibility and professional authority.
-
-CRITICAL SEO REQUIREMENTS:
-- Headline must be Google News compliant and include primary keywords
-- Include meta description (150-160 characters exactly) for maximum CTR
-- Strategic keyword placement: primary in first 100 words, distribute naturally
-- Use semantic keyword variations and LSI keywords
-- Professional tone that establishes authority and expertise
-- Structure for featured snippets and voice search optimization
-- Include internal linking opportunities
-
-Entity: ${entityName}
-Target keywords: ${keywords.join(', ')}
-
-HEADLINE OPTIMIZATION STRATEGY:
-- Lead with entity name for brand authority
-- Include primary keyword naturally
-- Professional but search-friendly language
-- Under 60 characters for full SERP display
-- Action-oriented when appropriate
-
-META DESCRIPTION EXCELLENCE:
-- Exactly 150-160 characters
-- Include primary keyword and entity name
-- Compelling value proposition
-- Current and newsworthy angle
-- Clear benefit for the reader
-
-CONTENT STRATEGY:
-- Primary keyword in first 100 words and conclusion
-- H2/H3 subheadings with secondary keywords
-- Semantic variations throughout (2-3% total density)
-- Professional industry insights and data
-- Authoritative tone with credible sources
-- Internal linking opportunities for domain authority
-
-Guidelines:
-- Write naturally without obvious AI patterns
-- Use professional, engaging tone with industry expertise
-- Include relevant industry insights and current trends
-- End with 3-5 strategic hashtags for social SEO only
-- Suggest internal linking and schema opportunities`;
-
-    userPrompt = `Create SEO-optimized professional content about ${entityName} focusing on ${contentTypeMap[config.contentType]}.
-
-TARGET KEYWORDS FOR STRATEGIC PLACEMENT:
-${keywords.map(keyword => `- ${keyword} (embed naturally, 2-3% density)`).join('\n')}
-
-${config.customContent ? `Additional guidelines: ${config.customContent}` : ''}
-
-Generate complete article with advanced SEO optimization:
-1. Google-compliant headline with primary keywords
-2. Meta description (150-160 characters for maximum CTR)
-3. URL slug suggestion
-4. Well-structured content with H2/H3 subheadings
-5. Strategic keyword placement and semantic variations
-6. Industry insights and authoritative content
-7. Professional conclusion with call-to-action
-8. Internal linking suggestions
-9. Schema markup recommendations
-
-FORMAT RESPONSE AS:
-HEADLINE: [SEO-optimized professional headline]
-
-META_DESCRIPTION: [150-160 character meta description]
-
-URL_SLUG: [seo-friendly-url-slug]
-
-CONTENT:
-[Full article content with strategic keyword integration and subheadings]
-
-INTERNAL_LINKS: [Suggested internal linking opportunities]
-
-SCHEMA_DATA: [Key information for schema markup]
-
-HASHTAGS: [3-5 strategic hashtags]`;
+  const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
+  if (!openaiApiKey) {
+    throw new Error('Missing OpenAI API Key');
   }
 
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${openAIApiKey}`,
+      'Authorization': `Bearer ${openaiApiKey}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'gpt-4o',
+      model: 'gpt-3.5-turbo',
       messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt }
+        {
+          role: 'system',
+          content: 'You are an expert headline writer for a major news publication.'
+        },
+        {
+          role: 'user',
+          content: headlinePrompt
+        }
       ],
-      temperature: 0.7,
-      max_tokens: 3000
-    }),
+      temperature: 0.6,
+      max_tokens: 80
+    })
   });
 
   if (!response.ok) {
     throw new Error(`OpenAI API error: ${response.status}`);
   }
 
-  const data = await response.json();
-  const content = data.choices[0].message.content;
-
-  // Parse the enhanced structured response
-  const headlineMatch = content.match(/HEADLINE:\s*(.+?)(?:\n|META_DESCRIPTION:)/s);
-  const metaMatch = content.match(/META_DESCRIPTION:\s*(.+?)(?:\n|URL_SLUG:)/s);
-  const urlSlugMatch = content.match(/URL_SLUG:\s*(.+?)(?:\n|CONTENT:)/s);
-  const contentMatch = content.match(/CONTENT:\s*([\s\S]+?)(?:INTERNAL_LINKS:|SCHEMA_DATA:|HASHTAGS:|$)/);
-  const internalLinksMatch = content.match(/INTERNAL_LINKS:\s*([\s\S]+?)(?:IMAGE_ALT:|SCHEMA_DATA:|HASHTAGS:|$)/);
-  const imageAltMatch = content.match(/IMAGE_ALT:\s*(.+?)(?:\n|SCHEMA_DATA:)/s);
-  const schemaMatch = content.match(/SCHEMA_DATA:\s*([\s\S]+?)(?:HASHTAGS:|$)/);
-  const hashtagsMatch = content.match(/HASHTAGS:\s*(.+?)$/s);
-
-  const title = headlineMatch ? headlineMatch[1].trim() : `${entityName} Professional Update`;
-  const metaDescription = metaMatch ? metaMatch[1].trim() : `Latest professional updates and insights from ${entityName}. Industry leadership and expertise.`;
-  const urlSlug = urlSlugMatch ? urlSlugMatch[1].trim() : entityName.toLowerCase().replace(/\s+/g, '-');
-  const body = contentMatch ? contentMatch[1].trim() : content;
-  const internalLinks = internalLinksMatch ? internalLinksMatch[1].trim() : '';
-  const imageAlt = imageAltMatch ? imageAltMatch[1].trim() : '';
-  const schemaData = schemaMatch ? schemaMatch[1].trim() : '';
-  const hashtags = hashtagsMatch ? hashtagsMatch[1].trim() : '';
-
-  return {
-    title,
-    content: body,
-    body, // For backward compatibility
-    metaDescription,
-    urlSlug,
-    hashtags,
-    internalLinks,
-    imageAlt,
-    schemaData,
-    seoKeywords: keywords,
-    keywordDensity: calculateAdvancedKeywordDensity(body, keywords),
-    seoScore: calculateSEOScore(title, metaDescription, body, keywords)
-  };
+  const aiResponse = await response.json();
+  const headline = aiResponse.choices[0]?.message?.content?.trim() || `Article about ${entity}`;
+  return headline;
 }
 
-// Enhanced keyword density calculation with semantic analysis
-function calculateAdvancedKeywordDensity(content: string, keywords: string[]): any {
-  const wordCount = content.split(/\s+/).length;
-  const densityReport = {};
-  
-  keywords.forEach(keyword => {
-    // Check for exact matches
-    const exactRegex = new RegExp(keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
-    const exactMatches = content.match(exactRegex) || [];
-    
-    // Check for partial matches and variations
-    const keywordWords = keyword.toLowerCase().split(' ');
-    let partialMatches = 0;
-    
-    keywordWords.forEach(word => {
-      const wordRegex = new RegExp(`\\b${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'gi');
-      const wordMatches = content.match(wordRegex) || [];
-      partialMatches += wordMatches.length;
-    });
-    
-    const totalDensity = ((exactMatches.length * 2 + partialMatches) / wordCount * 100).toFixed(2);
-    
-    densityReport[keyword] = {
-      exactMatches: exactMatches.length,
-      partialMatches: partialMatches,
-      totalOccurrences: exactMatches.length + partialMatches,
-      density: `${totalDensity}%`,
-      placement: checkKeywordPlacement(content, keyword)
-    };
-  });
-  
-  return densityReport;
-}
+async function generateMetaDescription(content: string, keywords: string[]): Promise<string> {
+  const metaDescriptionPrompt = `Create a concise meta description (150-160 characters) for the following content. Include these keywords: ${keywords.slice(0, 3).join(', ')}.
 
-// Check strategic keyword placement
-function checkKeywordPlacement(content: string, keyword: string): any {
-  const sentences = content.split(/[.!?]+/);
-  const firstSentence = sentences[0] || '';
-  const lastSentence = sentences[sentences.length - 1] || '';
-  
-  const keywordRegex = new RegExp(keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
-  
-  return {
-    inFirstSentence: keywordRegex.test(firstSentence),
-    inLastSentence: keywordRegex.test(lastSentence),
-    inHeadings: /#{1,3}\s.*/.test(content) && keywordRegex.test(content.match(/#{1,3}\s.*/g)?.join(' ') || ''),
-    earlyPlacement: keywordRegex.test(content.substring(0, 200))
-  };
-}
+Content:
+${content}
 
-// Calculate overall SEO score
-function calculateSEOScore(title: string, metaDescription: string, content: string, keywords: string[]): number {
-  let score = 0;
-  const maxScore = 100;
-  
-  // Title optimization (20 points)
-  if (title.length >= 30 && title.length <= 60) score += 10;
-  if (keywords.some(keyword => title.toLowerCase().includes(keyword.toLowerCase()))) score += 10;
-  
-  // Meta description optimization (20 points)
-  if (metaDescription.length >= 150 && metaDescription.length <= 160) score += 10;
-  if (keywords.some(keyword => metaDescription.toLowerCase().includes(keyword.toLowerCase()))) score += 10;
-  
-  // Content optimization (40 points)
-  const wordCount = content.split(/\s+/).length;
-  if (wordCount >= 300) score += 10;
-  if (content.includes('##') || content.includes('###')) score += 10; // Has subheadings
-  
-  // Keyword optimization (20 points)
-  keywords.forEach(keyword => {
-    const keywordRegex = new RegExp(keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
-    const matches = content.match(keywordRegex) || [];
-    const density = (matches.length / wordCount) * 100;
-    if (density >= 1 && density <= 3) score += 20 / keywords.length;
-  });
-  
-  return Math.round(score);
-}
+Return ONLY the meta description, nothing else.`;
 
-async function deployToLivePlatforms(articleContent: any, config: any) {
-  // Simulate live deployments for now
-  const platforms = ['GitHub Pages', 'Medium', 'WordPress.com', 'Reddit', 'Quora', 'LinkedIn'];
-  const results = [];
-
-  for (const platform of platforms) {
-    try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Simulate success/failure
-      const success = Math.random() > 0.3; // 70% success rate
-      
-      if (success) {
-        results.push({
-          platform,
-          success: true,
-          url: `https://${platform.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}.live`,
-          timestamp: new Date().toISOString()
-        });
-      } else {
-        results.push({
-          platform,
-          success: false,
-          error: 'Deployment failed',
-          timestamp: new Date().toISOString()
-        });
-      }
-    } catch (error) {
-      results.push({
-        platform,
-        success: false,
-        error: error.message,
-        timestamp: new Date().toISOString()
-      });
-    }
+  const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
+  if (!openaiApiKey) {
+    throw new Error('Missing OpenAI API Key');
   }
 
-  return results;
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${openaiApiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'gpt-3.5-turbo',
+      messages: [
+        {
+          role: 'system',
+          content: 'You are an SEO specialist creating meta descriptions.'
+        },
+        {
+          role: 'user',
+          content: metaDescriptionPrompt
+        }
+      ],
+      temperature: 0.5,
+      max_tokens: 100
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`OpenAI API error: ${response.status}`);
+  }
+
+  const aiResponse = await response.json();
+  const metaDescription = aiResponse.choices[0]?.message?.content?.trim() || `Read more about this article.`;
+  return metaDescription;
+}
+
+function generateUrlSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .substring(0, 100)
+    .replace(/^-+|-+$/g, '');
+}
+
+function analyzeKeywordDensity(text: string, keywords: string[]) {
+  const wordCount = text.split(/\s+/).length;
+  const analysis: any = {};
+
+  keywords.forEach(keyword => {
+    const keywordRegex = new RegExp(keyword.toLowerCase(), 'gi');
+    const matches = text.toLowerCase().match(keywordRegex) || [];
+    const density = wordCount > 0 ? ((matches.length / wordCount) * 100).toFixed(2) + '%' : '0%';
+
+    analysis[keyword] = {
+      count: matches.length,
+      density,
+      exactMatches: matches.length,
+      partialMatches: 0
+    };
+  });
+
+  return analysis;
+}
+
+function calculateSEOScore(content: string, headline: string, metaDescription: string, keywords: string[]): number {
+  let score = 0;
+
+  // Keyword in headline
+  keywords.slice(0, 3).forEach(keyword => {
+    if (headline.toLowerCase().includes(keyword.toLowerCase())) {
+      score += 20;
+    }
+  });
+
+  // Keyword density
+  const keywordAnalysis = analyzeKeywordDensity(content, keywords);
+  Object.values(keywordAnalysis).forEach((keywordData: any) => {
+    const density = parseFloat(keywordData.density);
+    if (density >= 1 && density <= 3) {
+      score += 25;
+    } else if (density > 0) {
+      score += 15;
+    }
+  });
+
+  // Meta description quality
+  if (metaDescription.length >= 150 && metaDescription.length <= 160) {
+    score += 20;
+  }
+  keywords.slice(0, 2).forEach(keyword => {
+    if (metaDescription.toLowerCase().includes(keyword.toLowerCase())) {
+      score += 10;
+    }
+  });
+
+  // Content length
+  if (content.length >= 800) {
+    score += 15;
+  }
+
+  return Math.min(score, 100); // Cap at 100
+}
+
+function generateSocialMediaHashtags(keywords: string[], entity: string): string {
+  const combinedTerms = [...keywords.slice(0, 4), entity];
+  const hashtags = combinedTerms
+    .map(term => term.replace(/\s+/g, ''))
+    .map(term => `#${term}`)
+    .join(' ');
+  return hashtags;
+}
+
+function suggestInternalLinks(content: string, entity: string): string {
+  const suggestions = [
+    `Learn more about ${entity} on our website.`,
+    `Read our latest news about ${entity}.`,
+    `Explore our services related to ${entity}.`
+  ];
+  return suggestions.join('\n');
+}
+
+function generateImageAltText(entity: string, keyword: string): string {
+  return `Image of ${entity} related to ${keyword}`;
+}
+
+function generateSchemaMarkup(entity: string, contentType: string, content: string): string {
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'NewsArticle',
+    headline: `News about ${entity}`,
+    description: `Article discussing ${contentType} related to ${entity}`,
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': 'https://example.com/article'
+    },
+    author: {
+      '@type': 'Organization',
+      name: entity
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: entity,
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://example.com/logo.png'
+      }
+    },
+    datePublished: new Date().toISOString(),
+    dateModified: new Date().toISOString(),
+    image: [
+      'https://example.com/image1.jpg',
+      'https://example.com/image2.jpg'
+    ],
+    content: content
+  };
+  return JSON.stringify(schema, null, 2);
 }

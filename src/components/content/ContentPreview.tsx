@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -26,9 +25,53 @@ interface ContentPreviewProps {
   onApprove: () => void;
   onReject: () => void;
   onEdit: () => void;
+  onContentUpdate?: (updatedContent: any) => void;
 }
 
-export const ContentPreview = ({ content, onApprove, onReject, onEdit }: ContentPreviewProps) => {
+export const ContentPreview = ({ content, onApprove, onReject, onEdit, onContentUpdate }: ContentPreviewProps) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedTitle, setEditedTitle] = useState(content.title);
+  const [editedBody, setEditedBody] = useState(content.body);
+
+  const handleSaveEdit = () => {
+    // Recalculate keyword density for edited content
+    const updatedKeywordDensity = content.seoKeywords ? 
+      analyzeKeywordDensity(editedBody, content.seoKeywords) : 
+      content.keywordDensity;
+
+    const updatedContent = {
+      ...content,
+      title: editedTitle,
+      body: editedBody,
+      keywordDensity: updatedKeywordDensity
+    };
+
+    if (onContentUpdate) {
+      onContentUpdate(updatedContent);
+    }
+    setIsEditing(false);
+  };
+
+  const analyzeKeywordDensity = (text: string, keywords: string[]) => {
+    const wordCount = text.split(/\s+/).length;
+    const analysis: any = {};
+
+    keywords.forEach(keyword => {
+      const keywordRegex = new RegExp(keyword.toLowerCase(), 'gi');
+      const matches = text.toLowerCase().match(keywordRegex) || [];
+      const density = wordCount > 0 ? ((matches.length / wordCount) * 100).toFixed(2) + '%' : '0%';
+      
+      analysis[keyword] = {
+        count: matches.length,
+        density,
+        exactMatches: matches.length,
+        partialMatches: 0
+      };
+    });
+
+    return analysis;
+  };
+
   const getSeoScoreColor = (score: number) => {
     if (score >= 80) return 'text-green-400';
     if (score >= 60) return 'text-yellow-400';
@@ -144,86 +187,121 @@ export const ContentPreview = ({ content, onApprove, onReject, onEdit }: Content
           </div>
         </div>
 
-        {/* Content Body */}
+        {/* Editable Content Section */}
         <div className="space-y-3">
-          <div className="bg-corporate-dark p-4 rounded border border-corporate-border max-h-96 overflow-y-auto">
-            <div className="prose prose-invert max-w-none">
-              {content.body.split('\n').map((paragraph, index) => {
-                if (paragraph.startsWith('##')) {
-                  return (
-                    <h3 key={index} className="text-lg font-semibold text-white mt-4 mb-2">
-                      {paragraph.replace(/^##\s/, '')}
-                    </h3>
-                  );
-                }
-                if (paragraph.startsWith('#')) {
-                  return (
-                    <h2 key={index} className="text-xl font-bold text-white mt-6 mb-3">
-                      {paragraph.replace(/^#\s/, '')}
-                    </h2>
-                  );
-                }
-                return (
+          <div className="flex items-center justify-between">
+            <h4 className="text-sm font-medium text-white">Article Content</h4>
+            <Button
+              onClick={() => setIsEditing(!isEditing)}
+              variant="outline"
+              size="sm"
+              className="text-corporate-accent border-corporate-accent"
+            >
+              <Edit className="h-3 w-3 mr-1" />
+              {isEditing ? 'Cancel Edit' : 'Edit Content'}
+            </Button>
+          </div>
+
+          {isEditing ? (
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs text-corporate-lightGray mb-1 block">Headline:</label>
+                <input
+                  type="text"
+                  value={editedTitle}
+                  onChange={(e) => setEditedTitle(e.target.value)}
+                  className="w-full p-2 bg-corporate-dark border border-corporate-border rounded text-white"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-corporate-lightGray mb-1 block">Article Body:</label>
+                <textarea
+                  value={editedBody}
+                  onChange={(e) => setEditedBody(e.target.value)}
+                  className="w-full h-96 p-3 bg-corporate-dark border border-corporate-border rounded text-white resize-none"
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleSaveEdit}
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                >
+                  Save Changes
+                </Button>
+                <Button
+                  onClick={() => setIsEditing(false)}
+                  variant="outline"
+                  className="text-corporate-lightGray border-corporate-border"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-corporate-dark p-4 rounded border border-corporate-border max-h-96 overflow-y-auto">
+              <div className="prose prose-invert max-w-none">
+                <h2 className="text-xl font-bold text-white mb-4">{editedTitle}</h2>
+                {editedBody.split('\n').map((paragraph, index) => (
                   <p key={index} className="text-corporate-lightGray mb-3 leading-relaxed">
                     {paragraph}
                   </p>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Additional SEO Elements */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {content.internalLinks && (
-              <div className="p-3 bg-blue-500/10 border border-blue-500/30 rounded">
-                <div className="flex items-center gap-2 mb-2">
-                  <Link className="h-4 w-4 text-blue-400" />
-                  <p className="text-sm font-medium text-blue-400">Internal Link Suggestions:</p>
-                </div>
-                <p className="text-xs text-corporate-lightGray whitespace-pre-wrap">{content.internalLinks}</p>
-              </div>
-            )}
-
-            {content.imageAlt && (
-              <div className="p-3 bg-purple-500/10 border border-purple-500/30 rounded">
-                <div className="flex items-center gap-2 mb-2">
-                  <Image className="h-4 w-4 text-purple-400" />
-                  <p className="text-sm font-medium text-purple-400">Image Alt Text:</p>
-                </div>
-                <p className="text-xs text-corporate-lightGray">{content.imageAlt}</p>
-              </div>
-            )}
-          </div>
-
-          {content.schemaData && (
-            <div className="p-3 bg-orange-500/10 border border-orange-500/30 rounded">
-              <p className="text-sm font-medium text-orange-400 mb-2">Schema Markup Data:</p>
-              <pre className="text-xs text-corporate-lightGray whitespace-pre-wrap overflow-x-auto">
-                {content.schemaData}
-              </pre>
-            </div>
-          )}
-
-          {content.hashtags && (
-            <div>
-              <p className="text-sm text-corporate-lightGray mb-2">Social Media Hashtags:</p>
-              <p className="text-sm text-blue-400">{content.hashtags}</p>
-            </div>
-          )}
-
-          {content.keywords.length > 0 && (
-            <div>
-              <p className="text-sm text-corporate-lightGray mb-2">Target Keywords:</p>
-              <div className="flex flex-wrap gap-1">
-                {content.keywords.map((keyword, index) => (
-                  <Badge key={index} variant="outline" className="text-xs">
-                    {keyword}
-                  </Badge>
                 ))}
               </div>
             </div>
           )}
         </div>
+
+        {/* Additional SEO Elements */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {content.internalLinks && (
+            <div className="p-3 bg-blue-500/10 border border-blue-500/30 rounded">
+              <div className="flex items-center gap-2 mb-2">
+                <Link className="h-4 w-4 text-blue-400" />
+                <p className="text-sm font-medium text-blue-400">Internal Link Suggestions:</p>
+              </div>
+              <p className="text-xs text-corporate-lightGray whitespace-pre-wrap">{content.internalLinks}</p>
+            </div>
+          )}
+
+          {content.imageAlt && (
+            <div className="p-3 bg-purple-500/10 border border-purple-500/30 rounded">
+              <div className="flex items-center gap-2 mb-2">
+                <Image className="h-4 w-4 text-purple-400" />
+                <p className="text-sm font-medium text-purple-400">Image Alt Text:</p>
+              </div>
+              <p className="text-xs text-corporate-lightGray">{content.imageAlt}</p>
+            </div>
+          )}
+        </div>
+
+        {content.schemaData && (
+          <div className="p-3 bg-orange-500/10 border border-orange-500/30 rounded">
+            <p className="text-sm font-medium text-orange-400 mb-2">Schema Markup Data:</p>
+            <pre className="text-xs text-corporate-lightGray whitespace-pre-wrap overflow-x-auto">
+              {content.schemaData}
+            </pre>
+          </div>
+        )}
+
+        {content.hashtags && (
+          <div>
+            <p className="text-sm text-corporate-lightGray mb-2">Social Media Hashtags:</p>
+            <p className="text-sm text-blue-400">{content.hashtags}</p>
+          </div>
+        )}
+
+        {content.keywords.length > 0 && (
+          <div>
+            <p className="text-sm text-corporate-lightGray mb-2">Target Keywords:</p>
+            <div className="flex flex-wrap gap-1">
+              {content.keywords.map((keyword, index) => (
+                <Badge key={index} variant="outline" className="text-xs">
+                  {keyword}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="flex gap-3 pt-4 border-t border-corporate-border">
           <Button
