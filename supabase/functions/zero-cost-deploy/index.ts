@@ -1,4 +1,3 @@
-
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -13,8 +12,12 @@ serve(async (req) => {
   }
 
   try {
-    const { platform, content, title, entity, contentType, keywords, enableSEO, generateSitemap, jsonLD } = await req.json()
+    const requestBody = await req.json()
+    const { platform, content, title, entity, contentType, keywords, enableSEO, generateSitemap, jsonLD } = requestBody
 
+    // Ensure content is a string - handle if it's an object with content property
+    const contentText = typeof content === 'string' ? content : (content?.content || JSON.stringify(content))
+    
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -38,15 +41,15 @@ serve(async (req) => {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${title}</title>
-    <meta name="description" content="${content.substring(0, 160)}...">
+    <meta name="description" content="${contentText.substring(0, 160)}...">
     <meta name="keywords" content="${seoKeywords}">
     <meta name="robots" content="index, follow">
     <meta property="og:title" content="${title}">
-    <meta property="og:description" content="${content.substring(0, 200)}...">
+    <meta property="og:description" content="${contentText.substring(0, 200)}...">
     <meta property="og:type" content="article">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="${title}">
-    <meta name="twitter:description" content="${content.substring(0, 200)}...">
+    <meta name="twitter:description" content="${contentText.substring(0, 200)}...">
     ${jsonLD ? `<script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -57,7 +60,7 @@ serve(async (req) => {
         "name": "Professional Content Platform"
       },
       "datePublished": "${new Date().toISOString()}",
-      "description": "${content.substring(0, 200)}...",
+      "description": "${contentText.substring(0, 200)}...",
       "keywords": "${seoKeywords}"
     }
     </script>` : ''}
@@ -128,7 +131,7 @@ serve(async (req) => {
             <strong>Category:</strong> ${contentType === 'positive_profile' ? 'Professional Excellence' : 'Industry Leadership'}
         </div>
         <div class="content">
-            ${content.split('\n').map(paragraph => paragraph.trim() ? `<p>${paragraph}</p>` : '').join('')}
+            ${contentText.split('\n').map(paragraph => paragraph.trim() ? `<p>${paragraph}</p>` : '').join('')}
         </div>
         ${keywords && keywords.length > 0 ? `
         <div class="keywords">
