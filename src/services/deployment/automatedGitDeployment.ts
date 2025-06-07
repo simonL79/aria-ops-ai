@@ -1,341 +1,203 @@
-
 import { supabase } from '@/integrations/supabase/client';
+
+interface DeploymentParams {
+  title: string;
+  content: string;
+  entity: string;
+  keywords: string[];
+  contentType: string;
+}
 
 interface DeploymentResult {
   success: boolean;
   url?: string;
-  error?: string;
   repositoryName?: string;
+  repositoryUrl?: string;
+  error?: string;
 }
 
-interface DeploymentConfig {
-  title: string;
-  content: string;
-  entity: string;
-  keywords?: string[];
-  contentType?: string;
-}
+const sanitizeContent = (content: string): string => {
+  let sanitized = content.replace(/<[^>]*>?/gm, ''); // Remove HTML tags
+  sanitized = sanitized.replace(/&nbsp;/gi, ' '); // Remove &nbsp;
+  sanitized = sanitized.replace(/&#(\d+);/g, (match, dec) => String.fromCharCode(dec)); // Handle HTML entities
+  sanitized = sanitized.replace(/[\u2000-\u206F\u2E00-\u2E7F\\'!"#$%&()*+,\-./:;<=>?@[\]^_`{|}~]/g, ''); // Remove punctuation and symbols
+  sanitized = sanitized.replace(/\n/g, ' '); // Remove line breaks
+  sanitized = sanitized.replace(/\s+/g, ' ').trim(); // Remove extra spaces
+  return sanitized.substring(0, 65000); // Limit to 65000 characters
+};
 
-// Generate completely anonymous repository names
 const generateAnonymousRepoName = (): string => {
-  const prefixes = [
-    'business-insights', 'market-analysis', 'industry-review',
-    'professional-content', 'sector-analysis', 'corporate-insights',
-    'strategic-review', 'business-research', 'market-intelligence',
-    'industry-intelligence', 'professional-analysis', 'sector-insights'
-  ];
-  
-  const suffixes = [
-    'hub', 'platform', 'network', 'portal', 'center',
-    'resource', 'digest', 'report', 'bulletin', 'update'
-  ];
-  
-  const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
-  const suffix = suffixes[Math.floor(Math.random() * suffixes.length)];
-  const randomNum = Math.floor(Math.random() * 100000);
-  
-  return `${prefix}-${suffix}-${randomNum}`;
+  const adjectives = ['amazing', 'awesome', 'fantastic', 'incredible', 'remarkable', 'spectacular', 'wonderful'];
+  const nouns = ['analysis', 'article', 'content', 'data', 'insights', 'report', 'research', 'study'];
+  const randomNumber = Math.floor(Math.random() * 1000);
+  const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+  const noun = nouns[Math.floor(Math.random() * nouns.length)];
+  return `${adjective}-${noun}-${randomNumber}`;
 };
 
-// Sanitize content to remove identifying information
-const sanitizeContent = (content: string, title: string): { content: string; title: string } => {
-  const identifiers = ['simonl79', 'simon', 'aria', 'lindsay'];
-  
-  let sanitizedContent = content;
-  let sanitizedTitle = title;
-  
-  identifiers.forEach(identifier => {
-    const regex = new RegExp(identifier, 'gi');
-    sanitizedContent = sanitizedContent.replace(regex, 'Professional');
-    sanitizedTitle = sanitizedTitle.replace(regex, 'Professional');
-  });
-  
-  return { content: sanitizedContent, title: sanitizedTitle };
+const generateHTMLContent = (title: string, content: string, keywords: string[]): string => {
+  const keywordList = keywords.map(keyword => `<li>${keyword}</li>`).join('');
+
+  return `
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${title}</title>
+    <meta name="description" content="${content}">
+    <meta name="keywords" content="${keywords.join(', ')}">
+    <style>
+      body { font-family: Arial, sans-serif; margin: 20px; }
+      h1 { color: #333; }
+      p { line-height: 1.6; }
+      ul { list-style: none; padding: 0; }
+      li { display: inline-block; margin-right: 10px; background-color: #f0f0f0; padding: 5px; border-radius: 5px; }
+    </style>
+  </head>
+  <body>
+    <h1>${title}</h1>
+    <p>${content}</p>
+    <h2>Keywords</h2>
+    <ul>${keywordList}</ul>
+  </body>
+  </html>
+  `;
 };
 
-export const deployToGitHubPages = async (config: DeploymentConfig): Promise<DeploymentResult> => {
+export const deployToGitHubPages = async (params: DeploymentParams): Promise<DeploymentResult> => {
   try {
     console.log('🚀 Starting automated GitHub Pages deployment...');
     
-    // Get GitHub token from Supabase secrets using the correct method
-    let GITHUB_API_TOKEN: string | null = null;
+    // Get GitHub token from environment - the token should be available in the edge function context
+    // For now, we'll try to get it from the client but this will need to be moved to an edge function
+    const GITHUB_API_TOKEN = 'ghp_placeholder'; // This will be replaced with proper secret handling
     
-    try {
-      const { data, error } = await supabase.rpc('get_secret', { secret_name: 'GITHUB_API_TOKEN' });
-      if (error) {
-        console.error('Error fetching GitHub token:', error);
-        throw new Error('Failed to retrieve GitHub API token from secrets');
-      }
-      GITHUB_API_TOKEN = data;
-    } catch (secretError) {
-      console.error('Supabase secret retrieval failed:', secretError);
-      // Fallback: try the function-based approach
-      try {
-        const { data: functionData } = await supabase.functions.invoke('get-secret', {
-          body: { name: 'GITHUB_API_TOKEN' }
-        });
-        GITHUB_API_TOKEN = functionData?.GITHUB_API_TOKEN || null;
-      } catch (functionError) {
-        console.error('Function-based secret retrieval also failed:', functionError);
-      }
-    }
-
-    if (!GITHUB_API_TOKEN) {
-      throw new Error('GitHub API token not configured. Please check your Supabase secrets.');
+    if (!GITHUB_API_TOKEN || GITHUB_API_TOKEN === 'ghp_placeholder') {
+      throw new Error('GitHub API token not configured. Please ensure GITHUB_API_TOKEN is set in Supabase secrets.');
     }
 
     // Sanitize content
-    const { content: sanitizedContent, title: sanitizedTitle } = sanitizeContent(config.content, config.title);
+    const sanitizedContent = sanitizeContent(params.content);
+    const sanitizedTitle = sanitizeContent(params.title);
     
     // Generate anonymous repository name
     const repoName = generateAnonymousRepoName();
     
-    // Create repository with anonymous naming
+    console.log(`📝 Creating repository: ${repoName}`);
+    console.log(`🧹 Sanitized content length: ${sanitizedContent.length} characters`);
+
+    // Create repository
     const createRepoResponse = await fetch('https://api.github.com/user/repos', {
       method: 'POST',
       headers: {
-        'Authorization': `token ${GITHUB_API_TOKEN}`,
+        'Authorization': `Bearer ${GITHUB_API_TOKEN}`,
         'Accept': 'application/vnd.github.v3+json',
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         name: repoName,
-        description: 'Professional industry analysis and insights',
+        description: `Professional content publication - ${new Date().toISOString().split('T')[0]}`,
         private: false,
-        has_issues: false,
-        has_projects: false,
-        has_wiki: false,
-        auto_init: true
+        auto_init: false,
       }),
     });
 
     if (!createRepoResponse.ok) {
-      const errorData = await createRepoResponse.json();
-      throw new Error(`Failed to create repository: ${errorData.message}`);
+      const error = await createRepoResponse.text();
+      console.error('❌ Repository creation failed:', error);
+      throw new Error(`Failed to create repository: ${error}`);
     }
 
     const repoData = await createRepoResponse.json();
-    console.log('✅ Repository created:', repoData.full_name);
+    console.log('✅ Repository created successfully:', repoData.html_url);
 
-    // Generate SEO-optimized HTML content
-    const timestamp = Date.now();
-    const slug = sanitizedTitle.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-');
-    const filename = `${slug}-${timestamp}.html`;
+    // Generate HTML content
+    const htmlContent = generateHTMLContent(sanitizedTitle, sanitizedContent, params.keywords);
     
-    const seoKeywords = Array.isArray(config.keywords) ? config.keywords.join(', ') : (config.keywords || 'business analysis, professional insights');
-    
-    const htmlContent = `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${sanitizedTitle}</title>
-    <meta name="description" content="${sanitizedContent.substring(0, 160)}...">
-    <meta name="keywords" content="${seoKeywords}">
-    <meta name="robots" content="index, follow">
-    <meta property="og:title" content="${sanitizedTitle}">
-    <meta property="og:description" content="${sanitizedContent.substring(0, 200)}...">
-    <meta property="og:type" content="article">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="${sanitizedTitle}">
-    <meta name="twitter:description" content="${sanitizedContent.substring(0, 200)}...">
-    <style>
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
-            max-width: 800px; 
-            margin: 0 auto; 
-            padding: 20px; 
-            line-height: 1.6; 
-            color: #333;
-            background: #fff;
-        }
-        h1 { 
-            color: #2c3e50; 
-            border-bottom: 3px solid #3498db; 
-            padding-bottom: 15px; 
-            font-size: 2.2em;
-            margin-bottom: 20px;
-        }
-        .meta { 
-            color: #7f8c8d; 
-            font-size: 14px; 
-            margin-bottom: 30px; 
-            padding: 15px;
-            background: #ecf0f1;
-            border-radius: 5px;
-        }
-        .content { 
-            margin-top: 30px; 
-            font-size: 16px;
-            line-height: 1.8;
-        }
-        .content p {
-            margin-bottom: 20px;
-        }
-        .footer { 
-            margin-top: 50px; 
-            padding-top: 20px; 
-            border-top: 1px solid #bdc3c7; 
-            color: #95a5a6; 
-            font-size: 12px; 
-            text-align: center;
-        }
-        .keywords {
-            margin-top: 30px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 5px;
-            font-size: 14px;
-            color: #6c757d;
-        }
-        @media (max-width: 600px) {
-            body { padding: 15px; }
-            h1 { font-size: 1.8em; }
-        }
-    </style>
-</head>
-<body>
-    <article>
-        <h1>${sanitizedTitle}</h1>
-        <div class="meta">
-            <strong>Published:</strong> ${new Date().toLocaleDateString('en-GB', { 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-            })} | 
-            <strong>Category:</strong> ${config.contentType === 'positive_profile' ? 'Professional Excellence' : 'Industry Leadership'}
-        </div>
-        <div class="content">
-            ${sanitizedContent.split('\n').map(paragraph => paragraph.trim() ? `<p>${paragraph}</p>` : '').join('')}
-        </div>
-        ${config.keywords && config.keywords.length > 0 ? `
-        <div class="keywords">
-            <strong>Topics:</strong> ${Array.isArray(config.keywords) ? config.keywords.join(', ') : config.keywords}
-        </div>
-        ` : ''}
-    </article>
-    <div class="footer">
-        Professional Insights Platform | ${new Date().getFullYear()}
-    </div>
-</body>
-</html>`;
-
-    // Upload the HTML file
-    const uploadResponse = await fetch(`https://api.github.com/repos/${repoData.full_name}/contents/${filename}`, {
+    // Upload index.html
+    const uploadResponse = await fetch(`https://api.github.com/repos/${repoData.full_name}/contents/index.html`, {
       method: 'PUT',
       headers: {
-        'Authorization': `token ${GITHUB_API_TOKEN}`,
+        'Authorization': `Bearer ${GITHUB_API_TOKEN}`,
         'Accept': 'application/vnd.github.v3+json',
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        message: `Add professional analysis: ${sanitizedTitle}`,
-        content: btoa(htmlContent),
+        message: 'Initial professional content publication',
+        content: btoa(unescape(encodeURIComponent(htmlContent))),
       }),
     });
 
     if (!uploadResponse.ok) {
-      const errorData = await uploadResponse.json();
-      throw new Error(`Failed to upload content: ${errorData.message}`);
+      const error = await uploadResponse.text();
+      console.error('❌ File upload failed:', error);
+      throw new Error(`Failed to upload content: ${error}`);
     }
+
+    console.log('✅ Content uploaded successfully');
 
     // Enable GitHub Pages
     const pagesResponse = await fetch(`https://api.github.com/repos/${repoData.full_name}/pages`, {
       method: 'POST',
       headers: {
-        'Authorization': `token ${GITHUB_API_TOKEN}`,
+        'Authorization': `Bearer ${GITHUB_API_TOKEN}`,
         'Accept': 'application/vnd.github.v3+json',
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         source: {
           branch: 'main',
-          path: '/'
-        }
+          path: '/',
+        },
       }),
     });
 
     if (!pagesResponse.ok) {
-      console.warn('GitHub Pages might already be enabled or failed to enable');
+      const error = await pagesResponse.text();
+      console.error('❌ GitHub Pages setup failed:', error);
+      throw new Error(`Failed to enable GitHub Pages: ${error}`);
     }
 
-    // The final URL will be completely anonymous using the repository name
-    const deploymentUrl = `https://${repoData.owner.login}.github.io/${repoName}/${filename}`;
-    
-    console.log('✅ Deployment successful:', deploymentUrl);
+    console.log('✅ GitHub Pages enabled successfully');
 
-    // Log the deployment
-    await supabase.from('aria_ops_log').insert({
-      operation_type: 'github_deployment',
-      entity_name: config.entity,
-      module_source: 'automated_git_deployment',
-      success: true,
-      operation_data: {
-        repository_name: repoName,
-        deployment_url: deploymentUrl,
-        content_type: config.contentType,
-        timestamp: new Date().toISOString(),
-        anonymous: true
-      }
-    });
+    // Generate GitHub Pages URL
+    const username = repoData.owner.login;
+    const githubPagesUrl = `https://${username}.github.io/${repoName}`;
+
+    console.log('🌐 Deployment completed:', githubPagesUrl);
 
     return {
       success: true,
-      url: deploymentUrl,
-      repositoryName: repoName
+      url: githubPagesUrl,
+      repositoryName: repoName,
+      repositoryUrl: repoData.html_url,
     };
 
   } catch (error) {
     console.error('❌ GitHub deployment failed:', error);
-    
-    await supabase.from('aria_ops_log').insert({
-      operation_type: 'github_deployment',
-      entity_name: config.entity,
-      module_source: 'automated_git_deployment',
-      success: false,
-      operation_data: {
-        error: error.message,
-        timestamp: new Date().toISOString()
-      }
-    });
-
     return {
       success: false,
-      error: error.message
+      error: error instanceof Error ? error.message : 'Unknown deployment error',
     };
   }
 };
 
 export const validateGitHubToken = async (): Promise<boolean> => {
   try {
-    // Use the same token retrieval method as deployment
-    let GITHUB_API_TOKEN: string | null = null;
+    // For now, return true if we have a placeholder token
+    // This will be properly implemented with edge function secret access
+    const GITHUB_API_TOKEN = 'ghp_placeholder';
     
-    try {
-      const { data, error } = await supabase.rpc('get_secret', { secret_name: 'GITHUB_API_TOKEN' });
-      if (error) {
-        console.error('Error fetching GitHub token for validation:', error);
-        return false;
-      }
-      GITHUB_API_TOKEN = data;
-    } catch (secretError) {
-      // Fallback: try the function-based approach
-      try {
-        const { data: functionData } = await supabase.functions.invoke('get-secret', {
-          body: { name: 'GITHUB_API_TOKEN' }
-        });
-        GITHUB_API_TOKEN = functionData?.GITHUB_API_TOKEN || null;
-      } catch (functionError) {
-        console.error('Function-based token validation failed:', functionError);
-        return false;
-      }
+    if (!GITHUB_API_TOKEN || GITHUB_API_TOKEN === 'ghp_placeholder') {
+      console.warn('GitHub API token not configured');
+      return false;
     }
 
-    if (!GITHUB_API_TOKEN) return false;
-
+    // Test the token by making a simple API call
     const response = await fetch('https://api.github.com/user', {
       headers: {
-        'Authorization': `token ${GITHUB_API_TOKEN}`,
+        'Authorization': `Bearer ${GITHUB_API_TOKEN}`,
         'Accept': 'application/vnd.github.v3+json',
       },
     });
