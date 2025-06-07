@@ -1,24 +1,81 @@
 
 import React, { useState } from 'react';
 import { ContentTypeSelector } from './ContentTypeSelector';
+import { ContentPreview } from './ContentPreview';
 import { LiveDeploymentManager } from './LiveDeploymentManager';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Zap, Target, Shield } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Zap, Target, Shield, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 import ClientSelector from '@/components/admin/ClientSelector';
 import type { Client } from '@/types/clients';
+import { supabase } from '@/integrations/supabase/client';
 
 export const ContentGenerationHub = () => {
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [contentConfig, setContentConfig] = useState<any>(null);
+  const [generatedContent, setGeneratedContent] = useState<any>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [deploymentResults, setDeploymentResults] = useState<any[]>([]);
 
-  const handleContentTypeSelect = (contentType: string, config: any) => {
-    setContentConfig({
+  const handleContentTypeSelect = async (contentType: string, config: any) => {
+    const fullConfig = {
       ...config,
       clientId: selectedClient?.id,
       clientName: selectedClient?.name
-    });
+    };
+    
+    setContentConfig(fullConfig);
+    await generatePreviewContent(fullConfig);
+  };
+
+  const generatePreviewContent = async (config: any) => {
+    setIsGenerating(true);
+    try {
+      console.log('🎯 Generating content preview...');
+      
+      const { data, error } = await supabase.functions.invoke('persona-saturation', {
+        body: {
+          ...config,
+          previewOnly: true
+        }
+      });
+
+      if (error) throw error;
+
+      setGeneratedContent({
+        title: data.title || 'Generated Article',
+        body: data.content || data.body || 'Content generation failed',
+        keywords: config.targetKeywords || [],
+        contentType: config.contentType,
+        responseAngle: config.responseAngle,
+        sourceUrl: config.followUpSource
+      });
+
+      toast.success('Content preview generated successfully');
+    } catch (error) {
+      console.error('❌ Content generation failed:', error);
+      toast.error('Failed to generate content preview');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleApproveContent = () => {
+    toast.success('Content approved for deployment');
+    // Content is ready for deployment
+  };
+
+  const handleEditContent = () => {
+    setGeneratedContent(null);
+    toast.info('Please regenerate content with updated configuration');
+  };
+
+  const handleRejectContent = () => {
+    setGeneratedContent(null);
+    setContentConfig(null);
+    toast.info('Content rejected - starting over');
   };
 
   const handleDeploymentComplete = (results: any[]) => {
@@ -60,17 +117,40 @@ export const ContentGenerationHub = () => {
       />
 
       {/* Content Type Selection */}
-      {selectedClient && (
+      {selectedClient && !generatedContent && (
         <ContentTypeSelector
           onContentTypeSelect={handleContentTypeSelect}
           selectedEntity={selectedClient.name}
         />
       )}
 
+      {/* Loading State */}
+      {isGenerating && (
+        <Card className="border-corporate-border bg-corporate-darkSecondary">
+          <CardContent className="p-6 text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-corporate-accent" />
+            <p className="text-white">Generating content preview...</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Content Preview */}
+      {generatedContent && !isGenerating && (
+        <ContentPreview
+          content={generatedContent}
+          onApprove={handleApproveContent}
+          onEdit={handleEditContent}
+          onReject={handleRejectContent}
+        />
+      )}
+
       {/* Live Deployment */}
-      {contentConfig && (
+      {generatedContent && contentConfig && (
         <LiveDeploymentManager
-          contentConfig={contentConfig}
+          contentConfig={{
+            ...contentConfig,
+            generatedContent
+          }}
           onDeploymentComplete={handleDeploymentComplete}
         />
       )}
