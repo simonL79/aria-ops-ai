@@ -137,87 +137,65 @@ The case demonstrates the continuing evolution of media law in the digital age a
       })
     }
 
-    // Handle live deployment
+    // Handle live deployment - Note: This is currently SIMULATION MODE
     if (liveDeployment && deploymentTargets?.length > 0) {
-      console.log('🚀 Starting live deployment process...')
+      console.log('🚀 Starting deployment simulation (not real deployments)...')
       
       const deploymentResults = []
-      const timestamp = Date.now()
 
       for (const platform of deploymentTargets) {
         try {
           let deploymentResult
           
+          // IMPORTANT: These are simulated deployments for demonstration
+          // Real integration would require platform APIs and authentication
           switch (platform) {
             case 'github-pages':
-              // Simulate GitHub Pages deployment with proper error handling
-              try {
-                const repoName = `${clientName.toLowerCase().replace(/\s+/g, '-')}-legal-case-${timestamp}`
-                const githubUrl = `https://${Deno.env.get('GITHUB_USERNAME') || 'aria-legal'}.github.io/${repoName}`
-                
-                // In a real implementation, this would create the actual repository
-                // For now, we'll create a placeholder that indicates the process
-                console.log(`📡 GitHub Pages: Creating repository ${repoName}`)
-                
-                deploymentResult = {
-                  success: true,
-                  url: githubUrl,
-                  platform: 'GitHub Pages',
-                  timestamp: new Date().toISOString()
-                }
-              } catch (error) {
-                deploymentResult = {
-                  success: false,
-                  error: `GitHub deployment failed: ${error.message}`,
-                  platform: 'GitHub Pages'
-                }
+              deploymentResult = {
+                success: false,
+                error: 'GitHub Pages deployment requires repository setup and authentication',
+                platform: 'GitHub Pages',
+                note: 'Simulation mode - no real deployment created'
               }
               break
 
             case 'medium':
-              // Simulate Medium publication
-              const mediumUrl = `https://medium.com/@legal-correspondent/${urlSlug}-${timestamp.toString().slice(-6)}`
               deploymentResult = {
-                success: true,
-                url: mediumUrl,
+                success: false,
+                error: 'Medium deployment requires API key and authentication',
                 platform: 'Medium',
-                timestamp: new Date().toISOString()
+                note: 'Simulation mode - no real deployment created'
               }
               break
 
             case 'reddit':
-              // Simulate Reddit post
-              const subreddit = 'legaladvice'
-              const redditUrl = `https://www.reddit.com/r/${subreddit}/comments/${timestamp.toString(36)}/${urlSlug.replace(/-/g, '_')}/`
               deploymentResult = {
-                success: true,
-                url: redditUrl,
+                success: false,
+                error: 'Reddit posting requires API credentials and subreddit permissions',
                 platform: 'Reddit',
-                timestamp: new Date().toISOString()
+                note: 'Simulation mode - no real deployment created'
               }
               break
 
             case 'linkedin':
-              // Simulate LinkedIn article
-              const linkedinUrl = `https://www.linkedin.com/pulse/${urlSlug}-legal-correspondent-${timestamp.toString().slice(-8)}`
               deploymentResult = {
-                success: true,
-                url: linkedinUrl,
+                success: false,
+                error: 'LinkedIn publishing requires OAuth authentication',
                 platform: 'LinkedIn',
-                timestamp: new Date().toISOString()
+                note: 'Simulation mode - no real deployment created'
               }
               break
 
             default:
               deploymentResult = {
                 success: false,
-                error: `Unsupported platform: ${platform}`,
+                error: `Platform ${platform} not yet supported`,
                 platform
               }
           }
 
           deploymentResults.push(deploymentResult)
-          console.log(`✅ ${platform} deployment:`, deploymentResult)
+          console.log(`⚠️ ${platform} deployment:`, deploymentResult)
 
         } catch (error) {
           console.error(`❌ ${platform} deployment failed:`, error)
@@ -228,9 +206,6 @@ The case demonstrates the continuing evolution of media law in the digital age a
           })
         }
       }
-
-      const successfulDeployments = deploymentResults.filter(r => r.success)
-      const deploymentUrls = successfulDeployments.map(r => r.url)
 
       return new Response(JSON.stringify({
         title,
@@ -244,11 +219,13 @@ The case demonstrates the continuing evolution of media law in the digital age a
         seoScore,
         schemaData,
         deploymentResults,
-        deploymentUrls,
+        deploymentUrls: [], // No real URLs since these are simulated
+        simulationMode: true,
+        message: 'Deployment simulation complete - real platform integration requires API setup',
         campaign: {
           contentGenerated: 1,
-          deploymentsSuccessful: successfulDeployments.length,
-          serpPenetration: Math.min(successfulDeployments.length * 25, 100),
+          deploymentsSuccessful: 0,
+          serpPenetration: 0,
           platformResults: deploymentResults.reduce((acc, result) => {
             acc[result.platform] = result
             return acc
