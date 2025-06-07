@@ -56,35 +56,83 @@ async function generateArticleContent(config: any) {
     throw new Error('OpenAI API key not configured');
   }
 
-  // Build the prompt based on content type
+  // Enhanced SEO-focused prompt system
   let systemPrompt = '';
   let userPrompt = '';
 
-  if (config.contentType === 'follow_up_response' && config.followUpSource) {
-    systemPrompt = `You are a professional content writer creating a strategic follow-up article. Write in a natural, human style without hashtags at the start of paragraphs. The response should be professional, factual, and address concerns constructively.
+  const keywords = config.targetKeywords || [];
+  const entityName = config.entity || config.clientName;
 
+  if (config.contentType === 'follow_up_response' && config.followUpSource) {
+    systemPrompt = `You are an expert SEO content strategist and professional writer creating a strategic follow-up article with maximum search visibility.
+
+CRITICAL SEO REQUIREMENTS:
+- Headline must be SEO-optimized with primary keywords naturally embedded
+- Include meta description (150-160 characters) for high CTR
+- Organically weave target keywords throughout content (2-3% density)
+- Use semantic keyword variations and related terms
+- Professional tone that doesn't sound AI-generated
+- Structure for featured snippets and voice search
+
+Entity: ${entityName}
 Response angle: ${config.responseAngle}
-Target keywords: ${config.targetKeywords?.join(', ') || 'N/A'}
+Target keywords: ${keywords.join(', ')}
+Source URL: ${config.followUpSource}
+
+HEADLINE FORMULA:
+[Entity Name] + [Action/Legal Term] + [Authority/Publication] + [Key Legal/Industry Term]
+Example: "Noel Clarke Files High Court Libel Lawsuit Against The Guardian Over Defamation Claims"
+
+META DESCRIPTION REQUIREMENTS:
+- 150-160 characters exactly
+- Include primary keyword
+- Clear value proposition
+- Action-oriented language
+- Include current year/timeframe
+
+CONTENT STRUCTURE:
+1. SEO-optimized headline
+2. Meta description
+3. Opening paragraph with primary keyword in first 100 words
+4. Strategic keyword placement throughout
+5. Semantic keyword variations
+6. Professional conclusion with call-to-action
 
 Guidelines:
 - Write naturally without obvious AI patterns
 - No hashtags at the beginning of sentences or paragraphs
-- Use a professional, measured tone
-- Address the situation constructively
+- Use professional, measured tone addressing concerns constructively
 - Include relevant achievements and context
-- End with 3-5 relevant hashtags for SEO`;
+- End with 3-5 relevant hashtags for social SEO only`;
 
-    userPrompt = `Create a follow-up response article for ${config.entity || config.clientName} responding to: ${config.followUpSource}
+    userPrompt = `Create an SEO-optimized follow-up response article for ${entityName} responding to: ${config.followUpSource}
+
+TARGET KEYWORDS TO EMBED ORGANICALLY:
+${keywords.map(keyword => `- ${keyword}`).join('\n')}
 
 ${config.customContent ? `Additional context: ${config.customContent}` : ''}
 
-Generate a complete article with:
-1. Professional headline
-2. Well-structured content addressing the situation
-3. Relevant achievements and positive context
-4. SEO hashtags at the end only`;
+Generate complete article with:
+1. SEO-optimized professional headline (include primary keywords naturally)
+2. Meta description (150-160 characters for high CTR)
+3. Well-structured content addressing the situation
+4. Strategic keyword embedding (2-3% density)
+5. Semantic keyword variations throughout
+6. Relevant achievements and positive context
+7. Professional conclusion
+8. Social media hashtags at the end only
+
+FORMAT RESPONSE AS:
+HEADLINE: [SEO-optimized headline]
+
+META_DESCRIPTION: [150-160 character meta description]
+
+CONTENT:
+[Full article content with organic keyword integration]
+
+HASHTAGS: [3-5 relevant hashtags]`;
   } else {
-    // Handle other content types
+    // Handle other content types with SEO focus
     const contentTypeMap = {
       'positive_profile': 'professional achievement and expertise showcase',
       'industry_analysis': 'thought leadership and market insights',
@@ -94,22 +142,69 @@ Generate a complete article with:
       'strategic_narrative': 'targeted response to specific concerns'
     };
 
-    systemPrompt = `You are a professional content writer creating ${contentTypeMap[config.contentType] || 'professional content'}. Write in a natural, human style without hashtags at the start of paragraphs.
+    systemPrompt = `You are an expert SEO content strategist creating ${contentTypeMap[config.contentType] || 'professional content'} with maximum search visibility.
 
-Target keywords: ${config.targetKeywords?.join(', ') || 'N/A'}
+CRITICAL SEO REQUIREMENTS:
+- Headline must be SEO-optimized with primary keywords naturally embedded
+- Include meta description (150-160 characters) for high CTR
+- Organically weave target keywords throughout content (2-3% density)
+- Use semantic keyword variations and related terms
+- Professional tone that doesn't sound AI-generated
+- Structure for featured snippets and voice search
+
+Entity: ${entityName}
+Target keywords: ${keywords.join(', ')}
+
+HEADLINE OPTIMIZATION:
+- Lead with entity name when relevant
+- Include primary keyword naturally
+- Professional but search-friendly
+- Under 60 characters for full display
+
+META DESCRIPTION REQUIREMENTS:
+- 150-160 characters exactly
+- Include primary keyword
+- Clear value proposition
+- Current and compelling
+
+CONTENT STRATEGY:
+- Primary keyword in first 100 words
+- Semantic variations throughout
+- Natural keyword density (2-3%)
+- Professional industry insights
+- Authoritative tone
+- Social proof elements
 
 Guidelines:
 - Write naturally without obvious AI patterns  
 - No hashtags at the beginning of sentences or paragraphs
 - Use professional, engaging tone
 - Include relevant industry insights
-- End with 3-5 relevant hashtags for SEO`;
+- End with 3-5 relevant hashtags for social SEO only`;
 
-    userPrompt = `Create professional content about ${config.entity || config.clientName} focusing on ${contentTypeMap[config.contentType]}.
+    userPrompt = `Create SEO-optimized professional content about ${entityName} focusing on ${contentTypeMap[config.contentType]}.
+
+TARGET KEYWORDS TO EMBED ORGANICALLY:
+${keywords.map(keyword => `- ${keyword}`).join('\n')}
 
 ${config.customContent ? `Additional guidelines: ${config.customContent}` : ''}
 
-Generate a complete article with compelling headline and well-structured content.`;
+Generate complete article with:
+1. SEO-optimized professional headline
+2. Meta description (150-160 characters for high CTR)
+3. Well-structured content with strategic keyword placement
+4. Industry insights and expertise demonstration
+5. Professional conclusion
+
+FORMAT RESPONSE AS:
+HEADLINE: [SEO-optimized headline]
+
+META_DESCRIPTION: [150-160 character meta description]
+
+CONTENT:
+[Full article content with organic keyword integration]
+
+HASHTAGS: [3-5 relevant hashtags]`;
   }
 
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -125,7 +220,7 @@ Generate a complete article with compelling headline and well-structured content
         { role: 'user', content: userPrompt }
       ],
       temperature: 0.7,
-      max_tokens: 2000
+      max_tokens: 2500
     }),
   });
 
@@ -136,16 +231,44 @@ Generate a complete article with compelling headline and well-structured content
   const data = await response.json();
   const content = data.choices[0].message.content;
 
-  // Extract title and body
-  const lines = content.split('\n').filter(line => line.trim());
-  const title = lines[0].replace(/^#+\s*/, '').trim();
-  const body = lines.slice(1).join('\n').trim();
+  // Parse the structured response
+  const headlineMatch = content.match(/HEADLINE:\s*(.+?)(?:\n|META_DESCRIPTION:)/s);
+  const metaMatch = content.match(/META_DESCRIPTION:\s*(.+?)(?:\n|CONTENT:)/s);
+  const contentMatch = content.match(/CONTENT:\s*([\s\S]+?)(?:HASHTAGS:|$)/);
+  const hashtagsMatch = content.match(/HASHTAGS:\s*(.+?)$/s);
+
+  const title = headlineMatch ? headlineMatch[1].trim() : `${entityName} Professional Update`;
+  const metaDescription = metaMatch ? metaMatch[1].trim() : `Latest professional updates and insights from ${entityName}. Industry leadership and expertise.`;
+  const body = contentMatch ? contentMatch[1].trim() : content;
+  const hashtags = hashtagsMatch ? hashtagsMatch[1].trim() : '';
 
   return {
     title,
     content: body,
-    body // For backward compatibility
+    body, // For backward compatibility
+    metaDescription,
+    hashtags,
+    seoKeywords: keywords,
+    keywordDensity: calculateKeywordDensity(body, keywords)
   };
+}
+
+// Helper function to calculate keyword density
+function calculateKeywordDensity(content: string, keywords: string[]): any {
+  const wordCount = content.split(/\s+/).length;
+  const densityReport = {};
+  
+  keywords.forEach(keyword => {
+    const regex = new RegExp(keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+    const matches = content.match(regex) || [];
+    const density = ((matches.length / wordCount) * 100).toFixed(2);
+    densityReport[keyword] = {
+      count: matches.length,
+      density: `${density}%`
+    };
+  });
+  
+  return densityReport;
 }
 
 async function deployToLivePlatforms(articleContent: any, config: any) {

@@ -6,7 +6,7 @@ import { LiveDeploymentManager } from './LiveDeploymentManager';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Zap, Target, Shield, Loader2 } from 'lucide-react';
+import { Zap, Target, Shield, Loader2, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import ClientSelector from '@/components/admin/ClientSelector';
 import type { Client } from '@/types/clients';
@@ -33,7 +33,7 @@ export const ContentGenerationHub = () => {
   const generatePreviewContent = async (config: any) => {
     setIsGenerating(true);
     try {
-      console.log('🎯 Generating content preview...');
+      console.log('🎯 Generating SEO-optimized content preview...');
       
       const { data, error } = await supabase.functions.invoke('persona-saturation', {
         body: {
@@ -50,10 +50,14 @@ export const ContentGenerationHub = () => {
         keywords: config.targetKeywords || [],
         contentType: config.contentType,
         responseAngle: config.responseAngle,
-        sourceUrl: config.followUpSource
+        sourceUrl: config.followUpSource,
+        metaDescription: data.metaDescription,
+        hashtags: data.hashtags,
+        seoKeywords: data.seoKeywords,
+        keywordDensity: data.keywordDensity
       });
 
-      toast.success('Content preview generated successfully');
+      toast.success('SEO-optimized content preview generated successfully');
     } catch (error) {
       console.error('❌ Content generation failed:', error);
       toast.error('Failed to generate content preview');
@@ -63,7 +67,7 @@ export const ContentGenerationHub = () => {
   };
 
   const handleApproveContent = () => {
-    toast.success('Content approved for deployment');
+    toast.success('SEO-optimized content approved for deployment');
     // Content is ready for deployment
   };
 
@@ -89,11 +93,11 @@ export const ContentGenerationHub = () => {
         <CardHeader>
           <CardTitle className="text-corporate-accent flex items-center gap-2">
             <Zap className="h-6 w-6" />
-            A.R.I.A™ Content Generation & Live Deployment Engine
+            A.R.I.A™ SEO-Optimized Content Generation & Live Deployment Engine
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-3 gap-4 text-center">
+          <div className="grid grid-cols-4 gap-4 text-center">
             <div>
               <div className="text-2xl font-bold text-green-400">LIVE</div>
               <p className="text-xs text-gray-400">Real Platform Deployment</p>
@@ -101,6 +105,10 @@ export const ContentGenerationHub = () => {
             <div>
               <div className="text-2xl font-bold text-blue-400">AI-DRIVEN</div>
               <p className="text-xs text-gray-400">Intelligent Content Generation</p>
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-orange-400">SEO-OPTIMIZED</div>
+              <p className="text-xs text-gray-400">Search Engine Optimized</p>
             </div>
             <div>
               <div className="text-2xl font-bold text-purple-400">STEALTH</div>
@@ -129,7 +137,11 @@ export const ContentGenerationHub = () => {
         <Card className="border-corporate-border bg-corporate-darkSecondary">
           <CardContent className="p-6 text-center">
             <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-corporate-accent" />
-            <p className="text-white">Generating content preview...</p>
+            <p className="text-white">Generating SEO-optimized content preview...</p>
+            <div className="flex items-center justify-center gap-2 mt-2">
+              <Search className="h-4 w-4 text-green-400" />
+              <span className="text-sm text-green-400">Optimizing keywords and meta data</span>
+            </div>
           </CardContent>
         </Card>
       )}
