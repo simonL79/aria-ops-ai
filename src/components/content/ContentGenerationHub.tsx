@@ -1,10 +1,11 @@
-
 import React, { useState } from 'react';
 import { ContentTypeSelector } from './ContentTypeSelector';
 import { ContentPreview } from './ContentPreview';
 import { LiveGitDeploymentManager } from './LiveGitDeploymentManager';
+import { BulkContentGenerator } from './BulkContentGenerator';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Zap, Target, Shield, Loader2, Search, TrendingUp, DollarSign, GitBranch } from 'lucide-react';
 import { toast } from 'sonner';
 import ClientSelector from '@/components/admin/ClientSelector';
@@ -16,6 +17,7 @@ export const ContentGenerationHub = () => {
   const [generatedContent, setGeneratedContent] = useState<any>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [deploymentResults, setDeploymentResults] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState('single');
 
   const handleContentTypeSelect = async (contentType: string, config: any) => {
     const fullConfig = {
@@ -96,6 +98,11 @@ Moving forward, ${config.clientName} remains committed to driving positive chang
     setDeploymentResults(results);
   };
 
+  const handleBulkComplete = (results: any[]) => {
+    setDeploymentResults(results);
+    toast.success(`Bulk saturation complete! ${results.filter(r => r.success).length} articles deployed`);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -131,8 +138,8 @@ Moving forward, ${config.clientName} remains committed to driving positive chang
               <p className="text-xs text-gray-400">Schema + Sitemap</p>
             </div>
             <div>
-              <div className="text-2xl font-bold text-yellow-400">LOCAL</div>
-              <p className="text-xs text-gray-400">No API Keys</p>
+              <div className="text-2xl font-bold text-yellow-400">BULK</div>
+              <p className="text-xs text-gray-400">Saturation Ready</p>
             </div>
           </div>
         </CardContent>
@@ -144,61 +151,95 @@ Moving forward, ${config.clientName} remains committed to driving positive chang
         onClientSelect={setSelectedClient}
       />
 
-      {/* Content Type Selection */}
-      {selectedClient && !generatedContent && (
-        <ContentTypeSelector
-          onContentTypeSelect={handleContentTypeSelect}
-          selectedEntity={selectedClient.name}
-        />
-      )}
+      {/* Generation Mode Tabs */}
+      {selectedClient && (
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2 bg-corporate-darkSecondary">
+            <TabsTrigger value="single" className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black">
+              Single Article
+            </TabsTrigger>
+            <TabsTrigger value="bulk" className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black">
+              Bulk Saturation
+            </TabsTrigger>
+          </TabsList>
 
-      {/* Loading State */}
-      {isGenerating && (
-        <Card className="border-corporate-border bg-corporate-darkSecondary">
-          <CardContent className="p-6 text-center">
-            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-corporate-accent" />
-            <p className="text-white">Generating live SEO content...</p>
-            <div className="flex items-center justify-center gap-4 mt-3">
-              <div className="flex items-center gap-2">
-                <GitBranch className="h-4 w-4 text-green-400" />
-                <span className="text-sm text-green-400">Git-based deployment</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-blue-400" />
-                <span className="text-sm text-blue-400">Local processing</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+          <TabsContent value="single" className="space-y-6">
+            {/* Single Article Generation */}
+            {!generatedContent && (
+              <ContentTypeSelector
+                onContentTypeSelect={handleContentTypeSelect}
+                selectedEntity={selectedClient.name}
+              />
+            )}
 
-      {/* Content Preview */}
-      {generatedContent && !isGenerating && (
-        <ContentPreview
-          content={generatedContent}
-          onApprove={() => toast.success('Content approved for Git deployment')}
-          onEdit={() => {
-            setGeneratedContent(null);
-            toast.info('Please regenerate content with updated configuration');
-          }}
-          onReject={() => {
-            setGeneratedContent(null);
-            setContentConfig(null);
-            toast.info('Content rejected - starting over');
-          }}
-          onContentUpdate={handleContentUpdate}
-        />
-      )}
+            {/* Loading State */}
+            {isGenerating && (
+              <Card className="border-corporate-border bg-corporate-darkSecondary">
+                <CardContent className="p-6 text-center">
+                  <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-corporate-accent" />
+                  <p className="text-white">Generating live SEO content...</p>
+                  <div className="flex items-center justify-center gap-4 mt-3">
+                    <div className="flex items-center gap-2">
+                      <GitBranch className="h-4 w-4 text-green-400" />
+                      <span className="text-sm text-green-400">Git-based deployment</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="h-4 w-4 text-blue-400" />
+                      <span className="text-sm text-blue-400">Local processing</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
-      {/* Live Git Deployment */}
-      {generatedContent && contentConfig && (
-        <LiveGitDeploymentManager
-          contentConfig={{
-            ...contentConfig,
-            generatedContent
-          }}
-          onDeploymentComplete={handleDeploymentComplete}
-        />
+            {/* Content Preview */}
+            {generatedContent && !isGenerating && (
+              <ContentPreview
+                content={generatedContent}
+                onApprove={() => toast.success('Content approved for Git deployment')}
+                onEdit={() => {
+                  setGeneratedContent(null);
+                  toast.info('Please regenerate content with updated configuration');
+                }}
+                onReject={() => {
+                  setGeneratedContent(null);
+                  setContentConfig(null);
+                  toast.info('Content rejected - starting over');
+                }}
+                onContentUpdate={handleContentUpdate}
+              />
+            )}
+
+            {/* Live Git Deployment */}
+            {generatedContent && contentConfig && (
+              <LiveGitDeploymentManager
+                contentConfig={{
+                  ...contentConfig,
+                  generatedContent
+                }}
+                onDeploymentComplete={handleDeploymentComplete}
+              />
+            )}
+          </TabsContent>
+
+          <TabsContent value="bulk" className="space-y-6">
+            {/* Bulk Content Generation */}
+            {!contentConfig && (
+              <ContentTypeSelector
+                onContentTypeSelect={handleContentTypeSelect}
+                selectedEntity={selectedClient.name}
+              />
+            )}
+
+            {contentConfig && (
+              <BulkContentGenerator
+                selectedClient={selectedClient}
+                contentConfig={contentConfig}
+                onBulkComplete={handleBulkComplete}
+              />
+            )}
+          </TabsContent>
+        </Tabs>
       )}
 
       {/* Deployment Results */}
@@ -212,7 +253,7 @@ Moving forward, ${config.clientName} remains committed to driving positive chang
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {deploymentResults.map((result, index) => (
+              {deploymentResults.slice(0, 10).map((result, index) => (
                 <div key={index} className="flex items-center justify-between p-3 border border-corporate-border rounded">
                   <div className="flex items-center gap-2">
                     {result.success ? (
@@ -220,7 +261,9 @@ Moving forward, ${config.clientName} remains committed to driving positive chang
                     ) : (
                       <Shield className="h-4 w-4 text-red-600" />
                     )}
-                    <span className="text-white font-medium">{result.platform}</span>
+                    <span className="text-white font-medium">
+                      {result.title || `Article #${result.articleNumber}`}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     {result.success && result.url && (
@@ -239,10 +282,15 @@ Moving forward, ${config.clientName} remains committed to driving positive chang
                   </div>
                 </div>
               ))}
+              {deploymentResults.length > 10 && (
+                <p className="text-center text-corporate-lightGray text-sm">
+                  + {deploymentResults.length - 10} more deployments
+                </p>
+              )}
             </div>
             <div className="mt-4 p-3 bg-green-500/10 border border-green-500/30 rounded">
               <p className="text-green-400 text-sm font-medium">
-                ✅ Git-based deployment complete - Real, indexable URLs generated
+                ✅ {activeTab === 'bulk' ? 'Bulk saturation' : 'Git-based deployment'} complete - Real, indexable URLs generated
               </p>
             </div>
           </CardContent>
