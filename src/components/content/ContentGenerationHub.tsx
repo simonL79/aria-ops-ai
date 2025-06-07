@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ContentTypeSelector } from './ContentTypeSelector';
 import { ContentPreview } from './ContentPreview';
-import { LiveGitDeploymentManager } from './LiveGitDeploymentManager';
+import { LiveDeploymentManager } from './LiveGitDeploymentManager';
 import { BulkContentGenerator } from './BulkContentGenerator';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -212,7 +212,7 @@ Moving forward, ${config.clientName} remains committed to driving positive chang
 
             {/* Live Git Deployment */}
             {generatedContent && contentConfig && (
-              <LiveGitDeploymentManager
+              <LiveDeploymentManager
                 contentConfig={{
                   ...contentConfig,
                   generatedContent
