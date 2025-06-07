@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -158,18 +157,26 @@ export const ZeroCostDeploymentManager = ({
       setDeploymentProgress(100);
       setDeploymentStatus('Zero-cost deployment complete!');
       
-      // Log successful zero-cost deployment
+      // Log successful zero-cost deployment with proper JSON serialization
+      const operationData = {
+        platforms_deployed: selectedPlatforms.length,
+        successful_deployments: results.filter(r => r.success).length,
+        total_cost: 0,
+        deployment_results: results.map(r => ({
+          platform: r.platform,
+          success: r.success,
+          url: r.url || null,
+          error: r.error || null,
+          timestamp: r.timestamp
+        }))
+      };
+
       await supabase.from('aria_ops_log').insert({
         operation_type: 'zero_cost_deployment',
         entity_name: contentConfig.clientName,
         module_source: 'zero_cost_deployment_manager',
         success: true,
-        operation_data: {
-          platforms_deployed: selectedPlatforms.length,
-          successful_deployments: results.filter(r => r.success).length,
-          total_cost: 0,
-          deployment_results: results
-        }
+        operation_data: operationData as any
       });
 
       onDeploymentComplete(results);
