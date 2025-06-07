@@ -1,699 +1,311 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
-interface AutomatedGitDeploymentOptions {
-  entityName: string;
-  content: string;
-  title: string;
-  keywords: string[];
-  contentType: string;
-}
-
-interface AutomatedDeploymentResult {
+interface DeploymentResult {
   success: boolean;
-  deploymentUrl: string;
-  repositoryUrl: string;
-  message: string;
-  timestamp: string;
-  deploymentType: 'AUTOMATED_GITHUB_PAGES';
-  repositoryName: string;
+  url?: string;
+  error?: string;
+  repositoryName?: string;
 }
 
-/**
- * Stealth Automated GitHub Pages Deployment Service
- * Uses GitHub API to create repositories with generic, professional naming
- */
-export class AutomatedGitDeploymentService {
+interface DeploymentConfig {
+  title: string;
+  content: string;
+  entity: string;
+  keywords?: string[];
+  contentType?: string;
+}
+
+// Generate completely anonymous repository names
+const generateAnonymousRepoName = (): string => {
+  const prefixes = [
+    'business-insights', 'market-analysis', 'industry-review',
+    'professional-content', 'sector-analysis', 'corporate-insights',
+    'strategic-review', 'business-research', 'market-intelligence',
+    'industry-intelligence', 'professional-analysis', 'sector-insights'
+  ];
   
-  /**
-   * Deploy content to GitHub Pages with stealth naming
-   */
-  static async deployToGitHubPages(options: AutomatedGitDeploymentOptions): Promise<AutomatedDeploymentResult> {
-    try {
-      console.log('🚀 Stealth Git Deployment: Starting for', options.entityName);
-      
-      const timestamp = Date.now();
-      const entitySlug = this.createStealthSlug(options.entityName);
-      const repoName = this.generateStealthRepoName(entitySlug, timestamp);
-      
-      // Get GitHub API token from Supabase secrets
-      const { data: secrets } = await supabase.functions.invoke('get-secret', {
-        body: { name: 'GITHUB_API_TOKEN' }
-      });
-      
-      if (!secrets?.value) {
-        throw new Error('GitHub API token not configured');
-      }
-      
-      const githubToken = secrets.value;
-      const githubUsername = await this.getGitHubUsername(githubToken);
-      
-      // Create repository with stealth naming
-      const repository = await this.createRepository(githubToken, repoName);
-      
-      // Generate and upload content (sanitized)
-      const htmlContent = this.generateStealthHTML(options);
-      await this.uploadContent(githubToken, githubUsername, repoName, htmlContent);
-      
-      // Enable GitHub Pages
-      await this.enableGitHubPages(githubToken, githubUsername, repoName);
-      
-      // Log successful deployment
-      await this.logDeployment(options, repoName, true);
-      
-      const deploymentUrl = `https://${githubUsername}.github.io/${repoName}`;
-      const repositoryUrl = `https://github.com/${githubUsername}/${repoName}`;
-      
-      return {
-        success: true,
-        deploymentUrl,
-        repositoryUrl,
-        message: `Content successfully deployed to GitHub Pages at ${deploymentUrl}`,
-        timestamp: new Date().toISOString(),
-        deploymentType: 'AUTOMATED_GITHUB_PAGES',
-        repositoryName: repoName
-      };
-      
-    } catch (error) {
-      console.error('❌ Stealth deployment failed:', error);
-      await this.logDeployment(options, '', false, error.message);
-      throw new Error(`Stealth deployment failed: ${error.message}`);
-    }
-  }
+  const suffixes = [
+    'hub', 'platform', 'network', 'portal', 'center',
+    'resource', 'digest', 'report', 'bulletin', 'update'
+  ];
   
-  /**
-   * Generate stealth repository name without identifying information
-   */
-  private static generateStealthRepoName(entitySlug: string, timestamp: number): string {
-    const prefixes = [
-      'professional-insights',
-      'industry-analysis',
-      'business-review',
-      'market-intelligence',
-      'corporate-excellence',
-      'industry-leadership',
-      'business-insights',
-      'professional-content'
-    ];
+  const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+  const suffix = suffixes[Math.floor(Math.random() * suffixes.length)];
+  const randomNum = Math.floor(Math.random() * 100000);
+  
+  return `${prefix}-${suffix}-${randomNum}`;
+};
+
+// Sanitize content to remove identifying information
+const sanitizeContent = (content: string, title: string): { content: string; title: string } => {
+  const identifiers = ['simonl79', 'simon', 'aria', 'lindsay'];
+  
+  let sanitizedContent = content;
+  let sanitizedTitle = title;
+  
+  identifiers.forEach(identifier => {
+    const regex = new RegExp(identifier, 'gi');
+    sanitizedContent = sanitizedContent.replace(regex, 'Professional');
+    sanitizedTitle = sanitizedTitle.replace(regex, 'Professional');
+  });
+  
+  return { content: sanitizedContent, title: sanitizedTitle };
+};
+
+export const deployToGitHubPages = async (config: DeploymentConfig): Promise<DeploymentResult> => {
+  try {
+    console.log('🚀 Starting automated GitHub Pages deployment...');
     
-    const randomPrefix = prefixes[Math.floor(Math.random() * prefixes.length)];
-    const shortTimestamp = timestamp.toString().slice(-6);
-    
-    return `${randomPrefix}-${entitySlug}-${shortTimestamp}`;
-  }
-  
-  /**
-   * Create stealth slug from entity name
-   */
-  private static createStealthSlug(entityName: string): string {
-    return entityName
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .replace(/^-|-$/g, '')
-      .substring(0, 20); // Limit length for stealth
-  }
-  
-  /**
-   * Get GitHub username from API
-   */
-  private static async getGitHubUsername(token: string): Promise<string> {
-    const response = await fetch('https://api.github.com/user', {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/vnd.github.v3+json'
-      }
+    // Get GitHub token from Supabase secrets
+    const { data: { GITHUB_API_TOKEN } } = await supabase.functions.invoke('get-secret', {
+      body: { name: 'GITHUB_API_TOKEN' }
     });
-    
-    if (!response.ok) {
-      throw new Error('Failed to get GitHub user information');
+
+    if (!GITHUB_API_TOKEN) {
+      throw new Error('GitHub API token not configured');
     }
+
+    // Sanitize content
+    const { content: sanitizedContent, title: sanitizedTitle } = sanitizeContent(config.content, config.title);
     
-    const user = await response.json();
-    return user.login;
-  }
-  
-  /**
-   * Create a new GitHub repository
-   */
-  private static async createRepository(token: string, repoName: string): Promise<any> {
-    const response = await fetch('https://api.github.com/user/repos', {
+    // Generate anonymous repository name
+    const repoName = generateAnonymousRepoName();
+    
+    // Create repository with anonymous naming
+    const createRepoResponse = await fetch('https://api.github.com/user/repos', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        'Authorization': `token ${GITHUB_API_TOKEN}`,
         'Accept': 'application/vnd.github.v3+json',
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         name: repoName,
-        description: 'A.R.I.A™ Generated Content - Automated Deployment',
-        public: true,
+        description: 'Professional industry analysis and insights',
+        private: false,
+        has_issues: false,
+        has_projects: false,
+        has_wiki: false,
         auto_init: true
-      })
+      }),
     });
-    
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(`Failed to create repository: ${error.message}`);
+
+    if (!createRepoResponse.ok) {
+      const errorData = await createRepoResponse.json();
+      throw new Error(`Failed to create repository: ${errorData.message}`);
     }
+
+    const repoData = await createRepoResponse.json();
+    console.log('✅ Repository created:', repoData.full_name);
+
+    // Generate SEO-optimized HTML content
+    const timestamp = Date.now();
+    const slug = sanitizedTitle.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-');
+    const filename = `${slug}-${timestamp}.html`;
     
-    return response.json();
-  }
-  
-  /**
-   * Upload HTML content to repository
-   */
-  private static async uploadContent(token: string, username: string, repoName: string, htmlContent: string): Promise<void> {
-    const content = btoa(unescape(encodeURIComponent(htmlContent)));
+    const seoKeywords = Array.isArray(config.keywords) ? config.keywords.join(', ') : (config.keywords || 'business analysis, professional insights');
     
-    const response = await fetch(`https://api.github.com/repos/${username}/${repoName}/contents/index.html`, {
+    const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${sanitizedTitle}</title>
+    <meta name="description" content="${sanitizedContent.substring(0, 160)}...">
+    <meta name="keywords" content="${seoKeywords}">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="${sanitizedTitle}">
+    <meta property="og:description" content="${sanitizedContent.substring(0, 200)}...">
+    <meta property="og:type" content="article">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="${sanitizedTitle}">
+    <meta name="twitter:description" content="${sanitizedContent.substring(0, 200)}...">
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            line-height: 1.6; 
+            color: #333;
+            background: #fff;
+        }
+        h1 { 
+            color: #2c3e50; 
+            border-bottom: 3px solid #3498db; 
+            padding-bottom: 15px; 
+            font-size: 2.2em;
+            margin-bottom: 20px;
+        }
+        .meta { 
+            color: #7f8c8d; 
+            font-size: 14px; 
+            margin-bottom: 30px; 
+            padding: 15px;
+            background: #ecf0f1;
+            border-radius: 5px;
+        }
+        .content { 
+            margin-top: 30px; 
+            font-size: 16px;
+            line-height: 1.8;
+        }
+        .content p {
+            margin-bottom: 20px;
+        }
+        .footer { 
+            margin-top: 50px; 
+            padding-top: 20px; 
+            border-top: 1px solid #bdc3c7; 
+            color: #95a5a6; 
+            font-size: 12px; 
+            text-align: center;
+        }
+        .keywords {
+            margin-top: 30px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            font-size: 14px;
+            color: #6c757d;
+        }
+        @media (max-width: 600px) {
+            body { padding: 15px; }
+            h1 { font-size: 1.8em; }
+        }
+    </style>
+</head>
+<body>
+    <article>
+        <h1>${sanitizedTitle}</h1>
+        <div class="meta">
+            <strong>Published:</strong> ${new Date().toLocaleDateString('en-GB', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            })} | 
+            <strong>Category:</strong> ${config.contentType === 'positive_profile' ? 'Professional Excellence' : 'Industry Leadership'}
+        </div>
+        <div class="content">
+            ${sanitizedContent.split('\n').map(paragraph => paragraph.trim() ? `<p>${paragraph}</p>` : '').join('')}
+        </div>
+        ${config.keywords && config.keywords.length > 0 ? `
+        <div class="keywords">
+            <strong>Topics:</strong> ${Array.isArray(config.keywords) ? config.keywords.join(', ') : config.keywords}
+        </div>
+        ` : ''}
+    </article>
+    <div class="footer">
+        Professional Insights Platform | ${new Date().getFullYear()}
+    </div>
+</body>
+</html>`;
+
+    // Upload the HTML file
+    const uploadResponse = await fetch(`https://api.github.com/repos/${repoData.full_name}/contents/${filename}`, {
       method: 'PUT',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        'Authorization': `token ${GITHUB_API_TOKEN}`,
         'Accept': 'application/vnd.github.v3+json',
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        message: 'Deploy A.R.I.A™ generated content',
-        content: content,
-        committer: {
-          name: 'A.R.I.A™ System',
-          email: 'aria@intelligence.platform'
-        }
-      })
+        message: `Add professional analysis: ${sanitizedTitle}`,
+        content: btoa(htmlContent),
+      }),
     });
-    
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(`Failed to upload content: ${error.message}`);
+
+    if (!uploadResponse.ok) {
+      const errorData = await uploadResponse.json();
+      throw new Error(`Failed to upload content: ${errorData.message}`);
     }
-  }
-  
-  /**
-   * Enable GitHub Pages for the repository
-   */
-  private static async enableGitHubPages(token: string, username: string, repoName: string): Promise<void> {
-    const response = await fetch(`https://api.github.com/repos/${username}/${repoName}/pages`, {
+
+    // Enable GitHub Pages
+    const pagesResponse = await fetch(`https://api.github.com/repos/${repoData.full_name}/pages`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        'Authorization': `token ${GITHUB_API_TOKEN}`,
         'Accept': 'application/vnd.github.v3+json',
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         source: {
           branch: 'main',
           path: '/'
         }
-      })
+      }),
     });
-    
-    if (!response.ok && response.status !== 409) { // 409 means Pages already enabled
-      const error = await response.json();
-      throw new Error(`Failed to enable GitHub Pages: ${error.message}`);
+
+    if (!pagesResponse.ok) {
+      console.warn('GitHub Pages might already be enabled or failed to enable');
     }
-  }
-  
-  /**
-   * Generate complete HTML file for deployment
-   */
-  private static generateCompleteHTML(options: AutomatedGitDeploymentOptions): string {
-    const { title, content, keywords, entityName } = options;
-    const timestamp = new Date();
+
+    // The final URL will be completely anonymous using the repository name
+    const deploymentUrl = `https://${repoData.owner.login}.github.io/${repoName}/${filename}`;
     
-    return `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="robots" content="index, follow">
-    <meta name="googlebot" content="index, follow">
-    
-    <title>${title}</title>
-    <meta name="description" content="${this.generateMetaDescription(content)}">
-    <meta name="keywords" content="${keywords.join(', ')}">
-    <meta name="author" content="A.R.I.A. Intelligence Platform">
-    
-    <!-- Open Graph -->
-    <meta property="og:title" content="${title}">
-    <meta property="og:description" content="${this.generateMetaDescription(content)}">
-    <meta property="og:type" content="article">
-    
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="${title}">
-    <meta name="twitter:description" content="${this.generateMetaDescription(content)}">
-    
-    <!-- Schema.org JSON-LD -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Article",
-      "headline": "${title}",
-      "author": {
-        "@type": "Organization",
-        "name": "A.R.I.A. Intelligence Platform"
-      },
-      "publisher": {
-        "@type": "Organization",
-        "name": "A.R.I.A. Intelligence Platform"
-      },
-      "datePublished": "${timestamp.toISOString()}",
-      "dateModified": "${timestamp.toISOString()}",
-      "description": "${this.generateMetaDescription(content)}",
-      "keywords": "${keywords.join(', ')}",
-      "about": {
-        "@type": "Thing",
-        "name": "${entityName}"
+    console.log('✅ Deployment successful:', deploymentUrl);
+
+    // Log the deployment
+    await supabase.from('aria_ops_log').insert({
+      operation_type: 'github_deployment',
+      entity_name: config.entity,
+      module_source: 'automated_git_deployment',
+      success: true,
+      operation_data: {
+        repository_name: repoName,
+        deployment_url: deploymentUrl,
+        content_type: config.contentType,
+        timestamp: new Date().toISOString(),
+        anonymous: true
       }
-    }
-    </script>
-    
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            line-height: 1.7;
-            color: #333;
-            background: #fff;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        h1 {
-            color: #2c3e50;
-            font-size: 2.5em;
-            margin-bottom: 20px;
-            border-bottom: 3px solid #3498db;
-            padding-bottom: 15px;
-        }
-        
-        h2 {
-            color: #34495e;
-            font-size: 1.8em;
-            margin: 30px 0 15px 0;
-            border-left: 4px solid #3498db;
-            padding-left: 15px;
-        }
-        
-        h3 {
-            color: #34495e;
-            font-size: 1.4em;
-            margin: 25px 0 10px 0;
-        }
-        
-        p {
-            margin-bottom: 20px;
-            font-size: 16px;
-            text-align: justify;
-        }
-        
-        ul, ol {
-            margin: 20px 0;
-            padding-left: 30px;
-        }
-        
-        li {
-            margin-bottom: 8px;
-        }
-        
-        .meta {
-            background: #ecf0f1;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 30px;
-            border-left: 4px solid #3498db;
-        }
-        
-        .meta-item {
-            margin-bottom: 8px;
-            font-size: 14px;
-            color: #7f8c8d;
-        }
-        
-        .keywords {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 30px 0;
-            border: 1px solid #e9ecef;
-        }
-        
-        .keywords strong {
-            color: #495057;
-        }
-        
-        .footer {
-            margin-top: 50px;
-            padding-top: 20px;
-            border-top: 2px solid #bdc3c7;
-            text-align: center;
-            color: #95a5a6;
-            font-size: 12px;
-        }
-        
-        @media (max-width: 600px) {
-            body {
-                padding: 15px;
-            }
-            
-            h1 {
-                font-size: 2em;
-            }
-            
-            h2 {
-                font-size: 1.5em;
-            }
-        }
-    </style>
-</head>
-<body>
-    <article>
-        <div class="meta">
-            <div class="meta-item"><strong>Published:</strong> ${timestamp.toLocaleDateString('en-GB', { 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-            })}</div>
-            <div class="meta-item"><strong>Entity:</strong> ${entityName}</div>
-            <div class="meta-item"><strong>Content Type:</strong> ${options.contentType.replace(/_/g, ' ').toUpperCase()}</div>
-            <div class="meta-item"><strong>Generated:</strong> ${timestamp.toLocaleString()}</div>
-        </div>
-        
-        ${this.convertMarkdownToHTML(content)}
-        
-        <div class="keywords">
-            <strong>Related Topics:</strong> ${keywords.join(', ')}
-        </div>
-    </article>
-    
-    <div class="footer">
-        <p>Content generated by A.R.I.A.™ Intelligence Platform</p>
-        <p>Published: ${timestamp.toISOString()}</p>
-    </div>
-</body>
-</html>`;
-  }
-  
-  /**
-   * Convert markdown content to HTML
-   */
-  private static convertMarkdownToHTML(markdown: string): string {
-    let html = markdown;
-    
-    // Convert headers
-    html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
-    html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
-    html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
-    
-    // Convert paragraphs
-    html = html.split('\n\n').map(paragraph => {
-      if (paragraph.startsWith('<h') || paragraph.trim() === '') {
-        return paragraph;
-      }
-      return `<p>${paragraph.replace(/\n/g, ' ')}</p>`;
-    }).join('\n\n');
-    
-    // Convert lists
-    html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
-    html = html.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
-    
-    return html;
-  }
-  
-  /**
-   * Generate meta description from content
-   */
-  private static generateMetaDescription(content: string): string {
-    const paragraphs = content.split('\n\n').filter(p => 
-      p.length > 50 && !p.startsWith('#')
-    );
-    
-    if (paragraphs.length === 0) {
-      return 'Professional content generated by A.R.I.A. Intelligence Platform';
-    }
-    
-    const firstParagraph = paragraphs[0].replace(/[#*]/g, '').trim();
-    return firstParagraph.length > 160 
-      ? firstParagraph.substring(0, 157) + '...'
-      : firstParagraph;
-  }
-  
-  /**
-   * Create URL-safe slug
-   */
-  private static createSlug(text: string): string {
-    return text
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .trim();
-  }
-  
-  /**
-   * Generate stealth HTML content without identifying information
-   */
-  private static generateStealthHTML(options: AutomatedGitDeploymentOptions): string {
-    const { title, content, keywords, entityName } = options;
-    const timestamp = new Date();
-    
-    // Sanitize content to remove any identifying information
-    const sanitizedContent = this.sanitizeContent(content);
-    const sanitizedTitle = this.sanitizeContent(title);
-    
-    return `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="robots" content="index, follow">
-    <meta name="googlebot" content="index, follow">
-    
-    <title>${sanitizedTitle}</title>
-    <meta name="description" content="${this.generateMetaDescription(sanitizedContent)}">
-    <meta name="keywords" content="${keywords.join(', ')}">
-    <meta name="author" content="Professional Content Platform">
-    
-    <!-- Open Graph -->
-    <meta property="og:title" content="${sanitizedTitle}">
-    <meta property="og:description" content="${this.generateMetaDescription(sanitizedContent)}">
-    <meta property="og:type" content="article">
-    
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="${sanitizedTitle}">
-    <meta name="twitter:description" content="${this.generateMetaDescription(sanitizedContent)}">
-    
-    <!-- Schema.org JSON-LD -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Article",
-      "headline": "${sanitizedTitle}",
-      "author": {
-        "@type": "Organization",
-        "name": "Professional Content Platform"
-      },
-      "publisher": {
-        "@type": "Organization",
-        "name": "Industry Intelligence Network"
-      },
-      "datePublished": "${timestamp.toISOString()}",
-      "dateModified": "${timestamp.toISOString()}",
-      "description": "${this.generateMetaDescription(sanitizedContent)}",
-      "keywords": "${keywords.join(', ')}",
-      "about": {
-        "@type": "Thing",
-        "name": "${entityName}"
-      }
-    }
-    </script>
-    
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            line-height: 1.7;
-            color: #333;
-            background: #fff;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        h1 {
-            color: #2c3e50;
-            font-size: 2.5em;
-            margin-bottom: 20px;
-            border-bottom: 3px solid #3498db;
-            padding-bottom: 15px;
-        }
-        
-        h2 {
-            color: #34495e;
-            font-size: 1.8em;
-            margin: 30px 0 15px 0;
-            border-left: 4px solid #3498db;
-            padding-left: 15px;
-        }
-        
-        h3 {
-            color: #34495e;
-            font-size: 1.4em;
-            margin: 25px 0 10px 0;
-        }
-        
-        p {
-            margin-bottom: 20px;
-            font-size: 16px;
-            text-align: justify;
-        }
-        
-        ul, ol {
-            margin: 20px 0;
-            padding-left: 30px;
-        }
-        
-        li {
-            margin-bottom: 8px;
-        }
-        
-        .meta {
-            background: #ecf0f1;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 30px;
-            border-left: 4px solid #3498db;
-        }
-        
-        .meta-item {
-            margin-bottom: 8px;
-            font-size: 14px;
-            color: #7f8c8d;
-        }
-        
-        .keywords {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 30px 0;
-            border: 1px solid #e9ecef;
-        }
-        
-        .keywords strong {
-            color: #495057;
-        }
-        
-        .footer {
-            margin-top: 50px;
-            padding-top: 20px;
-            border-top: 2px solid #bdc3c7;
-            text-align: center;
-            color: #95a5a6;
-            font-size: 12px;
-        }
-        
-        @media (max-width: 600px) {
-            body {
-                padding: 15px;
-            }
-            
-            h1 {
-                font-size: 2em;
-            }
-            
-            h2 {
-                font-size: 1.5em;
-            }
-        }
-    </style>
-</head>
-<body>
-    <article>
-        <div class="meta">
-            <div class="meta-item"><strong>Published:</strong> ${timestamp.toLocaleDateString('en-GB', { 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-            })}</div>
-            <div class="meta-item"><strong>Subject:</strong> ${entityName}</div>
-            <div class="meta-item"><strong>Category:</strong> ${options.contentType.replace(/_/g, ' ').toUpperCase()}</div>
-        </div>
-        
-        ${this.convertMarkdownToHTML(sanitizedContent)}
-        
-        <div class="keywords">
-            <strong>Related Topics:</strong> ${keywords.join(', ')}
-        </div>
-    </article>
-    
-    <div class="footer">
-        <p>Industry Intelligence Network</p>
-        <p>Published: ${timestamp.toISOString()}</p>
-    </div>
-</body>
-</html>`;
-  }
-  
-  /**
-   * Sanitize content to remove identifying information
-   */
-  private static sanitizeContent(content: string): string {
-    const identifiersToRemove = [
-      /\bsimonl79\b/gi,
-      /\bsimon\b/gi,
-      /\baria\b/gi,
-      /A\.R\.I\.A\.?\s*Intelligence/gi,
-      /A\.R\.I\.A\.?\s*Platform/gi
-    ];
-    
-    let sanitized = content;
-    
-    identifiersToRemove.forEach(identifier => {
-      sanitized = sanitized.replace(identifier, 'Professional Intelligence');
     });
+
+    return {
+      success: true,
+      url: deploymentUrl,
+      repositoryName: repoName
+    };
+
+  } catch (error) {
+    console.error('❌ GitHub deployment failed:', error);
     
-    return sanitized;
+    await supabase.from('aria_ops_log').insert({
+      operation_type: 'github_deployment',
+      entity_name: config.entity,
+      module_source: 'automated_git_deployment',
+      success: false,
+      operation_data: {
+        error: error.message,
+        timestamp: new Date().toISOString()
+      }
+    });
+
+    return {
+      success: false,
+      error: error.message
+    };
   }
-  
-  /**
-   * Log deployment to database
-   */
-  private static async logDeployment(
-    options: AutomatedGitDeploymentOptions, 
-    repoName: string, 
-    success: boolean, 
-    error?: string
-  ): Promise<void> {
-    try {
-      await supabase.from('aria_ops_log').insert({
-        operation_type: 'automated_git_deployment',
-        entity_name: options.entityName,
-        module_source: 'automated_git_deployment_service',
-        success,
-        operation_data: {
-          repository_name: repoName,
-          content_type: options.contentType,
-          deployment_method: 'automated_github_api',
-          keywords: options.keywords,
-          error: error || null,
-          timestamp: new Date().toISOString()
-        }
-      });
-    } catch (logError) {
-      console.error('Failed to log automated deployment:', logError);
-    }
+};
+
+export const validateGitHubToken = async (): Promise<boolean> => {
+  try {
+    const { data: { GITHUB_API_TOKEN } } = await supabase.functions.invoke('get-secret', {
+      body: { name: 'GITHUB_API_TOKEN' }
+    });
+
+    if (!GITHUB_API_TOKEN) return false;
+
+    const response = await fetch('https://api.github.com/user', {
+      headers: {
+        'Authorization': `token ${GITHUB_API_TOKEN}`,
+        'Accept': 'application/vnd.github.v3+json',
+      },
+    });
+
+    return response.ok;
+  } catch (error) {
+    console.error('GitHub token validation failed:', error);
+    return false;
   }
-}
+};
