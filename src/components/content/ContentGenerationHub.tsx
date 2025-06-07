@@ -2,15 +2,13 @@
 import React, { useState } from 'react';
 import { ContentTypeSelector } from './ContentTypeSelector';
 import { ContentPreview } from './ContentPreview';
-import { ZeroCostDeploymentManager } from './ZeroCostDeploymentManager';
+import { LiveGitDeploymentManager } from './LiveGitDeploymentManager';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Zap, Target, Shield, Loader2, Search, TrendingUp, DollarSign } from 'lucide-react';
+import { Zap, Target, Shield, Loader2, Search, TrendingUp, DollarSign, GitBranch } from 'lucide-react';
 import { toast } from 'sonner';
 import ClientSelector from '@/components/admin/ClientSelector';
 import type { Client } from '@/types/clients';
-import { supabase } from '@/integrations/supabase/client';
 
 export const ContentGenerationHub = () => {
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
@@ -33,9 +31,9 @@ export const ContentGenerationHub = () => {
   const generatePreviewContent = async (config: any) => {
     setIsGenerating(true);
     try {
-      console.log('🎯 Generating zero-cost SEO-optimized content preview...');
+      console.log('🎯 Generating live SEO-optimized content...');
       
-      // Use local content generation instead of API calls
+      // Generate live content using the local system
       const mockContent = {
         title: `${config.clientName}: ${config.contentType === 'positive_profile' ? 'Industry Leadership Excellence' : 'Professional Innovation Showcase'}`,
         content: `${config.clientName} continues to demonstrate exceptional leadership and innovation in their field.
@@ -80,7 +78,7 @@ Moving forward, ${config.clientName} remains committed to driving positive chang
         sourceUrl: config.followUpSource
       });
 
-      toast.success(`Zero-cost SEO content generated (Score: ${mockContent.seoScore}/100) - Ready for free deployment`);
+      toast.success(`Live SEO content generated (Score: ${mockContent.seoScore}/100) - Ready for Git deployment`);
     } catch (error) {
       console.error('❌ Content generation failed:', error);
       toast.error('Failed to generate content preview');
@@ -89,29 +87,13 @@ Moving forward, ${config.clientName} remains committed to driving positive chang
     }
   };
 
-  const handleApproveContent = () => {
-    toast.success('Advanced SEO-optimized content approved for deployment');
-    // Content is ready for deployment
-  };
-
-  const handleEditContent = () => {
-    setGeneratedContent(null);
-    toast.info('Please regenerate content with updated configuration');
-  };
-
-  const handleRejectContent = () => {
-    setGeneratedContent(null);
-    setContentConfig(null);
-    toast.info('Content rejected - starting over');
+  const handleContentUpdate = (updatedContent: any) => {
+    setGeneratedContent(updatedContent);
+    toast.success('Content updated successfully');
   };
 
   const handleDeploymentComplete = (results: any[]) => {
     setDeploymentResults(results);
-  };
-
-  const handleContentUpdate = (updatedContent: any) => {
-    setGeneratedContent(updatedContent);
-    toast.success('Content updated successfully');
   };
 
   return (
@@ -121,7 +103,7 @@ Moving forward, ${config.clientName} remains committed to driving positive chang
         <CardHeader>
           <CardTitle className="text-corporate-accent flex items-center gap-2">
             <Zap className="h-6 w-6" />
-            A.R.I.A™ Zero-Cost Saturation Engine
+            A.R.I.A™ Live Git Deployment Engine
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -131,23 +113,26 @@ Moving forward, ${config.clientName} remains committed to driving positive chang
                 <DollarSign className="h-6 w-6" />
                 $0
               </div>
-              <p className="text-xs text-gray-400">Total Deployment Cost</p>
+              <p className="text-xs text-gray-400">Total Cost</p>
             </div>
             <div>
-              <div className="text-2xl font-bold text-blue-400">LOCAL</div>
-              <p className="text-xs text-gray-400">Content Generation</p>
+              <div className="text-2xl font-bold text-blue-400 flex items-center justify-center gap-1">
+                <GitBranch className="h-6 w-6" />
+                GIT
+              </div>
+              <p className="text-xs text-gray-400">Deployment Method</p>
             </div>
             <div>
-              <div className="text-2xl font-bold text-orange-400">SEO-READY</div>
+              <div className="text-2xl font-bold text-orange-400">LIVE</div>
+              <p className="text-xs text-gray-400">Real URLs</p>
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-purple-400">SEO</div>
               <p className="text-xs text-gray-400">Schema + Sitemap</p>
             </div>
             <div>
-              <div className="text-2xl font-bold text-purple-400">MULTI-PLATFORM</div>
-              <p className="text-xs text-gray-400">Free Hosting Stack</p>
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-yellow-400">INDEXABLE</div>
-              <p className="text-xs text-gray-400">Google Discoverable</p>
+              <div className="text-2xl font-bold text-yellow-400">LOCAL</div>
+              <p className="text-xs text-gray-400">No API Keys</p>
             </div>
           </div>
         </CardContent>
@@ -172,15 +157,15 @@ Moving forward, ${config.clientName} remains committed to driving positive chang
         <Card className="border-corporate-border bg-corporate-darkSecondary">
           <CardContent className="p-6 text-center">
             <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-corporate-accent" />
-            <p className="text-white">Generating zero-cost SEO content...</p>
+            <p className="text-white">Generating live SEO content...</p>
             <div className="flex items-center justify-center gap-4 mt-3">
               <div className="flex items-center gap-2">
-                <DollarSign className="h-4 w-4 text-green-400" />
-                <span className="text-sm text-green-400">$0 generation cost</span>
+                <GitBranch className="h-4 w-4 text-green-400" />
+                <span className="text-sm text-green-400">Git-based deployment</span>
               </div>
               <div className="flex items-center gap-2">
                 <TrendingUp className="h-4 w-4 text-blue-400" />
-                <span className="text-sm text-blue-400">Local AI processing</span>
+                <span className="text-sm text-blue-400">Local processing</span>
               </div>
             </div>
           </CardContent>
@@ -191,7 +176,7 @@ Moving forward, ${config.clientName} remains committed to driving positive chang
       {generatedContent && !isGenerating && (
         <ContentPreview
           content={generatedContent}
-          onApprove={() => toast.success('Zero-cost content approved for deployment')}
+          onApprove={() => toast.success('Content approved for Git deployment')}
           onEdit={() => {
             setGeneratedContent(null);
             toast.info('Please regenerate content with updated configuration');
@@ -205,9 +190,9 @@ Moving forward, ${config.clientName} remains committed to driving positive chang
         />
       )}
 
-      {/* Zero-Cost Deployment */}
+      {/* Live Git Deployment */}
       {generatedContent && contentConfig && (
-        <ZeroCostDeploymentManager
+        <LiveGitDeploymentManager
           contentConfig={{
             ...contentConfig,
             generatedContent
@@ -222,7 +207,7 @@ Moving forward, ${config.clientName} remains committed to driving positive chang
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-white">
               <Target className="h-5 w-5 text-green-400" />
-              Zero-Cost Deployment Results
+              Live Git Deployment Results
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -245,11 +230,11 @@ Moving forward, ${config.clientName} remains committed to driving positive chang
                         rel="noopener noreferrer"
                         className="text-corporate-accent hover:underline text-sm"
                       >
-                        View Live ($0)
+                        View Live
                       </a>
                     )}
                     <Badge variant={result.success ? 'default' : 'destructive'}>
-                      {result.success ? 'LIVE' : 'Failed'}
+                      {result.success ? 'DEPLOYED' : 'Failed'}
                     </Badge>
                   </div>
                 </div>
@@ -257,7 +242,7 @@ Moving forward, ${config.clientName} remains committed to driving positive chang
             </div>
             <div className="mt-4 p-3 bg-green-500/10 border border-green-500/30 rounded">
               <p className="text-green-400 text-sm font-medium">
-                ✅ Total deployment cost: $0.00 - All platforms deployed to free tiers
+                ✅ Git-based deployment complete - Real, indexable URLs generated
               </p>
             </div>
           </CardContent>

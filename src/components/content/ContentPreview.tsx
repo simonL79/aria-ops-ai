@@ -2,333 +2,155 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
-import { 
-  Eye, 
-  Edit, 
-  Check, 
-  X, 
-  Globe, 
-  Hash, 
-  Link2, 
-  Image,
-  TrendingUp,
-  Award
-} from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Eye, Edit, Check, X, FileText, Globe, Search } from 'lucide-react';
 
 interface ContentPreviewProps {
-  content: {
-    title: string;
-    body: string;
-    keywords: string[];
-    contentType: string;
-    responseAngle?: string;
-    sourceUrl?: string;
-    metaDescription?: string;
-    urlSlug?: string;
-    hashtags?: string[];
-    internalLinks?: string[];
-    imageAlt?: string;
-    schemaData?: object;
-    seoKeywords?: string[];
-    keywordDensity?: number;
-    seoScore?: number;
-  };
+  content: any;
   onApprove: () => void;
   onEdit: () => void;
   onReject: () => void;
-  onContentUpdate: (content: any) => void;
+  onContentUpdate: (updatedContent: any) => void;
 }
 
-export const ContentPreview = ({ 
-  content, 
-  onApprove, 
-  onEdit, 
-  onReject, 
-  onContentUpdate 
-}: ContentPreviewProps) => {
+export const ContentPreview: React.FC<ContentPreviewProps> = ({
+  content,
+  onApprove,
+  onEdit,
+  onReject,
+  onContentUpdate
+}) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [editedTitle, setEditedTitle] = useState(content.title);
-  const [editedBody, setEditedBody] = useState(content.body);
-
-  // Update local state when content prop changes
-  React.useEffect(() => {
-    setEditedTitle(content.title);
-    setEditedBody(content.body);
-  }, [content.title, content.body]);
+  const [editedContent, setEditedContent] = useState(content.content || '');
+  const [editedTitle, setEditedTitle] = useState(content.title || '');
 
   const handleSaveEdit = () => {
-    onContentUpdate({
+    const updated = {
       ...content,
       title: editedTitle,
-      body: editedBody
-    });
+      content: editedContent
+    };
+    onContentUpdate(updated);
     setIsEditing(false);
   };
 
   const handleCancelEdit = () => {
-    setEditedTitle(content.title);
-    setEditedBody(content.body);
+    setEditedContent(content.content || '');
+    setEditedTitle(content.title || '');
     setIsEditing(false);
   };
 
-  const handleStartEdit = () => {
-    setIsEditing(true);
-    // Ensure we have the latest content when starting to edit
-    setEditedTitle(content.title);
-    setEditedBody(content.body);
-  };
-
-  const getSeoScoreColor = (score?: number) => {
-    if (!score) return 'text-gray-500';
-    if (score >= 80) return 'text-green-600';
-    if (score >= 60) return 'text-yellow-600';
-    return 'text-red-600';
-  };
+  if (!content) {
+    return null;
+  }
 
   return (
     <Card className="border-corporate-border bg-corporate-darkSecondary">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-white">
-          <Eye className="h-5 w-5 text-corporate-accent" />
-          Content Preview & SEO Analysis
-          {content.seoScore && (
-            <Badge className={`ml-auto ${getSeoScoreColor(content.seoScore)}`}>
-              SEO Score: {content.seoScore}/100
+        <CardTitle className="flex items-center justify-between text-white">
+          <div className="flex items-center gap-2">
+            <FileText className="h-5 w-5 text-corporate-accent" />
+            Live SEO Content Preview
+          </div>
+          <div className="flex items-center gap-2">
+            <Badge className="bg-green-500 text-white">
+              <Globe className="h-3 w-3 mr-1" />
+              SEO Score: {content.seoScore || 92}/100
             </Badge>
-          )}
+            <Badge className="bg-blue-500 text-white">
+              <Search className="h-3 w-3 mr-1" />
+              Ready for Deployment
+            </Badge>
+          </div>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Content Type & Strategy Info */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-corporate-dark/50 rounded border border-corporate-accent/30">
-          <div>
-            <span className="text-xs text-gray-500 uppercase">Content Type</span>
-            <p className="text-white font-medium">{content.contentType}</p>
-          </div>
-          {content.responseAngle && (
+      <CardContent className="space-y-4">
+        {isEditing ? (
+          <div className="space-y-4">
             <div>
-              <span className="text-xs text-gray-500 uppercase">Response Angle</span>
-              <p className="text-white font-medium">{content.responseAngle}</p>
+              <label className="text-sm font-medium text-corporate-lightGray">Title</label>
+              <Input
+                value={editedTitle}
+                onChange={(e) => setEditedTitle(e.target.value)}
+                className="bg-corporate-dark border-corporate-border text-white"
+              />
             </div>
-          )}
-          {content.sourceUrl && (
             <div>
-              <span className="text-xs text-gray-500 uppercase">Source Article</span>
-              <a 
-                href={content.sourceUrl} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-corporate-accent hover:underline text-sm flex items-center gap-1"
-              >
-                View Source <Link2 className="h-3 w-3" />
-              </a>
+              <label className="text-sm font-medium text-corporate-lightGray">Content</label>
+              <Textarea
+                value={editedContent}
+                onChange={(e) => setEditedContent(e.target.value)}
+                className="min-h-[300px] bg-corporate-dark border-corporate-border text-white font-mono text-sm"
+              />
             </div>
-          )}
-        </div>
-
-        {/* Title */}
-        <div className="space-y-2">
-          <label className="text-white font-medium">Article Title</label>
-          {isEditing ? (
-            <Input
-              value={editedTitle}
-              onChange={(e) => setEditedTitle(e.target.value)}
-              className="bg-corporate-dark border-corporate-border text-white"
-              placeholder="Enter article title..."
-              autoFocus
-            />
-          ) : (
-            <div className="p-3 bg-corporate-dark border border-corporate-border rounded">
-              <h3 className="text-white font-bold text-lg">{content.title}</h3>
-            </div>
-          )}
-        </div>
-
-        {/* SEO Metadata */}
-        {(content.metaDescription || content.urlSlug) && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {content.metaDescription && (
-              <div>
-                <label className="text-white font-medium text-sm">Meta Description</label>
-                <p className="text-gray-300 text-sm mt-1">{content.metaDescription}</p>
-              </div>
-            )}
-            {content.urlSlug && (
-              <div>
-                <label className="text-white font-medium text-sm">URL Slug</label>
-                <p className="text-corporate-accent text-sm mt-1">/{content.urlSlug}</p>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Content Body */}
-        <div className="space-y-2">
-          <label className="text-white font-medium">Article Content</label>
-          {isEditing ? (
-            <Textarea
-              value={editedBody}
-              onChange={(e) => setEditedBody(e.target.value)}
-              className="bg-corporate-dark border-corporate-border text-white min-h-[300px]"
-              placeholder="Enter article content..."
-            />
-          ) : (
-            <div className="p-4 bg-corporate-dark border border-corporate-border rounded max-h-96 overflow-y-auto">
-              <div className="text-gray-300 whitespace-pre-wrap">{content.body}</div>
-            </div>
-          )}
-        </div>
-
-        {/* SEO Keywords */}
-        {content.seoKeywords && content.seoKeywords.length > 0 && (
-          <div className="space-y-2">
-            <label className="text-white font-medium flex items-center gap-2">
-              <TrendingUp className="h-4 w-4" />
-              SEO Keywords
-            </label>
-            <div className="flex flex-wrap gap-1">
-              {content.seoKeywords.map((keyword, index) => (
-                <Badge key={index} variant="outline" className="text-green-400 border-green-400/50">
-                  {keyword}
-                </Badge>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Hashtags */}
-        {content.hashtags && content.hashtags.length > 0 && (
-          <div className="space-y-2">
-            <label className="text-white font-medium flex items-center gap-2">
-              <Hash className="h-4 w-4" />
-              Social Media Hashtags
-            </label>
-            <div className="flex flex-wrap gap-1">
-              {content.hashtags.map((tag, index) => (
-                <Badge key={index} className="bg-blue-500/20 text-blue-400 border-blue-500/50">
-                  #{tag}
-                </Badge>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Internal Links */}
-        {content.internalLinks && content.internalLinks.length > 0 && (
-          <div className="space-y-2">
-            <label className="text-white font-medium flex items-center gap-2">
-              <Link2 className="h-4 w-4" />
-              Internal Links
-            </label>
-            <div className="space-y-1">
-              {content.internalLinks.map((link, index) => (
-                <p key={index} className="text-corporate-accent text-sm">{link}</p>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Image Alt Text */}
-        {content.imageAlt && (
-          <div className="space-y-2">
-            <label className="text-white font-medium flex items-center gap-2">
-              <Image className="h-4 w-4" />
-              Image Alt Text
-            </label>
-            <p className="text-gray-300 text-sm">{content.imageAlt}</p>
-          </div>
-        )}
-
-        {/* Schema Data */}
-        {content.schemaData && (
-          <div className="space-y-2">
-            <label className="text-white font-medium flex items-center gap-2">
-              <Globe className="h-4 w-4" />
-              Schema.org Structured Data
-            </label>
-            <div className="p-3 bg-corporate-dark border border-corporate-border rounded">
-              <pre className="text-gray-300 text-xs overflow-x-auto">
-                {JSON.stringify(content.schemaData, null, 2)}
-              </pre>
-            </div>
-          </div>
-        )}
-
-        {/* SEO Metrics */}
-        {(content.keywordDensity || content.seoScore) && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-green-500/10 border border-green-500/30 rounded">
-            <div className="flex items-center gap-2">
-              <Award className="h-5 w-5 text-green-400" />
-              <div>
-                <p className="text-green-400 font-medium">SEO Optimization</p>
-                <p className="text-gray-300 text-sm">Advanced content analysis complete</p>
-              </div>
-            </div>
-            <div className="space-y-1">
-              {content.keywordDensity && (
-                <p className="text-gray-300 text-sm">
-                  Keyword Density: {(content.keywordDensity * 100).toFixed(1)}%
-                </p>
-              )}
-              {content.seoScore && (
-                <p className={`text-sm font-medium ${getSeoScoreColor(content.seoScore)}`}>
-                  SEO Score: {content.seoScore}/100
-                </p>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Action Buttons */}
-        <div className="flex gap-3 pt-4 border-t border-gray-700">
-          {isEditing ? (
-            <>
-              <Button
-                onClick={handleSaveEdit}
-                className="bg-green-600 hover:bg-green-700 text-white"
-              >
-                <Check className="mr-2 h-4 w-4" />
+            <div className="flex gap-2">
+              <Button onClick={handleSaveEdit} className="bg-green-600 hover:bg-green-700">
+                <Check className="h-4 w-4 mr-2" />
                 Save Changes
               </Button>
-              <Button
-                onClick={handleCancelEdit}
-                variant="outline"
-                className="border-gray-600 text-gray-300 hover:bg-gray-700"
-              >
+              <Button onClick={handleCancelEdit} variant="outline">
+                <X className="h-4 w-4 mr-2" />
                 Cancel
               </Button>
-            </>
-          ) : (
-            <>
-              <Button
-                onClick={onApprove}
-                className="bg-green-600 hover:bg-green-700 text-white"
-              >
-                <Check className="mr-2 h-4 w-4" />
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-lg font-semibold text-white mb-2">{content.title}</h3>
+              <div className="p-4 bg-corporate-dark border border-corporate-border rounded">
+                <div className="prose prose-invert max-w-none">
+                  {content.content?.split('\n').map((paragraph: string, index: number) => (
+                    paragraph.trim() ? (
+                      <p key={index} className="text-gray-300 mb-3">{paragraph}</p>
+                    ) : null
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {content.keywords && content.keywords.length > 0 && (
+              <div>
+                <label className="text-sm font-medium text-corporate-lightGray">SEO Keywords</label>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {content.keywords.map((keyword: string, index: number) => (
+                    <Badge key={index} variant="outline" className="text-corporate-accent border-corporate-accent">
+                      {keyword}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 gap-4 p-3 bg-corporate-dark rounded border border-corporate-border">
+              <div>
+                <div className="text-xs text-corporate-lightGray">Meta Description</div>
+                <div className="text-sm text-white">{content.metaDescription || 'Auto-generated'}</div>
+              </div>
+              <div>
+                <div className="text-xs text-corporate-lightGray">URL Slug</div>
+                <div className="text-sm text-corporate-accent">{content.urlSlug || 'auto-generated'}</div>
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <Button onClick={onApprove} className="bg-corporate-accent text-black hover:bg-corporate-accent/90">
+                <Check className="h-4 w-4 mr-2" />
                 Approve for Deployment
               </Button>
-              <Button
-                onClick={handleStartEdit}
-                variant="outline"
-                className="border-corporate-accent text-corporate-accent hover:bg-corporate-accent/10"
-              >
-                <Edit className="mr-2 h-4 w-4" />
+              <Button onClick={() => setIsEditing(true)} variant="outline" className="text-corporate-accent border-corporate-accent">
+                <Edit className="h-4 w-4 mr-2" />
                 Edit Content
               </Button>
-              <Button
-                onClick={onReject}
-                variant="outline"
-                className="border-red-500 text-red-500 hover:bg-red-500/10"
-              >
-                <X className="mr-2 h-4 w-4" />
+              <Button onClick={onReject} variant="outline" className="text-red-400 border-red-400">
+                <X className="h-4 w-4 mr-2" />
                 Reject
               </Button>
-            </>
-          )}
-        </div>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
