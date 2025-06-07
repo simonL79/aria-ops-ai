@@ -51,44 +51,52 @@ const RealTimeMonitoringActivator = () => {
         .select('*')
         .order('name');
 
-      const serviceList: MonitoringService[] = [
-        {
-          name: 'Reddit OSINT Scanner',
-          isActive: modules?.some(m => m.name.includes('Reddit') && m.system_status === 'LIVE') || false,
-          description: 'Live Reddit content monitoring'
-        },
-        {
-          name: 'News Feed Monitor',
-          isActive: modules?.some(m => m.name.includes('News') && m.system_status === 'LIVE') || false,
-          description: 'RSS and news source tracking'
-        },
-        {
-          name: 'Social Media Scanner',
-          isActive: modules?.some(m => m.name.includes('Social') && m.system_status === 'LIVE') || false,
-          description: 'Multi-platform social monitoring'
-        },
-        {
-          name: 'Threat Classification',
-          isActive: modules?.some(m => m.name.includes('Threat') && m.system_status === 'LIVE') || false,
-          description: 'AI-powered threat analysis'
-        },
-        {
-          name: 'Entity Recognition',
-          isActive: modules?.some(m => m.name.includes('Entity') && m.system_status === 'LIVE') || false,
-          description: 'Client entity detection'
-        },
-        {
-          name: 'Real-time Alerts',
-          isActive: modules?.some(m => m.name.includes('Alert') && m.system_status === 'LIVE') || false,
-          description: 'Instant notification system'
-        }
+      // Define the exact 6 services we need
+      const requiredServices = [
+        'Reddit OSINT Scanner',
+        'News Feed Monitor',
+        'Social Media Scanner',
+        'Threat Classification',
+        'Entity Recognition',
+        'Real-time Alerts'
       ];
+
+      const serviceList: MonitoringService[] = requiredServices.map(serviceName => {
+        const module = modules?.find(m => 
+          m.name === serviceName || 
+          m.name.includes(serviceName.split(' ')[0]) ||
+          (serviceName === 'Reddit OSINT Scanner' && m.name.includes('Reddit')) ||
+          (serviceName === 'News Feed Monitor' && m.name.includes('News')) ||
+          (serviceName === 'Social Media Scanner' && m.name.includes('Social')) ||
+          (serviceName === 'Threat Classification' && m.name.includes('Threat')) ||
+          (serviceName === 'Entity Recognition' && m.name.includes('Entity')) ||
+          (serviceName === 'Real-time Alerts' && m.name.includes('Alert'))
+        );
+
+        return {
+          name: serviceName,
+          isActive: module?.system_status === 'LIVE' || false,
+          description: getServiceDescription(serviceName)
+        };
+      });
 
       setServices(serviceList);
 
     } catch (error) {
       console.error('Failed to check monitoring status:', error);
     }
+  };
+
+  const getServiceDescription = (serviceName: string) => {
+    const descriptions = {
+      'Reddit OSINT Scanner': 'Live Reddit content monitoring',
+      'News Feed Monitor': 'RSS and news source tracking',
+      'Social Media Scanner': 'Multi-platform social monitoring',
+      'Threat Classification': 'AI-powered threat analysis',
+      'Entity Recognition': 'Client entity detection',
+      'Real-time Alerts': 'Instant notification system'
+    };
+    return descriptions[serviceName] || 'Monitoring service';
   };
 
   const activateRealTimeMonitoring = async () => {
@@ -102,19 +110,35 @@ const RealTimeMonitoringActivator = () => {
         .upsert({
           id: '1',
           is_active: true,
-          sources_count: 12,
+          sources_count: 6,
           last_run: new Date().toISOString(),
           updated_at: new Date().toISOString()
         }, { onConflict: 'id' });
 
-      // Activate ALL monitoring modules - ensure all 6 services are activated
-      const modules = [
+      // Activate ALL 6 required monitoring modules
+      const modulesToActivate = [
         'Reddit OSINT Scanner',
         'News Feed Monitor', 
         'Social Media Scanner',
         'Threat Classification Engine',
         'Entity Recognition Engine',
-        'Real-time Alert System',
+        'Real-time Alert System'
+      ];
+
+      for (const module of modulesToActivate) {
+        await supabase
+          .from('live_status')
+          .upsert({
+            name: module,
+            system_status: 'LIVE',
+            last_report: new Date().toISOString(),
+            active_threats: Math.floor(Math.random() * 10),
+            last_threat_seen: new Date().toISOString()
+          }, { onConflict: 'name' });
+      }
+
+      // Also activate additional supporting modules
+      const supportingModules = [
         'Live Threat Scanner',
         'Forum Analysis Engine',
         'Legal Discussion Monitor',
@@ -123,14 +147,14 @@ const RealTimeMonitoringActivator = () => {
         'EIDETIC Memory Engine'
       ];
 
-      for (const module of modules) {
+      for (const module of supportingModules) {
         await supabase
           .from('live_status')
           .upsert({
             name: module,
             system_status: 'LIVE',
             last_report: new Date().toISOString(),
-            active_threats: Math.floor(Math.random() * 10),
+            active_threats: Math.floor(Math.random() * 5),
             last_threat_seen: new Date().toISOString()
           }, { onConflict: 'name' });
       }
@@ -151,12 +175,12 @@ const RealTimeMonitoringActivator = () => {
           module_source: 'real_time_activator',
           success: true,
           operation_data: {
-            activated_modules: modules.length,
+            activated_modules: modulesToActivate.length,
             activation_time: new Date().toISOString()
           }
         });
 
-      toast.success('✅ Real-time monitoring activated successfully!');
+      toast.success('✅ All 6 monitoring services activated successfully!');
       await checkMonitoringStatus();
 
     } catch (error) {
@@ -191,7 +215,7 @@ const RealTimeMonitoringActivator = () => {
   };
 
   const activeServices = services.filter(s => s.isActive).length;
-  const totalServices = services.length;
+  const totalServices = 6; // Fixed to exactly 6 services
 
   return (
     <div className="space-y-6">
@@ -236,7 +260,7 @@ const RealTimeMonitoringActivator = () => {
             ) : (
               <>
                 <Zap className="h-4 w-4 mr-2" />
-                Activate All Monitoring Services
+                Activate All {totalServices} Monitoring Services
               </>
             )}
           </Button>
@@ -282,7 +306,7 @@ const RealTimeMonitoringActivator = () => {
             <div className="space-y-2">
               <h4 className="text-white font-medium">Monitoring Instructions</h4>
               <div className="text-corporate-lightGray text-sm space-y-1">
-                <p>• Click "Activate All Monitoring Services" to enable all 6 core services</p>
+                <p>• Click "Activate All 6 Monitoring Services" to enable all core services</p>
                 <p>• Individual services can be toggled using the switches</p>
                 <p>• Services will automatically scan for threats and generate alerts</p>
                 <p>• Monitor the dashboard for real-time updates and notifications</p>
