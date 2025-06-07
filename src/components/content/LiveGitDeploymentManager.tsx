@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Textarea } from '@/components/ui/textarea';
 import { 
   Rocket, 
   CheckCircle, 
@@ -14,180 +13,185 @@ import {
   Users,
   MessageSquare,
   FileText,
-  Loader2,
-  GitBranch,
-  Download,
-  Copy,
-  Code,
-  Zap
+  Loader2
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { GitDeploymentService } from '@/services/deployment/gitDeployment';
-import { AutomatedGitDeploymentService } from '@/services/deployment/automatedGitDeployment';
+import { supabase } from '@/integrations/supabase/client';
+import { deployToGitHubPages, validateGitHubToken } from '@/services/deployment/automatedGitDeployment';
 
-interface LiveGitDeploymentManagerProps {
-  contentConfig: {
-    clientName?: string;
-    contentType?: string;
-    targetKeywords?: string[];
-    generatedContent?: {
-      title: string;
-      content: string;
-      keywords: string[];
-    };
-  };
-  onDeploymentComplete: (results: any[]) => void;
+interface Platform {
+  id: string;
+  name: string;
+  apiEndpoint: string;
+  requiresAuth: boolean;
+  status: 'ready' | 'deploying' | 'deployed' | 'failed';
+  deploymentUrl?: string;
+  icon: React.ReactNode;
 }
 
-export const LiveGitDeploymentManager: React.FC<LiveGitDeploymentManagerProps> = ({ 
+interface LiveDeploymentManagerProps {
+  contentConfig: any;
+  onDeploymentComplete: (results: any) => void;
+}
+
+export const LiveDeploymentManager = ({ 
   contentConfig, 
   onDeploymentComplete 
-}) => {
+}: LiveDeploymentManagerProps) => {
+  const [platforms, setPlatforms] = useState<Platform[]>([
+    {
+      id: 'github-pages',
+      name: 'GitHub Pages',
+      apiEndpoint: 'github_deploy',
+      requiresAuth: true,
+      status: 'ready',
+      icon: <Github className="h-4 w-4" />
+    },
+    {
+      id: 'medium',
+      name: 'Medium',
+      apiEndpoint: 'medium_publish',
+      requiresAuth: true,
+      status: 'ready',
+      icon: <FileText className="h-4 w-4" />
+    },
+    {
+      id: 'reddit',
+      name: 'Reddit',
+      apiEndpoint: 'reddit_post',
+      requiresAuth: true,
+      status: 'ready',
+      icon: <MessageSquare className="h-4 w-4" />
+    },
+    {
+      id: 'linkedin',
+      name: 'LinkedIn',
+      apiEndpoint: 'linkedin_publish',
+      requiresAuth: true,
+      status: 'ready',
+      icon: <Users className="h-4 w-4" />
+    }
+  ]);
+
   const [isDeploying, setIsDeploying] = useState(false);
   const [deploymentProgress, setDeploymentProgress] = useState(0);
-  const [deploymentResults, setDeploymentResults] = useState<any[]>([]);
-  const [showSetupInstructions, setShowSetupInstructions] = useState(false);
-  const [setupInstructions, setSetupInstructions] = useState('');
-  const [htmlContent, setHtmlContent] = useState('');
-  const [deploymentMode, setDeploymentMode] = useState<'automated' | 'manual'>('automated');
 
-  const handleAutomatedGitDeployment = async () => {
-    if (!contentConfig.generatedContent) {
-      toast.error('No content available for deployment');
-      return;
-    }
-
+  const deployToRealPlatforms = async () => {
     setIsDeploying(true);
     setDeploymentProgress(0);
 
     try {
-      console.log('🚀 Starting automated GitHub Pages deployment...');
+      console.log('🚀 Starting LIVE deployment to real platforms...');
       
-      const deploymentOptions = {
-        entityName: contentConfig.clientName || 'Client',
-        content: contentConfig.generatedContent.content,
-        title: contentConfig.generatedContent.title,
-        keywords: contentConfig.generatedContent.keywords || [],
-        contentType: contentConfig.contentType || 'content'
-      };
+      const enabledPlatforms = platforms.filter(p => p.status === 'ready');
+      const results = [];
 
-      setDeploymentProgress(25);
-      toast.info('Creating GitHub repository...');
+      for (let i = 0; i < enabledPlatforms.length; i++) {
+        const platform = enabledPlatforms[i];
+        
+        setPlatforms(prev => prev.map(p => 
+          p.id === platform.id ? { ...p, status: 'deploying' } : p
+        ));
 
-      const result = await AutomatedGitDeploymentService.deployToGitHubPages(deploymentOptions);
-      
-      setDeploymentProgress(100);
+        try {
+          console.log(`📡 Deploying to ${platform.name}...`);
+          
+          if (platform.id === 'github-pages') {
+            // Use automated GitHub Pages deployment
+            const deploymentResult = await deployToGitHubPages({
+              title: contentConfig.title || 'Professional Content',
+              content: contentConfig.content || 'Professional insights and analysis.',
+              entity: contentConfig.entity || 'Professional',
+              keywords: contentConfig.keywords,
+              contentType: contentConfig.contentType
+            });
 
-      const deploymentResult = {
-        platform: 'GitHub Pages',
-        success: result.success,
-        url: result.deploymentUrl,
-        repositoryUrl: result.repositoryUrl,
-        timestamp: result.timestamp,
-        deploymentType: result.deploymentType,
-        repositoryName: result.repositoryName
-      };
+            if (deploymentResult.success) {
+              setPlatforms(prev => prev.map(p => 
+                p.id === platform.id 
+                  ? { ...p, status: 'deployed', deploymentUrl: deploymentResult.url } 
+                  : p
+              ));
 
-      setDeploymentResults([deploymentResult]);
-      onDeploymentComplete([deploymentResult]);
+              results.push({
+                platform: platform.name,
+                success: true,
+                url: deploymentResult.url,
+                repositoryName: deploymentResult.repositoryName,
+                timestamp: new Date().toISOString()
+              });
 
-      toast.success(`🎉 Content deployed successfully! Live at: ${result.deploymentUrl}`);
+              toast.success(`✅ Live deployment to ${platform.name} successful`);
+            } else {
+              throw new Error(deploymentResult.error || 'GitHub deployment failed');
+            }
+          } else {
+            // Call the persona-saturation edge function for other platforms
+            const { data, error } = await supabase.functions.invoke('persona-saturation', {
+              body: {
+                ...contentConfig,
+                deploymentTargets: [platform.id],
+                liveDeployment: true,
+                platformEndpoint: platform.apiEndpoint
+              }
+            });
 
-    } catch (error) {
-      console.error('❌ Automated deployment failed:', error);
-      
-      // Fall back to manual deployment preparation
-      toast.error(`Automated deployment failed: ${error.message}. Preparing manual deployment...`);
-      await handleManualGitDeployment();
-    } finally {
-      setIsDeploying(false);
-    }
-  };
+            if (error) throw error;
 
-  const handleManualGitDeployment = async () => {
-    if (!contentConfig.generatedContent) {
-      toast.error('No content available for deployment');
-      return;
-    }
+            // Handle the new response format with real deployment results
+            const deploymentResult = data.deploymentResults?.[0];
+            
+            if (deploymentResult?.success) {
+              setPlatforms(prev => prev.map(p => 
+                p.id === platform.id 
+                  ? { ...p, status: 'deployed', deploymentUrl: deploymentResult.url } 
+                  : p
+              ));
 
-    setIsDeploying(true);
-    setDeploymentProgress(0);
+              results.push({
+                platform: platform.name,
+                success: true,
+                url: deploymentResult.url,
+                timestamp: new Date().toISOString()
+              });
 
-    try {
-      console.log('🚀 Starting manual Git deployment preparation...');
-      
-      const deploymentOptions = {
-        entityName: contentConfig.clientName || 'Client',
-        content: contentConfig.generatedContent.content,
-        title: contentConfig.generatedContent.title,
-        keywords: contentConfig.generatedContent.keywords || [],
-        contentType: contentConfig.contentType || 'content'
-      };
+              toast.success(`✅ Live deployment to ${platform.name} successful`);
+            } else {
+              throw new Error(deploymentResult?.error || 'Deployment failed');
+            }
+          }
 
-      setDeploymentProgress(50);
+        } catch (error) {
+          console.error(`❌ Live deployment to ${platform.name} failed:`, error);
+          
+          setPlatforms(prev => prev.map(p => 
+            p.id === platform.id ? { ...p, status: 'failed' } : p
+          ));
 
-      const result = await GitDeploymentService.deployToGitHub(deploymentOptions);
-      
-      setDeploymentProgress(100);
+          results.push({
+            platform: platform.name,
+            success: false,
+            error: error.message,
+            timestamp: new Date().toISOString()
+          });
 
-      const deploymentResult = {
-        platform: 'GitHub Pages',
-        success: result.success,
-        url: result.deploymentUrl,
-        repositoryUrl: result.repositoryUrl,
-        timestamp: result.timestamp,
-        deploymentType: result.deploymentType,
-        repositoryName: result.repositoryName
-      };
+          toast.error(`❌ Live deployment to ${platform.name} failed: ${error.message}`);
+        }
 
-      setDeploymentResults([deploymentResult]);
-      setSetupInstructions(result.setupInstructions);
-      setHtmlContent(result.htmlContent);
-      onDeploymentComplete([deploymentResult]);
-
-      if (result.success) {
-        toast.success('Manual deployment package ready! Follow setup instructions to go live.');
-        setShowSetupInstructions(true);
-      } else {
-        toast.error('Deployment preparation failed');
+        setDeploymentProgress(((i + 1) / enabledPlatforms.length) * 100);
       }
 
+      onDeploymentComplete(results);
+      
+      const successCount = results.filter(r => r.success).length;
+      toast.success(`Live deployment complete: ${successCount}/${enabledPlatforms.length} platforms successful`);
+
     } catch (error) {
-      console.error('❌ Manual deployment preparation failed:', error);
-      toast.error(`Manual deployment preparation failed: ${error.message}`);
-      
-      const failedResult = {
-        platform: 'GitHub Pages',
-        success: false,
-        error: error.message,
-        timestamp: new Date().toISOString()
-      };
-      
-      setDeploymentResults([failedResult]);
-      onDeploymentComplete([failedResult]);
+      console.error('❌ Live deployment failed:', error);
+      toast.error('Live deployment failed - check console for details');
     } finally {
       setIsDeploying(false);
     }
-  };
-
-  const copyToClipboard = async (text: string, label: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      toast.success(`${label} copied to clipboard!`);
-    } catch (error) {
-      toast.error('Failed to copy to clipboard');
-    }
-  };
-
-  const downloadFile = (content: string, filename: string, type: string) => {
-    const blob = new Blob([content], { type });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success(`${filename} downloaded!`);
   };
 
   const getStatusIcon = (status: string) => {
@@ -203,215 +207,86 @@ export const LiveGitDeploymentManager: React.FC<LiveGitDeploymentManagerProps> =
     <Card className="border-corporate-border bg-corporate-darkSecondary">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-white">
-          <GitBranch className="h-5 w-5 text-corporate-accent" />
-          Live Git Deployment Manager
+          <Rocket className="h-5 w-5 text-corporate-accent" />
+          Live Platform Deployment
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Deployment Mode Selection */}
-        <div className="flex gap-2 p-1 bg-corporate-dark rounded border border-corporate-border">
-          <Button
-            onClick={() => setDeploymentMode('automated')}
-            variant={deploymentMode === 'automated' ? 'default' : 'ghost'}
-            size="sm"
-            className="flex-1"
-          >
-            <Zap className="h-4 w-4 mr-2" />
-            Automated
-          </Button>
-          <Button
-            onClick={() => setDeploymentMode('manual')}
-            variant={deploymentMode === 'manual' ? 'default' : 'ghost'}
-            size="sm"
-            className="flex-1"
-          >
-            <Code className="h-4 w-4 mr-2" />
-            Manual Setup
-          </Button>
-        </div>
-
         {/* Deployment Progress */}
         {isDeploying && (
           <div className="space-y-2">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-corporate-lightGray">
-                {deploymentMode === 'automated' ? 'Automated Deployment' : 'Preparing Manual Deployment'}
-              </span>
+              <span className="text-corporate-lightGray">Live Deployment Progress</span>
               <span className="text-white">{Math.round(deploymentProgress)}%</span>
             </div>
             <Progress value={deploymentProgress} className="h-2" />
           </div>
         )}
 
-        {/* Content Summary */}
-        {contentConfig.generatedContent && (
-          <div className="p-3 bg-corporate-dark rounded border border-corporate-border">
-            <div className="text-sm text-corporate-lightGray mb-2">Ready for Deployment:</div>
-            <div className="text-white font-medium">{contentConfig.generatedContent.title}</div>
-            <div className="text-xs text-corporate-lightGray mt-1">
-              {contentConfig.generatedContent.keywords?.length || 0} keywords • {contentConfig.contentType}
-            </div>
-          </div>
-        )}
-
-        {/* Deployment Results */}
-        {deploymentResults.length > 0 && (
-          <div className="space-y-2">
-            <h4 className="text-sm font-medium text-white">Deployment Status</h4>
-            {deploymentResults.map((result, index) => (
+        {/* Platform Status */}
+        <div className="space-y-2">
+          <h4 className="text-sm font-medium text-white">Platform Status</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            {platforms.map((platform) => (
               <div 
-                key={index}
+                key={platform.id}
                 className="flex items-center justify-between p-3 border border-corporate-border rounded"
               >
                 <div className="flex items-center gap-2">
-                  {getStatusIcon(result.success ? 'deployed' : 'failed')}
-                  <Github className="h-4 w-4" />
-                  <span className="text-white font-medium">{result.platform}</span>
-                  {result.repositoryName && (
-                    <Badge variant="outline" className="text-xs">
-                      {result.repositoryName}
-                    </Badge>
-                  )}
+                  {getStatusIcon(platform.status)}
+                  {platform.icon}
+                  <span className="text-white font-medium">{platform.name}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  {result.url && result.success && (
+                  {platform.deploymentUrl && (
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => window.open(result.url, '_blank')}
+                      onClick={() => window.open(platform.deploymentUrl, '_blank')}
                       className="h-6 w-6 p-0"
                     >
                       <ExternalLink className="h-3 w-3" />
                     </Button>
                   )}
                   <Badge 
-                    variant={result.success ? 'default' : 'destructive'}
+                    variant={platform.status === 'deployed' ? 'default' : 'outline'}
                     className="text-xs"
                   >
-                    {result.success ? (deploymentMode === 'automated' ? 'LIVE' : 'READY') : 'FAILED'}
+                    {platform.status === 'deployed' ? 'LIVE' : platform.status.toUpperCase()}
                   </Badge>
                 </div>
               </div>
             ))}
           </div>
-        )}
-
-        {/* Setup Instructions - Only show for manual mode */}
-        {showSetupInstructions && setupInstructions && deploymentMode === 'manual' && (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h4 className="text-sm font-medium text-white">Setup Instructions</h4>
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => copyToClipboard(setupInstructions, 'Setup instructions')}
-                  className="h-6 text-xs"
-                >
-                  <Copy className="h-3 w-3 mr-1" />
-                  Copy
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => downloadFile(setupInstructions, 'setup-instructions.md', 'text/markdown')}
-                  className="h-6 text-xs"
-                >
-                  <Download className="h-3 w-3 mr-1" />
-                  Download
-                </Button>
-              </div>
-            </div>
-            <Textarea
-              value={setupInstructions}
-              readOnly
-              className="bg-corporate-dark border-corporate-border text-white font-mono text-xs min-h-[200px]"
-            />
-          </div>
-        )}
-
-        {/* HTML Content Download - Only show for manual mode */}
-        {htmlContent && deploymentMode === 'manual' && (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h4 className="text-sm font-medium text-white">Generated HTML Content</h4>
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => copyToClipboard(htmlContent, 'HTML content')}
-                  className="h-6 text-xs"
-                >
-                  <Copy className="h-3 w-3 mr-1" />
-                  Copy HTML
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => downloadFile(htmlContent, 'index.html', 'text/html')}
-                  className="h-6 text-xs"
-                >
-                  <Download className="h-3 w-3 mr-1" />
-                  Download HTML
-                </Button>
-              </div>
-            </div>
-            <div className="p-3 bg-corporate-dark rounded border border-corporate-border">
-              <div className="text-xs text-corporate-lightGray">
-                Complete HTML file ready for GitHub Pages deployment
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Action Buttons */}
-        <div className="flex gap-2">
-          <Button
-            onClick={deploymentMode === 'automated' ? handleAutomatedGitDeployment : handleManualGitDeployment}
-            disabled={isDeploying || !contentConfig.generatedContent}
-            className="flex-1 bg-green-600 hover:bg-green-700 text-white"
-          >
-            {isDeploying ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                {deploymentMode === 'automated' ? 'Deploying...' : 'Preparing...'}
-              </>
-            ) : (
-              <>
-                {deploymentMode === 'automated' ? (
-                  <Zap className="mr-2 h-4 w-4" />
-                ) : (
-                  <GitBranch className="mr-2 h-4 w-4" />
-                )}
-                {deploymentMode === 'automated' ? 'Deploy to GitHub Pages' : 'Prepare Manual Deployment'}
-              </>
-            )}
-          </Button>
         </div>
 
-        {/* Information Notice */}
-        <div className={`p-3 rounded border ${
-          deploymentMode === 'automated' 
-            ? 'bg-green-500/10 border-green-500/30' 
-            : 'bg-blue-500/10 border-blue-500/30'
-        }`}>
+        {/* Deploy Button */}
+        <Button
+          onClick={deployToRealPlatforms}
+          disabled={isDeploying || !contentConfig}
+          className="w-full bg-green-600 hover:bg-green-700 text-white"
+        >
+          {isDeploying ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Deploying to Live Platforms...
+            </>
+          ) : (
+            <>
+              <Rocket className="mr-2 h-4 w-4" />
+              Deploy to LIVE Platforms
+            </>
+          )}
+        </Button>
+
+        {/* Warning */}
+        <div className="p-3 bg-orange-500/10 border border-orange-500/30 rounded">
           <div className="flex items-start gap-2">
-            {deploymentMode === 'automated' ? (
-              <Zap className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
-            ) : (
-              <GitBranch className="h-4 w-4 text-blue-500 flex-shrink-0 mt-0.5" />
-            )}
+            <AlertTriangle className="h-4 w-4 text-orange-500 flex-shrink-0 mt-0.5" />
             <div className="text-sm">
-              <p className={`font-medium ${
-                deploymentMode === 'automated' ? 'text-green-400' : 'text-blue-400'
-              }`}>
-                {deploymentMode === 'automated' ? 'Automated GitHub Deployment' : 'Manual GitHub Setup Required'}
-              </p>
-              <p className={deploymentMode === 'automated' ? 'text-green-300' : 'text-blue-300'}>
-                {deploymentMode === 'automated' 
-                  ? 'Automatically creates repository, uploads content, and enables GitHub Pages using your API token.'
-                  : 'Creates deployment package with HTML content and step-by-step instructions for GitHub Pages setup.'
-                }
+              <p className="text-orange-400 font-medium">Live Deployment Notice</p>
+              <p className="text-orange-300">
+                Articles will be published to real platforms with legitimate URLs. Ensure content review is complete.
               </p>
             </div>
           </div>
