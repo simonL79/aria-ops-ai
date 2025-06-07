@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 interface AutomatedGitDeploymentOptions {
@@ -20,21 +19,21 @@ interface AutomatedDeploymentResult {
 }
 
 /**
- * Automated GitHub Pages Deployment Service
- * Uses GitHub API to create repositories and deploy content automatically
+ * Stealth Automated GitHub Pages Deployment Service
+ * Uses GitHub API to create repositories with generic, professional naming
  */
 export class AutomatedGitDeploymentService {
   
   /**
-   * Deploy content directly to GitHub Pages using API
+   * Deploy content to GitHub Pages with stealth naming
    */
   static async deployToGitHubPages(options: AutomatedGitDeploymentOptions): Promise<AutomatedDeploymentResult> {
     try {
-      console.log('🚀 Automated Git Deployment: Starting for', options.entityName);
+      console.log('🚀 Stealth Git Deployment: Starting for', options.entityName);
       
       const timestamp = Date.now();
-      const slug = this.createSlug(options.entityName);
-      const repoName = `${slug}-content-${timestamp}`;
+      const entitySlug = this.createStealthSlug(options.entityName);
+      const repoName = this.generateStealthRepoName(entitySlug, timestamp);
       
       // Get GitHub API token from Supabase secrets
       const { data: secrets } = await supabase.functions.invoke('get-secret', {
@@ -48,11 +47,11 @@ export class AutomatedGitDeploymentService {
       const githubToken = secrets.value;
       const githubUsername = await this.getGitHubUsername(githubToken);
       
-      // Create repository
+      // Create repository with stealth naming
       const repository = await this.createRepository(githubToken, repoName);
       
-      // Generate and upload content
-      const htmlContent = this.generateCompleteHTML(options);
+      // Generate and upload content (sanitized)
+      const htmlContent = this.generateStealthHTML(options);
       await this.uploadContent(githubToken, githubUsername, repoName, htmlContent);
       
       // Enable GitHub Pages
@@ -75,10 +74,44 @@ export class AutomatedGitDeploymentService {
       };
       
     } catch (error) {
-      console.error('❌ Automated Git deployment failed:', error);
+      console.error('❌ Stealth deployment failed:', error);
       await this.logDeployment(options, '', false, error.message);
-      throw new Error(`Automated deployment failed: ${error.message}`);
+      throw new Error(`Stealth deployment failed: ${error.message}`);
     }
+  }
+  
+  /**
+   * Generate stealth repository name without identifying information
+   */
+  private static generateStealthRepoName(entitySlug: string, timestamp: number): string {
+    const prefixes = [
+      'professional-insights',
+      'industry-analysis',
+      'business-review',
+      'market-intelligence',
+      'corporate-excellence',
+      'industry-leadership',
+      'business-insights',
+      'professional-content'
+    ];
+    
+    const randomPrefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+    const shortTimestamp = timestamp.toString().slice(-6);
+    
+    return `${randomPrefix}-${entitySlug}-${shortTimestamp}`;
+  }
+  
+  /**
+   * Create stealth slug from entity name
+   */
+  private static createStealthSlug(entityName: string): string {
+    return entityName
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '')
+      .substring(0, 20); // Limit length for stealth
   }
   
   /**
@@ -422,6 +455,217 @@ export class AutomatedGitDeploymentService {
       .replace(/\s+/g, '-')
       .replace(/-+/g, '-')
       .trim();
+  }
+  
+  /**
+   * Generate stealth HTML content without identifying information
+   */
+  private static generateStealthHTML(options: AutomatedGitDeploymentOptions): string {
+    const { title, content, keywords, entityName } = options;
+    const timestamp = new Date();
+    
+    // Sanitize content to remove any identifying information
+    const sanitizedContent = this.sanitizeContent(content);
+    const sanitizedTitle = this.sanitizeContent(title);
+    
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="index, follow">
+    <meta name="googlebot" content="index, follow">
+    
+    <title>${sanitizedTitle}</title>
+    <meta name="description" content="${this.generateMetaDescription(sanitizedContent)}">
+    <meta name="keywords" content="${keywords.join(', ')}">
+    <meta name="author" content="Professional Content Platform">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="${sanitizedTitle}">
+    <meta property="og:description" content="${this.generateMetaDescription(sanitizedContent)}">
+    <meta property="og:type" content="article">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="${sanitizedTitle}">
+    <meta name="twitter:description" content="${this.generateMetaDescription(sanitizedContent)}">
+    
+    <!-- Schema.org JSON-LD -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "${sanitizedTitle}",
+      "author": {
+        "@type": "Organization",
+        "name": "Professional Content Platform"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Industry Intelligence Network"
+      },
+      "datePublished": "${timestamp.toISOString()}",
+      "dateModified": "${timestamp.toISOString()}",
+      "description": "${this.generateMetaDescription(sanitizedContent)}",
+      "keywords": "${keywords.join(', ')}",
+      "about": {
+        "@type": "Thing",
+        "name": "${entityName}"
+      }
+    }
+    </script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.7;
+            color: #333;
+            background: #fff;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 15px;
+        }
+        
+        h2 {
+            color: #34495e;
+            font-size: 1.8em;
+            margin: 30px 0 15px 0;
+            border-left: 4px solid #3498db;
+            padding-left: 15px;
+        }
+        
+        h3 {
+            color: #34495e;
+            font-size: 1.4em;
+            margin: 25px 0 10px 0;
+        }
+        
+        p {
+            margin-bottom: 20px;
+            font-size: 16px;
+            text-align: justify;
+        }
+        
+        ul, ol {
+            margin: 20px 0;
+            padding-left: 30px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+        }
+        
+        .meta {
+            background: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .meta-item {
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+        
+        .keywords {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 30px 0;
+            border: 1px solid #e9ecef;
+        }
+        
+        .keywords strong {
+            color: #495057;
+        }
+        
+        .footer {
+            margin-top: 50px;
+            padding-top: 20px;
+            border-top: 2px solid #bdc3c7;
+            text-align: center;
+            color: #95a5a6;
+            font-size: 12px;
+        }
+        
+        @media (max-width: 600px) {
+            body {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            h2 {
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <article>
+        <div class="meta">
+            <div class="meta-item"><strong>Published:</strong> ${timestamp.toLocaleDateString('en-GB', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            })}</div>
+            <div class="meta-item"><strong>Subject:</strong> ${entityName}</div>
+            <div class="meta-item"><strong>Category:</strong> ${options.contentType.replace(/_/g, ' ').toUpperCase()}</div>
+        </div>
+        
+        ${this.convertMarkdownToHTML(sanitizedContent)}
+        
+        <div class="keywords">
+            <strong>Related Topics:</strong> ${keywords.join(', ')}
+        </div>
+    </article>
+    
+    <div class="footer">
+        <p>Industry Intelligence Network</p>
+        <p>Published: ${timestamp.toISOString()}</p>
+    </div>
+</body>
+</html>`;
+  }
+  
+  /**
+   * Sanitize content to remove identifying information
+   */
+  private static sanitizeContent(content: string): string {
+    const identifiersToRemove = [
+      /\bsimonl79\b/gi,
+      /\bsimon\b/gi,
+      /\baria\b/gi,
+      /A\.R\.I\.A\.?\s*Intelligence/gi,
+      /A\.R\.I\.A\.?\s*Platform/gi
+    ];
+    
+    let sanitized = content;
+    
+    identifiersToRemove.forEach(identifier => {
+      sanitized = sanitized.replace(identifier, 'Professional Intelligence');
+    });
+    
+    return sanitized;
   }
   
   /**

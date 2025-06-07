@@ -21,24 +21,24 @@ interface DeploymentResult {
 }
 
 /**
- * Git-Based Deployment Service - Manual Setup Required
- * Generates complete HTML content and detailed setup instructions
+ * Git-Based Deployment Service - Manual Setup Required (Stealth Mode)
+ * Generates complete HTML content and detailed setup instructions with stealth naming
  */
 export class GitDeploymentService {
   
   /**
-   * Prepare content for GitHub Pages deployment with manual setup instructions
+   * Prepare content for GitHub Pages deployment with stealth setup instructions
    */
   static async deployToGitHub(options: GitDeploymentOptions): Promise<DeploymentResult> {
     try {
-      console.log('🚀 Git Deployment: Preparing deployment package for', options.entityName);
+      console.log('🚀 Stealth Git Deployment: Preparing deployment package for', options.entityName);
       
       const timestamp = Date.now();
-      const slug = this.createSlug(options.entityName);
-      const repoName = `${slug}-content-${timestamp}`;
+      const entitySlug = this.createStealthSlug(options.entityName);
+      const repoName = this.generateStealthRepoName(entitySlug, timestamp);
       
-      // Generate complete HTML file
-      const htmlContent = this.generateCompleteHTML(options);
+      // Generate complete HTML file with stealth content
+      const htmlContent = this.generateStealthHTML(options);
       
       // Generate detailed setup instructions
       const setupInstructions = this.generateDetailedInstructions(repoName, htmlContent);
@@ -53,7 +53,7 @@ export class GitDeploymentService {
         success: true,
         deploymentUrl: placeholderUrl,
         repositoryUrl,
-        message: `Deployment package ready. Follow setup instructions to go live.`,
+        message: `Stealth deployment package ready. Follow setup instructions to go live.`,
         timestamp: new Date().toISOString(),
         deploymentType: 'MANUAL_SETUP_REQUIRED',
         htmlContent,
@@ -62,17 +62,55 @@ export class GitDeploymentService {
       };
       
     } catch (error) {
-      console.error('❌ Git deployment preparation failed:', error);
-      throw new Error(`Git deployment preparation failed: ${error.message}`);
+      console.error('❌ Stealth deployment preparation failed:', error);
+      throw new Error(`Stealth deployment preparation failed: ${error.message}`);
     }
   }
   
   /**
-   * Generate complete HTML file for deployment
+   * Generate stealth repository name without identifying information
    */
-  private static generateCompleteHTML(options: GitDeploymentOptions): string {
+  private static generateStealthRepoName(entitySlug: string, timestamp: number): string {
+    const prefixes = [
+      'professional-insights',
+      'industry-analysis', 
+      'business-review',
+      'market-intelligence',
+      'corporate-excellence',
+      'industry-leadership',
+      'business-insights',
+      'professional-content'
+    ];
+    
+    const randomPrefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+    const shortTimestamp = timestamp.toString().slice(-6);
+    
+    return `${randomPrefix}-${entitySlug}-${shortTimestamp}`;
+  }
+  
+  /**
+   * Create stealth slug from entity name
+   */
+  private static createStealthSlug(entityName: string): string {
+    return entityName
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '')
+      .substring(0, 20); // Limit length for stealth
+  }
+  
+  /**
+   * Generate stealth HTML file for deployment
+   */
+  private static generateStealthHTML(options: GitDeploymentOptions): string {
     const { title, content, keywords, entityName } = options;
     const timestamp = new Date();
+    
+    // Sanitize content to remove identifying information
+    const sanitizedContent = this.sanitizeContent(content);
+    const sanitizedTitle = this.sanitizeContent(title);
     
     return `<!DOCTYPE html>
 <html lang="en">
@@ -82,39 +120,38 @@ export class GitDeploymentService {
     <meta name="robots" content="index, follow">
     <meta name="googlebot" content="index, follow">
     
-    <title>${title}</title>
-    <meta name="description" content="${this.generateMetaDescription(content)}">
+    <title>${sanitizedTitle}</title>
+    <meta name="description" content="${this.generateMetaDescription(sanitizedContent)}">
     <meta name="keywords" content="${keywords.join(', ')}">
-    <meta name="author" content="A.R.I.A. Intelligence Platform">
+    <meta name="author" content="Professional Content Platform">
     
     <!-- Open Graph -->
-    <meta property="og:title" content="${title}">
-    <meta property="og:description" content="${this.generateMetaDescription(content)}">
+    <meta property="og:title" content="${sanitizedTitle}">
+    <meta property="og:description" content="${this.generateMetaDescription(sanitizedContent)}">
     <meta property="og:type" content="article">
-    <meta property="og:url" content="">
     
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="${title}">
-    <meta name="twitter:description" content="${this.generateMetaDescription(content)}">
+    <meta name="twitter:title" content="${sanitizedTitle}">
+    <meta name="twitter:description" content="${this.generateMetaDescription(sanitizedContent)}">
     
     <!-- Schema.org JSON-LD -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "Article",
-      "headline": "${title}",
+      "headline": "${sanitizedTitle}",
       "author": {
         "@type": "Organization",
-        "name": "A.R.I.A. Intelligence Platform"
+        "name": "Professional Content Platform"
       },
       "publisher": {
         "@type": "Organization",
-        "name": "A.R.I.A. Intelligence Platform"
+        "name": "Industry Intelligence Network"
       },
       "datePublished": "${timestamp.toISOString()}",
       "dateModified": "${timestamp.toISOString()}",
-      "description": "${this.generateMetaDescription(content)}",
+      "description": "${this.generateMetaDescription(sanitizedContent)}",
       "keywords": "${keywords.join(', ')}",
       "about": {
         "@type": "Thing",
@@ -235,12 +272,11 @@ export class GitDeploymentService {
                 month: 'long', 
                 day: 'numeric' 
             })}</div>
-            <div class="meta-item"><strong>Entity:</strong> ${entityName}</div>
-            <div class="meta-item"><strong>Content Type:</strong> ${options.contentType.replace(/_/g, ' ').toUpperCase()}</div>
-            <div class="meta-item"><strong>Generated:</strong> ${timestamp.toLocaleString()}</div>
+            <div class="meta-item"><strong>Subject:</strong> ${entityName}</div>
+            <div class="meta-item"><strong>Category:</strong> ${options.contentType.replace(/_/g, ' ').toUpperCase()}</div>
         </div>
         
-        ${this.convertMarkdownToHTML(content)}
+        ${this.convertMarkdownToHTML(sanitizedContent)}
         
         <div class="keywords">
             <strong>Related Topics:</strong> ${keywords.join(', ')}
@@ -248,11 +284,32 @@ export class GitDeploymentService {
     </article>
     
     <div class="footer">
-        <p>Content generated by A.R.I.A.™ Intelligence Platform</p>
+        <p>Industry Intelligence Network</p>
         <p>Published: ${timestamp.toISOString()}</p>
     </div>
 </body>
 </html>`;
+  }
+  
+  /**
+   * Sanitize content to remove identifying information
+   */
+  private static sanitizeContent(content: string): string {
+    const identifiersToRemove = [
+      /\bsimonl79\b/gi,
+      /\bsimon\b/gi,
+      /\baria\b/gi,
+      /A\.R\.I\.A\.?\s*Intelligence/gi,
+      /A\.R\.I\.A\.?\s*Platform/gi
+    ];
+    
+    let sanitized = content;
+    
+    identifiersToRemove.forEach(identifier => {
+      sanitized = sanitized.replace(identifier, 'Professional Intelligence');
+    });
+    
+    return sanitized;
   }
   
   /**
@@ -313,10 +370,10 @@ export class GitDeploymentService {
   }
   
   /**
-   * Generate detailed setup instructions with copy-paste commands
+   * Generate detailed stealth setup instructions
    */
   private static generateDetailedInstructions(repoName: string, htmlContent: string): string {
-    return `# 🚀 Complete GitHub Pages Deployment Guide
+    return `# 🚀 Stealth GitHub Pages Deployment Guide
 
 ## Repository: ${repoName}
 
@@ -339,7 +396,7 @@ Create a file called **index.html** and paste the generated HTML content.
 ### Step 4: Deploy to GitHub
 \`\`\`bash
 git add .
-git commit -m "Deploy A.R.I.A. content"
+git commit -m "Deploy professional content"
 git push origin main
 \`\`\`
 
@@ -354,7 +411,7 @@ After 2-3 minutes: **https://YOUR_USERNAME.github.io/${repoName}**
 
 ---
 Generated: ${new Date().toISOString()}
-A.R.I.A.™ Intelligence Platform
+Professional Content Platform
     `;
   }
   
