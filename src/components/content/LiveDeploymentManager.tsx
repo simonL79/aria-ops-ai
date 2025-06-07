@@ -10,21 +10,15 @@ import {
   AlertTriangle, 
   ExternalLink,
   Github,
-  Globe,
-  Users,
-  MessageSquare,
-  FileText,
   Loader2
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
+import { deployToGitHubPages, validateGitHubToken } from '@/services/deployment/automatedGitDeployment';
 
 interface Platform {
   id: string;
   name: string;
-  apiEndpoint: string;
-  requiresAuth: boolean;
-  status: 'ready' | 'deploying' | 'deployed' | 'failed';
+  status: 'ready' | 'deploying' | 'deployed' | 'failed' | 'disabled';
   deploymentUrl?: string;
   icon: React.ReactNode;
 }
@@ -42,122 +36,84 @@ export const LiveDeploymentManager = ({
     {
       id: 'github-pages',
       name: 'GitHub Pages',
-      apiEndpoint: 'github_deploy',
-      requiresAuth: true,
       status: 'ready',
       icon: <Github className="h-4 w-4" />
-    },
-    {
-      id: 'medium',
-      name: 'Medium',
-      apiEndpoint: 'medium_publish',
-      requiresAuth: true,
-      status: 'ready',
-      icon: <FileText className="h-4 w-4" />
-    },
-    {
-      id: 'reddit',
-      name: 'Reddit',
-      apiEndpoint: 'reddit_post',
-      requiresAuth: true,
-      status: 'ready',
-      icon: <MessageSquare className="h-4 w-4" />
-    },
-    {
-      id: 'linkedin',
-      name: 'LinkedIn',
-      apiEndpoint: 'linkedin_publish',
-      requiresAuth: true,
-      status: 'ready',
-      icon: <Users className="h-4 w-4" />
     }
   ]);
 
   const [isDeploying, setIsDeploying] = useState(false);
   const [deploymentProgress, setDeploymentProgress] = useState(0);
 
-  const deployToRealPlatforms = async () => {
+  const deployToGitHub = async () => {
     setIsDeploying(true);
     setDeploymentProgress(0);
 
     try {
-      console.log('🚀 Starting LIVE deployment to real platforms...');
+      console.log('🚀 Starting GitHub Pages deployment...');
       
-      const enabledPlatforms = platforms.filter(p => p.status === 'ready');
-      const results = [];
-
-      for (let i = 0; i < enabledPlatforms.length; i++) {
-        const platform = enabledPlatforms[i];
-        
-        setPlatforms(prev => prev.map(p => 
-          p.id === platform.id ? { ...p, status: 'deploying' } : p
-        ));
-
-        try {
-          console.log(`📡 Deploying to ${platform.name}...`);
-          
-          // Call the persona-saturation edge function with live deployment config
-          const { data, error } = await supabase.functions.invoke('persona-saturation', {
-            body: {
-              ...contentConfig,
-              deploymentTargets: [platform.id],
-              liveDeployment: true,
-              platformEndpoint: platform.apiEndpoint
-            }
-          });
-
-          if (error) throw error;
-
-          // Handle the new response format with real deployment results
-          const deploymentResult = data.deploymentResults?.[0];
-          
-          if (deploymentResult?.success) {
-            setPlatforms(prev => prev.map(p => 
-              p.id === platform.id 
-                ? { ...p, status: 'deployed', deploymentUrl: deploymentResult.url } 
-                : p
-            ));
-
-            results.push({
-              platform: platform.name,
-              success: true,
-              url: deploymentResult.url,
-              timestamp: new Date().toISOString()
-            });
-
-            toast.success(`✅ Live deployment to ${platform.name} successful`);
-          } else {
-            throw new Error(deploymentResult?.error || 'Deployment failed');
-          }
-
-        } catch (error) {
-          console.error(`❌ Live deployment to ${platform.name} failed:`, error);
-          
-          setPlatforms(prev => prev.map(p => 
-            p.id === platform.id ? { ...p, status: 'failed' } : p
-          ));
-
-          results.push({
-            platform: platform.name,
-            success: false,
-            error: error.message,
-            timestamp: new Date().toISOString()
-          });
-
-          toast.error(`❌ Live deployment to ${platform.name} failed: ${error.message}`);
-        }
-
-        setDeploymentProgress(((i + 1) / enabledPlatforms.length) * 100);
+      // Validate GitHub token first
+      const isTokenValid = await validateGitHubToken();
+      if (!isTokenValid) {
+        throw new Error('GitHub API token is invalid or missing');
       }
 
-      onDeploymentComplete(results);
-      
-      const successCount = results.filter(r => r.success).length;
-      toast.success(`Live deployment complete: ${successCount}/${enabledPlatforms.length} platforms successful`);
+      setPlatforms(prev => prev.map(p => 
+        p.id === 'github-pages' ? { ...p, status: 'deploying' } : p
+      ));
+
+      setDeploymentProgress(25);
+
+      // Deploy to GitHub
+      const result = await deployToGitHubPages({
+        title: contentConfig.title || 'Professional Content',
+        content: contentConfig.content || 'Professional analysis content',
+        entity: contentConfig.targetEntity || 'Professional',
+        keywords: contentConfig.keywords || [],
+        contentType: contentConfig.contentType || 'positive_profile'
+      });
+
+      setDeploymentProgress(75);
+
+      if (result.success && result.url) {
+        setPlatforms(prev => prev.map(p => 
+          p.id === 'github-pages' 
+            ? { ...p, status: 'deployed', deploymentUrl: result.url } 
+            : p
+        ));
+
+        const deploymentResult = {
+          platform: 'GitHub Pages',
+          success: true,
+          url: result.url,
+          repositoryName: result.repositoryName,
+          timestamp: new Date().toISOString()
+        };
+
+        onDeploymentComplete([deploymentResult]);
+        toast.success(`✅ Live deployment to GitHub Pages successful!`);
+        
+      } else {
+        throw new Error(result.error || 'GitHub deployment failed');
+      }
+
+      setDeploymentProgress(100);
 
     } catch (error) {
-      console.error('❌ Live deployment failed:', error);
-      toast.error('Live deployment failed - check console for details');
+      console.error('❌ GitHub deployment failed:', error);
+      
+      setPlatforms(prev => prev.map(p => 
+        p.id === 'github-pages' ? { ...p, status: 'failed' } : p
+      ));
+
+      const failedResult = {
+        platform: 'GitHub Pages',
+        success: false,
+        error: error.message,
+        timestamp: new Date().toISOString()
+      };
+
+      onDeploymentComplete([failedResult]);
+      toast.error(`❌ GitHub deployment failed: ${error.message}`);
     } finally {
       setIsDeploying(false);
     }
@@ -168,7 +124,8 @@ export const LiveDeploymentManager = ({
       case 'deployed': return <CheckCircle className="h-4 w-4 text-green-600" />;
       case 'deploying': return <Loader2 className="h-4 w-4 text-blue-600 animate-spin" />;
       case 'failed': return <AlertTriangle className="h-4 w-4 text-red-600" />;
-      default: return <Globe className="h-4 w-4 text-gray-600" />;
+      case 'disabled': return <AlertTriangle className="h-4 w-4 text-gray-400" />;
+      default: return <Github className="h-4 w-4 text-gray-600" />;
     }
   };
 
@@ -177,7 +134,7 @@ export const LiveDeploymentManager = ({
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-white">
           <Rocket className="h-5 w-5 text-corporate-accent" />
-          Live Platform Deployment
+          Live GitHub Pages Deployment
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -185,7 +142,7 @@ export const LiveDeploymentManager = ({
         {isDeploying && (
           <div className="space-y-2">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-corporate-lightGray">Live Deployment Progress</span>
+              <span className="text-corporate-lightGray">Deployment Progress</span>
               <span className="text-white">{Math.round(deploymentProgress)}%</span>
             </div>
             <Progress value={deploymentProgress} className="h-2" />
@@ -195,7 +152,7 @@ export const LiveDeploymentManager = ({
         {/* Platform Status */}
         <div className="space-y-2">
           <h4 className="text-sm font-medium text-white">Platform Status</h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          <div className="space-y-2">
             {platforms.map((platform) => (
               <div 
                 key={platform.id}
@@ -231,31 +188,31 @@ export const LiveDeploymentManager = ({
 
         {/* Deploy Button */}
         <Button
-          onClick={deployToRealPlatforms}
+          onClick={deployToGitHub}
           disabled={isDeploying || !contentConfig}
           className="w-full bg-green-600 hover:bg-green-700 text-white"
         >
           {isDeploying ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Deploying to Live Platforms...
+              Deploying to GitHub Pages...
             </>
           ) : (
             <>
               <Rocket className="mr-2 h-4 w-4" />
-              Deploy to LIVE Platforms
+              Deploy to GitHub Pages
             </>
           )}
         </Button>
 
-        {/* Warning */}
-        <div className="p-3 bg-orange-500/10 border border-orange-500/30 rounded">
+        {/* Info */}
+        <div className="p-3 bg-blue-500/10 border border-blue-500/30 rounded">
           <div className="flex items-start gap-2">
-            <AlertTriangle className="h-4 w-4 text-orange-500 flex-shrink-0 mt-0.5" />
+            <Github className="h-4 w-4 text-blue-500 flex-shrink-0 mt-0.5" />
             <div className="text-sm">
-              <p className="text-orange-400 font-medium">Live Deployment Notice</p>
-              <p className="text-orange-300">
-                Articles will be published to real platforms with legitimate URLs. Ensure content review is complete.
+              <p className="text-blue-400 font-medium">Anonymous Deployment</p>
+              <p className="text-blue-300">
+                Creates anonymous repositories with sanitized content, removing ARIA and personal identifiers.
               </p>
             </div>
           </div>
