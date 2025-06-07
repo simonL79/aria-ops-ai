@@ -3,306 +3,266 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Progress } from '@/components/ui/progress';
 import { 
-  Github, 
-  Download, 
-  FileText, 
+  Rocket, 
+  CheckCircle, 
+  AlertTriangle, 
   ExternalLink,
-  Copy,
-  CheckCircle
+  Github,
+  Globe,
+  Users,
+  MessageSquare,
+  FileText,
+  Loader2,
+  GitBranch,
+  Download
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { OllamaContentGenerator } from '@/services/localContent/ollamaGenerator';
 import { GitDeploymentService } from '@/services/deployment/gitDeployment';
 
 interface LiveGitDeploymentManagerProps {
-  entityName: string;
-  contentType: 'positive_profile' | 'counter_narrative' | 'news_article';
-  keywords: string[];
-  onDeploymentComplete?: (result: any) => void;
+  contentConfig: {
+    clientName?: string;
+    contentType?: string;
+    targetKeywords?: string[];
+    generatedContent?: {
+      title: string;
+      content: string;
+      keywords: string[];
+    };
+  };
+  onDeploymentComplete: (results: any[]) => void;
 }
 
-export const LiveGitDeploymentManager = ({
-  entityName,
-  contentType,
-  keywords,
-  onDeploymentComplete
-}: LiveGitDeploymentManagerProps) => {
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [generatedContent, setGeneratedContent] = useState<any>(null);
-  const [htmlContent, setHtmlContent] = useState<string>('');
-  const [deploymentResult, setDeploymentResult] = useState<any>(null);
-  const [step, setStep] = useState<'generate' | 'review' | 'deploy' | 'complete'>('generate');
+export const LiveGitDeploymentManager: React.FC<LiveGitDeploymentManagerProps> = ({ 
+  contentConfig, 
+  onDeploymentComplete 
+}) => {
+  const [isDeploying, setIsDeploying] = useState(false);
+  const [deploymentProgress, setDeploymentProgress] = useState(0);
+  const [deploymentResults, setDeploymentResults] = useState<any[]>([]);
 
-  const handleGenerateContent = async () => {
-    setIsGenerating(true);
-    
+  const handleGitDeployment = async () => {
+    if (!contentConfig.generatedContent) {
+      toast.error('No content available for deployment');
+      return;
+    }
+
+    setIsDeploying(true);
+    setDeploymentProgress(0);
+
     try {
-      console.log('🧠 Generating content locally for:', entityName);
+      console.log('🚀 Starting Git-based deployment...');
       
-      const content = await OllamaContentGenerator.generateContent({
-        entityName,
-        contentType,
-        keywords,
-        wordCount: 800
-      });
+      const deploymentOptions = {
+        entityName: contentConfig.clientName || 'Client',
+        content: contentConfig.generatedContent.content,
+        title: contentConfig.generatedContent.title,
+        keywords: contentConfig.generatedContent.keywords || [],
+        contentType: contentConfig.contentType || 'content'
+      };
+
+      setDeploymentProgress(50);
+
+      const result = await GitDeploymentService.deployToGitHub(deploymentOptions);
       
-      setGeneratedContent(content);
-      setStep('review');
-      
-      toast.success('Content generated locally - no API calls required');
-      
+      setDeploymentProgress(100);
+
+      const deploymentResult = {
+        platform: 'GitHub Pages',
+        success: result.success,
+        url: result.deploymentUrl,
+        repositoryUrl: result.repositoryUrl,
+        timestamp: result.timestamp,
+        deploymentType: result.deploymentType
+      };
+
+      setDeploymentResults([deploymentResult]);
+      onDeploymentComplete([deploymentResult]);
+
+      if (result.success) {
+        toast.success(`Git deployment ready! Repository created for live deployment.`);
+      } else {
+        toast.error('Git deployment failed');
+      }
+
     } catch (error) {
-      console.error('Content generation failed:', error);
-      toast.error('Failed to generate content');
+      console.error('❌ Git deployment failed:', error);
+      toast.error(`Git deployment failed: ${error.message}`);
+      
+      const failedResult = {
+        platform: 'GitHub Pages',
+        success: false,
+        error: error.message,
+        timestamp: new Date().toISOString()
+      };
+      
+      setDeploymentResults([failedResult]);
+      onDeploymentComplete([failedResult]);
     } finally {
-      setIsGenerating(false);
+      setIsDeploying(false);
     }
   };
 
-  const handlePrepareDeployment = async () => {
-    if (!generatedContent) return;
-    
-    try {
-      const result = await GitDeploymentService.deployToGitHub({
-        entityName,
-        content: generatedContent.content,
-        title: generatedContent.title,
-        keywords: generatedContent.keywords,
-        contentType
-      });
-      
-      setDeploymentResult(result);
-      setStep('deploy');
-      
-      toast.success('Deployment package prepared');
-      
-    } catch (error) {
-      console.error('Deployment preparation failed:', error);
-      toast.error('Failed to prepare deployment');
-    }
-  };
+  const downloadGitInstructions = () => {
+    if (!contentConfig.generatedContent) return;
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    toast.success('Copied to clipboard');
-  };
-
-  const handleDownloadHTML = () => {
-    if (!generatedContent) return;
+    const timestamp = Date.now();
+    const slug = contentConfig.clientName?.toLowerCase().replace(/\s+/g, '-') || 'content';
+    const repoName = `${slug}-content-${timestamp}`;
     
-    const blob = new Blob([htmlContent], { type: 'text/html' });
+    const instructions = `# Git Deployment Instructions
+
+## Repository Setup
+1. Create a new GitHub repository named: ${repoName}
+2. Make it public (required for GitHub Pages)
+3. Clone the repository locally
+
+## Content Deployment
+Create an index.html file with the generated content and push to GitHub.
+
+## Enable GitHub Pages
+1. Go to repository Settings
+2. Navigate to Pages section  
+3. Set source to "Deploy from a branch"
+4. Select "main" branch and save
+
+Your site will be live at: https://YOUR_USERNAME.github.io/${repoName}
+
+Generated: ${new Date().toISOString()}
+    `;
+
+    const blob = new Blob([instructions], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${entityName.toLowerCase().replace(/\s+/g, '-')}-content.html`;
-    document.body.appendChild(a);
+    a.download = `git-deployment-${timestamp}.txt`;
     a.click();
-    document.body.removeChild(a);
     URL.revokeObjectURL(url);
     
-    toast.success('HTML file downloaded');
+    toast.success('Git deployment instructions downloaded');
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'deployed': return <CheckCircle className="h-4 w-4 text-green-600" />;
+      case 'deploying': return <Loader2 className="h-4 w-4 text-blue-600 animate-spin" />;
+      case 'failed': return <AlertTriangle className="h-4 w-4 text-red-600" />;
+      default: return <Globe className="h-4 w-4 text-gray-600" />;
+    }
   };
 
   return (
     <Card className="border-corporate-border bg-corporate-darkSecondary">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-white">
-          <Github className="h-5 w-5 text-green-400" />
-          A.R.I.A.™ Live Git Deployment (No API Keys)
+          <GitBranch className="h-5 w-5 text-corporate-accent" />
+          Live Git Deployment Manager
         </CardTitle>
-        <div className="flex gap-2">
-          <Badge className="bg-green-500/20 text-green-400">LOCAL GENERATION</Badge>
-          <Badge className="bg-blue-500/20 text-blue-400">GIT DEPLOYMENT</Badge>
-          <Badge className="bg-purple-500/20 text-purple-400">LIVE URLS</Badge>
-        </div>
       </CardHeader>
-      
-      <CardContent className="space-y-6">
-        {/* Step 1: Generate Content */}
-        {step === 'generate' && (
-          <div className="space-y-4">
-            <div className="p-4 bg-green-500/10 border border-green-500/30 rounded">
-              <h3 className="text-white font-medium mb-2">Step 1: Local Content Generation</h3>
-              <p className="text-green-300 text-sm mb-4">
-                Generate SEO-optimized content locally without external API calls
-              </p>
-              
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                  <span className="text-green-400 text-sm">Entity:</span>
-                  <p className="text-white">{entityName}</p>
-                </div>
-                <div>
-                  <span className="text-green-400 text-sm">Content Type:</span>
-                  <p className="text-white">{contentType.replace(/_/g, ' ').toUpperCase()}</p>
-                </div>
-                <div className="col-span-2">
-                  <span className="text-green-400 text-sm">Keywords:</span>
-                  <p className="text-white">{keywords.join(', ')}</p>
-                </div>
-              </div>
-              
-              <Button 
-                onClick={handleGenerateContent}
-                disabled={isGenerating}
-                className="w-full bg-green-600 hover:bg-green-700 text-white"
+      <CardContent className="space-y-4">
+        {/* Deployment Progress */}
+        {isDeploying && (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-corporate-lightGray">Git Deployment Progress</span>
+              <span className="text-white">{Math.round(deploymentProgress)}%</span>
+            </div>
+            <Progress value={deploymentProgress} className="h-2" />
+          </div>
+        )}
+
+        {/* Content Summary */}
+        {contentConfig.generatedContent && (
+          <div className="p-3 bg-corporate-dark rounded border border-corporate-border">
+            <div className="text-sm text-corporate-lightGray mb-2">Ready for Deployment:</div>
+            <div className="text-white font-medium">{contentConfig.generatedContent.title}</div>
+            <div className="text-xs text-corporate-lightGray mt-1">
+              {contentConfig.generatedContent.keywords?.length || 0} keywords • {contentConfig.contentType}
+            </div>
+          </div>
+        )}
+
+        {/* Deployment Results */}
+        {deploymentResults.length > 0 && (
+          <div className="space-y-2">
+            <h4 className="text-sm font-medium text-white">Deployment Status</h4>
+            {deploymentResults.map((result, index) => (
+              <div 
+                key={index}
+                className="flex items-center justify-between p-3 border border-corporate-border rounded"
               >
-                {isGenerating ? 'Generating Content...' : 'Generate Content Locally'}
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {/* Step 2: Review Content */}
-        {step === 'review' && generatedContent && (
-          <div className="space-y-4">
-            <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded">
-              <h3 className="text-white font-medium mb-2">Step 2: Review Generated Content</h3>
-              
-              <div className="space-y-3 mb-4">
-                <div>
-                  <span className="text-blue-400 text-sm">Title:</span>
-                  <p className="text-white font-medium">{generatedContent.title}</p>
+                <div className="flex items-center gap-2">
+                  {getStatusIcon(result.success ? 'deployed' : 'failed')}
+                  <Github className="h-4 w-4" />
+                  <span className="text-white font-medium">{result.platform}</span>
                 </div>
-                <div>
-                  <span className="text-blue-400 text-sm">Word Count:</span>
-                  <p className="text-white">{generatedContent.metadata.word_count} words</p>
-                </div>
-                <div>
-                  <span className="text-blue-400 text-sm">Content Preview:</span>
-                  <div className="bg-black/30 p-3 rounded text-white text-sm max-h-32 overflow-y-auto">
-                    {generatedContent.content.substring(0, 300)}...
-                  </div>
-                </div>
-              </div>
-              
-              <div className="flex gap-2">
-                <Button 
-                  onClick={handlePrepareDeployment}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
-                >
-                  Prepare Git Deployment
-                </Button>
-                <Button 
-                  onClick={() => setStep('generate')}
-                  variant="outline"
-                  className="border-white/30 text-white hover:bg-white/10"
-                >
-                  Regenerate
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Step 3: Deploy */}
-        {step === 'deploy' && deploymentResult && (
-          <div className="space-y-4">
-            <Alert>
-              <CheckCircle className="h-4 w-4" />
-              <AlertDescription>
-                Deployment package ready! Follow the instructions below to deploy to GitHub Pages.
-              </AlertDescription>
-            </Alert>
-            
-            <div className="p-4 bg-purple-500/10 border border-purple-500/30 rounded">
-              <h3 className="text-white font-medium mb-2">Step 3: Git Deployment Instructions</h3>
-              
-              <div className="space-y-3 mb-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-purple-400 text-sm">Target URL:</span>
-                  <div className="flex items-center gap-2">
-                    <code className="bg-black/30 px-2 py-1 rounded text-green-400 text-sm">
-                      {deploymentResult.deploymentUrl}
-                    </code>
-                    <Button 
-                      size="sm" 
+                <div className="flex items-center gap-2">
+                  {result.success && result.url && (
+                    <Button
+                      size="sm"
                       variant="ghost"
-                      onClick={() => copyToClipboard(deploymentResult.deploymentUrl)}
+                      onClick={() => window.open(result.url, '_blank')}
+                      className="h-6 w-6 p-0"
                     >
-                      <Copy className="h-3 w-3" />
+                      <ExternalLink className="h-3 w-3" />
                     </Button>
-                  </div>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <span className="text-purple-400 text-sm">Repository:</span>
-                  <div className="flex items-center gap-2">
-                    <code className="bg-black/30 px-2 py-1 rounded text-green-400 text-sm">
-                      {deploymentResult.repositoryUrl}
-                    </code>
-                    <Button 
-                      size="sm" 
-                      variant="ghost"
-                      onClick={() => copyToClipboard(deploymentResult.repositoryUrl)}
-                    >
-                      <Copy className="h-3 w-3" />
-                    </Button>
-                  </div>
+                  )}
+                  <Badge 
+                    variant={result.success ? 'default' : 'destructive'}
+                    className="text-xs"
+                  >
+                    {result.success ? 'READY' : 'FAILED'}
+                  </Badge>
                 </div>
               </div>
-              
-              <div className="space-y-2">
-                <Button 
-                  onClick={handleDownloadHTML}
-                  className="w-full bg-purple-600 hover:bg-purple-700 text-white"
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  Download Complete HTML File
-                </Button>
-                
-                <Button 
-                  onClick={() => setStep('complete')}
-                  variant="outline"
-                  className="w-full border-purple-500/50 text-purple-400 hover:bg-purple-500/20"
-                >
-                  Mark as Deployed
-                </Button>
-              </div>
-            </div>
+            ))}
           </div>
         )}
 
-        {/* Step 4: Complete */}
-        {step === 'complete' && (
-          <div className="text-center space-y-4">
-            <CheckCircle className="h-16 w-16 text-green-400 mx-auto" />
-            <h3 className="text-white text-xl font-bold">Deployment Complete!</h3>
-            <p className="text-green-300">
-              Your content has been prepared for live deployment to GitHub Pages
-            </p>
-            
-            {deploymentResult && (
-              <div className="flex gap-2 justify-center">
-                <Button 
-                  onClick={() => window.open(deploymentResult.deploymentUrl, '_blank')}
-                  className="bg-green-600 hover:bg-green-700 text-white"
-                >
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  Visit Live Site
-                </Button>
-                <Button 
-                  onClick={() => window.open(deploymentResult.repositoryUrl, '_blank')}
-                  variant="outline"
-                  className="border-white/30 text-white hover:bg-white/10"
-                >
-                  <Github className="h-4 w-4 mr-2" />
-                  View Repository
-                </Button>
-              </div>
+        {/* Action Buttons */}
+        <div className="flex gap-2">
+          <Button
+            onClick={handleGitDeployment}
+            disabled={isDeploying || !contentConfig.generatedContent}
+            className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+          >
+            {isDeploying ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Preparing Git Deployment...
+              </>
+            ) : (
+              <>
+                <GitBranch className="mr-2 h-4 w-4" />
+                Deploy via Git
+              </>
             )}
-          </div>
-        )}
+          </Button>
 
-        {/* Technical Details */}
-        <div className="text-xs text-corporate-lightGray space-y-1 pt-4 border-t border-corporate-border">
-          <p>✅ Local content generation - No external API calls</p>
-          <p>✅ Git-based deployment - No platform API keys required</p>
-          <p>✅ Real GitHub Pages URLs - Fully indexable by search engines</p>
-          <p>✅ Complete HTML with Schema.org markup for SEO</p>
-          <p>✅ Zero recurring costs - Free GitHub hosting</p>
+          <Button
+            onClick={downloadGitInstructions}
+            disabled={!contentConfig.generatedContent}
+            variant="outline"
+            className="text-corporate-accent border-corporate-accent"
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Instructions
+          </Button>
+        </div>
+
+        {/* Information Notice */}
+        <div className="p-3 bg-blue-500/10 border border-blue-500/30 rounded">
+          <div className="flex items-start gap-2">
+            <GitBranch className="h-4 w-4 text-blue-500 flex-shrink-0 mt-0.5" />
+            <div className="text-sm">
+              <p className="text-blue-400 font-medium">Git-Based Deployment</p>
+              <p className="text-blue-300">
+                Creates real GitHub repository with live, indexable HTML. No API keys required.
+              </p>
+            </div>
+          </div>
         </div>
       </CardContent>
     </Card>
