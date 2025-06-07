@@ -3,12 +3,21 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Activity } from "lucide-react";
 import ControlCenterModules from './control-center/ControlCenterModules';
+import ClientSelector from './ClientSelector';
+import type { Client } from '@/types/clients';
+
+interface ClientEntity {
+  id: string;
+  entity_name: string;
+  entity_type: string;
+  alias?: string;
+}
 
 const ControlCenter = () => {
-  const [selectedEntity, setSelectedEntity] = useState('');
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [clientEntities, setClientEntities] = useState<ClientEntity[]>([]);
   const [activeModule, setActiveModule] = useState('overview');
   const [systemStatus, setSystemStatus] = useState('operational');
   const [showConsole, setShowConsole] = useState(false);
@@ -29,17 +38,26 @@ const ControlCenter = () => {
   };
 
   // Mock entity memory - would be real in production
-  const entityMemory = selectedEntity ? [
+  const entityMemory = selectedClient ? [
     {
       id: '1',
-      content: `Intelligence data for ${selectedEntity}`,
+      content: `Intelligence data for ${selectedClient.name}`,
       created_at: new Date().toISOString(),
-      entity_name: selectedEntity
+      entity_name: selectedClient.name
     }
   ] : [];
 
+  const handleClientSelect = (client: Client | null) => {
+    setSelectedClient(client);
+  };
+
+  const handleEntitiesLoad = (entities: ClientEntity[]) => {
+    setClientEntities(entities);
+  };
+
   const handleEntitySelect = (entityName: string) => {
-    setSelectedEntity(entityName);
+    // This function is for backwards compatibility with existing modules
+    console.log('Entity selected:', entityName);
   };
 
   return (
@@ -48,7 +66,7 @@ const ControlCenter = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-corporate-accent">A.R.I.A™ Control Center</h1>
-          <p className="text-corporate-lightGray">Unified Command Interface with Entity Context</p>
+          <p className="text-corporate-lightGray">Unified Command Interface with Client Context</p>
         </div>
         <div className="flex items-center gap-4">
           <Badge variant={systemStatus === 'operational' ? 'default' : 'destructive'}>
@@ -62,37 +80,18 @@ const ControlCenter = () => {
         </div>
       </div>
 
-      {/* Entity Selection */}
-      <Card className="bg-corporate-darkSecondary border-corporate-border">
-        <CardHeader>
-          <CardTitle className="text-corporate-accent">Entity Context</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-4">
-            <div className="flex-1">
-              <Input
-                placeholder="Enter entity name..."
-                value={selectedEntity}
-                onChange={(e) => setSelectedEntity(e.target.value)}
-                className="bg-corporate-dark border-corporate-border text-white"
-              />
-            </div>
-            <Button 
-              variant="outline" 
-              className="text-corporate-accent border-corporate-accent hover:bg-corporate-accent hover:text-black"
-              onClick={() => handleEntitySelect(selectedEntity)}
-            >
-              Load Context
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Client Selection Section */}
+      <ClientSelector
+        selectedClient={selectedClient}
+        onClientSelect={handleClientSelect}
+        onEntitiesLoad={handleEntitiesLoad}
+      />
 
       {/* Main Control Modules */}
       <ControlCenterModules
         activeModule={activeModule}
         onModuleChange={setActiveModule}
-        selectedEntity={selectedEntity}
+        selectedEntity={selectedClient?.name || ''}
         onEntitySelect={handleEntitySelect}
         showConsole={showConsole}
         onToggleConsole={() => setShowConsole(!showConsole)}
