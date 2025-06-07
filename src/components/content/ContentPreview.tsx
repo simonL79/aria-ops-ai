@@ -53,6 +53,12 @@ export const ContentPreview = ({
   const [editedTitle, setEditedTitle] = useState(content.title);
   const [editedBody, setEditedBody] = useState(content.body);
 
+  // Update local state when content prop changes
+  React.useEffect(() => {
+    setEditedTitle(content.title);
+    setEditedBody(content.body);
+  }, [content.title, content.body]);
+
   const handleSaveEdit = () => {
     onContentUpdate({
       ...content,
@@ -66,6 +72,13 @@ export const ContentPreview = ({
     setEditedTitle(content.title);
     setEditedBody(content.body);
     setIsEditing(false);
+  };
+
+  const handleStartEdit = () => {
+    setIsEditing(true);
+    // Ensure we have the latest content when starting to edit
+    setEditedTitle(content.title);
+    setEditedBody(content.body);
   };
 
   const getSeoScoreColor = (score?: number) => {
@@ -125,6 +138,7 @@ export const ContentPreview = ({
               onChange={(e) => setEditedTitle(e.target.value)}
               className="bg-corporate-dark border-corporate-border text-white"
               placeholder="Enter article title..."
+              autoFocus
             />
           ) : (
             <div className="p-3 bg-corporate-dark border border-corporate-border rounded">
@@ -297,7 +311,7 @@ export const ContentPreview = ({
                 Approve for Deployment
               </Button>
               <Button
-                onClick={() => setIsEditing(true)}
+                onClick={handleStartEdit}
                 variant="outline"
                 className="border-corporate-accent text-corporate-accent hover:bg-corporate-accent/10"
               >
