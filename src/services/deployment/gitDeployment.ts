@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 interface GitDeploymentOptions {
@@ -15,21 +14,24 @@ interface DeploymentResult {
   repositoryUrl: string;
   message: string;
   timestamp: string;
-  deploymentType: 'LIVE_GIT';
+  deploymentType: 'MANUAL_SETUP_REQUIRED';
+  htmlContent: string;
+  setupInstructions: string;
+  repositoryName: string;
 }
 
 /**
- * Git-Based Deployment Service - No API Keys Required
- * Creates real GitHub repositories and deploys via Git commands
+ * Git-Based Deployment Service - Manual Setup Required
+ * Generates complete HTML content and detailed setup instructions
  */
 export class GitDeploymentService {
   
   /**
-   * Deploy content to GitHub Pages using Git-based workflow
+   * Prepare content for GitHub Pages deployment with manual setup instructions
    */
   static async deployToGitHub(options: GitDeploymentOptions): Promise<DeploymentResult> {
     try {
-      console.log('🚀 Git Deployment: Starting live deployment for', options.entityName);
+      console.log('🚀 Git Deployment: Preparing deployment package for', options.entityName);
       
       const timestamp = Date.now();
       const slug = this.createSlug(options.entityName);
@@ -38,27 +40,30 @@ export class GitDeploymentService {
       // Generate complete HTML file
       const htmlContent = this.generateCompleteHTML(options);
       
-      // Create deployment instructions for user
-      const gitInstructions = this.generateGitInstructions(repoName, htmlContent);
+      // Generate detailed setup instructions
+      const setupInstructions = this.generateDetailedInstructions(repoName, htmlContent);
       
       // Log deployment attempt
       await this.logDeployment(options, repoName);
       
-      const deploymentUrl = `https://${this.getUserGitHubUsername()}.github.io/${repoName}`;
-      const repositoryUrl = `https://github.com/${this.getUserGitHubUsername()}/${repoName}`;
+      const placeholderUrl = `https://[YOUR-GITHUB-USERNAME].github.io/${repoName}`;
+      const repositoryUrl = `https://github.com/[YOUR-GITHUB-USERNAME]/${repoName}`;
       
       return {
         success: true,
-        deploymentUrl,
+        deploymentUrl: placeholderUrl,
         repositoryUrl,
-        message: `Git deployment ready. Repository: ${repoName}`,
+        message: `Deployment package ready. Follow setup instructions to go live.`,
         timestamp: new Date().toISOString(),
-        deploymentType: 'LIVE_GIT'
+        deploymentType: 'MANUAL_SETUP_REQUIRED',
+        htmlContent,
+        setupInstructions,
+        repositoryName: repoName
       };
       
     } catch (error) {
-      console.error('❌ Git deployment failed:', error);
-      throw new Error(`Git deployment failed: ${error.message}`);
+      console.error('❌ Git deployment preparation failed:', error);
+      throw new Error(`Git deployment preparation failed: ${error.message}`);
     }
   }
   
@@ -308,50 +313,49 @@ export class GitDeploymentService {
   }
   
   /**
-   * Generate Git deployment instructions
+   * Generate detailed setup instructions with copy-paste commands
    */
-  private static generateGitInstructions(repoName: string, htmlContent: string): string {
-    return `
-# Git Deployment Instructions for ${repoName}
+  private static generateDetailedInstructions(repoName: string, htmlContent: string): string {
+    return `# 🚀 Complete GitHub Pages Deployment Guide
 
-## Step 1: Create Repository
-1. Go to GitHub.com and create new repository named: ${repoName}
-2. Make it public (required for GitHub Pages)
-3. Initialize with README
+## Repository: ${repoName}
 
-## Step 2: Clone and Setup
+### Step 1: Create GitHub Repository
+1. Go to GitHub.com and click "New repository"
+2. Repository name: **${repoName}**
+3. ✅ Make it PUBLIC (required for GitHub Pages)
+4. ✅ Initialize with README
+5. Click "Create repository"
+
+### Step 2: Clone Repository Locally
 \`\`\`bash
 git clone https://github.com/YOUR_USERNAME/${repoName}.git
 cd ${repoName}
 \`\`\`
 
-## Step 3: Add Content
-Create index.html with the generated content
+### Step 3: Add HTML Content
+Create a file called **index.html** and paste the generated HTML content.
 
-## Step 4: Deploy
+### Step 4: Deploy to GitHub
 \`\`\`bash
 git add .
-git commit -m "Deploy content via A.R.I.A. platform"
+git commit -m "Deploy A.R.I.A. content"
 git push origin main
 \`\`\`
 
-## Step 5: Enable GitHub Pages
-1. Go to repository Settings
-2. Navigate to Pages section
-3. Set source to "Deploy from a branch"
-4. Select "main" branch
-5. Save
+### Step 5: Enable GitHub Pages
+1. Go to repository Settings → Pages
+2. Source: "Deploy from a branch"
+3. Branch: **main** (root folder)
+4. Click Save
 
-Your site will be live at: https://YOUR_USERNAME.github.io/${repoName}
+### 🌐 Your Live URL
+After 2-3 minutes: **https://YOUR_USERNAME.github.io/${repoName}**
+
+---
+Generated: ${new Date().toISOString()}
+A.R.I.A.™ Intelligence Platform
     `;
-  }
-  
-  /**
-   * Get GitHub username (placeholder for user configuration)
-   */
-  private static getUserGitHubUsername(): string {
-    // This would be configured by the user
-    return 'YOUR_USERNAME';
   }
   
   /**
@@ -360,20 +364,20 @@ Your site will be live at: https://YOUR_USERNAME.github.io/${repoName}
   private static async logDeployment(options: GitDeploymentOptions, repoName: string): Promise<void> {
     try {
       await supabase.from('aria_ops_log').insert({
-        operation_type: 'git_deployment',
+        operation_type: 'git_deployment_prep',
         entity_name: options.entityName,
         module_source: 'git_deployment_service',
         success: true,
         operation_data: {
           repository_name: repoName,
           content_type: options.contentType,
-          deployment_method: 'git_based',
+          deployment_method: 'manual_setup',
           keywords: options.keywords,
           timestamp: new Date().toISOString()
         }
       });
     } catch (error) {
-      console.error('Failed to log deployment:', error);
+      console.error('Failed to log deployment preparation:', error);
     }
   }
 }
