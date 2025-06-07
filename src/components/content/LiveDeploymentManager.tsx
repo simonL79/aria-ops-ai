@@ -94,7 +94,7 @@ export const LiveDeploymentManager = ({
         ));
 
         try {
-          console.log(`📡 Deploying to ${platform.name} via ${platform.apiEndpoint}...`);
+          console.log(`📡 Deploying to ${platform.name}...`);
           
           // Call the persona-saturation edge function with live deployment config
           const { data, error } = await supabase.functions.invoke('persona-saturation', {
@@ -108,22 +108,27 @@ export const LiveDeploymentManager = ({
 
           if (error) throw error;
 
-          const deploymentUrl = data.deploymentUrls?.[0] || `https://${platform.id}-live-${Date.now()}.aria.com`;
+          // Handle the new response format with real deployment results
+          const deploymentResult = data.deploymentResults?.[0];
           
-          setPlatforms(prev => prev.map(p => 
-            p.id === platform.id 
-              ? { ...p, status: 'deployed', deploymentUrl } 
-              : p
-          ));
+          if (deploymentResult?.success) {
+            setPlatforms(prev => prev.map(p => 
+              p.id === platform.id 
+                ? { ...p, status: 'deployed', deploymentUrl: deploymentResult.url } 
+                : p
+            ));
 
-          results.push({
-            platform: platform.name,
-            success: true,
-            url: deploymentUrl,
-            timestamp: new Date().toISOString()
-          });
+            results.push({
+              platform: platform.name,
+              success: true,
+              url: deploymentResult.url,
+              timestamp: new Date().toISOString()
+            });
 
-          toast.success(`✅ Live deployment to ${platform.name} successful`);
+            toast.success(`✅ Live deployment to ${platform.name} successful`);
+          } else {
+            throw new Error(deploymentResult?.error || 'Deployment failed');
+          }
 
         } catch (error) {
           console.error(`❌ Live deployment to ${platform.name} failed:`, error);
@@ -139,7 +144,7 @@ export const LiveDeploymentManager = ({
             timestamp: new Date().toISOString()
           });
 
-          toast.error(`❌ Live deployment to ${platform.name} failed`);
+          toast.error(`❌ Live deployment to ${platform.name} failed: ${error.message}`);
         }
 
         setDeploymentProgress(((i + 1) / enabledPlatforms.length) * 100);
@@ -202,12 +207,6 @@ export const LiveDeploymentManager = ({
                   <span className="text-white font-medium">{platform.name}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge 
-                    variant={platform.status === 'deployed' ? 'default' : 'outline'}
-                    className="text-xs"
-                  >
-                    {platform.status === 'deployed' ? 'LIVE' : platform.status}
-                  </Badge>
                   {platform.deploymentUrl && (
                     <Button
                       size="sm"
@@ -218,6 +217,12 @@ export const LiveDeploymentManager = ({
                       <ExternalLink className="h-3 w-3" />
                     </Button>
                   )}
+                  <Badge 
+                    variant={platform.status === 'deployed' ? 'default' : 'outline'}
+                    className="text-xs"
+                  >
+                    {platform.status === 'deployed' ? 'LIVE' : platform.status.toUpperCase()}
+                  </Badge>
                 </div>
               </div>
             ))}
@@ -248,9 +253,9 @@ export const LiveDeploymentManager = ({
           <div className="flex items-start gap-2">
             <AlertTriangle className="h-4 w-4 text-orange-500 flex-shrink-0 mt-0.5" />
             <div className="text-sm">
-              <p className="text-orange-400 font-medium">Live Deployment Warning</p>
+              <p className="text-orange-400 font-medium">Live Deployment Notice</p>
               <p className="text-orange-300">
-                This will publish content to real platforms using live APIs. Ensure content review is complete.
+                Articles will be published to real platforms with legitimate URLs. Ensure content review is complete.
               </p>
             </div>
           </div>
