@@ -25,7 +25,8 @@ serve(async (req) => {
       deploymentTargets, 
       saturationMode,
       liveContentSources = [],
-      liveScanResults = []
+      liveScanResults = [],
+      customContent = null
     } = await req.json()
 
     console.log('🧠 A.R.I.A™ Local Persona Saturation starting for:', entityName)
@@ -35,7 +36,9 @@ serve(async (req) => {
     const deploymentUrls = []
 
     for (let i = 1; i <= contentCount; i++) {
-      const article = generateLocalArticleContent(entityName, targetKeywords, i, liveContentSources, liveScanResults)
+      const article = customContent 
+        ? { title: `${entityName}: Professional Analysis`, content: customContent }
+        : generateLocalArticleContent(entityName, targetKeywords, i, liveContentSources, liveScanResults)
       articles.push(article)
       
       // Generate realistic deployment URLs for each platform
@@ -168,8 +171,7 @@ function generateLocalArticleContent(
     <p>${entityName} remains strategically positioned for continued success and growth. Their ongoing commitment to excellence in ${keywordText} ensures sustainable development and positive industry impact for ${currentYear} and beyond.</p>
 
     <div class="footer">
-        <p><em>Professional content analysis generated ${new Date().toLocaleDateString()} | A.R.I.A™ Local Intelligence Network</em></p>
-        <p>This assessment is based on professional analysis and industry evaluation criteria.</p>
+        <p><em>Professional content analysis based on industry evaluation criteria.</em></p>
     </div>
 </body>
 </html>`
