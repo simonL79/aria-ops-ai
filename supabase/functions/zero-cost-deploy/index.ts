@@ -54,7 +54,7 @@ serve(async (req) => {
       "headline": "${title}",
       "author": {
         "@type": "Organization",
-        "name": "Professional Intelligence Platform"
+        "name": "Professional Content Platform"
       },
       "datePublished": "${new Date().toISOString()}",
       "description": "${content.substring(0, 200)}...",
@@ -137,7 +137,7 @@ serve(async (req) => {
         ` : ''}
     </article>
     <div class="footer">
-        Published via Professional Intelligence Platform | ${new Date().getFullYear()}
+        Published via Professional Content Platform | ${new Date().getFullYear()}
     </div>
 </body>
 </html>`;
@@ -152,7 +152,7 @@ serve(async (req) => {
 
       try {
         // Create file in GitHub repository for REAL deployment
-        const response = await fetch('https://api.github.com/repos/simonl79/professional-intelligence-platform/contents/articles/' + filename, {
+        const response = await fetch('https://api.github.com/repos/professional-content-platform/content-hub/contents/articles/' + filename, {
           method: 'PUT',
           headers: {
             'Authorization': `token ${githubToken}`,
@@ -169,7 +169,7 @@ serve(async (req) => {
           throw new Error(`GitHub API error: ${response.status} - ${errorData}`);
         }
 
-        deploymentUrl = `https://simonl79.github.io/professional-intelligence-platform/articles/${filename}`;
+        deploymentUrl = `https://professional-content-platform.github.io/content-hub/articles/${filename}`;
         success = true;
         
         console.log(`✅ REAL GitHub Pages deployment live: ${deploymentUrl}`);
@@ -189,7 +189,7 @@ serve(async (req) => {
         // Create GitHub file that can be connected to Cloudflare for free
         const githubToken = Deno.env.get('GITHUB_TOKEN');
         if (githubToken) {
-          await fetch('https://api.github.com/repos/simonl79/professional-intelligence-platform/contents/cloudflare/' + filename, {
+          await fetch('https://api.github.com/repos/professional-content-platform/content-hub/contents/cloudflare/' + filename, {
             method: 'PUT',
             headers: {
               'Authorization': `token ${githubToken}`,
@@ -203,7 +203,7 @@ serve(async (req) => {
         }
       }
       
-      deploymentUrl = `https://professional-intelligence-${timestamp}.pages.dev/${filename}`;
+      deploymentUrl = `https://content-platform-${timestamp}.pages.dev/${filename}`;
       success = true;
       console.log(`✅ REAL Cloudflare Pages deployment configured: ${deploymentUrl}`);
     }
@@ -216,7 +216,7 @@ serve(async (req) => {
         // Create GitHub file for Netlify Git integration (free)
         const githubToken = Deno.env.get('GITHUB_TOKEN');
         if (githubToken) {
-          await fetch('https://api.github.com/repos/simonl79/professional-intelligence-platform/contents/netlify/' + filename, {
+          await fetch('https://api.github.com/repos/professional-content-platform/content-hub/contents/netlify/' + filename, {
             method: 'PUT',
             headers: {
               'Authorization': `token ${githubToken}`,
@@ -230,7 +230,7 @@ serve(async (req) => {
         }
       }
       
-      deploymentUrl = `https://professional-intelligence-${timestamp}.netlify.app/${filename}`;
+      deploymentUrl = `https://content-platform-${timestamp}.netlify.app/${filename}`;
       success = true;
       console.log(`✅ REAL Netlify deployment configured: ${deploymentUrl}`);
     }
@@ -243,7 +243,7 @@ serve(async (req) => {
         // Create GitHub file for Vercel Git integration (free)
         const githubToken = Deno.env.get('GITHUB_TOKEN');
         if (githubToken) {
-          await fetch('https://api.github.com/repos/simonl79/professional-intelligence-platform/contents/vercel/' + filename, {
+          await fetch('https://api.github.com/repos/professional-content-platform/content-hub/contents/vercel/' + filename, {
             method: 'PUT',
             headers: {
               'Authorization': `token ${githubToken}`,
@@ -257,7 +257,7 @@ serve(async (req) => {
         }
       }
       
-      deploymentUrl = `https://professional-intelligence-${timestamp}.vercel.app/${filename}`;
+      deploymentUrl = `https://content-platform-${timestamp}.vercel.app/${filename}`;
       success = true;
       console.log(`✅ REAL Vercel deployment configured: ${deploymentUrl}`);
     }
