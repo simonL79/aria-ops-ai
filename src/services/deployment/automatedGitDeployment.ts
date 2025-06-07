@@ -57,13 +57,31 @@ export const deployToGitHubPages = async (config: DeploymentConfig): Promise<Dep
   try {
     console.log('🚀 Starting automated GitHub Pages deployment...');
     
-    // Get GitHub token from Supabase secrets
-    const { data: { GITHUB_API_TOKEN } } = await supabase.functions.invoke('get-secret', {
-      body: { name: 'GITHUB_API_TOKEN' }
-    });
+    // Get GitHub token from Supabase secrets using the correct method
+    let GITHUB_API_TOKEN: string | null = null;
+    
+    try {
+      const { data, error } = await supabase.rpc('get_secret', { secret_name: 'GITHUB_API_TOKEN' });
+      if (error) {
+        console.error('Error fetching GitHub token:', error);
+        throw new Error('Failed to retrieve GitHub API token from secrets');
+      }
+      GITHUB_API_TOKEN = data;
+    } catch (secretError) {
+      console.error('Supabase secret retrieval failed:', secretError);
+      // Fallback: try the function-based approach
+      try {
+        const { data: functionData } = await supabase.functions.invoke('get-secret', {
+          body: { name: 'GITHUB_API_TOKEN' }
+        });
+        GITHUB_API_TOKEN = functionData?.GITHUB_API_TOKEN || null;
+      } catch (functionError) {
+        console.error('Function-based secret retrieval also failed:', functionError);
+      }
+    }
 
     if (!GITHUB_API_TOKEN) {
-      throw new Error('GitHub API token not configured');
+      throw new Error('GitHub API token not configured. Please check your Supabase secrets.');
     }
 
     // Sanitize content
@@ -290,9 +308,28 @@ export const deployToGitHubPages = async (config: DeploymentConfig): Promise<Dep
 
 export const validateGitHubToken = async (): Promise<boolean> => {
   try {
-    const { data: { GITHUB_API_TOKEN } } = await supabase.functions.invoke('get-secret', {
-      body: { name: 'GITHUB_API_TOKEN' }
-    });
+    // Use the same token retrieval method as deployment
+    let GITHUB_API_TOKEN: string | null = null;
+    
+    try {
+      const { data, error } = await supabase.rpc('get_secret', { secret_name: 'GITHUB_API_TOKEN' });
+      if (error) {
+        console.error('Error fetching GitHub token for validation:', error);
+        return false;
+      }
+      GITHUB_API_TOKEN = data;
+    } catch (secretError) {
+      // Fallback: try the function-based approach
+      try {
+        const { data: functionData } = await supabase.functions.invoke('get-secret', {
+          body: { name: 'GITHUB_API_TOKEN' }
+        });
+        GITHUB_API_TOKEN = functionData?.GITHUB_API_TOKEN || null;
+      } catch (functionError) {
+        console.error('Function-based token validation failed:', functionError);
+        return false;
+      }
+    }
 
     if (!GITHUB_API_TOKEN) return false;
 
