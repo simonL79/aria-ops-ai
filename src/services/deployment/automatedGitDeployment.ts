@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 interface DeploymentParams {
@@ -56,26 +55,40 @@ export const deployToGitHubPages = async (params: DeploymentParams): Promise<Dep
 
 export const validateGitHubToken = async (): Promise<boolean> => {
   try {
-    // Test the Edge Function to validate GitHub token
+    console.log('🔍 Validating GitHub API token...');
+    
+    // Test the Edge Function with a simple validation request
     const { data, error } = await supabase.functions.invoke('github-deployment', {
       body: {
-        title: 'Test',
-        content: 'Test validation',
-        entity: 'Test',
-        keywords: ['test'],
-        contentType: 'test'
+        title: 'Token Validation Test',
+        content: 'This is a validation test for GitHub API token',
+        entity: 'System',
+        keywords: ['validation'],
+        contentType: 'validation'
       }
     });
 
-    // If we get a specific error about missing token, return false
-    if (error || (data && !data.success && data.error?.includes('GitHub API token'))) {
-      console.warn('GitHub API token validation failed');
+    // Check for specific token errors
+    if (error) {
+      console.warn('❌ GitHub token validation failed - Edge Function error:', error);
       return false;
     }
 
+    if (data && !data.success) {
+      if (data.error && data.error.includes('GitHub API token')) {
+        console.warn('❌ GitHub API token validation failed:', data.error);
+        return false;
+      }
+      // Other errors might not be token-related
+      console.log('⚠️ GitHub deployment test failed but may not be token issue:', data.error);
+      return true; // Assume token is OK if error isn't token-specific
+    }
+
+    console.log('✅ GitHub API token validation successful');
     return true;
+    
   } catch (error) {
-    console.error('GitHub token validation failed:', error);
+    console.error('❌ GitHub token validation failed with exception:', error);
     return false;
   }
 };

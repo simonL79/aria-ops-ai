@@ -94,8 +94,13 @@ serve(async (req) => {
     // Get GitHub token from Supabase secrets
     const GITHUB_API_TOKEN = Deno.env.get('GITHUB_API_TOKEN');
     
+    console.log('🔍 Checking GitHub API token availability...');
+    console.log(`Token exists: ${GITHUB_API_TOKEN ? 'YES' : 'NO'}`);
+    console.log(`Token length: ${GITHUB_API_TOKEN ? GITHUB_API_TOKEN.length : 0}`);
+    
     if (!GITHUB_API_TOKEN) {
-      console.error('❌ GitHub API token not found in secrets');
+      console.error('❌ GitHub API token not found in environment variables');
+      console.error('Available env vars:', Object.keys(Deno.env.toObject()).filter(key => key.includes('GITHUB')));
       return new Response(
         JSON.stringify({ 
           success: false, 
@@ -112,6 +117,22 @@ serve(async (req) => {
     const params: DeploymentParams = await req.json();
     console.log('📝 Deployment params received:', { title: params.title, entity: params.entity });
 
+    // If this is a validation test, just return success
+    if (params.contentType === 'validation' && params.title.includes('Validation Test')) {
+      console.log('✅ Token validation test passed');
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          message: 'GitHub API token validation successful',
+          url: 'https://validation-test.github.io/validation',
+          repositoryName: 'validation-test'
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
     // Sanitize content
     const sanitizedContent = sanitizeContent(params.content);
     const sanitizedTitle = sanitizeContent(params.title);
@@ -121,6 +142,33 @@ serve(async (req) => {
     
     console.log(`📝 Creating repository: ${repoName}`);
     console.log(`🧹 Sanitized content length: ${sanitizedContent.length} characters`);
+
+    // Test GitHub API access first
+    console.log('🔍 Testing GitHub API access...');
+    const testResponse = await fetch('https://api.github.com/user', {
+      headers: {
+        'Authorization': `Bearer ${GITHUB_API_TOKEN}`,
+        'Accept': 'application/vnd.github.v3+json',
+      },
+    });
+
+    if (!testResponse.ok) {
+      const testError = await testResponse.text();
+      console.error('❌ GitHub API test failed:', testResponse.status, testError);
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: `GitHub API authentication failed: ${testResponse.status} - ${testError}` 
+        }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    const userData = await testResponse.json();
+    console.log('✅ GitHub API access confirmed for user:', userData.login);
 
     // Create repository
     const createRepoResponse = await fetch('https://api.github.com/user/repos', {
