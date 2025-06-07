@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -35,7 +34,7 @@ const ContentGenerationModule: React.FC<ContentGenerationModuleProps> = ({
             Minimize
           </Button>
         </div>
-        <ContentGenerationHub clientId={selectedEntity} />
+        <ContentGenerationHub />
       </div>
     );
   }
