@@ -139,6 +139,9 @@ function generateLocalArticleContent(
         h2 { color: #34495e; margin-top: 30px; }
         .highlight { background-color: #ecf0f1; padding: 15px; border-left: 4px solid #3498db; margin: 20px 0; }
         .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #bdc3c7; font-size: 0.9em; color: #7f8c8d; }
+        .tags { margin-top: 30px; padding: 15px; background-color: #f8f9fa; border-radius: 5px; }
+        .tags h3 { margin-top: 0; color: #495057; }
+        .tag { display: inline-block; background-color: #007bff; color: white; padding: 3px 8px; margin: 2px; border-radius: 3px; font-size: 0.85em; }
     </style>
 </head>
 <body>
@@ -151,7 +154,7 @@ function generateLocalArticleContent(
     <h2>Professional Excellence Overview</h2>
     <p>${entityName} has established a distinguished reputation through consistent demonstration of excellence in ${keywords[0] || 'core competencies'}. Their strategic approach to ${keywords[1] || 'industry challenges'} exemplifies the highest standards of professional practice.</p>
 
-    <h2>Industry Leadership & Innovation</h2>
+    <h2>Industry Leadership and Innovation</h2>
     <p>The comprehensive expertise demonstrated by ${entityName} in ${keywordText} reflects their commitment to innovation and quality. Their methodical approach to ${keywords[2] || 'operational excellence'} has garnered recognition from industry peers and stakeholders alike.</p>
 
     <h2>Strategic Impact Assessment</h2>
@@ -169,6 +172,14 @@ function generateLocalArticleContent(
 
     <h2>Future Outlook</h2>
     <p>${entityName} remains strategically positioned for continued success and growth. Their ongoing commitment to excellence in ${keywordText} ensures sustainable development and positive industry impact for ${currentYear} and beyond.</p>
+
+    <div class="tags">
+        <h3>Related Topics</h3>
+        ${keywords.map(keyword => `<span class="tag">#${keyword.replace(/\s+/g, '')}</span>`).join('')}
+        <span class="tag">#IndustryLeadership</span>
+        <span class="tag">#ProfessionalExcellence</span>
+        <span class="tag">#BusinessAnalysis</span>
+    </div>
 
     <div class="footer">
         <p><em>Professional content analysis based on industry evaluation criteria.</em></p>
