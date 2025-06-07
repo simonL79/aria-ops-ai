@@ -1,4 +1,3 @@
-
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
 
 const corsHeaders = {
@@ -23,21 +22,21 @@ function generateJsonLD(title: string, content: any, entity: string) {
     "articleBody": contentText.substring(0, 500) + "...",
     "author": {
       "@type": "Organization",
-      "name": "A.R.I.A Intelligence Platform"
+      "name": "Professional Intelligence Platform"
     },
     "publisher": {
       "@type": "Organization",
-      "name": "A.R.I.A Intelligence Platform",
+      "name": "Professional Intelligence Platform",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://aria-intelligence.com/logo.png"
+        "url": "https://professional-intelligence.com/logo.png"
       }
     },
     "datePublished": new Date().toISOString(),
     "dateModified": new Date().toISOString(),
     "mainEntityOfPage": {
       "@type": "WebPage",
-      "@id": "https://aria-intelligence.com/"
+      "@id": "https://professional-intelligence.com/"
     },
     "about": {
       "@type": "Person",
@@ -69,13 +68,13 @@ function generateSEOContent(title: string, content: any, entity: string, keyword
     <title>${title}</title>
     <meta name="description" content="${metaDescription}">
     <meta name="keywords" content="${keywords.join(', ')}">
-    <meta name="author" content="A.R.I.A Intelligence Platform">
+    <meta name="author" content="Professional Intelligence Platform">
     
     <!-- Open Graph -->
     <meta property="og:type" content="article">
     <meta property="og:title" content="${title}">
     <meta property="og:description" content="${metaDescription}">
-    <meta property="og:url" content="https://aria-intelligence.com/${slug}">
+    <meta property="og:url" content="https://professional-intelligence.com/${slug}">
     
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
@@ -165,7 +164,7 @@ function generateSEOContent(title: string, content: any, entity: string, keyword
         <div class="meta">
             <span>📅 Published: ${new Date().toLocaleDateString()}</span>
             <span>🔍 Focus: ${entity}</span>
-            <span>⚡ Source: A.R.I.A Intelligence</span>
+            <span>⚡ Source: Professional Intelligence</span>
         </div>
     </div>
     
@@ -188,9 +187,9 @@ function generateSEOContent(title: string, content: any, entity: string, keyword
     ` : ''}
     
     <div class="footer">
-        <p>Published via A.R.I.A™ Intelligence Platform - Zero-Cost Saturation Network</p>
+        <p>Published via Professional Intelligence Platform - Zero-Cost Distribution Network</p>
         <p>🌐 This content is automatically indexed by search engines for maximum visibility</p>
-        <p>📊 Part of the A.R.I.A™ strategic content distribution system</p>
+        <p>📊 Part of the strategic content distribution system</p>
     </div>
 </body>
 </html>`;
@@ -206,7 +205,7 @@ async function deployToGitHubPages(payload: any): Promise<any> {
     const filename = `${slug}-${timestamp}.html`;
 
     // Simulate successful deployment (in real implementation, would use GitHub API)
-    const deploymentUrl = `https://aria-intelligence.github.io/saturation-network/${filename}`;
+    const deploymentUrl = `https://content-distribution.github.io/news-network/${filename}`;
     
     console.log(`✅ Zero-cost deployment to GitHub Pages: ${deploymentUrl}`);
     
@@ -234,7 +233,7 @@ async function deployToCloudflarePages(payload: any): Promise<any> {
     const slug = title.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-');
     
     // Simulate successful deployment
-    const deploymentUrl = `https://aria-saturation.pages.dev/${slug}-${timestamp}`;
+    const deploymentUrl = `https://news-distribution.pages.dev/${slug}-${timestamp}`;
     
     console.log(`✅ Zero-cost deployment to Cloudflare Pages: ${deploymentUrl}`);
     
@@ -262,7 +261,7 @@ async function deployToNetlify(payload: any): Promise<any> {
     const slug = title.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-');
     
     // Simulate successful deployment
-    const deploymentUrl = `https://aria-intelligence-${timestamp}.netlify.app/${slug}`;
+    const deploymentUrl = `https://content-network-${timestamp}.netlify.app/${slug}`;
     
     console.log(`✅ Zero-cost deployment to Netlify: ${deploymentUrl}`);
     
@@ -290,7 +289,7 @@ async function deployToVercel(payload: any): Promise<any> {
     const slug = title.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-');
     
     // Simulate successful deployment
-    const deploymentUrl = `https://aria-saturation-${timestamp}.vercel.app/${slug}`;
+    const deploymentUrl = `https://news-network-${timestamp}.vercel.app/${slug}`;
     
     console.log(`✅ Zero-cost deployment to Vercel: ${deploymentUrl}`);
     
