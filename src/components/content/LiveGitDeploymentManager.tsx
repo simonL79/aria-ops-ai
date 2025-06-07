@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,10 +18,12 @@ import {
   GitBranch,
   Download,
   Copy,
-  Code
+  Code,
+  Zap
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { GitDeploymentService } from '@/services/deployment/gitDeployment';
+import { AutomatedGitDeploymentService } from '@/services/deployment/automatedGitDeployment';
 
 interface LiveGitDeploymentManagerProps {
   contentConfig: {
@@ -48,8 +49,9 @@ export const LiveGitDeploymentManager: React.FC<LiveGitDeploymentManagerProps> =
   const [showSetupInstructions, setShowSetupInstructions] = useState(false);
   const [setupInstructions, setSetupInstructions] = useState('');
   const [htmlContent, setHtmlContent] = useState('');
+  const [deploymentMode, setDeploymentMode] = useState<'automated' | 'manual'>('automated');
 
-  const handleGitDeployment = async () => {
+  const handleAutomatedGitDeployment = async () => {
     if (!contentConfig.generatedContent) {
       toast.error('No content available for deployment');
       return;
@@ -59,7 +61,60 @@ export const LiveGitDeploymentManager: React.FC<LiveGitDeploymentManagerProps> =
     setDeploymentProgress(0);
 
     try {
-      console.log('🚀 Starting Git-based deployment preparation...');
+      console.log('🚀 Starting automated GitHub Pages deployment...');
+      
+      const deploymentOptions = {
+        entityName: contentConfig.clientName || 'Client',
+        content: contentConfig.generatedContent.content,
+        title: contentConfig.generatedContent.title,
+        keywords: contentConfig.generatedContent.keywords || [],
+        contentType: contentConfig.contentType || 'content'
+      };
+
+      setDeploymentProgress(25);
+      toast.info('Creating GitHub repository...');
+
+      const result = await AutomatedGitDeploymentService.deployToGitHubPages(deploymentOptions);
+      
+      setDeploymentProgress(100);
+
+      const deploymentResult = {
+        platform: 'GitHub Pages',
+        success: result.success,
+        url: result.deploymentUrl,
+        repositoryUrl: result.repositoryUrl,
+        timestamp: result.timestamp,
+        deploymentType: result.deploymentType,
+        repositoryName: result.repositoryName
+      };
+
+      setDeploymentResults([deploymentResult]);
+      onDeploymentComplete([deploymentResult]);
+
+      toast.success(`🎉 Content deployed successfully! Live at: ${result.deploymentUrl}`);
+
+    } catch (error) {
+      console.error('❌ Automated deployment failed:', error);
+      
+      // Fall back to manual deployment preparation
+      toast.error(`Automated deployment failed: ${error.message}. Preparing manual deployment...`);
+      await handleManualGitDeployment();
+    } finally {
+      setIsDeploying(false);
+    }
+  };
+
+  const handleManualGitDeployment = async () => {
+    if (!contentConfig.generatedContent) {
+      toast.error('No content available for deployment');
+      return;
+    }
+
+    setIsDeploying(true);
+    setDeploymentProgress(0);
+
+    try {
+      console.log('🚀 Starting manual Git deployment preparation...');
       
       const deploymentOptions = {
         entityName: contentConfig.clientName || 'Client',
@@ -91,15 +146,15 @@ export const LiveGitDeploymentManager: React.FC<LiveGitDeploymentManagerProps> =
       onDeploymentComplete([deploymentResult]);
 
       if (result.success) {
-        toast.success('Git deployment package ready! Follow setup instructions to go live.');
+        toast.success('Manual deployment package ready! Follow setup instructions to go live.');
         setShowSetupInstructions(true);
       } else {
-        toast.error('Git deployment preparation failed');
+        toast.error('Deployment preparation failed');
       }
 
     } catch (error) {
-      console.error('❌ Git deployment preparation failed:', error);
-      toast.error(`Git deployment preparation failed: ${error.message}`);
+      console.error('❌ Manual deployment preparation failed:', error);
+      toast.error(`Manual deployment preparation failed: ${error.message}`);
       
       const failedResult = {
         platform: 'GitHub Pages',
@@ -153,11 +208,35 @@ export const LiveGitDeploymentManager: React.FC<LiveGitDeploymentManagerProps> =
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Deployment Mode Selection */}
+        <div className="flex gap-2 p-1 bg-corporate-dark rounded border border-corporate-border">
+          <Button
+            onClick={() => setDeploymentMode('automated')}
+            variant={deploymentMode === 'automated' ? 'default' : 'ghost'}
+            size="sm"
+            className="flex-1"
+          >
+            <Zap className="h-4 w-4 mr-2" />
+            Automated
+          </Button>
+          <Button
+            onClick={() => setDeploymentMode('manual')}
+            variant={deploymentMode === 'manual' ? 'default' : 'ghost'}
+            size="sm"
+            className="flex-1"
+          >
+            <Code className="h-4 w-4 mr-2" />
+            Manual Setup
+          </Button>
+        </div>
+
         {/* Deployment Progress */}
         {isDeploying && (
           <div className="space-y-2">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-corporate-lightGray">Preparing Git Deployment</span>
+              <span className="text-corporate-lightGray">
+                {deploymentMode === 'automated' ? 'Automated Deployment' : 'Preparing Manual Deployment'}
+              </span>
               <span className="text-white">{Math.round(deploymentProgress)}%</span>
             </div>
             <Progress value={deploymentProgress} className="h-2" />
@@ -195,11 +274,21 @@ export const LiveGitDeploymentManager: React.FC<LiveGitDeploymentManagerProps> =
                   )}
                 </div>
                 <div className="flex items-center gap-2">
+                  {result.url && result.success && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => window.open(result.url, '_blank')}
+                      className="h-6 w-6 p-0"
+                    >
+                      <ExternalLink className="h-3 w-3" />
+                    </Button>
+                  )}
                   <Badge 
                     variant={result.success ? 'default' : 'destructive'}
                     className="text-xs"
                   >
-                    {result.success ? 'READY' : 'FAILED'}
+                    {result.success ? (deploymentMode === 'automated' ? 'LIVE' : 'READY') : 'FAILED'}
                   </Badge>
                 </div>
               </div>
@@ -207,8 +296,8 @@ export const LiveGitDeploymentManager: React.FC<LiveGitDeploymentManagerProps> =
           </div>
         )}
 
-        {/* Setup Instructions */}
-        {showSetupInstructions && setupInstructions && (
+        {/* Setup Instructions - Only show for manual mode */}
+        {showSetupInstructions && setupInstructions && deploymentMode === 'manual' && (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <h4 className="text-sm font-medium text-white">Setup Instructions</h4>
@@ -241,8 +330,8 @@ export const LiveGitDeploymentManager: React.FC<LiveGitDeploymentManagerProps> =
           </div>
         )}
 
-        {/* HTML Content Download */}
-        {htmlContent && (
+        {/* HTML Content Download - Only show for manual mode */}
+        {htmlContent && deploymentMode === 'manual' && (
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <h4 className="text-sm font-medium text-white">Generated HTML Content</h4>
@@ -278,32 +367,51 @@ export const LiveGitDeploymentManager: React.FC<LiveGitDeploymentManagerProps> =
         {/* Action Buttons */}
         <div className="flex gap-2">
           <Button
-            onClick={handleGitDeployment}
+            onClick={deploymentMode === 'automated' ? handleAutomatedGitDeployment : handleManualGitDeployment}
             disabled={isDeploying || !contentConfig.generatedContent}
             className="flex-1 bg-green-600 hover:bg-green-700 text-white"
           >
             {isDeploying ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Preparing Deployment...
+                {deploymentMode === 'automated' ? 'Deploying...' : 'Preparing...'}
               </>
             ) : (
               <>
-                <GitBranch className="mr-2 h-4 w-4" />
-                Prepare Git Deployment
+                {deploymentMode === 'automated' ? (
+                  <Zap className="mr-2 h-4 w-4" />
+                ) : (
+                  <GitBranch className="mr-2 h-4 w-4" />
+                )}
+                {deploymentMode === 'automated' ? 'Deploy to GitHub Pages' : 'Prepare Manual Deployment'}
               </>
             )}
           </Button>
         </div>
 
         {/* Information Notice */}
-        <div className="p-3 bg-blue-500/10 border border-blue-500/30 rounded">
+        <div className={`p-3 rounded border ${
+          deploymentMode === 'automated' 
+            ? 'bg-green-500/10 border-green-500/30' 
+            : 'bg-blue-500/10 border-blue-500/30'
+        }`}>
           <div className="flex items-start gap-2">
-            <GitBranch className="h-4 w-4 text-blue-500 flex-shrink-0 mt-0.5" />
+            {deploymentMode === 'automated' ? (
+              <Zap className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
+            ) : (
+              <GitBranch className="h-4 w-4 text-blue-500 flex-shrink-0 mt-0.5" />
+            )}
             <div className="text-sm">
-              <p className="text-blue-400 font-medium">Manual GitHub Setup Required</p>
-              <p className="text-blue-300">
-                Creates deployment package with HTML content and step-by-step instructions for GitHub Pages setup.
+              <p className={`font-medium ${
+                deploymentMode === 'automated' ? 'text-green-400' : 'text-blue-400'
+              }`}>
+                {deploymentMode === 'automated' ? 'Automated GitHub Deployment' : 'Manual GitHub Setup Required'}
+              </p>
+              <p className={deploymentMode === 'automated' ? 'text-green-300' : 'text-blue-300'}>
+                {deploymentMode === 'automated' 
+                  ? 'Automatically creates repository, uploads content, and enables GitHub Pages using your API token.'
+                  : 'Creates deployment package with HTML content and step-by-step instructions for GitHub Pages setup.'
+                }
               </p>
             </div>
           </div>
