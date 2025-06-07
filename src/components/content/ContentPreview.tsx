@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { 
   Eye, 
   Edit, 
@@ -61,6 +62,12 @@ export const ContentPreview = ({
     setIsEditing(false);
   };
 
+  const handleCancelEdit = () => {
+    setEditedTitle(content.title);
+    setEditedBody(content.body);
+    setIsEditing(false);
+  };
+
   const getSeoScoreColor = (score?: number) => {
     if (!score) return 'text-gray-500';
     if (score >= 80) return 'text-green-600';
@@ -113,11 +120,11 @@ export const ContentPreview = ({
         <div className="space-y-2">
           <label className="text-white font-medium">Article Title</label>
           {isEditing ? (
-            <Textarea
+            <Input
               value={editedTitle}
               onChange={(e) => setEditedTitle(e.target.value)}
               className="bg-corporate-dark border-corporate-border text-white"
-              rows={2}
+              placeholder="Enter article title..."
             />
           ) : (
             <div className="p-3 bg-corporate-dark border border-corporate-border rounded">
@@ -152,6 +159,7 @@ export const ContentPreview = ({
               value={editedBody}
               onChange={(e) => setEditedBody(e.target.value)}
               className="bg-corporate-dark border-corporate-border text-white min-h-[300px]"
+              placeholder="Enter article content..."
             />
           ) : (
             <div className="p-4 bg-corporate-dark border border-corporate-border rounded max-h-96 overflow-y-auto">
@@ -272,7 +280,7 @@ export const ContentPreview = ({
                 Save Changes
               </Button>
               <Button
-                onClick={() => setIsEditing(false)}
+                onClick={handleCancelEdit}
                 variant="outline"
                 className="border-gray-600 text-gray-300 hover:bg-gray-700"
               >
