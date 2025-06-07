@@ -137,65 +137,155 @@ The case demonstrates the continuing evolution of media law in the digital age a
       })
     }
 
-    // Handle live deployment - Note: This is currently SIMULATION MODE
+    // Handle live deployment to real platforms
     if (liveDeployment && deploymentTargets?.length > 0) {
-      console.log('🚀 Starting deployment simulation (not real deployments)...')
+      console.log('🚀 Starting REAL deployment to live platforms...')
       
       const deploymentResults = []
+      const deploymentUrls = []
 
       for (const platform of deploymentTargets) {
         try {
           let deploymentResult
+          let deploymentUrl
           
-          // IMPORTANT: These are simulated deployments for demonstration
-          // Real integration would require platform APIs and authentication
           switch (platform) {
             case 'github-pages':
-              deploymentResult = {
-                success: false,
-                error: 'GitHub Pages deployment requires repository setup and authentication',
-                platform: 'GitHub Pages',
-                note: 'Simulation mode - no real deployment created'
+              // Deploy to GitHub Pages using existing GitHub integration
+              const githubToken = Deno.env.get('GITHUB_TOKEN')
+              if (!githubToken) {
+                throw new Error('GitHub token not configured')
               }
-              break
-
-            case 'medium':
-              deploymentResult = {
-                success: false,
-                error: 'Medium deployment requires API key and authentication',
-                platform: 'Medium',
-                note: 'Simulation mode - no real deployment created'
+              
+              // Create HTML file content
+              const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${title}</title>
+    <meta name="description" content="${metaDescription}">
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; line-height: 1.6; }
+        h1 { color: #333; border-bottom: 2px solid #007acc; padding-bottom: 10px; }
+        h2 { color: #555; margin-top: 30px; }
+        .meta { background: #f5f5f5; padding: 15px; border-left: 4px solid #007acc; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    ${content.replace(/^# /, '<h1>').replace(/## /g, '<h2>').replace(/\n\n/g, '</p><p>').replace(/^\*/, '<em>').replace(/\*$/, '</em>')}
+    <div class="meta">
+        <p><strong>Keywords:</strong> ${seoKeywords.join(', ')}</p>
+        <p><strong>Published:</strong> ${new Date().toLocaleDateString()}</p>
+    </div>
+</body>
+</html>`
+              
+              // Create file in GitHub repo
+              const repoResponse = await fetch('https://api.github.com/user/repos', {
+                headers: {
+                  'Authorization': `token ${githubToken}`,
+                  'Content-Type': 'application/json'
+                }
+              })
+              
+              const repos = await repoResponse.json()
+              const repo = repos.find((r: any) => r.name.includes('aria') || r.name.includes('pages'))
+              
+              if (repo) {
+                const fileResponse = await fetch(`https://api.github.com/repos/${repo.full_name}/contents/articles/${urlSlug}.html`, {
+                  method: 'PUT',
+                  headers: {
+                    'Authorization': `token ${githubToken}`,
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify({
+                    message: `Add article: ${title}`,
+                    content: btoa(htmlContent)
+                  })
+                })
+                
+                if (fileResponse.ok) {
+                  deploymentUrl = `https://${repo.owner.login}.github.io/${repo.name}/articles/${urlSlug}.html`
+                  deploymentResult = {
+                    success: true,
+                    url: deploymentUrl,
+                    platform: 'GitHub Pages'
+                  }
+                } else {
+                  throw new Error('Failed to create GitHub file')
+                }
+              } else {
+                throw new Error('No suitable GitHub repository found')
               }
               break
 
             case 'reddit':
-              deploymentResult = {
-                success: false,
-                error: 'Reddit posting requires API credentials and subreddit permissions',
-                platform: 'Reddit',
-                note: 'Simulation mode - no real deployment created'
+              // Post to Reddit using existing credentials
+              const redditUsername = Deno.env.get('REDDIT_USERNAME')
+              const redditPassword = Deno.env.get('REDDIT_PASSWORD')
+              const redditClientId = Deno.env.get('REDDIT_CLIENT_ID')
+              const redditClientSecret = Deno.env.get('REDDIT_CLIENT_SECRET')
+              
+              if (!redditUsername || !redditPassword || !redditClientId || !redditClientSecret) {
+                throw new Error('Reddit credentials not configured')
               }
-              break
-
-            case 'linkedin':
-              deploymentResult = {
-                success: false,
-                error: 'LinkedIn publishing requires OAuth authentication',
-                platform: 'LinkedIn',
-                note: 'Simulation mode - no real deployment created'
+              
+              // Get Reddit OAuth token
+              const authResponse = await fetch('https://www.reddit.com/api/v1/access_token', {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Basic ${btoa(`${redditClientId}:${redditClientSecret}`)}`,
+                  'Content-Type': 'application/x-www-form-urlencoded',
+                  'User-Agent': 'ARIA-ContentBot/1.0'
+                },
+                body: `grant_type=password&username=${redditUsername}&password=${redditPassword}`
+              })
+              
+              const authData = await authResponse.json()
+              
+              if (authData.access_token) {
+                // Submit post to Reddit
+                const postResponse = await fetch('https://oauth.reddit.com/api/submit', {
+                  method: 'POST',
+                  headers: {
+                    'Authorization': `Bearer ${authData.access_token}`,
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'User-Agent': 'ARIA-ContentBot/1.0'
+                  },
+                  body: `sr=news&kind=self&title=${encodeURIComponent(title)}&text=${encodeURIComponent(content)}`
+                })
+                
+                const postData = await postResponse.json()
+                
+                if (postData.success) {
+                  deploymentUrl = `https://reddit.com${postData.jquery[16][3][0]}`
+                  deploymentResult = {
+                    success: true,
+                    url: deploymentUrl,
+                    platform: 'Reddit'
+                  }
+                } else {
+                  throw new Error('Reddit post submission failed')
+                }
+              } else {
+                throw new Error('Reddit authentication failed')
               }
               break
 
             default:
               deploymentResult = {
                 success: false,
-                error: `Platform ${platform} not yet supported`,
+                error: `Platform ${platform} not yet implemented`,
                 platform
               }
           }
 
           deploymentResults.push(deploymentResult)
-          console.log(`⚠️ ${platform} deployment:`, deploymentResult)
+          if (deploymentUrl) {
+            deploymentUrls.push(deploymentUrl)
+          }
+          console.log(`✅ ${platform} deployment:`, deploymentResult)
 
         } catch (error) {
           console.error(`❌ ${platform} deployment failed:`, error)
@@ -219,13 +309,13 @@ The case demonstrates the continuing evolution of media law in the digital age a
         seoScore,
         schemaData,
         deploymentResults,
-        deploymentUrls: [], // No real URLs since these are simulated
-        simulationMode: true,
-        message: 'Deployment simulation complete - real platform integration requires API setup',
+        deploymentUrls,
+        liveDeployment: true,
+        message: 'Live deployment complete',
         campaign: {
           contentGenerated: 1,
-          deploymentsSuccessful: 0,
-          serpPenetration: 0,
+          deploymentsSuccessful: deploymentResults.filter(r => r.success).length,
+          serpPenetration: deploymentUrls.length,
           platformResults: deploymentResults.reduce((acc, result) => {
             acc[result.platform] = result
             return acc
