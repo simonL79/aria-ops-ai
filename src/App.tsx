@@ -21,6 +21,7 @@ import ClientManagementPage from "./pages/admin/ClientManagementPage";
 import SystemSettingsPage from "./pages/admin/SystemSettingsPage";
 import StrategyBrainTestPage from "./pages/admin/StrategyBrainTestPage";
 import SystemCompletionPage from '@/pages/admin/SystemCompletionPage';
+import QASystemTestPage from '@/pages/QASystemTestPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -71,6 +72,12 @@ function App() {
                     <Route 
                       path="/admin/system-completion" 
                       element={<SystemCompletionPage />} 
+                    />
+                    
+                    {/* QA System Test Route */}
+                    <Route 
+                      path="/qa-system-test" 
+                      element={<QASystemTestPage />} 
                     />
                     
                     {/* Dynamic Routes */}

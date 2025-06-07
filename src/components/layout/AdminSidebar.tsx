@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -21,7 +20,8 @@ import {
   Target,
   Lock,
   Radar,
-  FileText
+  FileText,
+  ListChecks
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -105,6 +105,12 @@ const AdminSidebar = () => {
       href: '/admin/settings',
       icon: Settings,
       description: 'Configuration & preferences'
+    },
+    {
+      title: 'QA System Test',
+      href: '/qa-system-test',
+      icon: ListChecks,
+      description: 'Full system validation & live data compliance'
     }
   ];
 
