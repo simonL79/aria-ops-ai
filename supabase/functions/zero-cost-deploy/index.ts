@@ -1,3 +1,4 @@
+
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
 
 const corsHeaders = {
@@ -156,9 +157,24 @@ function generateSEOContent(title: string, content: any, entity: string, keyword
             margin: 30px 0;
             border-left: 4px solid #2563eb;
         }
+        .demo-notice {
+            background: #fef3c7;
+            border: 2px solid #f59e0b;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .demo-notice strong {
+            color: #92400e;
+        }
     </style>
 </head>
 <body>
+    <div class="demo-notice">
+        <strong>⚠️ DEMONSTRATION MODE:</strong> This is a simulated deployment preview. In production mode, this content would be deployed to live hosting platforms.
+    </div>
+    
     <div class="header">
         <h1>${title}</h1>
         <div class="meta">
@@ -204,10 +220,10 @@ async function deployToGitHubPages(payload: any): Promise<any> {
     const slug = title.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-');
     const filename = `${slug}-${timestamp}.html`;
 
-    // Simulate successful deployment (in real implementation, would use GitHub API)
+    // Return demo deployment URL with clear indication this is a preview
     const deploymentUrl = `https://content-distribution.github.io/news-network/${filename}`;
     
-    console.log(`✅ Zero-cost deployment to GitHub Pages: ${deploymentUrl}`);
+    console.log(`✅ Zero-cost deployment simulation for GitHub Pages: ${deploymentUrl}`);
     
     return {
       success: true,
@@ -216,10 +232,12 @@ async function deployToGitHubPages(payload: any): Promise<any> {
       filename,
       timestamp: new Date().toISOString(),
       cost: 0,
-      indexable: true
+      indexable: true,
+      status: 'simulated',
+      note: 'This is a demonstration preview. Production deployment requires platform authentication.'
     };
   } catch (error) {
-    console.error('GitHub Pages deployment failed:', error);
+    console.error('GitHub Pages deployment simulation failed:', error);
     throw error;
   }
 }
@@ -232,10 +250,10 @@ async function deployToCloudflarePages(payload: any): Promise<any> {
     const timestamp = Date.now();
     const slug = title.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-');
     
-    // Simulate successful deployment
+    // Return demo deployment URL
     const deploymentUrl = `https://news-distribution.pages.dev/${slug}-${timestamp}`;
     
-    console.log(`✅ Zero-cost deployment to Cloudflare Pages: ${deploymentUrl}`);
+    console.log(`✅ Zero-cost deployment simulation for Cloudflare Pages: ${deploymentUrl}`);
     
     return {
       success: true,
@@ -244,10 +262,12 @@ async function deployToCloudflarePages(payload: any): Promise<any> {
       timestamp: new Date().toISOString(),
       cost: 0,
       indexable: true,
-      cdn: 'global'
+      cdn: 'global',
+      status: 'simulated',
+      note: 'This is a demonstration preview. Production deployment requires platform authentication.'
     };
   } catch (error) {
-    console.error('Cloudflare Pages deployment failed:', error);
+    console.error('Cloudflare Pages deployment simulation failed:', error);
     throw error;
   }
 }
@@ -260,10 +280,10 @@ async function deployToNetlify(payload: any): Promise<any> {
     const timestamp = Date.now();
     const slug = title.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-');
     
-    // Simulate successful deployment
+    // Return demo deployment URL
     const deploymentUrl = `https://content-network-${timestamp}.netlify.app/${slug}`;
     
-    console.log(`✅ Zero-cost deployment to Netlify: ${deploymentUrl}`);
+    console.log(`✅ Zero-cost deployment simulation for Netlify: ${deploymentUrl}`);
     
     return {
       success: true,
@@ -272,10 +292,12 @@ async function deployToNetlify(payload: any): Promise<any> {
       timestamp: new Date().toISOString(),
       cost: 0,
       indexable: true,
-      ssl: 'automatic'
+      ssl: 'automatic',
+      status: 'simulated',
+      note: 'This is a demonstration preview. Production deployment requires platform authentication.'
     };
   } catch (error) {
-    console.error('Netlify deployment failed:', error);
+    console.error('Netlify deployment simulation failed:', error);
     throw error;
   }
 }
@@ -288,10 +310,10 @@ async function deployToVercel(payload: any): Promise<any> {
     const timestamp = Date.now();
     const slug = title.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-');
     
-    // Simulate successful deployment
+    // Return demo deployment URL
     const deploymentUrl = `https://news-network-${timestamp}.vercel.app/${slug}`;
     
-    console.log(`✅ Zero-cost deployment to Vercel: ${deploymentUrl}`);
+    console.log(`✅ Zero-cost deployment simulation for Vercel: ${deploymentUrl}`);
     
     return {
       success: true,
@@ -300,10 +322,12 @@ async function deployToVercel(payload: any): Promise<any> {
       timestamp: new Date().toISOString(),
       cost: 0,
       indexable: true,
-      edge: 'optimized'
+      edge: 'optimized',
+      status: 'simulated',
+      note: 'This is a demonstration preview. Production deployment requires platform authentication.'
     };
   } catch (error) {
-    console.error('Vercel deployment failed:', error);
+    console.error('Vercel deployment simulation failed:', error);
     throw error;
   }
 }
@@ -319,7 +343,7 @@ serve(async (req) => {
     const payload = await req.json();
     const { platform } = payload;
 
-    console.log(`[ZERO-COST-DEPLOY] Deploying to platform: ${platform}`);
+    console.log(`[ZERO-COST-DEPLOY] Simulating deployment to platform: ${platform}`);
     console.log(`[ZERO-COST-DEPLOY] Payload:`, JSON.stringify(payload, null, 2));
 
     let result;
@@ -341,7 +365,7 @@ serve(async (req) => {
         throw new Error(`Unsupported platform: ${platform}`);
     }
 
-    console.log(`[ZERO-COST-DEPLOY] Successfully deployed to ${platform}: ${result.deploymentUrl}`);
+    console.log(`[ZERO-COST-DEPLOY] Successfully simulated deployment to ${platform}: ${result.deploymentUrl}`);
 
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
