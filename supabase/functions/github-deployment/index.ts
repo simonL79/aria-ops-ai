@@ -91,16 +91,27 @@ serve(async (req) => {
   try {
     console.log('🚀 GitHub deployment Edge Function called');
     
-    // Get GitHub token from Supabase secrets
-    const GITHUB_API_TOKEN = Deno.env.get('GITHUB_API_TOKEN');
+    // Get GitHub token from Supabase secrets - try multiple possible names
+    let GITHUB_API_TOKEN = Deno.env.get('GITHUB_API_TOKEN') || 
+                          Deno.env.get('GITHUB_TOKEN') || 
+                          Deno.env.get('GH_TOKEN');
     
     console.log('🔍 Checking GitHub API token availability...');
-    console.log(`Token exists: ${GITHUB_API_TOKEN ? 'YES' : 'NO'}`);
-    console.log(`Token length: ${GITHUB_API_TOKEN ? GITHUB_API_TOKEN.length : 0}`);
+    console.log(`Token found: ${GITHUB_API_TOKEN ? 'YES' : 'NO'}`);
+    
+    if (GITHUB_API_TOKEN) {
+      console.log(`Token starts with: ${GITHUB_API_TOKEN.substring(0, 7)}...`);
+      console.log(`Token length: ${GITHUB_API_TOKEN.length}`);
+    }
+    
+    // List all available environment variables for debugging
+    const envVars = Object.keys(Deno.env.toObject());
+    console.log('Available environment variables:', envVars.filter(key => 
+      key.toLowerCase().includes('github') || key.toLowerCase().includes('token')
+    ));
     
     if (!GITHUB_API_TOKEN) {
-      console.error('❌ GitHub API token not found in environment variables');
-      console.error('Available env vars:', Object.keys(Deno.env.toObject()).filter(key => key.includes('GITHUB')));
+      console.error('❌ No GitHub API token found in any expected environment variable');
       return new Response(
         JSON.stringify({ 
           success: false, 
@@ -117,13 +128,40 @@ serve(async (req) => {
     const params: DeploymentParams = await req.json();
     console.log('📝 Deployment params received:', { title: params.title, entity: params.entity });
 
-    // If this is a validation test, just return success
+    // If this is a validation test, test the actual GitHub API
     if (params.contentType === 'validation' && params.title.includes('Validation Test')) {
-      console.log('✅ Token validation test passed');
+      console.log('🔍 Running GitHub API validation test...');
+      
+      const testResponse = await fetch('https://api.github.com/user', {
+        headers: {
+          'Authorization': `Bearer ${GITHUB_API_TOKEN}`,
+          'Accept': 'application/vnd.github.v3+json',
+          'User-Agent': 'ARIA-GitHub-Deployment/1.0',
+        },
+      });
+
+      if (!testResponse.ok) {
+        const testError = await testResponse.text();
+        console.error('❌ GitHub API validation failed:', testResponse.status, testError);
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            error: `GitHub API token validation failed: ${testResponse.status} - Token may be invalid or expired` 
+          }),
+          { 
+            status: 400, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          }
+        );
+      }
+
+      const userData = await testResponse.json();
+      console.log('✅ GitHub API validation successful for user:', userData.login);
+      
       return new Response(
         JSON.stringify({ 
           success: true, 
-          message: 'GitHub API token validation successful',
+          message: `GitHub API token validation successful for user: ${userData.login}`,
           url: 'https://validation-test.github.io/validation',
           repositoryName: 'validation-test'
         }),
@@ -143,22 +181,31 @@ serve(async (req) => {
     console.log(`📝 Creating repository: ${repoName}`);
     console.log(`🧹 Sanitized content length: ${sanitizedContent.length} characters`);
 
-    // Test GitHub API access first
+    // Test GitHub API access first with better error handling
     console.log('🔍 Testing GitHub API access...');
     const testResponse = await fetch('https://api.github.com/user', {
       headers: {
         'Authorization': `Bearer ${GITHUB_API_TOKEN}`,
         'Accept': 'application/vnd.github.v3+json',
+        'User-Agent': 'ARIA-GitHub-Deployment/1.0',
       },
     });
 
     if (!testResponse.ok) {
       const testError = await testResponse.text();
       console.error('❌ GitHub API test failed:', testResponse.status, testError);
+      
+      let errorMessage = 'GitHub API authentication failed';
+      if (testResponse.status === 401) {
+        errorMessage = 'GitHub API token is invalid or expired. Please check your token in Supabase secrets.';
+      } else if (testResponse.status === 403) {
+        errorMessage = 'GitHub API token lacks required permissions. Please ensure it has repo access.';
+      }
+      
       return new Response(
         JSON.stringify({ 
           success: false, 
-          error: `GitHub API authentication failed: ${testResponse.status} - ${testError}` 
+          error: `${errorMessage} (${testResponse.status})` 
         }),
         { 
           status: 500, 
@@ -177,6 +224,7 @@ serve(async (req) => {
         'Authorization': `Bearer ${GITHUB_API_TOKEN}`,
         'Accept': 'application/vnd.github.v3+json',
         'Content-Type': 'application/json',
+        'User-Agent': 'ARIA-GitHub-Deployment/1.0',
       },
       body: JSON.stringify({
         name: repoName,
@@ -214,6 +262,7 @@ serve(async (req) => {
         'Authorization': `Bearer ${GITHUB_API_TOKEN}`,
         'Accept': 'application/vnd.github.v3+json',
         'Content-Type': 'application/json',
+        'User-Agent': 'ARIA-GitHub-Deployment/1.0',
       },
       body: JSON.stringify({
         message: 'Initial professional content publication',
@@ -245,6 +294,7 @@ serve(async (req) => {
         'Authorization': `Bearer ${GITHUB_API_TOKEN}`,
         'Accept': 'application/vnd.github.v3+json',
         'Content-Type': 'application/json',
+        'User-Agent': 'ARIA-GitHub-Deployment/1.0',
       },
       body: JSON.stringify({
         source: {
