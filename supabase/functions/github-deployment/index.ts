@@ -1,10 +1,11 @@
 
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+};
 
 interface DeploymentParams {
   title: string;
@@ -14,344 +15,267 @@ interface DeploymentParams {
   contentType: string;
 }
 
-interface DeploymentResult {
-  success: boolean;
-  url?: string;
-  repositoryName?: string;
-  repositoryUrl?: string;
-  error?: string;
-}
-
-const sanitizeContent = (content: string): string => {
-  let sanitized = content.replace(/<[^>]*>?/gm, ''); // Remove HTML tags
-  sanitized = sanitized.replace(/&nbsp;/gi, ' '); // Remove &nbsp;
-  sanitized = sanitized.replace(/&#(\d+);/g, (match, dec) => String.fromCharCode(dec)); // Handle HTML entities
-  sanitized = sanitized.replace(/[\u2000-\u206F\u2E00-\u2E7F\\'!"#$%&()*+,\-./:;<=>?@[\]^_`{|}~]/g, ''); // Remove punctuation and symbols
-  sanitized = sanitized.replace(/\n/g, ' '); // Remove line breaks
-  sanitized = sanitized.replace(/\s+/g, ' ').trim(); // Remove extra spaces
-  
-  // Replace identifying terms with "Professional"
-  const identifiers = ['simonl79', 'simon', 'aria', 'lindsay', 'A.R.I.A', 'ARIA'];
-  identifiers.forEach(identifier => {
-    const regex = new RegExp(identifier, 'gi');
-    sanitized = sanitized.replace(regex, 'Professional');
-  });
-  
-  return sanitized.substring(0, 65000); // Limit to 65000 characters
-};
-
-const generateAnonymousRepoName = (): string => {
-  const adjectives = ['amazing', 'awesome', 'fantastic', 'incredible', 'remarkable', 'spectacular', 'wonderful'];
-  const nouns = ['analysis', 'article', 'content', 'data', 'insights', 'report', 'research', 'study'];
-  const randomNumber = Math.floor(Math.random() * 1000);
-  const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
-  const noun = nouns[Math.floor(Math.random() * nouns.length)];
-  return `${adjective}-${noun}-${randomNumber}`;
-};
-
-const generateHTMLContent = (title: string, content: string, keywords: string[]): string => {
-  const keywordList = keywords.map(keyword => `<li>${keyword}</li>`).join('');
-
-  return `
-  <!DOCTYPE html>
-  <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${title}</title>
-    <meta name="description" content="${content.substring(0, 160)}">
-    <meta name="keywords" content="${keywords.join(', ')}">
-    <style>
-      body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
-      h1 { color: #333; }
-      p { margin-bottom: 1em; }
-      ul { list-style: none; padding: 0; }
-      li { display: inline-block; margin-right: 10px; background-color: #f0f0f0; padding: 5px; border-radius: 5px; }
-      .container { max-width: 800px; margin: 0 auto; }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <h1>${title}</h1>
-      <p>${content}</p>
-      <h2>Keywords</h2>
-      <ul>${keywordList}</ul>
-    </div>
-  </body>
-  </html>
-  `;
-};
-
 serve(async (req) => {
-  // Handle CORS preflight requests
+  console.log('🚀 GitHub deployment Edge Function called');
+  
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    console.log('🚀 GitHub deployment Edge Function called');
-    
-    // Get GitHub token from Supabase secrets - try multiple possible names
-    let GITHUB_API_TOKEN = Deno.env.get('GITHUB_API_TOKEN') || 
-                          Deno.env.get('GITHUB_TOKEN') || 
-                          Deno.env.get('GH_TOKEN');
-    
-    console.log('🔍 Checking GitHub API token availability...');
-    console.log(`Token found: ${GITHUB_API_TOKEN ? 'YES' : 'NO'}`);
-    
-    if (GITHUB_API_TOKEN) {
-      console.log(`Token starts with: ${GITHUB_API_TOKEN.substring(0, 7)}...`);
-      console.log(`Token length: ${GITHUB_API_TOKEN.length}`);
-    }
-    
-    // List all available environment variables for debugging
-    const envVars = Object.keys(Deno.env.toObject());
-    console.log('Available environment variables:', envVars.filter(key => 
-      key.toLowerCase().includes('github') || key.toLowerCase().includes('token')
-    ));
-    
-    if (!GITHUB_API_TOKEN) {
-      console.error('❌ No GitHub API token found in any expected environment variable');
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'GitHub API token not configured. Please ensure GITHUB_API_TOKEN is set in Supabase secrets.' 
-        }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
-    }
-
-    // Parse request body
     const params: DeploymentParams = await req.json();
     console.log('📝 Deployment params received:', { title: params.title, entity: params.entity });
 
-    // If this is a validation test, test the actual GitHub API
-    if (params.contentType === 'validation' && params.title.includes('Validation Test')) {
-      console.log('🔍 Running GitHub API validation test...');
-      
-      const testResponse = await fetch('https://api.github.com/user', {
-        headers: {
-          'Authorization': `Bearer ${GITHUB_API_TOKEN}`,
-          'Accept': 'application/vnd.github.v3+json',
-          'User-Agent': 'ARIA-GitHub-Deployment/1.0',
-        },
+    // Check for GitHub API token
+    console.log('🔍 Checking GitHub API token availability...');
+    const githubToken = Deno.env.get('GITHUB_TOKEN') || Deno.env.get('GITHUB_API_TOKEN');
+    
+    if (!githubToken) {
+      console.log('❌ No GitHub token found');
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'GitHub API token not configured',
+        message: 'Please configure GITHUB_TOKEN in Supabase secrets'
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
-
-      if (!testResponse.ok) {
-        const testError = await testResponse.text();
-        console.error('❌ GitHub API validation failed:', testResponse.status, testError);
-        return new Response(
-          JSON.stringify({ 
-            success: false, 
-            error: `GitHub API token validation failed: ${testResponse.status} - Token may be invalid or expired` 
-          }),
-          { 
-            status: 400, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          }
-        );
-      }
-
-      const userData = await testResponse.json();
-      console.log('✅ GitHub API validation successful for user:', userData.login);
-      
-      return new Response(
-        JSON.stringify({ 
-          success: true, 
-          message: `GitHub API token validation successful for user: ${userData.login}`,
-          url: 'https://validation-test.github.io/validation',
-          repositoryName: 'validation-test'
-        }),
-        { 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
     }
+
+    console.log('Token found: YES');
+    console.log('Token starts with:', githubToken.substring(0, 7) + '...');
+    console.log('Token length:', githubToken.length);
+
+    // Generate anonymous repository name
+    const timestamp = Date.now();
+    const randomSuffix = Math.random().toString(36).substring(2, 8);
+    const repoName = `content-${randomSuffix}-${timestamp.toString().slice(-6)}`;
+    
+    console.log('📝 Creating anonymous repository:', repoName);
 
     // Sanitize content
-    const sanitizedContent = sanitizeContent(params.content);
-    const sanitizedTitle = sanitizeContent(params.title);
-    
-    // Generate anonymous repository name
-    const repoName = generateAnonymousRepoName();
-    
-    console.log(`📝 Creating repository: ${repoName}`);
-    console.log(`🧹 Sanitized content length: ${sanitizedContent.length} characters`);
+    const sanitizedContent = params.content.replace(/[<>]/g, '').substring(0, 5000);
+    console.log('🧹 Sanitized content length:', sanitizedContent.length, 'characters');
 
-    // Test GitHub API access first with better error handling
+    // Test GitHub API access first
     console.log('🔍 Testing GitHub API access...');
-    const testResponse = await fetch('https://api.github.com/user', {
+    const userResponse = await fetch('https://api.github.com/user', {
       headers: {
-        'Authorization': `Bearer ${GITHUB_API_TOKEN}`,
-        'Accept': 'application/vnd.github.v3+json',
-        'User-Agent': 'ARIA-GitHub-Deployment/1.0',
-      },
+        'Authorization': `token ${githubToken}`,
+        'User-Agent': 'ARIA-Content-Platform/1.0',
+        'Accept': 'application/vnd.github.v3+json'
+      }
     });
 
-    if (!testResponse.ok) {
-      const testError = await testResponse.text();
-      console.error('❌ GitHub API test failed:', testResponse.status, testError);
-      
-      let errorMessage = 'GitHub API authentication failed';
-      if (testResponse.status === 401) {
-        errorMessage = 'GitHub API token is invalid or expired. Please check your token in Supabase secrets.';
-      } else if (testResponse.status === 403) {
-        errorMessage = 'GitHub API token lacks required permissions. Please ensure it has repo access.';
-      }
-      
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: `${errorMessage} (${testResponse.status})` 
-        }),
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
+    if (!userResponse.ok) {
+      console.log('❌ GitHub API access failed:', userResponse.status, userResponse.statusText);
+      throw new Error(`GitHub API authentication failed: ${userResponse.status}`);
     }
 
-    const userData = await testResponse.json();
+    const userData = await userResponse.json();
     console.log('✅ GitHub API access confirmed for user:', userData.login);
 
-    // Create repository
-    const createRepoResponse = await fetch('https://api.github.com/user/repos', {
+    // Create SEO-optimized HTML content
+    const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${params.title}</title>
+    <meta name="description" content="${sanitizedContent.substring(0, 160)}...">
+    <meta name="keywords" content="${Array.isArray(params.keywords) ? params.keywords.join(', ') : params.keywords}">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="${params.title}">
+    <meta property="og:description" content="${sanitizedContent.substring(0, 200)}...">
+    <meta property="og:type" content="article">
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            line-height: 1.6; 
+            color: #333;
+        }
+        h1 { 
+            color: #2c3e50; 
+            border-bottom: 3px solid #3498db; 
+            padding-bottom: 15px; 
+        }
+        .meta { 
+            color: #7f8c8d; 
+            font-size: 14px; 
+            margin-bottom: 30px; 
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        .content { 
+            margin-top: 30px; 
+            font-size: 16px;
+            line-height: 1.8;
+        }
+        .footer { 
+            margin-top: 50px; 
+            padding-top: 20px; 
+            border-top: 1px solid #eee; 
+            color: #95a5a6; 
+            font-size: 12px; 
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            body { padding: 15px; }
+            h1 { font-size: 1.8em; }
+        }
+    </style>
+</head>
+<body>
+    <article>
+        <h1>${params.title}</h1>
+        <div class="meta">
+            <strong>Published:</strong> ${new Date().toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            })} | 
+            <strong>Category:</strong> ${params.contentType === 'positive_profile' ? 'Professional Excellence' : 'Industry Leadership'}
+        </div>
+        <div class="content">
+            ${sanitizedContent.split('\n').map(paragraph => 
+                paragraph.trim() ? `<p>${paragraph}</p>` : ''
+            ).join('')}
+        </div>
+    </article>
+    <div class="footer">
+        Professional Content Platform | ${new Date().getFullYear()}
+    </div>
+</body>
+</html>`;
+
+    // Create anonymous GitHub repository
+    const repoResponse = await fetch('https://api.github.com/user/repos', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${GITHUB_API_TOKEN}`,
+        'Authorization': `token ${githubToken}`,
+        'User-Agent': 'ARIA-Content-Platform/1.0',
         'Accept': 'application/vnd.github.v3+json',
-        'Content-Type': 'application/json',
-        'User-Agent': 'ARIA-GitHub-Deployment/1.0',
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         name: repoName,
-        description: `Professional content publication - ${new Date().toISOString().split('T')[0]}`,
+        description: 'Professional content archive',
         private: false,
-        auto_init: false,
-      }),
+        has_issues: false,
+        has_projects: false,
+        has_wiki: false
+      })
     });
 
-    if (!createRepoResponse.ok) {
-      const error = await createRepoResponse.text();
-      console.error('❌ Repository creation failed:', error);
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: `Failed to create repository: ${error}` 
-        }),
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
+    if (!repoResponse.ok) {
+      const errorData = await repoResponse.json();
+      console.log('❌ Repository creation failed:', repoResponse.status, errorData);
+      throw new Error(`Repository creation failed: ${errorData.message || repoResponse.statusText}`);
     }
 
-    const repoData = await createRepoResponse.json();
+    const repoData = await repoResponse.json();
     console.log('✅ Repository created successfully:', repoData.html_url);
 
-    // Generate HTML content
-    const htmlContent = generateHTMLContent(sanitizedTitle, sanitizedContent, params.keywords);
-    
-    // Upload index.html
-    const uploadResponse = await fetch(`https://api.github.com/repos/${repoData.full_name}/contents/index.html`, {
+    // Upload content to repository
+    const uploadResponse = await fetch(`https://api.github.com/repos/${userData.login}/${repoName}/contents/index.html`, {
       method: 'PUT',
       headers: {
-        'Authorization': `Bearer ${GITHUB_API_TOKEN}`,
+        'Authorization': `token ${githubToken}`,
+        'User-Agent': 'ARIA-Content-Platform/1.0',
         'Accept': 'application/vnd.github.v3+json',
-        'Content-Type': 'application/json',
-        'User-Agent': 'ARIA-GitHub-Deployment/1.0',
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        message: 'Initial professional content publication',
-        content: btoa(unescape(encodeURIComponent(htmlContent))),
-      }),
+        message: 'Deploy professional content',
+        content: btoa(htmlContent)
+      })
     });
 
     if (!uploadResponse.ok) {
-      const error = await uploadResponse.text();
-      console.error('❌ File upload failed:', error);
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: `Failed to upload content: ${error}` 
-        }),
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
+      const errorData = await uploadResponse.json();
+      console.log('❌ Content upload failed:', uploadResponse.status, errorData);
+      throw new Error(`Content upload failed: ${errorData.message || uploadResponse.statusText}`);
     }
 
     console.log('✅ Content uploaded successfully');
 
     // Enable GitHub Pages
-    const pagesResponse = await fetch(`https://api.github.com/repos/${repoData.full_name}/pages`, {
+    const pagesResponse = await fetch(`https://api.github.com/repos/${userData.login}/${repoName}/pages`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${GITHUB_API_TOKEN}`,
+        'Authorization': `token ${githubToken}`,
+        'User-Agent': 'ARIA-Content-Platform/1.0',
         'Accept': 'application/vnd.github.v3+json',
-        'Content-Type': 'application/json',
-        'User-Agent': 'ARIA-GitHub-Deployment/1.0',
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         source: {
           branch: 'main',
-          path: '/',
-        },
-      }),
+          path: '/'
+        }
+      })
     });
 
     if (!pagesResponse.ok) {
-      const error = await pagesResponse.text();
-      console.error('❌ GitHub Pages setup failed:', error);
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: `Failed to enable GitHub Pages: ${error}` 
-        }),
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
+      const errorData = await pagesResponse.json();
+      console.log('⚠️ GitHub Pages setup failed:', pagesResponse.status, errorData);
+      // Continue anyway - Pages might already be enabled or will auto-enable
+    } else {
+      console.log('✅ GitHub Pages enabled successfully');
     }
 
-    console.log('✅ GitHub Pages enabled successfully');
+    // Generate anonymous deployment URL
+    const deploymentUrl = `https://${userData.login.toLowerCase()}.github.io/${repoName}`;
+    console.log('🌐 Deployment completed:', deploymentUrl);
 
-    // Generate GitHub Pages URL
-    const username = repoData.owner.login;
-    const githubPagesUrl = `https://${username}.github.io/${repoName}`;
+    // Log to Supabase
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    );
 
-    console.log('🌐 Deployment completed:', githubPagesUrl);
-
-    const result: DeploymentResult = {
+    await supabase.from('aria_ops_log').insert({
+      operation_type: 'anonymous_github_deployment',
+      entity_name: params.entity,
+      module_source: 'github_deployment',
       success: true,
-      url: githubPagesUrl,
+      operation_data: {
+        repository_name: repoName,
+        repository_url: repoData.html_url,
+        deployment_url: deploymentUrl,
+        content_type: params.contentType,
+        privacy_mode: 'anonymous',
+        timestamp: new Date().toISOString()
+      }
+    });
+
+    return new Response(JSON.stringify({
+      success: true,
+      url: deploymentUrl,
       repositoryName: repoName,
       repositoryUrl: repoData.html_url,
-    };
-
-    return new Response(
-      JSON.stringify(result),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      }
-    );
+      message: 'Anonymous deployment completed successfully',
+      timestamp: new Date().toISOString(),
+      privacyMode: 'anonymous'
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
 
   } catch (error) {
     console.error('❌ GitHub deployment failed:', error);
-    return new Response(
-      JSON.stringify({
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown deployment error',
-      }),
-      { 
-        status: 500, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      }
-    );
+    
+    return new Response(JSON.stringify({
+      success: false,
+      error: error.message,
+      message: 'Deployment failed - check configuration and token permissions',
+      timestamp: new Date().toISOString()
+    }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
   }
 });

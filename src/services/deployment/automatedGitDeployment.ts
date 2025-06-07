@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 interface DeploymentParams {
@@ -14,11 +15,12 @@ interface DeploymentResult {
   repositoryName?: string;
   repositoryUrl?: string;
   error?: string;
+  privacyMode?: string;
 }
 
 export const deployToGitHubPages = async (params: DeploymentParams): Promise<DeploymentResult> => {
   try {
-    console.log('🚀 Starting secure GitHub Pages deployment via Edge Function...');
+    console.log('🚀 Starting anonymous GitHub Pages deployment via Edge Function...');
     
     // Call the Edge Function which has secure access to the GitHub API token
     const { data, error } = await supabase.functions.invoke('github-deployment', {
@@ -41,7 +43,8 @@ export const deployToGitHubPages = async (params: DeploymentParams): Promise<Dep
       };
     }
 
-    console.log('✅ GitHub Pages deployment successful:', data.url);
+    console.log('✅ Anonymous GitHub Pages deployment successful:', data.url);
+    console.log('🔒 Privacy mode:', data.privacyMode || 'anonymous');
     return data;
 
   } catch (error) {
