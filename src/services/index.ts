@@ -31,7 +31,7 @@ import {
   getAllEntities,
   getScanResultsByEntity,
   getEntityStatistics
-} from './entityRecognition';
+} from './entityExtraction';
 
 // Export the stopMonitoring function
 const stopMonitoring = () => {

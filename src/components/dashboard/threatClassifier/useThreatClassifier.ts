@@ -2,8 +2,15 @@
 import { useState } from "react";
 import { NavigateFunction } from "react-router-dom";
 import { toast } from "sonner";
-import { classifyThreat } from "@/services/intelligence";
-import { ThreatClassificationResult, ThreatClassifierRequest } from "@/types/intelligence";
+import { classifyThreat } from "@/services/intelligence/threatClassifier";
+import { ThreatClassificationResult } from "@/services/intelligence/threatClassifier";
+
+interface ThreatClassifierRequest {
+  content: string;
+  platform: string;
+  brand: string;
+  context?: string;
+}
 
 interface UseThreatClassifierProps {
   onClassified?: (result: ThreatClassificationResult) => void;
@@ -21,7 +28,11 @@ export default function useThreatClassifier({ onClassified, navigate }: UseThrea
     setIsClassifying(true);
     
     try {
-      const classificationResult = await classifyThreat(request);
+      const classificationResult = await classifyThreat(
+        request.content,
+        request.platform,
+        request.brand
+      );
       
       if (classificationResult) {
         setResult(classificationResult);
@@ -29,7 +40,7 @@ export default function useThreatClassifier({ onClassified, navigate }: UseThrea
         // Show notification for high severity threats
         if (classificationResult.severity >= 7) {
           toast.error("High severity threat detected", {
-            description: classificationResult.explanation || classificationResult.category,
+            description: classificationResult.reasoning || classificationResult.category,
             duration: 6000
           });
         }
@@ -38,7 +49,6 @@ export default function useThreatClassifier({ onClassified, navigate }: UseThrea
           onClassified(classificationResult);
         }
       } else {
-        // If classifyThreat returns null, it means there was an error
         setError("Unable to classify content. Please try again later.");
       }
     } catch (error) {

@@ -3,8 +3,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Search } from "lucide-react";
-import { ThreatClassifierRequest } from "@/types/intelligence";
-import { classifyThreat } from "@/services";
+import { classifyThreat } from "@/services/intelligence/threatClassifier";
 import ThreatClassificationResultDisplay from "../ThreatClassificationResult";
 import FormInputs from "./FormInputs";
 
@@ -31,13 +30,11 @@ const ManualClassificationForm = ({ onClassified }: ManualClassificationFormProp
     setIsClassifying(true);
     
     try {
-      const request: ThreatClassifierRequest = {
+      const result = await classifyThreat(
         content,
-        platform: platform || "Unknown",
+        platform || "Unknown",
         brand
-      };
-      
-      const result = await classifyThreat(request);
+      );
       
       if (result) {
         setResult(result);

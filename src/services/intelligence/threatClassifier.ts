@@ -1,5 +1,5 @@
+
 import { hybridAIService } from '@/services/ai/hybridAIService';
-import { supabase } from '@/integrations/supabase/client';
 
 export interface ThreatClassificationResult {
   threatLevel: string;
@@ -11,6 +11,9 @@ export interface ThreatClassificationResult {
   severity: number;
   source: string;
   timestamp: string;
+  recommendation: string;
+  ai_reasoning: string;
+  explanation?: string;
 }
 
 export interface ThreatClassificationOptions {
@@ -45,22 +48,11 @@ export const classifyThreat = async (
       entities: analysis.entities || [],
       severity: analysis.severity || 5.0,
       source,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      recommendation: analysis.reasoning || 'Monitor situation',
+      ai_reasoning: analysis.reasoning || 'AI analysis completed',
+      explanation: analysis.reasoning || 'Threat classification completed'
     };
-
-    // Store classification result
-    await supabase.from('threat_classifications').insert({
-      content_hash: btoa(content).slice(0, 64),
-      threat_level: result.threatLevel,
-      confidence: result.confidence,
-      category: result.category,
-      reasoning: result.reasoning,
-      suggested_actions: result.suggestedActions,
-      entities: result.entities,
-      severity: result.severity,
-      source: result.source,
-      ai_service: hybridAIService.getServiceStatus().active
-    });
 
     console.log('✅ Threat classification completed:', result);
     return result;
@@ -78,9 +70,21 @@ export const classifyThreat = async (
       entities: entityName ? [entityName] : [],
       severity: 5.0,
       source,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      recommendation: 'Manual review required',
+      ai_reasoning: 'Classification service unavailable',
+      explanation: 'Classification failed - manual review required'
     };
   }
+};
+
+export const classifyThreatAdvanced = async (
+  content: string,
+  source: string = 'unknown',
+  entityName?: string
+): Promise<ThreatClassificationResult> => {
+  // For now, use the same logic as classifyThreat
+  return await classifyThreat(content, source, entityName);
 };
 
 export const batchClassifyThreats = async (
@@ -105,7 +109,10 @@ export const batchClassifyThreats = async (
         entities: option.entityName ? [option.entityName] : [],
         severity: 5.0,
         source: option.source || 'batch',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        recommendation: 'Manual review required',
+        ai_reasoning: 'Batch classification failed',
+        explanation: 'Classification failed - manual review required'
       });
     }
   }
