@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { AlertTriangle, Brain, Cloud, Home, RefreshCw } from 'lucide-react';
+import { AlertTriangle, Brain, Cloud, Home, RefreshCw, TestTube } from 'lucide-react';
 import { hybridAIService } from '@/services/ai/hybridAIService';
 import { toast } from 'sonner';
 
@@ -16,6 +16,7 @@ export const AIServiceControl = () => {
   });
   const [preferLocal, setPreferLocal] = useState(false);
   const [isInitializing, setIsInitializing] = useState(false);
+  const [localDisabled, setLocalDisabled] = useState(true);
 
   useEffect(() => {
     initializeServices();
@@ -27,17 +28,19 @@ export const AIServiceControl = () => {
       await hybridAIService.initialize();
       const status = hybridAIService.getServiceStatus();
       
-      // Convert the AIServiceStatus to the expected format
       setServiceStatus({
         local: status.local === 'available',
         openai: status.openai === 'available',
         active: status.active
       });
       
-      // Auto-prefer local if available
-      if (status.local === 'available') {
-        setPreferLocal(true);
-        hybridAIService.setPreferLocal(true);
+      // Set local disabled state
+      setLocalDisabled(status.local === 'disabled');
+      
+      // Auto-prefer OpenAI when local is disabled
+      if (status.local === 'disabled' && status.openai === 'available') {
+        setPreferLocal(false);
+        hybridAIService.setPreferLocal(false);
       }
     } catch (error) {
       console.error('Failed to initialize AI services:', error);
@@ -48,6 +51,13 @@ export const AIServiceControl = () => {
   };
 
   const handlePreferenceChange = (prefer: boolean) => {
+    if (localDisabled && prefer) {
+      toast.warning('Local AI is disabled for testing', {
+        description: 'Enable local AI first to use this preference'
+      });
+      return;
+    }
+    
     setPreferLocal(prefer);
     hybridAIService.setPreferLocal(prefer);
     
@@ -63,26 +73,49 @@ export const AIServiceControl = () => {
     });
   };
 
-  const testLocalConnection = async () => {
+  const handleLocalToggle = (enabled: boolean) => {
+    hybridAIService.setOllamaEnabled(enabled);
+    setLocalDisabled(!enabled);
+    
+    if (enabled) {
+      toast.success('Local AI enabled', {
+        description: 'Ollama server will be checked on next initialization'
+      });
+    } else {
+      toast.info('Local AI disabled for testing', {
+        description: 'Only OpenAI will be used for AI operations'
+      });
+      setPreferLocal(false);
+      hybridAIService.setPreferLocal(false);
+    }
+    
+    // Refresh status
+    initializeServices();
+  };
+
+  const testOpenAIConnection = async () => {
     try {
       const result = await hybridAIService.classifyThreat(
-        'This is a test message for AI connectivity',
+        'This is a test message for OpenAI connectivity',
         'test-entity'
       );
       
       if (result) {
-        toast.success('Local AI test successful', {
+        toast.success('OpenAI test successful', {
           description: `Model responded with ${result.threatLevel} threat level`
         });
       }
     } catch (error) {
-      toast.error('Local AI test failed', {
-        description: 'Check if Ollama is running with Mixtral model'
+      toast.error('OpenAI test failed', {
+        description: 'Check your API key configuration'
       });
     }
   };
 
   const getStatusBadge = (service: string, available: boolean) => {
+    if (service === 'local' && localDisabled) {
+      return <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">Disabled</Badge>;
+    }
     if (service === serviceStatus.active) {
       return <Badge className="bg-green-600">Active</Badge>;
     } else if (available) {
@@ -98,6 +131,8 @@ export const AIServiceControl = () => {
         <CardTitle className="flex items-center gap-2">
           <Brain className="h-5 w-5 text-blue-600" />
           Hybrid AI Service Control
+          <TestTube className="h-4 w-4 text-yellow-600" />
+          <span className="text-sm font-normal text-yellow-700">(Testing Mode)</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -109,7 +144,7 @@ export const AIServiceControl = () => {
               <div>
                 <div className="font-medium">Local AI (Ollama)</div>
                 <div className="text-sm text-muted-foreground">
-                  Mixtral, LLaMA3, Mistral
+                  {localDisabled ? 'Disabled for testing' : 'Mixtral, LLaMA3, Mistral'}
                 </div>
               </div>
             </div>
@@ -130,6 +165,22 @@ export const AIServiceControl = () => {
           </div>
         </div>
 
+        {/* Local AI Testing Control */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="font-medium">Enable Local AI</div>
+              <div className="text-sm text-muted-foreground">
+                Toggle Ollama server connection for testing
+              </div>
+            </div>
+            <Switch 
+              checked={!localDisabled}
+              onCheckedChange={handleLocalToggle}
+            />
+          </div>
+        </div>
+
         {/* AI Preference Control */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
@@ -142,15 +193,15 @@ export const AIServiceControl = () => {
             <Switch 
               checked={preferLocal}
               onCheckedChange={handlePreferenceChange}
-              disabled={!serviceStatus.local}
+              disabled={localDisabled || !serviceStatus.local}
             />
           </div>
 
-          {preferLocal && !serviceStatus.local && (
-            <div className="flex items-center gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-              <AlertTriangle className="h-4 w-4 text-amber-600" />
-              <div className="text-sm text-amber-800">
-                Local AI preferred but not available. Install Ollama and pull Mixtral model.
+          {localDisabled && (
+            <div className="flex items-center gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <TestTube className="h-4 w-4 text-yellow-600" />
+              <div className="text-sm text-yellow-800">
+                Local AI is disabled for testing. Only OpenAI will be used for AI operations.
               </div>
             </div>
           )}
@@ -176,27 +227,15 @@ export const AIServiceControl = () => {
             )}
           </Button>
 
-          {serviceStatus.local && (
+          {serviceStatus.openai && (
             <Button 
               variant="outline" 
-              onClick={testLocalConnection}
+              onClick={testOpenAIConnection}
             >
-              Test Local AI
+              Test OpenAI
             </Button>
           )}
         </div>
-
-        {/* Setup Instructions */}
-        {!serviceStatus.local && (
-          <div className="p-4 bg-gray-50 border rounded-lg">
-            <div className="font-medium text-sm mb-2">Setup Local AI (Optional)</div>
-            <div className="text-sm text-muted-foreground space-y-1">
-              <div>1. Install Ollama: <code>curl -fsSL https://ollama.ai/install.sh | sh</code></div>
-              <div>2. Pull Mixtral: <code>ollama pull mixtral:8x7b-instruct</code></div>
-              <div>3. Start service: <code>ollama serve</code></div>
-            </div>
-          </div>
-        )}
 
         {/* Current Status Summary */}
         <div className="text-sm text-muted-foreground">
@@ -204,6 +243,7 @@ export const AIServiceControl = () => {
             {serviceStatus.active === 'local' ? 'Local AI (Ollama)' : 
              serviceStatus.active === 'openai' ? 'OpenAI API' : 'None Available'}
           </strong>
+          {localDisabled && ' (Local AI disabled for testing)'}
         </div>
       </CardContent>
     </Card>

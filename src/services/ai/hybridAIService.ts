@@ -1,10 +1,9 @@
-
 import { localInferenceClient } from './localInferenceClient';
 import { generateAIResponse } from '../secureOpenaiService';
 
 export interface AIServiceStatus {
   openai: 'available' | 'unavailable' | 'rate_limited';
-  local: 'available' | 'unavailable' | 'initializing';
+  local: 'available' | 'unavailable' | 'initializing' | 'disabled';
   active: 'openai' | 'local' | 'none';
 }
 
@@ -31,17 +30,18 @@ export interface ThreatAnalysisResult {
 class HybridAIService {
   private status: AIServiceStatus = {
     openai: 'unavailable',
-    local: 'unavailable',
+    local: 'disabled', // Changed from 'unavailable' to 'disabled'
     active: 'none'
   };
 
   private initialized = false;
   private preferLocal = false;
+  private ollamaDisabled = true; // Flag to disable Ollama for testing
 
   async initialize(): Promise<void> {
     if (this.initialized) return;
 
-    console.log('🔄 Initializing Hybrid AI Service...');
+    console.log('🔄 Initializing Hybrid AI Service (Ollama disabled for testing)...');
     
     // Check OpenAI availability
     try {
@@ -51,28 +51,34 @@ class HybridAIService {
       this.status.openai = 'unavailable';
     }
 
-    // Check local inference availability
-    try {
-      const localAvailable = await localInferenceClient.checkOllamaHealth();
-      this.status.local = localAvailable ? 'available' : 'unavailable';
-    } catch (error) {
-      console.log('⚠️ Local inference not available:', error.message);
-      this.status.local = 'unavailable';
+    // Skip local inference check when disabled
+    if (this.ollamaDisabled) {
+      console.log('🔇 Local inference disabled for testing');
+      this.status.local = 'disabled';
+    } else {
+      // Keep original local inference check code for re-enabling later
+      try {
+        const localAvailable = await localInferenceClient.checkOllamaHealth();
+        this.status.local = localAvailable ? 'available' : 'unavailable';
+      } catch (error) {
+        console.log('⚠️ Local inference not available:', error.message);
+        this.status.local = 'unavailable';
+      }
     }
 
     // Set active service based on preference and availability
     this.updateActiveService();
 
     this.initialized = true;
-    console.log('✅ Hybrid AI Service initialized:', this.status);
+    console.log('✅ Hybrid AI Service initialized (local disabled):', this.status);
   }
 
   private updateActiveService(): void {
-    if (this.preferLocal && this.status.local === 'available') {
+    if (this.preferLocal && this.status.local === 'available' && !this.ollamaDisabled) {
       this.status.active = 'local';
     } else if (this.status.openai === 'available') {
       this.status.active = 'openai';
-    } else if (this.status.local === 'available') {
+    } else if (this.status.local === 'available' && !this.ollamaDisabled) {
       this.status.active = 'local';
     } else {
       this.status.active = 'none';
@@ -82,6 +88,16 @@ class HybridAIService {
   setPreferLocal(prefer: boolean): void {
     this.preferLocal = prefer;
     this.updateActiveService();
+  }
+
+  // Method to enable/disable Ollama for testing
+  setOllamaEnabled(enabled: boolean): void {
+    this.ollamaDisabled = !enabled;
+    if (this.ollamaDisabled) {
+      this.status.local = 'disabled';
+    }
+    this.updateActiveService();
+    console.log(`🔧 Ollama ${enabled ? 'enabled' : 'disabled'} for testing`);
   }
 
   private async checkOpenAIHealth(): Promise<void> {
@@ -107,7 +123,7 @@ class HybridAIService {
   async classifyThreat(content: string, entity: string): Promise<ThreatAnalysisResult> {
     await this.initialize();
 
-    if (this.status.openai === 'available' && (!this.preferLocal || this.status.local !== 'available')) {
+    if (this.status.openai === 'available' && (!this.preferLocal || this.status.local !== 'available' || this.ollamaDisabled)) {
       try {
         console.log('🔍 Using OpenAI for threat classification...');
         const response = await generateAIResponse({
@@ -125,7 +141,8 @@ class HybridAIService {
       }
     }
 
-    if (this.status.local === 'available') {
+    // Only use local inference if not disabled
+    if (this.status.local === 'available' && !this.ollamaDisabled) {
       try {
         console.log('🔍 Using local inference for threat classification...');
         return await localInferenceClient.classifyThreat(content, entity);
@@ -139,7 +156,7 @@ class HybridAIService {
       threatLevel: 'medium',
       confidence: 0.5,
       category: 'unknown',
-      reasoning: 'Unable to classify - all AI services unavailable',
+      reasoning: 'Unable to classify - all AI services unavailable or disabled',
       suggestedActions: ['manual_review'],
       entities: [entity],
       severity: 5.0
@@ -149,7 +166,7 @@ class HybridAIService {
   async generateSEOContent(title: string, keywords: string[], entity: string): Promise<string> {
     await this.initialize();
 
-    if (this.status.openai === 'available' && (!this.preferLocal || this.status.local !== 'available')) {
+    if (this.status.openai === 'available' && (!this.preferLocal || this.status.local !== 'available' || this.ollamaDisabled)) {
       try {
         console.log('📝 Using OpenAI for SEO content generation...');
         const response = await generateAIResponse({
@@ -166,7 +183,8 @@ class HybridAIService {
       }
     }
 
-    if (this.status.local === 'available') {
+    // Only use local inference if not disabled
+    if (this.status.local === 'available' && !this.ollamaDisabled) {
       try {
         console.log('📝 Using local inference for SEO content generation...');
         return await localInferenceClient.generateSEOContent(title, keywords, entity);
@@ -176,13 +194,13 @@ class HybridAIService {
     }
 
     // Fallback content
-    return `# ${title}\n\nContent about ${entity} covering ${keywords.join(', ')}. Generated with fallback system.`;
+    return `# ${title}\n\nContent about ${entity} covering ${keywords.join(', ')}. Generated with fallback system (local AI disabled for testing).`;
   }
 
   async extractEntities(content: string): Promise<EntityExtractionResult> {
     await this.initialize();
 
-    if (this.status.openai === 'available' && (!this.preferLocal || this.status.local !== 'available')) {
+    if (this.status.openai === 'available' && (!this.preferLocal || this.status.local !== 'available' || this.ollamaDisabled)) {
       try {
         console.log('🔍 Using OpenAI for entity extraction...');
         const response = await generateAIResponse({
@@ -199,7 +217,8 @@ class HybridAIService {
       }
     }
 
-    if (this.status.local === 'available') {
+    // Only use local inference if not disabled
+    if (this.status.local === 'available' && !this.ollamaDisabled) {
       try {
         console.log('🔍 Using local inference for entity extraction...');
         return await localInferenceClient.extractEntities(content);
