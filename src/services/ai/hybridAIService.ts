@@ -88,8 +88,9 @@ class HybridAIService {
     try {
       // Simple test to check if OpenAI is working
       const testResponse = await generateAIResponse({
-        type: "general",
-        context: { test: true }
+        responseType: "test",
+        toneStyle: "professional",
+        content: "test"
       });
       
       this.status.openai = testResponse ? 'available' : 'unavailable';
@@ -110,8 +111,10 @@ class HybridAIService {
       try {
         console.log('🔍 Using OpenAI for threat classification...');
         const response = await generateAIResponse({
-          type: "threat_analysis",
-          context: { entity, content }
+          responseType: "threat_analysis",
+          toneStyle: "professional",
+          content: content,
+          platform: "analysis"
         });
 
         return this.parseOpenAIThreatResponse(response);
@@ -150,11 +153,12 @@ class HybridAIService {
       try {
         console.log('📝 Using OpenAI for SEO content generation...');
         const response = await generateAIResponse({
-          type: "content_generation",
-          context: { title, keywords, entity }
+          responseType: "content_generation",
+          toneStyle: "professional",
+          content: `Generate SEO content for: ${title}. Keywords: ${keywords.join(', ')}. Entity: ${entity}`
         });
 
-        return typeof response === 'string' ? response : response?.content || '';
+        return typeof response === 'string' ? response : String(response);
       } catch (error) {
         console.log('⚠️ OpenAI failed, falling back to local inference...');
         this.status.openai = 'rate_limited';
@@ -182,8 +186,9 @@ class HybridAIService {
       try {
         console.log('🔍 Using OpenAI for entity extraction...');
         const response = await generateAIResponse({
-          type: "entity_extraction",
-          context: { content }
+          responseType: "entity_extraction",
+          toneStyle: "professional",
+          content: content
         });
 
         return this.parseOpenAIEntityResponse(response);
