@@ -40,6 +40,16 @@ const AdminSidebar = () => {
       isLive: true
     },
     {
+      title: 'AI Service Control',
+      href: '/admin/ai-control',
+      icon: Zap,
+      description: 'Hybrid AI service management & fallback control',
+      classification: 'CORE AI',
+      priority: 1.5,
+      isLive: true,
+      isFeature: true
+    },
+    {
       title: 'Client Onboarding',
       href: '/admin/client-onboarding',
       icon: Users,

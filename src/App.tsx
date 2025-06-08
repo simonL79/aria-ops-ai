@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -22,6 +21,7 @@ import SystemSettingsPage from "./pages/admin/SystemSettingsPage";
 import StrategyBrainTestPage from "./pages/admin/StrategyBrainTestPage";
 import SystemCompletionPage from '@/pages/admin/SystemCompletionPage';
 import QASystemTestPage from '@/pages/QASystemTestPage';
+import AIControlPage from './pages/admin/AIControlPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -67,6 +67,7 @@ function App() {
                     <Route path="/admin/clients" element={<ClientManagementPage />} />
                     <Route path="/admin/settings" element={<SystemSettingsPage />} />
                     <Route path="/admin/strategy-brain-test" element={<StrategyBrainTestPage />} />
+                    <Route path="/admin/ai-control" element={<AIControlPage />} />
                     
                     {/* Add the new system completion route */}
                     <Route 

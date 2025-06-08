@@ -1,71 +1,111 @@
+import { hybridAIService } from '@/services/ai/hybridAIService';
+import { supabase } from '@/integrations/supabase/client';
 
-import { toast } from "sonner";
-import { contentSafetyCheck } from "../secureApiService";
-import { callSecureOpenAI, validateMessages } from "./client";
-import { OpenAIMessage } from "./types";
+export interface SEOContentResult {
+  title: string;
+  content: string;
+  keywords: string[];
+  entity: string;
+  contentType: 'positive_profile' | 'counter_narrative' | 'neutral_news';
+  wordCount: number;
+  seoScore: number;
+  readabilityScore: number;
+  generatedAt: string;
+  aiService: string;
+}
 
-// Create SEO-optimized content
+interface KeywordDensity {
+  [keyword: string]: number;
+}
+
+const calculateKeywordDensity = (content: string, keywords: string[]): KeywordDensity => {
+  const wordCount = content.split(/\s+/).length;
+  const keywordCounts: KeywordDensity = {};
+
+  keywords.forEach(keyword => {
+    const regex = new RegExp(keyword, 'gi');
+    const matches = content.match(regex);
+    keywordCounts[keyword] = matches ? matches.length / wordCount : 0;
+  });
+
+  return keywordCounts;
+};
+
+const calculateSEOScore = (content: string, keywords: string[]): number => {
+  const keywordDensity = calculateKeywordDensity(content, keywords);
+  let score = 0;
+
+  for (const keyword in keywordDensity) {
+    score += keywordDensity[keyword] * 100;
+  }
+
+  return Math.min(score, 100);
+};
+
+const calculateReadabilityScore = (content: string): number => {
+  // Simplified Flesch Reading Ease formula
+  const sentenceCount = content.split('.').length;
+  const wordCount = content.split(/\s+/).length;
+  const syllableCount = content.split('').length; // Very rough estimate
+
+  const averageSentenceLength = wordCount / sentenceCount;
+  const averageSyllablesPerWord = syllableCount / wordCount;
+
+  const fleschReadingEase = 206.835 - 1.015 * averageSentenceLength - 84.6 * averageSyllablesPerWord;
+  return fleschReadingEase;
+};
+
 export const generateSeoContent = async (
-  keyword: string,
-  title?: string,
-  wordCount: number = 1000
-): Promise<{ title: string, content: string }> => {
+  title: string,
+  keywords: string[],
+  entity: string,
+  contentType: 'positive_profile' | 'counter_narrative' | 'neutral_news' = 'positive_profile'
+): Promise<SEOContentResult> => {
   try {
-    // Security check on input
-    if (!contentSafetyCheck(keyword) || (title && !contentSafetyCheck(title))) {
-      throw new Error("Content failed safety checks. Please review and try again.");
-    }
+    console.log('📝 Generating SEO content using hybrid AI service...');
     
-    const prompt = `Generate SEO-optimized content about "${keyword}" ${title ? `with the title "${title}"` : ''}.
-    The content should be ${wordCount} words long and include:
-    1. An engaging headline if not provided
-    2. Strategic use of primary and LSI keywords
-    3. Headings and subheadings in a logical structure
-    4. Meta description for the content
+    // Initialize hybrid AI service
+    await hybridAIService.initialize();
     
-    Format the response as properly formatted markdown with # for main heading, ## for subheadings, etc.`;
+    // Generate content using hybrid AI
+    const content = await hybridAIService.generateSEOContent(title, keywords, entity);
     
-    const messages: OpenAIMessage[] = [
-      {
-        role: 'system',
-        content: 'You are an expert SEO content creator that specializes in creating content that ranks highly in search engines.'
-      },
-      {
-        role: 'user',
-        content: prompt
-      }
-    ];
-    
-    // Validate messages before sending
-    if (!validateMessages(messages)) {
-      throw new Error("Message validation failed");
-    }
-    
-    const data = await callSecureOpenAI("chat/completions", messages, 0.7, "gpt-4o");
-    
-    if (!data) {
-      throw new Error("Failed to generate content. Please check your API key.");
-    }
-    
-    const content = data.choices[0]?.message?.content || "";
-    
-    // Extract title from the content if it was generated
-    const titleMatch = content.match(/^#\s(.+)$/m);
-    const extractedTitle = titleMatch ? titleMatch[1] : title || keyword;
-    
-    return {
-      title: extractedTitle,
-      content: content
+    const result: SEOContentResult = {
+      title,
+      content,
+      keywords,
+      entity,
+      contentType,
+      wordCount: content.split(' ').length,
+      seoScore: calculateSEOScore(content, keywords),
+      readabilityScore: calculateReadabilityScore(content),
+      generatedAt: new Date().toISOString(),
+      aiService: hybridAIService.getServiceStatus().active
     };
+
+    // Store generated content
+    await supabase.from('generated_content').insert({
+      title: result.title,
+      content: result.content,
+      keywords: result.keywords,
+      entity_name: result.entity,
+      content_type: result.contentType,
+      word_count: result.wordCount,
+      seo_score: result.seoScore,
+      readability_score: result.readabilityScore,
+      ai_service: result.aiService
+    });
+
+    console.log('✅ SEO content generated successfully:', {
+      wordCount: result.wordCount,
+      seoScore: result.seoScore,
+      service: result.aiService
+    });
+    
+    return result;
     
   } catch (error) {
-    console.error("SEO Content Generation Error:", error);
-    toast.error("Failed to generate SEO content", {
-      description: error instanceof Error ? error.message : "Unknown error occurred"
-    });
-    return {
-      title: title || keyword,
-      content: "Error generating SEO content. Please check your API key or try again later."
-    };
+    console.error('❌ SEO content generation failed:', error);
+    throw new Error(`Content generation failed: ${error.message}`);
   }
 };

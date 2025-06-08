@@ -1,94 +1,114 @@
+import { hybridAIService } from '@/services/ai/hybridAIService';
+import { supabase } from '@/integrations/supabase/client';
 
-import { toast } from "sonner";
-import { ThreatClassifierRequest, ThreatClassificationResult } from "@/types/intelligence";
-import { supabase } from "@/integrations/supabase/client";
-import { logActivity, LogAction } from "@/services/activityLogService";
+export interface ThreatClassificationResult {
+  threatLevel: string;
+  confidence: number;
+  category: string;
+  reasoning: string;
+  suggestedActions: string[];
+  entities: string[];
+  severity: number;
+  source: string;
+  timestamp: string;
+}
 
-// Use the threat classifier edge function
-export const classifyThreat = async (data: ThreatClassifierRequest): Promise<ThreatClassificationResult | null> => {
+export interface ThreatClassificationOptions {
+  content: string;
+  source?: string;
+  entityName?: string;
+}
+
+export const classifyThreat = async (
+  content: string,
+  source: string = 'unknown',
+  entityName?: string
+): Promise<ThreatClassificationResult> => {
   try {
-    const { data: responseData, error } = await supabase.functions.invoke('threat-classification', {
-      body: data
-    });
-
-    if (error) {
-      console.error("Edge function error:", error);
-      toast.error("Failed to classify threat", {
-        description: "There was an error communicating with the classification service.",
-        duration: 5000
-      });
-      return null;
-    }
+    console.log('🔍 Classifying threat using hybrid AI service...');
     
-    if (!responseData) {
-      throw new Error("Empty response from classification service");
-    }
+    // Initialize hybrid AI service if not already done
+    await hybridAIService.initialize();
     
-    // Log the classification activity
-    await logActivity(
-      LogAction.CLASSIFY,
-      `Classified content with severity ${responseData.severity}/10 as "${responseData.category}"`,
-      'content',
-      'threat-classification'
+    // Use hybrid AI service for classification
+    const analysis = await hybridAIService.classifyThreat(
+      content, 
+      entityName || 'unknown_entity'
     );
     
-    // The edge function returns a properly formatted result
-    return responseData as ThreatClassificationResult;
+    const result: ThreatClassificationResult = {
+      threatLevel: analysis.threatLevel || 'medium',
+      confidence: analysis.confidence || 0.7,
+      category: analysis.category || 'unknown',
+      reasoning: analysis.reasoning || 'Analysis completed',
+      suggestedActions: analysis.suggestedActions || ['monitor'],
+      entities: analysis.entities || [],
+      severity: analysis.severity || 5.0,
+      source,
+      timestamp: new Date().toISOString()
+    };
+
+    // Store classification result
+    await supabase.from('threat_classifications').insert({
+      content_hash: btoa(content).slice(0, 64),
+      threat_level: result.threatLevel,
+      confidence: result.confidence,
+      category: result.category,
+      reasoning: result.reasoning,
+      suggested_actions: result.suggestedActions,
+      entities: result.entities,
+      severity: result.severity,
+      source: result.source,
+      ai_service: hybridAIService.getServiceStatus().active
+    });
+
+    console.log('✅ Threat classification completed:', result);
+    return result;
     
   } catch (error) {
-    console.error("Classification API Error:", error);
-    toast.error("Failed to classify threat", {
-      description: error instanceof Error 
-        ? error.message 
-        : "Unknown error occurred. Please try again later.",
-      duration: 5000
-    });
-    return null;
+    console.error('❌ Threat classification failed:', error);
+    
+    // Return safe fallback
+    return {
+      threatLevel: 'medium',
+      confidence: 0.5,
+      category: 'unknown',
+      reasoning: 'Classification failed - manual review required',
+      suggestedActions: ['manual_review', 'escalate'],
+      entities: entityName ? [entityName] : [],
+      severity: 5.0,
+      source,
+      timestamp: new Date().toISOString()
+    };
   }
 };
 
-// Advanced threat classifier that takes additional context into account
-export const classifyThreatAdvanced = async (
-  data: ThreatClassifierRequest & {
-    previousInteractions?: string[];
-    reputationScore?: number;
-    historicalContext?: string;
-  }
-): Promise<ThreatClassificationResult | null> => {
-  try {
-    // Use the same edge function for advanced classification
-    const { data: responseData, error } = await supabase.functions.invoke('threat-classification', {
-      body: data
-    });
-
-    if (error) {
-      console.error("Edge function error:", error);
-      toast.error("Failed to classify threat", {
-        description: "There was an error communicating with the classification service.",
-        duration: 5000
+export const batchClassifyThreats = async (
+  options: ThreatClassificationOptions[]
+): Promise<ThreatClassificationResult[]> => {
+  const results: ThreatClassificationResult[] = [];
+  
+  for (const option of options) {
+    try {
+      const result = await classifyThreat(option.content, option.source, option.entityName);
+      results.push(result);
+    } catch (error) {
+      console.error('❌ Batch threat classification failed for content:', option.content, error);
+      
+      // Push fallback result
+      results.push({
+        threatLevel: 'medium',
+        confidence: 0.5,
+        category: 'unknown',
+        reasoning: 'Classification failed - manual review required',
+        suggestedActions: ['manual_review', 'escalate'],
+        entities: option.entityName ? [option.entityName] : [],
+        severity: 5.0,
+        source: option.source || 'batch',
+        timestamp: new Date().toISOString()
       });
-      return null;
     }
-    
-    if (!responseData) {
-      throw new Error("Empty response from classification service");
-    }
-    
-    // Log advanced classification
-    await logActivity(
-      LogAction.CLASSIFY,
-      `Advanced classification: ${responseData.category} (severity: ${responseData.severity}/10)`,
-      'content',
-      'advanced-classification'
-    );
-    
-    return responseData as ThreatClassificationResult;
-    
-  } catch (error) {
-    console.error("Advanced Classification API Error:", error);
-    toast.error("Failed to classify threat", {
-      description: error instanceof Error ? error.message : "Unknown error occurred"
-    });
-    return null;
   }
+  
+  return results;
 };
