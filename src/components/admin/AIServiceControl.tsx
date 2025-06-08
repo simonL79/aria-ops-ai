@@ -26,10 +26,16 @@ export const AIServiceControl = () => {
     try {
       await hybridAIService.initialize();
       const status = hybridAIService.getServiceStatus();
-      setServiceStatus(status);
+      
+      // Convert the AIServiceStatus to the expected format
+      setServiceStatus({
+        local: status.local === 'available',
+        openai: status.openai === 'available',
+        active: status.active
+      });
       
       // Auto-prefer local if available
-      if (status.local) {
+      if (status.local === 'available') {
         setPreferLocal(true);
         hybridAIService.setPreferLocal(true);
       }
@@ -46,7 +52,11 @@ export const AIServiceControl = () => {
     hybridAIService.setPreferLocal(prefer);
     
     const status = hybridAIService.getServiceStatus();
-    setServiceStatus(status);
+    setServiceStatus({
+      local: status.local === 'available',
+      openai: status.openai === 'available',
+      active: status.active
+    });
     
     toast.success(`AI preference set to ${prefer ? 'Local' : 'OpenAI'}`, {
       description: prefer ? 'Using offline models for privacy' : 'Using cloud AI for quality'

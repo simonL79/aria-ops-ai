@@ -1,7 +1,6 @@
 
 import { localInferenceClient } from './localInferenceClient';
 import { generateAIResponse } from '../secureOpenaiService';
-import { toast } from 'sonner';
 
 export interface AIServiceStatus {
   openai: 'available' | 'unavailable' | 'rate_limited';
@@ -37,6 +36,7 @@ class HybridAIService {
   };
 
   private initialized = false;
+  private preferLocal = false;
 
   async initialize(): Promise<void> {
     if (this.initialized) return;
@@ -60,21 +60,36 @@ class HybridAIService {
       this.status.local = 'unavailable';
     }
 
-    // Set active service
-    this.status.active = this.status.openai === 'available' ? 'openai' : 
-                        this.status.local === 'available' ? 'local' : 'none';
+    // Set active service based on preference and availability
+    this.updateActiveService();
 
     this.initialized = true;
     console.log('✅ Hybrid AI Service initialized:', this.status);
+  }
+
+  private updateActiveService(): void {
+    if (this.preferLocal && this.status.local === 'available') {
+      this.status.active = 'local';
+    } else if (this.status.openai === 'available') {
+      this.status.active = 'openai';
+    } else if (this.status.local === 'available') {
+      this.status.active = 'local';
+    } else {
+      this.status.active = 'none';
+    }
+  }
+
+  setPreferLocal(prefer: boolean): void {
+    this.preferLocal = prefer;
+    this.updateActiveService();
   }
 
   private async checkOpenAIHealth(): Promise<void> {
     try {
       // Simple test to check if OpenAI is working
       const testResponse = await generateAIResponse({
-        prompt: "Test",
         type: "general",
-        context: {}
+        context: { test: true }
       });
       
       this.status.openai = testResponse ? 'available' : 'unavailable';
@@ -91,11 +106,10 @@ class HybridAIService {
   async classifyThreat(content: string, entity: string): Promise<ThreatAnalysisResult> {
     await this.initialize();
 
-    if (this.status.openai === 'available') {
+    if (this.status.openai === 'available' && (!this.preferLocal || this.status.local !== 'available')) {
       try {
         console.log('🔍 Using OpenAI for threat classification...');
         const response = await generateAIResponse({
-          prompt: `Analyze this content for threats against ${entity}: "${content}"`,
           type: "threat_analysis",
           context: { entity, content }
         });
@@ -104,7 +118,7 @@ class HybridAIService {
       } catch (error) {
         console.log('⚠️ OpenAI failed, falling back to local inference...');
         this.status.openai = 'rate_limited';
-        this.status.active = 'local';
+        this.updateActiveService();
       }
     }
 
@@ -132,20 +146,19 @@ class HybridAIService {
   async generateSEOContent(title: string, keywords: string[], entity: string): Promise<string> {
     await this.initialize();
 
-    if (this.status.openai === 'available') {
+    if (this.status.openai === 'available' && (!this.preferLocal || this.status.local !== 'available')) {
       try {
         console.log('📝 Using OpenAI for SEO content generation...');
         const response = await generateAIResponse({
-          prompt: `Create SEO-optimized content with title: ${title}, keywords: ${keywords.join(', ')}, for entity: ${entity}`,
           type: "content_generation",
           context: { title, keywords, entity }
         });
 
-        return response?.content || '';
+        return typeof response === 'string' ? response : response?.content || '';
       } catch (error) {
         console.log('⚠️ OpenAI failed, falling back to local inference...');
         this.status.openai = 'rate_limited';
-        this.status.active = 'local';
+        this.updateActiveService();
       }
     }
 
@@ -165,11 +178,10 @@ class HybridAIService {
   async extractEntities(content: string): Promise<EntityExtractionResult> {
     await this.initialize();
 
-    if (this.status.openai === 'available') {
+    if (this.status.openai === 'available' && (!this.preferLocal || this.status.local !== 'available')) {
       try {
         console.log('🔍 Using OpenAI for entity extraction...');
         const response = await generateAIResponse({
-          prompt: `Extract entities from this content: "${content}"`,
           type: "entity_extraction",
           context: { content }
         });
@@ -178,7 +190,7 @@ class HybridAIService {
       } catch (error) {
         console.log('⚠️ OpenAI failed, falling back to local inference...');
         this.status.openai = 'rate_limited';
-        this.status.active = 'local';
+        this.updateActiveService();
       }
     }
 
