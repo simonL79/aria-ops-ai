@@ -6,7 +6,7 @@ import MobileNav from './MobileNav';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '../ui/button';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { LogIn, LogOut, Home, Menu, X, Shield } from 'lucide-react';
+import { LogIn, LogOut, Home, Menu, X } from 'lucide-react';
 import Logo from '../ui/logo';
 
 interface PublicLayoutProps {
@@ -69,13 +69,6 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
               </Link>
               <Link to="/simon-lindsay" className="text-corporate-lightGray hover:text-white transition-colors text-sm lg:text-base">
                 About Simon
-              </Link>
-              <Link 
-                to="/atlas" 
-                className="text-corporate-lightGray hover:text-blue-400 transition-colors text-sm lg:text-base flex items-center gap-2"
-              >
-                <Shield className="h-4 w-4" />
-                Atlas
               </Link>
               <Link to="/scan" className="text-corporate-lightGray hover:text-white transition-colors text-sm lg:text-base">
                 Get Started
@@ -152,14 +145,6 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   About Simon
-                </Link>
-                <Link 
-                  to="/atlas" 
-                  className="text-corporate-lightGray hover:text-blue-400 transition-colors py-2 flex items-center gap-2"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <Shield className="h-4 w-4" />
-                  Atlas Intelligence
                 </Link>
                 <Link 
                   to="/scan" 

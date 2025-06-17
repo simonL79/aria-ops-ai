@@ -23,7 +23,6 @@ import StrategyBrainTestPage from "./pages/admin/StrategyBrainTestPage";
 import SystemCompletionPage from '@/pages/admin/SystemCompletionPage';
 import QASystemTestPage from '@/pages/QASystemTestPage';
 import AIControlPage from './pages/admin/AIControlPage';
-import AtlasSearch from './components/atlas/AtlasSearch';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -53,9 +52,6 @@ function App() {
                     {/* Protected Public Routes - DO NOT MODIFY */}
                     <Route path="/" element={<Index />} />
                     <Route path="/home" element={<HomePage />} />
-                    
-                    {/* Atlas Intelligence Platform */}
-                    <Route path="/atlas" element={<AtlasSearch />} />
                     
                     {/* Admin/Backend Routes - Safe to modify */}
                     <Route path="/secure-intake" element={<SecureClientIntakePage />} />
