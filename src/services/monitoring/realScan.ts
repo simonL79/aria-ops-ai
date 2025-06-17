@@ -17,6 +17,15 @@ export interface ScanResult {
   confidence: number;
   threat_type?: string;
   created_at: string;
+  status?: string;
+  sentiment?: number;
+  confidence_score?: number;
+  potential_reach?: number;
+  detected_entities?: string[];
+  source_type?: string;
+  source_credibility_score?: number;
+  media_is_ai_generated?: boolean;
+  ai_detection_confidence?: number;
 }
 
 /**
@@ -47,9 +56,18 @@ export const performRealScan = async (options: RealScanOptions = {}): Promise<Sc
       platform: result.platform,
       url: result.url || '',
       severity: result.severity as 'low' | 'medium' | 'high',
-      confidence: 0.8, // Default confidence
+      confidence: result.confidence_score || 0.8,
       threat_type: result.threat_type,
-      created_at: result.created_at
+      created_at: result.created_at,
+      status: result.status || 'new',
+      sentiment: 0,
+      confidence_score: result.confidence_score || 0.8,
+      potential_reach: 1000,
+      detected_entities: [],
+      source_type: 'live_osint',
+      source_credibility_score: 0.8,
+      media_is_ai_generated: false,
+      ai_detection_confidence: 0
     }));
     
     // Log the scan operation

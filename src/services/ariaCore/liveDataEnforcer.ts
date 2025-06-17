@@ -5,8 +5,10 @@ export interface LiveDataCompliance {
   isCompliant: boolean;
   liveDataOnly: boolean;
   mockDataBlocked: boolean;
+  simulationDetected: boolean;
   lastValidated: string;
   violations: string[];
+  message: string;
 }
 
 /**
@@ -56,7 +58,8 @@ export class LiveDataEnforcer {
         .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
         .limit(1);
       
-      if (mockData && mockData.length > 0) {
+      const simulationDetected = !!(mockData && mockData.length > 0);
+      if (simulationDetected) {
         violations.push('Mock data detected in recent scan results');
       }
       
@@ -64,12 +67,18 @@ export class LiveDataEnforcer {
       const liveDataOnly = configMap.get('allow_mock_data') !== 'enabled';
       const mockDataBlocked = !mockData || mockData.length === 0;
       
+      const message = violations.length > 0 
+        ? `${violations.length} compliance violations detected`
+        : 'System fully compliant with live data enforcement';
+      
       return {
         isCompliant,
         liveDataOnly,
         mockDataBlocked,
+        simulationDetected,
         lastValidated: new Date().toISOString(),
-        violations
+        violations,
+        message
       };
       
     } catch (error) {
@@ -78,8 +87,10 @@ export class LiveDataEnforcer {
         isCompliant: false,
         liveDataOnly: false,
         mockDataBlocked: false,
+        simulationDetected: true,
         lastValidated: new Date().toISOString(),
-        violations: ['Validation system error: ' + error.message]
+        violations: ['Validation system error: ' + error.message],
+        message: 'Validation system error'
       };
     }
   }
@@ -87,12 +98,13 @@ export class LiveDataEnforcer {
   /**
    * Validate input data to ensure it's not mock/test data
    */
-  static async validateDataInput(content: string, source: string): Promise<void> {
+  static async validateDataInput(content: string, source: string): Promise<boolean> {
     const mockIndicators = ['mock', 'test', 'demo', 'sample', 'example'];
     const lowerContent = content.toLowerCase();
     
     if (mockIndicators.some(indicator => lowerContent.includes(indicator))) {
-      throw new Error(`Mock data rejected: ${source} contains test indicators`);
+      console.warn(`Mock data rejected: ${source} contains test indicators`);
+      return false;
     }
     
     // Log validation
@@ -106,6 +118,16 @@ export class LiveDataEnforcer {
       },
       success: true
     });
+    
+    return true;
+  }
+  
+  /**
+   * Block simulation attempts
+   */
+  static blockSimulation(source: string): never {
+    console.error(`🚫 SIMULATION BLOCKED: ${source} - Live data enforcement active`);
+    throw new Error(`Simulation blocked by live data enforcement: ${source}`);
   }
   
   /**

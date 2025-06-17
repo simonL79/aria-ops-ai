@@ -4,15 +4,7 @@ import { AlertTriangle, Shield, CheckCircle, Ban } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { LiveDataEnforcer } from '@/services/ariaCore/liveDataEnforcer';
-
-interface LiveDataValidationResult {
-  isCompliant: boolean;
-  mockDataBlocked: boolean;
-  liveDataOnly: boolean;
-  simulationDetected: boolean;
-  message: string;
-}
+import { LiveDataEnforcer, LiveDataCompliance } from '@/services/ariaCore/liveDataEnforcer';
 
 interface LiveDataGuardProps {
   children: React.ReactNode;
@@ -20,7 +12,7 @@ interface LiveDataGuardProps {
 }
 
 export const LiveDataGuard = ({ children, enforceStrict = true }: LiveDataGuardProps) => {
-  const [validationResult, setValidationResult] = useState<LiveDataValidationResult | null>(null);
+  const [validationResult, setValidationResult] = useState<LiveDataCompliance | null>(null);
   const [isValidating, setIsValidating] = useState(true);
   const [showDetails, setShowDetails] = useState(false);
 
