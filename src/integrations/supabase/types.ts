@@ -75,6 +75,45 @@ export type Database = {
         }
         Relationships: []
       }
+      anubis_creeper_log: {
+        Row: {
+          confidence_score: number | null
+          content_discovered: string | null
+          created_at: string | null
+          discovered_at: string | null
+          entity_name: string
+          id: string
+          notes: string | null
+          processed: boolean | null
+          source_platform: string
+          threat_level: number | null
+        }
+        Insert: {
+          confidence_score?: number | null
+          content_discovered?: string | null
+          created_at?: string | null
+          discovered_at?: string | null
+          entity_name: string
+          id?: string
+          notes?: string | null
+          processed?: boolean | null
+          source_platform: string
+          threat_level?: number | null
+        }
+        Update: {
+          confidence_score?: number | null
+          content_discovered?: string | null
+          created_at?: string | null
+          discovered_at?: string | null
+          entity_name?: string
+          id?: string
+          notes?: string | null
+          processed?: boolean | null
+          source_platform?: string
+          threat_level?: number | null
+        }
+        Relationships: []
+      }
       anubis_entity_memory: {
         Row: {
           context_reference: string | null
@@ -425,6 +464,42 @@ export type Database = {
           verification_method?: string
           verified_at?: string | null
           verified_by?: string | null
+        }
+        Relationships: []
+      }
+      aria_event_dispatch: {
+        Row: {
+          created_at: string | null
+          event_data: Json | null
+          event_type: string
+          id: string
+          priority: string | null
+          processed_at: string | null
+          scheduled_for: string | null
+          status: string | null
+          target_entity: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          event_data?: Json | null
+          event_type: string
+          id?: string
+          priority?: string | null
+          processed_at?: string | null
+          scheduled_for?: string | null
+          status?: string | null
+          target_entity?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          event_data?: Json | null
+          event_type?: string
+          id?: string
+          priority?: string | null
+          processed_at?: string | null
+          scheduled_for?: string | null
+          status?: string | null
+          target_entity?: string | null
         }
         Relationships: []
       }
@@ -7719,6 +7794,7 @@ export type Database = {
           matched_phrase: string | null
           media_type: string | null
           sample_url: string | null
+          threat_score: number | null
         }
         Insert: {
           confidence_score?: number | null
@@ -7730,6 +7806,7 @@ export type Database = {
           matched_phrase?: string | null
           media_type?: string | null
           sample_url?: string | null
+          threat_score?: number | null
         }
         Update: {
           confidence_score?: number | null
@@ -7741,6 +7818,7 @@ export type Database = {
           matched_phrase?: string | null
           media_type?: string | null
           sample_url?: string | null
+          threat_score?: number | null
         }
         Relationships: []
       }

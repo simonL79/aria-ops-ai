@@ -1,169 +1,170 @@
 
-import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface LiveDataCompliance {
   isCompliant: boolean;
-  mockDataBlocked: boolean;
   liveDataOnly: boolean;
-  simulationDetected: boolean;
-  message: string;
+  mockDataBlocked: boolean;
+  lastValidated: string;
+  violations: string[];
 }
 
 /**
  * A.R.I.A™ Live Data Enforcement System
- * ZERO TOLERANCE for mock data in production client environment
  */
 export class LiveDataEnforcer {
   
-  private static readonly MOCK_DATA_PATTERNS = [
-    /mock/i,
-    /test/i,
-    /demo/i,
-    /sample/i,
-    /example\.com/i,
-    /localhost/i,
-    /127\.0\.0\.1/i,
-    /simulation/i,
-    /fake/i,
-    /dummy/i
-  ];
-  
   /**
-   * Validate that the system is operating in live data mode only
+   * Validate that the system is enforcing live data only
    */
   static async validateLiveDataCompliance(): Promise<LiveDataCompliance> {
     try {
-      console.log('🔍 A.R.I.A™ OSINT: Validating live data compliance...');
+      console.log('🔍 Validating live data compliance...');
       
-      // Check for any simulation or mock data indicators
-      const simulationDetected = this.detectSimulationIndicators();
+      const violations: string[] = [];
       
-      if (simulationDetected) {
-        const message = '🚨 SIMULATION DETECTED: A.R.I.A™ system must operate with 100% live data';
-        console.error(message);
-        
-        return {
-          isCompliant: false,
-          mockDataBlocked: true,
-          liveDataOnly: false,
-          simulationDetected: true,
-          message
-        };
+      // Check system configuration
+      const { data: config, error } = await supabase
+        .from('system_config')
+        .select('config_key, config_value')
+        .in('config_key', ['allow_mock_data', 'live_enforcement', 'system_mode']);
+      
+      if (error) {
+        violations.push('Could not verify system configuration');
       }
       
-      const compliance: LiveDataCompliance = {
-        isCompliant: true,
-        mockDataBlocked: true,
-        liveDataOnly: true,
-        simulationDetected: false,
-        message: 'A.R.I.A™ OSINT Intelligence: 100% live data compliance achieved - NO SIMULATIONS'
-      };
+      const configMap = new Map(config?.map(c => [c.config_key, c.config_value]) || []);
       
-      console.log('📊 Live data compliance:', compliance);
-      return compliance;
+      // Validate configuration
+      if (configMap.get('allow_mock_data') === 'enabled') {
+        violations.push('Mock data is enabled - should be disabled in production');
+      }
       
-    } catch (error) {
-      console.error('❌ Live data compliance check failed:', error);
+      if (configMap.get('live_enforcement') !== 'enabled') {
+        violations.push('Live data enforcement is not active');
+      }
+      
+      if (configMap.get('system_mode') !== 'live') {
+        violations.push('System not in live mode');
+      }
+      
+      // Check for recent mock data contamination
+      const { data: mockData, error: mockError } = await supabase
+        .from('scan_results')
+        .select('id')
+        .or('content.ilike.%mock%,content.ilike.%test%,content.ilike.%demo%')
+        .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+        .limit(1);
+      
+      if (mockData && mockData.length > 0) {
+        violations.push('Mock data detected in recent scan results');
+      }
+      
+      const isCompliant = violations.length === 0;
+      const liveDataOnly = configMap.get('allow_mock_data') !== 'enabled';
+      const mockDataBlocked = !mockData || mockData.length === 0;
       
       return {
+        isCompliant,
+        liveDataOnly,
+        mockDataBlocked,
+        lastValidated: new Date().toISOString(),
+        violations
+      };
+      
+    } catch (error) {
+      console.error('❌ Live data compliance validation failed:', error);
+      return {
         isCompliant: false,
-        mockDataBlocked: false,
         liveDataOnly: false,
-        simulationDetected: false,
-        message: `Compliance validation failed: ${error.message}`
+        mockDataBlocked: false,
+        lastValidated: new Date().toISOString(),
+        violations: ['Validation system error: ' + error.message]
       };
     }
   }
   
   /**
-   * Enforce system-wide live data requirements
+   * Validate input data to ensure it's not mock/test data
    */
-  static async enforceSystemWideLiveData(): Promise<void> {
-    const compliance = await this.validateLiveDataCompliance();
+  static async validateDataInput(content: string, source: string): Promise<void> {
+    const mockIndicators = ['mock', 'test', 'demo', 'sample', 'example'];
+    const lowerContent = content.toLowerCase();
     
-    if (!compliance.isCompliant) {
-      toast.error("Live Data Enforcement", {
-        description: "System blocked non-compliant data sources",
-        duration: 5000
-      });
-      throw new Error(compliance.message);
-    }
-  }
-  
-  /**
-   * Validate that input data is from live sources
-   */
-  static async validateDataInput(data: string, source: string): Promise<boolean> {
-    if (!data || !source) {
-      return false;
+    if (mockIndicators.some(indicator => lowerContent.includes(indicator))) {
+      throw new Error(`Mock data rejected: ${source} contains test indicators`);
     }
     
-    // Check for mock data patterns
-    const hasMockPattern = this.MOCK_DATA_PATTERNS.some(pattern => 
-      pattern.test(data) || pattern.test(source)
-    );
-    
-    if (hasMockPattern) {
-      console.warn(`🚫 Mock data detected in ${source}: ${data.substring(0, 100)}...`);
-      return false;
-    }
-    
-    return true;
-  }
-  
-  /**
-   * Block simulation operations with zero tolerance
-   */
-  static blockSimulation(operation: string): never {
-    const message = `🚫 SIMULATION BLOCKED: ${operation} - A.R.I.A™ operates with live data only in production`;
-    console.error(message);
-    
-    toast.error("Simulation Blocked", {
-      description: "A.R.I.A™ requires 100% live data sources for client operations",
-      duration: 10000
+    // Log validation
+    await supabase.from('aria_ops_log').insert({
+      operation_type: 'data_validation',
+      module_source: 'LiveDataEnforcer',
+      operation_data: {
+        source,
+        contentLength: content.length,
+        validated: true
+      },
+      success: true
     });
-    
-    throw new Error(message);
   }
   
   /**
-   * Detect simulation indicators in the environment
+   * Enable live data enforcement
    */
-  private static detectSimulationIndicators(): boolean {
-    // Check for common development/test indicators
-    const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
-    const userAgent = typeof navigator !== 'undefined' ? navigator.userAgent : '';
-    
-    const testIndicators = [
-      hostname.includes('localhost'),
-      hostname.includes('127.0.0.1'),
-      hostname.includes('test'),
-      hostname.includes('dev'),
-      userAgent.includes('test'),
-      // Check for common test frameworks
-      typeof window !== 'undefined' && (window as any).__test__,
-      typeof global !== 'undefined' && (global as any).__test__
-    ];
-    
-    return testIndicators.some(indicator => indicator);
-  }
-  
-  /**
-   * Enforce live data requirements for API calls
-   */
-  static async validateApiCall(endpoint: string, payload: any): Promise<void> {
-    const endpointValid = await this.validateDataInput(endpoint, 'api_endpoint');
-    const payloadValid = payload ? await this.validateDataInput(JSON.stringify(payload), 'api_payload') : true;
-    
-    if (!endpointValid || !payloadValid) {
-      this.blockSimulation(`API call to ${endpoint}`);
+  static async enableLiveEnforcement(): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from('system_config')
+        .upsert([
+          { config_key: 'live_enforcement', config_value: 'enabled' },
+          { config_key: 'allow_mock_data', config_value: 'disabled' },
+          { config_key: 'system_mode', config_value: 'live' }
+        ], { onConflict: 'config_key' });
+      
+      if (error) {
+        console.error('Failed to enable live enforcement:', error);
+        return false;
+      }
+      
+      console.log('✅ Live data enforcement enabled');
+      return true;
+      
+    } catch (error) {
+      console.error('Error enabling live enforcement:', error);
+      return false;
     }
   }
   
   /**
-   * Get current compliance status
+   * Get live system status
    */
-  static async getCurrentComplianceStatus(): Promise<LiveDataCompliance> {
-    return await this.validateLiveDataCompliance();
+  static async getLiveSystemStatus(): Promise<{
+    active: boolean;
+    modules: any[];
+    lastUpdate: string;
+  }> {
+    try {
+      const { data: liveStatus, error } = await supabase
+        .from('live_status')
+        .select('*')
+        .order('last_report', { ascending: false });
+      
+      if (error) {
+        console.error('Failed to get live status:', error);
+        return { active: false, modules: [], lastUpdate: new Date().toISOString() };
+      }
+      
+      const activeModules = liveStatus?.filter(m => m.system_status === 'LIVE') || [];
+      
+      return {
+        active: activeModules.length > 0,
+        modules: liveStatus || [],
+        lastUpdate: new Date().toISOString()
+      };
+      
+    } catch (error) {
+      console.error('Error getting live system status:', error);
+      return { active: false, modules: [], lastUpdate: new Date().toISOString() };
+    }
   }
 }
