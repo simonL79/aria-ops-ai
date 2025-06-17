@@ -6,7 +6,7 @@ export interface RealScanOptions {
   targetEntity?: string;
   source?: string;
   platforms?: string[];
-  scan_depth?: string; // Add this missing property
+  scan_depth?: string;
 }
 
 export interface ScanResult {
@@ -16,9 +16,9 @@ export interface ScanResult {
   url: string;
   severity: 'low' | 'medium' | 'high';
   confidence: number;
-  threat_type?: string;
+  threat_type: string; // Make this required to match LiveScanResult
   created_at: string;
-  status: 'new' | 'read' | 'actioned' | 'resolved'; // Fix the status type
+  status: 'new' | 'read' | 'actioned' | 'resolved';
   sentiment: number;
   confidence_score: number;
   potential_reach: number;
@@ -27,7 +27,7 @@ export interface ScanResult {
   source_credibility_score: number;
   media_is_ai_generated: boolean;
   ai_detection_confidence: number;
-  entity_name: string; // Add this required property for LiveScanResult compatibility
+  entity_name: string;
 }
 
 /**
@@ -59,7 +59,7 @@ export const performRealScan = async (options: RealScanOptions = {}): Promise<Sc
       url: result.url || '',
       severity: result.severity as 'low' | 'medium' | 'high',
       confidence: result.confidence_score || 0.8,
-      threat_type: result.threat_type,
+      threat_type: result.threat_type || 'unknown', // Ensure this is never undefined
       created_at: result.created_at,
       status: (result.status || 'new') as 'new' | 'read' | 'actioned' | 'resolved',
       sentiment: 0,
