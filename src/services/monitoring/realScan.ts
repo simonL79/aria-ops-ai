@@ -6,6 +6,7 @@ export interface RealScanOptions {
   targetEntity?: string;
   source?: string;
   platforms?: string[];
+  scan_depth?: string; // Add this missing property
 }
 
 export interface ScanResult {
@@ -17,15 +18,16 @@ export interface ScanResult {
   confidence: number;
   threat_type?: string;
   created_at: string;
-  status?: string;
-  sentiment?: number;
-  confidence_score?: number;
-  potential_reach?: number;
-  detected_entities?: string[];
-  source_type?: string;
-  source_credibility_score?: number;
-  media_is_ai_generated?: boolean;
-  ai_detection_confidence?: number;
+  status: 'new' | 'read' | 'actioned' | 'resolved'; // Fix the status type
+  sentiment: number;
+  confidence_score: number;
+  potential_reach: number;
+  detected_entities: string[];
+  source_type: string;
+  source_credibility_score: number;
+  media_is_ai_generated: boolean;
+  ai_detection_confidence: number;
+  entity_name: string; // Add this required property for LiveScanResult compatibility
 }
 
 /**
@@ -59,7 +61,7 @@ export const performRealScan = async (options: RealScanOptions = {}): Promise<Sc
       confidence: result.confidence_score || 0.8,
       threat_type: result.threat_type,
       created_at: result.created_at,
-      status: result.status || 'new',
+      status: (result.status || 'new') as 'new' | 'read' | 'actioned' | 'resolved',
       sentiment: 0,
       confidence_score: result.confidence_score || 0.8,
       potential_reach: 1000,
@@ -67,7 +69,8 @@ export const performRealScan = async (options: RealScanOptions = {}): Promise<Sc
       source_type: 'live_osint',
       source_credibility_score: 0.8,
       media_is_ai_generated: false,
-      ai_detection_confidence: 0
+      ai_detection_confidence: 0,
+      entity_name: targetEntity
     }));
     
     // Log the scan operation
