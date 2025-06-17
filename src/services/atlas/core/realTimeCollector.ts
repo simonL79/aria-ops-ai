@@ -1,4 +1,3 @@
-
 import { AtlasDataEnforcer } from './dataEnforcement';
 
 export interface RealDataSource {
@@ -33,6 +32,13 @@ export interface TimelineEntry {
   type: 'professional' | 'personal' | 'news' | 'social' | 'legal';
   sentiment: number;
   verified: boolean;
+}
+
+export interface DuckDuckGoResult {
+  Title: string;
+  Description: string;
+  FirstURL: string;
+  Text: string;
 }
 
 /**
@@ -96,6 +102,10 @@ export class AtlasRealTimeCollector {
         }
       }
 
+      // Update current status based on findings
+      intelligence.currentStatus.activePlatforms = this.extractActivePlatforms(intelligence.timeline);
+      intelligence.currentStatus.reputationTrend = this.calculateReputationTrend(intelligence.timeline);
+
       // Sort timeline chronologically
       intelligence.timeline.sort((a, b) => 
         new Date(a.date).getTime() - new Date(b.date).getTime()
@@ -111,23 +121,137 @@ export class AtlasRealTimeCollector {
   }
 
   /**
-   * Execute real-time search across live sources
+   * Execute real-time search across live sources using DuckDuckGo API
    */
   private async executeRealTimeSearch(name: string): Promise<any[]> {
     const results: any[] = [];
 
-    // This would integrate with real search APIs and web scraping
-    // For now, return empty array as we don't want any mock data
-    console.log(`🔍 Atlas: Executing live search for "${name}" across real sources`);
+    console.log(`🔍 Atlas: Executing live search for "${name}" via DuckDuckGo`);
     
-    // TODO: Implement real source integrations:
-    // - DuckDuckGo API
-    // - Wayback Machine API
-    // - News RSS feeds
-    // - Social media APIs (where available)
-    // - Public records databases
+    try {
+      // Search DuckDuckGo Instant Answer API
+      const duckResults = await this.searchDuckDuckGo(name);
+      results.push(...duckResults);
+
+      // Search with additional context terms
+      const contextTerms = ['linkedin', 'twitter', 'news', 'company', 'profile'];
+      for (const term of contextTerms) {
+        const contextResults = await this.searchDuckDuckGo(`"${name}" ${term}`);
+        results.push(...contextResults);
+      }
+
+      console.log(`📊 Atlas: Retrieved ${results.length} raw results from live sources`);
+      
+    } catch (error) {
+      console.error('❌ Real-time search error:', error);
+    }
     
     return results;
+  }
+
+  /**
+   * Search DuckDuckGo Instant Answer API
+   */
+  private async searchDuckDuckGo(query: string): Promise<any[]> {
+    try {
+      const encodedQuery = encodeURIComponent(query);
+      const apiUrl = `https://api.duckduckgo.com/?q=${encodedQuery}&format=json&no_redirect=1&no_html=1&skip_disambig=1`;
+      
+      console.log(`🦆 Atlas: Querying DuckDuckGo for: ${query}`);
+      
+      const response = await fetch(apiUrl);
+      if (!response.ok) {
+        throw new Error(`DuckDuckGo API error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      const results: any[] = [];
+      
+      // Process Abstract (main result)
+      if (data.Abstract && data.AbstractURL) {
+        results.push({
+          content: data.Abstract,
+          url: data.AbstractURL,
+          source: data.AbstractSource || 'DuckDuckGo',
+          date: new Date().toISOString(),
+          title: data.Heading || query
+        });
+      }
+      
+      // Process Related Topics
+      if (data.RelatedTopics && Array.isArray(data.RelatedTopics)) {
+        for (const topic of data.RelatedTopics.slice(0, 5)) { // Limit to 5 related topics
+          if (topic.Text && topic.FirstURL) {
+            results.push({
+              content: topic.Text,
+              url: topic.FirstURL,
+              source: 'DuckDuckGo Related',
+              date: new Date().toISOString(),
+              title: topic.Text.substring(0, 100)
+            });
+          }
+        }
+      }
+      
+      // Process Results (if available)
+      if (data.Results && Array.isArray(data.Results)) {
+        for (const result of data.Results.slice(0, 3)) { // Limit to 3 results
+          if (result.Text && result.FirstURL) {
+            results.push({
+              content: result.Text,
+              url: result.FirstURL,
+              source: 'DuckDuckGo Results',
+              date: new Date().toISOString(),
+              title: result.Text.substring(0, 100)
+            });
+          }
+        }
+      }
+      
+      console.log(`📋 Atlas: DuckDuckGo returned ${results.length} results for "${query}"`);
+      return results;
+      
+    } catch (error) {
+      console.error(`❌ DuckDuckGo search failed for "${query}":`, error);
+      return [];
+    }
+  }
+
+  /**
+   * Extract active platforms from timeline
+   */
+  private extractActivePlatforms(timeline: TimelineEntry[]): string[] {
+    const platforms = new Set<string>();
+    
+    timeline.forEach(entry => {
+      const url = entry.url.toLowerCase();
+      if (url.includes('linkedin')) platforms.add('LinkedIn');
+      if (url.includes('twitter') || url.includes('x.com')) platforms.add('Twitter/X');
+      if (url.includes('facebook')) platforms.add('Facebook');
+      if (url.includes('instagram')) platforms.add('Instagram');
+      if (url.includes('github')) platforms.add('GitHub');
+      if (url.includes('youtube')) platforms.add('YouTube');
+      
+      // Add source as platform if not already categorized
+      if (platforms.size === 0) {
+        platforms.add(entry.source);
+      }
+    });
+    
+    return Array.from(platforms);
+  }
+
+  /**
+   * Calculate reputation trend from timeline sentiment
+   */
+  private calculateReputationTrend(timeline: TimelineEntry[]): 'positive' | 'negative' | 'neutral' {
+    if (timeline.length === 0) return 'neutral';
+    
+    const avgSentiment = timeline.reduce((sum, entry) => sum + entry.sentiment, 0) / timeline.length;
+    
+    if (avgSentiment > 0.1) return 'positive';
+    if (avgSentiment < -0.1) return 'negative';
+    return 'neutral';
   }
 
   /**
