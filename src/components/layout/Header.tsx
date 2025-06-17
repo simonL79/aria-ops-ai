@@ -1,9 +1,10 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import Logo from '@/components/ui/logo';
-import { LogIn, LogOut } from 'lucide-react';
+import { LogIn, LogOut, Shield } from 'lucide-react';
 
 interface HeaderProps {
   variant?: 'default' | 'transparent';
@@ -34,6 +35,13 @@ const Header = ({ variant = 'default' }: HeaderProps) => {
             <Link to="/about" className="text-gray-300 hover:text-white transition-colors">About</Link>
             <Link to="/blog" className="text-gray-300 hover:text-white transition-colors">Blog</Link>
             <Link to="/simon-lindsay" className="text-gray-300 hover:text-white transition-colors">Simon Lindsay</Link>
+            <Link 
+              to="/atlas" 
+              className="text-gray-300 hover:text-blue-400 transition-colors flex items-center gap-2"
+            >
+              <Shield className="h-4 w-4" />
+              Atlas
+            </Link>
             
             <Link
               to="/secure-intake"
