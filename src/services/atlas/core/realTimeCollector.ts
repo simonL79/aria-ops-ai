@@ -34,13 +34,6 @@ export interface TimelineEntry {
   verified: boolean;
 }
 
-export interface DuckDuckGoResult {
-  Title: string;
-  Description: string;
-  FirstURL: string;
-  Text: string;
-}
-
 /**
  * Atlas Real-Time Data Collector
  * Collects ONLY verified, live data from real sources
@@ -55,7 +48,7 @@ export class AtlasRealTimeCollector {
     // Enforce real data only from the start
     AtlasDataEnforcer.enforceRealDataOnly({ name }, 'searchPersonMentions');
 
-    console.log(`🔍 Atlas: Starting real-time search for "${name}"`);
+    console.log(`🔍 Atlas: Starting enhanced real-time search for "${name}"`);
 
     const intelligence: PersonalIntelligence = {
       name,
@@ -69,8 +62,8 @@ export class AtlasRealTimeCollector {
     };
 
     try {
-      // Search across real sources only
-      const searchResults = await this.executeRealTimeSearch(name);
+      // Search across multiple real sources
+      const searchResults = await this.executeEnhancedRealTimeSearch(name);
       
       // Process only verified real results
       for (const result of searchResults) {
@@ -84,7 +77,7 @@ export class AtlasRealTimeCollector {
             content: result.content,
             type: this.classifyContentType(result.content),
             sentiment: this.analyzeSentiment(result.content),
-            verified: await AtlasDataEnforcer.verifyLiveUrl(result.url)
+            verified: await this.verifyUrlAccessible(result.url)
           };
 
           intelligence.timeline.push(timelineEntry);
@@ -121,99 +114,265 @@ export class AtlasRealTimeCollector {
   }
 
   /**
-   * Execute real-time search across live sources using DuckDuckGo API
+   * Enhanced real-time search using multiple free sources
    */
-  private async executeRealTimeSearch(name: string): Promise<any[]> {
+  private async executeEnhancedRealTimeSearch(name: string): Promise<any[]> {
     const results: any[] = [];
 
-    console.log(`🔍 Atlas: Executing live search for "${name}" via DuckDuckGo`);
+    console.log(`🔍 Atlas: Executing enhanced search for "${name}"`);
     
     try {
-      // Search DuckDuckGo Instant Answer API
-      const duckResults = await this.searchDuckDuckGo(name);
+      // 1. Try Wikipedia API (reliable and free)
+      const wikiResults = await this.searchWikipedia(name);
+      results.push(...wikiResults);
+
+      // 2. Try Internet Archive Wayback Machine
+      const archiveResults = await this.searchInternetArchive(name);
+      results.push(...archiveResults);
+
+      // 3. Try alternative DuckDuckGo approach
+      const duckResults = await this.searchDuckDuckGoAlternative(name);
       results.push(...duckResults);
 
-      // Search with additional context terms
-      const contextTerms = ['linkedin', 'twitter', 'news', 'company', 'profile'];
-      for (const term of contextTerms) {
-        const contextResults = await this.searchDuckDuckGo(`"${name}" ${term}`);
-        results.push(...contextResults);
-      }
+      // 4. Try Reddit search (free API)
+      const redditResults = await this.searchReddit(name);
+      results.push(...redditResults);
 
-      console.log(`📊 Atlas: Retrieved ${results.length} raw results from live sources`);
+      console.log(`📊 Atlas: Retrieved ${results.length} results from enhanced sources`);
       
     } catch (error) {
-      console.error('❌ Real-time search error:', error);
+      console.error('❌ Enhanced search error:', error);
     }
     
     return results;
   }
 
   /**
-   * Search DuckDuckGo Instant Answer API
+   * Search Wikipedia API
    */
-  private async searchDuckDuckGo(query: string): Promise<any[]> {
+  private async searchWikipedia(query: string): Promise<any[]> {
     try {
       const encodedQuery = encodeURIComponent(query);
-      const apiUrl = `https://api.duckduckgo.com/?q=${encodedQuery}&format=json&no_redirect=1&no_html=1&skip_disambig=1`;
+      const searchUrl = `https://en.wikipedia.org/api/rest_v1/page/search?q=${encodedQuery}&limit=5`;
       
-      console.log(`🦆 Atlas: Querying DuckDuckGo for: ${query}`);
+      console.log(`📚 Atlas: Searching Wikipedia for: ${query}`);
       
-      const response = await fetch(apiUrl);
+      const response = await fetch(searchUrl);
       if (!response.ok) {
-        throw new Error(`DuckDuckGo API error: ${response.status}`);
+        console.warn(`Wikipedia API error: ${response.status}`);
+        return [];
       }
       
       const data = await response.json();
       const results: any[] = [];
       
-      // Process Abstract (main result)
-      if (data.Abstract && data.AbstractURL) {
-        results.push({
-          content: data.Abstract,
-          url: data.AbstractURL,
-          source: data.AbstractSource || 'DuckDuckGo',
-          date: new Date().toISOString(),
-          title: data.Heading || query
-        });
-      }
-      
-      // Process Related Topics
-      if (data.RelatedTopics && Array.isArray(data.RelatedTopics)) {
-        for (const topic of data.RelatedTopics.slice(0, 5)) { // Limit to 5 related topics
-          if (topic.Text && topic.FirstURL) {
+      if (data.pages && Array.isArray(data.pages)) {
+        for (const page of data.pages.slice(0, 3)) {
+          if (page.title && page.description) {
             results.push({
-              content: topic.Text,
-              url: topic.FirstURL,
-              source: 'DuckDuckGo Related',
+              content: `${page.title}: ${page.description}`,
+              url: `https://en.wikipedia.org/wiki/${encodeURIComponent(page.title)}`,
+              source: 'Wikipedia',
               date: new Date().toISOString(),
-              title: topic.Text.substring(0, 100)
+              title: page.title
             });
           }
         }
       }
       
-      // Process Results (if available)
-      if (data.Results && Array.isArray(data.Results)) {
-        for (const result of data.Results.slice(0, 3)) { // Limit to 3 results
-          if (result.Text && result.FirstURL) {
-            results.push({
-              content: result.Text,
-              url: result.FirstURL,
-              source: 'DuckDuckGo Results',
-              date: new Date().toISOString(),
-              title: result.Text.substring(0, 100)
-            });
-          }
-        }
-      }
-      
-      console.log(`📋 Atlas: DuckDuckGo returned ${results.length} results for "${query}"`);
+      console.log(`📚 Atlas: Wikipedia returned ${results.length} results`);
       return results;
       
     } catch (error) {
-      console.error(`❌ DuckDuckGo search failed for "${query}":`, error);
+      console.error(`❌ Wikipedia search failed:`, error);
       return [];
+    }
+  }
+
+  /**
+   * Search Internet Archive Wayback Machine
+   */
+  private async searchInternetArchive(query: string): Promise<any[]> {
+    try {
+      const encodedQuery = encodeURIComponent(query);
+      const searchUrl = `https://web.archive.org/cdx/search/cdx?url=*${encodedQuery}*&output=json&limit=5`;
+      
+      console.log(`🏛️ Atlas: Searching Internet Archive for: ${query}`);
+      
+      const response = await fetch(searchUrl);
+      if (!response.ok) {
+        console.warn(`Internet Archive API error: ${response.status}`);
+        return [];
+      }
+      
+      const data = await response.json();
+      const results: any[] = [];
+      
+      if (Array.isArray(data) && data.length > 1) {
+        // Skip first row (headers) and process results
+        for (const row of data.slice(1, 4)) {
+          if (row.length >= 3) {
+            results.push({
+              content: `Archived page mentioning ${query}`,
+              url: `https://web.archive.org/web/${row[1]}/${row[2]}`,
+              source: 'Internet Archive',
+              date: row[1] ? this.parseArchiveDate(row[1]) : new Date().toISOString(),
+              title: `Archive: ${row[2]}`
+            });
+          }
+        }
+      }
+      
+      console.log(`🏛️ Atlas: Internet Archive returned ${results.length} results`);
+      return results;
+      
+    } catch (error) {
+      console.error(`❌ Internet Archive search failed:`, error);
+      return [];
+    }
+  }
+
+  /**
+   * Alternative DuckDuckGo search using their zero-click info API
+   */
+  private async searchDuckDuckGoAlternative(query: string): Promise<any[]> {
+    try {
+      // Try multiple DuckDuckGo endpoints
+      const endpoints = [
+        `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&pretty=1`,
+        `https://api.duckduckgo.com/?q=${encodeURIComponent(query + ' profile')}&format=json&pretty=1`,
+        `https://api.duckduckgo.com/?q=${encodeURIComponent(query + ' bio')}&format=json&pretty=1`
+      ];
+      
+      const results: any[] = [];
+      
+      for (const endpoint of endpoints) {
+        try {
+          console.log(`🦆 Atlas: Trying DuckDuckGo endpoint for: ${query}`);
+          
+          const response = await fetch(endpoint, {
+            headers: {
+              'User-Agent': 'Atlas Intelligence Platform'
+            }
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            
+            // Check for abstract/definition
+            if (data.Abstract && data.AbstractURL) {
+              results.push({
+                content: data.Abstract,
+                url: data.AbstractURL,
+                source: 'DuckDuckGo Abstract',
+                date: new Date().toISOString(),
+                title: data.Heading || query
+              });
+            }
+            
+            // Check for infobox data
+            if (data.Infobox && Array.isArray(data.Infobox.content)) {
+              const infoContent = data.Infobox.content
+                .map(item => `${item.label}: ${item.value}`)
+                .join(', ');
+              
+              if (infoContent) {
+                results.push({
+                  content: infoContent,
+                  url: data.AbstractURL || '#',
+                  source: 'DuckDuckGo Infobox',
+                  date: new Date().toISOString(),
+                  title: `${query} - Profile Data`
+                });
+              }
+            }
+          }
+        } catch (endpointError) {
+          console.warn(`DuckDuckGo endpoint failed:`, endpointError);
+        }
+      }
+      
+      console.log(`🦆 Atlas: DuckDuckGo alternative returned ${results.length} results`);
+      return results;
+      
+    } catch (error) {
+      console.error(`❌ DuckDuckGo alternative search failed:`, error);
+      return [];
+    }
+  }
+
+  /**
+   * Search Reddit (free API)
+   */
+  private async searchReddit(query: string): Promise<any[]> {
+    try {
+      const encodedQuery = encodeURIComponent(query);
+      const searchUrl = `https://www.reddit.com/search.json?q=${encodedQuery}&limit=5&sort=relevance`;
+      
+      console.log(`🔴 Atlas: Searching Reddit for: ${query}`);
+      
+      const response = await fetch(searchUrl, {
+        headers: {
+          'User-Agent': 'Atlas Intelligence Platform'
+        }
+      });
+      
+      if (!response.ok) {
+        console.warn(`Reddit API error: ${response.status}`);
+        return [];
+      }
+      
+      const data = await response.json();
+      const results: any[] = [];
+      
+      if (data.data && data.data.children && Array.isArray(data.data.children)) {
+        for (const post of data.data.children.slice(0, 3)) {
+          if (post.data && post.data.title) {
+            results.push({
+              content: `${post.data.title} - ${post.data.selftext || 'Reddit discussion'}`,
+              url: `https://reddit.com${post.data.permalink}`,
+              source: 'Reddit',
+              date: new Date(post.data.created_utc * 1000).toISOString(),
+              title: post.data.title
+            });
+          }
+        }
+      }
+      
+      console.log(`🔴 Atlas: Reddit returned ${results.length} results`);
+      return results;
+      
+    } catch (error) {
+      console.error(`❌ Reddit search failed:`, error);
+      return [];
+    }
+  }
+
+  /**
+   * Parse Internet Archive date format
+   */
+  private parseArchiveDate(timestamp: string): string {
+    try {
+      // Archive timestamps are in format YYYYMMDDHHMMSS
+      const year = timestamp.substring(0, 4);
+      const month = timestamp.substring(4, 6);
+      const day = timestamp.substring(6, 8);
+      return new Date(`${year}-${month}-${day}`).toISOString();
+    } catch {
+      return new Date().toISOString();
+    }
+  }
+
+  /**
+   * Verify URL is accessible
+   */
+  private async verifyUrlAccessible(url: string): Promise<boolean> {
+    try {
+      // Use a simple HEAD request to check if URL is accessible
+      const response = await fetch(url, { method: 'HEAD' });
+      return response.ok;
+    } catch {
+      return false; // If we can't verify, assume not accessible
     }
   }
 
@@ -231,6 +390,9 @@ export class AtlasRealTimeCollector {
       if (url.includes('instagram')) platforms.add('Instagram');
       if (url.includes('github')) platforms.add('GitHub');
       if (url.includes('youtube')) platforms.add('YouTube');
+      if (url.includes('wikipedia')) platforms.add('Wikipedia');
+      if (url.includes('reddit')) platforms.add('Reddit');
+      if (url.includes('archive.org')) platforms.add('Internet Archive');
       
       // Add source as platform if not already categorized
       if (platforms.size === 0) {
@@ -276,7 +438,7 @@ export class AtlasRealTimeCollector {
     }
     
     if (lowerContent.includes('twitter') || lowerContent.includes('facebook') || 
-        lowerContent.includes('instagram')) {
+        lowerContent.includes('instagram') || lowerContent.includes('reddit')) {
       return 'social';
     }
     
@@ -288,8 +450,8 @@ export class AtlasRealTimeCollector {
    */
   private analyzeSentiment(content: string): number {
     // Simple sentiment analysis - would be enhanced with proper NLP
-    const positiveWords = ['good', 'great', 'excellent', 'positive', 'success'];
-    const negativeWords = ['bad', 'terrible', 'negative', 'failure', 'problem'];
+    const positiveWords = ['good', 'great', 'excellent', 'positive', 'success', 'award', 'achievement'];
+    const negativeWords = ['bad', 'terrible', 'negative', 'failure', 'problem', 'controversy', 'scandal'];
     
     const lowerContent = content.toLowerCase();
     let score = 0;
