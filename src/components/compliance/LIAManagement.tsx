@@ -70,7 +70,7 @@ const LIAManagement = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setLias(data || []);
+      setLias((data || []) as any);
     } catch (error) {
       console.error('Error fetching LIAs:', error);
       toast.error('Failed to fetch LIAs');
@@ -90,8 +90,8 @@ const LIAManagement = () => {
       };
 
       if (editingLIA) {
-        const { error } = await supabase
-          .from('lia_records')
+        const { error } = await (supabase
+          .from('lia_records') as any)
           .update(liaData)
           .eq('id', editingLIA.id);
         
@@ -104,8 +104,8 @@ const LIAManagement = () => {
           p_legal_basis: 'Legal Obligation'
         });
       } else {
-        const { error } = await supabase
-          .from('lia_records')
+        const { error } = await (supabase
+          .from('lia_records') as any)
           .insert([liaData]);
         
         if (error) throw error;

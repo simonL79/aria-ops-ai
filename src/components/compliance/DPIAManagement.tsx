@@ -89,7 +89,7 @@ const DPIAManagement = () => {
         approved_by: item.approved_by || null
       })) || [];
       
-      setDpias(transformedData);
+      setDpias(transformedData as any);
     } catch (error) {
       console.error('Error fetching DPIAs:', error);
       toast.error('Failed to fetch DPIAs');
@@ -111,8 +111,8 @@ const DPIAManagement = () => {
       };
 
       if (editingDPIA) {
-        const { error } = await supabase
-          .from('dpia_records')
+        const { error } = await (supabase
+          .from('dpia_records') as any)
           .update(dpiaData)
           .eq('id', editingDPIA.id);
         
@@ -126,8 +126,8 @@ const DPIAManagement = () => {
           p_legal_basis: 'Legal Obligation'
         });
       } else {
-        const { error } = await supabase
-          .from('dpia_records')
+        const { error } = await (supabase
+          .from('dpia_records') as any)
           .insert([dpiaData]);
         
         if (error) throw error;

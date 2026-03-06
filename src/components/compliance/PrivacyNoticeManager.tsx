@@ -69,7 +69,7 @@ const PrivacyNoticeManager = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setNotices(data || []);
+      setNotices((data || []) as any);
     } catch (error) {
       console.error('Error fetching privacy notices:', error);
       toast.error('Failed to fetch privacy notices');
@@ -108,8 +108,8 @@ const PrivacyNoticeManager = () => {
       };
 
       if (editingNotice) {
-        const { error } = await supabase
-          .from('privacy_notices')
+        const { error } = await (supabase
+          .from('privacy_notices') as any)
           .update(noticeData)
           .eq('id', editingNotice.id);
         
@@ -122,8 +122,8 @@ const PrivacyNoticeManager = () => {
           p_legal_basis: 'Legal Obligation'
         });
       } else {
-        const { error } = await supabase
-          .from('privacy_notices')
+        const { error } = await (supabase
+          .from('privacy_notices') as any)
           .insert([noticeData]);
         
         if (error) throw error;

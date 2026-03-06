@@ -74,7 +74,7 @@ const DSRManagement = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setDsrs(data || []);
+      setDsrs((data || []) as any);
     } catch (error) {
       console.error('Error fetching DSRs:', error);
       toast.error('Failed to fetch data subject requests');
