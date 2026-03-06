@@ -865,6 +865,39 @@ export type Database = {
         }
         Relationships: []
       }
+      employee_scan_queue: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          employee_id: string | null
+          error_message: string | null
+          id: string
+          priority: number | null
+          started_at: string | null
+          status: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          employee_id?: string | null
+          error_message?: string | null
+          id?: string
+          priority?: number | null
+          started_at?: string | null
+          status?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          employee_id?: string | null
+          error_message?: string | null
+          id?: string
+          priority?: number | null
+          started_at?: string | null
+          status?: string | null
+        }
+        Relationships: []
+      }
       entities: {
         Row: {
           created_at: string
@@ -1140,28 +1173,34 @@ export type Database = {
       }
       live_status: {
         Row: {
+          active_threats: number | null
           created_at: string
           details: Json | null
           id: string
           last_report: string | null
+          last_threat_seen: string | null
           name: string
           system_status: string
           updated_at: string
         }
         Insert: {
+          active_threats?: number | null
           created_at?: string
           details?: Json | null
           id?: string
           last_report?: string | null
+          last_threat_seen?: string | null
           name: string
           system_status?: string
           updated_at?: string
         }
         Update: {
+          active_threats?: number | null
           created_at?: string
           details?: Json | null
           id?: string
           last_report?: string | null
+          last_threat_seen?: string | null
           name?: string
           system_status?: string
           updated_at?: string
@@ -1894,33 +1933,48 @@ export type Database = {
       }
       suppression_assets: {
         Row: {
+          asset_title: string | null
           asset_type: string | null
           created_at: string
+          gsc_clicks: number | null
+          gsc_ctr: number | null
+          gsc_impressions: number | null
           id: string
           metadata: Json | null
           published_at: string | null
+          rank_goal: number | null
           status: string | null
           title: string | null
           updated_at: string
           url: string | null
         }
         Insert: {
+          asset_title?: string | null
           asset_type?: string | null
           created_at?: string
+          gsc_clicks?: number | null
+          gsc_ctr?: number | null
+          gsc_impressions?: number | null
           id?: string
           metadata?: Json | null
           published_at?: string | null
+          rank_goal?: number | null
           status?: string | null
           title?: string | null
           updated_at?: string
           url?: string | null
         }
         Update: {
+          asset_title?: string | null
           asset_type?: string | null
           created_at?: string
+          gsc_clicks?: number | null
+          gsc_ctr?: number | null
+          gsc_impressions?: number | null
           id?: string
           metadata?: Json | null
           published_at?: string | null
+          rank_goal?: number | null
           status?: string | null
           title?: string | null
           updated_at?: string
@@ -1957,27 +2011,60 @@ export type Database = {
       }
       system_health_checks: {
         Row: {
+          check_time: string | null
           check_type: string | null
           created_at: string
           details: Json | null
           id: string
           metrics: Json | null
+          module: string | null
           status: string | null
         }
         Insert: {
+          check_time?: string | null
           check_type?: string | null
           created_at?: string
           details?: Json | null
           id?: string
           metrics?: Json | null
+          module?: string | null
           status?: string | null
         }
         Update: {
+          check_time?: string | null
           check_type?: string | null
           created_at?: string
           details?: Json | null
           id?: string
           metrics?: Json | null
+          module?: string | null
+          status?: string | null
+        }
+        Relationships: []
+      }
+      threat_ingestion_queue: {
+        Row: {
+          created_at: string
+          detected_at: string | null
+          id: string
+          metadata: Json | null
+          source: string | null
+          status: string | null
+        }
+        Insert: {
+          created_at?: string
+          detected_at?: string | null
+          id?: string
+          metadata?: Json | null
+          source?: string | null
+          status?: string | null
+        }
+        Update: {
+          created_at?: string
+          detected_at?: string | null
+          id?: string
+          metadata?: Json | null
+          source?: string | null
           status?: string | null
         }
         Relationships: []

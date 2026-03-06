@@ -53,7 +53,7 @@ const LiveSystemStatus = () => {
 
       if (statusError) throw statusError;
 
-      setLiveStatus(liveStatusData?.map(status => ({
+      setLiveStatus((liveStatusData as any[])?.map(status => ({
         name: status.name,
         active_threats: status.active_threats || 0,
         last_threat_seen: status.last_threat_seen,
@@ -65,29 +65,29 @@ const LiveSystemStatus = () => {
       const { data: healthData, error: healthError } = await supabase
         .from('system_health_checks')
         .select('*')
-        .order('check_time', { ascending: false })
+        .order('created_at', { ascending: false })
         .limit(6);
 
       if (healthError) throw healthError;
 
-      setHealthChecks(healthData?.map(check => ({
+      setHealthChecks((healthData as any[])?.map(check => ({
         id: check.id,
-        module: check.module,
+        module: check.module || check.check_type,
         status: check.status as 'ok' | 'warn' | 'fail',
-        details: check.details || '',
-        check_time: check.check_time
+        details: String(check.details || ''),
+        check_time: check.check_time || check.created_at
       })) || []);
 
       // Fetch queue items
-      const { data: queueData, error: queueError } = await supabase
-        .from('threat_ingestion_queue')
+      const { data: queueData, error: queueError } = await (supabase
+        .from('threat_ingestion_queue') as any)
         .select('*')
         .order('created_at', { ascending: false })
         .limit(5);
 
       if (queueError) throw queueError;
 
-      setQueueItems(queueData?.map(item => ({
+      setQueueItems((queueData as any[])?.map(item => ({
         id: item.id,
         source: item.source,
         status: item.status,
