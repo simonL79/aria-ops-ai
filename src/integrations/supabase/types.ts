@@ -140,6 +140,57 @@ export type Database = {
         }
         Relationships: []
       }
+      blog_posts: {
+        Row: {
+          author: string | null
+          category: string | null
+          content: string | null
+          created_at: string
+          date: string | null
+          description: string | null
+          id: string
+          image: string | null
+          meta_description: string | null
+          meta_title: string | null
+          slug: string | null
+          status: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author?: string | null
+          category?: string | null
+          content?: string | null
+          created_at?: string
+          date?: string | null
+          description?: string | null
+          id?: string
+          image?: string | null
+          meta_description?: string | null
+          meta_title?: string | null
+          slug?: string | null
+          status?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author?: string | null
+          category?: string | null
+          content?: string | null
+          created_at?: string
+          date?: string | null
+          description?: string | null
+          id?: string
+          image?: string | null
+          meta_description?: string | null
+          meta_title?: string | null
+          slug?: string | null
+          status?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       client_entities: {
         Row: {
           alias: string | null
@@ -502,6 +553,39 @@ export type Database = {
           name?: string
           system_status?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      monitored_platforms: {
+        Row: {
+          config: Json | null
+          created_at: string
+          id: string
+          is_active: boolean | null
+          platform_name: string
+          platform_type: string | null
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          config?: Json | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          platform_name: string
+          platform_type?: string | null
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          config?: Json | null
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          platform_name?: string
+          platform_type?: string | null
+          updated_at?: string
+          url?: string | null
         }
         Relationships: []
       }
