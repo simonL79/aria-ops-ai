@@ -38,8 +38,8 @@ const DecayProfilesPanel = () => {
   const loadDecayProfiles = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('memory_decay_profiles')
+      const { data, error } = await (supabase
+        .from('memory_decay_profiles') as any)
         .select(`
           *,
           memory_footprints (
@@ -62,8 +62,8 @@ const DecayProfilesPanel = () => {
 
   const updateActionStatus = async (profileId: string, status: string) => {
     try {
-      const { error } = await supabase
-        .from('memory_decay_profiles')
+      const { error } = await (supabase
+        .from('memory_decay_profiles') as any)
         .update({ action_status: status })
         .eq('id', profileId);
 

@@ -32,7 +32,7 @@ const useAlertSimulation = (interval: number = 60000) => {
             url: item.url || '',
             sourceType: item.source_type || 'scan',
             confidenceScore: item.confidence_score || 75,
-            sentiment: item.sentiment > 0 ? 'positive' : item.sentiment < 0 ? 'negative' : 'neutral',
+            sentiment: Number(item.sentiment) > 0 ? 'positive' : Number(item.sentiment) < 0 ? 'negative' : 'neutral',
             detectedEntities: Array.isArray(item.detected_entities) ? item.detected_entities.map(String) : [],
             category: 'Real-time Detection'
           });

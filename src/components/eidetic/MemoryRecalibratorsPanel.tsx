@@ -36,8 +36,8 @@ const MemoryRecalibratorsPanel = () => {
   const loadRecalibrators = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('memory_recalibrators')
+      const { data, error } = await (supabase
+        .from('memory_recalibrators') as any)
         .select(`
           *,
           memory_footprints (
@@ -59,8 +59,8 @@ const MemoryRecalibratorsPanel = () => {
 
   const deployRecalibrator = async (recalibratorId: string) => {
     try {
-      const { error } = await supabase
-        .from('memory_recalibrators')
+      const { error } = await (supabase
+        .from('memory_recalibrators') as any)
         .update({ 
           is_deployed: true,
           deployed_at: new Date().toISOString()
@@ -79,8 +79,8 @@ const MemoryRecalibratorsPanel = () => {
 
   const updateEffectiveness = async (recalibratorId: string, score: number) => {
     try {
-      const { error } = await supabase
-        .from('memory_recalibrators')
+      const { error } = await (supabase
+        .from('memory_recalibrators') as any)
         .update({ effectiveness_score: score })
         .eq('id', recalibratorId);
 

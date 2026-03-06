@@ -979,6 +979,48 @@ export type Database = {
         }
         Relationships: []
       }
+      executive_reports: {
+        Row: {
+          created_at: string
+          executive_summary: string | null
+          id: string
+          key_metrics: Json | null
+          metadata: Json | null
+          period_end: string | null
+          period_start: string | null
+          report_type: string | null
+          status: string | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          executive_summary?: string | null
+          id?: string
+          key_metrics?: Json | null
+          metadata?: Json | null
+          period_end?: string | null
+          period_start?: string | null
+          report_type?: string | null
+          status?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          executive_summary?: string | null
+          id?: string
+          key_metrics?: Json | null
+          metadata?: Json | null
+          period_end?: string | null
+          period_start?: string | null
+          report_type?: string | null
+          status?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       lead_magnets: {
         Row: {
           company: string | null
@@ -1161,6 +1203,151 @@ export type Database = {
           timestamp?: string | null
         }
         Relationships: []
+      }
+      memory_decay_profiles: {
+        Row: {
+          action_status: string | null
+          created_at: string
+          decay_trigger: string | null
+          emotional_charge: string | null
+          footprint_id: string | null
+          id: string
+          legal_outcome: string | null
+          recommended_action: string | null
+          relevancy_score: number | null
+          scheduled_for: string | null
+          social_velocity: number | null
+        }
+        Insert: {
+          action_status?: string | null
+          created_at?: string
+          decay_trigger?: string | null
+          emotional_charge?: string | null
+          footprint_id?: string | null
+          id?: string
+          legal_outcome?: string | null
+          recommended_action?: string | null
+          relevancy_score?: number | null
+          scheduled_for?: string | null
+          social_velocity?: number | null
+        }
+        Update: {
+          action_status?: string | null
+          created_at?: string
+          decay_trigger?: string | null
+          emotional_charge?: string | null
+          footprint_id?: string | null
+          id?: string
+          legal_outcome?: string | null
+          recommended_action?: string | null
+          relevancy_score?: number | null
+          scheduled_for?: string | null
+          social_velocity?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memory_decay_profiles_footprint_id_fkey"
+            columns: ["footprint_id"]
+            isOneToOne: false
+            referencedRelation: "memory_footprints"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      memory_footprints: {
+        Row: {
+          ai_memory_tags: string[] | null
+          client_id: string | null
+          content_url: string | null
+          created_at: string
+          decay_score: number | null
+          discovered_at: string | null
+          first_seen: string | null
+          id: string
+          is_active: boolean | null
+          last_seen: string | null
+          memory_context: string | null
+          memory_type: string | null
+          updated_at: string
+        }
+        Insert: {
+          ai_memory_tags?: string[] | null
+          client_id?: string | null
+          content_url?: string | null
+          created_at?: string
+          decay_score?: number | null
+          discovered_at?: string | null
+          first_seen?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_seen?: string | null
+          memory_context?: string | null
+          memory_type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ai_memory_tags?: string[] | null
+          client_id?: string | null
+          content_url?: string | null
+          created_at?: string
+          decay_score?: number | null
+          discovered_at?: string | null
+          first_seen?: string | null
+          id?: string
+          is_active?: boolean | null
+          last_seen?: string | null
+          memory_context?: string | null
+          memory_type?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      memory_recalibrators: {
+        Row: {
+          asset_url: string | null
+          content_excerpt: string | null
+          created_at: string
+          deployed_at: string | null
+          effectiveness_score: number | null
+          footprint_id: string | null
+          full_text: string | null
+          id: string
+          is_deployed: boolean | null
+          recalibration_type: string | null
+        }
+        Insert: {
+          asset_url?: string | null
+          content_excerpt?: string | null
+          created_at?: string
+          deployed_at?: string | null
+          effectiveness_score?: number | null
+          footprint_id?: string | null
+          full_text?: string | null
+          id?: string
+          is_deployed?: boolean | null
+          recalibration_type?: string | null
+        }
+        Update: {
+          asset_url?: string | null
+          content_excerpt?: string | null
+          created_at?: string
+          deployed_at?: string | null
+          effectiveness_score?: number | null
+          footprint_id?: string | null
+          full_text?: string | null
+          id?: string
+          is_deployed?: boolean | null
+          recalibration_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memory_recalibrators_footprint_id_fkey"
+            columns: ["footprint_id"]
+            isOneToOne: false
+            referencedRelation: "memory_footprints"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       monitored_platforms: {
         Row: {
@@ -1497,17 +1684,21 @@ export type Database = {
       }
       scan_results: {
         Row: {
+          ai_detection_confidence: number | null
           confidence_score: number | null
           content: string | null
           created_at: string
           detected_entities: Json | null
           entity_name: string | null
           id: string
+          incident_playbook: string | null
+          media_is_ai_generated: boolean | null
           metadata: Json | null
           platform: string | null
           potential_reach: number | null
           sentiment: string | null
           severity: string | null
+          source_credibility_score: number | null
           source_type: string | null
           status: string | null
           threat_type: string | null
@@ -1515,17 +1706,21 @@ export type Database = {
           url: string | null
         }
         Insert: {
+          ai_detection_confidence?: number | null
           confidence_score?: number | null
           content?: string | null
           created_at?: string
           detected_entities?: Json | null
           entity_name?: string | null
           id?: string
+          incident_playbook?: string | null
+          media_is_ai_generated?: boolean | null
           metadata?: Json | null
           platform?: string | null
           potential_reach?: number | null
           sentiment?: string | null
           severity?: string | null
+          source_credibility_score?: number | null
           source_type?: string | null
           status?: string | null
           threat_type?: string | null
@@ -1533,17 +1728,21 @@ export type Database = {
           url?: string | null
         }
         Update: {
+          ai_detection_confidence?: number | null
           confidence_score?: number | null
           content?: string | null
           created_at?: string
           detected_entities?: Json | null
           entity_name?: string | null
           id?: string
+          incident_playbook?: string | null
+          media_is_ai_generated?: boolean | null
           metadata?: Json | null
           platform?: string | null
           potential_reach?: number | null
           sentiment?: string | null
           severity?: string | null
+          source_credibility_score?: number | null
           source_type?: string | null
           status?: string | null
           threat_type?: string | null
