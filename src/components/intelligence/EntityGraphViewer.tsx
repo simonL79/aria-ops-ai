@@ -28,8 +28,8 @@ const EntityGraphViewer = () => {
   const loadEntityGraph = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('entity_graph')
+      const { data, error } = await (supabase
+        .from('entity_graph') as any)
         .select('*')
         .order('frequency', { ascending: false })
         .limit(20);
@@ -52,8 +52,8 @@ const EntityGraphViewer = () => {
 
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('entity_graph')
+      const { data, error } = await (supabase
+        .from('entity_graph') as any)
         .select('*')
         .or(`source_entity.ilike.%${searchTerm}%,related_entity.ilike.%${searchTerm}%`)
         .order('frequency', { ascending: false })

@@ -973,6 +973,39 @@ export type Database = {
         }
         Relationships: []
       }
+      entity_graph: {
+        Row: {
+          created_at: string
+          frequency: number | null
+          id: string
+          last_seen: string | null
+          metadata: Json | null
+          related_entity: string | null
+          relationship_type: string | null
+          source_entity: string | null
+        }
+        Insert: {
+          created_at?: string
+          frequency?: number | null
+          id?: string
+          last_seen?: string | null
+          metadata?: Json | null
+          related_entity?: string | null
+          relationship_type?: string | null
+          source_entity?: string | null
+        }
+        Update: {
+          created_at?: string
+          frequency?: number | null
+          id?: string
+          last_seen?: string | null
+          metadata?: Json | null
+          related_entity?: string | null
+          relationship_type?: string | null
+          source_entity?: string | null
+        }
+        Relationships: []
+      }
       entity_precision_stats: {
         Row: {
           created_at: string
@@ -1009,6 +1042,75 @@ export type Database = {
           total_scans?: number | null
           true_positives?: number | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      eris_attack_simulations: {
+        Row: {
+          attack_vector: string | null
+          created_at: string
+          id: string
+          metadata: Json | null
+          origin_source: string | null
+          scenario_description: string | null
+          status: string | null
+          target_entity: string | null
+          threat_score: number | null
+        }
+        Insert: {
+          attack_vector?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          origin_source?: string | null
+          scenario_description?: string | null
+          status?: string | null
+          target_entity?: string | null
+          threat_score?: number | null
+        }
+        Update: {
+          attack_vector?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          origin_source?: string | null
+          scenario_description?: string | null
+          status?: string | null
+          target_entity?: string | null
+          threat_score?: number | null
+        }
+        Relationships: []
+      }
+      eris_response_strategies: {
+        Row: {
+          created_at: string
+          effectiveness_score: number | null
+          executed: boolean | null
+          gpt_recommendation: string | null
+          id: string
+          metadata: Json | null
+          simulation_id: string | null
+          strategy_type: string | null
+        }
+        Insert: {
+          created_at?: string
+          effectiveness_score?: number | null
+          executed?: boolean | null
+          gpt_recommendation?: string | null
+          id?: string
+          metadata?: Json | null
+          simulation_id?: string | null
+          strategy_type?: string | null
+        }
+        Update: {
+          created_at?: string
+          effectiveness_score?: number | null
+          executed?: boolean | null
+          gpt_recommendation?: string | null
+          id?: string
+          metadata?: Json | null
+          simulation_id?: string | null
+          strategy_type?: string | null
         }
         Relationships: []
       }
@@ -1661,6 +1763,7 @@ export type Database = {
           phone: string | null
           scan_type: string | null
           status: string | null
+          updated_at: string | null
         }
         Insert: {
           company?: string | null
@@ -1673,6 +1776,7 @@ export type Database = {
           phone?: string | null
           scan_type?: string | null
           status?: string | null
+          updated_at?: string | null
         }
         Update: {
           company?: string | null
@@ -1685,6 +1789,7 @@ export type Database = {
           phone?: string | null
           scan_type?: string | null
           status?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -1935,50 +2040,68 @@ export type Database = {
         Row: {
           asset_title: string | null
           asset_type: string | null
+          asset_url: string | null
           created_at: string
+          current_rank: number | null
+          engagement_score: number | null
           gsc_clicks: number | null
           gsc_ctr: number | null
           gsc_impressions: number | null
           id: string
           metadata: Json | null
           published_at: string | null
+          publishing_channel: string | null
           rank_goal: number | null
           status: string | null
+          target_keyword: string | null
           title: string | null
           updated_at: string
           url: string | null
+          visibility_score: number | null
         }
         Insert: {
           asset_title?: string | null
           asset_type?: string | null
+          asset_url?: string | null
           created_at?: string
+          current_rank?: number | null
+          engagement_score?: number | null
           gsc_clicks?: number | null
           gsc_ctr?: number | null
           gsc_impressions?: number | null
           id?: string
           metadata?: Json | null
           published_at?: string | null
+          publishing_channel?: string | null
           rank_goal?: number | null
           status?: string | null
+          target_keyword?: string | null
           title?: string | null
           updated_at?: string
           url?: string | null
+          visibility_score?: number | null
         }
         Update: {
           asset_title?: string | null
           asset_type?: string | null
+          asset_url?: string | null
           created_at?: string
+          current_rank?: number | null
+          engagement_score?: number | null
           gsc_clicks?: number | null
           gsc_ctr?: number | null
           gsc_impressions?: number | null
           id?: string
           metadata?: Json | null
           published_at?: string | null
+          publishing_channel?: string | null
           rank_goal?: number | null
           status?: string | null
+          target_keyword?: string | null
           title?: string | null
           updated_at?: string
           url?: string | null
+          visibility_score?: number | null
         }
         Relationships: []
       }

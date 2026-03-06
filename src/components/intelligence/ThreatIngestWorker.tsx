@@ -99,7 +99,7 @@ const ThreatIngestWorker = () => {
         progress: normalizeThreatStatus(sub.status) === 'complete' ? 100 : 
                  normalizeThreatStatus(sub.status) === 'in_review' ? 50 : 0,
         startedAt: sub.created_at ? new Date(sub.created_at) : undefined,
-        completedAt: sub.updated_at && normalizeThreatStatus(sub.status) === 'complete' ? new Date(sub.updated_at) : undefined
+        completedAt: sub.created_at && normalizeThreatStatus(sub.status) === 'complete' ? new Date(sub.created_at) : undefined
       }));
 
       setJobs(ingestJobs);
@@ -145,8 +145,8 @@ const ThreatIngestWorker = () => {
         .eq('id', submission.id);
 
       // Create a new scan result entry
-      const { data: scanResult, error: scanError } = await supabase
-        .from('scan_results')
+      const { data: scanResult, error: scanError } = await (supabase
+        .from('scan_results') as any)
         .insert({
           platform: 'Manual Submission',
           content: `Reputation scan for: ${submission.keywords}`,

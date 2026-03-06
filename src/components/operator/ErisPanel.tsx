@@ -60,8 +60,8 @@ export const ErisPanel = () => {
 
   const loadErisData = async () => {
     try {
-      const { data, error } = await supabase
-        .from('eris_attack_simulations')
+      const { data, error } = await (supabase
+        .from('eris_attack_simulations') as any)
         .select('*')
         .order('created_at', { ascending: false })
         .limit(15);
@@ -75,8 +75,8 @@ export const ErisPanel = () => {
 
   const loadResponseStrategies = async () => {
     try {
-      const { data, error } = await supabase
-        .from('eris_response_strategies')
+      const { data, error } = await (supabase
+        .from('eris_response_strategies') as any)
         .select('*')
         .order('created_at', { ascending: false })
         .limit(20);
@@ -125,8 +125,8 @@ export const ErisPanel = () => {
   const executeStrategy = async (strategy: ResponseStrategy) => {
     setIsLoading(true);
     try {
-      await supabase
-        .from('eris_response_strategies')
+      await (supabase
+        .from('eris_response_strategies') as any)
         .update({ executed: true })
         .eq('id', strategy.id);
 
