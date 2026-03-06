@@ -1,5 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { requireAdmin, isAuthenticated } from '../_shared/auth.ts';
 
 const SLACK_WEBHOOK_URL = Deno.env.get('SLACK_WEBHOOK_URL');
 
@@ -18,12 +19,14 @@ interface AlertPayload {
 }
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    // Auth guard
+    const auth = await requireAdmin(req);
+    if (!isAuthenticated(auth)) return auth;
     // Check if Slack webhook URL is configured
     if (!SLACK_WEBHOOK_URL) {
       throw new Error("Slack webhook URL not configured");
