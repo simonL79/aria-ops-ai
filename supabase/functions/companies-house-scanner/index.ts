@@ -1,5 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { requireAdmin, isAuthenticated } from '../_shared/auth.ts';
 
 // CORS headers for browser requests
 const corsHeaders = {
