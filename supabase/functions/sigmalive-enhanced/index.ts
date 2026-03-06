@@ -1,6 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.26.0";
+import { requireAdmin, isAuthenticated } from '../_shared/auth.ts';
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL") as string;
 const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") as string;
@@ -34,6 +35,9 @@ serve(async (req) => {
   }
 
   try {
+    // Auth guard
+    const auth = await requireAdmin(req);
+    if (!isAuthenticated(auth)) return auth;
     const { entityName, scanType, clientId, discoverySource }: ScanRequest = await req.json();
 
     console.log(`🔍 A.R.I.A™ SIGMA Enhanced scan initiated for: ${entityName} (${scanType})`);

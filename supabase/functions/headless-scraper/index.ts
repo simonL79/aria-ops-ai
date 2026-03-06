@@ -1,6 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { DOMParser } from "https://deno.land/x/deno_dom@v0.1.38/deno-dom-wasm.ts";
+import { requireAdmin, isAuthenticated } from '../_shared/auth.ts';
 
 // CORS headers for browser requests
 const corsHeaders = {
@@ -45,6 +46,9 @@ serve(async (req) => {
   }
 
   try {
+    // Auth guard
+    const auth = await requireAdmin(req);
+    if (!isAuthenticated(auth)) return auth;
     // Parse request body
     const requestData: ScrapingRequest = await req.json()
     

@@ -1,5 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { requireAdmin, isAuthenticated } from '../_shared/auth.ts';
 
 // CORS headers for browser requests
 const corsHeaders = {
@@ -29,6 +30,9 @@ serve(async (req) => {
   }
 
   try {
+    // Auth guard
+    const auth = await requireAdmin(req);
+    if (!isAuthenticated(auth)) return auth;
     const config: CompaniesHouseConfig = await req.json();
     
     // Get API key from environment or request

@@ -1,6 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { requireAdmin, isAuthenticated } from '../_shared/auth.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -82,6 +83,9 @@ function extractTags(title: string, summary: string): string[] {
 
 async function fetchAndParseRSS(feedUrl: string, feedName: string): Promise<ArticleData[]> {
   try {
+    // Auth guard
+    const auth = await requireAdmin(req);
+    if (!isAuthenticated(auth)) return auth;
     console.log(`📡 Fetching RSS feed: ${feedName}`);
     
     const response = await fetch(feedUrl, {

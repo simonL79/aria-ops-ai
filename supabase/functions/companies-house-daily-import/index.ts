@@ -1,6 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.23.0';
+import { requireAdmin, isAuthenticated } from '../_shared/auth.ts';
 
 const COMPANIES_HOUSE_API_KEY = Deno.env.get('COMPANIES_HOUSE_API_KEY');
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
@@ -24,6 +25,9 @@ serve(async (req) => {
   );
 
   try {
+    // Auth guard
+    const auth = await requireAdmin(req);
+    if (!isAuthenticated(auth)) return auth;
     // Parse request body or use defaults
     const { date, maxResults = 10 } = await req.json().catch(() => ({
       date: new Date().toISOString().split('T')[0], // Default to today
