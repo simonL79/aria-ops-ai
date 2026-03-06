@@ -274,7 +274,7 @@ export async function getQuarantinedResults(): Promise<QuarantineRecord[]> {
         id: record.id,
         service_label: record.module_source || '',
         entity_name: record.entity_name || '',
-        failure_reason: record.error_message || '',
+        failure_reason: (record as any).error_message || '',
         raw_result: operationData?.raw_result || null,
         quarantined_at: record.created_at || '',
         reviewed: operationData?.reviewed || false

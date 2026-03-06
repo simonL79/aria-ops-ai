@@ -81,7 +81,7 @@ export class IntelligenceMemoryManager {
 
       // Process and correlate memories
       const processedMemories = memories.map(memory => {
-        const findings = memory.key_findings || {};
+        const findings = (memory as any).key_findings || (memory as any).metadata || {};
         const intelligenceData = typeof findings === 'object' && findings !== null ? 
           findings as any : {};
 
@@ -94,7 +94,7 @@ export class IntelligenceMemoryManager {
           patternFingerprint: intelligenceData.intelligence_data?.patternFingerprint || '',
           confidence: intelligenceData.learning_metadata?.confidence || 0.7,
           sourceModule: intelligenceData.learning_metadata?.source_module || 'unknown',
-          contextReference: memory.context_reference,
+          contextReference: (memory as any).context_reference || '',
           timestamp: memory.created_at,
           rawData: intelligenceData.intelligence_data || {}
         };
