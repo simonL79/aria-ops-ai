@@ -568,54 +568,163 @@ export type Database = {
         }
         Relationships: []
       }
+      data_retention_schedule: {
+        Row: {
+          created_at: string
+          data_type: string | null
+          deletion_job_name: string | null
+          id: string
+          last_review_date: string | null
+          metadata: Json | null
+          next_review_date: string | null
+          retention_period: string | null
+          review_frequency: string | null
+          status: string | null
+          table_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          data_type?: string | null
+          deletion_job_name?: string | null
+          id?: string
+          last_review_date?: string | null
+          metadata?: Json | null
+          next_review_date?: string | null
+          retention_period?: string | null
+          review_frequency?: string | null
+          status?: string | null
+          table_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          data_type?: string | null
+          deletion_job_name?: string | null
+          id?: string
+          last_review_date?: string | null
+          metadata?: Json | null
+          next_review_date?: string | null
+          retention_period?: string | null
+          review_frequency?: string | null
+          status?: string | null
+          table_name?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       data_subject_requests: {
         Row: {
+          automated_decisions_reviewed: boolean | null
           completed_at: string | null
           created_at: string
+          data_categories: string[] | null
+          data_deleted: boolean | null
+          data_exported: boolean | null
+          data_subject_email: string | null
+          data_subject_name: string | null
+          deadline: string | null
           details: string | null
           id: string
+          identity_verified: boolean | null
           metadata: Json | null
+          objection_grounds: string | null
+          processing_notes: string | null
+          request_details: string | null
           request_type: string | null
+          response_date: string | null
+          response_sent: boolean | null
+          restriction_applied: boolean | null
           status: string | null
           subject_email: string | null
           subject_name: string | null
+          systems_affected: string[] | null
+          third_parties_notified: boolean | null
+          updated_at: string | null
+          verification_status: string | null
         }
         Insert: {
+          automated_decisions_reviewed?: boolean | null
           completed_at?: string | null
           created_at?: string
+          data_categories?: string[] | null
+          data_deleted?: boolean | null
+          data_exported?: boolean | null
+          data_subject_email?: string | null
+          data_subject_name?: string | null
+          deadline?: string | null
           details?: string | null
           id?: string
+          identity_verified?: boolean | null
           metadata?: Json | null
+          objection_grounds?: string | null
+          processing_notes?: string | null
+          request_details?: string | null
           request_type?: string | null
+          response_date?: string | null
+          response_sent?: boolean | null
+          restriction_applied?: boolean | null
           status?: string | null
           subject_email?: string | null
           subject_name?: string | null
+          systems_affected?: string[] | null
+          third_parties_notified?: boolean | null
+          updated_at?: string | null
+          verification_status?: string | null
         }
         Update: {
+          automated_decisions_reviewed?: boolean | null
           completed_at?: string | null
           created_at?: string
+          data_categories?: string[] | null
+          data_deleted?: boolean | null
+          data_exported?: boolean | null
+          data_subject_email?: string | null
+          data_subject_name?: string | null
+          deadline?: string | null
           details?: string | null
           id?: string
+          identity_verified?: boolean | null
           metadata?: Json | null
+          objection_grounds?: string | null
+          processing_notes?: string | null
+          request_details?: string | null
           request_type?: string | null
+          response_date?: string | null
+          response_sent?: boolean | null
+          restriction_applied?: boolean | null
           status?: string | null
           subject_email?: string | null
           subject_name?: string | null
+          systems_affected?: string[] | null
+          third_parties_notified?: boolean | null
+          updated_at?: string | null
+          verification_status?: string | null
         }
         Relationships: []
       }
       dpia_records: {
         Row: {
+          approval_date: string | null
+          approved_by: string | null
+          assessment_title: string | null
+          consultation_required: boolean | null
           created_at: string
           data_categories: string | null
           data_minimization_measures: string | null
           data_retention_period: string | null
+          data_types: string | null
+          dpo_opinion: string | null
           entity_name: string | null
           id: string
           identified_risks: Json | null
+          legal_basis: string | null
           metadata: Json | null
           mitigation_measures: Json | null
+          necessity_justification: string | null
           processing_purpose: string | null
+          proportionality_assessment: string | null
+          residual_risk: string | null
           review_date: string | null
           security_measures: string | null
           status: string | null
@@ -623,16 +732,26 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          approval_date?: string | null
+          approved_by?: string | null
+          assessment_title?: string | null
+          consultation_required?: boolean | null
           created_at?: string
           data_categories?: string | null
           data_minimization_measures?: string | null
           data_retention_period?: string | null
+          data_types?: string | null
+          dpo_opinion?: string | null
           entity_name?: string | null
           id?: string
           identified_risks?: Json | null
+          legal_basis?: string | null
           metadata?: Json | null
           mitigation_measures?: Json | null
+          necessity_justification?: string | null
           processing_purpose?: string | null
+          proportionality_assessment?: string | null
+          residual_risk?: string | null
           review_date?: string | null
           security_measures?: string | null
           status?: string | null
@@ -640,16 +759,26 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          approval_date?: string | null
+          approved_by?: string | null
+          assessment_title?: string | null
+          consultation_required?: boolean | null
           created_at?: string
           data_categories?: string | null
           data_minimization_measures?: string | null
           data_retention_period?: string | null
+          data_types?: string | null
+          dpo_opinion?: string | null
           entity_name?: string | null
           id?: string
           identified_risks?: Json | null
+          legal_basis?: string | null
           metadata?: Json | null
           mitigation_measures?: Json | null
+          necessity_justification?: string | null
           processing_purpose?: string | null
+          proportionality_assessment?: string | null
+          residual_risk?: string | null
           review_date?: string | null
           security_measures?: string | null
           status?: string | null
@@ -1524,7 +1653,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      log_compliance_activity: {
+        Args: {
+          p_activity_type?: string
+          p_description?: string
+          p_entity_name?: string
+          p_metadata?: Json
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
