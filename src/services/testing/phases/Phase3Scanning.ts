@@ -25,10 +25,10 @@ export class Phase3Scanning extends BaseTestPhase {
 
     // Test 3.2: Platform Configuration
     try {
-      const { data, error } = await this.getSupabase()
+      const { data, error } = await (this.getSupabase() as any)
         .from('monitored_platforms')
         .select('*')
-        .eq('active', true);
+        .eq('is_active', true);
       
       if (error) throw error;
       this.addResult('Platform Configuration', 'pass', `${data?.length || 0} active platforms configured`, phase, true, 'live');

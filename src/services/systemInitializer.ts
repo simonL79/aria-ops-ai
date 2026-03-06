@@ -176,15 +176,14 @@ export class SystemInitializer {
   private static async setupMonitoringInfrastructure(result: SystemInitializationResult): Promise<void> {
     try {
       // Initialize monitoring status table if it exists
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('monitoring_status')
-        .upsert({
-          id: '1',
+        .upsert([{
+          module_name: 'system_init',
           is_active: true,
           sources_count: 12,
-          last_run: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'id' });
+          last_check: new Date().toISOString()
+        }]);
       
       if (error && error.code !== 'PGRST116') {
         result.warnings.push('Could not initialize monitoring status');

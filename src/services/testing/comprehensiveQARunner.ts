@@ -410,7 +410,7 @@ export class ComprehensiveQARunner {
 
   private async testGuardianMode(test: QATestCase) {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('genesis_guardian_log')
         .select('*')
         .limit(1);
@@ -424,7 +424,7 @@ export class ComprehensiveQARunner {
 
   private async testReportGeneration(test: QATestCase) {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('aria_reports')
         .select('*')
         .limit(1);
@@ -576,8 +576,8 @@ export class ComprehensiveQARunner {
     // Test that core Genesis Sentinel features are working
     try {
       const coreTests = [
-        supabase.from('genesis_entities').select('*').limit(1),
-        supabase.from('genesis_threat_reports').select('*').limit(1),
+        (supabase as any).from('genesis_entities').select('*').limit(1),
+        (supabase as any).from('genesis_threat_reports').select('*').limit(1),
         supabase.from('aria_notifications').select('*').limit(1)
       ];
 

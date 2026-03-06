@@ -33,7 +33,7 @@ export class Phase2CoreSystems extends BaseTestPhase {
 
     // Test 2.3: Prospect Intelligence
     try {
-      const { count, error } = await this.getSupabase()
+      const { count, error } = await (this.getSupabase() as any)
         .from('prospect_entities')
         .select('*', { count: 'exact', head: true });
       
