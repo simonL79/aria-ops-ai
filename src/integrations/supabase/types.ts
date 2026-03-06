@@ -50,6 +50,7 @@ export type Database = {
           created_at: string
           entity_name: string | null
           id: string
+          memory_summary: string | null
           memory_type: string | null
           metadata: Json | null
           updated_at: string
@@ -59,6 +60,7 @@ export type Database = {
           created_at?: string
           entity_name?: string | null
           id?: string
+          memory_summary?: string | null
           memory_type?: string | null
           metadata?: Json | null
           updated_at?: string
@@ -68,9 +70,82 @@ export type Database = {
           created_at?: string
           entity_name?: string | null
           id?: string
+          memory_summary?: string | null
           memory_type?: string | null
           metadata?: Json | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      anubis_pattern_log: {
+        Row: {
+          confidence: number | null
+          created_at: string
+          entity_name: string | null
+          id: string
+          metadata: Json | null
+          pattern_fingerprint: string | null
+          pattern_type: string | null
+        }
+        Insert: {
+          confidence?: number | null
+          created_at?: string
+          entity_name?: string | null
+          id?: string
+          metadata?: Json | null
+          pattern_fingerprint?: string | null
+          pattern_type?: string | null
+        }
+        Update: {
+          confidence?: number | null
+          created_at?: string
+          entity_name?: string | null
+          id?: string
+          metadata?: Json | null
+          pattern_fingerprint?: string | null
+          pattern_type?: string | null
+        }
+        Relationships: []
+      }
+      aria_client_intakes: {
+        Row: {
+          client_name: string
+          contact_email: string | null
+          contact_name: string | null
+          created_at: string
+          details: string | null
+          id: string
+          metadata: Json | null
+          service_type: string | null
+          status: string | null
+          updated_at: string
+          urgency: string | null
+        }
+        Insert: {
+          client_name: string
+          contact_email?: string | null
+          contact_name?: string | null
+          created_at?: string
+          details?: string | null
+          id?: string
+          metadata?: Json | null
+          service_type?: string | null
+          status?: string | null
+          updated_at?: string
+          urgency?: string | null
+        }
+        Update: {
+          client_name?: string
+          contact_email?: string | null
+          contact_name?: string | null
+          created_at?: string
+          details?: string | null
+          id?: string
+          metadata?: Json | null
+          service_type?: string | null
+          status?: string | null
+          updated_at?: string
+          urgency?: string | null
         }
         Relationships: []
       }
@@ -150,7 +225,9 @@ export type Database = {
           description: string | null
           id: string
           image: string | null
+          medium_url: string | null
           meta_description: string | null
+          meta_keywords: string | null
           meta_title: string | null
           slug: string | null
           status: string | null
@@ -166,7 +243,9 @@ export type Database = {
           description?: string | null
           id?: string
           image?: string | null
+          medium_url?: string | null
           meta_description?: string | null
+          meta_keywords?: string | null
           meta_title?: string | null
           slug?: string | null
           status?: string | null
@@ -182,7 +261,9 @@ export type Database = {
           description?: string | null
           id?: string
           image?: string | null
+          medium_url?: string | null
           meta_description?: string | null
+          meta_keywords?: string | null
           meta_title?: string | null
           slug?: string | null
           status?: string | null
@@ -376,6 +457,207 @@ export type Database = {
         }
         Relationships: []
       }
+      counter_narratives: {
+        Row: {
+          content: string | null
+          created_at: string
+          entity_name: string | null
+          id: string
+          metadata: Json | null
+          narrative_type: string | null
+          platform: string | null
+          status: string | null
+          theme: string | null
+          updated_at: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          entity_name?: string | null
+          id?: string
+          metadata?: Json | null
+          narrative_type?: string | null
+          platform?: string | null
+          status?: string | null
+          theme?: string | null
+          updated_at?: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          entity_name?: string | null
+          id?: string
+          metadata?: Json | null
+          narrative_type?: string | null
+          platform?: string | null
+          status?: string | null
+          theme?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      darkweb_agents: {
+        Row: {
+          agent_name: string | null
+          created_at: string
+          id: string
+          metadata: Json | null
+          results: Json | null
+          started_at: string | null
+          status: string | null
+          target: string | null
+        }
+        Insert: {
+          agent_name?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          results?: Json | null
+          started_at?: string | null
+          status?: string | null
+          target?: string | null
+        }
+        Update: {
+          agent_name?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          results?: Json | null
+          started_at?: string | null
+          status?: string | null
+          target?: string | null
+        }
+        Relationships: []
+      }
+      data_breach_incidents: {
+        Row: {
+          affected_records: number | null
+          created_at: string
+          description: string | null
+          id: string
+          incident_type: string | null
+          metadata: Json | null
+          reported_at: string | null
+          resolved_at: string | null
+          severity: string | null
+          status: string | null
+        }
+        Insert: {
+          affected_records?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          incident_type?: string | null
+          metadata?: Json | null
+          reported_at?: string | null
+          resolved_at?: string | null
+          severity?: string | null
+          status?: string | null
+        }
+        Update: {
+          affected_records?: number | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          incident_type?: string | null
+          metadata?: Json | null
+          reported_at?: string | null
+          resolved_at?: string | null
+          severity?: string | null
+          status?: string | null
+        }
+        Relationships: []
+      }
+      data_subject_requests: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          details: string | null
+          id: string
+          metadata: Json | null
+          request_type: string | null
+          status: string | null
+          subject_email: string | null
+          subject_name: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          details?: string | null
+          id?: string
+          metadata?: Json | null
+          request_type?: string | null
+          status?: string | null
+          subject_email?: string | null
+          subject_name?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          details?: string | null
+          id?: string
+          metadata?: Json | null
+          request_type?: string | null
+          status?: string | null
+          subject_email?: string | null
+          subject_name?: string | null
+        }
+        Relationships: []
+      }
+      dpia_records: {
+        Row: {
+          created_at: string
+          data_categories: string | null
+          data_minimization_measures: string | null
+          data_retention_period: string | null
+          entity_name: string | null
+          id: string
+          identified_risks: Json | null
+          metadata: Json | null
+          mitigation_measures: Json | null
+          processing_purpose: string | null
+          review_date: string | null
+          security_measures: string | null
+          status: string | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          data_categories?: string | null
+          data_minimization_measures?: string | null
+          data_retention_period?: string | null
+          entity_name?: string | null
+          id?: string
+          identified_risks?: Json | null
+          metadata?: Json | null
+          mitigation_measures?: Json | null
+          processing_purpose?: string | null
+          review_date?: string | null
+          security_measures?: string | null
+          status?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          data_categories?: string | null
+          data_minimization_measures?: string | null
+          data_retention_period?: string | null
+          entity_name?: string | null
+          id?: string
+          identified_risks?: Json | null
+          metadata?: Json | null
+          mitigation_measures?: Json | null
+          processing_purpose?: string | null
+          review_date?: string | null
+          security_measures?: string | null
+          status?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       entities: {
         Row: {
           created_at: string
@@ -490,6 +772,42 @@ export type Database = {
         }
         Relationships: []
       }
+      lead_magnets: {
+        Row: {
+          company: string | null
+          created_at: string
+          email: string | null
+          id: string
+          metadata: Json | null
+          name: string | null
+          phone: string | null
+          source: string | null
+          status: string | null
+        }
+        Insert: {
+          company?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          metadata?: Json | null
+          name?: string | null
+          phone?: string | null
+          source?: string | null
+          status?: string | null
+        }
+        Update: {
+          company?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          metadata?: Json | null
+          name?: string | null
+          phone?: string | null
+          source?: string | null
+          status?: string | null
+        }
+        Relationships: []
+      }
       lia_records: {
         Row: {
           assessment_type: string | null
@@ -553,6 +871,42 @@ export type Database = {
           name?: string
           system_status?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      llm_watchdog_logs: {
+        Row: {
+          created_at: string
+          entity_name: string | null
+          id: string
+          llm_provider: string | null
+          metadata: Json | null
+          query: string | null
+          response: string | null
+          risk_level: string | null
+          timestamp: string | null
+        }
+        Insert: {
+          created_at?: string
+          entity_name?: string | null
+          id?: string
+          llm_provider?: string | null
+          metadata?: Json | null
+          query?: string | null
+          response?: string | null
+          risk_level?: string | null
+          timestamp?: string | null
+        }
+        Update: {
+          created_at?: string
+          entity_name?: string | null
+          id?: string
+          llm_provider?: string | null
+          metadata?: Json | null
+          query?: string | null
+          response?: string | null
+          risk_level?: string | null
+          timestamp?: string | null
         }
         Relationships: []
       }
@@ -622,6 +976,45 @@ export type Database = {
         }
         Relationships: []
       }
+      multilingual_threats: {
+        Row: {
+          content: string | null
+          created_at: string
+          detected_at: string | null
+          entity_name: string | null
+          id: string
+          language: string | null
+          metadata: Json | null
+          severity: string | null
+          source: string | null
+          translated_content: string | null
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          detected_at?: string | null
+          entity_name?: string | null
+          id?: string
+          language?: string | null
+          metadata?: Json | null
+          severity?: string | null
+          source?: string | null
+          translated_content?: string | null
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          detected_at?: string | null
+          entity_name?: string | null
+          id?: string
+          language?: string | null
+          metadata?: Json | null
+          severity?: string | null
+          source?: string | null
+          translated_content?: string | null
+        }
+        Relationships: []
+      }
       narrative_clusters: {
         Row: {
           cluster_data: Json | null
@@ -685,6 +1078,42 @@ export type Database = {
           platforms?: string[] | null
           status?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      privacy_notices: {
+        Row: {
+          content: string | null
+          created_at: string
+          effective_date: string | null
+          id: string
+          metadata: Json | null
+          status: string | null
+          title: string | null
+          updated_at: string
+          version: string | null
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          effective_date?: string | null
+          id?: string
+          metadata?: Json | null
+          status?: string | null
+          title?: string | null
+          updated_at?: string
+          version?: string | null
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          effective_date?: string | null
+          id?: string
+          metadata?: Json | null
+          status?: string | null
+          title?: string | null
+          updated_at?: string
+          version?: string | null
         }
         Relationships: []
       }
@@ -916,6 +1345,48 @@ export type Database = {
         }
         Relationships: []
       }
+      strike_requests: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          entity_name: string | null
+          id: string
+          metadata: Json | null
+          platform: string | null
+          reason: string | null
+          status: string | null
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          entity_name?: string | null
+          id?: string
+          metadata?: Json | null
+          platform?: string | null
+          reason?: string | null
+          status?: string | null
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          entity_name?: string | null
+          id?: string
+          metadata?: Json | null
+          platform?: string | null
+          reason?: string | null
+          status?: string | null
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: []
+      }
       suppression_assets: {
         Row: {
           asset_type: string | null
@@ -976,6 +1447,33 @@ export type Database = {
           description?: string | null
           id?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      system_health_checks: {
+        Row: {
+          check_type: string | null
+          created_at: string
+          details: Json | null
+          id: string
+          metrics: Json | null
+          status: string | null
+        }
+        Insert: {
+          check_type?: string | null
+          created_at?: string
+          details?: Json | null
+          id?: string
+          metrics?: Json | null
+          status?: string | null
+        }
+        Update: {
+          check_type?: string | null
+          created_at?: string
+          details?: Json | null
+          id?: string
+          metrics?: Json | null
+          status?: string | null
         }
         Relationships: []
       }
