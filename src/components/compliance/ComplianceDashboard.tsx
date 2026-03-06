@@ -31,10 +31,10 @@ const ComplianceDashboard = () => {
         .order('created_at', { ascending: false })
         .limit(100);
 
-      const { data: breachData } = await supabase
-        .from('data_breach_incidents')
+      const { data: breachData } = await (supabase
+        .from('data_breach_incidents') as any)
         .select('*')
-        .eq('incident_status', 'open');
+        .eq('status', 'open');
 
       const { data: dsrData } = await supabase
         .from('data_subject_requests')

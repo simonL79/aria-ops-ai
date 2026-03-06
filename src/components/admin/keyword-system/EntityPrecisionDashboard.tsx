@@ -79,7 +79,7 @@ const EntityPrecisionDashboard = () => {
         .single();
 
       if (error && error.code !== 'PGRST116') throw error;
-      setStats(data);
+      setStats(data as any);
     } catch (error) {
       console.error('Error loading precision stats:', error);
     }

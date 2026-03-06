@@ -78,7 +78,7 @@ const DataRetentionManager = () => {
         cross_border_considerations: item.cross_border_considerations || null
       })) || [];
       
-      setSchedules(transformedData);
+      setSchedules(transformedData as any);
     } catch (error) {
       console.error('Error fetching retention schedules:', error);
       toast.error('Failed to fetch retention schedules');

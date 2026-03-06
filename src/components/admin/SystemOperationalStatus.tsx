@@ -260,13 +260,14 @@ const SystemOperationalStatus = () => {
 
     try {
       // Update monitoring status
-      await supabase
-        .from('monitoring_status')
+      await (supabase
+        .from('monitoring_status') as any)
         .upsert({
           id: '1',
+          module_name: 'system_monitoring',
           is_active: true,
           sources_count: 12,
-          last_run: new Date().toISOString(),
+          last_check: new Date().toISOString(),
           updated_at: new Date().toISOString()
         }, { onConflict: 'id' });
 
