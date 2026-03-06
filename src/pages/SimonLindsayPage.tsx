@@ -39,21 +39,21 @@ const SimonLindsayPage = () => {
                 <h2 className="text-2xl font-bold text-orange-500 mb-6">Expertise</h2>
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <h3 className="text-lg font-semibold mb-3">Technical Leadership</h3>
+                    <h3 className="text-lg font-semibold mb-3">Reputation Intelligence</h3>
                     <ul className="space-y-2 text-gray-300">
-                      <li>• AI & Machine Learning</li>
-                      <li>• Cybersecurity</li>
-                      <li>• Data Analytics</li>
-                      <li>• System Architecture</li>
+                      <li>• AI-Powered Reputation Monitoring</li>
+                      <li>• Digital Footprint Analysis</li>
+                      <li>• Narrative Risk Anticipation</li>
+                      <li>• Strategic Response & Crisis Management</li>
                     </ul>
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold mb-3">Business Strategy</h3>
+                    <h3 className="text-lg font-semibold mb-3">Commercial Strategy</h3>
                     <ul className="space-y-2 text-gray-300">
-                      <li>• Digital Transformation</li>
-                      <li>• Risk Management</li>
-                      <li>• Crisis Response</li>
-                      <li>• Executive Protection</li>
+                      <li>• Brand Partnerships & Sponsorship</li>
+                      <li>• Celebrity & Talent Management</li>
+                      <li>• Combat Sports (Boxing, BKFC)</li>
+                      <li>• Sports & Entertainment Industry</li>
                     </ul>
                   </div>
                 </div>
