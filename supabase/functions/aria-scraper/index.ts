@@ -1,8 +1,8 @@
 
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
 import { scanYouTube } from './youtube.ts';
+import { requireAdmin, isAuthenticated } from '../_shared/auth.ts';
 
-// CORS headers
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -10,14 +10,15 @@ const corsHeaders = {
 
 serve(async (req) => {
   console.log(`[ARIA-SCRAPER] === NEW REQUEST ===`);
-  console.log(`[ARIA-SCRAPER] Method: ${req.method}`);
   
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    // Auth guard
+    const auth = await requireAdmin(req);
+    if (!isAuthenticated(auth)) return auth;
     console.log('[ARIA-SCRAPER] Starting YouTube RSS scan...');
     
     const results = {
