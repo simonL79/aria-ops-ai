@@ -244,3 +244,6 @@ verify_jwt = false
 
 [functions.generate-sitemap]
 verify_jwt = false
+
+[functions.openai-proxy]
+verify_jwt = false
