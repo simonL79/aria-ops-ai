@@ -152,8 +152,8 @@ const AdminStrikeDashboard = () => {
     }
 
     try {
-      const { error } = await supabase
-        .from('strike_requests')
+      const { error } = await (supabase
+        .from('strike_requests') as any)
         .update({
           status: 'rejected',
           approved_by: user?.id,

@@ -80,7 +80,7 @@ export class AdvancedEntityMatcher {
         return null;
       }
 
-      const riskProfile = data.risk_profile as any || {};
+      const riskProfile = (data as any).risk_profile || data.metadata as any || {};
 
       return {
         id: data.id,

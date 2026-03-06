@@ -23,11 +23,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  // Emergency admin access for business owner
+  // Removed: forceAdminAccess was a security vulnerability (CLIENT_SIDE_AUTH)
   const forceAdminAccess = () => {
-    console.log('🚨 FORCE ADMIN ACCESS: Business owner override');
-    setIsAdmin(true);
-    localStorage.setItem('force_admin_access', 'true');
+    console.warn('⚠️ forceAdminAccess is disabled. Use server-side role assignment instead.');
   };
 
   // Simple force reset - clears everything immediately
@@ -66,12 +64,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return true;
       }
 
-      // Check for forced admin access
-      if (localStorage.getItem('force_admin_access') === 'true') {
-        console.log('✅ Force admin access detected');
-        setIsAdmin(true);
-        return true;
-      }
+      // Removed: localStorage admin bypass was a security vulnerability
       
       // Use the new is_current_user_admin function
       const { data, error } = await (supabase.rpc as any)('is_current_user_admin');

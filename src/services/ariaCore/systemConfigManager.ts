@@ -97,7 +97,7 @@ export class SystemConfigManager {
 
   private static async checkRLSCompliance(result: SystemBugScanResult): Promise<void> {
     try {
-      const { data: rlsCheck } = await supabase.rpc('check_rls_compliance');
+      const { data: rlsCheck } = await (supabase.rpc as any)('check_rls_compliance');
       
       if (rlsCheck) {
         const tablesWithoutRLS = rlsCheck.filter((table: any) => !table.rls_enabled);
@@ -198,7 +198,7 @@ export class SystemConfigManager {
     try {
       // Log critical issues
       for (const issue of result.critical_issues) {
-        await supabase.rpc('log_anubis_check', {
+        await (supabase.rpc as any)('log_anubis_check', {
           check_name: 'system_bug_scan',
           result: issue,
           passed: false,
@@ -209,7 +209,7 @@ export class SystemConfigManager {
 
       // Log warnings
       for (const warning of result.warnings) {
-        await supabase.rpc('log_anubis_check', {
+        await (supabase.rpc as any)('log_anubis_check', {
           check_name: 'system_bug_scan',
           result: warning,
           passed: false,
@@ -219,7 +219,7 @@ export class SystemConfigManager {
       }
 
       // Log overall scan completion
-      await supabase.rpc('log_anubis_check', {
+      await (supabase.rpc as any)('log_anubis_check', {
         check_name: 'system_bug_scan_completed',
         result: `Bug scan completed. Critical: ${result.critical_issues.length}, Warnings: ${result.warnings.length}, Info: ${result.info.length}`,
         passed: result.success,
@@ -304,7 +304,7 @@ export class SystemConfigManager {
         for (const platform of platforms) {
           const { error } = await supabase
             .from('monitored_platforms')
-            .insert(platform);
+            .insert({ platform_name: platform.name, platform_type: platform.type, is_active: true });
 
           if (error) {
             result.warnings.push(`Could not add platform ${platform.name}: ${error.message}`);

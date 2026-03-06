@@ -81,7 +81,7 @@ export class IntelligenceMemoryManager {
 
       // Process and correlate memories
       const processedMemories = memories.map(memory => {
-        const findings = memory.key_findings || {};
+        const findings = (memory as any).key_findings || (memory as any).metadata || {};
         const intelligenceData = typeof findings === 'object' && findings !== null ? 
           findings as any : {};
 
@@ -94,7 +94,7 @@ export class IntelligenceMemoryManager {
           patternFingerprint: intelligenceData.intelligence_data?.patternFingerprint || '',
           confidence: intelligenceData.learning_metadata?.confidence || 0.7,
           sourceModule: intelligenceData.learning_metadata?.source_module || 'unknown',
-          contextReference: memory.context_reference,
+          contextReference: (memory as any).context_reference || '',
           timestamp: memory.created_at,
           rawData: intelligenceData.intelligence_data || {}
         };
@@ -142,7 +142,7 @@ export class IntelligenceMemoryManager {
       }
 
       // Store in feedback memory table
-      const { error } = await supabase.from('anubis_feedback_memory').insert({
+      const { error } = await (supabase as any).from('anubis_feedback_memory').insert({
         entity_id: await this.getEntityId(entityName),
         source_module: 'intelligence_system',
         operator_action: feedbackData.action,
@@ -318,7 +318,7 @@ export class IntelligenceMemoryManager {
       // Update pattern confidence in database
       const fingerprint = this.generatePatternFingerprint(feedback);
       
-      await supabase.rpc('log_anubis_check', {
+      await (supabase.rpc as any)('log_anubis_check', {
         check_name: 'pattern_reinforcement',
         result: `Successful pattern reinforced: ${fingerprint}`,
         passed: true,
@@ -341,7 +341,7 @@ export class IntelligenceMemoryManager {
     try {
       const fingerprint = this.generatePatternFingerprint(feedback);
       
-      await supabase.rpc('log_anubis_check', {
+      await (supabase.rpc as any)('log_anubis_check', {
         check_name: 'pattern_ineffective',
         result: `Ineffective pattern flagged: ${fingerprint}`,
         passed: false,

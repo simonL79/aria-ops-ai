@@ -226,11 +226,11 @@ export class ARIASystemAudit {
       }
 
       // Check live threat ingestion
-      const { count: threatCount } = await supabase
-        .from('threats')
+      const { count: threatCount } = await (supabase
+        .from('scan_results') as any)
         .select('*', { count: 'exact', head: true })
-        .eq('is_live', true)
-        .gte('detected_at', new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString());
+        .eq('source_type', 'live_osint')
+        .gte('created_at', new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString());
 
       if (!threatCount || threatCount === 0) {
         issues.push('No live threats ingested in last 12 hours');
@@ -275,14 +275,14 @@ export class ARIASystemAudit {
       const { data: monitoringStatus } = await supabase
         .from('monitoring_status')
         .select('*')
-        .order('last_run', { ascending: false })
+        .order('last_check', { ascending: false })
         .limit(1);
 
       if (!monitoringStatus || monitoringStatus.length === 0) {
         issues.push('No monitoring status records found');
         recommendations.push('Initialize monitoring system');
       } else {
-        const lastRun = new Date(monitoringStatus[0].last_run);
+        const lastRun = new Date(monitoringStatus[0].last_check);
         const hoursSinceLastRun = (Date.now() - lastRun.getTime()) / (1000 * 60 * 60);
         
         if (hoursSinceLastRun > 2) {
@@ -295,7 +295,7 @@ export class ARIASystemAudit {
       const { data: platforms } = await supabase
         .from('monitored_platforms')
         .select('*')
-        .eq('status', 'active');
+        .eq('is_active', true);
 
       if (!platforms || platforms.length === 0) {
         issues.push('No active monitoring platforms');
@@ -337,7 +337,7 @@ export class ARIASystemAudit {
       const recommendations: string[] = [];
 
       // Check recent edge function activity
-      const { count: functionCount } = await supabase
+      const { count: functionCount } = await (supabase as any)
         .from('edge_function_events')
         .select('*', { count: 'exact', head: true })
         .gte('executed_at', new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString());
@@ -348,7 +348,7 @@ export class ARIASystemAudit {
       }
 
       // Check for function errors
-      const { count: errorCount } = await supabase
+      const { count: errorCount } = await (supabase as any)
         .from('edge_function_events')
         .select('*', { count: 'exact', head: true })
         .eq('status', 'error')

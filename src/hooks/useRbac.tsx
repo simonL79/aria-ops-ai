@@ -33,8 +33,8 @@ export const RbacProvider = ({ children, initialRoles = ['user'] }: { children: 
   const fetchUserRoles = async (userId: string) => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('user_roles')
+      const { data, error } = await (supabase
+        .from('user_roles') as any)
         .select('role')
         .eq('user_id', userId);
       

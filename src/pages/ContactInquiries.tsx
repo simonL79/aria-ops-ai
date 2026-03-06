@@ -42,8 +42,8 @@ const ContactInquiries = () => {
 
   const fetchSubmissions = async () => {
     try {
-      const { data, error } = await supabase
-        .from('contact_submissions')
+      const { data, error } = await (supabase
+        .from('contact_submissions') as any)
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -84,8 +84,8 @@ const ContactInquiries = () => {
 
   const updateStatus = async (submissionId: string, newStatus: string) => {
     try {
-      const { error } = await supabase
-        .from('contact_submissions')
+      const { error } = await (supabase
+        .from('contact_submissions') as any)
         .update({ status: newStatus })
         .eq('id', submissionId);
 

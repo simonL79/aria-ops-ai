@@ -86,7 +86,7 @@ const ThreatsManagement = () => {
 
       if (error) throw error;
 
-      setThreats(data || []);
+      setThreats((data || []).map((d: any) => ({ ...d, sentiment: Number(d.sentiment) || 0 })) as ThreatDetails[]);
     } catch (error) {
       console.error('Failed to load threats:', error);
       toast.error('Failed to load threats');
