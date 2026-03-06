@@ -2,6 +2,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.23.0';
 import { Resend } from "npm:resend@1.0.0";
+import { requireAdmin, isAuthenticated } from '../_shared/auth.ts';
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
@@ -14,13 +15,15 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
   
   try {
-    // Initialize Supabase client with service role key
+    // Auth guard
+    const auth = await requireAdmin(req);
+    if (!isAuthenticated(auth)) return auth;
+
     const supabase = createClient(
       SUPABASE_URL || '',
       SUPABASE_SERVICE_ROLE_KEY || ''
