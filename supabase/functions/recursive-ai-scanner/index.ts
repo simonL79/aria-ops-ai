@@ -1,6 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.192.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
+import { requireAdmin, isAuthenticated } from '../_shared/auth.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -9,13 +10,15 @@ const corsHeaders = {
 
 serve(async (req) => {
   console.log('[RECURSIVE-AI-SCANNER] === NEW REQUEST ===');
-  console.log('[RECURSIVE-AI-SCANNER] Method:', req.method);
   
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    // Auth guard
+    const auth = await requireAdmin(req);
+    if (!isAuthenticated(auth)) return auth;
     const { entity, keywords = [], maxDepth = 1 } = await req.json();
     console.log('[RECURSIVE-AI-SCANNER] Starting recursive scan for:', entity);
 
