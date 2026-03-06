@@ -1,11 +1,11 @@
 
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 // Safety check for content to prevent misuse
 export const contentSafetyCheck = (content: string): boolean => {
   if (!content || content.trim().length < 1) return false;
   
-  // Basic checks to prevent misuse - can be expanded
   const hasPotentialSqlInjection = /(\b(select|insert|update|delete|from|drop|alter)\b.*\b(from|into|table|database)\b)/i.test(content);
   const hasPotentialXss = /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/i.test(content);
   
@@ -17,7 +17,7 @@ export const contentSafetyCheck = (content: string): boolean => {
   return true;
 };
 
-// Secure API request wrapper
+// Secure API request wrapper — routes OpenAI calls through server-side proxy
 export const makeSecuredApiRequest = async (
   endpoint: string, 
   messages: any[], 
@@ -25,54 +25,50 @@ export const makeSecuredApiRequest = async (
   model: string = "gpt-4o"
 ): Promise<any> => {
   try {
-    // Define endpoint based on whether it's OpenAI or an internal endpoint
     const isOpenAiEndpoint = endpoint.includes('openai') || endpoint.includes('chat/completions');
     
-    let url, headers, body;
-    
     if (isOpenAiEndpoint) {
-      // For OpenAI requests
-      url = "https://api.openai.com/v1/" + endpoint;
-      headers = {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + import.meta.env.VITE_OPENAI_API_KEY
-      };
-      body = JSON.stringify({
-        model: model,
-        messages: messages,
-        temperature: temperature
+      // Route through server-side proxy — never call OpenAI directly from browser
+      const { data, error } = await supabase.functions.invoke('openai-proxy', {
+        body: { messages, temperature, model }
       });
+      
+      if (error) {
+        throw new Error(error.message || "OpenAI proxy request failed");
+      }
+      
+      return data;
     } else {
-      // For internal APIs like ARIA-ingest - use Supabase anon key for auth
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co`;
-      url = endpoint.startsWith("http") ? endpoint : `${supabaseUrl}/functions/v1/${endpoint}`;
+      // For internal APIs — use Supabase functions.invoke
+      const functionName = endpoint.startsWith("http") 
+        ? endpoint 
+        : endpoint;
       
-      headers = {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-        "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
-      };
-      
-      body = JSON.stringify(messages);
+      if (endpoint.startsWith("http")) {
+        // Direct URL call for non-Supabase endpoints
+        const response = await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(messages)
+        });
+        
+        if (!response.ok) {
+          throw new Error(`API request failed with status ${response.status}`);
+        }
+        
+        return await response.json();
+      } else {
+        const { data, error } = await supabase.functions.invoke(functionName, {
+          body: messages
+        });
+        
+        if (error) {
+          throw new Error(error.message || "API request failed");
+        }
+        
+        return data;
+      }
     }
-    
-    console.log(`Making secure API request to ${url}`);
-    console.log(`Using headers:`, headers);
-    
-    const response = await fetch(url, {
-      method: "POST",
-      headers: headers,
-      body: body
-    });
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`API error (${response.status}): ${errorText}`);
-      throw new Error(`API request failed with status ${response.status}`);
-    }
-    
-    const data = await response.json();
-    return data;
     
   } catch (error) {
     console.error("Secure API request failed:", error);
@@ -83,10 +79,9 @@ export const makeSecuredApiRequest = async (
   }
 };
 
-// Helper to make an ARIA ingest request - useful for direct content insertion
+// Helper to make an ARIA ingest request
 export const makeAriaIngestRequest = async (content: any): Promise<any> => {
   try {
-    // Send as raw content object
     return await makeSecuredApiRequest("aria-ingest", content);
   } catch (error) {
     console.error("ARIA ingest request failed:", error);

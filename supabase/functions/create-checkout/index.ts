@@ -1,41 +1,78 @@
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@14.21.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Server-side price map — never trust client-supplied prices
+const PLAN_PRICES: Record<string, { name: string; amount: number }> = {
+  "starter": { name: "Starter Plan", amount: 4900 },
+  "professional": { name: "Professional Plan", amount: 9700 },
+  "enterprise": { name: "Enterprise Plan", amount: 29700 },
+};
+
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    // Authenticate the user
+    const authHeader = req.headers.get("authorization");
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "Missing authorization header" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL") || "",
+      Deno.env.get("SUPABASE_ANON_KEY") || ""
+    );
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", { 
       apiVersion: "2023-10-16" 
     });
     
-    // Parse request data
-    const { planName, price } = await req.json();
+    const { planId } = await req.json();
     
-    // Convert price string (£97.00) to cents (9700)
-    const amount = parseInt(price.replace(/[^0-9.]/g, "")) * 100;
-    
-    console.log(`Creating checkout for ${planName} at ${amount} cents`);
+    // Look up price server-side — never use client-supplied price
+    const plan = PLAN_PRICES[planId];
+    if (!plan) {
+      return new Response(JSON.stringify({ error: `Invalid plan: ${planId}. Valid plans: ${Object.keys(PLAN_PRICES).join(", ")}` }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    console.log(`Creating checkout for ${plan.name} at ${plan.amount} pence for user ${user.id}`);
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
+      customer_email: user.email,
       line_items: [
         {
           price_data: {
             currency: "gbp",
             product_data: {
-              name: planName,
+              name: plan.name,
             },
-            unit_amount: amount,
+            unit_amount: plan.amount,
           },
           quantity: 1,
         },
@@ -51,7 +88,7 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error("Error creating checkout session:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: "Failed to create checkout session" }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });
