@@ -84,7 +84,7 @@ export const generateSeoContent = async (
     };
 
     // Store generated content
-    await supabase.from('generated_content').insert({
+    await (supabase as any).from('generated_content').insert({
       title: result.title,
       content: result.content,
       keywords: result.keywords,

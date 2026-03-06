@@ -37,7 +37,7 @@ export interface EmailDraft {
  */
 export const getHighPriorityThreats = async (): Promise<ThreatResponse[]> => {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('high_priority_threats')
       .select('*')
       .limit(20);

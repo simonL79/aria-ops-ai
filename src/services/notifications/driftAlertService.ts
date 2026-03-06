@@ -26,7 +26,7 @@ class DriftAlertService {
 
   async checkForDriftAlerts(): Promise<DriftAlert[]> {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('narrative_drift_tracking')
         .select('*')
         .gte('drift_score', this.DRIFT_THRESHOLD)
@@ -38,8 +38,7 @@ class DriftAlertService {
         return [];
       }
 
-      // Transform the data to match our interface
-      return (data || []).map(item => ({
+      return (data || []).map((item: any) => ({
         entity_name: item.entity_name,
         platform: item.platform,
         drift_score: item.drift_score,
@@ -59,7 +58,7 @@ class DriftAlertService {
 
   async checkForSentimentAlerts(): Promise<SentimentAlert[]> {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('sentiment_tracking')
         .select('*')
         .lte('delta_score', this.SENTIMENT_THRESHOLD)

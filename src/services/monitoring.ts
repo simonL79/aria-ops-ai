@@ -18,7 +18,7 @@ export {
  */
 export const getAvailableSources = async (): Promise<any[]> => {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('monitoring_sources')
       .select('*');
     
@@ -54,17 +54,17 @@ export const getScanResults = async (limit: number = 10): Promise<ScanResult[]> 
     if (!data) return [];
 
     // Map database columns to ScanResult interface  
-    return data.map(item => ({
+    return data.map((item: any) => ({
       id: item.id,
       content: item.content,
       platform: item.platform,
       url: item.url || '',
       date: item.created_at,
-      sentiment: item.sentiment || 0,
+      sentiment: Number(item.sentiment) || 0,
       severity: item.severity as 'low' | 'medium' | 'high',
       status: item.status as 'new' | 'read' | 'actioned' | 'resolved',
       threatType: item.threat_type,
-      client_id: item.client_id,
+      client_id: null,
       created_at: item.created_at,
       updated_at: item.updated_at
     }));
@@ -156,11 +156,11 @@ export const initializeMonitoringPlatforms = async (): Promise<void> => {
     // Only add default platforms if none exist
     if (count === 0) {
       const defaultPlatforms = [
-        { name: 'Twitter', type: 'social', status: 'active' },
-        { name: 'Facebook', type: 'social', status: 'active' },
-        { name: 'Reddit', type: 'forum', status: 'active' },
-        { name: 'Yelp', type: 'review', status: 'active' },
-        { name: 'Google Reviews', type: 'review', status: 'active' }
+        { platform_name: 'Twitter', platform_type: 'social', is_active: true },
+        { platform_name: 'Facebook', platform_type: 'social', is_active: true },
+        { platform_name: 'Reddit', platform_type: 'forum', is_active: true },
+        { platform_name: 'Yelp', platform_type: 'review', is_active: true },
+        { platform_name: 'Google Reviews', platform_type: 'review', is_active: true }
       ];
       
       const { error: insertError } = await supabase

@@ -42,13 +42,12 @@ export const getScanResults = async (limit: number = 20, page: number = 0): Prom
     }
     
     // Convert and validate the severity field to ensure it matches the expected type
-    return data?.map(item => ({
+    return (data || []).map((item: any) => ({
       ...item,
-      // Ensure severity is one of the allowed values, defaulting to 'medium' if invalid
+      sentiment: Number(item.sentiment) || 0,
       severity: (item.severity === 'low' || item.severity === 'medium' || item.severity === 'high') 
         ? item.severity as 'low' | 'medium' | 'high'
         : 'medium',
-      // Ensure status is one of the allowed values, defaulting to 'new' if invalid
       status: (item.status === 'new' || item.status === 'read' || item.status === 'actioned' || item.status === 'resolved')
         ? item.status as 'new' | 'read' | 'actioned' | 'resolved'
         : 'new'
@@ -81,13 +80,14 @@ export const getScanResultById = async (id: string): Promise<ScanResult | null> 
     // Convert and validate the severity and status fields
     return {
       ...data,
+      sentiment: Number(data.sentiment) || 0,
       severity: (data.severity === 'low' || data.severity === 'medium' || data.severity === 'high') 
         ? data.severity as 'low' | 'medium' | 'high'
         : 'medium',
       status: (data.status === 'new' || data.status === 'read' || data.status === 'actioned' || data.status === 'resolved')
         ? data.status as 'new' | 'read' | 'actioned' | 'resolved'
         : 'new'
-    };
+    } as any;
   } catch (error) {
     console.error("Error in getScanResultById:", error);
     return null;
@@ -126,8 +126,9 @@ export const updateScanResultStatus = async (id: string, status: 'read' | 'actio
 export const runScan = async (depth: string = 'standard'): Promise<ScanResult[]> => {
   try {
     // Call the stored function to run a scan
-    const { data, error } = await supabase
-      .rpc('run_scan', { scan_depth: depth });
+    const { data, error } = await supabase.functions.invoke('monitoring-scan', {
+      body: { scan_depth: depth }
+    });
     
     if (error) {
       console.error("Error running scan:", error);

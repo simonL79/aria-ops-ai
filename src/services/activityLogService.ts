@@ -46,7 +46,7 @@ export const logActivity = async (
       userEmail = profile.email;
     }
     
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from('activity_logs')
       .insert({
         action,
@@ -74,7 +74,7 @@ export const logActivity = async (
  */
 export const getRecentActivities = async (limit: number = 10): Promise<ActivityLog[]> => {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('activity_logs')
       .select('*')
       .order('created_at', { ascending: false })
@@ -85,7 +85,7 @@ export const getRecentActivities = async (limit: number = 10): Promise<ActivityL
       return [];
     }
     
-    return data?.map(log => ({
+    return (data || []).map((log: any) => ({
       id: log.id,
       action: log.action,
       details: log.details,
@@ -94,7 +94,7 @@ export const getRecentActivities = async (limit: number = 10): Promise<ActivityL
       timestamp: log.created_at,
       entityType: log.entity_type,
       entityId: log.entity_id
-    })) || [];
+    }));
     
   } catch (error) {
     console.error("Error in getRecentActivities:", error);
@@ -107,7 +107,7 @@ export const getRecentActivities = async (limit: number = 10): Promise<ActivityL
  */
 export const getEntityActivities = async (entityType: string, entityId: string): Promise<ActivityLog[]> => {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('activity_logs')
       .select('*')
       .eq('entity_type', entityType)
@@ -119,7 +119,7 @@ export const getEntityActivities = async (entityType: string, entityId: string):
       return [];
     }
     
-    return data?.map(log => ({
+    return (data || []).map((log: any) => ({
       id: log.id,
       action: log.action,
       details: log.details,
@@ -128,7 +128,7 @@ export const getEntityActivities = async (entityType: string, entityId: string):
       timestamp: log.created_at,
       entityType: log.entity_type,
       entityId: log.entity_id
-    })) || [];
+    }));
     
   } catch (error) {
     console.error("Error in getEntityActivities:", error);

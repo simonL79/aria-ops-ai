@@ -29,13 +29,12 @@ export const initializeMonitoringPlatforms = async (): Promise<void> => {
       // Only insert if it doesn't exist
       const { error } = await supabase
         .from('monitoring_status')
-        .insert({
-          id: '1',
+        .insert([{
+          module_name: 'default',
           is_active: true,
           sources_count: 6,
-          last_run: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        });
+          last_check: new Date().toISOString()
+        }]);
 
       if (error) {
         console.warn('Could not create monitoring status:', error.message);

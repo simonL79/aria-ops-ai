@@ -39,10 +39,10 @@ export const getMonitoringStatus = async (): Promise<MonitoringStatus> => {
     // Map database fields to our type
     return {
       isActive: data.is_active,
-      lastRun: data.last_run ? new Date(data.last_run) : null,
-      nextRun: data.next_run ? new Date(data.next_run) : null,
+      lastRun: data.last_check ? new Date(data.last_check) : null,
+      nextRun: null,
       sourcesCount: data.sources_count || 0,
-      sources: data.sources_count || 0, // Include both for backward compatibility
+      sources: data.sources_count || 0,
       activeSince: data.created_at ? new Date(data.created_at) : undefined
     };
   } catch (error) {
@@ -79,8 +79,7 @@ export const startMonitoring = async () => {
       .from('monitoring_status')
       .update({
         is_active: true,
-        updated_at: now.toISOString(),
-        next_run: nextRun.toISOString()
+        last_check: now.toISOString()
       })
       .eq('id', '1');
     
@@ -122,9 +121,7 @@ export const stopMonitoring = async () => {
     const { error } = await supabase
       .from('monitoring_status')
       .update({
-        is_active: false,
-        updated_at: now.toISOString(),
-        next_run: null
+        is_active: false
       })
       .eq('id', '1');
     

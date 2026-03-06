@@ -102,7 +102,7 @@ export const performLiveScan = async (
 
     // Store live results in database
     if (results.length > 0) {
-      const { error: dbError } = await supabase
+      const { error: dbError } = await (supabase as any)
         .from('scan_results')
         .insert(
           results.map(result => ({
