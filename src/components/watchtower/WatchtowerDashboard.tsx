@@ -65,7 +65,7 @@ const WatchtowerDashboard = () => {
       
       const transformedData = (data || []).map(item => ({
         id: item.id,
-        entity_name: item.risk_entity_name || item.entity_name || 'Unknown Entity',
+        entity_name: item.entity_name || 'Unknown Entity',
         threat_level: item.severity === 'critical' ? 95 : item.severity === 'high' ? 80 : item.severity === 'medium' ? 60 : 40,
         content: item.content || 'Live threat data',
         confidence_score: item.confidence_score || 75,

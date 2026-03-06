@@ -177,13 +177,13 @@ const QATestingDashboard = () => {
       
       else if (testName.includes('function health')) {
         // Check edge function health
-        const { data, error } = await supabase
-          .from('edge_function_events')
-          .select('status')
-          .order('executed_at', { ascending: false })
+        const { data, error } = await (supabase
+          .from('activity_logs') as any)
+          .select('action')
+          .order('created_at', { ascending: false })
           .limit(5);
         
-        const recentSuccess = data?.some(event => event.status === 'success');
+        const recentSuccess = data?.some((event: any) => event.action === 'success');
         status = recentSuccess ? 'pass' : 'warning';
         message = recentSuccess ? 'Edge functions healthy' : 'Recent edge function issues detected';
       }

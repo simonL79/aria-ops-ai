@@ -117,9 +117,9 @@ export const SentiencePanel = () => {
   const executeRecalibration = async (recalibration: RecalibrationDecision) => {
     setIsLoading(true);
     try {
-      await supabase
-        .from('sentience_recalibration_decisions')
-        .update({ executed: true })
+      await (supabase
+        .from('sentience_recalibration_decisions') as any)
+        .update({ applied: true })
         .eq('id', recalibration.id);
 
       toast.success(`Recalibration executed: ${recalibration.recalibration_type}`);
