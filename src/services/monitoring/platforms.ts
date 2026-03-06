@@ -10,7 +10,7 @@ export const getMonitoredPlatforms = async (): Promise<MonitorablePlatform[]> =>
     const { data, error } = await supabase
       .from('monitored_platforms')
       .select('*')
-      .order('name');
+      .order('platform_name');
     
     if (error) {
       console.warn("Could not fetch monitored platforms (may require auth):", error.message);
@@ -27,9 +27,9 @@ export const getMonitoredPlatforms = async (): Promise<MonitorablePlatform[]> =>
     
     return data.map(platform => ({
       id: platform.id,
-      name: platform.name,
-      isActive: platform.active,
-      type: platform.type
+      name: platform.platform_name,
+      isActive: platform.is_active,
+      type: platform.platform_type
     }));
   } catch (error) {
     console.warn("Error in getMonitoredPlatforms:", error);
@@ -50,10 +50,10 @@ export const getMonitoredPlatforms = async (): Promise<MonitorablePlatform[]> =>
  */
 export const isPlatformMonitored = async (platformName: string): Promise<boolean> => {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('monitored_platforms')
-      .select('active')
-      .eq('name', platformName)
+      .select('is_active')
+      .eq('platform_name', platformName)
       .maybeSingle();
     
     if (error) {
@@ -61,7 +61,7 @@ export const isPlatformMonitored = async (platformName: string): Promise<boolean
       return true; // Default to monitored if we can't check
     }
     
-    return data?.active || false;
+    return data?.is_active || false;
   } catch (error) {
     console.warn("Error in isPlatformMonitored:", error);
     return true; // Default to monitored if there's an error
@@ -76,7 +76,7 @@ export const updatePlatformStatus = async (platformId: string, isActive: boolean
     const { error } = await supabase
       .from('monitored_platforms')
       .update({
-        active: isActive,
+        is_active: isActive,
         updated_at: new Date().toISOString()
       })
       .eq('id', platformId);

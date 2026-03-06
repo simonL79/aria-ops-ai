@@ -23,8 +23,8 @@ export const getMonitoringStatus = async (): Promise<MonitoringStatus> => {
     
     return {
       isActive: data?.is_active || false,
-      lastRun: data?.last_run ? new Date(data.last_run) : null,
-      nextRun: data?.next_run ? new Date(data.next_run) : null,
+      lastRun: data?.last_check ? new Date(data.last_check) : null,
+      nextRun: null,
       sourcesCount: data?.sources_count || 0,
       sources: data?.sources_count || 0
     };
@@ -44,12 +44,11 @@ export const startMonitoring = async (): Promise<boolean> => {
   try {
     const { error } = await supabase
       .from('monitoring_status')
-      .upsert({
-        id: '1',
+      .upsert([{
+        module_name: 'default',
         is_active: true,
-        last_run: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      });
+        last_check: new Date().toISOString()
+      }]);
     
     if (error) {
       console.error("Error starting monitoring:", error);
@@ -68,11 +67,10 @@ export const stopMonitoring = async (): Promise<boolean> => {
   try {
     const { error } = await supabase
       .from('monitoring_status')
-      .upsert({
-        id: '1',
-        is_active: false,
-        updated_at: new Date().toISOString()
-      });
+      .upsert([{
+        module_name: 'default',
+        is_active: false
+      }]);
     
     if (error) {
       console.error("Error stopping monitoring:", error);
