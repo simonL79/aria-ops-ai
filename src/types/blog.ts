@@ -1,19 +1,19 @@
 
 export interface BlogPost {
-  id?: string;
+  id: string;
   title: string;
   slug: string;
-  description: string;
-  content: string;
-  author: string;
-  date: string;
-  image: string;
-  category: string;
-  status: 'draft' | 'published';
-  meta_title?: string;
-  meta_description?: string;
-  meta_keywords?: string;
-  medium_url?: string;
-  created_at?: string;
-  updated_at?: string;
+  summary: string | null;
+  content_html: string | null;
+  image_url: string | null;
+  canonical_url: string | null;
+  tags: string[];
+  language: string;
+  meta_description: string | null;
+  meta_keywords: string[];
+  faq_schema: { question: string; answer: string }[] | null;
+  reading_time: number;
+  published_at: string | null;
+  modified_at: string | null;
+  synced_at: string | null;
 }
