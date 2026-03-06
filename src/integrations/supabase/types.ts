@@ -220,58 +220,58 @@ export type Database = {
       }
       blog_posts: {
         Row: {
-          author: string | null
-          category: string | null
-          content: string | null
-          created_at: string
-          date: string | null
-          description: string | null
+          canonical_url: string | null
+          content_html: string | null
+          faq_schema: Json | null
           id: string
-          image: string | null
-          medium_url: string | null
+          image_url: string | null
+          language: string | null
           meta_description: string | null
-          meta_keywords: string | null
-          meta_title: string | null
-          slug: string | null
-          status: string | null
+          meta_keywords: string[] | null
+          modified_at: string | null
+          published_at: string | null
+          reading_time: number | null
+          slug: string
+          summary: string | null
+          synced_at: string | null
+          tags: string[] | null
           title: string
-          updated_at: string
         }
         Insert: {
-          author?: string | null
-          category?: string | null
-          content?: string | null
-          created_at?: string
-          date?: string | null
-          description?: string | null
-          id?: string
-          image?: string | null
-          medium_url?: string | null
+          canonical_url?: string | null
+          content_html?: string | null
+          faq_schema?: Json | null
+          id: string
+          image_url?: string | null
+          language?: string | null
           meta_description?: string | null
-          meta_keywords?: string | null
-          meta_title?: string | null
-          slug?: string | null
-          status?: string | null
+          meta_keywords?: string[] | null
+          modified_at?: string | null
+          published_at?: string | null
+          reading_time?: number | null
+          slug: string
+          summary?: string | null
+          synced_at?: string | null
+          tags?: string[] | null
           title: string
-          updated_at?: string
         }
         Update: {
-          author?: string | null
-          category?: string | null
-          content?: string | null
-          created_at?: string
-          date?: string | null
-          description?: string | null
+          canonical_url?: string | null
+          content_html?: string | null
+          faq_schema?: Json | null
           id?: string
-          image?: string | null
-          medium_url?: string | null
+          image_url?: string | null
+          language?: string | null
           meta_description?: string | null
-          meta_keywords?: string | null
-          meta_title?: string | null
-          slug?: string | null
-          status?: string | null
+          meta_keywords?: string[] | null
+          modified_at?: string | null
+          published_at?: string | null
+          reading_time?: number | null
+          slug?: string
+          summary?: string | null
+          synced_at?: string | null
+          tags?: string[] | null
           title?: string
-          updated_at?: string
         }
         Relationships: []
       }
