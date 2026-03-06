@@ -54,12 +54,12 @@ const SovraDecisionEngine = () => {
     try {
       // Use existing tables from the schema
       const [threatsData, notificationsData] = await Promise.all([
-        supabase.from('high_priority_threats').select('*').order('created_at', { ascending: false }).limit(50),
+        (supabase.from('scan_results') as any).select('*').order('created_at', { ascending: false }).limit(50),
         supabase.from('aria_notifications').select('*').order('created_at', { ascending: false }).limit(20)
       ]);
 
       if (threatsData.data) {
-        const threatItems: ThreatItem[] = threatsData.data.map(item => ({
+        const threatItems: ThreatItem[] = (threatsData.data as any[]).map(item => ({
           id: item.id || '',
           content: item.content || '',
           platform: item.platform || '',

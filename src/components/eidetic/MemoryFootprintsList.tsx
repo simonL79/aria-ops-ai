@@ -39,8 +39,8 @@ const MemoryFootprintsList = ({ onFootprintAdded }: MemoryFootprintsListProps) =
   const loadFootprints = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('memory_footprints')
+      const { data, error } = await (supabase
+        .from('memory_footprints') as any)
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -56,8 +56,8 @@ const MemoryFootprintsList = ({ onFootprintAdded }: MemoryFootprintsListProps) =
 
   const updateFootprintStatus = async (footprintId: string, isActive: boolean) => {
     try {
-      const { error } = await supabase
-        .from('memory_footprints')
+      const { error } = await (supabase
+        .from('memory_footprints') as any)
         .update({ is_active: isActive })
         .eq('id', footprintId);
 

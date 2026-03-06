@@ -62,8 +62,8 @@ export const SentiencePanel = () => {
 
   const loadMemoryLogs = async () => {
     try {
-      const { data, error } = await supabase
-        .from('sentience_memory_log')
+      const { data, error } = await (supabase
+        .from('sentience_memory_log') as any)
         .select('*')
         .order('timestamp', { ascending: false })
         .limit(15);
@@ -77,8 +77,8 @@ export const SentiencePanel = () => {
 
   const loadRecalibrations = async () => {
     try {
-      const { data, error } = await supabase
-        .from('sentience_recalibration_decisions')
+      const { data, error } = await (supabase
+        .from('sentience_recalibration_decisions') as any)
         .select('*')
         .order('created_at', { ascending: false })
         .limit(20);
@@ -117,9 +117,9 @@ export const SentiencePanel = () => {
   const executeRecalibration = async (recalibration: RecalibrationDecision) => {
     setIsLoading(true);
     try {
-      await supabase
-        .from('sentience_recalibration_decisions')
-        .update({ executed: true })
+      await (supabase
+        .from('sentience_recalibration_decisions') as any)
+        .update({ applied: true })
         .eq('id', recalibration.id);
 
       toast.success(`Recalibration executed: ${recalibration.recalibration_type}`);

@@ -41,12 +41,12 @@ const GSCRankTracker = () => {
       if (error) throw error;
       
       // Transform the data to match our interface
-      const formattedData = data?.map(item => ({
+      const formattedData = (data as any[])?.map(item => ({
         id: item.id,
         recorded_at: new Date(item.created_at).toLocaleDateString(),
         impressions: item.gsc_impressions || 0,
         clicks: item.gsc_clicks || 0,
-        ctr: (item.gsc_ctr || 0) * 100, // Convert to percentage
+        ctr: (item.gsc_ctr || 0) * 100,
         position: item.rank_goal || 0,
         asset_title: item.asset_title
       })) || [];

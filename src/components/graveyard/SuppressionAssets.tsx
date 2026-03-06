@@ -46,7 +46,7 @@ const SuppressionAssets = ({ onStatsChange }: SuppressionAssetsProps) => {
         .order('published_at', { ascending: false });
 
       if (error) throw error;
-      setAssets(data || []);
+      setAssets((data || []) as any);
     } catch (error) {
       console.error('Error loading suppression assets:', error);
       toast.error('Failed to load suppression assets');

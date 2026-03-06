@@ -111,8 +111,8 @@ const RSIManagementPanel = () => {
       toast.info('Generating RSI effectiveness report...');
       
       // Create a basic report entry
-      const { data, error } = await supabase
-        .from('executive_reports')
+      const { data, error } = await (supabase
+        .from('executive_reports') as any)
         .insert({
           title: 'RSI Effectiveness Report',
           report_type: 'rsi_effectiveness',

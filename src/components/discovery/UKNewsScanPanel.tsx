@@ -47,7 +47,7 @@ const UKNewsScanPanel = () => {
         url: result.url || '#',
         timestamp: result.created_at,
         severity: result.severity as 'high' | 'medium' | 'low',
-        entityMentions: result.risk_entity_name ? [result.risk_entity_name] : []
+        entityMentions: result.entity_name ? [result.entity_name] : []
       }));
 
       setNewsAlerts(alerts);

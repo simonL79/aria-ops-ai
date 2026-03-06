@@ -63,8 +63,8 @@ export const PanopticaPanel = () => {
 
   const loadSensorEvents = async () => {
     try {
-      const { data, error } = await supabase
-        .from('panoptica_sensor_events')
+      const { data, error } = await (supabase
+        .from('panoptica_sensor_events') as any)
         .select('*')
         .order('detected_at', { ascending: false })
         .limit(20);
@@ -78,8 +78,8 @@ export const PanopticaPanel = () => {
 
   const loadSystemHealth = async () => {
     try {
-      const { data, error } = await supabase
-        .from('panoptica_system_health')
+      const { data, error } = await (supabase
+        .from('panoptica_system_health') as any)
         .select('*')
         .order('last_sync', { ascending: false })
         .limit(15);
@@ -176,8 +176,8 @@ export const PanopticaPanel = () => {
 
       const randomEvent = eventTypes[Math.floor(Math.random() * eventTypes.length)];
       
-      await supabase
-        .from('panoptica_sensor_events')
+      await (supabase
+        .from('panoptica_sensor_events') as any)
         .insert({
           source_type: randomEvent.source,
           source_detail: randomEvent.detail,

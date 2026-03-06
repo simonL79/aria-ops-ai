@@ -73,16 +73,19 @@ const AdminStrikeDashboard = () => {
       // Group by batch_id with default email fallback
       const batchMap = new Map<string, StrikeRequest[]>();
       
-      data.forEach(request => {
+      data.forEach((request: any) => {
         const requestWithEmail = {
           ...request,
-          requester_email: 'User'
+          requester_email: 'User',
+          batch_id: request.id,
+          strike_type: request.reason || 'standard',
+          requested_by: request.entity_name || 'Unknown'
         };
         
-        if (!batchMap.has(request.batch_id)) {
-          batchMap.set(request.batch_id, []);
+        if (!batchMap.has(requestWithEmail.batch_id)) {
+          batchMap.set(requestWithEmail.batch_id, []);
         }
-        batchMap.get(request.batch_id)!.push(requestWithEmail);
+        batchMap.get(requestWithEmail.batch_id)!.push(requestWithEmail);
       });
 
       // Create batch groups
@@ -121,8 +124,8 @@ const AdminStrikeDashboard = () => {
     }
 
     try {
-      const { error } = await supabase
-        .from('strike_requests')
+      const { error } = await (supabase
+        .from('strike_requests') as any)
         .update({
           status: 'approved',
           approved_by: user?.id,

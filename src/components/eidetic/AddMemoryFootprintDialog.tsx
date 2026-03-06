@@ -46,7 +46,7 @@ const AddMemoryFootprintDialog = ({ open, onOpenChange, onFootprintAdded }: AddM
         }
       }
 
-      const { error } = await supabase.from('memory_footprints').insert({
+      const { error } = await (supabase.from('memory_footprints') as any).insert({
         content_url: form.content_url,
         memory_type: form.memory_type,
         memory_context: form.memory_context,

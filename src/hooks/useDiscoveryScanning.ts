@@ -68,25 +68,25 @@ export const useDiscoveryScanning = () => {
         return;
       }
 
-      const threats: DiscoveredThreat[] = (scanResults || []).map(item => ({
+      const threats: DiscoveredThreat[] = (scanResults || []).map((item: any) => ({
         id: item.id,
-        entityName: item.risk_entity_name || item.platform || 'Detected Entity',
-        entityType: item.risk_entity_type === 'person' ? 'person' : 'brand',
+        entityName: item.entity_name || item.platform || 'Detected Entity',
+        entityType: 'brand' as const,
         platform: item.platform || 'Unknown',
         content: item.content || '',
-        threatLevel: Math.min(10, Math.max(1, Math.floor(Math.abs(item.sentiment || 0) * 10))),
+        threatLevel: Math.min(10, Math.max(1, Math.floor(Math.abs(Number(item.sentiment) || 0) * 10))),
         threatType: item.threat_type || 'reputation_risk',
-        sentiment: item.sentiment || 0,
+        sentiment: Number(item.sentiment) || 0,
         sourceUrl: item.url || '',
         contextSnippet: (item.content || '').substring(0, 150) + (item.content && item.content.length > 150 ? '...' : ''),
         mentionCount: 1,
         spreadVelocity: Math.floor(Math.random() * 10) + 1,
         timestamp: item.created_at,
         status: item.status === 'resolved' ? 'resolved' : 'active',
-        clientLinked: item.client_linked || false,
-        linkedClientId: item.linked_client_id,
-        linkedClientName: item.linked_client_id,
-        matchType: item.client_linked ? 'linked' : undefined,
+        clientLinked: false,
+        linkedClientId: undefined,
+        linkedClientName: undefined,
+        matchType: undefined,
         matchConfidence: item.confidence_score || undefined
       }));
 

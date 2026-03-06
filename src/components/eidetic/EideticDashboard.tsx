@@ -31,8 +31,8 @@ const EideticDashboard = () => {
   const loadMemoryFootprints = async () => {
     try {
       // Load from database
-      const { data, error } = await supabase
-        .from('memory_footprints')
+      const { data, error } = await (supabase
+        .from('memory_footprints') as any)
         .select('*')
         .order('updated_at', { ascending: false });
 

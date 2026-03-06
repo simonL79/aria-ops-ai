@@ -48,7 +48,7 @@ const ThreatAnalysisPanel = () => {
       // Transform live data to threat analysis format
       const transformedData = (data || []).map(item => ({
         id: item.id,
-        entity_name: item.risk_entity_name || 'Live Entity',
+        entity_name: item.entity_name || 'Live Entity',
         threat_level: item.severity === 'critical' ? 90 : item.severity === 'high' ? 70 : 40,
         analysis_summary: item.content || 'Live threat intelligence data',
         confidence_score: item.confidence_score || 75,

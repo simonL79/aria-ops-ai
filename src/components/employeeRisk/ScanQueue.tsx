@@ -29,8 +29,8 @@ const ScanQueue = () => {
   const loadQueueData = async () => {
     try {
       // Use existing employee_scan_queue table
-      const { data, error } = await supabase
-        .from('employee_scan_queue')
+      const { data, error } = await (supabase
+        .from('employee_scan_queue') as any)
         .select('*')
         .order('priority', { ascending: false })
         .order('created_at', { ascending: true });

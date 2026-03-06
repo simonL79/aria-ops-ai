@@ -21,7 +21,7 @@ export const fetchRealContent = async (): Promise<ContentItem[]> => {
       type: 'post',
       content: item.content,
       date: new Date(item.created_at).toLocaleDateString(),
-      sentiment: item.sentiment > 0 ? 'positive' : item.sentiment < 0 ? 'negative' : 'neutral',
+      sentiment: Number(item.sentiment) > 0 ? 'positive' : Number(item.sentiment) < 0 ? 'negative' : 'neutral',
       impact: item.severity as 'high' | 'medium' | 'low',
       url: item.url || ''
     }));
