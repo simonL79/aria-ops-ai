@@ -22,6 +22,7 @@ export type Database = {
           entity_id: string | null
           entity_type: string | null
           id: string
+          user_email: string | null
           user_id: string | null
         }
         Insert: {
@@ -31,6 +32,7 @@ export type Database = {
           entity_id?: string | null
           entity_type?: string | null
           id?: string
+          user_email?: string | null
           user_id?: string | null
         }
         Update: {
@@ -40,6 +42,7 @@ export type Database = {
           entity_id?: string | null
           entity_type?: string | null
           id?: string
+          user_email?: string | null
           user_id?: string | null
         }
         Relationships: []
@@ -412,6 +415,42 @@ export type Database = {
           status?: string | null
           updated_at?: string
           website?: string | null
+        }
+        Relationships: []
+      }
+      contact_submissions: {
+        Row: {
+          company: string | null
+          created_at: string
+          email: string
+          first_name: string
+          id: string
+          last_name: string
+          message: string
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          company?: string | null
+          created_at?: string
+          email: string
+          first_name: string
+          id?: string
+          last_name: string
+          message: string
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company?: string | null
+          created_at?: string
+          email?: string
+          first_name?: string
+          id?: string
+          last_name?: string
+          message?: string
+          status?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -865,6 +904,36 @@ export type Database = {
         }
         Relationships: []
       }
+      eidetic_footprint_queue: {
+        Row: {
+          content_excerpt: string | null
+          created_at: string
+          decay_score: number | null
+          id: string
+          prospect_name: string | null
+          routed_at: string | null
+          status: string | null
+        }
+        Insert: {
+          content_excerpt?: string | null
+          created_at?: string
+          decay_score?: number | null
+          id?: string
+          prospect_name?: string | null
+          routed_at?: string | null
+          status?: string | null
+        }
+        Update: {
+          content_excerpt?: string | null
+          created_at?: string
+          decay_score?: number | null
+          id?: string
+          prospect_name?: string | null
+          routed_at?: string | null
+          status?: string | null
+        }
+        Relationships: []
+      }
       employee_scan_queue: {
         Row: {
           completed_at: string | null
@@ -1153,6 +1222,60 @@ export type Database = {
           status?: string | null
           title?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      genesis_entities: {
+        Row: {
+          created_at: string
+          entity_type: string | null
+          id: string
+          metadata: Json | null
+          name: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          entity_type?: string | null
+          id?: string
+          metadata?: Json | null
+          name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          entity_type?: string | null
+          id?: string
+          metadata?: Json | null
+          name?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      graveyard_simulations: {
+        Row: {
+          created_at: string
+          expected_trigger_module: string | null
+          id: string
+          injected_at: string | null
+          leak_title: string | null
+          suppression_status: string | null
+        }
+        Insert: {
+          created_at?: string
+          expected_trigger_module?: string | null
+          id?: string
+          injected_at?: string | null
+          leak_title?: string | null
+          suppression_status?: string | null
+        }
+        Update: {
+          created_at?: string
+          expected_trigger_module?: string | null
+          id?: string
+          injected_at?: string | null
+          leak_title?: string | null
+          suppression_status?: string | null
         }
         Relationships: []
       }
@@ -1880,14 +2003,43 @@ export type Database = {
         }
         Relationships: []
       }
+      prospect_alerts: {
+        Row: {
+          alert_type: string | null
+          created_at: string
+          entity: string | null
+          id: string
+          source_module: string | null
+          status: string | null
+        }
+        Insert: {
+          alert_type?: string | null
+          created_at?: string
+          entity?: string | null
+          id?: string
+          source_module?: string | null
+          status?: string | null
+        }
+        Update: {
+          alert_type?: string | null
+          created_at?: string
+          entity?: string | null
+          id?: string
+          source_module?: string | null
+          status?: string | null
+        }
+        Relationships: []
+      }
       reputation_scan_submissions: {
         Row: {
+          admin_notes: string | null
           company: string | null
           created_at: string
           details: string | null
           email: string | null
           full_name: string | null
           id: string
+          keywords: string | null
           metadata: Json | null
           phone: string | null
           scan_type: string | null
@@ -1895,12 +2047,14 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          admin_notes?: string | null
           company?: string | null
           created_at?: string
           details?: string | null
           email?: string | null
           full_name?: string | null
           id?: string
+          keywords?: string | null
           metadata?: Json | null
           phone?: string | null
           scan_type?: string | null
@@ -1908,12 +2062,14 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          admin_notes?: string | null
           company?: string | null
           created_at?: string
           details?: string | null
           email?: string | null
           full_name?: string | null
           id?: string
+          keywords?: string | null
           metadata?: Json | null
           phone?: string | null
           scan_type?: string | null
@@ -2429,11 +2585,31 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      has_role: { Args: { _role: string; _user_id: string }; Returns: boolean }
+      is_current_user_admin: { Args: never; Returns: boolean }
       log_compliance_activity: {
         Args: {
           p_activity_type?: string
