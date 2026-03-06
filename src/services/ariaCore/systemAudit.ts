@@ -337,8 +337,8 @@ export class ARIASystemAudit {
       const recommendations: string[] = [];
 
       // Check recent edge function activity
-      const { count: functionCount } = await (supabase
-        .from('edge_function_events') as any)
+      const { count: functionCount } = await (supabase as any)
+        .from('edge_function_events')
         .select('*', { count: 'exact', head: true })
         .gte('executed_at', new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString());
 
@@ -348,8 +348,8 @@ export class ARIASystemAudit {
       }
 
       // Check for function errors
-      const { count: errorCount } = await (supabase
-        .from('edge_function_events') as any)
+      const { count: errorCount } = await (supabase as any)
+        .from('edge_function_events')
         .select('*', { count: 'exact', head: true })
         .eq('status', 'error')
         .gte('executed_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());

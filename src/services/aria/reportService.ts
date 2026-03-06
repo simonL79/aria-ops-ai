@@ -37,8 +37,8 @@ export interface ReportExport {
 
 export const getARIAReports = async (): Promise<ARIAReport[]> => {
   try {
-    const { data, error } = await (supabase
-      .from('aria_reports') as any)
+    const { data, error } = await (supabase as any)
+      .from('aria_reports')
       .select('*')
       .order('created_at', { ascending: false })
       .limit(50);
@@ -117,8 +117,8 @@ export const queueReportExport = async (
 
 export const getReportExports = async (): Promise<ReportExport[]> => {
   try {
-    const { data, error } = await (supabase
-      .from('report_exports') as any)
+    const { data, error } = await (supabase as any)
+      .from('report_exports')
       .select('*')
       .order('created_at', { ascending: false })
       .limit(20);

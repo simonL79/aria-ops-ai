@@ -23,8 +23,8 @@ export class PatternRecognitionService {
         .limit(50);
 
       // Get feedback data
-      const { data: feedbackData } = await (supabase
-        .from('anubis_feedback_memory') as any)
+      const { data: feedbackData } = await (supabase as any)
+        .from('anubis_feedback_memory')
         .select('*')
         .order('created_at', { ascending: false })
         .limit(30);

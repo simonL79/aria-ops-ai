@@ -182,7 +182,7 @@ const createDummyInfluencerAlerts = async (): Promise<void> => {
     ];
 
     for (const alert of dummyAlerts) {
-      await supabase.from('scan_results').insert([alert]);
+      await (supabase as any).from('scan_results').insert([alert]);
     }
   } catch (error) {
     console.error("Error creating dummy alerts:", error);

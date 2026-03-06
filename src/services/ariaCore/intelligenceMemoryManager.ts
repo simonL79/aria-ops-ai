@@ -142,7 +142,7 @@ export class IntelligenceMemoryManager {
       }
 
       // Store in feedback memory table
-      const { error } = await (supabase.from('anubis_feedback_memory') as any).insert({
+      const { error } = await (supabase as any).from('anubis_feedback_memory').insert({
         entity_id: await this.getEntityId(entityName),
         source_module: 'intelligence_system',
         operator_action: feedbackData.action,

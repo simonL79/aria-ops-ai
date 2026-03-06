@@ -95,8 +95,8 @@ export interface PraxisSignalTrend {
 
 export const getInternalBehaviorSignals = async (): Promise<InternalBehaviorSignal[]> => {
   try {
-    const { data, error } = await (supabase
-      .from('internal_behavior_signals') as any)
+    const { data, error } = await (supabase as any)
+      .from('internal_behavior_signals')
       .select('*')
       .order('captured_at', { ascending: false })
       .limit(100);
