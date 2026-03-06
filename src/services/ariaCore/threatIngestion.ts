@@ -143,7 +143,7 @@ export class ThreatIngestionService {
    */
   static async getLiveThreats(): Promise<any[]> {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('threats')
         .select('*')
         .eq('is_live', true)
