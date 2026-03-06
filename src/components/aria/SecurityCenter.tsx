@@ -44,10 +44,10 @@ const SecurityCenter = () => {
       else setThreatLevel('low');
 
       // Fetch active monitoring platforms as "scanners"
-      const { data: platforms, error: platformsError } = await supabase
-        .from('monitored_platforms')
+      const { data: platforms, error: platformsError } = await (supabase
+        .from('monitored_platforms') as any)
         .select('*')
-        .eq('active', true);
+        .eq('is_active', true);
 
       if (platformsError) throw platformsError;
 

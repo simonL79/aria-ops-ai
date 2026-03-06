@@ -61,13 +61,14 @@ const RealTimeMonitoringActivator = () => {
       })));
 
       // Activate monitoring in database
-      const { error: monitoringError } = await supabase
-        .from('monitoring_status')
+      const { error: monitoringError } = await (supabase
+        .from('monitoring_status') as any)
         .upsert({
           id: '1',
+          module_name: 'real_time_monitoring',
           is_active: true,
           sources_count: 6,
-          last_run: new Date().toISOString(),
+          last_check: new Date().toISOString(),
           updated_at: new Date().toISOString()
         });
 

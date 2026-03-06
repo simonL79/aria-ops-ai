@@ -42,7 +42,7 @@ const StrategyBrainControl = () => {
       if (error) throw error;
       
       // Transform the data to match our interface
-      const transformedStrategies: Strategy[] = (data || []).map(item => ({
+      const transformedStrategies: Strategy[] = ((data || []) as any[]).map(item => ({
         id: item.id,
         entity_name: item.entity_name,
         strategy_type: item.strategy_type,

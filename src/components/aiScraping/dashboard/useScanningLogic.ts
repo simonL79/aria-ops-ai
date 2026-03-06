@@ -67,7 +67,7 @@ const useScanningLogic = () => {
             threatType: result.threat_type,
             sourceType: result.source_type || mapPlatformToSourceType(result.platform),
             confidenceScore: result.confidence_score || 75,
-            sentiment: mapNumericSentimentToString(result.sentiment),
+            sentiment: mapNumericSentimentToString(String(result.sentiment)),
             detectedEntities: Array.isArray(result.detected_entities) ? 
               result.detected_entities.map(entity => String(entity)) : [],
             potentialReach: result.potential_reach
