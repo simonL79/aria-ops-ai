@@ -1625,6 +1625,135 @@ export type Database = {
         }
         Relationships: []
       }
+      operator_command_log: {
+        Row: {
+          command_text: string | null
+          created_at: string
+          id: string
+          intent: string | null
+          metadata: Json | null
+          priority: string | null
+          response_type: string | null
+          target: string | null
+        }
+        Insert: {
+          command_text?: string | null
+          created_at?: string
+          id?: string
+          intent?: string | null
+          metadata?: Json | null
+          priority?: string | null
+          response_type?: string | null
+          target?: string | null
+        }
+        Update: {
+          command_text?: string | null
+          created_at?: string
+          id?: string
+          intent?: string | null
+          metadata?: Json | null
+          priority?: string | null
+          response_type?: string | null
+          target?: string | null
+        }
+        Relationships: []
+      }
+      operator_response_log: {
+        Row: {
+          command_id: string | null
+          created_at: string
+          id: string
+          metadata: Json | null
+          processed_by: string | null
+          response_text: string | null
+        }
+        Insert: {
+          command_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          processed_by?: string | null
+          response_text?: string | null
+        }
+        Update: {
+          command_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          processed_by?: string | null
+          response_text?: string | null
+        }
+        Relationships: []
+      }
+      panoptica_sensor_events: {
+        Row: {
+          created_at: string
+          detected_at: string | null
+          event_content: string | null
+          flagged: boolean | null
+          id: string
+          metadata: Json | null
+          relevance_score: number | null
+          risk_level: string | null
+          source_detail: string | null
+          source_type: string | null
+        }
+        Insert: {
+          created_at?: string
+          detected_at?: string | null
+          event_content?: string | null
+          flagged?: boolean | null
+          id?: string
+          metadata?: Json | null
+          relevance_score?: number | null
+          risk_level?: string | null
+          source_detail?: string | null
+          source_type?: string | null
+        }
+        Update: {
+          created_at?: string
+          detected_at?: string | null
+          event_content?: string | null
+          flagged?: boolean | null
+          id?: string
+          metadata?: Json | null
+          relevance_score?: number | null
+          risk_level?: string | null
+          source_detail?: string | null
+          source_type?: string | null
+        }
+        Relationships: []
+      }
+      panoptica_system_health: {
+        Row: {
+          created_at: string
+          diagnostic: string | null
+          id: string
+          last_sync: string | null
+          metadata: Json | null
+          sensor_name: string | null
+          sync_status: string | null
+        }
+        Insert: {
+          created_at?: string
+          diagnostic?: string | null
+          id?: string
+          last_sync?: string | null
+          metadata?: Json | null
+          sensor_name?: string | null
+          sync_status?: string | null
+        }
+        Update: {
+          created_at?: string
+          diagnostic?: string | null
+          id?: string
+          last_sync?: string | null
+          metadata?: Json | null
+          sensor_name?: string | null
+          sync_status?: string | null
+        }
+        Relationships: []
+      }
       persona_saturation_campaigns: {
         Row: {
           campaign_name: string | null
@@ -1931,6 +2060,72 @@ export type Database = {
           results_matched_entity?: number | null
           source?: string | null
           total_results_returned?: number | null
+        }
+        Relationships: []
+      }
+      sentience_memory_log: {
+        Row: {
+          context: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          insight_level: number | null
+          metadata: Json | null
+          reflection: string | null
+          timestamp: string | null
+        }
+        Insert: {
+          context?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          insight_level?: number | null
+          metadata?: Json | null
+          reflection?: string | null
+          timestamp?: string | null
+        }
+        Update: {
+          context?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          insight_level?: number | null
+          metadata?: Json | null
+          reflection?: string | null
+          timestamp?: string | null
+        }
+        Relationships: []
+      }
+      sentience_recalibration_decisions: {
+        Row: {
+          applied: boolean | null
+          confidence: number | null
+          created_at: string
+          decision_type: string | null
+          id: string
+          memory_log_id: string | null
+          metadata: Json | null
+          rationale: string | null
+        }
+        Insert: {
+          applied?: boolean | null
+          confidence?: number | null
+          created_at?: string
+          decision_type?: string | null
+          id?: string
+          memory_log_id?: string | null
+          metadata?: Json | null
+          rationale?: string | null
+        }
+        Update: {
+          applied?: boolean | null
+          confidence?: number | null
+          created_at?: string
+          decision_type?: string | null
+          id?: string
+          memory_log_id?: string | null
+          metadata?: Json | null
+          rationale?: string | null
         }
         Relationships: []
       }

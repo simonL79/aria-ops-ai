@@ -81,8 +81,8 @@ const OperatorConsole = () => {
 
   const loadCommandHistory = async () => {
     try {
-      const { data, error } = await supabase
-        .from('operator_command_log')
+      const { data, error } = await (supabase
+        .from('operator_command_log') as any)
         .select('*')
         .order('created_at', { ascending: false })
         .limit(50);
@@ -96,8 +96,8 @@ const OperatorConsole = () => {
 
   const loadResponses = async () => {
     try {
-      const { data, error } = await supabase
-        .from('operator_response_log')
+      const { data, error } = await (supabase
+        .from('operator_response_log') as any)
         .select('*')
         .order('created_at', { ascending: false })
         .limit(100);
