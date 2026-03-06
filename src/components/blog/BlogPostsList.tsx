@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Edit, Trash2, Eye, ArrowUpDown } from 'lucide-react';
@@ -19,7 +20,7 @@ import type { BlogPost } from '@/types/blog';
 
 type BlogPostListProps = {
   onEditPost: (post: BlogPost) => void;
-  filter: 'all' | 'draft' | 'published';
+  filter: 'all';
 };
 
 const BlogPostsList = ({ onEditPost, filter = 'all' }: BlogPostListProps) => {
@@ -27,44 +28,41 @@ const BlogPostsList = ({ onEditPost, filter = 'all' }: BlogPostListProps) => {
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [sortField, setSortField] = useState('date');
+  const [sortField, setSortField] = useState('published_at');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   
   const fetchBlogPosts = async () => {
     try {
       setLoading(true);
-      console.log('Fetching blog posts from database...');
-      
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('blog_posts')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('published_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching blog posts:', error);
         setError(error.message);
       } else {
-        console.log('Blog posts fetched:', data);
-        const transformedPosts: BlogPost[] = (data || []).map(post => ({
-          id: post.id,
-          title: post.title,
-          slug: post.slug,
-          description: post.description || '',
-          content: post.content || '',
-          author: post.author,
-          date: post.date,
-          image: post.image || '',
-          category: post.category,
-          status: post.status as 'draft' | 'published',
-          meta_title: post.meta_title,
-          meta_description: post.meta_description,
-          meta_keywords: post.meta_keywords,
-          medium_url: post.medium_url
+        const posts: BlogPost[] = (data || []).map((p: any) => ({
+          id: p.id,
+          title: p.title,
+          slug: p.slug,
+          summary: p.summary,
+          content_html: p.content_html,
+          image_url: p.image_url,
+          canonical_url: p.canonical_url,
+          tags: p.tags || [],
+          language: p.language || 'en',
+          meta_description: p.meta_description,
+          meta_keywords: p.meta_keywords || [],
+          faq_schema: p.faq_schema,
+          reading_time: p.reading_time || 1,
+          published_at: p.published_at,
+          modified_at: p.modified_at,
+          synced_at: p.synced_at,
         }));
-        setBlogPosts(transformedPosts);
+        setBlogPosts(posts);
       }
     } catch (err) {
-      console.error('Unexpected error:', err);
       setError('Failed to fetch blog posts');
     } finally {
       setLoading(false);
@@ -87,148 +85,65 @@ const BlogPostsList = ({ onEditPost, filter = 'all' }: BlogPostListProps) => {
   if (loading) {
     return (
       <div className="text-center py-10">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-amber-400 mx-auto mb-4"></div>
-        <p className="text-lg">Loading blog posts...</p>
+        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-4"></div>
+        <p className="text-muted-foreground">Loading blog posts...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="text-center py-10 text-red-500">
-        <p className="text-lg">Error loading blog posts: {error}</p>
-        <Button onClick={fetchBlogPosts} className="mt-4">
-          Try Again
-        </Button>
+      <div className="text-center py-10 text-destructive">
+        <p>Error loading blog posts: {error}</p>
+        <Button onClick={fetchBlogPosts} className="mt-4">Try Again</Button>
       </div>
     );
   }
   
-  // Filter and sort posts
-  const filteredPosts = blogPosts
-    .filter(post => {
-      if (filter === 'all') return true;
-      return post.status === filter;
-    })
-    .sort((a, b) => {
-      const fieldA = sortField === 'date' ? new Date(a.date).getTime() : a[sortField as keyof BlogPost];
-      const fieldB = sortField === 'date' ? new Date(b.date).getTime() : b[sortField as keyof BlogPost];
-      
-      if (fieldA < fieldB) return sortDirection === 'asc' ? -1 : 1;
-      if (fieldA > fieldB) return sortDirection === 'asc' ? 1 : -1;
-      return 0;
-    });
-  
-  const handleDeletePost = (postId: string) => {
-    // In a real app, this would call an API to delete the post
-    console.log('Deleting post:', postId);
-    toast.success('Post deleted successfully');
-  };
-  
-  const viewPost = (slug: string) => {
-    navigate(`/blog/${slug}`);
-  };
+  const filteredPosts = [...blogPosts].sort((a, b) => {
+    const fieldA = sortField === 'published_at' ? new Date(a.published_at || '').getTime() : (a as any)[sortField];
+    const fieldB = sortField === 'published_at' ? new Date(b.published_at || '').getTime() : (b as any)[sortField];
+    if (fieldA < fieldB) return sortDirection === 'asc' ? -1 : 1;
+    if (fieldA > fieldB) return sortDirection === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  const formatDate = (d: string | null) => d ? new Date(d).toLocaleDateString() : '—';
   
   return (
     <div>
       {filteredPosts.length === 0 ? (
-        <div className="text-center py-10 text-gray-500">
+        <div className="text-center py-10 text-muted-foreground">
           <p className="text-lg">No posts found</p>
-          {filter !== 'all' && (
-            <p className="mt-2">Try changing your filter settings</p>
-          )}
         </div>
       ) : (
-        <div>
-          <table className="w-full">
-            <thead>
-              <tr className="border-b">
-                <th className="text-left p-3 cursor-pointer" onClick={() => handleSort('title')}>
-                  <div className="flex items-center">
-                    Title
-                    {sortField === 'title' && (
-                      <ArrowUpDown className={`ml-1 h-4 w-4 ${sortDirection === 'asc' ? 'transform rotate-180' : ''}`} />
-                    )}
-                  </div>
-                </th>
-                <th className="text-left p-3 cursor-pointer" onClick={() => handleSort('date')}>
-                  <div className="flex items-center">
-                    Date
-                    {sortField === 'date' && (
-                      <ArrowUpDown className={`ml-1 h-4 w-4 ${sortDirection === 'asc' ? 'transform rotate-180' : ''}`} />
-                    )}
-                  </div>
-                </th>
-                <th className="text-left p-3">Status</th>
-                <th className="text-right p-3">Actions</th>
+        <table className="w-full">
+          <thead>
+            <tr className="border-b border-border">
+              <th className="text-left p-3 cursor-pointer" onClick={() => handleSort('title')}>Title</th>
+              <th className="text-left p-3 cursor-pointer" onClick={() => handleSort('published_at')}>Published</th>
+              <th className="text-left p-3">Reading Time</th>
+              <th className="text-right p-3">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredPosts.map((post) => (
+              <tr key={post.id} className="border-b border-border hover:bg-muted/50">
+                <td className="p-3">
+                  <div className="font-medium text-foreground">{post.title}</div>
+                  <div className="text-sm text-muted-foreground">{post.slug}</div>
+                </td>
+                <td className="p-3 text-muted-foreground">{formatDate(post.published_at)}</td>
+                <td className="p-3 text-muted-foreground">{post.reading_time} min</td>
+                <td className="p-3 text-right">
+                  <Button variant="ghost" size="sm" onClick={() => navigate(`/blog/${post.slug}`)}>
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {filteredPosts.map((post) => (
-                <tr key={post.slug} className="border-b hover:bg-gray-50">
-                  <td className="p-3">
-                    <div className="font-medium">{post.title}</div>
-                    <div className="text-sm text-gray-500">{post.slug}</div>
-                  </td>
-                  <td className="p-3">{post.date}</td>
-                  <td className="p-3">
-                    <span className={`inline-block px-2 py-1 rounded text-xs ${
-                      post.status === 'published' 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-amber-100 text-amber-800'
-                    }`}>
-                      {post.status || 'Draft'}
-                    </span>
-                  </td>
-                  <td className="p-3 text-right">
-                    <div className="flex justify-end space-x-2">
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={() => viewPost(post.slug)}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"  
-                        onClick={() => onEditPost(post)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="sm">
-                            <Trash2 className="h-4 w-4 text-red-500" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              This action cannot be undone. This will permanently delete the post 
-                              "{post.title}" and remove it from the database.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction 
-                              className="bg-red-600 text-white hover:bg-red-700"
-                              onClick={() => handleDeletePost(post.slug)}
-                            >
-                              Delete
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
       )}
     </div>
   );
