@@ -98,7 +98,7 @@ const ScanSubmissionsPage = () => {
         throw error;
       }
 
-      setSubmissions(data as ScanSubmission[]);
+      setSubmissions(data as unknown as ScanSubmission[]);
     } catch (error) {
       console.error('Error fetching submissions:', error);
       toast.error('Failed to load submissions');

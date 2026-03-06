@@ -30,7 +30,7 @@ export async function sendToAriaIngest(item: RSSItem) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': ARIA_INGEST_KEY || 'H7zYd0N6R9xM3bKpLqE1jUvTnZqF5sBgXwPm9QCeLd0=',
+        'Authorization': ARIA_INGEST_KEY || '',
       },
       body: JSON.stringify(payload)
     });

@@ -115,8 +115,8 @@ export const getRSIActivationQueue = async (): Promise<RSIActivationItem[]> => {
     // Map to RSIActivationItem format
     return (data || []).map(item => ({
       id: item.id,
-      prospect_name: `Entity ${item.entity_id}`,
-      threat_reason: item.counter_message,
+      prospect_name: `Entity ${item.entity_name || item.id}`,
+      threat_reason: item.task_type || '',
       source: 'RSI Queue',
       queued_at: item.created_at,
       status: item.status
@@ -130,7 +130,7 @@ export const getRSIActivationQueue = async (): Promise<RSIActivationItem[]> => {
 export const getEideticFootprintQueue = async (): Promise<EideticFootprintItem[]> => {
   try {
     const { data, error } = await supabase
-      .from('eidetic_footprint_queue')
+      .from('eidetic_footprint_queue') as any)
       .select('*')
       .order('routed_at', { ascending: false })
       .limit(20);

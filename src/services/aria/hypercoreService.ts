@@ -50,9 +50,14 @@ class HypercoreService {
     entropy_score: number;
   }): Promise<ThreatIntelligence | null> {
     try {
+      // Store as activity log since darkweb_feed table doesn't exist
       const { data: threat, error } = await supabase
-        .from('darkweb_feed')
-        .insert([data])
+        .from('activity_logs')
+        .insert([{
+          action: 'threat_intel_ingested',
+          details: JSON.stringify(data),
+          entity_type: 'darkweb_feed'
+        }])
         .select()
         .single();
 
@@ -61,11 +66,11 @@ class HypercoreService {
       toast.success('Threat intelligence ingested successfully');
       return {
         id: threat.id,
-        source_url: threat.source_url,
-        content_text: threat.content_text,
-        actor_alias: threat.actor_alias,
-        entropy_score: threat.entropy_score,
-        inserted_at: threat.inserted_at
+        source_url: data.source_url,
+        content_text: data.content_text,
+        actor_alias: data.actor_alias,
+        entropy_score: data.entropy_score,
+        inserted_at: threat.created_at
       };
     } catch (error) {
       console.error('Error ingesting threat intelligence:', error);
@@ -85,7 +90,7 @@ class HypercoreService {
         .insert([{
           name: data.name,
           entity_type: data.entity_type || 'individual',
-          risk_profile: data.risk_profile || {}
+          metadata: data.risk_profile || {}
         }])
         .select()
         .single();
@@ -97,7 +102,7 @@ class HypercoreService {
         id: entity.id,
         name: entity.name,
         entity_type: entity.entity_type,
-        risk_profile: entity.risk_profile,
+        risk_profile: (entity as any).risk_profile || entity.metadata || {},
         created_at: entity.created_at
       };
     } catch (error) {
@@ -213,7 +218,7 @@ class HypercoreService {
             id: existingEntity.id,
             name: existingEntity.name,
             entity_type: existingEntity.entity_type,
-            risk_profile: existingEntity.risk_profile,
+            risk_profile: (existingEntity as any).risk_profile || existingEntity.metadata || {},
             created_at: existingEntity.created_at
           };
         } else {

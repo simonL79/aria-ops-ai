@@ -43,13 +43,14 @@ export const makeSecuredApiRequest = async (
         temperature: temperature
       });
     } else {
-      // For internal APIs like ARIA-ingest
-      url = endpoint.startsWith("http") ? endpoint : `https://ssvskbejfacmjemphmry.supabase.co/functions/v1/${endpoint}`;
+      // For internal APIs like ARIA-ingest - use Supabase anon key for auth
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co`;
+      url = endpoint.startsWith("http") ? endpoint : `${supabaseUrl}/functions/v1/${endpoint}`;
       
-      // IMPORTANT: Send the full auth key WITH "Bearer " prefix to match what's expected in the edge function
       headers = {
         "Content-Type": "application/json",
-        "Authorization": "H7zYd0N6R9xM3bKpLqE1jUvTnZqF5sBgXwPm9QCeLd0="
+        "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
       };
       
       body = JSON.stringify(messages);

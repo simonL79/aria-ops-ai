@@ -83,7 +83,7 @@ export const fetchAlerts = async () => {
       severity: item.severity || 'medium',
       timestamp: item.created_at,
       status: item.status || 'new',
-      sentiment: item.sentiment > 0 ? 'positive' : item.sentiment < 0 ? 'negative' : 'neutral',
+      sentiment: Number(item.sentiment) > 0 ? 'positive' : Number(item.sentiment) < 0 ? 'negative' : 'neutral',
       date: item.created_at,
       url: item.url || ''
     }));

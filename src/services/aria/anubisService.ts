@@ -194,8 +194,8 @@ export class AnubisService {
       });
       
       // Check genesis entities
-      const { data: entities, error: entitiesError } = await supabase
-        .from('genesis_entities')
+      const { data: entities, error: entitiesError } = await (supabase
+        .from('genesis_entities') as any)
         .select('*')
         .limit(5);
       
@@ -348,17 +348,16 @@ export class AnubisService {
   static async getGraveyardSimulations(): Promise<GraveyardSimulation[]> {
     try {
       // Use graveyard_simulations table if it exists, otherwise return mock data
-      const { data, error } = await supabase
-        .from('graveyard_simulations')
+      const { data, error } = await (supabase
+        .from('graveyard_simulations') as any)
         .select('*')
         .limit(10);
 
       if (error) {
-        // Return mock data if table doesn't exist
         return [];
       }
 
-      return data || [];
+      return (data || []) as GraveyardSimulation[];
     } catch (error) {
       console.error('Failed to get graveyard simulations:', error);
       return [];

@@ -6,7 +6,8 @@ import { corsHeaders, handleRequest, validateRequest } from './middleware.ts';
 // Load environment
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const AUTH_KEY = "H7zYd0N6R9xM3bKpLqE1jUvTnZqF5sBgXwPm9QCeLd0=";
+// Auth key loaded from environment secret - never hardcode
+const AUTH_KEY = Deno.env.get('ARIA_INGEST_KEY');
 
 // Initialize Supabase client
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);

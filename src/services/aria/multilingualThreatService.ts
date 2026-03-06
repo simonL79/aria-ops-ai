@@ -47,7 +47,15 @@ class MultilingualThreatService {
         return [];
       }
 
-      return data || [];
+      return (data || []).map((d: any) => ({
+        id: d.id,
+        original_text: d.content || '',
+        translated_text: d.translated_content,
+        language_code: d.language || '',
+        entity_id: d.entity_name,
+        detected_at: d.detected_at,
+        processed: true
+      })) as MultilingualThreat[];
     } catch (error) {
       console.error('Error in getMultilingualThreats:', error);
       return [];
@@ -63,7 +71,12 @@ class MultilingualThreatService {
     try {
       const { error } = await supabase
         .from('multilingual_threats')
-        .insert(threat);
+        .insert({
+          content: threat.original_text,
+          language: threat.language_code,
+          translated_content: threat.translated_text,
+          entity_name: threat.entity_id
+        });
 
       if (error) {
         console.error('Error logging multilingual threat:', error);
@@ -88,11 +101,16 @@ class MultilingualThreatService {
         return [];
       }
 
-      // Type assertion to ensure proper typing
-      return (data || []).map(agent => ({
-        ...agent,
-        mission_type: agent.mission_type as DarkWebAgent['mission_type']
-      }));
+      return (data || []).map((agent: any) => ({
+        id: agent.id,
+        agent_alias: agent.agent_name || '',
+        mission_type: (agent.status || 'surveillance') as DarkWebAgent['mission_type'],
+        target_actor: agent.target,
+        mission_status: agent.status || 'unknown',
+        findings: agent.results || {},
+        started_at: agent.started_at || agent.created_at,
+        ended_at: undefined
+      })) as DarkWebAgent[];
     } catch (error) {
       console.error('Error in getDarkWebAgents:', error);
       return [];
@@ -107,7 +125,11 @@ class MultilingualThreatService {
     try {
       const { error } = await supabase
         .from('darkweb_agents')
-        .insert(agent);
+        .insert({
+          agent_name: agent.agent_alias,
+          status: 'active',
+          target: agent.target_actor
+        });
 
       if (error) {
         console.error('Error deploying dark web agent:', error);
@@ -133,12 +155,16 @@ class MultilingualThreatService {
         return [];
       }
 
-      // Type assertion to ensure proper typing
-      return (data || []).map(log => ({
-        ...log,
-        llm_model: log.llm_model as LLMWatchdogLog['llm_model'],
-        threat_level: log.threat_level as LLMWatchdogLog['threat_level']
-      }));
+      return (data || []).map((log: any) => ({
+        id: log.id,
+        llm_model: (log.llm_provider || 'other') as LLMWatchdogLog['llm_model'],
+        perception_summary: log.response,
+        contains_bias: false,
+        hallucination_detected: false,
+        timestamp: log.timestamp || log.created_at,
+        entity_id: log.entity_name,
+        threat_level: (log.risk_level || 'low') as LLMWatchdogLog['threat_level']
+      })) as LLMWatchdogLog[];
     } catch (error) {
       console.error('Error in getLLMWatchdogLogs:', error);
       return [];
@@ -156,7 +182,12 @@ class MultilingualThreatService {
     try {
       const { error } = await supabase
         .from('llm_watchdog_logs')
-        .insert(log);
+        .insert({
+          llm_provider: log.llm_model,
+          response: log.perception_summary,
+          risk_level: log.threat_level || 'low',
+          entity_name: log.entity_id
+        });
 
       if (error) {
         console.error('Error logging LLM watchdog:', error);
