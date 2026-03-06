@@ -32,6 +32,9 @@ serve(async (req) => {
   }
 
   try {
+    // Auth guard
+    const auth = await requireAdmin(req);
+    if (!isAuthenticated(auth)) return auth;
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''

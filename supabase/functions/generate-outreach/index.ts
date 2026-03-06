@@ -19,6 +19,9 @@ serve(async (req) => {
   }
 
   try {
+    // Auth guard
+    const auth = await requireAdmin(req);
+    if (!isAuthenticated(auth)) return auth;
     const { influencer_name, platform, controversy_type, content, outreach_type } = await req.json();
     
     // Validate input

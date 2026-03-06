@@ -28,6 +28,9 @@ serve(async (req) => {
   )
 
   try {
+    // Auth guard
+    const auth = await requireAdmin(req);
+    if (!isAuthenticated(auth)) return auth;
     // Parse request
     const { timeframe = 'last24h' } = await req.json()
     let daysToLookBack = 1;

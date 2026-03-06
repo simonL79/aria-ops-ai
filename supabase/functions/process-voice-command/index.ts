@@ -19,6 +19,9 @@ serve(async (req) => {
   }
 
   try {
+    // Auth guard
+    const auth = await requireAdmin(req);
+    if (!isAuthenticated(auth)) return auth;
     const { command, userId } = await req.json();
 
     if (!command) {

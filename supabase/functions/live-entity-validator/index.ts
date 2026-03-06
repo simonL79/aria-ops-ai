@@ -41,6 +41,9 @@ serve(async (req) => {
   }
 
   try {
+    // Auth guard
+    const auth = await requireAdmin(req);
+    if (!isAuthenticated(auth)) return auth;
     const requestData: ValidationRequest = await req.json();
     console.log('[LIVE-VALIDATOR] Request data:', requestData);
     

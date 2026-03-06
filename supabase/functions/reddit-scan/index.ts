@@ -17,6 +17,9 @@ serve(async (req) => {
   }
 
   try {
+    // Auth guard
+    const auth = await requireAdmin(req);
+    if (!isAuthenticated(auth)) return auth;
     const requestBody = await req.json().catch(() => ({}));
     console.log('[REDDIT-SCAN] Raw request body:', requestBody);
     

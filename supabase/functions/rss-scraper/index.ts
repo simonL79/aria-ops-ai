@@ -17,6 +17,9 @@ serve(async (req) => {
   }
 
   try {
+    // Auth guard
+    const auth = await requireAdmin(req);
+    if (!isAuthenticated(auth)) return auth;
     const { entity, sources = [], scan_type = 'entity_monitoring' } = await req.json();
     console.log('[RSS-SCRAPER] Starting generic RSS scan for:', entity);
 

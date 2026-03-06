@@ -22,6 +22,9 @@ serve(async (req) => {
   }
 
   try {
+    // Auth guard
+    const auth = await requireAdmin(req);
+    if (!isAuthenticated(auth)) return auth;
     const { query, entityName, searchType = 'threat_patterns', limit = 5 } = await req.json();
     
     console.log(`[LOCAL-MEMORY-SEARCH] Searching for: ${query}, entity: ${entityName}`);

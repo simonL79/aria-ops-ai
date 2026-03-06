@@ -14,6 +14,9 @@ serve(async (req) => {
   }
 
   try {
+    // Auth guard
+    const auth = await requireAdmin(req);
+    if (!isAuthenticated(auth)) return auth;
     const requestBody = await req.json().catch(() => ({}));
     console.log('[UK-NEWS-SCANNER] Raw request body:', requestBody);
     

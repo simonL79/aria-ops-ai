@@ -46,6 +46,9 @@ serve(async (req) => {
   }
 
   try {
+    // Auth guard
+    const auth = await requireAdmin(req);
+    if (!isAuthenticated(auth)) return auth;
     // Parse request body
     const requestData: ScrapingRequest = await req.json()
     

@@ -15,6 +15,9 @@ serve(async (req) => {
   }
 
   try {
+    // Auth guard
+    const auth = await requireAdmin(req);
+    if (!isAuthenticated(auth)) return auth;
     // This is a placeholder for the actual Companies House API integration
     // In a real implementation, you would:
     // 1. Authenticate with Companies House API

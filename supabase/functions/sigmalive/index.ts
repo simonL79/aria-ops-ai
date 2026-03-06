@@ -16,6 +16,9 @@ serve(async (req) => {
   }
 
   try {
+    // Auth guard
+    const auth = await requireAdmin(req);
+    if (!isAuthenticated(auth)) return auth;
     const { entity, keywords = [], depth = 2, generateProfile = true } = await req.json();
     console.log('[SIGMALIVE] Starting SIGMA live scan for:', entity);
 

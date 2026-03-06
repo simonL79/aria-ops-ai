@@ -25,6 +25,9 @@ serve(async (req) => {
   }
 
   try {
+    // Auth guard
+    const auth = await requireAdmin(req);
+    if (!isAuthenticated(auth)) return auth;
     const { caseId, executionType, userId, customActions }: ExecutionRequest = await req.json();
 
     console.log(`🎯 A.R.I.A™ Response execution: ${executionType} for case ${caseId}`);

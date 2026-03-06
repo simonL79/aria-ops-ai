@@ -25,6 +25,9 @@ serve(async (req) => {
   );
 
   try {
+    // Auth guard
+    const auth = await requireAdmin(req);
+    if (!isAuthenticated(auth)) return auth;
     // Parse request body or use defaults
     const { date, maxResults = 10 } = await req.json().catch(() => ({
       date: new Date().toISOString().split('T')[0], // Default to today

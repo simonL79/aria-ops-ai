@@ -35,6 +35,9 @@ serve(async (req) => {
   }
 
   try {
+    // Auth guard
+    const auth = await requireAdmin(req);
+    if (!isAuthenticated(auth)) return auth;
     const { entityName, scanType, clientId, discoverySource }: ScanRequest = await req.json();
 
     console.log(`🔍 A.R.I.A™ SIGMA Enhanced scan initiated for: ${entityName} (${scanType})`);

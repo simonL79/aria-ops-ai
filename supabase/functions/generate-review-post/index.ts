@@ -191,6 +191,9 @@ serve(async (req) => {
   }
 
   try {
+    // Auth guard
+    const auth = await requireAdmin(req);
+    if (!isAuthenticated(auth)) return auth;
     console.log('🔄 A.R.I.A™ Review Post Generator: Starting analysis...');
     
     const supabase = createClient(

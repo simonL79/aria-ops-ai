@@ -30,6 +30,9 @@ serve(async (req) => {
   }
 
   try {
+    // Auth guard
+    const auth = await requireAdmin(req);
+    if (!isAuthenticated(auth)) return auth;
     const config: CompaniesHouseConfig = await req.json();
     
     // Get API key from environment or request

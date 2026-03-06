@@ -26,6 +26,9 @@ serve(async (req) => {
   }
 
   try {
+    // Auth guard
+    const auth = await requireAdmin(req);
+    if (!isAuthenticated(auth)) return auth;
     const requestData: ContentGenerationRequest = await req.json();
     console.log('[CONTENT-GENERATOR] Request data:', requestData);
     

@@ -15,6 +15,9 @@ serve(async (req) => {
   }
 
   try {
+    // Auth guard
+    const auth = await requireAdmin(req);
+    if (!isAuthenticated(auth)) return auth;
     // In a real implementation, this would:
     // 1. Accept a person's name and other identifiers
     // 2. Search news, social media, and other sources for mentions

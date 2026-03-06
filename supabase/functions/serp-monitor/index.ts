@@ -25,6 +25,9 @@ serve(async (req) => {
   }
 
   try {
+    // Auth guard
+    const auth = await requireAdmin(req);
+    if (!isAuthenticated(auth)) return auth;
     const { entityName, keywords, searchEngines = ['duckduckgo'], trackingDomains = [] }: SERPMonitorRequest = await req.json();
 
     console.log(`🔍 SERP Monitoring for: ${entityName}`);
