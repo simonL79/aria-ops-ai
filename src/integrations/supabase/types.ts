@@ -44,6 +44,36 @@ export type Database = {
         }
         Relationships: []
       }
+      anubis_entity_memory: {
+        Row: {
+          content: string | null
+          created_at: string
+          entity_name: string | null
+          id: string
+          memory_type: string | null
+          metadata: Json | null
+          updated_at: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          entity_name?: string | null
+          id?: string
+          memory_type?: string | null
+          metadata?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          entity_name?: string | null
+          id?: string
+          memory_type?: string | null
+          metadata?: Json | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       aria_notifications: {
         Row: {
           created_at: string
@@ -316,6 +346,45 @@ export type Database = {
         }
         Relationships: []
       }
+      entity_fingerprints_advanced: {
+        Row: {
+          aliases: string[] | null
+          confidence_score: number | null
+          created_at: string
+          entity_id: string | null
+          id: string
+          locations: string[] | null
+          metadata: Json | null
+          organization: string | null
+          primary_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          aliases?: string[] | null
+          confidence_score?: number | null
+          created_at?: string
+          entity_id?: string | null
+          id?: string
+          locations?: string[] | null
+          metadata?: Json | null
+          organization?: string | null
+          primary_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          aliases?: string[] | null
+          confidence_score?: number | null
+          created_at?: string
+          entity_id?: string | null
+          id?: string
+          locations?: string[] | null
+          metadata?: Json | null
+          organization?: string | null
+          primary_name?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       lia_records: {
         Row: {
           assessment_type: string | null
@@ -378,6 +447,102 @@ export type Database = {
           last_report?: string | null
           name?: string
           system_status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      monitoring_status: {
+        Row: {
+          created_at: string
+          details: Json | null
+          id: string
+          is_active: boolean | null
+          last_check: string | null
+          module_name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          details?: Json | null
+          id?: string
+          is_active?: boolean | null
+          last_check?: string | null
+          module_name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          details?: Json | null
+          id?: string
+          is_active?: boolean | null
+          last_check?: string | null
+          module_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      narrative_clusters: {
+        Row: {
+          cluster_data: Json | null
+          created_at: string
+          entity_name: string | null
+          id: string
+          intent_label: string | null
+          narrative_snippet: string | null
+          source_platform: string | null
+        }
+        Insert: {
+          cluster_data?: Json | null
+          created_at?: string
+          entity_name?: string | null
+          id?: string
+          intent_label?: string | null
+          narrative_snippet?: string | null
+          source_platform?: string | null
+        }
+        Update: {
+          cluster_data?: Json | null
+          created_at?: string
+          entity_name?: string | null
+          id?: string
+          intent_label?: string | null
+          narrative_snippet?: string | null
+          source_platform?: string | null
+        }
+        Relationships: []
+      }
+      persona_saturation_campaigns: {
+        Row: {
+          campaign_name: string | null
+          content: Json | null
+          created_at: string
+          entity_name: string | null
+          id: string
+          metrics: Json | null
+          platforms: string[] | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          campaign_name?: string | null
+          content?: Json | null
+          created_at?: string
+          entity_name?: string | null
+          id?: string
+          metrics?: Json | null
+          platforms?: string[] | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          campaign_name?: string | null
+          content?: Json | null
+          created_at?: string
+          entity_name?: string | null
+          id?: string
+          metrics?: Json | null
+          platforms?: string[] | null
+          status?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -459,6 +624,7 @@ export type Database = {
           confidence_score: number | null
           content: string | null
           created_at: string
+          detected_entities: Json | null
           entity_name: string | null
           id: string
           metadata: Json | null
@@ -475,6 +641,7 @@ export type Database = {
           confidence_score?: number | null
           content?: string | null
           created_at?: string
+          detected_entities?: Json | null
           entity_name?: string | null
           id?: string
           metadata?: Json | null
@@ -491,6 +658,7 @@ export type Database = {
           confidence_score?: number | null
           content?: string | null
           created_at?: string
+          detected_entities?: Json | null
           entity_name?: string | null
           id?: string
           metadata?: Json | null
@@ -540,6 +708,7 @@ export type Database = {
           content: string | null
           created_at: string
           entity_name: string | null
+          executed_at: string | null
           id: string
           metadata: Json | null
           priority: string | null
@@ -551,6 +720,7 @@ export type Database = {
           content?: string | null
           created_at?: string
           entity_name?: string | null
+          executed_at?: string | null
           id?: string
           metadata?: Json | null
           priority?: string | null
@@ -562,6 +732,7 @@ export type Database = {
           content?: string | null
           created_at?: string
           entity_name?: string | null
+          executed_at?: string | null
           id?: string
           metadata?: Json | null
           priority?: string | null
