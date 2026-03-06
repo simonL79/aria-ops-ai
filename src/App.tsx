@@ -8,6 +8,7 @@ import { RbacProvider } from "@/hooks/useRbac";
 import AppErrorBoundary from "@/components/common/AppErrorBoundary";
 import { navItems } from "./nav-items";
 import Index from "./pages/Index";
+import BlogPostPage from "./pages/BlogPostPage";
 import HomePage from "./pages/HomePage";
 import SecureClientIntakePage from "./pages/SecureClientIntakePage";
 import SmartIntakePage from "./pages/SmartIntakePage";
@@ -81,6 +82,9 @@ function App() {
                       path="/qa-system-test" 
                       element={<QASystemTestPage />} 
                     />
+                    
+                    {/* Blog Routes */}
+                    <Route path="/blog/:slug" element={<BlogPostPage />} />
                     
                     {/* Dynamic Routes */}
                     {navItems.map(({ to, page }) => (

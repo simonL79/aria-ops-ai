@@ -1,101 +1,134 @@
 
 import React from 'react';
+import { Helmet } from 'react-helmet-async';
 import PublicLayout from '@/components/layout/PublicLayout';
 import { useBlogPosts } from '@/hooks/useBlogPosts';
-import { useAuth } from '@/hooks/useAuth';
 import { Link } from 'react-router-dom';
-import MediumImportButton from '@/components/blog/MediumImportButton';
-import { Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Clock, RefreshCw } from 'lucide-react';
+
+const SkeletonCard = () => (
+  <div className="rounded-lg border border-border bg-card overflow-hidden animate-pulse">
+    <div className="h-48 bg-muted" />
+    <div className="p-5 space-y-3">
+      <div className="h-4 bg-muted rounded w-3/4" />
+      <div className="h-3 bg-muted rounded w-full" />
+      <div className="h-3 bg-muted rounded w-2/3" />
+      <div className="flex justify-between pt-2">
+        <div className="h-3 bg-muted rounded w-24" />
+        <div className="h-3 bg-muted rounded w-16" />
+      </div>
+    </div>
+  </div>
+);
+
+const formatDate = (dateStr: string | null) => {
+  if (!dateStr) return '';
+  return new Date(dateStr).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+};
+
+const truncate = (text: string | null, max: number) => {
+  if (!text) return '';
+  return text.length > max ? text.slice(0, max) + '…' : text;
+};
 
 const BlogPage = () => {
-  const { blogPosts, loading, error } = useBlogPosts();
-  const { isAuthenticated, isAdmin } = useAuth();
+  const { blogPosts, loading, syncing, error, hasMore, loadMore, refetch } = useBlogPosts();
 
   return (
     <PublicLayout>
-      <div className="min-h-screen bg-black text-white py-16">
-        <div className="container mx-auto px-6">
-          <div className="max-w-4xl mx-auto">
-            <div className="flex justify-between items-center mb-8">
-              <div>
-                <h1 className="text-4xl font-bold text-center mb-2">A.R.I.A™ Blog</h1>
-                <p className="text-xl text-gray-300 text-center">
-                  Insights, analysis, and updates from the world of digital reputation management
-                </p>
-              </div>
-              {isAuthenticated && isAdmin && <MediumImportButton />}
+      <Helmet>
+        <title>Blog | A.R.I.A™ Ops</title>
+        <meta name="description" content="Read our latest articles and insights on digital reputation management, online security, and brand protection." />
+        <link rel="alternate" type="application/json" title="Blog Feed" href="https://getautoseo.com/feeds/14237/jk-unsGNI0FWRs6DS_Mx0WJqmzRFLgcEoG39QeOCWN0.json" />
+      </Helmet>
+      <div className="min-h-screen bg-background py-12 sm:py-16">
+        <div className="container mx-auto px-4 sm:px-6">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-10 sm:mb-14">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-3">Blog</h1>
+              <p className="text-muted-foreground text-base sm:text-lg max-w-2xl mx-auto">
+                Insights, analysis, and updates on digital reputation management
+              </p>
             </div>
-            
-            {loading && (
-              <div className="flex justify-center items-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
-                <span className="ml-2 text-gray-300">Loading articles...</span>
+
+            {/* Loading / Syncing */}
+            {(loading || syncing) && (
+              <div>
+                {syncing && (
+                  <p className="text-center text-muted-foreground text-sm mb-6 flex items-center justify-center gap-2">
+                    <RefreshCw className="h-4 w-4 animate-spin" /> Loading articles…
+                  </p>
+                )}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
+                </div>
               </div>
             )}
 
-            {error && (
-              <div className="text-center py-12">
-                <p className="text-red-400">Error loading articles: {error}</p>
+            {/* Error */}
+            {error && !loading && (
+              <div className="text-center py-16">
+                <p className="text-destructive mb-4">Couldn't load articles. Please try again.</p>
+                <Button onClick={refetch} variant="outline">Retry</Button>
               </div>
             )}
 
-            {!loading && !error && (
-              <div className="space-y-8">
-                {blogPosts.map((post, index) => (
-                  <article key={post.id || index} className="bg-gray-900 border border-gray-800 rounded-lg p-8">
-                    <div className="flex items-center gap-4 mb-4">
-                      <span className="bg-orange-500 text-black px-3 py-1 rounded-full text-sm font-semibold">
-                        {post.category}
-                      </span>
-                      <span className="text-gray-500 text-sm">{post.date}</span>
-                      {post.medium_url && (
-                        <span className="bg-green-500 text-black px-2 py-1 rounded text-xs font-semibold">
-                          Medium Import
-                        </span>
+            {/* Empty */}
+            {!loading && !error && blogPosts.length === 0 && (
+              <div className="text-center py-16">
+                <div className="text-5xl mb-4">📝</div>
+                <p className="text-muted-foreground text-lg">Articles are on the way! Check back soon.</p>
+              </div>
+            )}
+
+            {/* Posts grid */}
+            {!loading && !error && blogPosts.length > 0 && (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {blogPosts.map(post => (
+                    <Link
+                      key={post.id}
+                      to={`/blog/${post.slug}`}
+                      className="group rounded-lg border border-border bg-card overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+                    >
+                      {post.image_url && (
+                        <div className="h-48 overflow-hidden">
+                          <img
+                            src={post.image_url}
+                            alt={post.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            onError={(e) => { (e.target as HTMLElement).parentElement!.style.display = 'none'; }}
+                          />
+                        </div>
                       )}
-                    </div>
-                    
-                    <h2 className="text-2xl font-bold text-orange-500 mb-4">
-                      {post.title}
-                    </h2>
-                    
-                    <p className="text-gray-300 mb-4">
-                      {post.description}
-                    </p>
-                    
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-400">By {post.author}</span>
-                      <div className="flex gap-4">
-                        {post.medium_url && (
-                          <a 
-                            href={post.medium_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-green-500 hover:text-green-400 font-semibold"
-                          >
-                            View on Medium →
-                          </a>
-                        )}
-                        <Link 
-                          to={`/blog/${post.slug}`}
-                          className="text-orange-500 hover:text-orange-400 font-semibold"
-                        >
-                          Read More →
-                        </Link>
+                      <div className="p-5">
+                        <h2 className="text-lg font-semibold text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+                          {post.title}
+                        </h2>
+                        <p className="text-sm text-muted-foreground mb-3 line-clamp-3">
+                          {truncate(post.summary, 160)}
+                        </p>
+                        <div className="flex items-center justify-between text-xs text-muted-foreground">
+                          <span>{formatDate(post.published_at)}</span>
+                          <span className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {post.reading_time} min read
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  </article>
-                ))}
-                
-                {!loading && !error && blogPosts.length === 0 && (
-                  <div className="text-center py-12">
-                    <p className="text-gray-400 mb-4">No blog posts available at the moment.</p>
-                    {isAuthenticated && isAdmin && (
-                      <p className="text-gray-500 text-sm">Use the import button above to import Medium articles.</p>
-                    )}
+                    </Link>
+                  ))}
+                </div>
+
+                {hasMore && (
+                  <div className="text-center mt-10">
+                    <Button onClick={loadMore} variant="outline" className="px-8">
+                      Load More
+                    </Button>
                   </div>
                 )}
-              </div>
+              </>
             )}
           </div>
         </div>
