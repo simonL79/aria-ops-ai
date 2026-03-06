@@ -107,16 +107,13 @@ const BiographyPage = () => {
                     </div>
                     <div className="md:w-2/3">
                       <p className="leading-7 mb-4 text-premium-gray">
-                        Simon Lindsay is the founder of <strong className="text-premium-black">A.R.I.A™</strong> — the AI Reputation Intelligence Agent.
+                        Simon Lindsay is the founder of <strong className="text-premium-black">A.R.I.A™</strong> (AI Reputation Intelligence Agent), an advanced reputation intelligence platform designed to monitor, analyse, and protect digital reputation in an increasingly AI-driven information environment.
                       </p>
                       <p className="leading-7 mb-4 text-premium-gray">
-                        Simon's professional journey began in the personal care industry, where he founded <strong className="text-premium-black">KSL Hair</strong>, 
-                        one of the UK's fastest-growing hair restoration clinics. With high-profile clients and a strong social 
-                        media presence, the business saw rapid success — but also intense public scrutiny when challenges arose.
+                        With experience spanning combat sports, celebrity management, commercial partnerships, and digital strategy, Simon has developed an international network across sport, media, and business. His work focuses on identifying emerging reputational risks, protecting public profiles, and structuring strategic opportunities that strengthen both personal and organisational brands.
                       </p>
                       <p className="leading-7 text-premium-gray">
-                        After facing reputation-damaging press and business fallout, Simon realized that the tools to protect 
-                        digital identity didn't exist — until now.
+                        Through A.R.I.A™, Simon combines artificial intelligence with real-world experience operating in high-profile environments. The platform enables clients to monitor their digital footprint, anticipate narrative risks, and maintain greater control over how they are represented across search, media, and social platforms.
                       </p>
                     </div>
                   </div>
@@ -125,18 +122,13 @@ const BiographyPage = () => {
 
                   <div>
                     <p className="leading-7 mb-4 text-premium-gray">
-                      <strong className="text-premium-black">A.R.I.A™</strong> is his answer: an autonomous digital agent that detects threats, classifies risk, 
-                      and helps users respond before damage occurs.
-                    </p>
-                    <p className="leading-7 mb-4 text-premium-gray">
-                      Simon now helps others control their narrative, protect their future, and rebuild trust — 
-                      using technology powered by real-world experience.
+                      Alongside his work in reputation intelligence, Simon remains active across boxing, BKFC, and the wider sports and entertainment industry, where he structures brand partnerships and commercial opportunities for athletes, creators, and public figures.
                     </p>
                   </div>
 
                   <div className="bg-gray-50 p-6 rounded-md my-6 border border-premium-silver">
                     <blockquote className="italic text-lg text-premium-darkGray">
-                      "Reputation is the currency of modern credibility. <strong>A.R.I.A™</strong> protects yours."
+                      "Protect reputation. Control narrative. Unlock strategic opportunity."
                     </blockquote>
                     <p className="text-right mt-2 text-premium-gray">— Simon Lindsay</p>
                   </div>

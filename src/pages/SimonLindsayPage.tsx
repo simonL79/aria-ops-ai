@@ -18,22 +18,19 @@ const SimonLindsayPage = () => {
                 <h2 className="text-2xl font-bold text-orange-500 mb-6">About Simon</h2>
                 <div className="space-y-4 text-gray-300">
                   <p>
-                    Simon Lindsay is the visionary founder and CEO of A.R.I.A™ (Adaptive Reputation 
-                    Intelligence & Analysis), bringing over a decade of experience in digital security, 
-                    artificial intelligence, and reputation management.
+                    Simon Lindsay is the founder of A.R.I.A™ (AI Reputation Intelligence Agent), an advanced reputation intelligence platform designed to monitor, analyse, and protect digital reputation in an increasingly AI-driven information environment.
                   </p>
                   <p>
-                    With a background in cybersecurity and emerging technologies, Simon recognized 
-                    the critical need for intelligent, proactive reputation protection in our 
-                    increasingly connected world. His vision led to the creation of A.R.I.A™, 
-                    a platform that combines cutting-edge AI with human expertise to deliver 
-                    unparalleled reputation intelligence.
+                    With experience spanning combat sports, celebrity management, commercial partnerships, and digital strategy, Simon has developed an international network across sport, media, and business. His work focuses on identifying emerging reputational risks, protecting public profiles, and structuring strategic opportunities that strengthen both personal and organisational brands.
                   </p>
                   <p>
-                    Under Simon's leadership, A.R.I.A™ has become a trusted partner for executives, 
-                    organizations, and individuals seeking comprehensive digital reputation protection. 
-                    His commitment to innovation and client success continues to drive the evolution 
-                    of reputation management technology.
+                    Through A.R.I.A™, Simon combines artificial intelligence with real-world experience operating in high-profile environments. The platform enables clients to monitor their digital footprint, anticipate narrative risks, and maintain greater control over how they are represented across search, media, and social platforms.
+                  </p>
+                  <p>
+                    Alongside his work in reputation intelligence, Simon remains active across boxing, BKFC, and the wider sports and entertainment industry, where he structures brand partnerships and commercial opportunities for athletes, creators, and public figures.
+                  </p>
+                  <p className="italic text-white mt-4">
+                    "Protect reputation. Control narrative. Unlock strategic opportunity."
                   </p>
                 </div>
               </div>
