@@ -570,13 +570,21 @@ export type Database = {
       }
       data_retention_schedule: {
         Row: {
+          automated_deletion: boolean | null
           created_at: string
+          cross_border_considerations: string | null
+          data_category: string | null
           data_type: string | null
           deletion_job_name: string | null
+          deletion_method: string | null
+          exceptions: string | null
           id: string
           last_review_date: string | null
+          legal_basis: string | null
           metadata: Json | null
           next_review_date: string | null
+          responsible_team: string | null
+          retention_justification: string | null
           retention_period: string | null
           review_frequency: string | null
           status: string | null
@@ -584,13 +592,21 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          automated_deletion?: boolean | null
           created_at?: string
+          cross_border_considerations?: string | null
+          data_category?: string | null
           data_type?: string | null
           deletion_job_name?: string | null
+          deletion_method?: string | null
+          exceptions?: string | null
           id?: string
           last_review_date?: string | null
+          legal_basis?: string | null
           metadata?: Json | null
           next_review_date?: string | null
+          responsible_team?: string | null
+          retention_justification?: string | null
           retention_period?: string | null
           review_frequency?: string | null
           status?: string | null
@@ -598,13 +614,21 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          automated_deletion?: boolean | null
           created_at?: string
+          cross_border_considerations?: string | null
+          data_category?: string | null
           data_type?: string | null
           deletion_job_name?: string | null
+          deletion_method?: string | null
+          exceptions?: string | null
           id?: string
           last_review_date?: string | null
+          legal_basis?: string | null
           metadata?: Json | null
           next_review_date?: string | null
+          responsible_team?: string | null
+          retention_justification?: string | null
           retention_period?: string | null
           review_frequency?: string | null
           status?: string | null
@@ -615,26 +639,39 @@ export type Database = {
       }
       data_subject_requests: {
         Row: {
+          appeal_status: string | null
+          assigned_to: string | null
           automated_decisions_reviewed: boolean | null
+          closure_reason: string | null
+          communication_log: Json | null
           completed_at: string | null
           created_at: string
           data_categories: string[] | null
           data_deleted: boolean | null
           data_exported: boolean | null
+          data_mapping: Json | null
           data_subject_email: string | null
           data_subject_name: string | null
           deadline: string | null
           details: string | null
           id: string
           identity_verified: boolean | null
+          impact_assessment: string | null
+          legal_basis_for_refusal: string | null
           metadata: Json | null
           objection_grounds: string | null
+          priority: string | null
           processing_notes: string | null
+          processing_systems: string[] | null
+          regulatory_authority: string | null
+          request_date: string | null
           request_details: string | null
           request_type: string | null
           response_date: string | null
+          response_method: string | null
           response_sent: boolean | null
           restriction_applied: boolean | null
+          review_notes: string | null
           status: string | null
           subject_email: string | null
           subject_name: string | null
@@ -644,26 +681,39 @@ export type Database = {
           verification_status: string | null
         }
         Insert: {
+          appeal_status?: string | null
+          assigned_to?: string | null
           automated_decisions_reviewed?: boolean | null
+          closure_reason?: string | null
+          communication_log?: Json | null
           completed_at?: string | null
           created_at?: string
           data_categories?: string[] | null
           data_deleted?: boolean | null
           data_exported?: boolean | null
+          data_mapping?: Json | null
           data_subject_email?: string | null
           data_subject_name?: string | null
           deadline?: string | null
           details?: string | null
           id?: string
           identity_verified?: boolean | null
+          impact_assessment?: string | null
+          legal_basis_for_refusal?: string | null
           metadata?: Json | null
           objection_grounds?: string | null
+          priority?: string | null
           processing_notes?: string | null
+          processing_systems?: string[] | null
+          regulatory_authority?: string | null
+          request_date?: string | null
           request_details?: string | null
           request_type?: string | null
           response_date?: string | null
+          response_method?: string | null
           response_sent?: boolean | null
           restriction_applied?: boolean | null
+          review_notes?: string | null
           status?: string | null
           subject_email?: string | null
           subject_name?: string | null
@@ -673,26 +723,39 @@ export type Database = {
           verification_status?: string | null
         }
         Update: {
+          appeal_status?: string | null
+          assigned_to?: string | null
           automated_decisions_reviewed?: boolean | null
+          closure_reason?: string | null
+          communication_log?: Json | null
           completed_at?: string | null
           created_at?: string
           data_categories?: string[] | null
           data_deleted?: boolean | null
           data_exported?: boolean | null
+          data_mapping?: Json | null
           data_subject_email?: string | null
           data_subject_name?: string | null
           deadline?: string | null
           details?: string | null
           id?: string
           identity_verified?: boolean | null
+          impact_assessment?: string | null
+          legal_basis_for_refusal?: string | null
           metadata?: Json | null
           objection_grounds?: string | null
+          priority?: string | null
           processing_notes?: string | null
+          processing_systems?: string[] | null
+          regulatory_authority?: string | null
+          request_date?: string | null
           request_details?: string | null
           request_type?: string | null
           response_date?: string | null
+          response_method?: string | null
           response_sent?: boolean | null
           restriction_applied?: boolean | null
+          review_notes?: string | null
           status?: string | null
           subject_email?: string | null
           subject_name?: string | null
@@ -707,7 +770,11 @@ export type Database = {
         Row: {
           approval_date: string | null
           approved_by: string | null
+          assessment_date: string | null
           assessment_title: string | null
+          assessor_name: string | null
+          assessor_role: string | null
+          automated_decision_making: string | null
           consultation_required: boolean | null
           created_at: string
           data_categories: string | null
@@ -723,6 +790,7 @@ export type Database = {
           mitigation_measures: Json | null
           necessity_justification: string | null
           processing_purpose: string | null
+          profiling_activities: string | null
           proportionality_assessment: string | null
           residual_risk: string | null
           review_date: string | null
@@ -734,7 +802,11 @@ export type Database = {
         Insert: {
           approval_date?: string | null
           approved_by?: string | null
+          assessment_date?: string | null
           assessment_title?: string | null
+          assessor_name?: string | null
+          assessor_role?: string | null
+          automated_decision_making?: string | null
           consultation_required?: boolean | null
           created_at?: string
           data_categories?: string | null
@@ -750,6 +822,7 @@ export type Database = {
           mitigation_measures?: Json | null
           necessity_justification?: string | null
           processing_purpose?: string | null
+          profiling_activities?: string | null
           proportionality_assessment?: string | null
           residual_risk?: string | null
           review_date?: string | null
@@ -761,7 +834,11 @@ export type Database = {
         Update: {
           approval_date?: string | null
           approved_by?: string | null
+          assessment_date?: string | null
           assessment_title?: string | null
+          assessor_name?: string | null
+          assessor_role?: string | null
+          automated_decision_making?: string | null
           consultation_required?: boolean | null
           created_at?: string
           data_categories?: string | null
@@ -777,6 +854,7 @@ export type Database = {
           mitigation_measures?: Json | null
           necessity_justification?: string | null
           processing_purpose?: string | null
+          profiling_activities?: string | null
           proportionality_assessment?: string | null
           residual_risk?: string | null
           review_date?: string | null
@@ -940,33 +1018,78 @@ export type Database = {
       lia_records: {
         Row: {
           assessment_type: string | null
+          assessor_name: string | null
+          assessor_role: string | null
+          balancing_test: string | null
           created_at: string
+          data_categories: string | null
+          data_sources: string[] | null
+          data_subject_impact: string | null
           details: Json | null
           entity_name: string | null
           id: string
+          legitimate_interest: string | null
+          mitigation_measures: string | null
+          necessity_test: string | null
+          opt_out_mechanism: string | null
+          processing_methods: string | null
+          purpose_description: string | null
+          retention_period: string | null
+          review_date: string | null
           risk_level: string | null
+          safeguards: string | null
           status: string | null
           title: string | null
           updated_at: string
         }
         Insert: {
           assessment_type?: string | null
+          assessor_name?: string | null
+          assessor_role?: string | null
+          balancing_test?: string | null
           created_at?: string
+          data_categories?: string | null
+          data_sources?: string[] | null
+          data_subject_impact?: string | null
           details?: Json | null
           entity_name?: string | null
           id?: string
+          legitimate_interest?: string | null
+          mitigation_measures?: string | null
+          necessity_test?: string | null
+          opt_out_mechanism?: string | null
+          processing_methods?: string | null
+          purpose_description?: string | null
+          retention_period?: string | null
+          review_date?: string | null
           risk_level?: string | null
+          safeguards?: string | null
           status?: string | null
           title?: string | null
           updated_at?: string
         }
         Update: {
           assessment_type?: string | null
+          assessor_name?: string | null
+          assessor_role?: string | null
+          balancing_test?: string | null
           created_at?: string
+          data_categories?: string | null
+          data_sources?: string[] | null
+          data_subject_impact?: string | null
           details?: Json | null
           entity_name?: string | null
           id?: string
+          legitimate_interest?: string | null
+          mitigation_measures?: string | null
+          necessity_test?: string | null
+          opt_out_mechanism?: string | null
+          processing_methods?: string | null
+          purpose_description?: string | null
+          retention_period?: string | null
+          review_date?: string | null
           risk_level?: string | null
+          safeguards?: string | null
           status?: string | null
           title?: string | null
           updated_at?: string
@@ -1212,33 +1335,87 @@ export type Database = {
       }
       privacy_notices: {
         Row: {
+          approved_by: string | null
+          automated_decisions: string | null
+          contact_details: string | null
           content: string | null
+          cookies_policy: string | null
           created_at: string
+          data_categories_covered: string[] | null
+          data_controller: string | null
           effective_date: string | null
           id: string
+          individual_rights: string | null
+          international_transfers: string | null
+          jurisdiction: string | null
+          language: string | null
+          last_reviewed: string | null
+          legal_bases: string[] | null
           metadata: Json | null
+          notice_type: string | null
+          publication_url: string | null
+          purposes: string[] | null
+          recipients: string[] | null
+          retention_periods: string | null
+          review_frequency: string | null
           status: string | null
           title: string | null
           updated_at: string
           version: string | null
         }
         Insert: {
+          approved_by?: string | null
+          automated_decisions?: string | null
+          contact_details?: string | null
           content?: string | null
+          cookies_policy?: string | null
           created_at?: string
+          data_categories_covered?: string[] | null
+          data_controller?: string | null
           effective_date?: string | null
           id?: string
+          individual_rights?: string | null
+          international_transfers?: string | null
+          jurisdiction?: string | null
+          language?: string | null
+          last_reviewed?: string | null
+          legal_bases?: string[] | null
           metadata?: Json | null
+          notice_type?: string | null
+          publication_url?: string | null
+          purposes?: string[] | null
+          recipients?: string[] | null
+          retention_periods?: string | null
+          review_frequency?: string | null
           status?: string | null
           title?: string | null
           updated_at?: string
           version?: string | null
         }
         Update: {
+          approved_by?: string | null
+          automated_decisions?: string | null
+          contact_details?: string | null
           content?: string | null
+          cookies_policy?: string | null
           created_at?: string
+          data_categories_covered?: string[] | null
+          data_controller?: string | null
           effective_date?: string | null
           id?: string
+          individual_rights?: string | null
+          international_transfers?: string | null
+          jurisdiction?: string | null
+          language?: string | null
+          last_reviewed?: string | null
+          legal_bases?: string[] | null
           metadata?: Json | null
+          notice_type?: string | null
+          publication_url?: string | null
+          purposes?: string[] | null
+          recipients?: string[] | null
+          retention_periods?: string | null
+          review_frequency?: string | null
           status?: string | null
           title?: string | null
           updated_at?: string
