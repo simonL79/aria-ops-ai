@@ -129,7 +129,7 @@ export const getRSIActivationQueue = async (): Promise<RSIActivationItem[]> => {
 
 export const getEideticFootprintQueue = async (): Promise<EideticFootprintItem[]> => {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase
       .from('eidetic_footprint_queue') as any)
       .select('*')
       .order('routed_at', { ascending: false })
