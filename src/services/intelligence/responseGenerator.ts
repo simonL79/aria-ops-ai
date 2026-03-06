@@ -78,7 +78,7 @@ export const saveGeneratedResponse = async (
 ): Promise<boolean> => {
   try {
     // Insert the response into the database
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from('generated_responses')
       .insert({
         response_text: response,
@@ -111,7 +111,7 @@ export const saveGeneratedResponse = async (
 export const getResponseHistory = async (limit: number = 10): Promise<any[]> => {
   try {
     // Get response history
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('generated_responses')
       .select(`
         *,

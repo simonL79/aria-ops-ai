@@ -43,8 +43,9 @@ export const storeEntityMemory = async (memory: EntityMemory): Promise<boolean> 
         entity_name: memory.entityName,
         memory_type: memory.memoryType,
         memory_summary: memory.content,
-        context_reference: memory.context,
-        key_findings: {
+        content: memory.content,
+        metadata: {
+          context: memory.context,
           importance: memory.importance,
           decay: memory.decay,
           timestamp: memory.timestamp
@@ -138,9 +139,12 @@ export const analyzeThreatPatterns = async (
     await supabase.from('anubis_pattern_log').insert({
       entity_name: pattern.entityName,
       pattern_fingerprint: pattern.patternId,
-      pattern_summary: `${pattern.threatType}: ${pattern.indicators.join(', ')}`,
-      confidence_score: pattern.severity,
-      recommended_response: `Detected ${pattern.threatType} pattern with ${pattern.frequency} occurrences`
+      pattern_type: pattern.threatType,
+      confidence: pattern.severity,
+      metadata: {
+        indicators: pattern.indicators,
+        recommended_response: `Detected ${pattern.threatType} pattern with ${pattern.frequency} occurrences`
+      }
     });
 
     return pattern;
@@ -222,7 +226,7 @@ export const getEntityContext = async (entityName: string): Promise<{
         .from('anubis_pattern_log')
         .select('*')
         .eq('entity_name', entityName)
-        .order('first_detected', { ascending: false })
+        .order('created_at', { ascending: false })
         .limit(5)
         .then(({ data }) => data || []),
       
@@ -236,24 +240,24 @@ export const getEntityContext = async (entityName: string): Promise<{
         .then(({ data }) => data || []),
       
       // Get risk profile from entity_risk_profiles
-      supabase
+      (supabase as any)
         .from('entity_risk_profiles')
         .select('*')
         .eq('entity_name', entityName)
         .single()
-        .then(({ data }) => data)
+        .then(({ data }: any) => data)
     ]);
 
     return {
       memories,
-      patterns: patterns.map(p => ({
+      patterns: (patterns as any[]).map(p => ({
         patternId: p.pattern_fingerprint || '',
         entityName: p.entity_name || '',
-        threatType: p.pattern_summary || 'unknown',
-        indicators: p.pattern_summary ? [p.pattern_summary] : [],
-        severity: p.confidence_score || 0,
+        threatType: p.pattern_type || 'unknown',
+        indicators: p.pattern_type ? [p.pattern_type] : [],
+        severity: p.confidence || 0,
         frequency: 1,
-        lastSeen: p.first_detected || new Date().toISOString()
+        lastSeen: p.created_at || new Date().toISOString()
       })),
       relationships: relationships.map(r => ({
         entityA: r.source_entity || '',

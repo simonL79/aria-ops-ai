@@ -117,8 +117,8 @@ export const createInternalBehaviorSignal = async (
   signal: Omit<InternalBehaviorSignal, 'id' | 'captured_at'> & { entity_name: string }
 ): Promise<boolean> => {
   try {
-    const { error } = await (supabase
-      .from('internal_behavior_signals') as any)
+    const { error } = await (supabase as any)
+      .from('internal_behavior_signals')
       .insert([signal]);
 
     if (error) {
@@ -138,8 +138,8 @@ export const createInternalBehaviorSignal = async (
 
 export const getToneDriftProfiles = async (): Promise<ToneDriftProfile[]> => {
   try {
-    const { data, error } = await (supabase
-      .from('tone_drift_profiles') as any)
+    const { data, error } = await (supabase as any)
+      .from('tone_drift_profiles')
       .select('*')
       .order('created_at', { ascending: false });
 
@@ -159,8 +159,8 @@ export const createToneDriftProfile = async (
   profile: Omit<ToneDriftProfile, 'id' | 'created_at' | 'updated_at'> & { entity_name: string }
 ): Promise<boolean> => {
   try {
-    const { error } = await (supabase
-      .from('tone_drift_profiles') as any)
+    const { error } = await (supabase as any)
+      .from('tone_drift_profiles')
       .insert([profile]);
 
     if (error) {
@@ -180,8 +180,8 @@ export const createToneDriftProfile = async (
 
 export const getPraxisRiskArchetypes = async (): Promise<PraxisRiskArchetype[]> => {
   try {
-    const { data, error } = await (supabase
-      .from('praxis_risk_archetypes') as any)
+    const { data, error } = await (supabase as any)
+      .from('praxis_risk_archetypes')
       .select('*')
       .order('triggered_at', { ascending: false });
 
@@ -201,8 +201,8 @@ export const createPraxisRiskArchetype = async (
   archetype: Omit<PraxisRiskArchetype, 'id' | 'triggered_at' | 'last_updated'> & { entity_name: string }
 ): Promise<boolean> => {
   try {
-    const { error } = await (supabase
-      .from('praxis_risk_archetypes') as any)
+    const { error } = await (supabase as any)
+      .from('praxis_risk_archetypes')
       .insert([archetype]);
 
     if (error) {
@@ -222,8 +222,8 @@ export const createPraxisRiskArchetype = async (
 
 export const getPraxisCrisisSimulations = async (): Promise<PraxisCrisisSimulation[]> => {
   try {
-    const { data, error } = await (supabase
-      .from('praxis_crisis_simulations') as any)
+    const { data, error } = await (supabase as any)
+      .from('praxis_crisis_simulations')
       .select('*')
       .order('created_at', { ascending: false });
 
@@ -241,8 +241,8 @@ export const getPraxisCrisisSimulations = async (): Promise<PraxisCrisisSimulati
 
 export const getPraxisForecastDashboard = async (): Promise<PraxisForecastDashboard[]> => {
   try {
-    const { data, error } = await (supabase
-      .from('praxis_forecast_dashboard') as any)
+    const { data, error } = await (supabase as any)
+      .from('praxis_forecast_dashboard')
       .select('*');
 
     if (error) {
@@ -259,8 +259,8 @@ export const getPraxisForecastDashboard = async (): Promise<PraxisForecastDashbo
 
 export const getPraxisSignalTrends = async (): Promise<PraxisSignalTrend[]> => {
   try {
-    const { data, error } = await (supabase
-      .from('praxis_signal_trends') as any)
+    const { data, error } = await (supabase as any)
+      .from('praxis_signal_trends')
       .select('*');
 
     if (error) {
@@ -293,9 +293,9 @@ export const updateRiskArchetypeStatus = async (
   status: string
 ): Promise<boolean> => {
   try {
-    const { error } = await (supabase
-      .from('praxis_risk_archetypes') as any)
-      .update({ 
+    const { error } = await (supabase as any)
+      .from('praxis_risk_archetypes')
+      .update({
         status,
         last_updated: new Date().toISOString()
       })

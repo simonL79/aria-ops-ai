@@ -111,9 +111,9 @@ class ExecutiveReportingService {
       // Since executive_threat_summary is a view we just created, we'll use a direct query for now
       // until the types are updated
       const { data, error } = await supabase
-        .from('entity_threat_history')
+        .from('scan_results')
         .select('*')
-        .order('first_detected', { ascending: false })
+        .order('created_at', { ascending: false })
         .limit(12);
       
       if (error) {
@@ -121,22 +121,20 @@ class ExecutiveReportingService {
         return [];
       }
       
-      // Transform the data to match our ThreatSummary interface
-      // This is a simplified transformation - in practice you'd aggregate the data properly
-      return (data || []).map(item => ({
-        week_period: item.first_detected || new Date().toISOString(),
+      return (data || []).map((item: any) => ({
+        week_period: item.created_at || new Date().toISOString(),
         unique_entities_threatened: 1,
-        total_threats: item.total_mentions || 0,
+        total_threats: 1,
         high_severity_threats: item.severity === 'high' ? 1 : 0,
         medium_severity_threats: item.severity === 'medium' ? 1 : 0,
         low_severity_threats: item.severity === 'low' ? 1 : 0,
-        threats_by_platform: { [item.platform]: 1 },
-        overall_sentiment: item.average_sentiment || 0,
+        threats_by_platform: { [item.platform || 'unknown']: 1 },
+        overall_sentiment: Number(item.sentiment) || 0,
         avg_sentiment_improvement: 0,
         avg_response_effectiveness: 75,
         avg_resolution_hours: 24,
-        resolved_threats: item.resolution_status === 'resolved' ? 1 : 0,
-        open_threats: item.resolution_status === 'open' ? 1 : 0,
+        resolved_threats: item.status === 'resolved' ? 1 : 0,
+        open_threats: item.status !== 'resolved' ? 1 : 0,
       }));
     } catch (error) {
       console.error('Error in getThreatSummary:', error);
