@@ -288,8 +288,11 @@ export type Database = {
           created_at: string
           id: string
           metadata: Json | null
+          published_at: string | null
           source_type: string | null
           status: string | null
+          summary: string | null
+          tags: string[] | null
           title: string | null
           updated_at: string
           url: string | null
@@ -298,8 +301,11 @@ export type Database = {
           created_at?: string
           id?: string
           metadata?: Json | null
+          published_at?: string | null
           source_type?: string | null
           status?: string | null
+          summary?: string | null
+          tags?: string[] | null
           title?: string | null
           updated_at?: string
           url?: string | null
@@ -308,8 +314,11 @@ export type Database = {
           created_at?: string
           id?: string
           metadata?: Json | null
+          published_at?: string | null
           source_type?: string | null
           status?: string | null
+          summary?: string | null
+          tags?: string[] | null
           title?: string | null
           updated_at?: string
           url?: string | null
@@ -350,8 +359,10 @@ export type Database = {
         Row: {
           aliases: string[] | null
           confidence_score: number | null
+          context_tags: string[] | null
           created_at: string
           entity_id: string | null
+          false_positive_blocklist: string[] | null
           id: string
           locations: string[] | null
           metadata: Json | null
@@ -362,8 +373,10 @@ export type Database = {
         Insert: {
           aliases?: string[] | null
           confidence_score?: number | null
+          context_tags?: string[] | null
           created_at?: string
           entity_id?: string | null
+          false_positive_blocklist?: string[] | null
           id?: string
           locations?: string[] | null
           metadata?: Json | null
@@ -374,13 +387,54 @@ export type Database = {
         Update: {
           aliases?: string[] | null
           confidence_score?: number | null
+          context_tags?: string[] | null
           created_at?: string
           entity_id?: string | null
+          false_positive_blocklist?: string[] | null
           id?: string
           locations?: string[] | null
           metadata?: Json | null
           organization?: string | null
           primary_name?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      entity_precision_stats: {
+        Row: {
+          created_at: string
+          entity_name: string | null
+          false_positives: number | null
+          id: string
+          metadata: Json | null
+          precision_score: number | null
+          recall_score: number | null
+          total_scans: number | null
+          true_positives: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          entity_name?: string | null
+          false_positives?: number | null
+          id?: string
+          metadata?: Json | null
+          precision_score?: number | null
+          recall_score?: number | null
+          total_scans?: number | null
+          true_positives?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          entity_name?: string | null
+          false_positives?: number | null
+          id?: string
+          metadata?: Json | null
+          precision_score?: number | null
+          recall_score?: number | null
+          total_scans?: number | null
+          true_positives?: number | null
           updated_at?: string
         }
         Relationships: []
@@ -459,6 +513,7 @@ export type Database = {
           is_active: boolean | null
           last_check: string | null
           module_name: string
+          sources_count: number | null
           updated_at: string
         }
         Insert: {
@@ -468,6 +523,7 @@ export type Database = {
           is_active?: boolean | null
           last_check?: string | null
           module_name: string
+          sources_count?: number | null
           updated_at?: string
         }
         Update: {
@@ -477,6 +533,7 @@ export type Database = {
           is_active?: boolean | null
           last_check?: string | null
           module_name?: string
+          sources_count?: number | null
           updated_at?: string
         }
         Relationships: []
@@ -629,6 +686,7 @@ export type Database = {
           id: string
           metadata: Json | null
           platform: string | null
+          potential_reach: number | null
           sentiment: string | null
           severity: string | null
           source_type: string | null
@@ -646,6 +704,7 @@ export type Database = {
           id?: string
           metadata?: Json | null
           platform?: string | null
+          potential_reach?: number | null
           sentiment?: string | null
           severity?: string | null
           source_type?: string | null
@@ -663,6 +722,7 @@ export type Database = {
           id?: string
           metadata?: Json | null
           platform?: string | null
+          potential_reach?: number | null
           sentiment?: string | null
           severity?: string | null
           source_type?: string | null
@@ -679,65 +739,95 @@ export type Database = {
           execution_time_ms: number | null
           id: string
           metadata: Json | null
+          platform: string | null
           query_text: string | null
           results_count: number | null
+          results_matched_entity: number | null
           source: string | null
+          total_results_returned: number | null
         }
         Insert: {
           executed_at?: string
           execution_time_ms?: number | null
           id?: string
           metadata?: Json | null
+          platform?: string | null
           query_text?: string | null
           results_count?: number | null
+          results_matched_entity?: number | null
           source?: string | null
+          total_results_returned?: number | null
         }
         Update: {
           executed_at?: string
           execution_time_ms?: number | null
           id?: string
           metadata?: Json | null
+          platform?: string | null
           query_text?: string | null
           results_count?: number | null
+          results_matched_entity?: number | null
           source?: string | null
+          total_results_returned?: number | null
         }
         Relationships: []
       }
       strategy_responses: {
         Row: {
+          actions: Json | null
           content: string | null
           created_at: string
+          description: string | null
           entity_name: string | null
           executed_at: string | null
+          execution_result: Json | null
           id: string
           metadata: Json | null
           priority: string | null
+          resources: Json | null
           status: string | null
+          strategy_id: string | null
           strategy_type: string | null
+          timeframe: string | null
+          title: string | null
           updated_at: string
         }
         Insert: {
+          actions?: Json | null
           content?: string | null
           created_at?: string
+          description?: string | null
           entity_name?: string | null
           executed_at?: string | null
+          execution_result?: Json | null
           id?: string
           metadata?: Json | null
           priority?: string | null
+          resources?: Json | null
           status?: string | null
+          strategy_id?: string | null
           strategy_type?: string | null
+          timeframe?: string | null
+          title?: string | null
           updated_at?: string
         }
         Update: {
+          actions?: Json | null
           content?: string | null
           created_at?: string
+          description?: string | null
           entity_name?: string | null
           executed_at?: string | null
+          execution_result?: Json | null
           id?: string
           metadata?: Json | null
           priority?: string | null
+          resources?: Json | null
           status?: string | null
+          strategy_id?: string | null
           strategy_type?: string | null
+          timeframe?: string | null
+          title?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -802,6 +892,48 @@ export type Database = {
           description?: string | null
           id?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      threats: {
+        Row: {
+          content: string | null
+          created_at: string
+          entity_name: string | null
+          id: string
+          metadata: Json | null
+          severity: string | null
+          source: string | null
+          status: string | null
+          threat_type: string | null
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          entity_name?: string | null
+          id?: string
+          metadata?: Json | null
+          severity?: string | null
+          source?: string | null
+          status?: string | null
+          threat_type?: string | null
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          entity_name?: string | null
+          id?: string
+          metadata?: Json | null
+          severity?: string | null
+          source?: string | null
+          status?: string | null
+          threat_type?: string | null
+          updated_at?: string
+          url?: string | null
         }
         Relationships: []
       }
