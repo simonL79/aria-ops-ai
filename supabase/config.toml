@@ -238,3 +238,9 @@ verify_jwt = false
 
 [functions.threat-summarization]
 verify_jwt = false
+
+[functions.sync-blog-posts]
+verify_jwt = false
+
+[functions.generate-sitemap]
+verify_jwt = false
