@@ -84,10 +84,10 @@ class ExecutiveReportingService {
         title: item.title,
         executive_summary: item.executive_summary,
         key_metrics: item.key_metrics,
-        threat_highlights: Array.isArray(item.threat_highlights) 
-          ? item.threat_highlights 
-          : typeof item.threat_highlights === 'string' 
-            ? JSON.parse(item.threat_highlights) 
+        threat_highlights: Array.isArray((item as any).threat_highlights) 
+          ? (item as any).threat_highlights 
+          : typeof (item as any).threat_highlights === 'string' 
+            ? JSON.parse((item as any).threat_highlights) 
             : [],
         recommendations: Array.isArray(item.recommendations) 
           ? item.recommendations 

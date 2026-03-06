@@ -23,8 +23,8 @@ export class PatternRecognitionService {
         .limit(50);
 
       // Get feedback data
-      const { data: feedbackData } = await supabase
-        .from('anubis_feedback_memory')
+      const { data: feedbackData } = await (supabase
+        .from('anubis_feedback_memory') as any)
         .select('*')
         .order('created_at', { ascending: false })
         .limit(30);
@@ -354,18 +354,18 @@ export class PatternRecognitionService {
         .from('anubis_pattern_log')
         .select('*')
         .eq('entity_name', entityName)
-        .order('first_detected', { ascending: false })
+        .order('created_at', { ascending: false })
         .limit(10);
 
-      return (data || []).map(log => ({
+      return (data || []).map((log: any) => ({
         id: log.pattern_fingerprint,
         type: 'stored_pattern',
-        description: log.pattern_summary || 'Stored pattern',
-        confidence: log.confidence_score || 0,
+        description: log.pattern_summary || log.pattern_type || 'Stored pattern',
+        confidence: log.confidence_score || log.confidence || 0,
         frequency: 1,
-        lastSeen: log.first_detected || new Date().toISOString(),
+        lastSeen: log.first_detected || log.created_at || new Date().toISOString(),
         indicators: [],
-        riskLevel: log.confidence_score && log.confidence_score > 0.8 ? 'high' : 'medium'
+        riskLevel: (log.confidence_score || log.confidence) > 0.8 ? 'high' : 'medium'
       }));
 
     } catch (error) {

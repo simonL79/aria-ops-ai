@@ -142,7 +142,7 @@ export class IntelligenceMemoryManager {
       }
 
       // Store in feedback memory table
-      const { error } = await supabase.from('anubis_feedback_memory').insert({
+      const { error } = await (supabase.from('anubis_feedback_memory') as any).insert({
         entity_id: await this.getEntityId(entityName),
         source_module: 'intelligence_system',
         operator_action: feedbackData.action,
@@ -318,7 +318,7 @@ export class IntelligenceMemoryManager {
       // Update pattern confidence in database
       const fingerprint = this.generatePatternFingerprint(feedback);
       
-      await supabase.rpc('log_anubis_check', {
+      await (supabase.rpc as any)('log_anubis_check', {
         check_name: 'pattern_reinforcement',
         result: `Successful pattern reinforced: ${fingerprint}`,
         passed: true,
@@ -341,7 +341,7 @@ export class IntelligenceMemoryManager {
     try {
       const fingerprint = this.generatePatternFingerprint(feedback);
       
-      await supabase.rpc('log_anubis_check', {
+      await (supabase.rpc as any)('log_anubis_check', {
         check_name: 'pattern_ineffective',
         result: `Ineffective pattern flagged: ${fingerprint}`,
         passed: false,

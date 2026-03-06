@@ -97,7 +97,7 @@ export const getInfluencerAlerts = async (
       content: item.content,
       severity: item.severity as 'high' | 'medium' | 'low',
       status: item.status as 'new' | 'contacted' | 'responded' | 'converted' | 'ignored',
-      sentiment_score: item.sentiment,
+      sentiment_score: Number(item.sentiment) || 0,
       opportunity_score: item.confidence_score,
       created_at: item.created_at,
       detected_at: item.created_at
@@ -176,7 +176,7 @@ const createDummyInfluencerAlerts = async (): Promise<void> => {
         threat_type: "Intellectual Property Dispute",
         source_type: "influencer",
         confidence_score: 86,
-        sentiment: -70,
+        sentiment: String(-70),
         potential_reach: 520000
       }
     ];

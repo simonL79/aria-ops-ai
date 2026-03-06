@@ -250,7 +250,7 @@ export class StrategyMemoryService {
 
       const totalStrategies = memories.length;
       const successfulStrategies = memories.filter(m => {
-        const findings = m.key_findings || {};
+        const findings = (m as any).key_findings || (m as any).metadata || {};
         const outcomeData = typeof findings === 'object' && findings !== null ? findings as any : {};
         return outcomeData.outcome_data?.successScore >= 0.7;
       }).length;
