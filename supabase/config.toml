@@ -247,3 +247,6 @@ verify_jwt = false
 
 [functions.openai-proxy]
 verify_jwt = false
+
+[functions.requiem-pipeline]
+verify_jwt = false
