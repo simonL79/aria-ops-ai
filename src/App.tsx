@@ -24,6 +24,7 @@ import StrategyBrainTestPage from "./pages/admin/StrategyBrainTestPage";
 import SystemCompletionPage from '@/pages/admin/SystemCompletionPage';
 import QASystemTestPage from '@/pages/QASystemTestPage';
 import AIControlPage from './pages/admin/AIControlPage';
+import RequiemDashboardPage from './pages/admin/RequiemDashboardPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -70,6 +71,7 @@ function App() {
                     <Route path="/admin/settings" element={<SystemSettingsPage />} />
                     <Route path="/admin/strategy-brain-test" element={<StrategyBrainTestPage />} />
                     <Route path="/admin/ai-control" element={<AIControlPage />} />
+                    <Route path="/admin/requiem" element={<RequiemDashboardPage />} />
                     
                     {/* Add the new system completion route */}
                     <Route 
