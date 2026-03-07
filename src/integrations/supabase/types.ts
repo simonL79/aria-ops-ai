@@ -2078,6 +2078,164 @@ export type Database = {
         }
         Relationships: []
       }
+      requiem_jobs: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          deployed_domains: Json | null
+          entity_config: Json | null
+          error_message: string | null
+          generated_pages: Json | null
+          id: string
+          job_type: string
+          scan_results: Json | null
+          started_at: string | null
+          status: string
+          updated_at: string
+          urls: string[]
+          variant_count: number
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          deployed_domains?: Json | null
+          entity_config?: Json | null
+          error_message?: string | null
+          generated_pages?: Json | null
+          id?: string
+          job_type?: string
+          scan_results?: Json | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+          urls?: string[]
+          variant_count?: number
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          deployed_domains?: Json | null
+          entity_config?: Json | null
+          error_message?: string | null
+          generated_pages?: Json | null
+          id?: string
+          job_type?: string
+          scan_results?: Json | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+          urls?: string[]
+          variant_count?: number
+        }
+        Relationships: []
+      }
+      requiem_payloads: {
+        Row: {
+          author_name: string | null
+          created_at: string
+          deployed_url: string | null
+          filename: string
+          html_content: string | null
+          id: string
+          job_id: string | null
+          pub_date: string | null
+          scan_result_id: string | null
+          title: string | null
+          variant_index: number | null
+        }
+        Insert: {
+          author_name?: string | null
+          created_at?: string
+          deployed_url?: string | null
+          filename: string
+          html_content?: string | null
+          id?: string
+          job_id?: string | null
+          pub_date?: string | null
+          scan_result_id?: string | null
+          title?: string | null
+          variant_index?: number | null
+        }
+        Update: {
+          author_name?: string | null
+          created_at?: string
+          deployed_url?: string | null
+          filename?: string
+          html_content?: string | null
+          id?: string
+          job_id?: string | null
+          pub_date?: string | null
+          scan_result_id?: string | null
+          title?: string | null
+          variant_index?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "requiem_payloads_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "requiem_jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "requiem_payloads_scan_result_id_fkey"
+            columns: ["scan_result_id"]
+            isOneToOne: false
+            referencedRelation: "requiem_scan_results"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      requiem_scan_results: {
+        Row: {
+          authority_score: number | null
+          content_text: string | null
+          created_at: string
+          entity_identity: Json | null
+          id: string
+          image_url: string | null
+          is_negative: boolean | null
+          job_id: string | null
+          paragraphs: Json | null
+          title: string | null
+          url: string
+        }
+        Insert: {
+          authority_score?: number | null
+          content_text?: string | null
+          created_at?: string
+          entity_identity?: Json | null
+          id?: string
+          image_url?: string | null
+          is_negative?: boolean | null
+          job_id?: string | null
+          paragraphs?: Json | null
+          title?: string | null
+          url: string
+        }
+        Update: {
+          authority_score?: number | null
+          content_text?: string | null
+          created_at?: string
+          entity_identity?: Json | null
+          id?: string
+          image_url?: string | null
+          is_negative?: boolean | null
+          job_id?: string | null
+          paragraphs?: Json | null
+          title?: string | null
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "requiem_scan_results_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "requiem_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rsi_queue: {
         Row: {
           created_at: string

@@ -123,7 +123,7 @@ const DPIAManagement = () => {
         await supabase.rpc('log_compliance_activity', {
           p_activity_type: 'dpia_updated',
           p_description: `DPIA updated: ${formData.assessment_title}`,
-          p_legal_basis: 'Legal Obligation'
+          p_entity_name: 'DPIA'
         });
       } else {
         const { error } = await (supabase
@@ -137,7 +137,7 @@ const DPIAManagement = () => {
         await supabase.rpc('log_compliance_activity', {
           p_activity_type: 'dpia_created',
           p_description: `New DPIA created: ${formData.assessment_title}`,
-          p_legal_basis: 'Legal Obligation'
+          p_entity_name: 'DPIA'
         });
       }
       
