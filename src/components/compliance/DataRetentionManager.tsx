@@ -110,7 +110,7 @@ const DataRetentionManager = () => {
         await supabase.rpc('log_compliance_activity', {
           p_activity_type: 'retention_schedule_updated',
           p_description: `Retention schedule updated for ${formData.data_category}`,
-          p_legal_basis: 'Legal Obligation'
+          p_entity_name: 'DataRetention'
         });
       } else {
         const { error } = await supabase
@@ -123,7 +123,7 @@ const DataRetentionManager = () => {
         await supabase.rpc('log_compliance_activity', {
           p_activity_type: 'retention_schedule_created',
           p_description: `New retention schedule created for ${formData.data_category}`,
-          p_legal_basis: 'Legal Obligation'
+          p_entity_name: 'DataRetention'
         });
       }
       

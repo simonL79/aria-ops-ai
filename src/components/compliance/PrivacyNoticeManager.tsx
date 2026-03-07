@@ -119,7 +119,7 @@ const PrivacyNoticeManager = () => {
         await supabase.rpc('log_compliance_activity', {
           p_activity_type: 'privacy_notice_updated',
           p_description: `Privacy notice updated: ${formData.title}`,
-          p_legal_basis: 'Legal Obligation'
+          p_entity_name: 'PrivacyNotice'
         });
       } else {
         const { error } = await (supabase
@@ -132,7 +132,7 @@ const PrivacyNoticeManager = () => {
         await supabase.rpc('log_compliance_activity', {
           p_activity_type: 'privacy_notice_created',
           p_description: `New privacy notice created: ${formData.title}`,
-          p_legal_basis: 'Legal Obligation'
+          p_entity_name: 'PrivacyNotice'
         });
       }
       

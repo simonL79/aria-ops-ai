@@ -107,7 +107,7 @@ const DSRManagement = () => {
         await supabase.rpc('log_compliance_activity', {
           p_activity_type: 'dsr_updated',
           p_description: `DSR updated for ${formData.data_subject_name} (${formData.request_type})`,
-          p_legal_basis: 'Legal Obligation'
+          p_entity_name: 'DSR'
         });
       } else {
         const { error } = await supabase
@@ -120,7 +120,7 @@ const DSRManagement = () => {
         await supabase.rpc('log_compliance_activity', {
           p_activity_type: 'dsr_created',
           p_description: `New DSR received from ${formData.data_subject_name} (${formData.request_type})`,
-          p_legal_basis: 'Legal Obligation'
+          p_entity_name: 'DSR'
         });
       }
       

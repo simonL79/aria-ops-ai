@@ -101,7 +101,7 @@ const LIAManagement = () => {
         await supabase.rpc('log_compliance_activity', {
           p_activity_type: 'lia_updated',
           p_description: `LIA updated: ${formData.purpose_description}`,
-          p_legal_basis: 'Legal Obligation'
+          p_entity_name: 'LIA'
         });
       } else {
         const { error } = await (supabase
@@ -114,7 +114,7 @@ const LIAManagement = () => {
         await supabase.rpc('log_compliance_activity', {
           p_activity_type: 'lia_created',
           p_description: `New LIA created: ${formData.purpose_description}`,
-          p_legal_basis: 'Legal Obligation'
+          p_entity_name: 'LIA'
         });
       }
       
