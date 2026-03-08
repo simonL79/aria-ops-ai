@@ -33,8 +33,7 @@ serve(async (req) => {
     if (error) {
       console.error('Database error:', error);
       return new Response(JSON.stringify({
-        error: 'Failed to fetch prospect entities',
-        details: error.message
+        error: 'Internal server error'
       }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
