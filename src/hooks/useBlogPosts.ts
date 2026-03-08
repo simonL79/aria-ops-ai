@@ -77,36 +77,8 @@ export const useBlogPosts = () => {
     const init = async () => {
       setLoading(true);
       try {
-        // Check if posts exist and get oldest synced_at
-        const { data: checkData } = await (supabase as any)
-          .from('blog_posts')
-          .select('synced_at')
-          .order('synced_at', { ascending: true })
-          .limit(1);
-
-        const hasRows = checkData && checkData.length > 0;
-
-        if (!hasRows) {
-          // No posts - sync immediately
-          setSyncing(true);
-          await syncBlogPosts();
-          setSyncing(false);
-          await fetchPosts(0);
-        } else {
-          // Load existing posts immediately
-          await fetchPosts(0);
-
-          // Check if sync needed (background)
-          const oldestSync = new Date(checkData[0].synced_at).getTime();
-          if (Date.now() - oldestSync > SYNC_INTERVAL_MS) {
-            syncBlogPosts().then(async (result) => {
-              if (result.success && ((result.synced || 0) > 0 || (result.deleted || 0) > 0)) {
-                // Refresh if new data arrived
-                await fetchPosts(0);
-              }
-            });
-          }
-        }
+        // Always load existing posts first
+        await fetchPosts(0);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load');
       } finally {
