@@ -12,10 +12,11 @@ export interface ProtectedRouteProps {
 
 const ProtectedRoute = ({ 
   children, 
-  redirectTo = "/auth" 
+  redirectTo = "/auth",
+  requireAdmin = false,
 }: ProtectedRouteProps) => {
   const location = useLocation();
-  const { isLoading, isAuthenticated } = useAuth();
+  const { isLoading, isAuthenticated, isAdmin } = useAuth();
   
   if (isLoading) {
     return (
