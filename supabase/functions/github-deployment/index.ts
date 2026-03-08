@@ -46,9 +46,7 @@ serve(async (req) => {
       });
     }
 
-    console.log('Token found: YES');
-    console.log('Token starts with:', githubToken.substring(0, 7) + '...');
-    console.log('Token length:', githubToken.length);
+    console.log('✅ GitHub token found');
 
     // Generate anonymous repository name
     const timestamp = Date.now();
