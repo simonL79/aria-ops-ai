@@ -78,9 +78,7 @@ serve(async (req) => {
   } catch (err) {
     console.error('[ARIA-INGEST] Function error:', err);
     return new Response(JSON.stringify({ 
-      error: 'Internal Server Error', 
-      details: err.message,
-      stack: err.stack
+      error: 'Internal server error'
     }), { 
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }

@@ -12,7 +12,7 @@ import { useAuth } from '@/hooks/useAuth';
 
 const BlogAdminPage = () => {
   const [isSending, setIsSending] = React.useState(false);
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading, isAdmin } = useAuth();
   
   // Show loading state while checking auth
   if (isLoading) {
@@ -29,8 +29,8 @@ const BlogAdminPage = () => {
     return <Navigate to="/auth" replace />;
   }
   
-  // Check if user is admin (based on email)
-  if (user?.email !== 'simonlindsay7988@gmail.com') {
+  // Check if user is admin (server-side role check via useAuth)
+  if (!isAdmin) {
     return <Navigate to="/dashboard" replace />;
   }
   
