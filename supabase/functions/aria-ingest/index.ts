@@ -57,9 +57,7 @@ serve(async (req) => {
     // The key should be sent directly as is - no Bearer prefix expected
     const receivedKey = authHeader.trim();
     
-    console.log(`[ARIA-INGEST] Expected key: "${AUTH_KEY}" (${AUTH_KEY.length} chars)`);
-    console.log(`[ARIA-INGEST] Received key: "${receivedKey}" (${receivedKey.length} chars)`);
-    console.log(`[ARIA-INGEST] Keys match: ${receivedKey === AUTH_KEY}`);
+    console.log(`[ARIA-INGEST] Auth check in progress...`);
     
     // Validate the key
     if (!receivedKey || receivedKey !== AUTH_KEY) {
