@@ -55,28 +55,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // Enhanced admin check with business owner email override
   const checkAdminStatus = async (userId: string, userEmail: string) => {
     try {
-      console.log('🔍 Checking admin status for:', userId, userEmail);
+      console.log('🔍 Checking admin status for:', userId);
       
-      // Business owner email override
-      if (userEmail === 'simonlindsay7988@gmail.com') {
-        console.log('✅ Business owner detected - granting admin access');
-        setIsAdmin(true);
-        return true;
-      }
-
-      // Removed: localStorage admin bypass was a security vulnerability
-      
-      // Use the new is_current_user_admin function
+      // Use the server-side is_current_user_admin function as sole authority
       const { data, error } = await (supabase.rpc as any)('is_current_user_admin');
       
       if (error) {
         console.error('Error checking admin status:', error);
-        // Fallback: if this is the business owner email, grant access anyway
-        if (userEmail === 'simonlindsay7988@gmail.com') {
-          console.log('🚨 Fallback: Granting admin access to business owner');
-          setIsAdmin(true);
-          return true;
-        }
         setIsAdmin(false);
         return false;
       }
@@ -88,14 +73,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       
     } catch (error) {
       console.error('❌ Error checking admin status:', error);
-      
-      // Fallback: if this is the business owner email, grant access anyway
-      if (userEmail === 'simonlindsay7988@gmail.com') {
-        console.log('🚨 Fallback: Granting admin access to business owner');
-        setIsAdmin(true);
-        return true;
-      }
-      
       setIsAdmin(false);
       return false;
     }

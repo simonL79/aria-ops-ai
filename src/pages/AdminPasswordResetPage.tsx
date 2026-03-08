@@ -31,8 +31,9 @@ const AdminPasswordResetPage = () => {
         return;
       } 
       
-      // Check if user is admin (based on email)
-      if (data.session.user.email !== "simonlindsay7988@gmail.com") {
+      // Check admin via server-side RPC
+      const { data: isAdminUser, error } = await (supabase.rpc as any)('is_current_user_admin');
+      if (error || !isAdminUser) {
         toast.error("Not authorized", {
           description: "Only admin users can access this page"
         });

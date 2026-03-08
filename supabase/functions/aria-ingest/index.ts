@@ -57,20 +57,13 @@ serve(async (req) => {
     // The key should be sent directly as is - no Bearer prefix expected
     const receivedKey = authHeader.trim();
     
-    console.log(`[ARIA-INGEST] Expected key: "${AUTH_KEY}" (${AUTH_KEY.length} chars)`);
-    console.log(`[ARIA-INGEST] Received key: "${receivedKey}" (${receivedKey.length} chars)`);
-    console.log(`[ARIA-INGEST] Keys match: ${receivedKey === AUTH_KEY}`);
+    console.log(`[ARIA-INGEST] Auth check in progress...`);
     
     // Validate the key
     if (!receivedKey || receivedKey !== AUTH_KEY) {
       console.log(`[ARIA-INGEST] Auth failed - invalid or missing key`);
       return new Response(JSON.stringify({ 
-        error: 'Invalid or missing authorization key',
-        debug: { 
-          receivedKeyLength: receivedKey.length,
-          expectedKeyLength: AUTH_KEY.length,
-          hasAuth: !!authHeader
-        }
+        error: 'Unauthorized'
       }), {
         status: 401, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -85,9 +78,7 @@ serve(async (req) => {
   } catch (err) {
     console.error('[ARIA-INGEST] Function error:', err);
     return new Response(JSON.stringify({ 
-      error: 'Internal Server Error', 
-      details: err.message,
-      stack: err.stack
+      error: 'Internal server error'
     }), { 
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
