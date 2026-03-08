@@ -7,14 +7,16 @@ import { Loader2 } from "lucide-react";
 export interface ProtectedRouteProps {
   children?: ReactNode;
   redirectTo?: string;
+  requireAdmin?: boolean;
 }
 
 const ProtectedRoute = ({ 
   children, 
-  redirectTo = "/auth" 
+  redirectTo = "/auth",
+  requireAdmin = false,
 }: ProtectedRouteProps) => {
   const location = useLocation();
-  const { isLoading, isAuthenticated } = useAuth();
+  const { isLoading, isAuthenticated, isAdmin } = useAuth();
   
   if (isLoading) {
     return (
@@ -27,6 +29,10 @@ const ProtectedRoute = ({
   
   if (!isAuthenticated) {
     return <Navigate to={redirectTo} state={{ from: location }} replace />;
+  }
+
+  if (requireAdmin && !isAdmin) {
+    return <Navigate to="/" replace />;
   }
   
   return children ? <>{children}</> : <Outlet />;
