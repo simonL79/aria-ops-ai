@@ -56,35 +56,25 @@ function App() {
                     <Route path="/" element={<Index />} />
                     <Route path="/home" element={<HomePage />} />
                     
-                    {/* Admin/Backend Routes - Safe to modify */}
-                    <Route path="/secure-intake" element={<SecureClientIntakePage />} />
-                    <Route path="/smart-intake" element={<SmartIntakePage />} />
-                    <Route path="/content-generation" element={<ContentGenerationPage />} />
-                    <Route path="/admin/keyword-to-article" element={<KeywordToArticleSystemPage />} />
-                    <Route path="/admin/control-center" element={<ControlCenterPage />} />
-                    <Route path="/control-center" element={<ControlCenterPage />} />
-                    <Route path="/admin/client-onboarding" element={<ClientOnboardingPage />} />
-                    <Route path="/admin/strategy-brain-stage3" element={<StrategyBrainStage3Page />} />
-                    
-                    {/* New Admin Routes */}
-                    <Route path="/admin" element={<AdminDashboardPage />} />
-                    <Route path="/admin/clients" element={<ClientManagementPage />} />
-                    <Route path="/admin/settings" element={<SystemSettingsPage />} />
-                    <Route path="/admin/strategy-brain-test" element={<StrategyBrainTestPage />} />
-                    <Route path="/admin/ai-control" element={<AIControlPage />} />
-                    <Route path="/admin/requiem" element={<RequiemDashboardPage />} />
-                    
-                    {/* Add the new system completion route */}
-                    <Route 
-                      path="/admin/system-completion" 
-                      element={<SystemCompletionPage />} 
-                    />
-                    
-                    {/* QA System Test Route */}
-                    <Route 
-                      path="/qa-system-test" 
-                      element={<QASystemTestPage />} 
-                    />
+                    {/* Admin/Backend Routes - Protected */}
+                    <Route element={<ProtectedRoute requireAdmin redirectTo="/auth" />}>
+                      <Route path="/secure-intake" element={<SecureClientIntakePage />} />
+                      <Route path="/smart-intake" element={<SmartIntakePage />} />
+                      <Route path="/content-generation" element={<ContentGenerationPage />} />
+                      <Route path="/admin/keyword-to-article" element={<KeywordToArticleSystemPage />} />
+                      <Route path="/admin/control-center" element={<ControlCenterPage />} />
+                      <Route path="/control-center" element={<ControlCenterPage />} />
+                      <Route path="/admin/client-onboarding" element={<ClientOnboardingPage />} />
+                      <Route path="/admin/strategy-brain-stage3" element={<StrategyBrainStage3Page />} />
+                      <Route path="/admin" element={<AdminDashboardPage />} />
+                      <Route path="/admin/clients" element={<ClientManagementPage />} />
+                      <Route path="/admin/settings" element={<SystemSettingsPage />} />
+                      <Route path="/admin/strategy-brain-test" element={<StrategyBrainTestPage />} />
+                      <Route path="/admin/ai-control" element={<AIControlPage />} />
+                      <Route path="/admin/requiem" element={<RequiemDashboardPage />} />
+                      <Route path="/admin/system-completion" element={<SystemCompletionPage />} />
+                      <Route path="/qa-system-test" element={<QASystemTestPage />} />
+                    </Route>
                     
                     {/* Blog Routes */}
                     <Route path="/blog/:slug" element={<BlogPostPage />} />
