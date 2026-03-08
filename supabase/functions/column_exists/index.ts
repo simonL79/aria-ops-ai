@@ -2,6 +2,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.26.0";
 import { Pool } from "https://deno.land/x/postgres@v0.17.0/mod.ts";
+import { requireAdmin, isAuthenticated } from '../_shared/auth.ts';
 
 // Initialize Supabase client
 const supabaseUrl = Deno.env.get("SUPABASE_URL") as string;
@@ -19,6 +20,9 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
+
+  const auth = await requireAdmin(req);
+  if (!isAuthenticated(auth)) return auth;
 
   try {
     const { p_table_name, p_column_name } = await req.json();

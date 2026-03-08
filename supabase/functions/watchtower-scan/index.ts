@@ -83,9 +83,6 @@ function extractTags(title: string, summary: string): string[] {
 
 async function fetchAndParseRSS(feedUrl: string, feedName: string): Promise<ArticleData[]> {
   try {
-    // Auth guard
-    const auth = await requireAdmin(req);
-    if (!isAuthenticated(auth)) return auth;
     console.log(`📡 Fetching RSS feed: ${feedName}`);
     
     const response = await fetch(feedUrl, {
@@ -145,6 +142,10 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
+
+  // Auth guard
+  const auth = await requireAdmin(req);
+  if (!isAuthenticated(auth)) return auth;
 
   try {
     console.log('🔍 A.R.I.A™ Watchtower: Starting real article ingestion...');

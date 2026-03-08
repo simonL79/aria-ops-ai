@@ -1,6 +1,7 @@
 
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { requireAdmin, isAuthenticated } from '../_shared/auth.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -22,6 +23,9 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const auth = await requireAdmin(req);
+  if (!isAuthenticated(auth)) return auth;
+
   try {
     const params: DeploymentParams = await req.json();
     console.log('📝 Deployment params received:', { title: params.title, entity: params.entity });
@@ -42,9 +46,7 @@ serve(async (req) => {
       });
     }
 
-    console.log('Token found: YES');
-    console.log('Token starts with:', githubToken.substring(0, 7) + '...');
-    console.log('Token length:', githubToken.length);
+    console.log('✅ GitHub token found');
 
     // Generate anonymous repository name
     const timestamp = Date.now();
