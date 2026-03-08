@@ -50,7 +50,7 @@ serve(async (req) => {
         status: error ? 'down' : 'healthy',
         response_time_ms: dbTime,
         last_check: new Date().toISOString(),
-        details: error ? error.message : 'Connection successful'
+        details: error ? 'Database check failed' : 'Connection successful'
       });
     } catch (dbError) {
       healthChecks.push({
