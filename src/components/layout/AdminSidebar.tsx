@@ -21,7 +21,8 @@ import {
   Lock,
   Radar,
   FileText,
-  ListChecks
+  ListChecks,
+  Skull
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
