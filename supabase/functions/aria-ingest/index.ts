@@ -63,12 +63,7 @@ serve(async (req) => {
     if (!receivedKey || receivedKey !== AUTH_KEY) {
       console.log(`[ARIA-INGEST] Auth failed - invalid or missing key`);
       return new Response(JSON.stringify({ 
-        error: 'Invalid or missing authorization key',
-        debug: { 
-          receivedKeyLength: receivedKey.length,
-          expectedKeyLength: AUTH_KEY.length,
-          hasAuth: !!authHeader
-        }
+        error: 'Unauthorized'
       }), {
         status: 401, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
