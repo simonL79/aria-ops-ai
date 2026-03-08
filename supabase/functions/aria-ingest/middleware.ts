@@ -118,8 +118,7 @@ export async function handleRequest(requestData: any, supabase: any): Promise<Re
     if (insertError) {
       console.error('[ARIA-INGEST] Error inserting scan result:', insertError);
       return new Response(JSON.stringify({ 
-        error: 'Failed to insert scan result',
-        details: insertError.message 
+        error: 'Internal server error'
       }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
