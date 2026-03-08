@@ -199,6 +199,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     isAuthenticated: !!user,
     isLoading,
     isAdmin,
+    isAdminLoading,
     signOut,
     signIn,
     forceReset,
