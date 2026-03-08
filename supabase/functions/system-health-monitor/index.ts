@@ -58,7 +58,7 @@ serve(async (req) => {
         status: 'down',
         response_time_ms: -1,
         last_check: new Date().toISOString(),
-        details: `Database connection failed: ${dbError.message}`
+        details: 'Database connection failed'
       });
     }
 
