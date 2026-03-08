@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react";
 export interface ProtectedRouteProps {
   children?: ReactNode;
   redirectTo?: string;
+  requireAdmin?: boolean;
 }
 
 const ProtectedRoute = ({ 
