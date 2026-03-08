@@ -21,7 +21,8 @@ import {
   Lock,
   Radar,
   FileText,
-  ListChecks
+  ListChecks,
+  Skull
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -93,6 +94,16 @@ const AdminSidebar = () => {
       description: 'Advanced AI intelligence testing',
       classification: 'ADVANCED',
       priority: 6,
+      isLive: true
+    },
+    {
+      title: 'Requiem Pipeline',
+      href: '/admin/requiem',
+      icon: Skull,
+      description: 'SEO reputation defense & content deployment',
+      classification: 'LIVE ENGINE',
+      isFeature: true,
+      priority: 7,
       isLive: true
     }
   ];
