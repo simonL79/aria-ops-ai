@@ -56,26 +56,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Enhanced admin check with business owner email override
   const checkAdminStatus = async (userId: string, userEmail: string) => {
+    setIsAdminLoading(true);
     try {
       console.log('🔍 Checking admin status for:', userId);
       
-      // Use the server-side is_current_user_admin function as sole authority
       const { data, error } = await (supabase.rpc as any)('is_current_user_admin');
       
       if (error) {
         console.error('Error checking admin status:', error);
         setIsAdmin(false);
+        setIsAdminLoading(false);
         return false;
       }
 
       console.log('✅ Admin status from function:', data);
       const isAdminUser = data === true;
       setIsAdmin(isAdminUser);
+      setIsAdminLoading(false);
       return isAdminUser;
       
     } catch (error) {
       console.error('❌ Error checking admin status:', error);
       setIsAdmin(false);
+      setIsAdminLoading(false);
       return false;
     }
   };
