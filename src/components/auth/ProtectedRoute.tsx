@@ -30,6 +30,10 @@ const ProtectedRoute = ({
   if (!isAuthenticated) {
     return <Navigate to={redirectTo} state={{ from: location }} replace />;
   }
+
+  if (requireAdmin && !isAdmin) {
+    return <Navigate to="/" replace />;
+  }
   
   return children ? <>{children}</> : <Outlet />;
 };
