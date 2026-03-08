@@ -146,6 +146,10 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Auth guard
+  const auth = await requireAdmin(req);
+  if (!isAuthenticated(auth)) return auth;
+
   try {
     console.log('🔍 A.R.I.A™ Watchtower: Starting real article ingestion...');
     
