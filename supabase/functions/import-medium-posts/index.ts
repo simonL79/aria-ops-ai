@@ -13,6 +13,9 @@ serve(async (req) => {
     return new Response('ok', { headers: corsHeaders })
   }
 
+  const auth = await requireAdmin(req);
+  if (!isAuthenticated(auth)) return auth;
+
   try {
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',

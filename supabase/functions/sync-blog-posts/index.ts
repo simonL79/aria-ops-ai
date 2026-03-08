@@ -29,6 +29,9 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders })
   }
 
+  const auth = await requireAdmin(req);
+  if (!isAuthenticated(auth)) return auth;
+
   try {
     // Fetch the JSON feed
     const feedResponse = await fetch(FEED_URL)

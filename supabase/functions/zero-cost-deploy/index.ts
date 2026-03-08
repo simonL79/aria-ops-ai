@@ -13,6 +13,9 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const auth = await requireAdmin(req);
+  if (!isAuthenticated(auth)) return auth;
+
   try {
     const requestBody = await req.json()
     const { platform, content, title, entity, contentType, keywords, enableSEO, generateSitemap, jsonLD } = requestBody

@@ -23,6 +23,9 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const auth = await requireAdmin(req);
+  if (!isAuthenticated(auth)) return auth;
+
   try {
     const params: DeploymentParams = await req.json();
     console.log('📝 Deployment params received:', { title: params.title, entity: params.entity });

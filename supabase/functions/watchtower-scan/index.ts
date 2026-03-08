@@ -83,9 +83,6 @@ function extractTags(title: string, summary: string): string[] {
 
 async function fetchAndParseRSS(feedUrl: string, feedName: string): Promise<ArticleData[]> {
   try {
-    // Auth guard
-    const auth = await requireAdmin(req);
-    if (!isAuthenticated(auth)) return auth;
     console.log(`📡 Fetching RSS feed: ${feedName}`);
     
     const response = await fetch(feedUrl, {
