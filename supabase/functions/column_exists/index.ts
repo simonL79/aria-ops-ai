@@ -75,7 +75,7 @@ serve(async (req) => {
       } catch (sqlError) {
         console.error("SQL error:", sqlError);
         return new Response(
-          JSON.stringify({ error: "Failed to check column existence", details: sqlError.message }),
+          JSON.stringify({ error: "Internal server error" }),
           { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       } finally {
