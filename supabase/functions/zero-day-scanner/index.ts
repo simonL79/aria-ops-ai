@@ -142,8 +142,7 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error('Zero-Day Scanner error:', error);
     return new Response(JSON.stringify({
-      error: 'Zero-Day Scanner failed',
-      details: error.message
+      error: 'Internal server error'
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }

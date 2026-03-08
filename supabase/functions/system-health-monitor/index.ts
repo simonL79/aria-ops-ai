@@ -163,8 +163,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('[SYSTEM-HEALTH] Error:', error);
     return new Response(JSON.stringify({ 
-      error: 'Health check failed',
-      details: error.message,
+      error: 'Internal server error',
       timestamp: new Date().toISOString()
     }), {
       status: 500,

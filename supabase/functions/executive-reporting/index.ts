@@ -113,8 +113,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('[EXEC-REPORTING] Error:', error);
     return new Response(JSON.stringify({ 
-      error: 'Internal server error', 
-      details: error.message 
+      error: 'Internal server error'
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }

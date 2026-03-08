@@ -274,8 +274,7 @@ serve(async (req) => {
     console.error('Anubis Creeper Agent error:', error)
     return new Response(
       JSON.stringify({
-        error: 'Creeper Agent scan failed',
-        details: error.message
+        error: 'Internal server error'
       }),
       {
         status: 500,

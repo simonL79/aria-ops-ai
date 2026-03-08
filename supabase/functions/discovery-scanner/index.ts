@@ -128,7 +128,7 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error('Discovery scanner error:', error);
     return new Response(
-      JSON.stringify({ error: 'Discovery scan failed', details: error.message }),
+      JSON.stringify({ error: 'Internal server error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

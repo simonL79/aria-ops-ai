@@ -139,8 +139,7 @@ export async function handleRequest(requestData: any, supabase: any): Promise<Re
   } catch (error) {
     console.error('[ARIA-INGEST] Error processing request:', error);
     return new Response(JSON.stringify({ 
-      error: 'Internal processing error',
-      details: error.message 
+      error: 'Internal server error'
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
