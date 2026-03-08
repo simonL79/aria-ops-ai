@@ -117,7 +117,7 @@ serve(async (req) => {
           status: 'down',
           response_time_ms: -1,
           last_check: new Date().toISOString(),
-          details: `Function check failed: ${funcError.message}`
+          details: 'Function check failed'
         });
       }
     }
