@@ -96,8 +96,7 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error('RSI Threat Simulator error:', error);
     return new Response(JSON.stringify({
-      error: 'RSI Threat Simulator failed',
-      details: error.message
+      error: 'Internal server error'
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }

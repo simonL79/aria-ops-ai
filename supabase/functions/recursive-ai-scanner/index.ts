@@ -222,8 +222,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('[RECURSIVE-AI-SCANNER] Error:', error);
     return new Response(JSON.stringify({
-      error: 'Recursive AI scanner failed',
-      details: error.message
+      error: 'Internal server error'
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }

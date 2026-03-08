@@ -143,9 +143,7 @@ Deno.serve(async (req) => {
     console.error('[MONITORING-SCAN] A.R.I.A™ Intelligence Sweep error:', error);
     return new Response(
       JSON.stringify({ 
-        error: 'Intelligence sweep failed', 
-        details: error.message,
-        strategy: 'NO_API_KEY_OSINT'
+        error: 'Internal server error'
       }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

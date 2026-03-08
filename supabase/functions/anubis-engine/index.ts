@@ -101,8 +101,7 @@ Deno.serve(async (req) => {
   } catch (error) {
     console.error('Anubis Engine error:', error);
     return new Response(JSON.stringify({
-      error: 'Anubis Engine failed',
-      details: error.message
+      error: 'Internal server error'
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }

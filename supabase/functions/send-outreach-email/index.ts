@@ -65,8 +65,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Outreach email error:', error);
     return new Response(JSON.stringify({
-      error: error.message,
-      timestamp: new Date().toISOString()
+      error: 'Internal server error'
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }

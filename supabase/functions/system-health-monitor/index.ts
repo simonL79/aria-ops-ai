@@ -50,7 +50,7 @@ serve(async (req) => {
         status: error ? 'down' : 'healthy',
         response_time_ms: dbTime,
         last_check: new Date().toISOString(),
-        details: error ? error.message : 'Connection successful'
+        details: error ? 'Database check failed' : 'Connection successful'
       });
     } catch (dbError) {
       healthChecks.push({
@@ -58,7 +58,7 @@ serve(async (req) => {
         status: 'down',
         response_time_ms: -1,
         last_check: new Date().toISOString(),
-        details: `Database connection failed: ${dbError.message}`
+        details: 'Database connection failed'
       });
     }
 
@@ -87,7 +87,7 @@ serve(async (req) => {
         status: 'down',
         response_time_ms: -1,
         last_check: new Date().toISOString(),
-        details: `Pipeline check failed: ${pipelineError.message}`
+        details: 'Pipeline check failed'
       });
     }
 
@@ -117,7 +117,7 @@ serve(async (req) => {
           status: 'down',
           response_time_ms: -1,
           last_check: new Date().toISOString(),
-          details: `Function check failed: ${funcError.message}`
+          details: 'Function check failed'
         });
       }
     }
@@ -163,8 +163,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('[SYSTEM-HEALTH] Error:', error);
     return new Response(JSON.stringify({ 
-      error: 'Health check failed',
-      details: error.message,
+      error: 'Internal server error',
       timestamp: new Date().toISOString()
     }), {
       status: 500,

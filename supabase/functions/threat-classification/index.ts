@@ -72,8 +72,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('[THREAT-CLASSIFICATION] Error:', error);
     return new Response(JSON.stringify({ 
-      error: 'Classification failed',
-      details: error.message 
+      error: 'Internal server error'
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
