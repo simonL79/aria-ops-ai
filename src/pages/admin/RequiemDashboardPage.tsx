@@ -29,6 +29,8 @@ import {
 function UrlInputPanel({ onLaunch, isRunning }: { onLaunch: (urls: string[], variants: number) => void; isRunning: boolean }) {
   const [urls, setUrls] = useState<string[]>([""]);
   const [variantCount, setVariantCount] = useState(20);
+  const [bulkMode, setBulkMode] = useState(false);
+  const [bulkText, setBulkText] = useState("");
 
   const addUrl = () => setUrls([...urls, ""]);
   const removeUrl = (i: number) => setUrls(urls.filter((_, idx) => idx !== i));
@@ -38,13 +40,36 @@ function UrlInputPanel({ onLaunch, isRunning }: { onLaunch: (urls: string[], var
     setUrls(next);
   };
 
+  const handleBulkImport = () => {
+    const parsed = bulkText
+      .split(/[\n,]+/)
+      .map((u) => u.trim())
+      .filter((u) => u.length > 0);
+    if (parsed.length === 0) {
+      toast.error("No valid URLs found in paste");
+      return;
+    }
+    setUrls((prev) => {
+      const existing = prev.filter((u) => u.trim().length > 0);
+      const merged = [...existing, ...parsed];
+      return merged.length > 0 ? merged : [""];
+    });
+    setBulkText("");
+    setBulkMode(false);
+    toast.success(`${parsed.length} URLs imported`);
+  };
+
+  const clearAll = () => {
+    setUrls([""]);
+    toast.info("All URLs cleared");
+  };
+
   const handleLaunch = () => {
     const validUrls = urls.map((u) => u.trim()).filter((u) => u.length > 0);
     if (validUrls.length === 0) {
       toast.error("Add at least one URL");
       return;
     }
-    // Basic URL validation
     for (const u of validUrls) {
       try {
         new URL(u.startsWith("http") ? u : `https://${u}`);
@@ -60,6 +85,8 @@ function UrlInputPanel({ onLaunch, isRunning }: { onLaunch: (urls: string[], var
     onLaunch(validUrls, variantCount);
   };
 
+  const validCount = urls.filter((u) => u.trim().length > 0).length;
+
   return (
     <Card className="border-primary/20 bg-card">
       <CardHeader>
@@ -67,42 +94,89 @@ function UrlInputPanel({ onLaunch, isRunning }: { onLaunch: (urls: string[], var
           <div className="p-2 rounded-lg bg-primary/10">
             <Crosshair className="h-5 w-5 text-primary" />
           </div>
-          <div>
+          <div className="flex-1">
             <CardTitle className="text-lg">Target URLs</CardTitle>
             <CardDescription>Enter URLs to scan, analyse and generate content variants from</CardDescription>
           </div>
+          {validCount > 0 && (
+            <Badge variant="secondary" className="text-xs">
+              {validCount} URL{validCount !== 1 ? "s" : ""}
+            </Badge>
+          )}
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="space-y-2">
-          {urls.map((url, i) => (
-            <div key={i} className="flex gap-2">
-              <div className="relative flex-1">
-                <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  value={url}
-                  onChange={(e) => updateUrl(i, e.target.value)}
-                  placeholder="https://example.com/article"
-                  className="pl-10 bg-background border-border"
-                  disabled={isRunning}
-                />
-              </div>
-              {urls.length > 1 && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => removeUrl(i)}
-                  disabled={isRunning}
-                  className="text-destructive hover:text-destructive"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
-          ))}
+        {/* Bulk paste toggle */}
+        <div className="flex items-center gap-2">
+          <Button
+            variant={bulkMode ? "default" : "outline"}
+            size="sm"
+            onClick={() => setBulkMode(!bulkMode)}
+            disabled={isRunning}
+            className="gap-1"
+          >
+            <FileText className="h-4 w-4" /> Bulk Paste
+          </Button>
+          {urls.filter((u) => u.trim()).length > 1 && (
+            <Button variant="ghost" size="sm" onClick={clearAll} disabled={isRunning} className="text-destructive gap-1">
+              <Trash2 className="h-3 w-3" /> Clear All
+            </Button>
+          )}
         </div>
 
-        <Button variant="outline" size="sm" onClick={addUrl} disabled={isRunning || urls.length >= 50}>
+        {bulkMode && (
+          <div className="space-y-2 p-3 rounded-lg border border-dashed border-primary/30 bg-primary/5">
+            <p className="text-xs text-muted-foreground">Paste multiple URLs — one per line or comma-separated</p>
+            <textarea
+              value={bulkText}
+              onChange={(e) => setBulkText(e.target.value)}
+              placeholder={"https://example.com/article-1\nhttps://example.com/article-2\nhttps://example.com/article-3"}
+              className="w-full h-32 rounded-md border border-border bg-background px-3 py-2 text-sm font-mono resize-y focus:outline-none focus:ring-2 focus:ring-ring"
+              disabled={isRunning}
+            />
+            <div className="flex gap-2">
+              <Button size="sm" onClick={handleBulkImport} disabled={isRunning || !bulkText.trim()}>
+                <Plus className="h-4 w-4 mr-1" /> Import {bulkText.split(/[\n,]+/).filter((u) => u.trim()).length} URLs
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => { setBulkMode(false); setBulkText(""); }}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Individual URL inputs */}
+        <ScrollArea className={urls.length > 6 ? "h-[280px]" : ""}>
+          <div className="space-y-2">
+            {urls.map((url, i) => (
+              <div key={i} className="flex gap-2">
+                <div className="relative flex-1">
+                  <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    value={url}
+                    onChange={(e) => updateUrl(i, e.target.value)}
+                    placeholder="https://example.com/article"
+                    className="pl-10 bg-background border-border"
+                    disabled={isRunning}
+                  />
+                </div>
+                {urls.length > 1 && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => removeUrl(i)}
+                    disabled={isRunning}
+                    className="text-destructive hover:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            ))}
+          </div>
+        </ScrollArea>
+
+        <Button variant="outline" size="sm" onClick={addUrl} disabled={isRunning || urls.length >= 200}>
           <Plus className="h-4 w-4 mr-1" /> Add URL
         </Button>
 
@@ -129,7 +203,7 @@ function UrlInputPanel({ onLaunch, isRunning }: { onLaunch: (urls: string[], var
               </>
             ) : (
               <>
-                <Rocket className="h-4 w-4" /> Launch Requiem
+                <Rocket className="h-4 w-4" /> Launch Requiem ({validCount})
               </>
             )}
           </Button>
