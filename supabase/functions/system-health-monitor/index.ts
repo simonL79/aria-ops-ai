@@ -87,7 +87,7 @@ serve(async (req) => {
         status: 'down',
         response_time_ms: -1,
         last_check: new Date().toISOString(),
-        details: `Pipeline check failed: ${pipelineError.message}`
+        details: 'Pipeline check failed'
       });
     }
 
