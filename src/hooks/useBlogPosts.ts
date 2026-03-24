@@ -3,6 +3,16 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { BlogPost } from '@/types/blog';
 
+export const syncBlogPosts = async (): Promise<{ success: boolean; synced?: number; deleted?: number; error?: string }> => {
+  try {
+    const { data, error } = await supabase.functions.invoke('sync-blog-posts');
+    if (error) throw error;
+    return data;
+  } catch (err) {
+    return { success: false, error: err instanceof Error ? err.message : 'Sync failed' };
+  }
+};
+
 const PAGE_SIZE = 12;
 
 const mapPost = (p: any): BlogPost => ({
