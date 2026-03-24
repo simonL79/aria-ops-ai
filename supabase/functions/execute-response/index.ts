@@ -146,7 +146,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Response execution error:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: 'Internal server error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
@@ -172,7 +172,7 @@ async function executeResponseActions(
       executedActions.push(action.type || action.description);
     } catch (error) {
       console.error(`Failed to execute action ${action.type}:`, error);
-      results.push({ action: action.type, success: false, error: error.message });
+      results.push({ action: action.type, success: false, error: 'Internal server error' });
     }
   }
 

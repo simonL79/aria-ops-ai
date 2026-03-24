@@ -171,7 +171,7 @@ This document serves as both technical documentation and intellectual property d
     if (error) {
       console.error('Error inserting posts:', error)
       return new Response(
-        JSON.stringify({ error: error.message }),
+        JSON.stringify({ error: 'Internal server error' }),
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 400 
@@ -193,7 +193,7 @@ This document serves as both technical documentation and intellectual property d
   } catch (error) {
     console.error('Error:', error)
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: 'Internal server error' }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500 

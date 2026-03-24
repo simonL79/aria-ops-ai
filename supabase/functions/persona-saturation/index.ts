@@ -155,7 +155,7 @@ serve(async (req) => {
         }
         deploymentResults.push(result);
       } catch (error) {
-        deploymentResults.push({ success: false, platform: target, error: error.message, timestamp: new Date().toISOString() });
+        deploymentResults.push({ success: false, platform: target, error: 'Internal server error', timestamp: new Date().toISOString() });
       }
     }
 

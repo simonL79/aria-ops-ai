@@ -140,7 +140,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Reputation scan error:', error);
     return new Response(JSON.stringify({
-      error: error.message,
+      error: 'Internal server error',
       timestamp: new Date().toISOString()
     }), {
       status: 500,

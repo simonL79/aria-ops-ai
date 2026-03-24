@@ -272,7 +272,7 @@ serve(async (req) => {
     
     return new Response(JSON.stringify({
       success: false,
-      error: error.message,
+      error: 'Internal server error',
       message: 'Deployment failed - check configuration and token permissions',
       timestamp: new Date().toISOString()
     }), {

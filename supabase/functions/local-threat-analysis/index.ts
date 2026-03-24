@@ -104,7 +104,7 @@ serve(async (req) => {
     
     return new Response(JSON.stringify({
       success: false,
-      error: error.message,
+      error: 'Internal server error',
       fallback: 'Consider using OpenAI fallback if local inference is unavailable'
     }), {
       status: 500,
