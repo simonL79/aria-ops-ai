@@ -108,12 +108,13 @@ import RadarPage from "./pages/dashboard/RadarPage";
 import IntelligenceWorkbenchPage from "./pages/intelligence/IntelligenceWorkbench";
 import OffensiveOperationsPage from "./pages/intelligence/OffensiveOperations";
 
-export const navItems = [
+export const navItems: { title: string; to: string; icon: React.ReactElement; page: React.ReactElement; isPublic?: boolean }[] = [
   {
     title: "Home",
     to: "/home",
     icon: <HomeIcon className="h-4 w-4" />,
     page: <HomePage />,
+    isPublic: true,
   },
   {
     title: "About",
