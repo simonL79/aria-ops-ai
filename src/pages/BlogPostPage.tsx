@@ -130,11 +130,11 @@ const BlogPostPage = () => {
             </Link>
 
             {/* Hero image */}
-            {post.image_url && (
+            {(post.hero_image_url || post.image_url) && (
               <div className="mb-8 rounded-lg overflow-hidden" style={{ maxHeight: 400 }}>
                 <img
-                  src={post.image_url}
-                  alt={post.title}
+                  src={post.hero_image_url || post.image_url!}
+                  alt={post.hero_image_alt || post.title}
                   className="w-full h-full object-cover"
                   onError={(e) => { (e.target as HTMLElement).parentElement!.style.display = 'none'; }}
                 />
@@ -169,6 +169,18 @@ const BlogPostPage = () => {
               className="blog-prose mb-12"
               dangerouslySetInnerHTML={{ __html: post.content_html || '' }}
             />
+
+            {/* Infographic */}
+            {post.infographic_url && (
+              <div className="mb-12">
+                <img
+                  src={post.infographic_url}
+                  alt={`${post.title} infographic`}
+                  className="w-full rounded-lg border border-border"
+                  onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
+                />
+              </div>
+            )}
 
             {/* FAQ Accordion */}
             {faqItems && (
