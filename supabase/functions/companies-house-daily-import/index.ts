@@ -99,7 +99,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: false, 
-        error: error.message 
+        error: 'Internal server error' 
       }),
       { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
     );

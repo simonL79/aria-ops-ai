@@ -139,7 +139,7 @@ A.R.I.A. Reputation Intelligence Team
     console.error("Error in generate-outreach function:", error);
     
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: 'Internal server error' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

@@ -285,15 +285,15 @@ serve(async (req) => {
       await supabase.from('edge_function_events').insert({
         function_name: 'process-threat-ingestion',
         status: 'fail',
-        event_payload: { error: error.message },
-        result_summary: `❌ System failure: ${error.message}`
+        event_payload: { error: 'Internal server error' },
+        result_summary: 'System failure'
       })
     } catch (logError) {
       console.error('Failed to log error:', logError)
     }
     
     return new Response(JSON.stringify({
-      error: error.message,
+      error: 'Internal server error',
       success: false,
       systemStatus: 'ERROR'
     }), {

@@ -155,7 +155,7 @@ serve(async (req) => {
     console.error('Executive reports API error:', error);
     return new Response(
       JSON.stringify({ 
-        error: error.message || 'An unexpected error occurred'
+        error: 'Internal server error'
       }),
       { 
         status: 500,

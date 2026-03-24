@@ -85,7 +85,7 @@ serve(async (req) => {
     console.error("Error generating RSS feed:", error);
     
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: 'Internal server error' }),
       { 
         status: 500, 
         headers: { 

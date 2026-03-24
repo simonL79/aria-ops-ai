@@ -7,6 +7,12 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MAX_NAME_LENGTH = 100;
+const MAX_EMAIL_LENGTH = 255;
+const MAX_COMPANY_LENGTH = 200;
+const MAX_MESSAGE_LENGTH = 5000;
+
 interface ContactSubmission {
   firstName: string;
   lastName: string;
@@ -36,15 +42,52 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    // Insert contact submission
+    // Validate email format
+    if (!EMAIL_REGEX.test(email)) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid email format' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Enforce field length limits
+    if (firstName.length > MAX_NAME_LENGTH || lastName.length > MAX_NAME_LENGTH) {
+      return new Response(
+        JSON.stringify({ error: 'Name fields must be under 100 characters' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (email.length > MAX_EMAIL_LENGTH) {
+      return new Response(
+        JSON.stringify({ error: 'Email must be under 255 characters' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (company && company.length > MAX_COMPANY_LENGTH) {
+      return new Response(
+        JSON.stringify({ error: 'Company name must be under 200 characters' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (message.length > MAX_MESSAGE_LENGTH) {
+      return new Response(
+        JSON.stringify({ error: 'Message must be under 5000 characters' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Insert contact submission with trimmed values
     const { data, error } = await supabase
       .from('contact_submissions')
       .insert({
-        first_name: firstName,
-        last_name: lastName,
-        email: email,
-        company: company || null,
-        message: message,
+        first_name: firstName.trim(),
+        last_name: lastName.trim(),
+        email: email.trim().toLowerCase(),
+        company: company?.trim() || null,
+        message: message.trim(),
         status: 'new'
       })
       .select()

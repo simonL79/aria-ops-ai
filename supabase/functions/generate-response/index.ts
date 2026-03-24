@@ -75,7 +75,7 @@ serve(async (req) => {
     console.error('[CONTENT-GENERATOR] Error:', error);
     return new Response(JSON.stringify({ 
       success: false,
-      error: error.message,
+      error: 'Internal server error',
       timestamp: new Date().toISOString()
     }), { 
       status: 500,

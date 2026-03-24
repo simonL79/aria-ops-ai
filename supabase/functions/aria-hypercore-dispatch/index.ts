@@ -41,7 +41,7 @@ serve(async (req) => {
 
     if (error) {
       console.error('Error fetching events:', error);
-      return new Response(JSON.stringify({ error: error.message }), {
+      return new Response(JSON.stringify({ error: 'Internal server error' }), {
         status: 500,
         headers: { 'Content-Type': 'application/json', ...corsHeaders }
       });
@@ -130,7 +130,7 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in aria-hypercore-dispatch:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: 'Internal server error' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json', ...corsHeaders }
     });
