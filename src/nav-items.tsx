@@ -121,6 +121,7 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     to: "/about",
     icon: <Users className="h-4 w-4" />,
     page: <AboutPage />,
+    isPublic: true,
   },
   {
     title: "Contact",
