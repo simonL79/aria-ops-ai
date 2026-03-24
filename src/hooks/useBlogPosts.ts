@@ -3,23 +3,38 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { BlogPost } from '@/types/blog';
 
-const SYNC_INTERVAL_MS = 60 * 60 * 1000; // 1 hour
 const PAGE_SIZE = 12;
 
-export const syncBlogPosts = async (): Promise<{ success: boolean; synced?: number; deleted?: number; error?: string }> => {
-  try {
-    const { data, error } = await supabase.functions.invoke('sync-blog-posts');
-    if (error) throw error;
-    return data;
-  } catch (err) {
-    return { success: false, error: err instanceof Error ? err.message : 'Sync failed' };
-  }
-};
+const mapPost = (p: any): BlogPost => ({
+  id: p.id,
+  title: p.title,
+  slug: p.slug,
+  summary: p.summary,
+  content_html: p.content_html,
+  content_markdown: p.content_markdown || null,
+  image_url: p.image_url || p.hero_image_url,
+  hero_image_url: p.hero_image_url || p.image_url,
+  hero_image_alt: p.hero_image_alt || null,
+  infographic_url: p.infographic_url || null,
+  canonical_url: p.canonical_url,
+  tags: p.tags || [],
+  language: p.language || 'en',
+  meta_description: p.meta_description,
+  meta_keywords: p.meta_keywords || [],
+  faq_schema: p.faq_schema,
+  reading_time: p.reading_time || 1,
+  published_at: p.published_at,
+  modified_at: p.modified_at,
+  updated_at: p.updated_at || null,
+  created_at: p.created_at || null,
+  synced_at: p.synced_at,
+  received_at: p.received_at || null,
+});
 
 export const useBlogPosts = () => {
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
-  const [syncing, setSyncing] = useState(false);
+  const [syncing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(0);
@@ -37,24 +52,7 @@ export const useBlogPosts = () => {
 
       if (queryError) throw queryError;
 
-      const posts: BlogPost[] = (data || []).map((p: any) => ({
-        id: p.id,
-        title: p.title,
-        slug: p.slug,
-        summary: p.summary,
-        content_html: p.content_html,
-        image_url: p.image_url,
-        canonical_url: p.canonical_url,
-        tags: p.tags || [],
-        language: p.language || 'en',
-        meta_description: p.meta_description,
-        meta_keywords: p.meta_keywords || [],
-        faq_schema: p.faq_schema,
-        reading_time: p.reading_time || 1,
-        published_at: p.published_at,
-        modified_at: p.modified_at,
-        synced_at: p.synced_at,
-      }));
+      const posts: BlogPost[] = (data || []).map(mapPost);
 
       if (append) {
         setBlogPosts(prev => [...prev, ...posts]);
@@ -77,7 +75,6 @@ export const useBlogPosts = () => {
     const init = async () => {
       setLoading(true);
       try {
-        // Always load existing posts first
         await fetchPosts(0);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load');
@@ -85,7 +82,6 @@ export const useBlogPosts = () => {
         setLoading(false);
       }
     };
-
     init();
   }, [fetchPosts]);
 
@@ -98,10 +94,7 @@ export const useBlogPost = (slug: string | undefined) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!slug) {
-      setLoading(false);
-      return;
-    }
+    if (!slug) { setLoading(false); return; }
 
     const fetchPost = async () => {
       try {
@@ -113,34 +106,13 @@ export const useBlogPost = (slug: string | undefined) => {
           .single();
 
         if (queryError) throw queryError;
-
-        if (data) {
-          setPost({
-            id: data.id,
-            title: data.title,
-            slug: data.slug,
-            summary: data.summary,
-            content_html: data.content_html,
-            image_url: data.image_url,
-            canonical_url: data.canonical_url,
-            tags: data.tags || [],
-            language: data.language || 'en',
-            meta_description: data.meta_description,
-            meta_keywords: data.meta_keywords || [],
-            faq_schema: data.faq_schema,
-            reading_time: data.reading_time || 1,
-            published_at: data.published_at,
-            modified_at: data.modified_at,
-            synced_at: data.synced_at,
-          });
-        }
+        if (data) setPost(mapPost(data));
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Article not found');
       } finally {
         setLoading(false);
       }
     };
-
     fetchPost();
   }, [slug]);
 
@@ -155,7 +127,6 @@ export const useRelatedPosts = (currentPost: BlogPost | null) => {
 
     const fetchRelated = async () => {
       try {
-        // Get recent posts excluding current
         const { data } = await (supabase as any)
           .from('blog_posts')
           .select('*')
@@ -165,26 +136,7 @@ export const useRelatedPosts = (currentPost: BlogPost | null) => {
 
         if (!data || data.length === 0) return;
 
-        const posts: BlogPost[] = data.map((p: any) => ({
-          id: p.id,
-          title: p.title,
-          slug: p.slug,
-          summary: p.summary,
-          content_html: p.content_html,
-          image_url: p.image_url,
-          canonical_url: p.canonical_url,
-          tags: p.tags || [],
-          language: p.language || 'en',
-          meta_description: p.meta_description,
-          meta_keywords: p.meta_keywords || [],
-          faq_schema: p.faq_schema,
-          reading_time: p.reading_time || 1,
-          published_at: p.published_at,
-          modified_at: p.modified_at,
-          synced_at: p.synced_at,
-        }));
-
-        // Sort by tag overlap
+        const posts: BlogPost[] = data.map(mapPost);
         const currentTags = new Set(currentPost.tags || []);
         if (currentTags.size > 0) {
           posts.sort((a, b) => {
@@ -193,13 +145,9 @@ export const useRelatedPosts = (currentPost: BlogPost | null) => {
             return overlapB - overlapA;
           });
         }
-
         setRelated(posts.slice(0, 3));
-      } catch {
-        // Silently fail
-      }
+      } catch { /* silent */ }
     };
-
     fetchRelated();
   }, [currentPost]);
 

@@ -170,6 +170,18 @@ const BlogPostPage = () => {
               dangerouslySetInnerHTML={{ __html: post.content_html || '' }}
             />
 
+            {/* Infographic */}
+            {post.infographic_url && (
+              <div className="mb-12">
+                <img
+                  src={post.infographic_url}
+                  alt={`${post.title} infographic`}
+                  className="w-full rounded-lg border border-border"
+                  onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
+                />
+              </div>
+            )}
+
             {/* FAQ Accordion */}
             {faqItems && (
               <div className="mb-12">
