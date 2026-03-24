@@ -222,56 +222,77 @@ export type Database = {
         Row: {
           canonical_url: string | null
           content_html: string | null
+          content_markdown: string | null
+          created_at: string | null
           faq_schema: Json | null
+          hero_image_alt: string | null
+          hero_image_url: string | null
           id: string
           image_url: string | null
+          infographic_url: string | null
           language: string | null
           meta_description: string | null
           meta_keywords: string[] | null
           modified_at: string | null
           published_at: string | null
           reading_time: number | null
+          received_at: string | null
           slug: string
           summary: string | null
           synced_at: string | null
           tags: string[] | null
           title: string
+          updated_at: string | null
         }
         Insert: {
           canonical_url?: string | null
           content_html?: string | null
+          content_markdown?: string | null
+          created_at?: string | null
           faq_schema?: Json | null
+          hero_image_alt?: string | null
+          hero_image_url?: string | null
           id: string
           image_url?: string | null
+          infographic_url?: string | null
           language?: string | null
           meta_description?: string | null
           meta_keywords?: string[] | null
           modified_at?: string | null
           published_at?: string | null
           reading_time?: number | null
+          received_at?: string | null
           slug: string
           summary?: string | null
           synced_at?: string | null
           tags?: string[] | null
           title: string
+          updated_at?: string | null
         }
         Update: {
           canonical_url?: string | null
           content_html?: string | null
+          content_markdown?: string | null
+          created_at?: string | null
           faq_schema?: Json | null
+          hero_image_alt?: string | null
+          hero_image_url?: string | null
           id?: string
           image_url?: string | null
+          infographic_url?: string | null
           language?: string | null
           meta_description?: string | null
           meta_keywords?: string[] | null
           modified_at?: string | null
           published_at?: string | null
           reading_time?: number | null
+          received_at?: string | null
           slug?: string
           summary?: string | null
           synced_at?: string | null
           tags?: string[] | null
           title?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
