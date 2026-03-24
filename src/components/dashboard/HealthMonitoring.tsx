@@ -50,33 +50,10 @@ const HealthMonitoring = () => {
   };
 
   const saveSettings = () => {
-    // In a real implementation, this would save to database/localStorage
-    localStorage.setItem('aria_health_monitoring', JSON.stringify({
-      slack: { webhookUrl: slackWebhook, enabled: slackEnabled },
-      discord: { webhookUrl: discordWebhook, enabled: discordEnabled },
-      email: { recipients: emailRecipients, enabled: emailEnabled }
-    }));
-    
-    toast.success('Health monitoring settings saved');
+    // Settings are kept in session memory only — webhook URLs are not persisted
+    // to avoid plaintext credential exposure in localStorage
+    toast.success('Health monitoring settings applied for this session');
   };
-
-  // Load settings on component mount
-  React.useEffect(() => {
-    const saved = localStorage.getItem('aria_health_monitoring');
-    if (saved) {
-      try {
-        const settings = JSON.parse(saved);
-        setSlackWebhook(settings.slack?.webhookUrl || '');
-        setSlackEnabled(settings.slack?.enabled || false);
-        setDiscordWebhook(settings.discord?.webhookUrl || '');
-        setDiscordEnabled(settings.discord?.enabled || false);
-        setEmailRecipients(settings.email?.recipients || '');
-        setEmailEnabled(settings.email?.enabled || false);
-      } catch (error) {
-        console.error('Failed to load settings:', error);
-      }
-    }
-  }, []);
 
   return (
     <div className="space-y-6">

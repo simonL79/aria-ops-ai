@@ -79,10 +79,21 @@ function App() {
                     {/* Blog Routes */}
                     <Route path="/blog/:slug" element={<BlogPostPage />} />
                     
-                    {/* Dynamic Routes */}
-                    {navItems.map(({ to, page }) => (
-                      <Route key={to} path={to} element={page} />
-                    ))}
+                    {/* Public Dynamic Routes */}
+                    {navItems
+                      .filter(({ isPublic }) => isPublic)
+                      .map(({ to, page }) => (
+                        <Route key={to} path={to} element={page} />
+                      ))}
+                    
+                    {/* Protected Dynamic Routes - Admin Only */}
+                    <Route element={<ProtectedRoute requireAdmin redirectTo="/auth" />}>
+                      {navItems
+                        .filter(({ isPublic }) => !isPublic)
+                        .map(({ to, page }) => (
+                          <Route key={to} path={to} element={page} />
+                        ))}
+                    </Route>
                   </Routes>
                 </div>
                 <Toaster />
