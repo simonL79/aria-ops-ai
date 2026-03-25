@@ -1,5 +1,6 @@
 
 import React, { useEffect } from 'react';
+import DOMPurify from 'dompurify';
 import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import PublicLayout from '@/components/layout/PublicLayout';
