@@ -1,7 +1,10 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const SITE_URL = 'https://aria-ops-ai.lovable.app'
-const WEBHOOK_TOKEN = 'aseo_wh_bd0be7d2a482b9fedd06895c3ba641e1'
+const WEBHOOK_TOKEN = Deno.env.get('ARTICLE_WEBHOOK_TOKEN');
+if (!WEBHOOK_TOKEN) {
+  console.error('ARTICLE_WEBHOOK_TOKEN secret is not configured');
+}
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
