@@ -168,7 +168,7 @@ const BlogPostPage = () => {
             {/* Content */}
             <div
               className="blog-prose mb-12"
-              dangerouslySetInnerHTML={{ __html: post.content_html || '' }}
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content_html || '') }}
             />
 
             {/* Infographic */}
