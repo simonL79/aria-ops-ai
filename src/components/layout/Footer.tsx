@@ -36,7 +36,7 @@ const Footer = () => {
                 <span className="font-semibold tracking-wide">ISO 27001</span>
               </div>
             </div>
-            <p>&copy; 2025 A.R.I.A™ — AI Reputation Intelligence Agent</p>
+            <p>&copy; {new Date().getFullYear()} A.R.I.A™ — AI Reputation Intelligence Agent</p>
           </div>
         </div>
       </div>
