@@ -44,16 +44,35 @@ const ContactFormSection = () => {
 
     setIsSubmitting(true);
     try {
+      const submissionId = crypto.randomUUID();
       const nameParts = formData.fullName.trim().split(/\s+/);
       const firstName = nameParts[0] || '';
       const lastName = nameParts.slice(1).join(' ') || '-';
 
       const { error } = await supabase.from('contact_submissions').insert({
+        id: submissionId,
         first_name: firstName,
         last_name: lastName,
         email: formData.companyEmail.trim(),
         company: formData.company.trim() || null,
         message: formData.details.trim(),
+      });
+
+      if (error) throw error;
+
+      // Send notification email to simon@ariaops.co.uk
+      await supabase.functions.invoke('send-transactional-email', {
+        body: {
+          templateName: 'contact-form-notification',
+          recipientEmail: formData.companyEmail.trim(),
+          idempotencyKey: `contact-notify-${submissionId}`,
+          templateData: {
+            name: formData.fullName.trim(),
+            email: formData.companyEmail.trim(),
+            company: formData.company.trim() || undefined,
+            message: formData.details.trim(),
+          },
+        },
       });
 
       if (error) throw error;

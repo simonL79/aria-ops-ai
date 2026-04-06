@@ -9,6 +9,7 @@ import { RbacProvider } from "@/hooks/useRbac";
 import AppErrorBoundary from "@/components/common/AppErrorBoundary";
 import { navItems } from "./nav-items";
 import Index from "./pages/Index";
+import UnsubscribePage from "./pages/UnsubscribePage";
 import BlogPostPage from "./pages/BlogPostPage";
 import HomePage from "./pages/HomePage";
 import SecureClientIntakePage from "./pages/SecureClientIntakePage";
@@ -78,6 +79,9 @@ function App() {
                     
                     {/* Blog Routes */}
                     <Route path="/blog/:slug" element={<BlogPostPage />} />
+                    
+                    {/* Unsubscribe */}
+                    <Route path="/unsubscribe" element={<UnsubscribePage />} />
                     
                     {/* Public Dynamic Routes */}
                     {navItems
