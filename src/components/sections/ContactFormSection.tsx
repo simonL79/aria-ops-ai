@@ -4,6 +4,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { z } from 'zod';
+
+const contactSchema = z.object({
+  fullName: z.string().trim().min(2, 'Name must be at least 2 characters').max(100),
+  companyEmail: z.string().trim().email('Please enter a valid email'),
+  company: z.string().trim().max(100).optional(),
+  phoneNumber: z.string().trim().max(30).optional(),
+  details: z.string().trim().min(10, 'Please provide at least 10 characters of detail').max(2000),
+});
 
 const ContactFormSection = () => {
   const [formData, setFormData] = useState({
@@ -13,6 +24,7 @@ const ContactFormSection = () => {
     phoneNumber: '',
     details: ''
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
@@ -21,10 +33,38 @@ const ContactFormSection = () => {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
-    // Handle form submission here
+
+    const result = contactSchema.safeParse(formData);
+    if (!result.success) {
+      toast.error(result.error.errors[0].message);
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const nameParts = formData.fullName.trim().split(/\s+/);
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '-';
+
+      const { error } = await supabase.from('contact_submissions').insert({
+        first_name: firstName,
+        last_name: lastName,
+        email: formData.companyEmail.trim(),
+        company: formData.company.trim() || null,
+        message: formData.details.trim(),
+      });
+
+      if (error) throw error;
+
+      toast.success('Your request has been submitted. We\'ll be in touch shortly.');
+      setFormData({ fullName: '', companyEmail: '', company: '', phoneNumber: '', details: '' });
+    } catch {
+      toast.error('Something went wrong. Please try again or email us directly.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -40,24 +80,26 @@ const ContactFormSection = () => {
           <Card className="bg-gray-900 border-gray-800 p-8">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label className="text-white text-sm font-medium mb-2 block">Full Name</label>
+                <label className="text-white text-sm font-medium mb-2 block">Full Name *</label>
                 <Input
                   name="fullName"
                   value={formData.fullName}
                   onChange={handleChange}
                   placeholder="Your full name"
+                  required
                   className="bg-gray-800 border-gray-700 text-white placeholder-gray-400"
                 />
               </div>
 
               <div>
-                <label className="text-white text-sm font-medium mb-2 block">Company Email</label>
+                <label className="text-white text-sm font-medium mb-2 block">Company Email *</label>
                 <Input
                   name="companyEmail"
                   type="email"
                   value={formData.companyEmail}
                   onChange={handleChange}
                   placeholder="your.email@company.com"
+                  required
                   className="bg-gray-800 border-gray-700 text-white placeholder-gray-400"
                 />
               </div>
@@ -85,22 +127,24 @@ const ContactFormSection = () => {
               </div>
 
               <div>
-                <label className="text-white text-sm font-medium mb-2 block">Brief Details</label>
+                <label className="text-white text-sm font-medium mb-2 block">Brief Details *</label>
                 <Textarea
                   name="details"
                   value={formData.details}
                   onChange={handleChange}
                   placeholder="Briefly describe your needs or concerns..."
                   rows={4}
+                  required
                   className="bg-gray-800 border-gray-700 text-white placeholder-gray-400 resize-none"
                 />
               </div>
 
               <Button 
                 type="submit"
+                disabled={isSubmitting}
                 className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 text-lg font-semibold"
               >
-                Request Risk Assessment
+                {isSubmitting ? 'Submitting...' : 'Request Risk Assessment'}
               </Button>
 
               <p className="text-gray-400 text-xs text-center">
@@ -110,7 +154,7 @@ const ContactFormSection = () => {
           </Card>
 
           <div className="text-center mt-8">
-            <p className="text-gray-500 text-sm">© 2025 A.R.I.A — All Reputation Rights Reserved</p>
+            <p className="text-gray-500 text-sm">© {new Date().getFullYear()} A.R.I.A — All Reputation Rights Reserved</p>
           </div>
         </div>
       </div>

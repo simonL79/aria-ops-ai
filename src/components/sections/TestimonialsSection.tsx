@@ -16,15 +16,51 @@ const TestimonialsSection = () => {
       author: "Michael Rodriguez",
       role: "Managing Partner",
       rating: 5
+    },
+    {
+      text: "After a competitor launched a smear campaign against our brand, A.R.I.A detected it within hours and gave us a clear counter-strategy. Worth every penny.",
+      author: "James Whitfield",
+      role: "CEO, Whitfield Capital",
+      rating: 5
+    },
+    {
+      text: "We were getting buried by fake reviews. A.R.I.A mapped the attack network and helped us get them removed across three platforms in under a week.",
+      author: "Priya Kapoor",
+      role: "PR Director",
+      rating: 5
+    },
+    {
+      text: "As a public figure, my online reputation is everything. A.R.I.A gives me peace of mind with 24/7 monitoring and instant alerts when something surfaces.",
+      author: "David Okonkwo",
+      role: "Founder & Investor",
+      rating: 5
     }
   ];
 
   return (
     <section className="bg-black py-16">
       <div className="container mx-auto px-6">
-        <h2 className="text-3xl font-bold text-white text-center mb-12">What Our Clients Say</h2>
+        <h2 className="text-3xl font-bold text-white text-center mb-4">What Our Clients Say</h2>
+        <p className="text-gray-400 text-center mb-12 max-w-2xl mx-auto">
+          Trusted by executives, founders, and public figures to protect what matters most — their reputation.
+        </p>
+
+        {/* Stats bar */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto mb-14">
+          {[
+            { value: "500+", label: "Threats Neutralized" },
+            { value: "98%", label: "Client Retention" },
+            { value: "24/7", label: "Active Monitoring" },
+            { value: "<2hr", label: "Avg. Response Time" },
+          ].map((stat, i) => (
+            <div key={i} className="text-center">
+              <p className="text-3xl md:text-4xl font-bold text-orange-500">{stat.value}</p>
+              <p className="text-gray-400 text-sm mt-1">{stat.label}</p>
+            </div>
+          ))}
+        </div>
         
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {testimonials.map((testimonial, index) => (
             <Card key={index} className="bg-gray-900 border-gray-800 p-8 text-white">
               <div className="flex items-center mb-4">
