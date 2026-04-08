@@ -37,15 +37,15 @@ const BlogPostPage = () => {
   if (loading) {
     return (
       <PublicLayout>
-        <div className="min-h-screen bg-black py-16">
+        <div className="min-h-screen bg-background py-16">
           <div className="container mx-auto px-4 sm:px-6 max-w-3xl">
             <div className="animate-pulse space-y-6">
-              <div className="h-4 bg-gray-800 rounded w-32" />
-              <div className="h-64 bg-gray-900 rounded-lg" />
-              <div className="h-8 bg-gray-800 rounded w-3/4" />
-              <div className="h-4 bg-gray-800 rounded w-1/2" />
+              <div className="h-4 bg-secondary rounded w-32" />
+              <div className="h-64 bg-card rounded-lg" />
+              <div className="h-8 bg-secondary rounded w-3/4" />
+              <div className="h-4 bg-secondary rounded w-1/2" />
               <div className="space-y-3">
-                {Array.from({ length: 8 }).map((_, i) => <div key={i} className="h-3 bg-gray-800 rounded" />)}
+                {Array.from({ length: 8 }).map((_, i) => <div key={i} className="h-3 bg-secondary rounded" />)}
               </div>
             </div>
           </div>
@@ -57,11 +57,11 @@ const BlogPostPage = () => {
   if (error || !post) {
     return (
       <PublicLayout>
-        <div className="min-h-screen bg-black py-16">
+        <div className="min-h-screen bg-background py-16">
           <div className="container mx-auto px-4 sm:px-6 max-w-3xl text-center">
-            <h1 className="text-3xl font-bold text-white mb-4">Article not found</h1>
-            <p className="text-gray-400 mb-6">The article you're looking for doesn't exist or has been removed.</p>
-            <Button asChild variant="outline" className="border-gray-700 text-gray-300 hover:border-orange-500/50">
+            <h1 className="text-3xl font-bold text-foreground mb-4">Article not found</h1>
+            <p className="text-muted-foreground mb-6">The article you're looking for doesn't exist or has been removed.</p>
+            <Button asChild variant="outline" className="border-border text-muted-foreground hover:border-primary/50">
               <Link to="/blog">← Back to all articles</Link>
             </Button>
           </div>
@@ -124,18 +124,18 @@ const BlogPostPage = () => {
       </Helmet>
 
       <ReadingProgressBar containerRef={articleRef} />
-      <div className="min-h-screen bg-black py-12 sm:py-16">
+      <div className="min-h-screen bg-background py-12 sm:py-16">
         <div className="container mx-auto px-4 sm:px-6">
           <div ref={articleRef} className="max-w-[720px] mx-auto">
             {/* Back link */}
-            <Link to="/blog" className="inline-flex items-center gap-2 text-sm text-orange-500 hover:text-orange-400 mb-8 transition-colors cursor-pointer">
+            <Link to="/blog" className="inline-flex items-center gap-2 text-sm text-primary hover:text-primary/80 mb-8 transition-colors cursor-pointer">
               <ArrowLeft className="h-4 w-4" />
               Back to all articles
             </Link>
 
             {/* Hero image */}
             {(post.hero_image_url || post.image_url) && (
-              <div className="mb-8 rounded-lg overflow-hidden border border-gray-800" style={{ maxHeight: 400 }}>
+              <div className="mb-8 rounded-lg overflow-hidden border border-border" style={{ maxHeight: 400 }}>
                 <img
                   src={post.hero_image_url || post.image_url!}
                   alt={post.hero_image_alt || post.title}
@@ -146,12 +146,12 @@ const BlogPostPage = () => {
             )}
 
             {/* Title */}
-            <h1 className="text-3xl sm:text-4xl font-bold text-white mb-4 leading-tight">
+            <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-4 leading-tight">
               {post.title}
             </h1>
 
             {/* Meta row */}
-            <div className="flex flex-wrap items-center gap-3 text-sm text-gray-400 mb-8">
+            <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground mb-8">
               {post.published_at && <span>{formatDate(post.published_at)}</span>}
               <span className="flex items-center gap-1">
                 <Clock className="h-3.5 w-3.5" />
@@ -160,7 +160,7 @@ const BlogPostPage = () => {
               {post.tags && post.tags.length > 0 && (
                 <div className="flex flex-wrap gap-1.5">
                   {post.tags.map(tag => (
-                    <Badge key={tag} variant="secondary" className="text-xs cursor-default bg-gray-800 text-gray-300 border-gray-700">
+                    <Badge key={tag} variant="secondary" className="text-xs cursor-default bg-secondary text-muted-foreground border-border">
                       {tag}
                     </Badge>
                   ))}
@@ -180,7 +180,7 @@ const BlogPostPage = () => {
                 <img
                   src={post.infographic_url}
                   alt={`${post.title} infographic`}
-                  className="w-full rounded-lg border border-gray-800"
+                  className="w-full rounded-lg border border-border"
                   onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
                 />
               </div>
@@ -189,14 +189,14 @@ const BlogPostPage = () => {
             {/* FAQ Accordion */}
             {faqItems && (
               <div className="mb-12">
-                <h2 className="text-2xl font-bold text-white mb-6">Frequently Asked Questions</h2>
+                <h2 className="text-2xl font-bold text-foreground mb-6">Frequently Asked Questions</h2>
                 <Accordion type="single" defaultValue="faq-0" collapsible className="space-y-2">
                   {faqItems.map((faq, i) => (
-                    <AccordionItem key={i} value={`faq-${i}`} className="border border-gray-800 rounded-lg px-4 hover:border-orange-500/50 transition-colors">
-                      <AccordionTrigger className="text-left text-white hover:text-orange-500 cursor-pointer">
+                    <AccordionItem key={i} value={`faq-${i}`} className="border border-border rounded-lg px-4 hover:border-primary/50 transition-colors">
+                      <AccordionTrigger className="text-left text-foreground hover:text-primary cursor-pointer">
                         {faq.question}
                       </AccordionTrigger>
-                      <AccordionContent className="text-gray-400">
+                      <AccordionContent className="text-muted-foreground">
                         {faq.answer}
                       </AccordionContent>
                     </AccordionItem>
@@ -207,14 +207,14 @@ const BlogPostPage = () => {
 
             {/* Related Articles */}
             {related.length > 0 && (
-              <div className="border-t border-gray-800 pt-10">
-                <h2 className="text-xl font-bold text-white mb-6">Related Articles</h2>
+              <div className="border-t border-border pt-10">
+                <h2 className="text-xl font-bold text-foreground mb-6">Related Articles</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   {related.map(r => (
                     <Link
                       key={r.id}
                       to={`/blog/${r.slug}`}
-                      className="group flex gap-3 sm:flex-col rounded-lg border border-gray-800 bg-black/50 backdrop-blur-sm overflow-hidden hover:border-orange-500/50 hover:shadow-[0_0_20px_rgba(249,115,22,0.1)] transition-all cursor-pointer"
+                      className="group flex gap-3 sm:flex-col rounded-lg border border-border bg-card backdrop-blur-sm overflow-hidden hover:border-primary/50 hover:shadow-[0_0_20px_rgba(245,158,11,0.1)] transition-all cursor-pointer"
                     >
                       {r.image_url && (
                         <div className="w-24 sm:w-full h-20 sm:h-32 flex-shrink-0 overflow-hidden">
@@ -227,10 +227,10 @@ const BlogPostPage = () => {
                         </div>
                       )}
                       <div className="p-3 flex-1 min-w-0">
-                        <h3 className="text-sm font-medium text-white line-clamp-2 group-hover:text-orange-500 transition-colors">
+                        <h3 className="text-sm font-medium text-foreground line-clamp-2 group-hover:text-primary transition-colors">
                           {r.title}
                         </h3>
-                        <p className="text-xs text-gray-500 mt-1">{formatDate(r.published_at)}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{formatDate(r.published_at)}</p>
                       </div>
                     </Link>
                   ))}
@@ -239,10 +239,10 @@ const BlogPostPage = () => {
             )}
 
             {/* CTA */}
-            <div className="mt-12 pt-8 border-t border-gray-800 text-center">
-              <h3 className="text-xl font-bold text-white mb-3">Ready to Protect Your Reputation?</h3>
-              <p className="text-gray-400 mb-6">Get started with a comprehensive assessment of your digital risk profile.</p>
-              <Button asChild className="bg-orange-500 text-black font-semibold hover:bg-orange-400">
+            <div className="mt-12 pt-8 border-t border-border text-center">
+              <h3 className="text-xl font-bold text-foreground mb-3">Ready to Protect Your Reputation?</h3>
+              <p className="text-muted-foreground mb-6">Get started with a comprehensive assessment of your digital risk profile.</p>
+              <Button asChild className="bg-primary text-primary-foreground font-semibold hover:bg-primary/90">
                 <Link to="/scan">Request Assessment</Link>
               </Button>
             </div>
