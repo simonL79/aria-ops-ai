@@ -10,24 +10,55 @@ const PricingSection = () => {
 
   const plans = [
     {
-      name: "Private",
-      subtitle: "For individuals",
-      features: ["Confidential reputation scan", "Threat monitoring", "Priority email support"],
+      name: "Individual",
+      price: "£97",
+      period: "/month",
+      description: "Personal reputation monitoring",
+      features: [
+        "Personal reputation monitoring",
+        "Basic threat detection",
+        "Monthly reports",
+        "Email support",
+        "Social media monitoring",
+        "Search engine tracking"
+      ],
       buttonText: "Get Started",
       popular: false
     },
     {
-      name: "Executive",
-      subtitle: "For founders & leaders",
-      features: ["Everything in Private", "24/7 AI monitoring", "Crisis response team", "Dark web scanning"],
-      buttonText: "Get Started",
+      name: "PRO",
+      price: "£297",
+      period: "/month",
+      description: "Executive protection suite",
+      features: [
+        "Executive protection suite",
+        "Advanced threat intelligence",
+        "Real-time alerts",
+        "Crisis response team",
+        "Weekly reports",
+        "Priority support",
+        "Dark web monitoring",
+        "Proactive content strategy"
+      ],
+      buttonText: "Most Popular",
       popular: true
     },
     {
       name: "Enterprise",
-      subtitle: "For organisations",
-      features: ["Everything in Executive", "Multi-entity coverage", "Dedicated account manager", "Custom SLA"],
-      buttonText: "Contact Us",
+      price: "Custom",
+      period: "pricing",
+      description: "Full organization coverage",
+      features: [
+        "Full organization coverage",
+        "Custom threat models",
+        "Dedicated account manager",
+        "API access",
+        "Daily reports",
+        "24/7 support",
+        "Multi-entity monitoring",
+        "Advanced analytics dashboard"
+      ],
+      buttonText: "Contact Sales",
       popular: false
     }
   ];
@@ -44,24 +75,28 @@ const PricingSection = () => {
             <div 
               key={index} 
               className={`bg-gray-900/50 p-8 rounded-lg border transition-colors hover:border-orange-500/50 ${
-                plan.popular ? 'border-orange-500' : 'border-gray-800'
+                plan.popular ? 'border-2 border-orange-500' : 'border-gray-800'
               } relative`}
             >
               {plan.popular && (
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-orange-500 text-white px-4 py-1 rounded-full text-sm font-medium">
+                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                  <span className="bg-orange-500 text-black px-4 py-1 rounded-full text-sm font-bold">
                     Most Popular
                   </span>
                 </div>
               )}
               
-              <h3 className="text-2xl font-light mb-2 text-center text-white">{plan.name}</h3>
-              <p className="text-gray-400 text-center mb-8">{plan.subtitle}</p>
+              <h3 className="text-2xl font-bold mb-4 text-orange-500">{plan.name}</h3>
+              <div className="mb-6">
+                <span className="text-3xl font-bold text-white">{plan.price}</span>
+                <span className="text-gray-400">{plan.period}</span>
+              </div>
+              <p className="text-gray-300 mb-6">{plan.description}</p>
               
-              <ul className="space-y-4 mb-8">
+              <ul className="space-y-3 mb-8">
                 {plan.features.map((feature, featureIndex) => (
-                  <li key={featureIndex} className="flex items-center">
-                    <Check className="h-5 w-5 text-orange-500 mr-3 flex-shrink-0" />
+                  <li key={featureIndex} className="flex items-start">
+                    <Check className="h-5 w-5 text-orange-500 mr-3 mt-0.5 flex-shrink-0" />
                     <span className="text-gray-300">{feature}</span>
                   </li>
                 ))}
