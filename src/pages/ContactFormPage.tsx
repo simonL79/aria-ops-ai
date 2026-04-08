@@ -49,7 +49,6 @@ const ContactFormPage = () => {
     setIsSubmitting(true);
 
     try {
-      // Insert into aria_notifications for admin visibility
       const { error } = await supabase
         .from('aria_notifications')
         .insert({
@@ -89,20 +88,20 @@ const ContactFormPage = () => {
 
   return (
     <PublicLayout>
-      <div className="min-h-screen bg-black py-16">
+      <div className="min-h-screen bg-background py-16">
         <div className="container mx-auto px-6">
           <div className="max-w-2xl mx-auto">
             <div className="text-center mb-8">
               <div className="flex items-center justify-center gap-2 mb-4">
-                <MessageSquare className="h-8 w-8 text-orange-500" />
-                <h2 className="text-3xl font-bold text-white">Contact Sales</h2>
+                <MessageSquare className="h-8 w-8 text-primary" />
+                <h2 className="text-3xl font-bold text-foreground">Contact Sales</h2>
               </div>
-              <p className="text-lg text-gray-300">
+              <p className="text-lg text-muted-foreground">
                 Ready to protect your reputation? Get in touch with our team to discuss your specific needs.
               </p>
             </div>
 
-            <div className="bg-gray-800 border border-gray-700 p-8 rounded-xl shadow-lg">
+            <div className="bg-card border border-border p-8 rounded-xl shadow-lg">
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                   <FormField
@@ -110,18 +109,18 @@ const ContactFormPage = () => {
                     name="name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-white flex items-center gap-2">
+                        <FormLabel className="text-foreground flex items-center gap-2">
                           <User className="h-4 w-4" />
                           Full Name *
                         </FormLabel>
                         <FormControl>
                           <Input 
                             placeholder="John Smith" 
-                            className="bg-black/50 border-gray-600 text-white placeholder-gray-400 focus:border-orange-500"
+                            className="bg-secondary border-border text-foreground placeholder:text-muted-foreground focus:border-primary"
                             {...field} 
                           />
                         </FormControl>
-                        <FormMessage className="text-red-500" />
+                        <FormMessage className="text-destructive" />
                       </FormItem>
                     )}
                   />
@@ -131,18 +130,18 @@ const ContactFormPage = () => {
                     name="companyName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-white flex items-center gap-2">
+                        <FormLabel className="text-foreground flex items-center gap-2">
                           <Building className="h-4 w-4" />
                           Company Name *
                         </FormLabel>
                         <FormControl>
                           <Input 
                             placeholder="Acme Corporation" 
-                            className="bg-black/50 border-gray-600 text-white placeholder-gray-400 focus:border-orange-500"
+                            className="bg-secondary border-border text-foreground placeholder:text-muted-foreground focus:border-primary"
                             {...field} 
                           />
                         </FormControl>
-                        <FormMessage className="text-red-500" />
+                        <FormMessage className="text-destructive" />
                       </FormItem>
                     )}
                   />
@@ -152,7 +151,7 @@ const ContactFormPage = () => {
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-white flex items-center gap-2">
+                        <FormLabel className="text-foreground flex items-center gap-2">
                           <Mail className="h-4 w-4" />
                           Email Address *
                         </FormLabel>
@@ -160,11 +159,11 @@ const ContactFormPage = () => {
                           <Input 
                             type="email"
                             placeholder="john@company.com" 
-                            className="bg-black/50 border-gray-600 text-white placeholder-gray-400 focus:border-orange-500"
+                            className="bg-secondary border-border text-foreground placeholder:text-muted-foreground focus:border-primary"
                             {...field} 
                           />
                         </FormControl>
-                        <FormMessage className="text-red-500" />
+                        <FormMessage className="text-destructive" />
                       </FormItem>
                     )}
                   />
@@ -174,7 +173,7 @@ const ContactFormPage = () => {
                     name="phoneNumber"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-white flex items-center gap-2">
+                        <FormLabel className="text-foreground flex items-center gap-2">
                           <Phone className="h-4 w-4" />
                           Phone Number *
                         </FormLabel>
@@ -182,11 +181,11 @@ const ContactFormPage = () => {
                           <Input 
                             type="tel"
                             placeholder="+1 (555) 123-4567" 
-                            className="bg-black/50 border-gray-600 text-white placeholder-gray-400 focus:border-orange-500"
+                            className="bg-secondary border-border text-foreground placeholder:text-muted-foreground focus:border-primary"
                             {...field} 
                           />
                         </FormControl>
-                        <FormMessage className="text-red-500" />
+                        <FormMessage className="text-destructive" />
                       </FormItem>
                     )}
                   />
@@ -196,20 +195,20 @@ const ContactFormPage = () => {
                     name="description"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-white">
+                        <FormLabel className="text-foreground">
                           Tell us about your needs *
                         </FormLabel>
                         <FormControl>
                           <Textarea 
                             placeholder="Please describe your reputation monitoring needs, any specific concerns, or questions you have about our services. Include details about your industry, company size, and what you're looking to achieve..."
-                            className="min-h-[200px] bg-black/50 border-gray-600 text-white placeholder-gray-400 focus:border-orange-500 resize-none" 
+                            className="min-h-[200px] bg-secondary border-border text-foreground placeholder:text-muted-foreground focus:border-primary resize-none" 
                             maxLength={3000}
                             {...field} 
                           />
                         </FormControl>
                         <div className="flex justify-between text-sm">
-                          <FormMessage className="text-red-500" />
-                          <span className="text-gray-400">
+                          <FormMessage className="text-destructive" />
+                          <span className="text-muted-foreground">
                             {wordCount}/500 words ({field.value.length}/3000 characters)
                           </span>
                         </div>
@@ -219,7 +218,7 @@ const ContactFormPage = () => {
 
                   <Button 
                     type="submit" 
-                    className="w-full py-6 bg-orange-500 hover:bg-orange-600 text-white" 
+                    className="w-full py-6 bg-primary hover:bg-primary/90 text-primary-foreground" 
                     size="lg"
                     disabled={isSubmitting}
                   >
@@ -239,7 +238,7 @@ const ContactFormPage = () => {
               </Form>
             </div>
 
-            <div className="mt-6 text-center text-sm text-gray-400">
+            <div className="mt-6 text-center text-sm text-muted-foreground">
               <p>We typically respond to sales inquiries within 2-4 business hours.</p>
               <p className="mt-2">All inquiries are confidential and handled by our senior sales team.</p>
             </div>
