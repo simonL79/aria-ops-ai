@@ -6,17 +6,18 @@ import { useBlogPosts } from '@/hooks/useBlogPosts';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Clock, RefreshCw } from 'lucide-react';
+import { useScrollReveal } from '@/hooks/useScrollReveal';
 
 const SkeletonCard = () => (
-  <div className="rounded-lg border border-border bg-card overflow-hidden animate-pulse">
-    <div className="h-48 bg-muted" />
+  <div className="rounded-lg border border-gray-800 bg-gray-900 overflow-hidden animate-pulse">
+    <div className="h-48 bg-gray-800" />
     <div className="p-5 space-y-3">
-      <div className="h-4 bg-muted rounded w-3/4" />
-      <div className="h-3 bg-muted rounded w-full" />
-      <div className="h-3 bg-muted rounded w-2/3" />
+      <div className="h-4 bg-gray-800 rounded w-3/4" />
+      <div className="h-3 bg-gray-800 rounded w-full" />
+      <div className="h-3 bg-gray-800 rounded w-2/3" />
       <div className="flex justify-between pt-2">
-        <div className="h-3 bg-muted rounded w-24" />
-        <div className="h-3 bg-muted rounded w-16" />
+        <div className="h-3 bg-gray-800 rounded w-24" />
+        <div className="h-3 bg-gray-800 rounded w-16" />
       </div>
     </div>
   </div>
@@ -34,6 +35,7 @@ const truncate = (text: string | null, max: number) => {
 
 const BlogPage = () => {
   const { blogPosts, loading, syncing, error, hasMore, loadMore, refetch } = useBlogPosts();
+  const { ref, visible } = useScrollReveal(0.05);
 
   return (
     <PublicLayout>
@@ -42,12 +44,15 @@ const BlogPage = () => {
         <meta name="description" content="Read our latest articles and insights on digital reputation management, online security, and brand protection." />
         <link rel="alternate" type="application/json" title="Blog Feed" href="https://getautoseo.com/feeds/14237/jk-unsGNI0FWRs6DS_Mx0WJqmzRFLgcEoG39QeOCWN0.json" />
       </Helmet>
-      <div className="min-h-screen bg-background py-12 sm:py-16">
+      <div className="min-h-screen bg-black py-12 sm:py-16">
         <div className="container mx-auto px-4 sm:px-6">
-          <div className="max-w-5xl mx-auto">
+          <div
+            ref={ref}
+            className={`max-w-5xl mx-auto transition-all duration-1000 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+          >
             <div className="text-center mb-10 sm:mb-14">
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-3">Blog</h1>
-              <p className="text-muted-foreground text-base sm:text-lg max-w-2xl mx-auto">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-3">Blog</h1>
+              <p className="text-gray-400 text-base sm:text-lg max-w-2xl mx-auto">
                 Insights, analysis, and updates on digital reputation management
               </p>
             </div>
@@ -56,7 +61,7 @@ const BlogPage = () => {
             {(loading || syncing) && (
               <div>
                 {syncing && (
-                  <p className="text-center text-muted-foreground text-sm mb-6 flex items-center justify-center gap-2">
+                  <p className="text-center text-gray-400 text-sm mb-6 flex items-center justify-center gap-2">
                     <RefreshCw className="h-4 w-4 animate-spin" /> Loading articles…
                   </p>
                 )}
@@ -70,7 +75,7 @@ const BlogPage = () => {
             {error && !loading && (
               <div className="text-center py-16">
                 <p className="text-destructive mb-4">Couldn't load articles. Please try again.</p>
-                <Button onClick={refetch} variant="outline">Retry</Button>
+                <Button onClick={refetch} variant="outline" className="border-gray-700 text-gray-300 hover:border-orange-500/50">Retry</Button>
               </div>
             )}
 
@@ -78,7 +83,7 @@ const BlogPage = () => {
             {!loading && !error && blogPosts.length === 0 && (
               <div className="text-center py-16">
                 <div className="text-5xl mb-4">📝</div>
-                <p className="text-muted-foreground text-lg">Articles are on the way! Check back soon.</p>
+                <p className="text-gray-400 text-lg">Articles are on the way! Check back soon.</p>
               </div>
             )}
 
@@ -90,7 +95,7 @@ const BlogPage = () => {
                     <Link
                       key={post.id}
                       to={`/blog/${post.slug}`}
-                      className="group rounded-lg border border-border bg-card overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+                      className="group rounded-lg border border-gray-800 bg-black/50 backdrop-blur-sm overflow-hidden hover:border-orange-500/50 hover:shadow-[0_0_30px_rgba(249,115,22,0.1)] hover:-translate-y-1 transition-all duration-300 cursor-pointer"
                     >
                       {post.image_url && (
                         <div className="h-48 overflow-hidden">
@@ -103,13 +108,13 @@ const BlogPage = () => {
                         </div>
                       )}
                       <div className="p-5">
-                        <h2 className="text-lg font-semibold text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+                        <h2 className="text-lg font-semibold text-white mb-2 line-clamp-2 group-hover:text-orange-500 transition-colors">
                           {post.title}
                         </h2>
-                        <p className="text-sm text-muted-foreground mb-3 line-clamp-3">
+                        <p className="text-sm text-gray-400 mb-3 line-clamp-3">
                           {truncate(post.summary, 160)}
                         </p>
-                        <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <div className="flex items-center justify-between text-xs text-gray-500">
                           <span>{formatDate(post.published_at)}</span>
                           <span className="flex items-center gap-1">
                             <Clock className="h-3 w-3" />
@@ -123,7 +128,7 @@ const BlogPage = () => {
 
                 {hasMore && (
                   <div className="text-center mt-10">
-                    <Button onClick={loadMore} variant="outline" className="px-8">
+                    <Button onClick={loadMore} variant="outline" className="px-8 border-orange-500/50 text-orange-500 hover:bg-orange-500/10 hover:border-orange-500">
                       Load More
                     </Button>
                   </div>
