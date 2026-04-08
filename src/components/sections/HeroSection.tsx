@@ -54,8 +54,23 @@ const HeroSection = () => {
 
       <div className="container mx-auto px-6 relative z-10 w-full py-20">
         <div className="max-w-4xl mx-auto text-center space-y-10">
-          <div className="flex justify-center mb-6">
-            <Logo variant="light" size="10x" />
+          <div className="relative flex justify-center mb-6">
+            {/* Glow ring behind logo */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="w-72 h-72 rounded-full bg-primary/10 blur-3xl animate-ring-pulse" />
+            </div>
+            {/* Scanline sweep */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none flex justify-center">
+              <div className="w-80 h-full relative">
+                <div className="absolute w-full h-1 bg-gradient-to-r from-transparent via-primary/30 to-transparent animate-scanline" />
+              </div>
+            </div>
+            {/* Logo with entrance + float */}
+            <div className="animate-fade-in-scale" style={{ animationFillMode: 'forwards' }}>
+              <div className="animate-float">
+                <Logo variant="light" size="10x" />
+              </div>
+            </div>
           </div>
 
           <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-light leading-tight text-white min-h-[2.4em]">
