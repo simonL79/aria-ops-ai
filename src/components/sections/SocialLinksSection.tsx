@@ -1,13 +1,14 @@
 
 import React from 'react';
-import { Facebook, Instagram, Linkedin, Youtube } from 'lucide-react';
+import { Facebook, Instagram, Linkedin, Youtube, Twitter } from 'lucide-react';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 
 const socialLinks = [
-  { Icon: Facebook, href: "https://facebook.com", label: "Facebook" },
-  { Icon: Instagram, href: "https://instagram.com", label: "Instagram" },
-  { Icon: Linkedin, href: "https://linkedin.com", label: "LinkedIn" },
-  { Icon: Youtube, href: "https://youtube.com", label: "YouTube" },
+  { Icon: Facebook, href: "https://facebook.com/ariaops", label: "Facebook" },
+  { Icon: Instagram, href: "https://instagram.com/ariaops", label: "Instagram" },
+  { Icon: Twitter, href: "https://x.com/ariaops", label: "X (Twitter)" },
+  { Icon: Linkedin, href: "https://linkedin.com/company/ariaops", label: "LinkedIn" },
+  { Icon: Youtube, href: "https://youtube.com/@ariaops", label: "YouTube" },
 ];
 
 const SocialLinksSection = () => {
