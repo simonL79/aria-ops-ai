@@ -1,47 +1,27 @@
 
 
-# Animate the Hero Logo
+# Replace Logo Animations with System Dashboard Mockup
 
-The logo at `h-80` (320px) is a large static image. We'll add layered animations to make it feel alive and fill the space with visual interest.
+## What Changes
 
-## Changes
+1. **Revert the logo** — remove glow ring, scanline, and float animations. Return to a simple centered logo.
 
-**File: `src/components/sections/HeroSection.tsx`**
+2. **Add a dashboard mockup** below the CTA buttons — a CSS-built "system preview" showing a stylized ARIA dashboard interface (threat meters, status indicators, scanning lines). This fills the visual space and communicates what the product does, similar to how Palantir/enterprise AI sites show their UI below the fold.
 
-Replace the plain `<Logo>` wrapper with an animated logo container that includes:
+## File Changes
 
-1. **Fade-in + scale entrance** — logo fades in from slightly scaled down (0.8 → 1) over 1.2s on mount
-2. **Continuous subtle float** — slow up/down oscillation (translateY ±8px over 6s, infinite)
-3. **Radial glow ring** — an animated pulsing ring behind the logo using a pseudo-element or sibling div (orange/primary gradient, opacity pulsing 0.1→0.3 over 3s)
-4. **Soft scanline sweep** — a thin horizontal light line that sweeps top-to-bottom across the logo every 4s (gives an "AI scanning" feel)
+### `src/components/sections/HeroSection.tsx`
 
-All CSS-only via Tailwind keyframes + inline styles. No JS animation libraries needed.
+- Remove the glow ring, scanline, and float wrapper around the logo — replace with plain `<Logo variant="light" size="xl" />`
+- Add a new `DashboardMockup` component below the CTA buttons: a glass-card container with fake UI elements:
+  - Top bar with dot indicators and "ARIA Threat Intelligence" label
+  - Three metric cards (Threat Score, Signals Monitored, Risk Level) with colored indicators
+  - A simulated scanning bar with a pulse animation
+  - Status text like "Real-time monitoring active"
+- All built with divs + Tailwind — no images needed, pure CSS UI mockup
+- Wrapped in a perspective container with slight 3D tilt for depth on desktop
 
-**File: `tailwind.config.ts`**
+### No other files change
 
-Add keyframes:
-- `float`: `0%,100% { transform: translateY(0) } 50% { transform: translateY(-8px) }`
-- `scanline`: a vertical sweep animation
-- `ring-pulse`: scale + opacity pulse for the glow ring
-
-**File: `src/components/sections/HeroSection.tsx`** structure change:
-
-```
-<div className="relative flex justify-center mb-6">
-  {/* Glow ring behind logo */}
-  <div className="absolute inset-0 flex items-center justify-center">
-    <div className="w-72 h-72 rounded-full bg-primary/10 blur-3xl animate-ring-pulse" />
-  </div>
-  {/* Scanline overlay */}
-  <div className="absolute inset-0 overflow-hidden pointer-events-none">
-    <div className="animate-scanline ..." />
-  </div>
-  {/* Logo with entrance + float */}
-  <div className="animate-fade-in-scale animate-float">
-    <Logo variant="light" size="10x" />
-  </div>
-</div>
-```
-
-Two files changed. Pure CSS animations, no dependencies.
+The tailwind keyframes added previously (float, scanline, ring-pulse, fade-in-scale) can stay — they're harmless and some are used elsewhere.
 
