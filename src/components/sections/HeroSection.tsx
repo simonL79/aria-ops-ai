@@ -116,7 +116,7 @@ const HeroSection = () => {
         <div className="max-w-4xl mx-auto text-center space-y-10">
           {/* Simple logo */}
           <div className="flex justify-center mb-6">
-            <Logo variant="light" size="xl" />
+            <Logo variant="light" size="3xl" />
           </div>
 
           <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-light leading-tight text-white min-h-[2.4em]">
