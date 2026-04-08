@@ -1,78 +1,70 @@
 
 
-# Make Your AI Business Website Cutting-Edge Interactive
+# Level Up the Homepage -- Polish & Missing Sections
 
-Your site is currently static HTML cards and text. For an AI company, visitors expect to *feel* the technology. Here are 5 quick-win interactive upgrades that will set you apart.
+## What We'll Do
 
----
-
-## 1. Live AI Chat Widget (Hero Section)
-
-Add a floating AI chat bubble powered by Lovable AI that visitors can talk to instantly. It answers questions about your services, qualifies leads, and can hand off to the contact form.
-
-- Small chat icon in bottom-right corner, expands into a sleek chat panel
-- Streams responses token-by-token (visually impressive)
-- Pre-seeded with knowledge about A.R.I.A services and pricing
-- Captures lead info (name/email) before or after conversation
-- New edge function `chat` + a `ChatWidget` component on the homepage
-
-This is the single biggest "we practice what we preach" signal you can add.
+Add the missing sections to the homepage, add a typewriter effect to the hero headline, create an FAQ section, fix social links, and update the theme color to match your brand.
 
 ---
 
-## 2. Animated Particle/Network Background on Hero
+## 1. Add Missing Sections to Homepage
 
-Replace the flat black hero background with an animated canvas showing interconnected nodes/particles -- a visual metaphor for threat detection networks.
+The `HowItWorksSection`, `PricingSection`, and `CTASection` components already exist but aren't on the homepage. We'll add them in a logical flow order and restyle `HowItWorksSection` to use the dark theme (currently white background, clashes with the rest of the site).
 
-- Use `tsparticles` (already lightweight, no heavy deps) or pure CSS/SVG animation
-- Subtle floating dots with connecting lines that react to mouse movement
-- Dark theme with orange accent particles matching your brand
-- Stays performant -- runs on `requestAnimationFrame`, pauses when off-screen
+**Updated homepage section order:**
+Hero → Social Links → Services → Add-On Services → How It Works (restyled dark) → Pricing (restyled dark) → Testimonials → FAQ (new) → Contact Form → CTA
 
 ---
 
-## 3. Live Threat Counter (Animated Stats)
+## 2. Hero Typewriter Effect
 
-Turn the static stats bar into animated counters that tick up when scrolled into view, plus a live "threats detected today" number that increments in real-time.
+Add an animated typewriter effect to the headline text "Elevate Your Digital Reputation" so the words type out character by character on load. Pure CSS + React state -- no library needed.
 
-- Use Intersection Observer to trigger count-up animation on scroll
-- Add a pulsing "LIVE" indicator next to a simulated real-time threat counter
-- Numbers animate from 0 to target value over ~2 seconds
-- Feels alive and data-driven
+**File:** `HeroSection.tsx`
 
 ---
 
-## 4. Interactive Service Cards with Hover Effects
+## 3. New FAQ Section
 
-Replace flat cards with glassmorphism cards that have:
+Create a new `FAQSection.tsx` with expandable accordion items using the existing `Collapsible` component. Dark-themed, scroll-animated. Topics:
 
-- Subtle glow effect on hover (orange gradient border)
-- Icon animation (shield pulse, eye scan sweep)
-- Slight 3D tilt on mouse move (CSS `perspective` + `transform`)
-- Smooth reveal animations as you scroll down (staggered fade-in)
-
----
-
-## 5. Scroll-Triggered Section Animations
-
-Add entrance animations to every section so the page feels dynamic as you scroll:
-
-- Sections fade + slide up on scroll into view
-- Testimonial cards stagger in one-by-one
-- Stats counters animate on visibility
-- Uses Intersection Observer -- no heavy animation library needed
+- What is A.R.I.A?
+- How fast do you respond to threats?
+- Is my data confidential?
+- What platforms do you monitor?
+- How does pricing work?
 
 ---
 
-## Technical Summary
+## 4. Fix Social Links
 
-| Feature | Files | New Dependencies |
-|---------|-------|-----------------|
-| AI Chat Widget | New `ChatWidget.tsx`, new edge function `chat/index.ts`, `HomePage.tsx` | None (uses existing Supabase + Lovable AI) |
-| Particle Background | New `ParticleBackground.tsx`, `HeroSection.tsx` | `tsparticles` + `@tsparticles/react` |
-| Animated Counters | `TestimonialsSection.tsx` | None (Intersection Observer API) |
-| Interactive Cards | `ServicesSection.tsx`, `AddOnServicesSection.tsx` | None (CSS only) |
-| Scroll Animations | All section components | None (Intersection Observer) |
+Update `SocialLinksSection.tsx` to point to real A.R.I.A profiles (or remove the links and just show icons if no real profiles exist yet). Add X/Twitter icon alongside the existing four.
 
-All changes are additive and won't break existing functionality. The AI chat is the headline feature; the rest are polish that makes the site feel premium.
+---
+
+## 5. Restyle Existing Sections for Dark Theme
+
+- `HowItWorksSection`: Change from white bg to black bg with white/gray text and orange accents
+- `PricingSection`: Change from `bg-background` to black bg with orange accent borders
+
+---
+
+## 6. Update Theme Color
+
+Change `index.html` theme-color from `#247CFF` (blue) to `#F97316` (orange) to match the site's actual brand palette.
+
+---
+
+## Files Changed
+
+| File | Change |
+|------|--------|
+| `src/pages/HomePage.tsx` | Add HowItWorks, Pricing, FAQ, CTA sections |
+| `src/components/sections/HeroSection.tsx` | Add typewriter animation |
+| `src/components/sections/FAQSection.tsx` | **New** -- accordion FAQ |
+| `src/components/sections/HowItWorksSection.tsx` | Restyle to dark theme |
+| `src/components/sections/PricingSection.tsx` | Restyle to dark theme |
+| `src/components/sections/SocialLinksSection.tsx` | Add X icon, update hrefs |
+| `index.html` | Fix theme-color meta |
 
