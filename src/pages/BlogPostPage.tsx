@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import DOMPurify from 'dompurify';
 import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
@@ -14,6 +14,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import ReadingProgressBar from '@/components/blog/ReadingProgressBar';
 
 const SITE_URL = 'https://aria-ops-ai.lovable.app';
 const SITE_NAME = 'A.R.I.A™ Ops';
@@ -27,6 +28,7 @@ const BlogPostPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const { post, loading, error } = useBlogPost(slug);
   const related = useRelatedPosts(post);
+  const articleRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -121,9 +123,10 @@ const BlogPostPage = () => {
         {faqJsonLd && <script type="application/ld+json">{JSON.stringify(faqJsonLd)}</script>}
       </Helmet>
 
+      <ReadingProgressBar containerRef={articleRef} />
       <div className="min-h-screen bg-black py-12 sm:py-16">
         <div className="container mx-auto px-4 sm:px-6">
-          <div className="max-w-[720px] mx-auto">
+          <div ref={articleRef} className="max-w-[720px] mx-auto">
             {/* Back link */}
             <Link to="/blog" className="inline-flex items-center gap-2 text-sm text-orange-500 hover:text-orange-400 mb-8 transition-colors cursor-pointer">
               <ArrowLeft className="h-4 w-4" />
