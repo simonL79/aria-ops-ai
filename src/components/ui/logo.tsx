@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 
 interface LogoProps {
   variant?: 'default' | 'light' | 'dark';
-  size?: 'sm' | 'md' | 'lg' | 'xl' | '10x';
+  size?: 'sm' | 'md' | 'lg' | 'xl' | '3xl' | '10x';
   className?: string;
 }
 
@@ -21,6 +21,9 @@ const Logo = ({ variant = 'default', size = 'md', className }: LogoProps) => {
     },
     xl: {
       logo: 'h-32'
+    },
+    '3xl': {
+      logo: 'h-96'
     },
     '10x': {
       logo: 'h-80'
