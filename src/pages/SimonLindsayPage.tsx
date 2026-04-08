@@ -5,18 +5,18 @@ import PublicLayout from '@/components/layout/PublicLayout';
 const SimonLindsayPage = () => {
   return (
     <PublicLayout>
-      <div className="min-h-screen bg-black text-white py-16">
+      <div className="min-h-screen bg-background text-foreground py-16">
         <div className="container mx-auto px-6">
           <div className="max-w-4xl mx-auto">
             <h1 className="text-4xl font-bold text-center mb-8">Simon Lindsay</h1>
-            <p className="text-xl text-gray-300 text-center mb-12">
+            <p className="text-xl text-muted-foreground text-center mb-12">
               Founder & CEO of A.R.I.A™
             </p>
             
             <div className="space-y-8">
-              <div className="bg-gray-900 border border-gray-800 rounded-lg p-8">
-                <h2 className="text-2xl font-bold text-orange-500 mb-6">About Simon</h2>
-                <div className="space-y-4 text-gray-300">
+              <div className="bg-card border border-border rounded-lg p-8">
+                <h2 className="text-2xl font-bold text-primary mb-6">About Simon</h2>
+                <div className="space-y-4 text-muted-foreground">
                   <p>
                     Simon Lindsay is the founder of A.R.I.A™ (AI Reputation Intelligence Agent), an advanced reputation intelligence platform designed to monitor, analyse, and protect digital reputation in an increasingly AI-driven information environment.
                   </p>
@@ -29,18 +29,18 @@ const SimonLindsayPage = () => {
                   <p>
                     Alongside his work in reputation intelligence, Simon remains active across boxing, BKFC, and the wider sports and entertainment industry, where he structures brand partnerships and commercial opportunities for athletes, creators, and public figures.
                   </p>
-                  <p className="italic text-white mt-4">
+                  <p className="italic text-foreground mt-4">
                     "Protect reputation. Control narrative. Unlock strategic opportunity."
                   </p>
                 </div>
               </div>
               
-              <div className="bg-gray-900 border border-gray-800 rounded-lg p-8">
-                <h2 className="text-2xl font-bold text-orange-500 mb-6">Expertise</h2>
+              <div className="bg-card border border-border rounded-lg p-8">
+                <h2 className="text-2xl font-bold text-primary mb-6">Expertise</h2>
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <h3 className="text-lg font-semibold mb-3">Reputation Intelligence</h3>
-                    <ul className="space-y-2 text-gray-300">
+                    <h3 className="text-lg font-semibold mb-3 text-foreground">Reputation Intelligence</h3>
+                    <ul className="space-y-2 text-muted-foreground">
                       <li>• AI-Powered Reputation Monitoring</li>
                       <li>• Digital Footprint Analysis</li>
                       <li>• Narrative Risk Anticipation</li>
@@ -48,8 +48,8 @@ const SimonLindsayPage = () => {
                     </ul>
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold mb-3">Commercial Strategy</h3>
-                    <ul className="space-y-2 text-gray-300">
+                    <h3 className="text-lg font-semibold mb-3 text-foreground">Commercial Strategy</h3>
+                    <ul className="space-y-2 text-muted-foreground">
                       <li>• Brand Partnerships & Sponsorship</li>
                       <li>• Celebrity & Talent Management</li>
                       <li>• Combat Sports (Boxing, BKFC)</li>
