@@ -8,6 +8,7 @@ import TestimonialsSection from '@/components/sections/TestimonialsSection';
 import ContactFormSection from '@/components/sections/ContactFormSection';
 import SocialLinksSection from '@/components/sections/SocialLinksSection';
 import AddOnServicesSection from '@/components/sections/AddOnServicesSection';
+import ChatWidget from '@/components/widgets/ChatWidget';
 
 const HomePage = () => {
   console.log('HomePage component rendering...');
@@ -23,6 +24,7 @@ const HomePage = () => {
           <TestimonialsSection />
           <ContactFormSection />
         </div>
+        <ChatWidget />
       </PublicLayout>
     </PublicPagesProtection>
   );
