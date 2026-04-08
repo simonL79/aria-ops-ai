@@ -1,46 +1,37 @@
 
 
-# Restyle Blog Pages to Match the Dark AI Aesthetic
+# Add Reading Progress Bar to Blog Post Pages
 
-The blog page and blog post page use generic theme tokens (`bg-background`, `bg-card`, `border-border`) which render as a light, plain design. The rest of the site uses an explicit dark theme with black backgrounds, orange accents, glassmorphism, and scroll animations. Here's how to bring the blog in line.
-
----
-
-## 1. Blog Listing Page (`BlogPage.tsx`)
-
-- Change outer wrapper from `bg-background` to `bg-black`
-- Heading: white text, add scroll-reveal animation
-- Subheading: `text-gray-400`
-- Skeleton cards: dark-themed (`bg-gray-900`, `border-gray-800`)
-- Post cards: `bg-black/50 border-gray-800 backdrop-blur` with `hover:border-orange-500/50` glow effect (matching the glassmorphism style from other sections)
-- Card text: white title, `text-gray-400` summary, orange hover on title
-- "Load More" button: orange outline style
-- Add scroll-reveal entrance animation using existing `useScrollReveal` hook
-
-## 2. Blog Post Page (`BlogPostPage.tsx`)
-
-- Change outer wrapper from `bg-background` to `bg-black`
-- Back link: orange colored
-- Title: white text
-- Meta row: `text-gray-400`, badges with dark background
-- `blog-prose` content: ensure text renders white/light gray (may need a global CSS tweak or inline prose class override)
-- Related articles cards: dark-themed matching the listing cards
-- CTA section at bottom: dark card with orange button
-- FAQ accordion: dark borders, orange accent on triggers
-
-## 3. Blog Prose Styles
-
-Check if there's a `blog-prose` CSS class defined. If so, update it for dark backgrounds (light text, orange links). If not, add one in the global stylesheet.
+A thin, fixed progress bar at the top of the screen that fills left-to-right as the reader scrolls through the article content. Orange-themed to match the brand.
 
 ---
 
-## Files Changed
+## Implementation
+
+### New Component: `ReadingProgressBar.tsx`
+
+Create `src/components/blog/ReadingProgressBar.tsx`:
+- Fixed to top of viewport (`fixed top-0 left-0 z-50`)
+- Thin orange bar (3px height, `bg-orange-500`)
+- Width driven by scroll percentage of the article content area
+- Uses `useEffect` with a `scroll` event listener on `window`
+- Calculates progress based on article container's top/bottom position relative to viewport
+- Smooth CSS transition on width for fluid animation
+- Only renders when scroll progress > 0
+
+### Edit: `BlogPostPage.tsx`
+
+- Import and render `<ReadingProgressBar />` inside the article view (not in loading/error states)
+- Pass a ref to the article content container so progress is scoped to the article, not the full page
+
+---
+
+## Files
 
 | File | Change |
 |------|--------|
-| `src/pages/BlogPage.tsx` | Dark theme, glassmorphism cards, scroll animation |
-| `src/pages/BlogPostPage.tsx` | Dark theme, dark prose, dark related cards |
-| Global CSS (if `blog-prose` exists) | Light text for dark background |
+| `src/components/blog/ReadingProgressBar.tsx` | **New** — fixed progress bar component |
+| `src/pages/BlogPostPage.tsx` | Import and add progress bar |
 
-No new dependencies. Purely visual changes using existing patterns from the homepage sections.
+No new dependencies. Pure CSS + scroll event listener.
 
