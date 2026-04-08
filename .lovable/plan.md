@@ -1,27 +1,47 @@
 
 
-# Fix Blank Screen — CSS Compilation Error
+# Animate the Hero Logo
 
-## Problem
-`src/index.css` line 143-145 uses `@apply` inside `@layer utilities` for `.glass-card`. When Tailwind compiles this, it produces malformed CSS with mismatched braces, causing a PostCSS parse error that kills the entire app.
+The logo at `h-80` (320px) is a large static image. We'll add layered animations to make it feel alive and fill the space with visual interest.
 
-Error: `[postcss] /dev-server/src/index.css:169:3: Unexpected }`
+## Changes
 
-## Fix
+**File: `src/components/sections/HeroSection.tsx`**
 
-**File: `src/index.css`** — Replace `@apply` in `.glass-card` with equivalent plain CSS:
+Replace the plain `<Logo>` wrapper with an animated logo container that includes:
 
-```css
-.glass-card {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 1rem;
-}
+1. **Fade-in + scale entrance** — logo fades in from slightly scaled down (0.8 → 1) over 1.2s on mount
+2. **Continuous subtle float** — slow up/down oscillation (translateY ±8px over 6s, infinite)
+3. **Radial glow ring** — an animated pulsing ring behind the logo using a pseudo-element or sibling div (orange/primary gradient, opacity pulsing 0.1→0.3 over 3s)
+4. **Soft scanline sweep** — a thin horizontal light line that sweeps top-to-bottom across the logo every 4s (gives an "AI scanning" feel)
+
+All CSS-only via Tailwind keyframes + inline styles. No JS animation libraries needed.
+
+**File: `tailwind.config.ts`**
+
+Add keyframes:
+- `float`: `0%,100% { transform: translateY(0) } 50% { transform: translateY(-8px) }`
+- `scanline`: a vertical sweep animation
+- `ring-pulse`: scale + opacity pulse for the glow ring
+
+**File: `src/components/sections/HeroSection.tsx`** structure change:
+
+```
+<div className="relative flex justify-center mb-6">
+  {/* Glow ring behind logo */}
+  <div className="absolute inset-0 flex items-center justify-center">
+    <div className="w-72 h-72 rounded-full bg-primary/10 blur-3xl animate-ring-pulse" />
+  </div>
+  {/* Scanline overlay */}
+  <div className="absolute inset-0 overflow-hidden pointer-events-none">
+    <div className="animate-scanline ..." />
+  </div>
+  {/* Logo with entrance + float */}
+  <div className="animate-fade-in-scale animate-float">
+    <Logo variant="light" size="10x" />
+  </div>
+</div>
 ```
 
-This produces the exact same visual result without the `@apply` compilation issue.
-
-One file changed. Instant fix.
+Two files changed. Pure CSS animations, no dependencies.
 
