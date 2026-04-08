@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Star, Shield } from 'lucide-react';
@@ -7,8 +7,33 @@ import Logo from '../ui/logo';
 import ParticleBackground from '../widgets/ParticleBackground';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 
+const useTypewriter = (text: string, speed = 60, delay = 500) => {
+  const [displayed, setDisplayed] = useState('');
+  const [done, setDone] = useState(false);
+
+  useEffect(() => {
+    let i = 0;
+    const timeout = setTimeout(() => {
+      const interval = setInterval(() => {
+        if (i < text.length) {
+          setDisplayed(text.slice(0, i + 1));
+          i++;
+        } else {
+          setDone(true);
+          clearInterval(interval);
+        }
+      }, speed);
+      return () => clearInterval(interval);
+    }, delay);
+    return () => clearTimeout(timeout);
+  }, [text, speed, delay]);
+
+  return { displayed, done };
+};
+
 const HeroSection = () => {
   const { ref, visible } = useScrollReveal(0.1);
+  const { displayed, done } = useTypewriter('Elevate Your Digital Reputation', 50, 800);
 
   return (
     <section className="hero bg-black text-foreground py-20 relative overflow-hidden min-h-screen flex items-center">
@@ -20,10 +45,18 @@ const HeroSection = () => {
               <Logo variant="light" size="10x" />
             </div>
             
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-light leading-tight text-foreground text-center">
-              <span className="text-white">Elevate Your</span> <span className="text-orange-500">Digital</span>
-              <br />
-              <span className="text-white">Reputation</span>
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-light leading-tight text-white text-center min-h-[1.2em]">
+              {displayed.split(' ').map((word, i) => (
+                <React.Fragment key={i}>
+                  {i > 0 && ' '}
+                  {word === 'Digital' ? (
+                    <span className="text-orange-500">{word}</span>
+                  ) : (
+                    <span>{word}</span>
+                  )}
+                </React.Fragment>
+              ))}
+              {!done && <span className="inline-block w-[3px] h-[1em] bg-orange-500 ml-1 animate-pulse align-text-bottom" />}
             </h1>
             
             <p className="text-xl md:text-2xl leading-relaxed text-white max-w-2xl mx-auto text-center">
