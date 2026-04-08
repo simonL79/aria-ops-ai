@@ -133,6 +133,10 @@ export default {
 			'fade-in-scale': {
 				'0%': { opacity: '0', transform: 'scale(0.8)' },
 				'100%': { opacity: '1', transform: 'scale(1)' }
+			},
+			'scanline-bar': {
+				'0%': { transform: 'translateX(-100%)' },
+				'100%': { transform: 'translateX(400%)' }
 			}
 			},
 			animation: {
