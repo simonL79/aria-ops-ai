@@ -3,34 +3,34 @@ import React from 'react';
 import PublicPagesProtection from '@/components/layout/PublicPagesProtection';
 import PublicLayout from '@/components/layout/PublicLayout';
 import HeroSection from '@/components/sections/HeroSection';
+import ThreatScoreSection from '@/components/sections/ThreatScoreSection';
 import ServicesSection from '@/components/sections/ServicesSection';
-import TestimonialsSection from '@/components/sections/TestimonialsSection';
-import ContactFormSection from '@/components/sections/ContactFormSection';
-import SocialLinksSection from '@/components/sections/SocialLinksSection';
-import AddOnServicesSection from '@/components/sections/AddOnServicesSection';
 import HowItWorksSection from '@/components/sections/HowItWorksSection';
+import TrustSection from '@/components/sections/TrustSection';
+import TestimonialsSection from '@/components/sections/TestimonialsSection';
 import PricingSection from '@/components/sections/PricingSection';
 import FAQSection from '@/components/sections/FAQSection';
+import ContactFormSection from '@/components/sections/ContactFormSection';
 import CTASection from '@/components/sections/CTASection';
+import SocialLinksSection from '@/components/sections/SocialLinksSection';
 import ChatWidget from '@/components/widgets/ChatWidget';
 
 const HomePage = () => {
-  console.log('HomePage component rendering...');
-  
   return (
     <PublicPagesProtection>
       <PublicLayout>
-        <div className="bg-black text-white min-h-screen">
+        <div className="bg-background text-foreground min-h-screen">
           <HeroSection />
-          <SocialLinksSection />
+          <ThreatScoreSection />
           <ServicesSection />
-          <AddOnServicesSection />
           <HowItWorksSection />
-          <PricingSection />
+          <TrustSection />
           <TestimonialsSection />
+          <PricingSection />
           <FAQSection />
           <ContactFormSection />
           <CTASection />
+          <SocialLinksSection />
         </div>
         <ChatWidget />
       </PublicLayout>
