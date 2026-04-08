@@ -1,9 +1,18 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Star } from 'lucide-react';
+import { useScrollReveal, useCountUp } from '@/hooks/useScrollReveal';
 
 const TestimonialsSection = () => {
+  const { ref: statsRef, visible: statsVisible } = useScrollReveal(0.3);
+  const { ref: cardsRef, visible: cardsVisible } = useScrollReveal(0.1);
+
+  const threats = useCountUp(500, 2000, statsVisible);
+  const retention = useCountUp(98, 1800, statsVisible);
+  const [liveCount] = useState(() => Math.floor(Math.random() * 50) + 120);
+  const liveThreat = useCountUp(liveCount, 2500, statsVisible);
+
   const testimonials = [
     {
       text: "This intelligence platform helped us identify and neutralize a coordinated attack before it reached mainstream media. I don't know what we would have done without them.",
@@ -45,24 +54,41 @@ const TestimonialsSection = () => {
           Trusted by executives, founders, and public figures to protect what matters most — their reputation.
         </p>
 
-        {/* Stats bar */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto mb-14">
-          {[
-            { value: "500+", label: "Threats Neutralized" },
-            { value: "98%", label: "Client Retention" },
-            { value: "24/7", label: "Active Monitoring" },
-            { value: "<2hr", label: "Avg. Response Time" },
-          ].map((stat, i) => (
-            <div key={i} className="text-center">
-              <p className="text-3xl md:text-4xl font-bold text-orange-500">{stat.value}</p>
-              <p className="text-gray-400 text-sm mt-1">{stat.label}</p>
+        {/* Animated Stats bar */}
+        <div ref={statsRef} className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto mb-14">
+          <div className="text-center">
+            <p className="text-3xl md:text-4xl font-bold text-orange-500">{threats}+</p>
+            <p className="text-gray-400 text-sm mt-1">Threats Neutralized</p>
+          </div>
+          <div className="text-center">
+            <p className="text-3xl md:text-4xl font-bold text-orange-500">{retention}%</p>
+            <p className="text-gray-400 text-sm mt-1">Client Retention</p>
+          </div>
+          <div className="text-center">
+            <p className="text-3xl md:text-4xl font-bold text-orange-500">24/7</p>
+            <p className="text-gray-400 text-sm mt-1">Active Monitoring</p>
+          </div>
+          <div className="text-center relative">
+            <div className="flex items-center justify-center gap-2">
+              <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+              <span className="text-green-400 text-[10px] font-semibold uppercase tracking-wider">Live</span>
             </div>
-          ))}
+            <p className="text-3xl md:text-4xl font-bold text-orange-500">{liveThreat}</p>
+            <p className="text-gray-400 text-sm mt-1">Threats Detected Today</p>
+          </div>
         </div>
         
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div ref={cardsRef} className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {testimonials.map((testimonial, index) => (
-            <Card key={index} className="bg-gray-900 border-gray-800 p-8 text-white">
+            <Card
+              key={index}
+              className={`bg-gray-900 border-gray-800 p-8 text-white transition-all duration-700 ${
+                cardsVisible
+                  ? 'opacity-100 translate-y-0'
+                  : 'opacity-0 translate-y-6'
+              }`}
+              style={{ transitionDelay: cardsVisible ? `${index * 120}ms` : '0ms' }}
+            >
               <div className="flex items-center mb-4">
                 {[...Array(testimonial.rating)].map((_, i) => (
                   <Star key={i} className="h-5 w-5 fill-orange-500 text-orange-500" />

@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Facebook, Instagram, Linkedin, Youtube } from 'lucide-react';
+import { useScrollReveal } from '@/hooks/useScrollReveal';
 
 const socialLinks = [
   { Icon: Facebook, href: "https://facebook.com", label: "Facebook" },
@@ -10,9 +11,11 @@ const socialLinks = [
 ];
 
 const SocialLinksSection = () => {
+  const { ref, visible } = useScrollReveal(0.3);
+
   return (
     <section className="bg-black py-8">
-      <div className="container mx-auto px-6">
+      <div ref={ref} className={`container mx-auto px-6 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
         <div className="text-center mb-6">
           <p className="text-white text-lg mb-2">Trusted Across Social Platforms</p>
         </div>
@@ -24,7 +27,7 @@ const SocialLinksSection = () => {
               target="_blank"
               rel="noopener noreferrer"
               aria-label={label}
-              className="text-gray-400 hover:text-white transition-colors"
+              className="text-gray-400 hover:text-orange-500 transition-all duration-300 hover:scale-110"
             >
               <Icon className="h-8 w-8" />
             </a>
