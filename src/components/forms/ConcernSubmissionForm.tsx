@@ -66,14 +66,12 @@ const ConcernSubmissionForm = () => {
   });
 
   const onSubmit = async (data: FormData) => {
-    // Rate limiting - prevent submissions within 30 seconds
     const now = Date.now();
     if (now - lastSubmission < 30000) {
       toast.error('Please wait before submitting another report');
       return;
     }
 
-    // Honeypot check
     if (data.honeypot && data.honeypot.length > 0) {
       toast.error('Invalid submission detected');
       return;
@@ -103,8 +101,6 @@ const ConcernSubmissionForm = () => {
 
       setIsSubmitted(true);
       toast.success('Your concern has been submitted successfully');
-      
-      // Reset form
       form.reset();
     } catch (error) {
       console.error('Submission error:', error);
@@ -116,19 +112,19 @@ const ConcernSubmissionForm = () => {
 
   if (isSubmitted) {
     return (
-      <div className="max-w-2xl mx-auto p-8 bg-gray-800 border border-gray-700 rounded-lg">
+      <div className="max-w-2xl mx-auto p-8 bg-card border border-border rounded-lg">
         <div className="text-center">
-          <Shield className="h-12 w-12 text-orange-500 mx-auto mb-4" />
-          <h3 className="text-2xl font-bold text-white mb-2">Report Submitted</h3>
-          <p className="text-gray-300 mb-4">
+          <Shield className="h-12 w-12 text-primary mx-auto mb-4" />
+          <h3 className="text-2xl font-bold text-foreground mb-2">Report Submitted</h3>
+          <p className="text-muted-foreground mb-4">
             Thank you for your submission. Our team will review your concern and take appropriate action.
           </p>
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-muted-foreground">
             You will be contacted if additional information is needed.
           </p>
           <Button 
             variant="outline" 
-            className="mt-4 border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white"
+            className="mt-4 border-primary text-primary hover:bg-primary hover:text-primary-foreground"
             onClick={() => setIsSubmitted(false)}
           >
             Submit Another Report
@@ -142,15 +138,15 @@ const ConcernSubmissionForm = () => {
     <div className="max-w-2xl mx-auto">
       <div className="text-center mb-8">
         <div className="flex items-center justify-center gap-2 mb-4">
-          <AlertTriangle className="h-8 w-8 text-orange-500" />
-          <h2 className="text-3xl font-bold text-white">Submit a Concern</h2>
+          <AlertTriangle className="h-8 w-8 text-primary" />
+          <h2 className="text-3xl font-bold text-foreground">Submit a Concern</h2>
         </div>
-        <p className="text-lg text-gray-300">
+        <p className="text-lg text-muted-foreground">
           Report content that may be threatening, defamatory, or harmful to individuals or organizations.
         </p>
       </div>
 
-      <div className="bg-gray-800 border border-gray-700 p-8 rounded-xl shadow-lg">
+      <div className="bg-card border border-border p-8 rounded-xl shadow-lg">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
@@ -158,15 +154,15 @@ const ConcernSubmissionForm = () => {
               name="reporterName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-white">Your Name (Optional)</FormLabel>
+                  <FormLabel className="text-foreground">Your Name (Optional)</FormLabel>
                   <FormControl>
                     <Input 
                       placeholder="John Smith" 
-                      className="bg-black/50 border-gray-600 text-white placeholder-gray-400 focus:border-orange-500"
+                      className="bg-secondary border-border text-foreground placeholder:text-muted-foreground focus:border-primary"
                       {...field} 
                     />
                   </FormControl>
-                  <FormDescription className="text-gray-400">
+                  <FormDescription className="text-muted-foreground">
                     Providing your name helps us follow up if needed, but anonymous reports are accepted.
                   </FormDescription>
                   <FormMessage />
@@ -179,15 +175,15 @@ const ConcernSubmissionForm = () => {
               name="entityBeingTargeted"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-white">Entity Being Targeted *</FormLabel>
+                  <FormLabel className="text-foreground">Entity Being Targeted *</FormLabel>
                   <FormControl>
                     <Input 
                       placeholder="Person or organization name" 
-                      className="bg-black/50 border-gray-600 text-white placeholder-gray-400 focus:border-orange-500"
+                      className="bg-secondary border-border text-foreground placeholder:text-muted-foreground focus:border-primary"
                       {...field} 
                     />
                   </FormControl>
-                  <FormDescription className="text-gray-400">
+                  <FormDescription className="text-muted-foreground">
                     Who is being targeted or mentioned in the concerning content?
                   </FormDescription>
                   <FormMessage />
@@ -200,16 +196,16 @@ const ConcernSubmissionForm = () => {
               name="platform"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-white">Platform *</FormLabel>
+                  <FormLabel className="text-foreground">Platform *</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger className="bg-black/50 border-gray-600 text-white focus:border-orange-500">
+                      <SelectTrigger className="bg-secondary border-border text-foreground focus:border-primary">
                         <SelectValue placeholder="Select platform where content was found" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent className="bg-gray-800 border-gray-600">
+                    <SelectContent className="bg-card border-border">
                       {platforms.map((platform) => (
-                        <SelectItem key={platform} value={platform} className="text-white hover:bg-gray-700">
+                        <SelectItem key={platform} value={platform} className="text-foreground hover:bg-secondary">
                           {platform}
                         </SelectItem>
                       ))}
@@ -225,16 +221,16 @@ const ConcernSubmissionForm = () => {
               name="contentLink"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-white">Link to Content (Optional)</FormLabel>
+                  <FormLabel className="text-foreground">Link to Content (Optional)</FormLabel>
                   <FormControl>
                     <Input 
                       placeholder="https://example.com/post/123" 
                       type="url"
-                      className="bg-black/50 border-gray-600 text-white placeholder-gray-400 focus:border-orange-500"
+                      className="bg-secondary border-border text-foreground placeholder:text-muted-foreground focus:border-primary"
                       {...field} 
                     />
                   </FormControl>
-                  <FormDescription className="text-gray-400">
+                  <FormDescription className="text-muted-foreground">
                     Direct link to the concerning content, if available.
                   </FormDescription>
                   <FormMessage />
@@ -247,15 +243,15 @@ const ConcernSubmissionForm = () => {
               name="contentText"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-white">Content Description *</FormLabel>
+                  <FormLabel className="text-foreground">Content Description *</FormLabel>
                   <FormControl>
                     <Textarea 
                       placeholder="Describe the concerning content or paste the text here..."
-                      className="min-h-[120px] bg-black/50 border-gray-600 text-white placeholder-gray-400 focus:border-orange-500" 
+                      className="min-h-[120px] bg-secondary border-border text-foreground placeholder:text-muted-foreground focus:border-primary" 
                       {...field} 
                     />
                   </FormControl>
-                  <FormDescription className="text-gray-400">
+                  <FormDescription className="text-muted-foreground">
                     Provide details about the content that concerns you. Include quotes if possible.
                   </FormDescription>
                   <FormMessage />
@@ -279,7 +275,7 @@ const ConcernSubmissionForm = () => {
 
             <Button 
               type="submit" 
-              className="w-full py-6 bg-orange-500 hover:bg-orange-600 text-white" 
+              className="w-full py-6 bg-primary hover:bg-primary/90 text-primary-foreground" 
               size="lg"
               disabled={isSubmitting}
             >
@@ -299,7 +295,7 @@ const ConcernSubmissionForm = () => {
         </Form>
       </div>
 
-      <div className="mt-6 text-center text-sm text-gray-400">
+      <div className="mt-6 text-center text-sm text-muted-foreground">
         <p>All submissions are confidential and will be reviewed by our security team.</p>
         <p className="mt-2">False or malicious reports may result in restrictions.</p>
       </div>
