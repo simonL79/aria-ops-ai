@@ -33,7 +33,7 @@ const FAQSection = () => {
   return (
     <section className="py-24 bg-black">
       <div ref={ref} className={`container mx-auto px-6 max-w-3xl transition-all duration-1000 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-        <h2 className="text-4xl md:text-5xl font-light mb-16 text-center text-white">
+        <h2 className="text-4xl md:text-5xl font-bold mb-16 text-center text-white">
           Frequently Asked Questions
         </h2>
 
@@ -41,7 +41,7 @@ const FAQSection = () => {
           {faqs.map((faq, index) => (
             <div
               key={index}
-              className="border border-gray-800 rounded-lg overflow-hidden transition-colors hover:border-orange-500/50"
+              className="glass-card overflow-hidden hover:border-primary/30 transition-colors"
             >
               <button
                 onClick={() => setOpenIndex(openIndex === index ? null : index)}
@@ -49,7 +49,7 @@ const FAQSection = () => {
               >
                 {faq.question}
                 <ChevronDown
-                  className={`h-5 w-5 text-orange-500 transition-transform duration-300 flex-shrink-0 ml-4 ${
+                  className={`h-5 w-5 text-primary transition-transform duration-300 flex-shrink-0 ml-4 ${
                     openIndex === index ? 'rotate-180' : ''
                   }`}
                 />
@@ -59,7 +59,7 @@ const FAQSection = () => {
                   openIndex === index ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
                 }`}
               >
-                <p className="px-6 pb-5 text-gray-400 leading-relaxed">
+                <p className="px-6 pb-5 text-muted-foreground leading-relaxed">
                   {faq.answer}
                 </p>
               </div>

@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Card } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -60,7 +59,6 @@ const ContactFormSection = () => {
 
       if (error) throw error;
 
-      // Send notification email to simon@ariaops.co.uk
       await supabase.functions.invoke('send-transactional-email', {
         body: {
           templateName: 'contact-form-notification',
@@ -75,8 +73,6 @@ const ContactFormSection = () => {
         },
       });
 
-      if (error) throw error;
-
       toast.success('Your request has been submitted. We\'ll be in touch shortly.');
       setFormData({ fullName: '', companyEmail: '', company: '', phoneNumber: '', details: '' });
     } catch {
@@ -85,6 +81,8 @@ const ContactFormSection = () => {
       setIsSubmitting(false);
     }
   };
+
+  const inputClasses = "bg-secondary border-border text-white placeholder-muted-foreground focus:border-primary focus:outline-none";
 
   return (
     <section className="bg-black py-16">
@@ -96,7 +94,7 @@ const ContactFormSection = () => {
             </h2>
           </div>
 
-          <Card className="bg-gray-900 border-gray-800 p-8">
+          <div className="glass-card p-8">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label className="text-white text-sm font-medium mb-2 block">Full Name *</label>
@@ -106,7 +104,7 @@ const ContactFormSection = () => {
                   onChange={handleChange}
                   placeholder="Your full name"
                   required
-                  className="bg-gray-800 border-gray-700 text-white placeholder-gray-400"
+                  className={inputClasses}
                 />
               </div>
 
@@ -119,7 +117,7 @@ const ContactFormSection = () => {
                   onChange={handleChange}
                   placeholder="your.email@company.com"
                   required
-                  className="bg-gray-800 border-gray-700 text-white placeholder-gray-400"
+                  className={inputClasses}
                 />
               </div>
 
@@ -130,7 +128,7 @@ const ContactFormSection = () => {
                   value={formData.company}
                   onChange={handleChange}
                   placeholder="Company name"
-                  className="bg-gray-800 border-gray-700 text-white placeholder-gray-400"
+                  className={inputClasses}
                 />
               </div>
 
@@ -141,7 +139,7 @@ const ContactFormSection = () => {
                   value={formData.phoneNumber}
                   onChange={handleChange}
                   placeholder="+1 (555) 000-0000"
-                  className="bg-gray-800 border-gray-700 text-white placeholder-gray-400"
+                  className={inputClasses}
                 />
               </div>
 
@@ -154,26 +152,26 @@ const ContactFormSection = () => {
                   placeholder="Briefly describe your needs or concerns..."
                   rows={4}
                   required
-                  className="bg-gray-800 border-gray-700 text-white placeholder-gray-400 resize-none"
+                  className={`${inputClasses} resize-none`}
                 />
               </div>
 
               <Button 
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 text-lg font-semibold"
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-3 text-lg font-semibold rounded-xl hover:shadow-[0_0_30px_rgba(245,158,11,0.3)] transition-all duration-300"
               >
                 {isSubmitting ? 'Submitting...' : 'Request Risk Assessment'}
               </Button>
 
-              <p className="text-gray-400 text-xs text-center">
+              <p className="text-muted-foreground text-xs text-center">
                 * Information stays confidential
               </p>
             </form>
-          </Card>
+          </div>
 
           <div className="text-center mt-8">
-            <p className="text-gray-500 text-sm">© {new Date().getFullYear()} A.R.I.A — All Reputation Rights Reserved</p>
+            <p className="text-muted-foreground text-sm">© {new Date().getFullYear()} A.R.I.A — All Reputation Rights Reserved</p>
           </div>
         </div>
       </div>

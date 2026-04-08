@@ -28,7 +28,7 @@ const SocialLinksSection = () => {
               target="_blank"
               rel="noopener noreferrer"
               aria-label={label}
-              className="text-gray-400 hover:text-orange-500 transition-all duration-300 hover:scale-110"
+              className="text-muted-foreground hover:text-primary transition-all duration-300 hover:scale-110"
             >
               <Icon className="h-8 w-8" />
             </a>
