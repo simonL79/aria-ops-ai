@@ -1,6 +1,5 @@
 
 import React, { useState } from 'react';
-import { Card } from '@/components/ui/card';
 import { Star } from 'lucide-react';
 import { useScrollReveal, useCountUp } from '@/hooks/useScrollReveal';
 
@@ -49,40 +48,40 @@ const TestimonialsSection = () => {
   return (
     <section className="bg-black py-16">
       <div className="container mx-auto px-6">
-        <h2 className="text-3xl font-bold text-white text-center mb-4">What Our Clients Say</h2>
-        <p className="text-gray-400 text-center mb-12 max-w-2xl mx-auto">
+        <h2 className="text-3xl md:text-4xl font-bold text-white text-center mb-4">What Our Clients Say</h2>
+        <p className="text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
           Trusted by executives, founders, and public figures to protect what matters most — their reputation.
         </p>
 
         {/* Animated Stats bar */}
         <div ref={statsRef} className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto mb-14">
           <div className="text-center">
-            <p className="text-3xl md:text-4xl font-bold text-orange-500">{threats}+</p>
-            <p className="text-gray-400 text-sm mt-1">Threats Neutralized</p>
+            <p className="text-3xl md:text-4xl font-bold text-primary">{threats}+</p>
+            <p className="text-muted-foreground text-sm mt-1">Threats Neutralized</p>
           </div>
           <div className="text-center">
-            <p className="text-3xl md:text-4xl font-bold text-orange-500">{retention}%</p>
-            <p className="text-gray-400 text-sm mt-1">Client Retention</p>
+            <p className="text-3xl md:text-4xl font-bold text-primary">{retention}%</p>
+            <p className="text-muted-foreground text-sm mt-1">Client Retention</p>
           </div>
           <div className="text-center">
-            <p className="text-3xl md:text-4xl font-bold text-orange-500">24/7</p>
-            <p className="text-gray-400 text-sm mt-1">Active Monitoring</p>
+            <p className="text-3xl md:text-4xl font-bold text-primary">24/7</p>
+            <p className="text-muted-foreground text-sm mt-1">Active Monitoring</p>
           </div>
           <div className="text-center relative">
             <div className="flex items-center justify-center gap-2">
               <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
               <span className="text-green-400 text-[10px] font-semibold uppercase tracking-wider">Live</span>
             </div>
-            <p className="text-3xl md:text-4xl font-bold text-orange-500">{liveThreat}</p>
-            <p className="text-gray-400 text-sm mt-1">Threats Detected Today</p>
+            <p className="text-3xl md:text-4xl font-bold text-primary">{liveThreat}</p>
+            <p className="text-muted-foreground text-sm mt-1">Threats Detected Today</p>
           </div>
         </div>
         
         <div ref={cardsRef} className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {testimonials.map((testimonial, index) => (
-            <Card
+            <div
               key={index}
-              className={`bg-gray-900 border-gray-800 p-8 text-white transition-all duration-700 ${
+              className={`glass-card p-8 text-white transition-all duration-700 ${
                 cardsVisible
                   ? 'opacity-100 translate-y-0'
                   : 'opacity-0 translate-y-6'
@@ -91,24 +90,24 @@ const TestimonialsSection = () => {
             >
               <div className="flex items-center mb-4">
                 {[...Array(testimonial.rating)].map((_, i) => (
-                  <Star key={i} className="h-5 w-5 fill-orange-500 text-orange-500" />
+                  <Star key={i} className="h-5 w-5 fill-current text-primary" />
                 ))}
               </div>
               
-              <p className="text-gray-300 mb-6 italic">"{testimonial.text}"</p>
+              <p className="text-muted-foreground mb-6 italic">"{testimonial.text}"</p>
               
               <div className="flex items-center">
-                <div className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center mr-4">
-                  <span className="text-white font-bold">
+                <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center mr-4">
+                  <span className="text-primary-foreground font-bold">
                     {testimonial.author.split(' ').map(n => n[0]).join('')}
                   </span>
                 </div>
                 <div>
                   <p className="font-semibold text-white">{testimonial.author}</p>
-                  <p className="text-gray-400 text-sm">{testimonial.role}</p>
+                  <p className="text-muted-foreground text-sm">{testimonial.role}</p>
                 </div>
               </div>
-            </Card>
+            </div>
           ))}
         </div>
       </div>
