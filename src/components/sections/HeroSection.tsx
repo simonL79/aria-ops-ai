@@ -4,11 +4,16 @@ import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Star, Shield } from 'lucide-react';
 import Logo from '../ui/logo';
+import ParticleBackground from '../widgets/ParticleBackground';
+import { useScrollReveal } from '@/hooks/useScrollReveal';
 
 const HeroSection = () => {
+  const { ref, visible } = useScrollReveal(0.1);
+
   return (
     <section className="hero bg-black text-foreground py-20 relative overflow-hidden min-h-screen flex items-center">
-      <div className="container mx-auto px-6 relative z-10 w-full">
+      <ParticleBackground />
+      <div ref={ref} className={`container mx-auto px-6 relative z-10 w-full transition-all duration-1000 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
         <div className="grid lg:grid-cols-2 gap-16 items-center max-w-7xl mx-auto">
           <div className="space-y-8 text-center">
             <div className="flex justify-center mb-8">
