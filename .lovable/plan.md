@@ -1,58 +1,36 @@
 
 
-# Level Up the Homepage -- Polish & Missing Sections
+# Restyle Blog Pages to Match the Dark AI Aesthetic
 
-## What We'll Do
-
-Add the missing sections to the homepage, add a typewriter effect to the hero headline, create an FAQ section, fix social links, and update the theme color to match your brand.
+The blog page and blog post page use generic theme tokens (`bg-background`, `bg-card`, `border-border`) which render as a light, plain design. The rest of the site uses an explicit dark theme with black backgrounds, orange accents, glassmorphism, and scroll animations. Here's how to bring the blog in line.
 
 ---
 
-## 1. Add Missing Sections to Homepage
+## 1. Blog Listing Page (`BlogPage.tsx`)
 
-The `HowItWorksSection`, `PricingSection`, and `CTASection` components already exist but aren't on the homepage. We'll add them in a logical flow order and restyle `HowItWorksSection` to use the dark theme (currently white background, clashes with the rest of the site).
+- Change outer wrapper from `bg-background` to `bg-black`
+- Heading: white text, add scroll-reveal animation
+- Subheading: `text-gray-400`
+- Skeleton cards: dark-themed (`bg-gray-900`, `border-gray-800`)
+- Post cards: `bg-black/50 border-gray-800 backdrop-blur` with `hover:border-orange-500/50` glow effect (matching the glassmorphism style from other sections)
+- Card text: white title, `text-gray-400` summary, orange hover on title
+- "Load More" button: orange outline style
+- Add scroll-reveal entrance animation using existing `useScrollReveal` hook
 
-**Updated homepage section order:**
-Hero → Social Links → Services → Add-On Services → How It Works (restyled dark) → Pricing (restyled dark) → Testimonials → FAQ (new) → Contact Form → CTA
+## 2. Blog Post Page (`BlogPostPage.tsx`)
 
----
+- Change outer wrapper from `bg-background` to `bg-black`
+- Back link: orange colored
+- Title: white text
+- Meta row: `text-gray-400`, badges with dark background
+- `blog-prose` content: ensure text renders white/light gray (may need a global CSS tweak or inline prose class override)
+- Related articles cards: dark-themed matching the listing cards
+- CTA section at bottom: dark card with orange button
+- FAQ accordion: dark borders, orange accent on triggers
 
-## 2. Hero Typewriter Effect
+## 3. Blog Prose Styles
 
-Add an animated typewriter effect to the headline text "Elevate Your Digital Reputation" so the words type out character by character on load. Pure CSS + React state -- no library needed.
-
-**File:** `HeroSection.tsx`
-
----
-
-## 3. New FAQ Section
-
-Create a new `FAQSection.tsx` with expandable accordion items using the existing `Collapsible` component. Dark-themed, scroll-animated. Topics:
-
-- What is A.R.I.A?
-- How fast do you respond to threats?
-- Is my data confidential?
-- What platforms do you monitor?
-- How does pricing work?
-
----
-
-## 4. Fix Social Links
-
-Update `SocialLinksSection.tsx` to point to real A.R.I.A profiles (or remove the links and just show icons if no real profiles exist yet). Add X/Twitter icon alongside the existing four.
-
----
-
-## 5. Restyle Existing Sections for Dark Theme
-
-- `HowItWorksSection`: Change from white bg to black bg with white/gray text and orange accents
-- `PricingSection`: Change from `bg-background` to black bg with orange accent borders
-
----
-
-## 6. Update Theme Color
-
-Change `index.html` theme-color from `#247CFF` (blue) to `#F97316` (orange) to match the site's actual brand palette.
+Check if there's a `blog-prose` CSS class defined. If so, update it for dark backgrounds (light text, orange links). If not, add one in the global stylesheet.
 
 ---
 
@@ -60,11 +38,9 @@ Change `index.html` theme-color from `#247CFF` (blue) to `#F97316` (orange) to m
 
 | File | Change |
 |------|--------|
-| `src/pages/HomePage.tsx` | Add HowItWorks, Pricing, FAQ, CTA sections |
-| `src/components/sections/HeroSection.tsx` | Add typewriter animation |
-| `src/components/sections/FAQSection.tsx` | **New** -- accordion FAQ |
-| `src/components/sections/HowItWorksSection.tsx` | Restyle to dark theme |
-| `src/components/sections/PricingSection.tsx` | Restyle to dark theme |
-| `src/components/sections/SocialLinksSection.tsx` | Add X icon, update hrefs |
-| `index.html` | Fix theme-color meta |
+| `src/pages/BlogPage.tsx` | Dark theme, glassmorphism cards, scroll animation |
+| `src/pages/BlogPostPage.tsx` | Dark theme, dark prose, dark related cards |
+| Global CSS (if `blog-prose` exists) | Light text for dark background |
+
+No new dependencies. Purely visual changes using existing patterns from the homepage sections.
 
