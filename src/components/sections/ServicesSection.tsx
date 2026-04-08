@@ -1,7 +1,7 @@
 
 import React, { useRef, useCallback } from 'react';
 import { Card } from '@/components/ui/card';
-import { Shield, Eye, Users } from 'lucide-react';
+import { Shield, Swords, Fingerprint, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 
@@ -14,7 +14,7 @@ const ServiceCard = ({ service, index, visible }: { service: any; index: number;
     const rect = card.getBoundingClientRect();
     const x = (e.clientX - rect.left) / rect.width - 0.5;
     const y = (e.clientY - rect.top) / rect.height - 0.5;
-    card.style.transform = `perspective(600px) rotateY(${x * 8}deg) rotateX(${-y * 8}deg) scale(1.02)`;
+    card.style.transform = `perspective(600px) rotateY(${x * 6}deg) rotateX(${-y * 6}deg) scale(1.02)`;
   }, []);
 
   const handleMouseLeave = useCallback(() => {
@@ -28,29 +28,24 @@ const ServiceCard = ({ service, index, visible }: { service: any; index: number;
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       className={`transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
-      style={{ transitionDelay: visible ? `${index * 150}ms` : '0ms', transformStyle: 'preserve-3d' }}
+      style={{ transitionDelay: visible ? `${index * 120}ms` : '0ms', transformStyle: 'preserve-3d' }}
     >
-      <Card className="bg-gray-900/60 backdrop-blur-md border border-gray-700/50 p-8 text-white hover:border-orange-500/50 hover:shadow-[0_0_30px_rgba(245,158,11,0.15)] transition-all duration-500 h-full">
-        <div className="flex items-center mb-6">
-          <div className="w-12 h-12 bg-orange-500 rounded-lg flex items-center justify-center mr-4">
-            <service.icon className="h-6 w-6 text-white" />
+      <Card className="glass-card p-8 text-white hover:border-primary/30 hover:shadow-[0_0_30px_rgba(245,158,11,0.1)] transition-all duration-500 h-full">
+        <div className="flex items-center gap-4 mb-6">
+          <div className="w-12 h-12 bg-primary/10 border border-primary/20 rounded-xl flex items-center justify-center">
+            <service.icon className="h-6 w-6 text-primary" />
           </div>
           <h3 className="text-xl font-bold">{service.title}</h3>
         </div>
         
-        <div className="mb-6">
-          <h4 className="text-orange-500 font-semibold mb-2">{service.description}</h4>
-          <ul className="text-gray-300 space-y-1">
-            {service.details.map((detail: string, idx: number) => (
-              <li key={idx} className="text-sm">{detail}</li>
-            ))}
-          </ul>
-        </div>
-
-        <div>
-          <h4 className="text-orange-500 font-semibold mb-2">{service.mission}</h4>
-          <p className="text-gray-300 text-sm">{service.missionText}</p>
-        </div>
+        <ul className="text-muted-foreground space-y-2">
+          {service.capabilities.map((cap: string, idx: number) => (
+            <li key={idx} className="text-sm flex items-start gap-2">
+              <span className="text-primary mt-1">·</span>
+              {cap}
+            </li>
+          ))}
+        </ul>
       </Card>
     </div>
   );
@@ -62,73 +57,67 @@ const ServicesSection = () => {
   const services = [
     {
       icon: Shield,
-      title: "Social Media Protection",
-      description: "What We Do:",
-      details: [
-        "• Monitor & respond to negative Twitter mentions",
-        "• Instagram brand protection & reputation",
-        "• LinkedIn professional presence management",
-        "• Facebook reputation crisis response"
+      title: "AI Threat Detection",
+      capabilities: [
+        "Emerging narrative risk identification",
+        "Hostile content discovery & tracking",
+        "Search vulnerability analysis",
+        "Sentiment volatility monitoring",
       ],
-      mission: "Why It Matters:",
-      missionText: "Social media moves fast. Negative content spreads at light speed and can cause severe reputational damage within hours."
     },
     {
-      icon: Eye,
-      title: "Influence & Creator Shield",
-      description: "What We Do:",
-      details: [
-        "• Monitor influencer mentions and collaborations",
-        "• Proactive content against upcoming threats",
-        "• Creator network relationship management",
-        "• Digital footprint analysis and protection"
+      icon: Swords,
+      title: "Narrative Defense",
+      capabilities: [
+        "Strategic response architecture",
+        "Content counterweight deployment",
+        "Press balancing & correction",
+        "Social narrative repositioning",
       ],
-      mission: "Why It Matters:",
-      missionText: "Influencers and creators shape public opinion and their followers can be mobilized to defend reputations when done right."
     },
     {
-      icon: Users,
-      title: "Executive Protection",
-      description: "What We Do:",
-      details: [
-        "• High-level threat identification & suppression",
-        "• Personal brand protection for executives",
-        "• Crisis communication strategy development",
-        "• Reputation recovery and reconstruction"
+      icon: Fingerprint,
+      title: "Identity Protection",
+      capabilities: [
+        "Impersonation scanning & alerts",
+        "Profile cloning risk assessment",
+        "Synthetic content detection",
+        "Misinformation containment",
       ],
-      mission: "Why It Matters:",
-      missionText: "Executives need to maintain a threat-free environment. Whether it's pre-IPO due diligence or personal brand threats."
-    }
+    },
+    {
+      icon: Search,
+      title: "Search Positioning",
+      capabilities: [
+        "Defensive ranking strategy",
+        "Reputation-safe visibility",
+        "Authority content layering",
+        "Long-term search resilience",
+      ],
+    },
   ];
 
   return (
-    <section className="bg-black py-16" id="services">
+    <section className="bg-black py-24" id="services">
       <div ref={ref} className="container mx-auto px-6">
-        <div className={`text-center mb-12 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            Reputation Management Services – Powered by <span className="text-orange-500">A.R.I.A™</span>
+        <div className={`text-center mb-16 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+            Intelligence-Grade <span className="text-primary">Protection</span>
           </h2>
-          <p className="text-gray-300 max-w-4xl mx-auto">
-            A.R.I.A™ isn't just for individuals, CEOs, or global brands. Reputation is personal — and everyone 
-            deserves protection. Whether you're facing online abuse, negative press, or algorithmic bias, we've 
-            built elite tools for every type of modern digital reality.
+          <p className="text-muted-foreground max-w-3xl mx-auto text-lg">
+            Four integrated defence layers powered by A.R.I.A™ — built for high-profile individuals, brands, and organisations that cannot afford reputational exposure.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8 mb-16">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
           {services.map((service, index) => (
             <ServiceCard key={index} service={service} index={index} visible={visible} />
           ))}
         </div>
 
         <div className={`text-center transition-all duration-700 delay-500 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
-          <h3 className="text-2xl font-bold text-white mb-4">Ready to Get Started?</h3>
-          <p className="text-gray-300 mb-8 max-w-2xl mx-auto">
-            Get a comprehensive assessment of your digital risk profile. Our experts will identify 
-            vulnerabilities and provide a strategic roadmap.
-          </p>
           <Link to="/scan">
-            <button className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-lg font-semibold transition-colors">
+            <button className="bg-primary hover:bg-primary/90 text-primary-foreground px-10 py-4 rounded-xl font-medium transition-all duration-300 hover:shadow-[0_0_30px_rgba(245,158,11,0.3)]">
               Request Risk Assessment
             </button>
           </Link>
