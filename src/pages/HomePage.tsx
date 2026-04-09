@@ -13,6 +13,7 @@ import FAQSection from '@/components/sections/FAQSection';
 import ContactFormSection from '@/components/sections/ContactFormSection';
 import CTASection from '@/components/sections/CTASection';
 import SocialLinksSection from '@/components/sections/SocialLinksSection';
+import AINewsFeedSection from '@/components/sections/AINewsFeedSection';
 import ChatWidget from '@/components/widgets/ChatWidget';
 
 const HomePage = () => {
@@ -23,6 +24,7 @@ const HomePage = () => {
           <HeroSection />
           <ThreatScoreSection />
           <ServicesSection />
+          <AINewsFeedSection />
           <HowItWorksSection />
           <TrustSection />
           <TestimonialsSection />
