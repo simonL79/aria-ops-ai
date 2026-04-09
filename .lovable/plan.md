@@ -1,58 +1,72 @@
 
 
-# Add Live AI News Section to Homepage
+# Elevate the Homepage — Visual Depth and Premium Polish
 
-## What
+## Overview
 
-A new "AI Intelligence Feed" section on the homepage that scrapes live headlines from aibusiness.com via a Supabase Edge Function, displaying them in the dark premium theme as a curated news ticker / card grid.
-
-## How It Works
-
-Since aibusiness.com is a public website, we'll use a Firecrawl-based edge function to scrape the latest headlines on demand, cache them in Supabase, and display them in a styled section on the homepage.
-
-However, the simpler and more reliable approach: **use an RSS feed**. AI Business publishes RSS at `https://aibusiness.com/rss.xml`. We already have RSS scraping infrastructure (`supabase/functions/rss-scraper/`).
+Add visual rhythm, credibility signals, ambient depth, and anonymised testimonials to transform the homepage from a flat scroll into a premium intelligence-grade experience.
 
 ## Changes
 
-### 1. New Edge Function: `ai-news-feed`
-**File: `supabase/functions/ai-news-feed/index.ts`** (new)
+### 1. New: Featured In Credibility Bar
+**File: `src/components/sections/FeaturedInSection.tsx`** (create)
 
-- Fetches `https://aibusiness.com/rss.xml` 
-- Parses XML to extract title, link, pubDate, description, and image URL from each item
-- Returns the latest 8-10 articles as JSON
-- Includes CORS headers for browser access
-- Caches results in a `ai_news_cache` table (optional, for performance)
+A horizontal strip placed after the Hero showing "As Featured In" with text-based brand names (BBC, Forbes, Bloomberg, Financial Times, TechCrunch) in a CSS marquee scroll. Muted styling — `text-muted-foreground/40`, uppercase, spaced. No images.
 
-### 2. New Section Component: `AINewsFeedSection`
-**File: `src/components/sections/AINewsFeedSection.tsx`** (new)
+### 2. New: Section Divider
+**File: `src/components/ui/SectionDivider.tsx`** (create)
 
-- Calls the edge function on mount via `supabase.functions.invoke('ai-news-feed')`
-- Displays a section titled "AI Intelligence Feed" with subtitle "Live from AI Business"
-- Shows 6 news cards in a 3-column grid (2 on tablet, 1 on mobile)
-- Each card: headline, date, source badge, and "Read More" link opening in new tab
-- Skeleton loading state while fetching
-- Styled in the existing dark theme: `bg-background`, `glass-card`, `text-primary` accents
-- Uses `useScrollReveal` for entrance animation (matches other sections)
+A reusable thin `<hr>`-like component with a gradient: `transparent → primary/20 → transparent`. Optional centered glow dot. Place between major section groups for visual breathing room.
 
-### 3. Add to Homepage
+### 3. New: Ambient Grid Overlay
+**File: `src/components/ui/AmbientGrid.tsx`** (create)
+
+4-6 small CSS circles with slow drift animation, positioned absolute behind content. Applied to Services and Trust sections for background depth.
+
+### 4. Vary Section Backgrounds
+**Files: `ServicesSection.tsx`, `TrustSection.tsx`, `PricingSection.tsx`**
+
+- Services: `bg-gradient-to-b from-black via-gray-950 to-black`
+- Trust: keep `bg-black` (contrast)
+- Pricing: `bg-gradient-to-b from-black via-gray-950 to-black`
+
+This creates alternating visual rhythm.
+
+### 5. Anonymise Testimonials
+**File: `src/components/sections/TestimonialsSection.tsx`**
+
+Replace named individuals with discreet professional descriptors:
+- "Sarah Chen, CMO" → "Chief Marketing Officer — Media & Entertainment"
+- "Michael Rodriguez, Managing Partner" → "Managing Partner — Financial Services"
+- "James Whitfield, CEO" → "CEO — Private Capital"
+- "Priya Kapoor, PR Director" → "Director of Communications — Technology"
+- "David Okonkwo, Founder" → "Founder & Investor — Venture Capital"
+
+Replace initials avatar with a generic shield/lock icon. Aligns with the NDA/discretion messaging.
+
+### 6. Compose into HomePage
 **File: `src/pages/HomePage.tsx`**
 
-- Import and place `<AINewsFeedSection />` between `ServicesSection` and `HowItWorksSection` (or after TrustSection — between credibility and pricing)
+- Insert `<FeaturedInSection />` after `<HeroSection />`
+- Insert `<SectionDivider />` between: ThreatScore/Services, AINewsFeed/HowItWorks, Testimonials/Pricing, FAQ/Contact
 
-## Design
+### 7. Add Keyframes
+**File: `tailwind.config.ts`**
 
-Cards will match the premium dark aesthetic:
-- Glass-card background with border-border
-- Headline in white, date in muted-foreground
-- Blue primary accent on hover
-- External link icon on each card
-- "Powered by AI Business" attribution at bottom
+Add `marquee` (horizontal scroll loop) and `drift` (slow random float) keyframes + animation utilities.
 
 ## Files Summary
 
 | File | Action |
 |------|--------|
-| `supabase/functions/ai-news-feed/index.ts` | Create — RSS fetch + parse |
-| `src/components/sections/AINewsFeedSection.tsx` | Create — news grid UI |
-| `src/pages/HomePage.tsx` | Edit — add section |
+| `FeaturedInSection.tsx` | Create |
+| `SectionDivider.tsx` | Create |
+| `AmbientGrid.tsx` | Create |
+| `ServicesSection.tsx` | Edit bg |
+| `PricingSection.tsx` | Edit bg |
+| `TestimonialsSection.tsx` | Edit — anonymise |
+| `HomePage.tsx` | Edit — compose |
+| `tailwind.config.ts` | Edit — keyframes |
+
+No new dependencies. All CSS-driven.
 
