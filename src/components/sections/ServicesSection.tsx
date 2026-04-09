@@ -98,7 +98,7 @@ const ServicesSection = () => {
   ];
 
   return (
-    <section className="bg-black py-24" id="services">
+    <section className="bg-gradient-to-b from-black via-gray-950 to-black py-24 relative" id="services">
       <div ref={ref} className="container mx-auto px-6">
         <div className={`text-center mb-16 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">

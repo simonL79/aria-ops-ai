@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Star } from 'lucide-react';
+import { Star, Shield } from 'lucide-react';
 import { useScrollReveal, useCountUp } from '@/hooks/useScrollReveal';
 
 const TestimonialsSection = () => {
@@ -15,32 +15,27 @@ const TestimonialsSection = () => {
   const testimonials = [
     {
       text: "This intelligence platform helped us identify and neutralize a coordinated attack before it reached mainstream media. I don't know what we would have done without them.",
-      author: "Sarah Chen",
-      role: "Chief Marketing Officer",
+      role: "Chief Marketing Officer — Media & Entertainment",
       rating: 5
     },
     {
       text: "The speed of their analysis and speed of response is unmatched. They don't just monitor – they predict and prevent. Incredible for our adviser team safety.",
-      author: "Michael Rodriguez",
-      role: "Managing Partner",
+      role: "Managing Partner — Financial Services",
       rating: 5
     },
     {
       text: "After a competitor launched a smear campaign against our brand, A.R.I.A detected it within hours and gave us a clear counter-strategy. Worth every penny.",
-      author: "James Whitfield",
-      role: "CEO, Whitfield Capital",
+      role: "CEO — Private Capital",
       rating: 5
     },
     {
       text: "We were getting buried by fake reviews. A.R.I.A mapped the attack network and helped us get them removed across three platforms in under a week.",
-      author: "Priya Kapoor",
-      role: "PR Director",
+      role: "Director of Communications — Technology",
       rating: 5
     },
     {
       text: "As a public figure, my online reputation is everything. A.R.I.A gives me peace of mind with 24/7 monitoring and instant alerts when something surfaces.",
-      author: "David Okonkwo",
-      role: "Founder & Investor",
+      role: "Founder & Investor — Venture Capital",
       rating: 5
     }
   ];
@@ -97,14 +92,12 @@ const TestimonialsSection = () => {
               <p className="text-muted-foreground mb-6 italic">"{testimonial.text}"</p>
               
               <div className="flex items-center">
-                <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center mr-4">
-                  <span className="text-primary-foreground font-bold">
-                    {testimonial.author.split(' ').map(n => n[0]).join('')}
-                  </span>
+                <div className="w-12 h-12 bg-primary/10 border border-primary/20 rounded-full flex items-center justify-center mr-4">
+                  <Shield className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <p className="font-semibold text-white">{testimonial.author}</p>
                   <p className="text-muted-foreground text-sm">{testimonial.role}</p>
+                  <p className="text-muted-foreground/50 text-xs mt-0.5">Identity Protected</p>
                 </div>
               </div>
             </div>

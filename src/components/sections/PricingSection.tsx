@@ -64,7 +64,7 @@ const PricingSection = () => {
   ];
 
   return (
-    <section className="py-24 bg-black">
+    <section className="py-24 bg-gradient-to-b from-black via-gray-950 to-black">
       <div ref={ref} className={`container mx-auto px-6 transition-all duration-1000 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
         <h2 className="text-4xl md:text-5xl font-bold mb-16 text-center text-white">
           Pricing
