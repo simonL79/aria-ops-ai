@@ -137,6 +137,16 @@ export default {
 			'scanline-bar': {
 				'0%': { transform: 'translateX(-100%)' },
 				'100%': { transform: 'translateX(400%)' }
+			},
+			'marquee': {
+				'0%': { transform: 'translateX(0%)' },
+				'100%': { transform: 'translateX(-50%)' }
+			},
+			'drift': {
+				'0%, 100%': { transform: 'translate(0, 0)', opacity: '0.3' },
+				'25%': { transform: 'translate(10px, -15px)', opacity: '0.6' },
+				'50%': { transform: 'translate(-5px, 10px)', opacity: '0.4' },
+				'75%': { transform: 'translate(15px, 5px)', opacity: '0.5' }
 			}
 			},
 			animation: {
@@ -147,7 +157,9 @@ export default {
 			'float': 'float 6s ease-in-out infinite',
 			'scanline': 'scanline 4s linear infinite',
 			'ring-pulse': 'ring-pulse 3s ease-in-out infinite',
-			'fade-in-scale': 'fade-in-scale 1.2s ease-out forwards'
+			'fade-in-scale': 'fade-in-scale 1.2s ease-out forwards',
+			'marquee': 'marquee 20s linear infinite',
+			'drift': 'drift 8s ease-in-out infinite'
 			}
 		}
 	},
