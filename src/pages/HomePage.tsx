@@ -3,7 +3,7 @@ import React from 'react';
 import PublicPagesProtection from '@/components/layout/PublicPagesProtection';
 import PublicLayout from '@/components/layout/PublicLayout';
 import HeroSection from '@/components/sections/HeroSection';
-import FeaturedInSection from '@/components/sections/FeaturedInSection';
+
 import ThreatScoreSection from '@/components/sections/ThreatScoreSection';
 import ServicesSection from '@/components/sections/ServicesSection';
 import HowItWorksSection from '@/components/sections/HowItWorksSection';
@@ -24,7 +24,7 @@ const HomePage = () => {
       <PublicLayout>
         <div className="bg-background text-foreground min-h-screen">
           <HeroSection />
-          <FeaturedInSection />
+          
           <ThreatScoreSection />
           <SectionDivider glow />
           <ServicesSection />
