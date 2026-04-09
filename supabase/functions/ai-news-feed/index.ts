@@ -25,7 +25,7 @@ serve(async (req) => {
 
     for (const itemXml of itemMatches.slice(0, 8)) {
       const title = itemXml.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]?.replace(/<!\[CDATA\[(.*?)\]\]>/gs, '$1').trim() || '';
-      const link = itemXml.match(/<link[^>]*>([\s\S]*?)<\/link>/i)?.[1]?.trim() || '';
+      const link = itemXml.match(/<link[^>]*>([\s\S]*?)<\/link>/i)?.[1]?.replace(/<!\[CDATA\[(.*?)\]\]>/gs, '$1').trim() || '';
       const description = itemXml.match(/<description[^>]*>([\s\S]*?)<\/description>/i)?.[1]?.replace(/<!\[CDATA\[(.*?)\]\]>/gs, '$1').replace(/<[^>]+>/g, '').trim() || '';
       const pubDate = itemXml.match(/<pubDate[^>]*>([\s\S]*?)<\/pubDate>/i)?.[1]?.trim() || '';
       const image = itemXml.match(/<media:content[^>]*url="([^"]+)"/i)?.[1] ||
