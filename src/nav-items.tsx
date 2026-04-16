@@ -17,11 +17,8 @@ import ReputationScanPage from "./pages/ReputationScanPage";
 import ReputationScanForm from "./pages/ReputationScanForm";
 import ThankYouPage from "./pages/ThankYouPage";
 import Monitor from "./pages/Monitor";
-import MonitoringPage from "./pages/MonitoringPage";
 import Reports from "./pages/Reports";
-import ReportsPage from "./pages/ReportsPage";
 import Clients from "./pages/Clients";
-import ClientsPage from "./pages/ClientsPage";
 import SettingsPage from "./pages/Settings";
 import Contact from "./pages/Contact";
 import Terms from "./pages/Terms";
@@ -33,13 +30,11 @@ import BlogPage from "./pages/BlogPage";
 import BlogPostPage from "./pages/BlogPostPage";
 import BlogAdminPage from "./pages/BlogAdminPage";
 import ClientIntakePage from "./pages/ClientIntakePage";
-import SecureClientIntakePage from "./pages/SecureClientIntakePage";
 import DPARequestPage from "./pages/DPARequestPage";
 import RequestDataAccessPage from "./pages/RequestDataAccessPage";
 import PaymentPage from "./pages/PaymentPage";
 import ContactFormPage from "./pages/ContactFormPage";
 import CleanLaunchPage from "./pages/CleanLaunchPage";
-import CleanLaunch from "./pages/CleanLaunch";
 import CalendarPage from "./pages/CalendarPage";
 import ThreatsPage from "./pages/ThreatsPage";
 import Discovery from "./pages/Discovery";
@@ -57,7 +52,6 @@ import SeoCenterPage from "./pages/SeoCenterPage";
 import OperatorConsole from "./pages/OperatorConsole";
 import AriaCommand from "./pages/AriaCommand";
 import HyperCorePage from "./pages/HyperCorePage";
-import AnubisGPTCockpit from "./pages/AnubisGPTCockpit";
 import AnubisCockpitPage from "./pages/AnubisCockpitPage";
 import AiScrapingPage from "./pages/AiScrapingPage";
 import EnhancedIntelligence from "./pages/EnhancedIntelligence";
@@ -67,29 +61,19 @@ import NotFound from "./pages/NotFound";
 import ExecutiveReportsPage from "./pages/ExecutiveReportsPage";
 import SystemCheckPage from "./pages/SystemCheckPage";
 import QATestPage from "./pages/QATestPage";
-import ClientOnboardingPage from "./pages/ClientOnboardingPage";
 import UsersPage from "./pages/UsersPage";
 
 // Admin imports
-import AdminDashboardPage from "./pages/admin/AdminDashboard";
-import ClientManagementPage from "./pages/admin/ClientManagementPage";
-import ClientsPageAdmin from "./pages/admin/ClientsPage";
-import SettingsPageAdmin from "./pages/admin/SettingsPage";
-import SystemSettingsPage from "./pages/admin/SystemSettingsPage";
 import SystemOptimizationPage from "./pages/admin/SystemOptimizationPage";
 import SystemAuditPage from "./pages/admin/SystemAuditPage";
 import QATestingPage from "./pages/admin/QATestingPage";
-import StrategyBrainTestPage from "./pages/admin/StrategyBrainTestPage";
-import StrategyBrainStage3Page from "./pages/admin/StrategyBrainStage3Page";
 import StrategyBrainStage3TestPage from "./pages/admin/StrategyBrainStage3TestPage";
 import PersonaSaturationPage from "./pages/admin/PersonaSaturationPage";
-import KeywordToArticleSystemPage from "./pages/admin/KeywordToArticleSystemPage";
 import GenesisSentinelPage from "./pages/admin/GenesisSentinelPage";
 import GenesisSentinel from "./pages/admin/GenesisSentinel";
 import SentinelPage from "./pages/admin/SentinelPage";
 import SentinelOperatorPage from "./pages/admin/SentinelOperatorPage";
 import IntelligenceCorePage from "./pages/admin/IntelligenceCorePage";
-import ControlCenterPage from "./pages/admin/ControlCenterPage";
 import LegalOpsPage from "./pages/admin/LegalOpsPage";
 import AnubisMemoryPage from "./pages/admin/AnubisMemoryPage";
 
@@ -103,10 +87,6 @@ import ThreatResponsePage from "./pages/dashboard/ThreatResponsePage";
 import ScanSubmissionsPage from "./pages/dashboard/ScanSubmissionsPage";
 import MentionsPage from "./pages/dashboard/MentionsPage";
 import RadarPage from "./pages/dashboard/RadarPage";
-
-// Intelligence imports
-import IntelligenceWorkbenchPage from "./pages/intelligence/IntelligenceWorkbench";
-import OffensiveOperationsPage from "./pages/intelligence/OffensiveOperations";
 
 export const navItems: { title: string; to: string; icon: React.ReactElement; page: React.ReactElement; isPublic?: boolean }[] = [
   {
@@ -219,34 +199,16 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     page: <Monitor />,
   },
   {
-    title: "Monitoring",
-    to: "/monitoring",
-    icon: <Clock className="h-4 w-4" />,
-    page: <MonitoringPage />,
-  },
-  {
     title: "Reports",
     to: "/reports",
     icon: <FileText className="h-4 w-4" />,
     page: <Reports />,
   },
   {
-    title: "Reports Page",
-    to: "/reports-page",
-    icon: <FileImage className="h-4 w-4" />,
-    page: <ReportsPage />,
-  },
-  {
     title: "Clients",
     to: "/clients",
     icon: <Users className="h-4 w-4" />,
     page: <Clients />,
-  },
-  {
-    title: "Clients Page",
-    to: "/clients-page",
-    icon: <UserPlus className="h-4 w-4" />,
-    page: <ClientsPage />,
   },
   {
     title: "Settings",
@@ -324,12 +286,6 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     isPublic: true,
   },
   {
-    title: "A.R.I.A™ Secure Intake",
-    to: "/secure-intake",
-    icon: <Shield className="h-4 w-4" />,
-    page: <SecureClientIntakePage />,
-  },
-  {
     title: "DPA Request",
     to: "/dpa-request",
     icon: <FileText className="h-4 w-4" />,
@@ -362,13 +318,6 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     to: "/clean-launch",
     icon: <Zap className="h-4 w-4" />,
     page: <CleanLaunchPage />,
-    isPublic: true,
-  },
-  {
-    title: "Clean Launch Page",
-    to: "/clean-launch-page",
-    icon: <Zap className="h-4 w-4" />,
-    page: <CleanLaunch />,
     isPublic: true,
   },
   {
@@ -475,12 +424,6 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     page: <HyperCorePage />,
   },
   {
-    title: "Anubis GPT Cockpit",
-    to: "/anubis-gpt-cockpit",
-    icon: <Bot className="h-4 w-4" />,
-    page: <AnubisGPTCockpit />,
-  },
-  {
     title: "Anubis Cockpit",
     to: "/anubis-cockpit",
     icon: <Gauge className="h-4 w-4" />,
@@ -535,49 +478,13 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     icon: <CheckSquare className="h-4 w-4" />,
     page: <QATestPage />,
   },
-    {
-    title: "Client Onboarding",
-    to: "/client-onboarding",
-    icon: <UserPlus className="h-4 w-4" />,
-    page: <ClientOnboardingPage />,
-  },
   {
     title: "Users",
     to: "/users",
     icon: <Users className="h-4 w-4" />,
     page: <UsersPage />,
   },
-  // Admin Routes
-  {
-    title: "Admin Dashboard",
-    to: "/admin/admin-dashboard",
-    icon: <Command className="h-4 w-4" />,
-    page: <AdminDashboardPage />,
-  },
-  {
-    title: "Client Management",
-    to: "/admin/client-management",
-    icon: <Briefcase className="h-4 w-4" />,
-    page: <ClientManagementPage />,
-  },
-  {
-    title: "Clients Admin",
-    to: "/admin/clients",
-    icon: <Headphones className="h-4 w-4" />,
-    page: <ClientsPageAdmin />,
-  },
-  {
-    title: "Settings Admin",
-    to: "/admin/settings",
-    icon: <Settings className="h-4 w-4" />,
-    page: <SettingsPageAdmin />,
-  },
-  {
-    title: "System Settings",
-    to: "/admin/system-settings",
-    icon: <Layers className="h-4 w-4" />,
-    page: <SystemSettingsPage />,
-  },
+  // Admin Routes (unique to navItems — not duplicated in App.tsx)
   {
     title: "System Optimization",
     to: "/admin/system-optimization",
@@ -597,18 +504,6 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     page: <QATestingPage />,
   },
   {
-    title: "Strategy Brain Test",
-    to: "/admin/strategy-brain-test",
-    icon: <Brain className="h-4 w-4" />,
-    page: <StrategyBrainTestPage />,
-  },
-  {
-    title: "Strategy Brain Stage 3",
-    to: "/admin/strategy-brain-stage3",
-    icon: <Brain className="h-4 w-4" />,
-    page: <StrategyBrainStage3Page />,
-  },
-  {
     title: "Strategy Brain Stage 3 Test",
     to: "/admin/strategy-brain-stage3-test",
     icon: <Brain className="h-4 w-4" />,
@@ -621,22 +516,16 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     page: <PersonaSaturationPage />,
   },
   {
-    title: "Keyword to Article System",
-    to: "/admin/keyword-to-article-system",
-    icon: <FileText className="h-4 w-4" />,
-    page: <KeywordToArticleSystemPage />,
+    title: "Genesis Sentinel",
+    to: "/admin/genesis-sentinel",
+    icon: <Shield className="h-4 w-4" />,
+    page: <GenesisSentinel />,
   },
   {
     title: "Genesis Sentinel Page",
     to: "/admin/genesis-sentinel-page",
     icon: <Shield className="h-4 w-4" />,
     page: <GenesisSentinelPage />,
-  },
-  {
-    title: "Genesis Sentinel",
-    to: "/admin/genesis-sentinel",
-    icon: <Shield className="h-4 w-4" />,
-    page: <GenesisSentinel />,
   },
   {
     title: "Sentinel Page",
@@ -650,26 +539,20 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     icon: <Shield className="h-4 w-4" />,
     page: <SentinelOperatorPage />,
   },
-   {
-    title: "Intelligence Core Page",
+  {
+    title: "Intelligence Core",
     to: "/admin/intelligence-core-page",
     icon: <Brain className="h-4 w-4" />,
     page: <IntelligenceCorePage />,
   },
   {
-    title: "Control Center Page",
-    to: "/admin/control-center-page",
-    icon: <Command className="h-4 w-4" />,
-    page: <ControlCenterPage />,
-  },
-  {
-    title: "Legal Ops Page",
+    title: "Legal Ops",
     to: "/admin/legal-ops-page",
     icon: <Gavel className="h-4 w-4" />,
     page: <LegalOpsPage />,
   },
   {
-    title: "Anubis Memory Page",
+    title: "Anubis Memory",
     to: "/admin/anubis-memory-page",
     icon: <Database className="h-4 w-4" />,
     page: <AnubisMemoryPage />,
@@ -682,64 +565,51 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     page: <DashboardPage />,
   },
   {
-    title: "Aria Ingest Page",
+    title: "Aria Ingest",
     to: "/dashboard/aria-ingest-page",
     icon: <Zap className="h-4 w-4" />,
     page: <AriaIngestPage />,
   },
   {
-    title: "Analytics Page",
+    title: "Analytics",
     to: "/dashboard/analytics-page",
     icon: <BarChart3 className="h-4 w-4" />,
     page: <AnalyticsPage />,
   },
   {
-    title: "Command Center Page",
+    title: "Command Center",
     to: "/dashboard/command-center-page",
     icon: <Command className="h-4 w-4" />,
     page: <CommandCenterPage />,
   },
   {
-    title: "Intelligence Page",
+    title: "Intelligence",
     to: "/dashboard/intelligence-page",
     icon: <Brain className="h-4 w-4" />,
     page: <IntelligencePage />,
   },
   {
-    title: "Threat Response Page",
+    title: "Threat Response",
     to: "/dashboard/threat-response-page",
     icon: <AlertTriangle className="h-4 w-4" />,
     page: <ThreatResponsePage />,
   },
   {
-    title: "Scan Submissions Page",
+    title: "Scan Submissions",
     to: "/dashboard/scan-submissions-page",
     icon: <FileText className="h-4 w-4" />,
     page: <ScanSubmissionsPage />,
   },
   {
-    title: "Mentions Page",
+    title: "Mentions",
     to: "/dashboard/mentions-page",
     icon: <MessageSquare className="h-4 w-4" />,
     page: <MentionsPage />,
   },
   {
-    title: "Radar Page",
+    title: "Radar",
     to: "/dashboard/radar-page",
     icon: <Radar className="h-4 w-4" />,
     page: <RadarPage />,
-  },
-  // Intelligence Routes
-  {
-    title: "Intelligence Workbench Page",
-    to: "/intelligence/intelligence-workbench-page",
-    icon: <Brain className="h-4 w-4" />,
-    page: <IntelligenceWorkbenchPage />,
-  },
-  {
-    title: "Offensive Operations Page",
-    to: "/intelligence/offensive-operations-page",
-    icon: <Gavel className="h-4 w-4" />,
-    page: <OffensiveOperationsPage />,
   },
 ];
