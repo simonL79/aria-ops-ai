@@ -64,7 +64,7 @@ function App() {
                       <Route path="/content-generation" element={<ContentGenerationPage />} />
                       <Route path="/admin/keyword-to-article" element={<KeywordToArticleSystemPage />} />
                       <Route path="/admin/control-center" element={<ControlCenterPage />} />
-                      <Route path="/control-center" element={<ControlCenterPage />} />
+                      
                       <Route path="/admin/client-onboarding" element={<ClientOnboardingPage />} />
                       <Route path="/admin/strategy-brain-stage3" element={<StrategyBrainStage3Page />} />
                       <Route path="/admin" element={<AdminDashboardPage />} />
