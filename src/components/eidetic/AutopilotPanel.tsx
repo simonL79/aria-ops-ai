@@ -134,6 +134,10 @@ const AutopilotPanel = () => {
             {scoring ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <RefreshCw className="h-4 w-4 mr-1" />}
             AI-Score Backlog
           </Button>
+          <Button onClick={seedTest} disabled={seeding} size="sm" variant="secondary">
+            {seeding ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Sprout className="h-4 w-4 mr-1" />}
+            Seed Test Footprint
+          </Button>
         </div>
 
         {runs.length > 0 && (
