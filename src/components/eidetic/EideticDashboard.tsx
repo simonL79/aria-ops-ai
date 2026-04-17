@@ -3,7 +3,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Brain, Search, TrendingDown, Archive } from "lucide-react";
+import { Brain, Search, TrendingDown, Archive, Bell, Settings } from "lucide-react";
+import { Link } from "react-router-dom";
+import NotificationCenter from "@/components/admin/NotificationCenter";
 import { supabase } from '@/integrations/supabase/client';
 import { scanMemoryFootprints, calculateDecayScores, triggerMemoryRecalibration } from '@/services/eidetic/eideticService';
 import MemoryFootprintsList from './MemoryFootprintsList';
@@ -110,6 +112,12 @@ const EideticDashboard = () => {
         </div>
         
         <div className="flex items-center gap-2">
+          <NotificationCenter />
+          <Button asChild variant="outline" size="sm">
+            <Link to="/admin/eidetic/preferences" aria-label="Alert preferences">
+              <Settings className="h-4 w-4 mr-1" /> Alerts
+            </Link>
+          </Button>
           <Button onClick={handleRecalculateDecay} variant="outline" size="sm">
             Recalculate Decay
           </Button>

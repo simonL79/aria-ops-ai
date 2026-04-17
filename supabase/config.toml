@@ -287,3 +287,10 @@ verify_jwt = false
 [functions.eidetic-approve-dispatch]
 verify_jwt = true
 
+[functions.eidetic-update-preferences]
+verify_jwt = true
+
+[functions.eidetic-send-digest]
+verify_jwt = false
+
+

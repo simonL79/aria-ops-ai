@@ -969,6 +969,60 @@ export type Database = {
           },
         ]
       }
+      eidetic_alert_preferences: {
+        Row: {
+          created_at: string
+          digest_frequency: string
+          digest_last_sent_at: string | null
+          digest_send_time: string
+          email_enabled: boolean
+          email_min_severity: string
+          event_type_filter: string[] | null
+          id: string
+          mute_until: string | null
+          narrative_category_filter: string[] | null
+          quiet_hours_end: string | null
+          quiet_hours_start: string | null
+          quiet_hours_timezone: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          digest_frequency?: string
+          digest_last_sent_at?: string | null
+          digest_send_time?: string
+          email_enabled?: boolean
+          email_min_severity?: string
+          event_type_filter?: string[] | null
+          id?: string
+          mute_until?: string | null
+          narrative_category_filter?: string[] | null
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          quiet_hours_timezone?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          digest_frequency?: string
+          digest_last_sent_at?: string | null
+          digest_send_time?: string
+          email_enabled?: boolean
+          email_min_severity?: string
+          event_type_filter?: string[] | null
+          id?: string
+          mute_until?: string | null
+          narrative_category_filter?: string[] | null
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          quiet_hours_timezone?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       eidetic_autopilot_runs: {
         Row: {
           anomalies_detected: number
@@ -1002,6 +1056,51 @@ export type Database = {
           metadata?: Json | null
           started_at?: string
           status?: string
+        }
+        Relationships: []
+      }
+      eidetic_digest_log: {
+        Row: {
+          created_at: string
+          critical_count: number
+          digest_type: string
+          email_message_id: string | null
+          email_sent: boolean
+          event_count: number
+          high_count: number
+          id: string
+          period_end: string
+          period_start: string
+          resolved_count: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          critical_count?: number
+          digest_type: string
+          email_message_id?: string | null
+          email_sent?: boolean
+          event_count?: number
+          high_count?: number
+          id?: string
+          period_end: string
+          period_start: string
+          resolved_count?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          critical_count?: number
+          digest_type?: string
+          email_message_id?: string | null
+          email_sent?: boolean
+          event_count?: number
+          high_count?: number
+          id?: string
+          period_end?: string
+          period_start?: string
+          resolved_count?: number
+          user_id?: string
         }
         Relationships: []
       }
