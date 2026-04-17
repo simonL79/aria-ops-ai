@@ -72,6 +72,34 @@ const AutopilotPanel = () => {
     }
   };
 
+  const seedTest = async () => {
+    setSeeding(true);
+    try {
+      const samples = [
+        { url: 'https://en.wikipedia.org/wiki/Reputation_management', ctx: 'Reputation management overview article.' },
+        { url: 'https://en.wikipedia.org/wiki/Online_identity', ctx: 'Online identity and digital footprint analysis.' },
+        { url: 'https://en.wikipedia.org/wiki/Cancel_culture', ctx: 'Cancel culture and reputational risk dynamics.' },
+      ];
+      const pick = samples[Math.floor(Math.random() * samples.length)];
+      const { error } = await (supabase.from('memory_footprints') as any).insert({
+        content_url: pick.url,
+        memory_context: pick.ctx,
+        memory_type: 'test_seed',
+        is_active: true,
+        discovered_at: new Date().toISOString(),
+        first_seen: new Date().toISOString(),
+        last_seen: new Date().toISOString(),
+      });
+      if (error) throw error;
+      toast.success('Seeded test footprint — click "Run Autopilot Now" to process it');
+    } catch (e) {
+      console.error(e);
+      toast.error('Failed to seed test footprint');
+    } finally {
+      setSeeding(false);
+    }
+  };
+
   const last = runs[0];
   const next = last?.completed_at
     ? new Date(new Date(last.completed_at).getTime() + 6 * 3600 * 1000)
