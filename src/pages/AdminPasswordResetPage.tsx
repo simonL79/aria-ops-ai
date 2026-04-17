@@ -8,6 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Helmet } from "react-helmet-async";
+import { validatePassword } from "@/utils/passwordStrength";
+import { PasswordStrengthMeter } from "@/components/auth/PasswordStrengthMeter";
 
 const AdminPasswordResetPage = () => {
   const navigate = useNavigate();
@@ -56,9 +58,10 @@ const AdminPasswordResetPage = () => {
       return;
     }
     
-    // Validate password strength
-    if (password.length < 8) {
-      setMessage("Password must be at least 8 characters");
+    // Validate password strength (client-side HIBP fallback)
+    const validation = validatePassword(password);
+    if (!validation.isValid) {
+      setMessage(validation.errors[0]);
       return;
     }
     
@@ -134,6 +137,7 @@ const AdminPasswordResetPage = () => {
                   placeholder="Enter your new password"
                   required
                 />
+                <PasswordStrengthMeter password={password} className="mt-2" />
               </div>
               
               <div>
