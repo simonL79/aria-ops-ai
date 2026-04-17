@@ -13,6 +13,10 @@ import AddMemoryFootprintDialog from './AddMemoryFootprintDialog';
 import SemanticSearchPanel from './SemanticSearchPanel';
 import AutopilotPanel from './AutopilotPanel';
 import ResurfacingAlertsPanel from './ResurfacingAlertsPanel';
+import PendingDispatchesPanel from './PendingDispatchesPanel';
+import ResponseHooksPanel from './ResponseHooksPanel';
+import MemoryGraph from './MemoryGraph';
+import DecayTimeline from './DecayTimeline';
 import { toast } from 'sonner';
 
 const EideticDashboard = () => {
@@ -197,6 +201,9 @@ const EideticDashboard = () => {
       {/* Resurfacing Alerts */}
       <ResurfacingAlertsPanel />
 
+      {/* Auto-Response: pending dispatches */}
+      <PendingDispatchesPanel />
+
       {/* Autopilot */}
       <AutopilotPanel />
 
@@ -206,24 +213,27 @@ const EideticDashboard = () => {
           <TabsTrigger value="footprints">Memory Footprints</TabsTrigger>
           <TabsTrigger value="decay">Decay Profiles</TabsTrigger>
           <TabsTrigger value="recalibrators">Memory Recalibrators</TabsTrigger>
+          <TabsTrigger value="insights">Insights</TabsTrigger>
+          <TabsTrigger value="hooks">Response Hooks</TabsTrigger>
         </TabsList>
 
         <TabsContent value="footprints">
-          <MemoryFootprintsList 
-            onFootprintAdded={loadMemoryFootprints}
-          />
+          <MemoryFootprintsList onFootprintAdded={loadMemoryFootprints} />
         </TabsContent>
 
-        <TabsContent value="decay">
-          <DecayProfilesPanel />
+        <TabsContent value="decay"><DecayProfilesPanel /></TabsContent>
+
+        <TabsContent value="recalibrators"><MemoryRecalibratorsPanel /></TabsContent>
+
+        <TabsContent value="insights" className="space-y-4">
+          <DecayTimeline />
+          <MemoryGraph />
         </TabsContent>
 
-        <TabsContent value="recalibrators">
-          <MemoryRecalibratorsPanel />
-        </TabsContent>
+        <TabsContent value="hooks"><ResponseHooksPanel /></TabsContent>
       </Tabs>
 
-      <AddMemoryFootprintDialog 
+      <AddMemoryFootprintDialog
         open={showAddDialog}
         onOpenChange={setShowAddDialog}
         onFootprintAdded={loadMemoryFootprints}
