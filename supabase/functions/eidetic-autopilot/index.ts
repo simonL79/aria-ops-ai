@@ -308,7 +308,7 @@ Deno.serve(async (req) => {
       metadata: { events_emitted: eventsEmitted },
     }).eq('id', runId);
 
-    return new Response(JSON.stringify({ runId, processed, changed, anomalies, eventsEmitted }), {
+    return new Response(JSON.stringify({ runId, processed, changed, anomalies, eventsEmitted, seededId }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (e) {
