@@ -925,6 +925,50 @@ export type Database = {
         }
         Relationships: []
       }
+      eidetic_alert_actions: {
+        Row: {
+          action_type: string
+          actor: string | null
+          alert_id: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          new_status: string | null
+          notes: string | null
+          prior_status: string | null
+        }
+        Insert: {
+          action_type: string
+          actor?: string | null
+          alert_id: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          new_status?: string | null
+          notes?: string | null
+          prior_status?: string | null
+        }
+        Update: {
+          action_type?: string
+          actor?: string | null
+          alert_id?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          new_status?: string | null
+          notes?: string | null
+          prior_status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "eidetic_alert_actions_alert_id_fkey"
+            columns: ["alert_id"]
+            isOneToOne: false
+            referencedRelation: "eidetic_resurfacing_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       eidetic_autopilot_runs: {
         Row: {
           anomalies_detected: number
@@ -961,6 +1005,66 @@ export type Database = {
         }
         Relationships: []
       }
+      eidetic_dispatched_responses: {
+        Row: {
+          action_type: string
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          dispatched_at: string | null
+          error_message: string | null
+          event_id: string | null
+          hook_id: string | null
+          id: string
+          payload: Json
+          result: Json | null
+          status: string
+        }
+        Insert: {
+          action_type: string
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          dispatched_at?: string | null
+          error_message?: string | null
+          event_id?: string | null
+          hook_id?: string | null
+          id?: string
+          payload?: Json
+          result?: Json | null
+          status?: string
+        }
+        Update: {
+          action_type?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          dispatched_at?: string | null
+          error_message?: string | null
+          event_id?: string | null
+          hook_id?: string | null
+          id?: string
+          payload?: Json
+          result?: Json | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "eidetic_dispatched_responses_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "eidetic_resurfacing_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "eidetic_dispatched_responses_hook_id_fkey"
+            columns: ["hook_id"]
+            isOneToOne: false
+            referencedRelation: "eidetic_response_hooks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       eidetic_footprint_queue: {
         Row: {
           content_excerpt: string | null
@@ -991,11 +1095,60 @@ export type Database = {
         }
         Relationships: []
       }
+      eidetic_response_hooks: {
+        Row: {
+          action_config: Json
+          action_type: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          enabled: boolean
+          id: string
+          name: string
+          requires_approval: boolean
+          trigger_event_types: string[]
+          trigger_min_severity: string
+          trigger_narrative_categories: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          action_config?: Json
+          action_type: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          enabled?: boolean
+          id?: string
+          name: string
+          requires_approval?: boolean
+          trigger_event_types?: string[]
+          trigger_min_severity?: string
+          trigger_narrative_categories?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          action_config?: Json
+          action_type?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          enabled?: boolean
+          id?: string
+          name?: string
+          requires_approval?: boolean
+          trigger_event_types?: string[]
+          trigger_min_severity?: string
+          trigger_narrative_categories?: string[] | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       eidetic_resurfacing_events: {
         Row: {
           acknowledged: boolean
           acknowledged_at: string | null
           acknowledged_by: string | null
+          assigned_to: string | null
           content_excerpt: string | null
           content_url: string | null
           created_at: string
@@ -1010,13 +1163,19 @@ export type Database = {
           notified_at: string | null
           prev_decay_score: number | null
           prev_threat_30d: number | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          resolved_by: string | null
           severity: string
+          snoozed_until: string | null
+          status: string
           threat_delta: number | null
         }
         Insert: {
           acknowledged?: boolean
           acknowledged_at?: string | null
           acknowledged_by?: string | null
+          assigned_to?: string | null
           content_excerpt?: string | null
           content_url?: string | null
           created_at?: string
@@ -1031,13 +1190,19 @@ export type Database = {
           notified_at?: string | null
           prev_decay_score?: number | null
           prev_threat_30d?: number | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
           severity: string
+          snoozed_until?: string | null
+          status?: string
           threat_delta?: number | null
         }
         Update: {
           acknowledged?: boolean
           acknowledged_at?: string | null
           acknowledged_by?: string | null
+          assigned_to?: string | null
           content_excerpt?: string | null
           content_url?: string | null
           created_at?: string
@@ -1052,7 +1217,12 @@ export type Database = {
           notified_at?: string | null
           prev_decay_score?: number | null
           prev_threat_30d?: number | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
           severity?: string
+          snoozed_until?: string | null
+          status?: string
           threat_delta?: number | null
         }
         Relationships: [
