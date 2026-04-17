@@ -1489,6 +1489,36 @@ export type Database = {
         }
         Relationships: []
       }
+      memory_clusters: {
+        Row: {
+          centroid_embedding: string | null
+          created_at: string
+          entity_name: string | null
+          footprint_count: number
+          id: string
+          narrative_theme: string | null
+          updated_at: string
+        }
+        Insert: {
+          centroid_embedding?: string | null
+          created_at?: string
+          entity_name?: string | null
+          footprint_count?: number
+          id?: string
+          narrative_theme?: string | null
+          updated_at?: string
+        }
+        Update: {
+          centroid_embedding?: string | null
+          created_at?: string
+          entity_name?: string | null
+          footprint_count?: number
+          id?: string
+          narrative_theme?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       memory_decay_profiles: {
         Row: {
           action_status: string | null
@@ -1543,46 +1573,61 @@ export type Database = {
         Row: {
           ai_memory_tags: string[] | null
           client_id: string | null
+          cluster_id: string | null
+          content_hash: string | null
           content_url: string | null
           created_at: string
           decay_score: number | null
           discovered_at: string | null
+          embedded_at: string | null
+          embedding: string | null
           first_seen: string | null
           id: string
           is_active: boolean | null
           last_seen: string | null
           memory_context: string | null
           memory_type: string | null
+          narrative_summary: string | null
           updated_at: string
         }
         Insert: {
           ai_memory_tags?: string[] | null
           client_id?: string | null
+          cluster_id?: string | null
+          content_hash?: string | null
           content_url?: string | null
           created_at?: string
           decay_score?: number | null
           discovered_at?: string | null
+          embedded_at?: string | null
+          embedding?: string | null
           first_seen?: string | null
           id?: string
           is_active?: boolean | null
           last_seen?: string | null
           memory_context?: string | null
           memory_type?: string | null
+          narrative_summary?: string | null
           updated_at?: string
         }
         Update: {
           ai_memory_tags?: string[] | null
           client_id?: string | null
+          cluster_id?: string | null
+          content_hash?: string | null
           content_url?: string | null
           created_at?: string
           decay_score?: number | null
           discovered_at?: string | null
+          embedded_at?: string | null
+          embedding?: string | null
           first_seen?: string | null
           id?: string
           is_active?: boolean | null
           last_seen?: string | null
           memory_context?: string | null
           memory_type?: string | null
+          narrative_summary?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -2797,6 +2842,23 @@ export type Database = {
           p_metadata?: Json
         }
         Returns: undefined
+      }
+      match_memories: {
+        Args: {
+          match_count?: number
+          match_threshold?: number
+          query_embedding: string
+        }
+        Returns: {
+          cluster_id: string
+          content_url: string
+          decay_score: number
+          id: string
+          memory_context: string
+          memory_type: string
+          narrative_summary: string
+          similarity: number
+        }[]
       }
     }
     Enums: {
