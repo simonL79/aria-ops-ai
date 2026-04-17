@@ -22,6 +22,7 @@ const AutopilotPanel = () => {
   const [runs, setRuns] = useState<Run[]>([]);
   const [running, setRunning] = useState(false);
   const [scoring, setScoring] = useState(false);
+  const [seeding, setSeeding] = useState(false);
 
   const load = async () => {
     const { data } = await (supabase.from('eidetic_autopilot_runs') as any)
