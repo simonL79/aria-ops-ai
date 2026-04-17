@@ -96,7 +96,7 @@ Deno.serve(async (req) => {
     }
 
     await (supabase.from('eidetic_resurfacing_events') as any)
-      .update({ notified_at: new Response().headers.has('x') ? null : new Date().toISOString() })
+      .update({ notified_at: new Date().toISOString() })
       .eq('id', event_id);
 
     return new Response(JSON.stringify({ ok: true, event_id, recipient: ALERT_EMAIL }), {
