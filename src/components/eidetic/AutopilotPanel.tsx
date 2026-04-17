@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Bot, Loader2, Play, AlertTriangle, RefreshCw, Sprout } from 'lucide-react';
+import { Bot, Loader2, Play, AlertTriangle, RefreshCw, Sprout, Zap } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
@@ -23,6 +23,7 @@ const AutopilotPanel = () => {
   const [running, setRunning] = useState(false);
   const [scoring, setScoring] = useState(false);
   const [seeding, setSeeding] = useState(false);
+  const [triggering, setTriggering] = useState(false);
 
   const load = async () => {
     const { data } = await (supabase.from('eidetic_autopilot_runs') as any)
@@ -100,6 +101,36 @@ const AutopilotPanel = () => {
     }
   };
 
+  const triggerTestResurfacing = async () => {
+    setTriggering(true);
+    try {
+      // Find an active footprint and force its decay high so the next autopilot scoring
+      // is likely to register a decay_reversal event.
+      const { data: fps } = await (supabase.from('memory_footprints') as any)
+        .select('id')
+        .eq('is_active', true)
+        .limit(1);
+      const target = fps?.[0];
+      if (!target) {
+        toast.error('No active footprints — click "Seed Test Footprint" first');
+        return;
+      }
+      await (supabase.from('memory_footprints') as any)
+        .update({ decay_score: 0.9, last_autopilot_at: null, ai_scored_at: new Date(Date.now() - 86400000).toISOString() })
+        .eq('id', target.id);
+
+      const { data, error } = await supabase.functions.invoke('eidetic-autopilot', { body: {} });
+      if (error) throw error;
+      toast.success(`Test resurfacing triggered — ${data?.eventsEmitted ?? 0} events emitted`);
+      load();
+    } catch (e) {
+      console.error(e);
+      toast.error('Failed to trigger test resurfacing');
+    } finally {
+      setTriggering(false);
+    }
+  };
+
   const last = runs[0];
   const next = last?.completed_at
     ? new Date(new Date(last.completed_at).getTime() + 6 * 3600 * 1000)
@@ -137,6 +168,10 @@ const AutopilotPanel = () => {
           <Button onClick={seedTest} disabled={seeding} size="sm" variant="secondary">
             {seeding ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Sprout className="h-4 w-4 mr-1" />}
             Seed Test Footprint
+          </Button>
+          <Button onClick={triggerTestResurfacing} disabled={triggering} size="sm" variant="outline" className="border-red-500/40 text-red-500 hover:bg-red-500/10 hover:text-red-500">
+            {triggering ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Zap className="h-4 w-4 mr-1" />}
+            Trigger Test Resurfacing
           </Button>
         </div>
 

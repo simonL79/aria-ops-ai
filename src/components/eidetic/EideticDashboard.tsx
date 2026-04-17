@@ -12,6 +12,7 @@ import MemoryRecalibratorsPanel from './MemoryRecalibratorsPanel';
 import AddMemoryFootprintDialog from './AddMemoryFootprintDialog';
 import SemanticSearchPanel from './SemanticSearchPanel';
 import AutopilotPanel from './AutopilotPanel';
+import ResurfacingAlertsPanel from './ResurfacingAlertsPanel';
 import { toast } from 'sonner';
 
 const EideticDashboard = () => {
@@ -192,6 +193,9 @@ const EideticDashboard = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Resurfacing Alerts */}
+      <ResurfacingAlertsPanel />
 
       {/* Autopilot */}
       <AutopilotPanel />
