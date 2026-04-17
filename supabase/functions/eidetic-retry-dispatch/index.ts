@@ -1,4 +1,5 @@
-// Approve or reject a pending dispatched response. On approve, executes the action.
+// Retry a failed EIDETIC dispatched response — re-runs the downstream invoke only,
+// reusing the existing artifact row. Admin-only.
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { executeAction } from '../_shared/eidetic-executors.ts';
 
@@ -7,7 +8,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-interface Body { dispatch_id: string; decision: 'approve' | 'reject'; notes?: string; }
+interface Body { dispatch_id: string; }
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
@@ -19,7 +20,7 @@ Deno.serve(async (req) => {
     const userClient = createClient(
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_ANON_KEY')!,
-      { global: { headers: { Authorization: authHeader } } }
+      { global: { headers: { Authorization: authHeader } } },
     );
     const token = authHeader.replace('Bearer ', '');
     const { data: claims, error: aerr } = await userClient.auth.getClaims(token);
@@ -31,10 +32,16 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
     );
 
-    const { dispatch_id, decision, notes } = (await req.json()) as Body;
-    if (!dispatch_id || !['approve', 'reject'].includes(decision)) {
-      return json({ error: 'Invalid input' }, 400);
-    }
+    const { data: roleRow } = await admin
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', actor)
+      .eq('role', 'admin')
+      .maybeSingle();
+    if (!roleRow) return json({ error: 'Admin role required' }, 403);
+
+    const { dispatch_id } = (await req.json()) as Body;
+    if (!dispatch_id) return json({ error: 'dispatch_id required' }, 400);
 
     const { data: dispatch, error: dErr } = await admin
       .from('eidetic_dispatched_responses')
@@ -42,24 +49,7 @@ Deno.serve(async (req) => {
       .eq('id', dispatch_id)
       .maybeSingle();
     if (dErr || !dispatch) return json({ error: 'Dispatch not found' }, 404);
-    if (dispatch.status !== 'pending') return json({ error: `Already ${dispatch.status}` }, 400);
-
-    if (decision === 'reject') {
-      await admin.from('eidetic_dispatched_responses').update({
-        status: 'rejected',
-        approved_by: actor,
-        approved_at: new Date().toISOString(),
-        error_message: notes ?? null,
-      }).eq('id', dispatch_id);
-      return json({ ok: true, status: 'rejected' });
-    }
-
-    // Approve + execute
-    await admin.from('eidetic_dispatched_responses').update({
-      status: 'approved',
-      approved_by: actor,
-      approved_at: new Date().toISOString(),
-    }).eq('id', dispatch_id);
+    if (dispatch.status !== 'failed') return json({ error: `Cannot retry status=${dispatch.status}` }, 400);
 
     const { data: event } = await admin
       .from('eidetic_resurfacing_events')
@@ -77,7 +67,7 @@ Deno.serve(async (req) => {
 
     return json({ ok: result.ok, result: result.data, error: result.error });
   } catch (e) {
-    console.error('approve-dispatch error', e);
+    console.error('[EIDETIC-RETRY] error', e);
     return json({ error: 'Internal server error' }, 500);
   }
 });
