@@ -33,16 +33,17 @@ async function fetchContent(url: string): Promise<string> {
 }
 
 async function embed(text: string): Promise<number[] | null> {
+  if (!OPENAI_API_KEY) { console.warn('embed skipped: no OPENAI_API_KEY'); return null; }
   try {
-    const r = await fetch('https://ai.gateway.lovable.dev/v1/embeddings', {
+    const r = await fetch('https://api.openai.com/v1/embeddings', {
       method: 'POST',
-      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'openai/text-embedding-3-small', input: text.slice(0, 8000) }),
+      headers: { Authorization: `Bearer ${OPENAI_API_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'text-embedding-3-small', input: text.slice(0, 8000) }),
     });
-    if (!r.ok) return null;
+    if (!r.ok) { console.error('embed failed', r.status, await r.text().catch(()=>'')); return null; }
     const j = await r.json();
     return j.data[0].embedding;
-  } catch { return null; }
+  } catch (e) { console.error('embed exception', e); return null; }
 }
 
 const SCORING_TOOL = {
