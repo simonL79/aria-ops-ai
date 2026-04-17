@@ -10,7 +10,11 @@ export interface TemplateEntry {
 }
 
 import { template as contactFormNotification } from './contact-form-notification.tsx'
+import { template as eideticResurfacingAlert } from './eidetic-resurfacing-alert.tsx'
+import { template as eideticDigest } from './eidetic-digest.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'contact-form-notification': contactFormNotification,
+  'eidetic-resurfacing-alert': eideticResurfacingAlert,
+  'eidetic-digest': eideticDigest,
 }
