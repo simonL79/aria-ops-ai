@@ -278,3 +278,12 @@ verify_jwt = false
 [functions.eidetic-notify-resurfacing]
 verify_jwt = false
 
+[functions.eidetic-triage-action]
+verify_jwt = true
+
+[functions.eidetic-dispatch-response]
+verify_jwt = false
+
+[functions.eidetic-approve-dispatch]
+verify_jwt = true
+

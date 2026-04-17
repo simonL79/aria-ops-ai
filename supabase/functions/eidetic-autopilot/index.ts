@@ -124,6 +124,15 @@ async function emitEvent(supabase: any, payload: any) {
           });
         } catch (e) { console.error('notify dispatch failed', e); }
       }
+
+      // Tier 7: evaluate auto-response hooks
+      try {
+        await fetch(`${SUPABASE_URL}/functions/v1/eidetic-dispatch-response`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${SERVICE_ROLE}` },
+          body: JSON.stringify({ event_id: ev.id }),
+        });
+      } catch (e) { console.error('dispatch hook eval failed', e); }
     }
     return ev;
   } catch (e) {
