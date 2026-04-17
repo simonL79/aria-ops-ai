@@ -925,6 +925,42 @@ export type Database = {
         }
         Relationships: []
       }
+      eidetic_autopilot_runs: {
+        Row: {
+          anomalies_detected: number
+          completed_at: string | null
+          error_message: string | null
+          footprints_changed: number
+          footprints_processed: number
+          id: string
+          metadata: Json | null
+          started_at: string
+          status: string
+        }
+        Insert: {
+          anomalies_detected?: number
+          completed_at?: string | null
+          error_message?: string | null
+          footprints_changed?: number
+          footprints_processed?: number
+          id?: string
+          metadata?: Json | null
+          started_at?: string
+          status?: string
+        }
+        Update: {
+          anomalies_detected?: number
+          completed_at?: string | null
+          error_message?: string | null
+          footprints_changed?: number
+          footprints_processed?: number
+          id?: string
+          metadata?: Json | null
+          started_at?: string
+          status?: string
+        }
+        Relationships: []
+      }
       eidetic_footprint_queue: {
         Row: {
           content_excerpt: string | null
@@ -1572,6 +1608,8 @@ export type Database = {
       memory_footprints: {
         Row: {
           ai_memory_tags: string[] | null
+          ai_scored_at: string | null
+          authority_weight: number | null
           client_id: string | null
           cluster_id: string | null
           content_hash: string | null
@@ -1584,14 +1622,22 @@ export type Database = {
           first_seen: string | null
           id: string
           is_active: boolean | null
+          last_autopilot_at: string | null
           last_seen: string | null
           memory_context: string | null
           memory_type: string | null
+          narrative_category: string | null
           narrative_summary: string | null
+          sentiment_trajectory: Json | null
+          threat_persistence_30d: number | null
+          threat_persistence_365d: number | null
+          threat_persistence_90d: number | null
           updated_at: string
         }
         Insert: {
           ai_memory_tags?: string[] | null
+          ai_scored_at?: string | null
+          authority_weight?: number | null
           client_id?: string | null
           cluster_id?: string | null
           content_hash?: string | null
@@ -1604,14 +1650,22 @@ export type Database = {
           first_seen?: string | null
           id?: string
           is_active?: boolean | null
+          last_autopilot_at?: string | null
           last_seen?: string | null
           memory_context?: string | null
           memory_type?: string | null
+          narrative_category?: string | null
           narrative_summary?: string | null
+          sentiment_trajectory?: Json | null
+          threat_persistence_30d?: number | null
+          threat_persistence_365d?: number | null
+          threat_persistence_90d?: number | null
           updated_at?: string
         }
         Update: {
           ai_memory_tags?: string[] | null
+          ai_scored_at?: string | null
+          authority_weight?: number | null
           client_id?: string | null
           cluster_id?: string | null
           content_hash?: string | null
@@ -1624,10 +1678,16 @@ export type Database = {
           first_seen?: string | null
           id?: string
           is_active?: boolean | null
+          last_autopilot_at?: string | null
           last_seen?: string | null
           memory_context?: string | null
           memory_type?: string | null
+          narrative_category?: string | null
           narrative_summary?: string | null
+          sentiment_trajectory?: Json | null
+          threat_persistence_30d?: number | null
+          threat_persistence_365d?: number | null
+          threat_persistence_90d?: number | null
           updated_at?: string
         }
         Relationships: []
