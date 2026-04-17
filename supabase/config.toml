@@ -262,3 +262,16 @@ verify_jwt = false
 
 [functions.handle-email-suppression]
 verify_jwt = false
+
+[functions.eidetic-embed]
+verify_jwt = true
+
+[functions.eidetic-search]
+verify_jwt = true
+
+[functions.eidetic-ai-score]
+verify_jwt = true
+
+[functions.eidetic-autopilot]
+verify_jwt = false
+
