@@ -135,6 +135,28 @@ Deno.serve(async (req) => {
 
   const supabase = createClient(SUPABASE_URL, SERVICE_ROLE);
 
+  // Optional: seed a footprint inline before the run (useful for E2E testing)
+  let seededId: string | null = null;
+  try {
+    const body = await req.json().catch(() => ({}));
+    if (body && typeof body === 'object' && body.seed_url) {
+      const nowIso = new Date().toISOString();
+      const { data: seeded } = await (supabase.from('memory_footprints') as any)
+        .insert({
+          content_url: body.seed_url,
+          memory_context: body.seed_context ?? 'Seeded via autopilot inline seed.',
+          memory_type: body.seed_type ?? 'test_seed',
+          is_active: true,
+          discovered_at: nowIso,
+          first_seen: nowIso,
+          last_seen: nowIso,
+        })
+        .select('id')
+        .single();
+      seededId = seeded?.id ?? null;
+    }
+  } catch (e) { console.warn('inline seed skipped', e); }
+
   const { data: run, error: runErr } = await (supabase.from('eidetic_autopilot_runs') as any)
     .insert({ status: 'running' })
     .select('id')
