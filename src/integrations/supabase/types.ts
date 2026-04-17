@@ -991,6 +991,80 @@ export type Database = {
         }
         Relationships: []
       }
+      eidetic_resurfacing_events: {
+        Row: {
+          acknowledged: boolean
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          content_excerpt: string | null
+          content_url: string | null
+          created_at: string
+          decay_delta: number | null
+          event_type: string
+          footprint_id: string | null
+          id: string
+          metadata: Json | null
+          narrative_category: string | null
+          new_decay_score: number | null
+          new_threat_30d: number | null
+          notified_at: string | null
+          prev_decay_score: number | null
+          prev_threat_30d: number | null
+          severity: string
+          threat_delta: number | null
+        }
+        Insert: {
+          acknowledged?: boolean
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          content_excerpt?: string | null
+          content_url?: string | null
+          created_at?: string
+          decay_delta?: number | null
+          event_type: string
+          footprint_id?: string | null
+          id?: string
+          metadata?: Json | null
+          narrative_category?: string | null
+          new_decay_score?: number | null
+          new_threat_30d?: number | null
+          notified_at?: string | null
+          prev_decay_score?: number | null
+          prev_threat_30d?: number | null
+          severity: string
+          threat_delta?: number | null
+        }
+        Update: {
+          acknowledged?: boolean
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          content_excerpt?: string | null
+          content_url?: string | null
+          created_at?: string
+          decay_delta?: number | null
+          event_type?: string
+          footprint_id?: string | null
+          id?: string
+          metadata?: Json | null
+          narrative_category?: string | null
+          new_decay_score?: number | null
+          new_threat_30d?: number | null
+          notified_at?: string | null
+          prev_decay_score?: number | null
+          prev_threat_30d?: number | null
+          severity?: string
+          threat_delta?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "eidetic_resurfacing_events_footprint_id_fkey"
+            columns: ["footprint_id"]
+            isOneToOne: false
+            referencedRelation: "memory_footprints"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employee_scan_queue: {
         Row: {
           completed_at: string | null
