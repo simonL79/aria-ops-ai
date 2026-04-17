@@ -16,6 +16,7 @@ import SemanticSearchPanel from './SemanticSearchPanel';
 import AutopilotPanel from './AutopilotPanel';
 import ResurfacingAlertsPanel from './ResurfacingAlertsPanel';
 import PendingDispatchesPanel from './PendingDispatchesPanel';
+import DispatchedResponsesPanel from './DispatchedResponsesPanel';
 import ResponseHooksPanel from './ResponseHooksPanel';
 import MemoryGraph from './MemoryGraph';
 import DecayTimeline from './DecayTimeline';
@@ -211,6 +212,9 @@ const EideticDashboard = () => {
 
       {/* Auto-Response: pending dispatches */}
       <PendingDispatchesPanel />
+
+      {/* Auto-Response: dispatched responses log + retry */}
+      <DispatchedResponsesPanel />
 
       {/* Autopilot */}
       <AutopilotPanel />

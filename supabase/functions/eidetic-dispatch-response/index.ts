@@ -2,6 +2,7 @@
 // Evaluates a resurfacing event against active hooks and creates dispatched_responses.
 // If hook.requires_approval=false, executes immediately. Otherwise stays pending for operator approval.
 import { createClient } from 'npm:@supabase/supabase-js@2';
+import { executeAction } from '../_shared/eidetic-executors.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -100,52 +101,6 @@ function buildPayload(hook: any, event: any) {
       new_decay_score: event.new_decay_score,
     },
   };
-}
-
-async function executeAction(supabase: any, action: string, payload: any, event: any): Promise<{ ok: boolean; data?: any; error?: string }> {
-  try {
-    switch (action) {
-      case 'requiem': {
-        // Queue a counter-content campaign
-        const { data, error } = await supabase.from('persona_saturation_campaigns').insert({
-          campaign_name: `EIDETIC auto: ${event.event_type} ${event.id.slice(0, 8)}`,
-          entity_name: event.narrative_category ?? 'unknown',
-          status: 'queued',
-          content: { source_event: event.id, url: event.content_url, excerpt: event.content_excerpt },
-          platforms: payload.config?.platforms ?? ['blog'],
-        }).select().single();
-        if (error) return { ok: false, error: error.message };
-        return { ok: true, data: { campaign_id: data.id } };
-      }
-      case 'legal_erasure': {
-        const { data, error } = await supabase.from('data_subject_requests').insert({
-          request_type: 'erasure',
-          status: 'pending',
-          priority: event.severity === 'critical' ? 'high' : 'medium',
-          request_details: `EIDETIC auto-generated erasure request. Source URL: ${event.content_url ?? 'n/a'}\n\nExcerpt: ${event.content_excerpt ?? ''}`,
-          metadata: { source: 'eidetic', event_id: event.id, footprint_id: event.footprint_id },
-        }).select().single();
-        if (error) return { ok: false, error: error.message };
-        return { ok: true, data: { request_id: data.id } };
-      }
-      case 'counter_narrative': {
-        const { data, error } = await supabase.from('counter_narratives').insert({
-          entity_name: event.narrative_category ?? 'unknown',
-          narrative_type: 'auto_response',
-          theme: event.event_type,
-          status: 'draft',
-          content: `Auto-generated counter for ${event.content_url}: ${event.content_excerpt ?? ''}`,
-          metadata: { source: 'eidetic', event_id: event.id },
-        }).select().single();
-        if (error) return { ok: false, error: error.message };
-        return { ok: true, data: { narrative_id: data.id } };
-      }
-      default:
-        return { ok: false, error: `Unknown action: ${action}` };
-    }
-  } catch (e) {
-    return { ok: false, error: (e as Error).message };
-  }
 }
 
 function json(body: unknown, status = 200) {
