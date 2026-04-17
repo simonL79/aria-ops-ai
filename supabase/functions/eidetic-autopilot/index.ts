@@ -6,6 +6,7 @@ const corsHeaders = {
 };
 
 const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY')!;
+const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY') ?? '';
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
 const SERVICE_ROLE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const MODEL = 'google/gemini-2.5-flash';
@@ -32,16 +33,17 @@ async function fetchContent(url: string): Promise<string> {
 }
 
 async function embed(text: string): Promise<number[] | null> {
+  if (!OPENAI_API_KEY) { console.warn('embed skipped: no OPENAI_API_KEY'); return null; }
   try {
-    const r = await fetch('https://ai.gateway.lovable.dev/v1/embeddings', {
+    const r = await fetch('https://api.openai.com/v1/embeddings', {
       method: 'POST',
-      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'openai/text-embedding-3-small', input: text.slice(0, 8000) }),
+      headers: { Authorization: `Bearer ${OPENAI_API_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'text-embedding-3-small', input: text.slice(0, 8000) }),
     });
-    if (!r.ok) return null;
+    if (!r.ok) { console.error('embed failed', r.status, await r.text().catch(()=>'')); return null; }
     const j = await r.json();
     return j.data[0].embedding;
-  } catch { return null; }
+  } catch (e) { console.error('embed exception', e); return null; }
 }
 
 const SCORING_TOOL = {
@@ -134,6 +136,28 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
 
   const supabase = createClient(SUPABASE_URL, SERVICE_ROLE);
+
+  // Optional: seed a footprint inline before the run (useful for E2E testing)
+  let seededId: string | null = null;
+  try {
+    const body = await req.json().catch(() => ({}));
+    if (body && typeof body === 'object' && body.seed_url) {
+      const nowIso = new Date().toISOString();
+      const { data: seeded } = await (supabase.from('memory_footprints') as any)
+        .insert({
+          content_url: body.seed_url,
+          memory_context: body.seed_context ?? 'Seeded via autopilot inline seed.',
+          memory_type: body.seed_type ?? 'test_seed',
+          is_active: true,
+          discovered_at: nowIso,
+          first_seen: nowIso,
+          last_seen: nowIso,
+        })
+        .select('id')
+        .single();
+      seededId = seeded?.id ?? null;
+    }
+  } catch (e) { console.warn('inline seed skipped', e); }
 
   const { data: run, error: runErr } = await (supabase.from('eidetic_autopilot_runs') as any)
     .insert({ status: 'running' })
@@ -286,7 +310,7 @@ Deno.serve(async (req) => {
       metadata: { events_emitted: eventsEmitted },
     }).eq('id', runId);
 
-    return new Response(JSON.stringify({ runId, processed, changed, anomalies, eventsEmitted }), {
+    return new Response(JSON.stringify({ runId, processed, changed, anomalies, eventsEmitted, seededId }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (e) {
