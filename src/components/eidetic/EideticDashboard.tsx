@@ -10,6 +10,7 @@ import MemoryFootprintsList from './MemoryFootprintsList';
 import DecayProfilesPanel from './DecayProfilesPanel';
 import MemoryRecalibratorsPanel from './MemoryRecalibratorsPanel';
 import AddMemoryFootprintDialog from './AddMemoryFootprintDialog';
+import SemanticSearchPanel from './SemanticSearchPanel';
 import { toast } from 'sonner';
 
 const EideticDashboard = () => {
@@ -162,6 +163,9 @@ const EideticDashboard = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Semantic Search */}
+      <SemanticSearchPanel />
 
       {/* Entity Scanner */}
       <Card>
