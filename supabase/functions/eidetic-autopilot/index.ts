@@ -87,10 +87,52 @@ async function score(text: string, url: string | null) {
   return args ? JSON.parse(args) : null;
 }
 
+function severityFromDelta(delta: number): 'low'|'medium'|'high'|'critical' {
+  const a = Math.abs(delta);
+  if (a >= 0.6) return 'critical';
+  if (a >= 0.4) return 'high';
+  if (a >= 0.2) return 'medium';
+  return 'low';
+}
+
+async function emitEvent(supabase: any, payload: any) {
+  try {
+    const { data: ev } = await supabase
+      .from('eidetic_resurfacing_events')
+      .insert(payload)
+      .select('id, severity')
+      .single();
+
+    if (ev) {
+      // Mirror to aria_notifications for in-app feed
+      await supabase.from('aria_notifications').insert({
+        event_type: `eidetic_${payload.event_type}`,
+        priority: payload.severity === 'critical' ? 'high' : payload.severity,
+        summary: `${payload.event_type.replace('_',' ')}: ${payload.narrative_category ?? 'memory'} (${(payload.content_url ?? '').slice(0,80)})`,
+        metadata: { event_id: ev.id, footprint_id: payload.footprint_id },
+      });
+
+      // Notify by email for high/critical
+      if (ev.severity === 'high' || ev.severity === 'critical') {
+        try {
+          await fetch(`${SUPABASE_URL}/functions/v1/eidetic-notify-resurfacing`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${SERVICE_ROLE}` },
+            body: JSON.stringify({ event_id: ev.id }),
+          });
+        } catch (e) { console.error('notify dispatch failed', e); }
+      }
+    }
+    return ev;
+  } catch (e) {
+    console.error('emitEvent failed', e);
+    return null;
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
 
-  // Cron-callable: no auth required, but rate-limit by checking a recent run exists is not necessary here
   const supabase = createClient(SUPABASE_URL, SERVICE_ROLE);
 
   const { data: run, error: runErr } = await (supabase.from('eidetic_autopilot_runs') as any)
@@ -105,7 +147,7 @@ Deno.serve(async (req) => {
   }
   const runId = run.id;
 
-  let processed = 0, changed = 0, anomalies = 0;
+  let processed = 0, changed = 0, anomalies = 0, eventsEmitted = 0;
   let errorMessage: string | null = null;
 
   try {
@@ -145,6 +187,9 @@ Deno.serve(async (req) => {
         if (scored) {
           const prevTraj = Array.isArray((fp as any).sentiment_trajectory) ? (fp as any).sentiment_trajectory : [];
           const prevDecay = Number((fp as any).decay_score ?? 0);
+          const prevThreat30 = Number((fp as any).threat_persistence_30d ?? 0);
+          const prevCategory = (fp as any).narrative_category as string | null;
+          const wasNeverScored = !(fp as any).ai_scored_at;
 
           updates.narrative_category = scored.narrative_category;
           updates.threat_persistence_30d = scored.threat_persistence_30d;
@@ -158,9 +203,62 @@ Deno.serve(async (req) => {
             { t: new Date().toISOString(), s: scored.sentiment_score, label: scored.sentiment_label },
           ];
 
-          // Anomaly: was decayed, now fresh again
+          const baseEvent = {
+            footprint_id: fp.id,
+            narrative_category: scored.narrative_category,
+            content_excerpt: text.slice(0, 280),
+            content_url: url ?? null,
+          };
+
+          // 1. Decay reversal
           if (prevDecay > 0.7 && scored.decay_score < 0.4) {
             anomalies += 1;
+            const delta = scored.decay_score - prevDecay;
+            await emitEvent(supabase, {
+              ...baseEvent,
+              event_type: 'decay_reversal',
+              severity: severityFromDelta(delta),
+              prev_decay_score: prevDecay,
+              new_decay_score: scored.decay_score,
+              decay_delta: delta,
+            });
+            eventsEmitted += 1;
+          }
+
+          // 2. Threat spike
+          const threatDelta = scored.threat_persistence_30d - prevThreat30;
+          if (threatDelta > 0.3) {
+            await emitEvent(supabase, {
+              ...baseEvent,
+              event_type: 'threat_spike',
+              severity: severityFromDelta(threatDelta),
+              prev_threat_30d: prevThreat30,
+              new_threat_30d: scored.threat_persistence_30d,
+              threat_delta: threatDelta,
+            });
+            eventsEmitted += 1;
+          }
+
+          // 3. Content drift with category change
+          if (contentChanged && prevCategory && prevCategory !== scored.narrative_category) {
+            await emitEvent(supabase, {
+              ...baseEvent,
+              event_type: 'content_drift',
+              severity: 'medium',
+              metadata: { prev_category: prevCategory, new_category: scored.narrative_category },
+            });
+            eventsEmitted += 1;
+          }
+
+          // 4. New high threat (first scoring)
+          if (wasNeverScored && scored.threat_persistence_30d >= 0.7) {
+            await emitEvent(supabase, {
+              ...baseEvent,
+              event_type: 'new_high_threat',
+              severity: scored.threat_persistence_30d >= 0.85 ? 'critical' : 'high',
+              new_threat_30d: scored.threat_persistence_30d,
+            });
+            eventsEmitted += 1;
           }
         }
 
@@ -185,9 +283,10 @@ Deno.serve(async (req) => {
       footprints_changed: changed,
       anomalies_detected: anomalies,
       status: 'completed',
+      metadata: { events_emitted: eventsEmitted },
     }).eq('id', runId);
 
-    return new Response(JSON.stringify({ runId, processed, changed, anomalies }), {
+    return new Response(JSON.stringify({ runId, processed, changed, anomalies, eventsEmitted }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (e) {

@@ -275,3 +275,6 @@ verify_jwt = true
 [functions.eidetic-autopilot]
 verify_jwt = false
 
+[functions.eidetic-notify-resurfacing]
+verify_jwt = false
+
