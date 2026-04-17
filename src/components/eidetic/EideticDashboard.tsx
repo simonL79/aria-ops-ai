@@ -11,6 +11,7 @@ import DecayProfilesPanel from './DecayProfilesPanel';
 import MemoryRecalibratorsPanel from './MemoryRecalibratorsPanel';
 import AddMemoryFootprintDialog from './AddMemoryFootprintDialog';
 import SemanticSearchPanel from './SemanticSearchPanel';
+import AutopilotPanel from './AutopilotPanel';
 import { toast } from 'sonner';
 
 const EideticDashboard = () => {
@@ -191,6 +192,9 @@ const EideticDashboard = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Autopilot */}
+      <AutopilotPanel />
 
       {/* Main Content Tabs */}
       <Tabs defaultValue="footprints" className="space-y-4">
