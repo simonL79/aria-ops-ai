@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Bot, Loader2, Play, AlertTriangle, RefreshCw } from 'lucide-react';
+import { Bot, Loader2, Play, AlertTriangle, RefreshCw, Sprout } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
@@ -22,6 +22,7 @@ const AutopilotPanel = () => {
   const [runs, setRuns] = useState<Run[]>([]);
   const [running, setRunning] = useState(false);
   const [scoring, setScoring] = useState(false);
+  const [seeding, setSeeding] = useState(false);
 
   const load = async () => {
     const { data } = await (supabase.from('eidetic_autopilot_runs') as any)
@@ -71,6 +72,34 @@ const AutopilotPanel = () => {
     }
   };
 
+  const seedTest = async () => {
+    setSeeding(true);
+    try {
+      const samples = [
+        { url: 'https://en.wikipedia.org/wiki/Reputation_management', ctx: 'Reputation management overview article.' },
+        { url: 'https://en.wikipedia.org/wiki/Online_identity', ctx: 'Online identity and digital footprint analysis.' },
+        { url: 'https://en.wikipedia.org/wiki/Cancel_culture', ctx: 'Cancel culture and reputational risk dynamics.' },
+      ];
+      const pick = samples[Math.floor(Math.random() * samples.length)];
+      const { error } = await (supabase.from('memory_footprints') as any).insert({
+        content_url: pick.url,
+        memory_context: pick.ctx,
+        memory_type: 'test_seed',
+        is_active: true,
+        discovered_at: new Date().toISOString(),
+        first_seen: new Date().toISOString(),
+        last_seen: new Date().toISOString(),
+      });
+      if (error) throw error;
+      toast.success('Seeded test footprint — click "Run Autopilot Now" to process it');
+    } catch (e) {
+      console.error(e);
+      toast.error('Failed to seed test footprint');
+    } finally {
+      setSeeding(false);
+    }
+  };
+
   const last = runs[0];
   const next = last?.completed_at
     ? new Date(new Date(last.completed_at).getTime() + 6 * 3600 * 1000)
@@ -104,6 +133,10 @@ const AutopilotPanel = () => {
           <Button onClick={scoreBacklog} disabled={scoring} size="sm" variant="outline">
             {scoring ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <RefreshCw className="h-4 w-4 mr-1" />}
             AI-Score Backlog
+          </Button>
+          <Button onClick={seedTest} disabled={seeding} size="sm" variant="secondary">
+            {seeding ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Sprout className="h-4 w-4 mr-1" />}
+            Seed Test Footprint
           </Button>
         </div>
 
