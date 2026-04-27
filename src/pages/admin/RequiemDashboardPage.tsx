@@ -1,486 +1,317 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-import { Progress } from "@/components/ui/progress";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ArrowLeft, Loader2, RefreshCw, Search, ExternalLink, Eye, RotateCw } from "lucide-react";
 import {
-  Plus, Trash2, Rocket, Loader2, RefreshCw, Globe, Shield,
-  AlertTriangle, CheckCircle2, FileText, ExternalLink, ArrowLeft,
-  Crosshair, Zap, Eye
-} from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import {
-  launchRequiemPipeline,
   listRequiemJobs,
-  getJobScanResults,
-  getJobPayloads,
+  getJobSnapshots,
+  runRequiemScan,
+  rerunRequiemJob,
   type RequiemJob,
-  type RequiemScanResult,
-  type RequiemPayload,
+  type ParsedResult,
 } from "@/services/requiem/requiemPipeline";
 
-// ── URL Input Panel ─────────────────────────────────────────
-function UrlInputPanel({ onLaunch, isRunning }: { onLaunch: (urls: string[], variants: number) => void; isRunning: boolean }) {
-  const [urls, setUrls] = useState<string[]>([""]);
-  const [variantCount, setVariantCount] = useState(20);
-  const [bulkMode, setBulkMode] = useState(false);
-  const [bulkText, setBulkText] = useState("");
-
-  const addUrl = () => setUrls([...urls, ""]);
-  const removeUrl = (i: number) => setUrls(urls.filter((_, idx) => idx !== i));
-  const updateUrl = (i: number, val: string) => {
-    const next = [...urls];
-    next[i] = val;
-    setUrls(next);
-  };
-
-  const handleBulkImport = () => {
-    const parsed = bulkText
-      .split(/[\n,]+/)
-      .map((u) => u.trim())
-      .filter((u) => u.length > 0);
-    if (parsed.length === 0) {
-      toast.error("No valid URLs found in paste");
-      return;
-    }
-    setUrls((prev) => {
-      const existing = prev.filter((u) => u.trim().length > 0);
-      const merged = [...existing, ...parsed];
-      return merged.length > 0 ? merged : [""];
-    });
-    setBulkText("");
-    setBulkMode(false);
-    toast.success(`${parsed.length} URLs imported`);
-  };
-
-  const clearAll = () => {
-    setUrls([""]);
-    toast.info("All URLs cleared");
-  };
-
-  const handleLaunch = () => {
-    const validUrls = urls.map((u) => u.trim()).filter((u) => u.length > 0);
-    if (validUrls.length === 0) {
-      toast.error("Add at least one URL");
-      return;
-    }
-    for (const u of validUrls) {
-      try {
-        new URL(u.startsWith("http") ? u : `https://${u}`);
-      } catch {
-        toast.error(`Invalid URL: ${u}`);
-        return;
-      }
-    }
-    if (variantCount < 1 || variantCount > 100) {
-      toast.error("Variant count must be between 1 and 100");
-      return;
-    }
-    onLaunch(validUrls, variantCount);
-  };
-
-  const validCount = urls.filter((u) => u.trim().length > 0).length;
-
-  return (
-    <Card className="border-primary/20 bg-card">
-      <CardHeader>
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-primary/10">
-            <Crosshair className="h-5 w-5 text-primary" />
-          </div>
-          <div className="flex-1">
-            <CardTitle className="text-lg">Target URLs</CardTitle>
-            <CardDescription>Enter URLs to scan, analyse and generate content variants from</CardDescription>
-          </div>
-          {validCount > 0 && (
-            <Badge variant="secondary" className="text-xs">
-              {validCount} URL{validCount !== 1 ? "s" : ""}
-            </Badge>
-          )}
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Bulk paste toggle */}
-        <div className="flex items-center gap-2">
-          <Button
-            variant={bulkMode ? "default" : "outline"}
-            size="sm"
-            onClick={() => setBulkMode(!bulkMode)}
-            disabled={isRunning}
-            className="gap-1"
-          >
-            <FileText className="h-4 w-4" /> Bulk Paste
-          </Button>
-          {urls.filter((u) => u.trim()).length > 1 && (
-            <Button variant="ghost" size="sm" onClick={clearAll} disabled={isRunning} className="text-destructive gap-1">
-              <Trash2 className="h-3 w-3" /> Clear All
-            </Button>
-          )}
-        </div>
-
-        {bulkMode && (
-          <div className="space-y-2 p-3 rounded-lg border border-dashed border-primary/30 bg-primary/5">
-            <p className="text-xs text-muted-foreground">Paste multiple URLs — one per line or comma-separated</p>
-            <textarea
-              value={bulkText}
-              onChange={(e) => setBulkText(e.target.value)}
-              placeholder={"https://example.com/article-1\nhttps://example.com/article-2\nhttps://example.com/article-3"}
-              className="w-full h-32 rounded-md border border-border bg-background px-3 py-2 text-sm font-mono resize-y focus:outline-none focus:ring-2 focus:ring-ring"
-              disabled={isRunning}
-            />
-            <div className="flex gap-2">
-              <Button size="sm" onClick={handleBulkImport} disabled={isRunning || !bulkText.trim()}>
-                <Plus className="h-4 w-4 mr-1" /> Import {bulkText.split(/[\n,]+/).filter((u) => u.trim()).length} URLs
-              </Button>
-              <Button variant="ghost" size="sm" onClick={() => { setBulkMode(false); setBulkText(""); }}>
-                Cancel
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {/* Individual URL inputs */}
-        <ScrollArea className={urls.length > 6 ? "h-[280px]" : ""}>
-          <div className="space-y-2">
-            {urls.map((url, i) => (
-              <div key={i} className="flex gap-2">
-                <div className="relative flex-1">
-                  <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    value={url}
-                    onChange={(e) => updateUrl(i, e.target.value)}
-                    placeholder="https://example.com/article"
-                    className="pl-10 bg-background border-border"
-                    disabled={isRunning}
-                  />
-                </div>
-                {urls.length > 1 && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeUrl(i)}
-                    disabled={isRunning}
-                    className="text-destructive hover:text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-            ))}
-          </div>
-        </ScrollArea>
-
-        <Button variant="outline" size="sm" onClick={addUrl} disabled={isRunning || urls.length >= 200}>
-          <Plus className="h-4 w-4 mr-1" /> Add URL
-        </Button>
-
-        <Separator />
-
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <label className="text-sm text-muted-foreground whitespace-nowrap">Variants per URL:</label>
-            <Input
-              type="number"
-              min={1}
-              max={100}
-              value={variantCount}
-              onChange={(e) => setVariantCount(Number(e.target.value))}
-              className="w-20 bg-background"
-              disabled={isRunning}
-            />
-          </div>
-          <div className="flex-1" />
-          <Button onClick={handleLaunch} disabled={isRunning} className="gap-2">
-            {isRunning ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" /> Running Pipeline…
-              </>
-            ) : (
-              <>
-                <Rocket className="h-4 w-4" /> Launch Requiem ({validCount})
-              </>
-            )}
-          </Button>
-        </div>
-
-        {isRunning && (
-          <div className="space-y-2">
-            <Progress value={undefined} className="h-1" />
-            <p className="text-xs text-muted-foreground animate-pulse">
-              Scanning targets, extracting content, generating payloads…
-            </p>
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
+function statusVariant(status: string): "default" | "secondary" | "destructive" | "outline" {
+  switch (status) {
+    case "completed": return "default";
+    case "running": return "secondary";
+    case "failed": return "destructive";
+    default: return "outline";
+  }
 }
 
-// ── Job Status Badge ────────────────────────────────────────
-function StatusBadge({ status }: { status: string }) {
-  const map: Record<string, { variant: "default" | "secondary" | "destructive" | "outline"; icon: React.ReactNode }> = {
-    pending: { variant: "outline", icon: null },
-    scanning: { variant: "secondary", icon: <Loader2 className="h-3 w-3 animate-spin" /> },
-    generating: { variant: "secondary", icon: <Zap className="h-3 w-3" /> },
-    completed: { variant: "default", icon: <CheckCircle2 className="h-3 w-3" /> },
-    failed: { variant: "destructive", icon: <AlertTriangle className="h-3 w-3" /> },
-  };
-  const cfg = map[status] || map.pending;
-  return (
-    <Badge variant={cfg.variant} className="gap-1 capitalize">
-      {cfg.icon} {status}
-    </Badge>
-  );
-}
-
-// ── Job Detail View ─────────────────────────────────────────
-function JobDetailView({ jobId }: { jobId: string }) {
-  const { data: scans, isLoading: scansLoading } = useQuery({
-    queryKey: ["requiem-scans", jobId],
-    queryFn: () => getJobScanResults(jobId),
-  });
-
-  const { data: payloads, isLoading: payloadsLoading } = useQuery({
-    queryKey: ["requiem-payloads", jobId],
-    queryFn: () => getJobPayloads(jobId),
-  });
-
-  return (
-    <Tabs defaultValue="scans" className="space-y-4">
-      <TabsList>
-        <TabsTrigger value="scans" className="gap-1">
-          <Eye className="h-3.5 w-3.5" /> Scan Results ({scans?.length ?? 0})
-        </TabsTrigger>
-        <TabsTrigger value="payloads" className="gap-1">
-          <FileText className="h-3.5 w-3.5" /> Payloads ({payloads?.length ?? 0})
-        </TabsTrigger>
-      </TabsList>
-
-      <TabsContent value="scans">
-        {scansLoading ? (
-          <div className="flex items-center gap-2 p-4 text-muted-foreground">
-            <Loader2 className="h-4 w-4 animate-spin" /> Loading scan results…
-          </div>
-        ) : !scans || scans.length === 0 ? (
-          <p className="text-sm text-muted-foreground p-4">No scan results yet.</p>
-        ) : (
-          <ScrollArea className="h-[400px]">
-            <div className="space-y-3">
-              {scans.map((scan: RequiemScanResult) => (
-                <Card key={scan.id} className="bg-background border-border">
-                  <CardContent className="p-4 space-y-2">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="space-y-1 flex-1 min-w-0">
-                        <h4 className="font-medium text-sm truncate">{scan.title || "Untitled"}</h4>
-                        <a
-                          href={scan.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs text-primary hover:underline flex items-center gap-1 truncate"
-                        >
-                          <ExternalLink className="h-3 w-3 flex-shrink-0" /> {scan.url}
-                        </a>
-                      </div>
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        {scan.is_negative && (
-                          <Badge variant="destructive" className="gap-1 text-xs">
-                            <AlertTriangle className="h-3 w-3" /> Negative
-                          </Badge>
-                        )}
-                        <Badge variant="outline" className="text-xs">
-                          Auth: {(scan.authority_score * 100).toFixed(0)}%
-                        </Badge>
-                      </div>
-                    </div>
-                    <p className="text-xs text-muted-foreground line-clamp-2">
-                      {scan.content_text?.slice(0, 200)}…
-                    </p>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <span>{(scan.paragraphs as string[])?.length ?? 0} paragraphs extracted</span>
-                      {scan.image_url && <span>• Image found</span>}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </ScrollArea>
-        )}
-      </TabsContent>
-
-      <TabsContent value="payloads">
-        {payloadsLoading ? (
-          <div className="flex items-center gap-2 p-4 text-muted-foreground">
-            <Loader2 className="h-4 w-4 animate-spin" /> Loading payloads…
-          </div>
-        ) : !payloads || payloads.length === 0 ? (
-          <p className="text-sm text-muted-foreground p-4">No payloads generated yet.</p>
-        ) : (
-          <ScrollArea className="h-[400px]">
-            <div className="space-y-2">
-              {payloads.map((p: RequiemPayload) => (
-                <Card key={p.id} className="bg-background border-border">
-                  <CardContent className="p-3 flex items-center justify-between gap-3">
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium truncate">{p.title}</p>
-                      <p className="text-xs text-muted-foreground">
-                        By {p.author_name} • {p.pub_date} • Variant #{p.variant_index}
-                      </p>
-                    </div>
-                    <Badge variant="outline" className="text-xs flex-shrink-0">{p.filename}</Badge>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </ScrollArea>
-        )}
-      </TabsContent>
-    </Tabs>
-  );
-}
-
-// ── Main Page ───────────────────────────────────────────────
 export default function RequiemDashboardPage() {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+  const qc = useQueryClient();
+  const [entityName, setEntityName] = useState("");
+  const [query, setQuery] = useState("");
+  const [clientId, setClientId] = useState<string>("none");
+  const [selectedJob, setSelectedJob] = useState<RequiemJob | null>(null);
 
-  const { data: jobs, isLoading: jobsLoading } = useQuery({
+  const jobsQ = useQuery({
     queryKey: ["requiem-jobs"],
-    queryFn: listRequiemJobs,
-    refetchInterval: 10000,
+    queryFn: () => listRequiemJobs(50),
+    refetchInterval: (q) => {
+      const data = q.state.data as RequiemJob[] | undefined;
+      return data?.some((j) => j.status === "running" || j.status === "pending") ? 10_000 : false;
+    },
   });
 
-  const pipelineMutation = useMutation({
-    mutationFn: (params: { urls: string[]; variantCount: number }) =>
-      launchRequiemPipeline({ urls: params.urls, variantCount: params.variantCount }),
-    onSuccess: (data) => {
-      toast.success(`Pipeline complete — ${data.scanned} scanned, ${data.payloadsGenerated} payloads generated`);
-      setSelectedJobId(data.jobId);
-      queryClient.invalidateQueries({ queryKey: ["requiem-jobs"] });
-    },
-    onError: (err: Error) => {
-      toast.error("Pipeline failed", { description: err.message });
+  const clientsQ = useQuery({
+    queryKey: ["clients-min"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("clients")
+        .select("id, name")
+        .order("name");
+      if (error) throw error;
+      return data ?? [];
     },
   });
+
+  const snapshotsQ = useQuery({
+    queryKey: ["requiem-snapshots", selectedJob?.id],
+    queryFn: () => getJobSnapshots(selectedJob!.id),
+    enabled: !!selectedJob,
+  });
+
+  const runMut = useMutation({
+    mutationFn: runRequiemScan,
+    onSuccess: () => {
+      toast.success("Scan dispatched");
+      setEntityName("");
+      setQuery("");
+      qc.invalidateQueries({ queryKey: ["requiem-jobs"] });
+    },
+    onError: (e: any) => toast.error(e.message ?? "Scan failed"),
+  });
+
+  const rerunMut = useMutation({
+    mutationFn: rerunRequiemJob,
+    onSuccess: () => {
+      toast.success("Re-run dispatched");
+      qc.invalidateQueries({ queryKey: ["requiem-jobs"] });
+    },
+    onError: (e: any) => toast.error(e.message ?? "Re-run failed"),
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!entityName.trim() || !query.trim()) {
+      toast.error("Entity name and query required");
+      return;
+    }
+    runMut.mutate({
+      entity_name: entityName.trim(),
+      query: query.trim(),
+      client_id: clientId === "none" ? null : clientId,
+    });
+  };
+
+  const latestSnapshot = useMemo(
+    () => snapshotsQ.data?.[0],
+    [snapshotsQ.data],
+  );
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="border-b border-border bg-card">
-        <div className="container mx-auto px-4 py-4 flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/admin")}>
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-destructive/10">
-              <Shield className="h-6 w-6 text-destructive" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold tracking-tight">Requiem Pipeline</h1>
-              <p className="text-sm text-muted-foreground">
-                RIE Scan → Payload Generation → Content Deployment
-              </p>
-            </div>
+    <div className="min-h-screen bg-background text-foreground">
+      <div className="container mx-auto py-8 space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate("/admin")}
+              className="mb-2"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Admin
+            </Button>
+            <h1 className="text-3xl font-bold tracking-tight">Requiem Engine</h1>
+            <p className="text-muted-foreground">
+              SERP intelligence and reputation monitoring via SerpApi.
+            </p>
           </div>
-          <div className="flex-1" />
-          <Badge variant="outline" className="gap-1 text-xs">
-            <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-            LIVE SYSTEM
-          </Badge>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => qc.invalidateQueries({ queryKey: ["requiem-jobs"] })}
+          >
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Refresh
+          </Button>
         </div>
-      </div>
 
-      <div className="container mx-auto px-4 py-6 space-y-6">
-        {/* URL Input */}
-        <UrlInputPanel
-          onLaunch={(urls, variants) => pipelineMutation.mutate({ urls, variantCount: variants })}
-          isRunning={pipelineMutation.isPending}
-        />
-
-        {/* Jobs List + Detail */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Job List */}
-          <Card className="lg:col-span-1 border-border bg-card">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base">Pipeline Jobs</CardTitle>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => queryClient.invalidateQueries({ queryKey: ["requiem-jobs"] })}
-                >
-                  <RefreshCw className="h-4 w-4" />
+        {/* New scan */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Search className="w-5 h-5" /> New SERP Scan
+            </CardTitle>
+            <CardDescription>
+              Capture a search snapshot for an entity. Mirrors top results into the ranking history.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+              <div className="space-y-1">
+                <Label htmlFor="entity">Entity name</Label>
+                <Input
+                  id="entity"
+                  placeholder="e.g. Acme Corp"
+                  value={entityName}
+                  onChange={(e) => setEntityName(e.target.value)}
+                />
+              </div>
+              <div className="space-y-1 md:col-span-2">
+                <Label htmlFor="query">Search query</Label>
+                <Input
+                  id="query"
+                  placeholder='e.g. "Acme Corp" scandal'
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label>Client</Label>
+                <Select value={clientId} onValueChange={setClientId}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">— None —</SelectItem>
+                    {clientsQ.data?.map((c: any) => (
+                      <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="md:col-span-4">
+                <Button type="submit" disabled={runMut.isPending}>
+                  {runMut.isPending ? (
+                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Running…</>
+                  ) : (
+                    <><Search className="w-4 h-4 mr-2" /> Run Scan</>
+                  )}
                 </Button>
               </div>
-            </CardHeader>
-            <CardContent className="p-0">
-              <ScrollArea className="h-[500px]">
-                {jobsLoading ? (
-                  <div className="flex items-center justify-center p-8 text-muted-foreground">
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" /> Loading…
-                  </div>
-                ) : !jobs || jobs.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center p-8">
-                    No jobs yet. Launch your first pipeline above.
-                  </p>
-                ) : (
-                  <div className="divide-y divide-border">
-                    {jobs.map((job: RequiemJob) => (
-                      <button
-                        key={job.id}
-                        onClick={() => setSelectedJobId(job.id)}
-                        className={`w-full text-left p-4 hover:bg-accent/50 transition-colors ${
-                          selectedJobId === job.id ? "bg-accent/30 border-l-2 border-primary" : ""
-                        }`}
-                      >
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-xs font-mono text-muted-foreground">
-                            {job.id.slice(0, 8)}
-                          </span>
-                          <StatusBadge status={job.status} />
-                        </div>
-                        <p className="text-sm">
-                          {(job.urls as string[])?.length ?? 0} URL{(job.urls as string[])?.length !== 1 ? "s" : ""}
-                          {" • "}
-                          {job.variant_count} variants
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {new Date(job.created_at).toLocaleString()}
-                        </p>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </ScrollArea>
-            </CardContent>
-          </Card>
+            </form>
+          </CardContent>
+        </Card>
 
-          {/* Detail Panel */}
-          <Card className="lg:col-span-2 border-border bg-card">
-            <CardHeader>
-              <CardTitle className="text-base">
-                {selectedJobId ? `Job ${selectedJobId.slice(0, 8)}…` : "Select a Job"}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {selectedJobId ? (
-                <JobDetailView jobId={selectedJobId} />
-              ) : (
-                <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
-                  <FileText className="h-12 w-12 mb-4 opacity-30" />
-                  <p className="text-sm">Select a job from the list or launch a new pipeline</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+        {/* Job queue */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Job Queue</CardTitle>
+            <CardDescription>Latest 50 Requiem jobs</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {jobsQ.isLoading ? (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Loader2 className="w-4 h-4 animate-spin" /> Loading jobs…
+              </div>
+            ) : jobsQ.data?.length === 0 ? (
+              <p className="text-muted-foreground text-sm">No jobs yet. Run a scan above.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="text-left text-muted-foreground border-b">
+                    <tr>
+                      <th className="py-2 pr-4">Entity</th>
+                      <th className="py-2 pr-4">Query</th>
+                      <th className="py-2 pr-4">Status</th>
+                      <th className="py-2 pr-4">Results</th>
+                      <th className="py-2 pr-4">Completed</th>
+                      <th className="py-2 pr-4 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {jobsQ.data?.map((j) => (
+                      <tr key={j.id} className="border-b hover:bg-muted/30">
+                        <td className="py-2 pr-4 font-medium">{j.entity_name}</td>
+                        <td className="py-2 pr-4 text-muted-foreground max-w-xs truncate">{j.query}</td>
+                        <td className="py-2 pr-4">
+                          <Badge variant={statusVariant(j.status)}>{j.status}</Badge>
+                        </td>
+                        <td className="py-2 pr-4">
+                          {j.result_summary?.total_results ?? "—"}
+                        </td>
+                        <td className="py-2 pr-4 text-muted-foreground">
+                          {j.completed_at ? new Date(j.completed_at).toLocaleString() : "—"}
+                        </td>
+                        <td className="py-2 pr-4 text-right space-x-2">
+                          <Button size="sm" variant="ghost" onClick={() => setSelectedJob(j)}>
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => rerunMut.mutate(j.id)}
+                            disabled={rerunMut.isPending}
+                          >
+                            <RotateCw className="w-4 h-4" />
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
+
+      {/* Snapshot drawer */}
+      <Sheet open={!!selectedJob} onOpenChange={(o) => !o && setSelectedJob(null)}>
+        <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>{selectedJob?.entity_name}</SheetTitle>
+            <SheetDescription>
+              <span className="block">Query: <code className="text-xs">{selectedJob?.query}</code></span>
+              {selectedJob?.error_message && (
+                <span className="block text-destructive mt-1">{selectedJob.error_message}</span>
+              )}
+            </SheetDescription>
+          </SheetHeader>
+
+          <div className="mt-4">
+            {snapshotsQ.isLoading ? (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Loader2 className="w-4 h-4 animate-spin" /> Loading snapshot…
+              </div>
+            ) : !latestSnapshot ? (
+              <p className="text-muted-foreground text-sm">No snapshot captured yet.</p>
+            ) : (
+              <ScrollArea className="h-[70vh] pr-3">
+                <p className="text-xs text-muted-foreground mb-3">
+                  Captured {new Date(latestSnapshot.captured_at).toLocaleString()} •{" "}
+                  {latestSnapshot.total_results} results
+                </p>
+                <ol className="space-y-3">
+                  {(latestSnapshot.parsed_results ?? []).map((r: ParsedResult) => (
+                    <li
+                      key={`${r.position}-${r.link}`}
+                      className="p-3 rounded-lg border bg-card"
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="text-2xl font-bold text-muted-foreground w-8 shrink-0">
+                          {r.position}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <a
+                            href={r.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-medium hover:underline flex items-center gap-1"
+                          >
+                            {r.title ?? r.link}
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                          <div className="text-xs text-muted-foreground truncate">
+                            {r.domain ?? r.displayed_link}
+                          </div>
+                          {r.snippet && (
+                            <p className="text-sm text-muted-foreground mt-1">{r.snippet}</p>
+                          )}
+                        </div>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              </ScrollArea>
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
