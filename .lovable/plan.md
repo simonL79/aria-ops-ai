@@ -1,83 +1,51 @@
-# A.R.I.A Ops Executive — Phase 0 & 1 Plan
+# Phase 2 — Requiem Engine (SerpApi)
 
-Confirmed:
-- **Archive, don't drop** legacy tables (rename to `_archived_<name>`)
-- **SerpApi** as the search provider for Requiem (key added later)
+## What gets built
 
----
+### 1. Edge function: `requiem-scan`
+- Input: `{ entity_name, query, client_id? }` **or** `{ job_id }` (rerun an existing job)
+- Calls SerpApi `engine=google&q=<query>&num=20`
+- Stores raw + parsed results into `requiem_serp_snapshots`
+- Mirrors top results into `scan_results` (rank_position, serpapi_query_id, domain) for ranking history
+- Updates `requiem_jobs` (running → completed/failed)
+- Writes audit row to `ops_audit_log`
+- Reads key from `SERPAPI_API_KEY` env var
 
-## Phase 0 — Codebase & Database Pruning
+### 2. Edge function: `requiem-cron`
+- Selects up to 5 `requiem_jobs` where `status='pending'` and `scheduled_for <= now()`
+- Invokes `requiem-scan` for each (service-role auth)
+- Returns dispatch summary
 
-### 0.1 Archive legacy tables (rename only — fully reversible)
-Rename to `_archived_<name>`:
-- **Anubis layer**: `anubis_entity_memory`, `anubis_pattern_log`
-- **Eris layer**: `eris_attack_simulations`, `eris_response_strategies`
-- **Graveyard**: `graveyard_simulations`
-- **Sentience / experiments**: `sentience_*`, `narrative_clusters`, `multilingual_threats`, `llm_watchdog_*`, `recalibrator_*` (whichever exist)
-- **Persona / RSI**: `persona_saturation_campaigns`, `rsi_*`
-- **Genesis / Darkweb**: `genesis_entities`, `darkweb_agents`
-- **Employee/B2B**: `employee_scan_queue`, `prospect_alerts`, `strike_requests` (if present)
+### 3. pg_cron schedule
+- Runs `requiem-cron` every 15 minutes
+- Uses `pg_cron` + `pg_net`, scheduled via the `supabase--read_query`/insert pattern (not migration, since it embeds the project URL + anon key)
 
-Keep untouched: `clients`, `client_entities`, `entities`, `entity_*`, `eidetic_*`, `executive_reports`, `aria_*`, `contact_submissions`, `lead_magnets`, `blog_posts`, `data_subject_requests`, `dpia_records`, `lia_records`, `data_retention_schedule`, `data_breach_incidents`, `activity_logs`, `live_status`, `counter_narratives`, `content_sources`.
+### 4. Admin UI: `/admin/requiem`
+- Page `src/pages/admin/RequiemDashboardPage.tsx` (file already imported in `App.tsx` but currently a stub — will be implemented)
+- Sections:
+  - **New scan form**: entity_name, query, client (dropdown from `clients`), submit → calls `requiem-scan` directly
+  - **Job queue table**: latest 50 `requiem_jobs` with status badges, started/completed times, results count
+  - **Snapshot drawer**: click a job → side panel listing parsed_results (rank, title, link, domain, snippet)
+  - **Auto-refresh** every 20s while a job is running
 
-### 0.2 Delete edge functions
-- `anubis-*` (all)
-- `rsi-threat-simulator`
-- `headless-scraper`
-- `local-memory-search`, `local-threat-analysis`, `local-inference` (Ollama fallback — switching to cloud-only)
-- Any `eris-*`, `graveyard-*`, `sentience-*`, `persona-saturation-*` if present
+### 5. Route
+- Add `<Route path="/admin/requiem" element={<RequiemDashboardPage />} />` inside the protected admin block in `App.tsx`
 
-### 0.3 Delete frontend pages & routes
-Remove from `App.tsx` and delete the files:
-- `AnubisCockpitPage`, `GraveyardPage`, `RSI.tsx`
-- Legacy product pages: `HyperCorePage`, `SovraPage`, `CleanLaunch`, `EngagementHubPage`, `SeoCenterPage`, `OutreachPipelinePage`
-- Any sidebar/nav links pointing to the above
+## Required from you
 
-### 0.4 Cron / workflow cleanup
-- Edit `.github/workflows/aria-health-check.yml` to remove pings to deleted functions
-- Remove cron schedules (in `supabase/config.toml` or pg_cron) referencing archived tables
+**`SERPAPI_API_KEY`** — get it from https://serpapi.com/manage-api-key. Once you confirm you have it, I'll trigger the secret prompt so you can paste it into Lovable. The edge function will read it via `Deno.env.get("SERPAPI_API_KEY")` — never exposed to the browser.
 
----
+## Out of scope this phase
+- Black Vertex (Phase 3)
+- Oblivion takedowns (Phase 4)
+- Suppression actions on results (just monitoring this phase)
 
-## Phase 1 — Schema alignment for Ops Executive
+## Order of execution after approval
+1. Prompt you to add `SERPAPI_API_KEY`
+2. Write both edge functions, deploy them
+3. Build `RequiemDashboardPage` and wire the route
+4. Test `requiem-scan` with a sample query via curl
+5. Schedule pg_cron job for `requiem-cron` (every 15 min)
+6. Confirm end-to-end and hand back
 
-### New tables
-1. `profiles` — user metadata (id → auth.users.id, email, display_name, avatar_url)
-2. `client_identities` — primary names, aliases, handles per client (FK clients.id)
-3. `reputation_scores` — periodic threat/sentiment score snapshots per client
-4. `requiem_jobs` — SEO/reputation suppression job queue (entity, query, status, serpapi_payload)
-5. `requiem_serp_snapshots` — captured SERP results per query (raw + parsed)
-6. `black_vertex_actions` — offensive/defensive content actions (status, target_url, action_type)
-7. `oblivion_takedowns` — takedown requests lifecycle (legal basis, target, status, evidence)
-8. `ops_audit_log` — unified audit trail across Requiem/Vertex/Oblivion
-
-All tables: RLS enabled, admin-only via `has_role(auth.uid(),'admin')`.
-
-### Extend existing
-- `clients`: add `tier` (individual|pro|enterprise), `onboarded_at`, `primary_contact_user_id`
-- `scan_results`: add `serpapi_query_id`, `rank_position`, `domain_authority`
-- `executive_reports`: add `client_id` FK, `pdf_url`
-- `eidetic_resurfacing_events`: add `client_id` FK
-
-### Triggers / functions
-- `update_updated_at_column()` triggers on new tables
-- `handle_new_user()` → auto-insert `profiles` on auth signup
-
----
-
-## Phase 2+ (preview, built later)
-- **Phase 2 — Requiem engine**: SerpApi integration edge function (`requiem-scan`), cron, dashboard at `/admin/requiem`
-- **Phase 3 — Black Vertex**: counter-content dispatch
-- **Phase 4 — Oblivion**: takedown automation tied to Legal Ops module
-
----
-
-## Required from you later
-- `SERPAPI_API_KEY` (added via Lovable secrets when Phase 2 starts)
-
-## Risk notes
-- Archive-rename is reversible: `ALTER TABLE _archived_x RENAME TO x;`
-- Edge function & page deletions are git-tracked and recoverable
-- No live cron will break — health-check workflow updated in same phase
-
-Approving this plan switches to build mode and I execute Phase 0 → Phase 1 in order.
+Approve to switch to build mode and execute.
