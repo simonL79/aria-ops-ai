@@ -1,4 +1,5 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
+import { requireAdmin, isAuthenticated } from '../_shared/auth.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -143,6 +144,14 @@ async function emitEvent(supabase: any, payload: any) {
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
+
+  // Allow either an admin user (via JWT) OR a service-role caller (cron / internal).
+  const authHeader = req.headers.get('authorization') ?? '';
+  const isServiceRoleCaller = authHeader === `Bearer ${SERVICE_ROLE}`;
+  if (!isServiceRoleCaller) {
+    const auth = await requireAdmin(req);
+    if (!isAuthenticated(auth)) return auth;
+  }
 
   const supabase = createClient(SUPABASE_URL, SERVICE_ROLE);
 
