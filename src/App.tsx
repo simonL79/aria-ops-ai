@@ -31,6 +31,7 @@ import BlackVertexPage from './pages/admin/BlackVertexPage';
 import OblivionPage from './pages/admin/OblivionPage';
 import EideticAlertPreferencesPage from './pages/admin/EideticAlertPreferencesPage';
 import AdminNotificationsPage from './pages/admin/AdminNotificationsPage';
+import Authentication from './pages/Authentication';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -60,6 +61,7 @@ function App() {
                     {/* Protected Public Routes - DO NOT MODIFY */}
                     <Route path="/" element={<Index />} />
                     <Route path="/home" element={<HomePage />} />
+                    <Route path="/auth" element={<Authentication />} />
                     
                     {/* Admin/Backend Routes - Protected */}
                     <Route element={<ProtectedRoute requireAdmin redirectTo="/auth" />}>
