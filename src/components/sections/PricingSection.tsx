@@ -131,6 +131,30 @@ const PricingSection = () => {
             </div>
           ))}
         </div>
+
+        <div className="max-w-3xl mx-auto mt-8">
+          <div className="glass-card p-8 transition-colors hover:border-primary/30 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+            <div className="flex-1">
+              <h3 className="text-2xl font-bold mb-2 text-primary">{enterprisePlan.name}</h3>
+              <div className="mb-3">
+                <span className="text-3xl font-bold text-white">{enterprisePlan.price}</span>
+                <span className="text-muted-foreground ml-1">{enterprisePlan.period}</span>
+              </div>
+              <p className="text-card-foreground mb-4">{enterprisePlan.description}</p>
+              <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-2">
+                {enterprisePlan.features.map((feature, i) => (
+                  <li key={i} className="flex items-start">
+                    <Check className="h-5 w-5 text-primary mr-2 mt-0.5 flex-shrink-0" />
+                    <span className="text-muted-foreground text-sm">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <Button asChild className="bg-primary hover:bg-primary/90 text-primary-foreground py-3 px-8 md:self-center whitespace-nowrap">
+              <Link to="/contact">{enterprisePlan.buttonText}</Link>
+            </Button>
+          </div>
+        </div>
       </div>
     </section>
   );
