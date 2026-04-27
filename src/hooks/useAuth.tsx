@@ -151,6 +151,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         // Check admin if user exists; otherwise mark admin check complete
         if (currentSession?.user) {
           await checkAdminStatus(currentSession.user.id, currentSession.user.email || '');
+          await checkPortalAccess(currentSession.user.id);
 
           // Initialize database
           try {
@@ -161,6 +162,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         } else {
           setIsAdmin(false);
           setIsAdminLoading(false);
+          setClientIds([]);
+          setIsPortalLoading(false);
         }
 
         setIsLoading(false);
