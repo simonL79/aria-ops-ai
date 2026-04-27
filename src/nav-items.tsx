@@ -62,7 +62,7 @@ import UsersPage from "./pages/UsersPage";
 // Admin imports
 import SystemOptimizationPage from "./pages/admin/SystemOptimizationPage";
 import SystemAuditPage from "./pages/admin/SystemAuditPage";
-import QATestingPage from "./pages/admin/QATestingPage";
+// QATestingPage removed (legacy)
 // StrategyBrainStage3TestPage removed (legacy)
 import PersonaSaturationPage from "./pages/admin/PersonaSaturationPage";
 import GenesisSentinelPage from "./pages/admin/GenesisSentinelPage";
@@ -424,12 +424,6 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     to: "/admin/system-audit",
     icon: <FileText className="h-4 w-4" />,
     page: <SystemAuditPage />,
-  },
-  {
-    title: "QA Testing",
-    to: "/admin/qa-testing",
-    icon: <CheckSquare className="h-4 w-4" />,
-    page: <QATestingPage />,
   },
   {
     title: "Persona Saturation",
