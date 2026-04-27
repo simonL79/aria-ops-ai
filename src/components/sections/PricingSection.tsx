@@ -162,17 +162,23 @@ const PricingSection = () => {
                 ))}
               </ul>
               
-              <Button 
-                asChild 
+              <Button
+                onClick={() => handleCheckout(plan.id)}
+                disabled={loadingPlan !== null}
                 className={`w-full py-3 ${
-                  plan.popular 
-                    ? 'bg-primary hover:bg-primary/90 text-primary-foreground' 
+                  plan.popular
+                    ? 'bg-primary hover:bg-primary/90 text-primary-foreground'
                     : 'bg-secondary hover:bg-secondary/80 text-secondary-foreground border border-border'
                 }`}
               >
-                <Link to="/contact">
-                  {plan.buttonText}
-                </Link>
+                {loadingPlan === plan.id ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  plan.buttonText
+                )}
               </Button>
             </div>
           ))}
