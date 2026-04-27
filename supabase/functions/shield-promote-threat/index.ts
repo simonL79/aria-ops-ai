@@ -1,9 +1,9 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
-import { requireAdmin, isAuthenticated } from '../_shared/auth.ts';
+import { verifyShieldToken } from '../_shared/shieldToken.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-shield-token',
 };
 
 function mapThreatTypeToShield(t: string | null): string {
@@ -44,8 +44,12 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   try {
-    const auth = await requireAdmin(req);
-    if (!isAuthenticated(auth)) return auth;
+    let auth: { userId: string };
+    try {
+      auth = await verifyShieldToken(req.headers.get('x-shield-token'), 'promote');
+    } catch {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
 
     const { threat_id } = await req.json();
     if (!threat_id || typeof threat_id !== 'string') {
@@ -77,7 +81,7 @@ Deno.serve(async (req) => {
       source: threat.source,
       source_url: threat.url,
       status: 'new',
-      created_by: auth.user.id,
+      created_by: auth.userId,
       ...scores,
     }).select('id').single();
 
@@ -87,13 +91,13 @@ Deno.serve(async (req) => {
     }
 
     await (admin as any).from('shield_alert_events').insert({
-      alert_id: alert.id, actor_id: auth.user.id, to_status: 'new',
+      alert_id: alert.id, actor_id: auth.userId, to_status: 'new',
       event_type: 'promoted_from_threat', notes: `Promoted from threat ${threat.id}`,
       metadata: { threat_id: threat.id, threat_type: threat.threat_type },
     });
 
     await (admin as any).from('shield_score_events').insert({
-      alert_id: alert.id, actor_id: auth.user.id, ...scores, reason: 'initial_promotion',
+      alert_id: alert.id, actor_id: auth.userId, ...scores, reason: 'initial_promotion',
     });
 
     await (admin as any).from('aria_ops_log').insert({

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { invokeShield } from '@/lib/shield/invokeShield';
 import { Button } from '@/components/ui/button';
 import { Shield, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
@@ -27,7 +28,7 @@ export default function PromoteToShieldButton({ threatId }: { threatId: string }
 
   const handle = async () => {
     setWorking(true);
-    const { data, error } = await supabase.functions.invoke('shield-promote-threat', { body: { threat_id: threatId } });
+    const { data, error } = await invokeShield<{ alert_id: string; severity: string }>('shield-promote-threat', { threat_id: threatId });
     setWorking(false);
     if (error || !data?.alert_id) { toast.error('Promotion failed'); return; }
     toast.success(`Shield alert created (${data.severity})`);

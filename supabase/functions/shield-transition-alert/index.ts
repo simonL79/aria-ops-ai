@@ -1,9 +1,9 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
-import { requireAdmin, isAuthenticated } from '../_shared/auth.ts';
+import { verifyShieldToken } from '../_shared/shieldToken.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-shield-token',
 };
 
 const ALLOWED: Record<string, string[]> = {
@@ -23,8 +23,12 @@ const ALLOWED: Record<string, string[]> = {
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   try {
-    const auth = await requireAdmin(req);
-    if (!isAuthenticated(auth)) return auth;
+    let auth: { userId: string };
+    try {
+      auth = await verifyShieldToken(req.headers.get('x-shield-token'), 'transition');
+    } catch {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
 
     const { alert_id, to_status, notes, client_visible } = await req.json();
     if (!alert_id || !to_status) {
@@ -47,7 +51,7 @@ Deno.serve(async (req) => {
     await (admin as any).from('shield_alerts').update(updatePatch).eq('id', alert_id);
 
     await (admin as any).from('shield_alert_events').insert({
-      alert_id, actor_id: auth.user.id, from_status: current.status, to_status,
+      alert_id, actor_id: auth.userId, from_status: current.status, to_status,
       event_type: 'status_change', notes: notes || null,
     });
 
