@@ -44,8 +44,7 @@ import InfluencerRadar from "./pages/InfluencerRadar";
 import EideticPage from "./pages/EideticPage";
 // GraveyardPage and SovraPage removed (legacy)
 import EmergencyStrikePage from "./pages/EmergencyStrikePage";
-import StrikeManagementPage from "./pages/StrikeManagementPage";
-import EmployeeBrandRiskPage from "./pages/EmployeeBrandRiskPage";
+// StrikeManagementPage and EmployeeBrandRiskPage removed (legacy)
 // SeoCenterPage removed (legacy)
 import OperatorConsole from "./pages/OperatorConsole";
 import AriaCommand from "./pages/AriaCommand";
@@ -352,18 +351,6 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     to: "/emergency-strike",
     icon: <Zap className="h-4 w-4" />,
     page: <EmergencyStrikePage />,
-  },
-  {
-    title: "Strike Management",
-    to: "/strike-management",
-    icon: <Target className="h-4 w-4" />,
-    page: <StrikeManagementPage />,
-  },
-  {
-    title: "Employee Brand Risk",
-    to: "/employee-brand-risk",
-    icon: <AlertTriangle className="h-4 w-4" />,
-    page: <EmployeeBrandRiskPage />,
   },
   {
     title: "Operator Console",
