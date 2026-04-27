@@ -10,13 +10,27 @@ const PricingSection = () => {
 
   const plans = [
     {
+      name: "Basic",
+      price: "£29",
+      period: "/month",
+      description: "Essential reputation monitoring",
+      features: [
+        "Personal reputation monitoring",
+        "Basic threat detection",
+        "Monthly reports",
+        "Email support"
+      ],
+      buttonText: "Get Started",
+      popular: false
+    },
+    {
       name: "Individual",
       price: "£97",
       period: "/month",
       description: "Personal reputation monitoring",
       features: [
         "Personal reputation monitoring",
-        "Basic threat detection",
+        "Advanced threat detection",
         "Monthly reports",
         "Email support",
         "Social media monitoring",
@@ -27,7 +41,7 @@ const PricingSection = () => {
     },
     {
       name: "PRO",
-      price: "£297",
+      price: "£397",
       period: "/month",
       description: "Executive protection suite",
       features: [
@@ -42,26 +56,26 @@ const PricingSection = () => {
       ],
       buttonText: "Most Popular",
       popular: true
-    },
-    {
-      name: "Enterprise",
-      price: "Custom",
-      period: "pricing",
-      description: "Full organization coverage",
-      features: [
-        "Full organization coverage",
-        "Custom threat models",
-        "Dedicated account manager",
-        "API access",
-        "Daily reports",
-        "24/7 support",
-        "Multi-entity monitoring",
-        "Advanced analytics dashboard"
-      ],
-      buttonText: "Contact Sales",
-      popular: false
     }
   ];
+
+  const enterprisePlan = {
+    name: "Enterprise",
+    price: "Custom",
+    period: "pricing",
+    description: "Full organization coverage",
+    features: [
+      "Full organization coverage",
+      "Custom threat models",
+      "Dedicated account manager",
+      "API access",
+      "Daily reports",
+      "24/7 support",
+      "Multi-entity monitoring",
+      "Advanced analytics dashboard"
+    ],
+    buttonText: "Contact Sales"
+  };
 
   return (
     <section className="py-24 bg-gradient-to-b from-black via-gray-950 to-black">
@@ -116,6 +130,30 @@ const PricingSection = () => {
               </Button>
             </div>
           ))}
+        </div>
+
+        <div className="max-w-3xl mx-auto mt-8">
+          <div className="glass-card p-8 transition-colors hover:border-primary/30 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+            <div className="flex-1">
+              <h3 className="text-2xl font-bold mb-2 text-primary">{enterprisePlan.name}</h3>
+              <div className="mb-3">
+                <span className="text-3xl font-bold text-white">{enterprisePlan.price}</span>
+                <span className="text-muted-foreground ml-1">{enterprisePlan.period}</span>
+              </div>
+              <p className="text-card-foreground mb-4">{enterprisePlan.description}</p>
+              <ul className="grid sm:grid-cols-2 gap-x-6 gap-y-2">
+                {enterprisePlan.features.map((feature, i) => (
+                  <li key={i} className="flex items-start">
+                    <Check className="h-5 w-5 text-primary mr-2 mt-0.5 flex-shrink-0" />
+                    <span className="text-muted-foreground text-sm">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <Button asChild className="bg-primary hover:bg-primary/90 text-primary-foreground py-3 px-8 md:self-center whitespace-nowrap">
+              <Link to="/contact">{enterprisePlan.buttonText}</Link>
+            </Button>
+          </div>
         </div>
       </div>
     </section>
