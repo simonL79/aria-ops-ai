@@ -55,32 +55,48 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     console.log('✅ FORCE RESET: Complete');
   };
 
-  // Enhanced admin check with business owner email override
-  const checkAdminStatus = async (userId: string, userEmail: string) => {
+  // Enhanced admin check - tries RPC first, falls back to direct user_roles query
+  const checkAdminStatus = async (userId: string, _userEmail: string) => {
     setIsAdminLoading(true);
     try {
       console.log('🔍 Checking admin status for:', userId);
-      
+
       const { data, error } = await (supabase.rpc as any)('is_current_user_admin');
-      
+
+      if (!error && data === true) {
+        console.log('✅ Admin confirmed via RPC');
+        setIsAdmin(true);
+        return true;
+      }
+
       if (error) {
-        console.error('Error checking admin status:', error);
+        console.warn('RPC is_current_user_admin failed, falling back to direct query:', error.message);
+      }
+
+      // Fallback: direct query (RLS allows users to read their own role)
+      const { data: roleRow, error: roleErr } = await (supabase
+        .from('user_roles') as any)
+        .select('role')
+        .eq('user_id', userId)
+        .eq('role', 'admin')
+        .maybeSingle();
+
+      if (roleErr) {
+        console.error('❌ Fallback admin query failed:', roleErr);
         setIsAdmin(false);
-        setIsAdminLoading(false);
         return false;
       }
 
-      console.log('✅ Admin status from function:', data);
-      const isAdminUser = data === true;
+      const isAdminUser = !!roleRow;
+      console.log(isAdminUser ? '✅ Admin confirmed via fallback' : 'ℹ️ User is not admin');
       setIsAdmin(isAdminUser);
-      setIsAdminLoading(false);
       return isAdminUser;
-      
     } catch (error) {
       console.error('❌ Error checking admin status:', error);
       setIsAdmin(false);
-      setIsAdminLoading(false);
       return false;
+    } finally {
+      setIsAdminLoading(false);
     }
   };
 
