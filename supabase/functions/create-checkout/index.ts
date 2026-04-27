@@ -10,9 +10,9 @@ const corsHeaders = {
 
 // Server-side price map — never trust client-supplied prices
 const PLAN_PRICES: Record<string, { name: string; amount: number }> = {
-  "starter": { name: "Starter Plan", amount: 4900 },
-  "professional": { name: "Professional Plan", amount: 9700 },
-  "enterprise": { name: "Enterprise Plan", amount: 29700 },
+  "basic": { name: "A.R.I.A™ Basic Plan", amount: 2900 },
+  "individual": { name: "A.R.I.A™ Individual Plan", amount: 9700 },
+  "pro": { name: "A.R.I.A™ PRO Plan", amount: 39700 },
 };
 
 serve(async (req) => {
