@@ -34,25 +34,21 @@ import DPARequestPage from "./pages/DPARequestPage";
 import RequestDataAccessPage from "./pages/RequestDataAccessPage";
 import PaymentPage from "./pages/PaymentPage";
 import ContactFormPage from "./pages/ContactFormPage";
-import CleanLaunchPage from "./pages/CleanLaunchPage";
+// CleanLaunchPage removed (legacy)
 import CalendarPage from "./pages/CalendarPage";
 import ThreatsPage from "./pages/ThreatsPage";
 import Discovery from "./pages/Discovery";
-import NewCoPage from "./pages/NewCoPage";
+// NewCoPage removed (legacy)
 import InfluencerRadar from "./pages/InfluencerRadar";
-import OutreachPipelinePage from "./pages/OutreachPipelinePage";
-import RSI from "./pages/RSI";
+// OutreachPipelinePage and RSI removed (legacy)
 import EideticPage from "./pages/EideticPage";
-import GraveyardPage from "./pages/GraveyardPage";
-import SovraPage from "./pages/SovraPage";
+// GraveyardPage and SovraPage removed (legacy)
 import EmergencyStrikePage from "./pages/EmergencyStrikePage";
-import StrikeManagementPage from "./pages/StrikeManagementPage";
-import EmployeeBrandRiskPage from "./pages/EmployeeBrandRiskPage";
-import SeoCenterPage from "./pages/SeoCenterPage";
+// StrikeManagementPage and EmployeeBrandRiskPage removed (legacy)
+// SeoCenterPage removed (legacy)
 import OperatorConsole from "./pages/OperatorConsole";
 import AriaCommand from "./pages/AriaCommand";
-import HyperCorePage from "./pages/HyperCorePage";
-import AnubisCockpitPage from "./pages/AnubisCockpitPage";
+// HyperCorePage and AnubisCockpitPage removed (legacy)
 import AiScrapingPage from "./pages/AiScrapingPage";
 import EnhancedIntelligence from "./pages/EnhancedIntelligence";
 import IntelligenceWorkbench from "./pages/IntelligenceWorkbench";
@@ -66,8 +62,8 @@ import UsersPage from "./pages/UsersPage";
 // Admin imports
 import SystemOptimizationPage from "./pages/admin/SystemOptimizationPage";
 import SystemAuditPage from "./pages/admin/SystemAuditPage";
-import QATestingPage from "./pages/admin/QATestingPage";
-import StrategyBrainStage3TestPage from "./pages/admin/StrategyBrainStage3TestPage";
+// QATestingPage removed (legacy)
+// StrategyBrainStage3TestPage removed (legacy)
 import PersonaSaturationPage from "./pages/admin/PersonaSaturationPage";
 import GenesisSentinelPage from "./pages/admin/GenesisSentinelPage";
 import GenesisSentinel from "./pages/admin/GenesisSentinel";
@@ -75,7 +71,7 @@ import SentinelPage from "./pages/admin/SentinelPage";
 import SentinelOperatorPage from "./pages/admin/SentinelOperatorPage";
 import IntelligenceCorePage from "./pages/admin/IntelligenceCorePage";
 import LegalOpsPage from "./pages/admin/LegalOpsPage";
-import AnubisMemoryPage from "./pages/admin/AnubisMemoryPage";
+// AnubisMemoryPage removed (legacy)
 
 // Dashboard imports
 import DashboardPage from "./pages/dashboard/DashboardPage";
@@ -314,13 +310,6 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     isPublic: true,
   },
   {
-    title: "Clean Launch",
-    to: "/clean-launch",
-    icon: <Zap className="h-4 w-4" />,
-    page: <CleanLaunchPage />,
-    isPublic: true,
-  },
-  {
     title: "Calendar",
     to: "/calendar",
     icon: <Calendar className="h-4 w-4" />,
@@ -339,29 +328,10 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     page: <Discovery />,
   },
   {
-    title: "NewCo",
-    to: "/newco",
-    icon: <Building className="h-4 w-4" />,
-    page: <NewCoPage />,
-    isPublic: true,
-  },
-  {
     title: "Influencer Radar",
     to: "/influencer-radar",
     icon: <Radar className="h-4 w-4" />,
     page: <InfluencerRadar />,
-  },
-  {
-    title: "Outreach Pipeline",
-    to: "/outreach-pipeline",
-    icon: <TrendingUp className="h-4 w-4" />,
-    page: <OutreachPipelinePage />,
-  },
-  {
-    title: "RSI",
-    to: "/rsi",
-    icon: <TrendingUp className="h-4 w-4" />,
-    page: <RSI />,
   },
   {
     title: "Eidetic",
@@ -370,40 +340,10 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     page: <EideticPage />,
   },
   {
-    title: "Graveyard",
-    to: "/graveyard",
-    icon: <Gavel className="h-4 w-4" />,
-    page: <GraveyardPage />,
-  },
-  {
-    title: "Sovra",
-    to: "/sovra",
-    icon: <Globe className="h-4 w-4" />,
-    page: <SovraPage />,
-  },
-  {
     title: "Emergency Strike",
     to: "/emergency-strike",
     icon: <Zap className="h-4 w-4" />,
     page: <EmergencyStrikePage />,
-  },
-  {
-    title: "Strike Management",
-    to: "/strike-management",
-    icon: <Target className="h-4 w-4" />,
-    page: <StrikeManagementPage />,
-  },
-  {
-    title: "Employee Brand Risk",
-    to: "/employee-brand-risk",
-    icon: <AlertTriangle className="h-4 w-4" />,
-    page: <EmployeeBrandRiskPage />,
-  },
-  {
-    title: "SEO Center",
-    to: "/seo-center",
-    icon: <Search className="h-4 w-4" />,
-    page: <SeoCenterPage />,
   },
   {
     title: "Operator Console",
@@ -416,18 +356,6 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     to: "/aria-command",
     icon: <Command className="h-4 w-4" />,
     page: <AriaCommand />,
-  },
-  {
-    title: "HyperCore",
-    to: "/hypercore",
-    icon: <Network className="h-4 w-4" />,
-    page: <HyperCorePage />,
-  },
-  {
-    title: "Anubis Cockpit",
-    to: "/anubis-cockpit",
-    icon: <Gauge className="h-4 w-4" />,
-    page: <AnubisCockpitPage />,
   },
   {
     title: "AI Scraping",
@@ -498,18 +426,6 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     page: <SystemAuditPage />,
   },
   {
-    title: "QA Testing",
-    to: "/admin/qa-testing",
-    icon: <CheckSquare className="h-4 w-4" />,
-    page: <QATestingPage />,
-  },
-  {
-    title: "Strategy Brain Stage 3 Test",
-    to: "/admin/strategy-brain-stage3-test",
-    icon: <Brain className="h-4 w-4" />,
-    page: <StrategyBrainStage3TestPage />,
-  },
-  {
     title: "Persona Saturation",
     to: "/admin/persona-saturation",
     icon: <Users className="h-4 w-4" />,
@@ -550,12 +466,6 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     to: "/admin/legal-ops-page",
     icon: <Gavel className="h-4 w-4" />,
     page: <LegalOpsPage />,
-  },
-  {
-    title: "Anubis Memory",
-    to: "/admin/anubis-memory-page",
-    icon: <Database className="h-4 w-4" />,
-    page: <AnubisMemoryPage />,
   },
   // Dashboard Routes
   {

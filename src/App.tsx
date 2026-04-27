@@ -15,8 +15,8 @@ import HomePage from "./pages/HomePage";
 import SecureClientIntakePage from "./pages/SecureClientIntakePage";
 import SmartIntakePage from "./pages/SmartIntakePage";
 import ContentGenerationPage from "./pages/ContentGenerationPage";
-import KeywordToArticleSystemPage from "./pages/admin/KeywordToArticleSystemPage";
-import ControlCenterPage from "./pages/admin/ControlCenterPage";
+// KeywordToArticleSystemPage removed (legacy)
+// ControlCenterPage removed (legacy)
 import ClientOnboardingPage from "./pages/ClientOnboardingPage";
 import StrategyBrainStage3Page from "./pages/admin/StrategyBrainStage3Page";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
@@ -64,8 +64,8 @@ function App() {
                       <Route path="/secure-intake" element={<SecureClientIntakePage />} />
                       <Route path="/smart-intake" element={<SmartIntakePage />} />
                       <Route path="/content-generation" element={<ContentGenerationPage />} />
-                      <Route path="/admin/keyword-to-article" element={<KeywordToArticleSystemPage />} />
-                      <Route path="/admin/control-center" element={<ControlCenterPage />} />
+                      {/* /admin/keyword-to-article route removed (legacy) */}
+                      {/* /admin/control-center route removed (legacy) */}
                       
                       <Route path="/admin/client-onboarding" element={<ClientOnboardingPage />} />
                       <Route path="/admin/strategy-brain-stage3" element={<StrategyBrainStage3Page />} />

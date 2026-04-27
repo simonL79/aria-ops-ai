@@ -22,8 +22,7 @@ import { PanopticaPanel } from './PanopticaPanel';
 import { SelfHealingPanel } from './SelfHealingPanel';
 import { StrategicResponsePanel } from "./StrategicResponsePanel";
 import { AletheiaTruthPanel } from "./AletheiaTruthPanel";
-import { ErisPanel } from "./ErisPanel";
-import { SentiencePanel } from "./SentiencePanel";
+// ErisPanel and SentiencePanel removed (legacy)
 import { CommandExecutionFeedback } from './feedback/CommandExecutionFeedback';
 import { RemediationSuggestions } from './feedback/RemediationSuggestions';
 import { useFeedbackData } from './feedback/useFeedbackData';
@@ -59,8 +58,7 @@ export const FeedbackPanel = ({ commandHistory }: FeedbackPanelProps) => {
       <SelfHealingPanel />
       <StrategicResponsePanel />
       <AletheiaTruthPanel />
-      <ErisPanel />
-      <SentiencePanel />
+      {/* ErisPanel and SentiencePanel removed (legacy) */}
       <CommandExecutionFeedback feedback={feedback} />
       <RemediationSuggestions suggestions={suggestions} />
     </div>

@@ -8,8 +8,7 @@ export { FeedbackPanel } from './FeedbackPanel';
 export { SelfHealingPanel } from './SelfHealingPanel';
 export { StrategicResponsePanel } from './StrategicResponsePanel';
 export { AletheiaTruthPanel } from './AletheiaTruthPanel';
-export { ErisPanel } from './ErisPanel';
-export { SentiencePanel } from './SentiencePanel';
+// ErisPanel and SentiencePanel removed (legacy)
 export { PanopticaPanel } from './PanopticaPanel';
 export { NexusPanel } from './NexusPanel';
 export { SentinelShieldPanel } from './SentinelShieldPanel';
