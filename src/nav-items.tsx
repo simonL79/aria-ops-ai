@@ -63,7 +63,7 @@ import UsersPage from "./pages/UsersPage";
 import SystemOptimizationPage from "./pages/admin/SystemOptimizationPage";
 import SystemAuditPage from "./pages/admin/SystemAuditPage";
 import QATestingPage from "./pages/admin/QATestingPage";
-import StrategyBrainStage3TestPage from "./pages/admin/StrategyBrainStage3TestPage";
+// StrategyBrainStage3TestPage removed (legacy)
 import PersonaSaturationPage from "./pages/admin/PersonaSaturationPage";
 import GenesisSentinelPage from "./pages/admin/GenesisSentinelPage";
 import GenesisSentinel from "./pages/admin/GenesisSentinel";
@@ -430,12 +430,6 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     to: "/admin/qa-testing",
     icon: <CheckSquare className="h-4 w-4" />,
     page: <QATestingPage />,
-  },
-  {
-    title: "Strategy Brain Stage 3 Test",
-    to: "/admin/strategy-brain-stage3-test",
-    icon: <Brain className="h-4 w-4" />,
-    page: <StrategyBrainStage3TestPage />,
   },
   {
     title: "Persona Saturation",
