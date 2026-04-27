@@ -38,7 +38,7 @@ import ContactFormPage from "./pages/ContactFormPage";
 import CalendarPage from "./pages/CalendarPage";
 import ThreatsPage from "./pages/ThreatsPage";
 import Discovery from "./pages/Discovery";
-import NewCoPage from "./pages/NewCoPage";
+// NewCoPage removed (legacy)
 import InfluencerRadar from "./pages/InfluencerRadar";
 // OutreachPipelinePage and RSI removed (legacy)
 import EideticPage from "./pages/EideticPage";
@@ -326,13 +326,6 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     to: "/discovery",
     icon: <Search className="h-4 w-4" />,
     page: <Discovery />,
-  },
-  {
-    title: "NewCo",
-    to: "/newco",
-    icon: <Building className="h-4 w-4" />,
-    page: <NewCoPage />,
-    isPublic: true,
   },
   {
     title: "Influencer Radar",
