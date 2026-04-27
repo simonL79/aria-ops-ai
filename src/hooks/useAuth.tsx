@@ -10,6 +10,9 @@ interface AuthContextType {
   isLoading: boolean;
   isAdmin: boolean;
   isAdminLoading: boolean;
+  clientIds: string[];
+  isPortalUser: boolean;
+  isPortalLoading: boolean;
   signOut: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<{ error?: any }>;
   forceReset: () => Promise<void>;
