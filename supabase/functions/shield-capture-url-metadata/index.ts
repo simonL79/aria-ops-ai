@@ -1,9 +1,9 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
-import { requireAdmin, isAuthenticated } from '../_shared/auth.ts';
+import { verifyShieldToken } from '../_shared/shieldToken.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-shield-token',
 };
 
 async function sha256Hex(input: string) {
@@ -15,8 +15,12 @@ async function sha256Hex(input: string) {
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   try {
-    const auth = await requireAdmin(req);
-    if (!isAuthenticated(auth)) return auth;
+    let auth: { userId: string };
+    try {
+      auth = await verifyShieldToken(req.headers.get('x-shield-token'), 'capture');
+    } catch {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
 
     const { alert_id, url } = await req.json();
     if (!alert_id || !url) {
