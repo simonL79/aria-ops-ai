@@ -60,3 +60,24 @@ Viewports:
 ## Deliverable
 
 A QA report in chat with a 3×3 matrix (page × viewport) of statuses, screenshots of any issues found, and a summary of fixes applied. Then await your go-ahead for Phase 5.
+
+---
+
+## Phase 5 — DEFERRED (parked for later)
+
+**Client Portal** — role-isolated read-only experience for end clients.
+
+- New `client` value on `user_roles.role` + new `client_accounts` table linking `auth.users.id` → existing client/entity record
+- Helper functions: `is_current_user_client()`, `current_user_client_id()` (SECURITY DEFINER, no recursion)
+- Additive RLS SELECT policies on reports / sentiment / findings / scans tables, scoped by `current_user_client_id()`
+- Routes: `/portal/*` (Overview, Reports, Findings, Sentiment, Account) behind new `ClientProtectedRoute`
+- Post-login redirect: admin → `/admin`, client → `/portal`
+- `useAuth` extended with `isClient`, `clientId`
+- Admin-gated `invite-client` edge function (creates auth user + role + link + sends invite via existing transactional email)
+- `portal-report-download` edge function returns short-lived signed URLs from a private storage bucket
+- No admin surface exposure to clients (UI hidden + RLS enforced — defense in depth)
+
+Open questions to resolve before starting Phase 5:
+1. Confirm exact existing table names for reports / sentiment / findings to attach client-read RLS policies
+2. Confirm v1 portal scope (5 sections above vs. trimmed)
+3. Confirm report storage format (existing files vs. on-demand render)
