@@ -262,7 +262,7 @@ export default function OblivionPage() {
       </div>
 
       <Sheet open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
-        <SheetContent className="w-[600px] sm:max-w-[600px]">
+        <SheetContent className="w-full overflow-y-auto sm:max-w-[600px]">
           {selected && (
             <>
               <SheetHeader>
