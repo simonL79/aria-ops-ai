@@ -764,6 +764,13 @@ export type Database = {
             foreignKeyName: "black_vertex_actions_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
+            referencedRelation: "client_portal_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "black_vertex_actions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
@@ -883,6 +890,13 @@ export type Database = {
             foreignKeyName: "client_entities_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
+            referencedRelation: "client_portal_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_entities_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
@@ -920,6 +934,13 @@ export type Database = {
           value?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "client_identities_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_portal_clients"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "client_identities_client_id_fkey"
             columns: ["client_id"]
@@ -985,6 +1006,45 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      client_portal_users: {
+        Row: {
+          client_id: string
+          created_at: string
+          id: string
+          invited_by: string | null
+          user_id: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          id?: string
+          invited_by?: string | null
+          user_id: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          id?: string
+          invited_by?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_portal_users_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_portal_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_portal_users_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       clients: {
         Row: {
@@ -1900,6 +1960,13 @@ export type Database = {
             foreignKeyName: "eidetic_resurfacing_events_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
+            referencedRelation: "client_portal_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "eidetic_resurfacing_events_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
@@ -2106,6 +2173,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "executive_reports_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_portal_clients"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "executive_reports_client_id_fkey"
             columns: ["client_id"]
@@ -2602,6 +2676,13 @@ export type Database = {
             foreignKeyName: "oblivion_takedowns_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
+            referencedRelation: "client_portal_clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "oblivion_takedowns_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
@@ -2972,6 +3053,13 @@ export type Database = {
           visibility_score?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "reputation_scores_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_portal_clients"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "reputation_scores_client_id_fkey"
             columns: ["client_id"]
@@ -3593,9 +3681,42 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      client_portal_clients: {
+        Row: {
+          created_at: string | null
+          id: string | null
+          industry: string | null
+          name: string | null
+          onboarded_at: string | null
+          status: string | null
+          tier: string | null
+          website: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string | null
+          industry?: string | null
+          name?: string | null
+          onboarded_at?: string | null
+          status?: string | null
+          tier?: string | null
+          website?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string | null
+          industry?: string | null
+          name?: string | null
+          onboarded_at?: string | null
+          status?: string | null
+          tier?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      get_user_client_ids: { Args: { _user_id: string }; Returns: string[] }
       has_role: { Args: { _role: string; _user_id: string }; Returns: boolean }
       is_current_user_admin: { Args: never; Returns: boolean }
       log_compliance_activity: {
@@ -3623,6 +3744,14 @@ export type Database = {
           narrative_summary: string
           similarity: number
         }[]
+      }
+      user_owns_client: {
+        Args: { _client_id: string; _user_id: string }
+        Returns: boolean
+      }
+      user_owns_entity: {
+        Args: { _entity: string; _user_id: string }
+        Returns: boolean
       }
     }
     Enums: {
