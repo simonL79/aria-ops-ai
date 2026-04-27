@@ -2850,6 +2850,110 @@ export type Database = {
         }
         Relationships: []
       }
+      portal_removal_items: {
+        Row: {
+          ai_rationale: string | null
+          category: string | null
+          created_at: string
+          excerpt: string | null
+          id: string
+          removal_status: string
+          severity: number
+          submission_id: string
+          updated_at: string
+          url: string | null
+          user_confirmed: boolean
+          user_dismissed: boolean
+        }
+        Insert: {
+          ai_rationale?: string | null
+          category?: string | null
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          removal_status?: string
+          severity?: number
+          submission_id: string
+          updated_at?: string
+          url?: string | null
+          user_confirmed?: boolean
+          user_dismissed?: boolean
+        }
+        Update: {
+          ai_rationale?: string | null
+          category?: string | null
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          removal_status?: string
+          severity?: number
+          submission_id?: string
+          updated_at?: string
+          url?: string | null
+          user_confirmed?: boolean
+          user_dismissed?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portal_removal_items_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "portal_removal_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      portal_removal_submissions: {
+        Row: {
+          client_id: string
+          confirmed_at: string | null
+          created_at: string
+          dispatched_at: string | null
+          id: string
+          notes: string | null
+          requiem_run_id: string | null
+          scan_completed_at: string | null
+          scan_started_at: string | null
+          source_text: string | null
+          source_url: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          client_id: string
+          confirmed_at?: string | null
+          created_at?: string
+          dispatched_at?: string | null
+          id?: string
+          notes?: string | null
+          requiem_run_id?: string | null
+          scan_completed_at?: string | null
+          scan_started_at?: string | null
+          source_text?: string | null
+          source_url?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          client_id?: string
+          confirmed_at?: string | null
+          created_at?: string
+          dispatched_at?: string | null
+          id?: string
+          notes?: string | null
+          requiem_run_id?: string | null
+          scan_completed_at?: string | null
+          scan_started_at?: string | null
+          source_text?: string | null
+          source_url?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       privacy_notices: {
         Row: {
           approved_by: string | null

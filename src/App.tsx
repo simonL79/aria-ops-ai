@@ -39,6 +39,7 @@ import PortalThreats from './pages/portal/PortalThreats';
 import PortalFindings from './pages/portal/PortalFindings';
 import PortalAccount from './pages/portal/PortalAccount';
 import PortalNoAccess from './pages/portal/PortalNoAccess';
+import PortalRemoval from './pages/portal/PortalRemoval';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -78,6 +79,7 @@ function App() {
                       <Route path="/portal/threats" element={<PortalThreats />} />
                       <Route path="/portal/findings" element={<PortalFindings />} />
                       <Route path="/portal/account" element={<PortalAccount />} />
+                      <Route path="/portal/removal" element={<PortalRemoval />} />
                     </Route>
                     
                     {/* Admin/Backend Routes - Protected */}
