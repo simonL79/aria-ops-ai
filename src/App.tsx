@@ -27,6 +27,8 @@ import SystemCompletionPage from '@/pages/admin/SystemCompletionPage';
 import QASystemTestPage from '@/pages/QASystemTestPage';
 import AIControlPage from './pages/admin/AIControlPage';
 import RequiemDashboardPage from './pages/admin/RequiemDashboardPage';
+import BlackVertexPage from './pages/admin/BlackVertexPage';
+import OblivionPage from './pages/admin/OblivionPage';
 import EideticAlertPreferencesPage from './pages/admin/EideticAlertPreferencesPage';
 import AdminNotificationsPage from './pages/admin/AdminNotificationsPage';
 
@@ -75,6 +77,8 @@ function App() {
                       <Route path="/admin/strategy-brain-test" element={<StrategyBrainTestPage />} />
                       <Route path="/admin/ai-control" element={<AIControlPage />} />
                       <Route path="/admin/requiem" element={<RequiemDashboardPage />} />
+                      <Route path="/admin/black-vertex" element={<BlackVertexPage />} />
+                      <Route path="/admin/oblivion" element={<OblivionPage />} />
                       <Route path="/admin/system-completion" element={<SystemCompletionPage />} />
                       <Route path="/admin/eidetic/preferences" element={<EideticAlertPreferencesPage />} />
                       <Route path="/admin/notifications" element={<AdminNotificationsPage />} />
