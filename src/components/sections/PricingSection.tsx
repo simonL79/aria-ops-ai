@@ -1,15 +1,59 @@
 
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { Check } from 'lucide-react';
+import { Check, Loader2 } from 'lucide-react';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+
+type PlanId = 'basic' | 'individual' | 'pro';
 
 const PricingSection = () => {
   const { ref, visible } = useScrollReveal(0.1);
+  const navigate = useNavigate();
+  const [loadingPlan, setLoadingPlan] = useState<PlanId | null>(null);
 
-  const plans = [
+  const handleCheckout = async (planId: PlanId) => {
+    setLoadingPlan(planId);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.info('Please sign in to subscribe');
+        navigate(`/auth?redirect=/pricing&plan=${planId}`);
+        return;
+      }
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: { planId },
+      });
+      if (error) throw error;
+      if (data?.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error('No checkout URL returned');
+      }
+    } catch (err) {
+      console.error('Checkout error:', err);
+      toast.error('Unable to start checkout', {
+        description: 'Please try again later or contact support.',
+      });
+    } finally {
+      setLoadingPlan(null);
+    }
+  };
+
+  const plans: Array<{
+    id: PlanId;
+    name: string;
+    price: string;
+    period: string;
+    description: string;
+    features: string[];
+    buttonText: string;
+    popular: boolean;
+  }> = [
     {
+      id: "basic",
       name: "Basic",
       price: "£29",
       period: "/month",
@@ -24,6 +68,7 @@ const PricingSection = () => {
       popular: false
     },
     {
+      id: "individual",
       name: "Individual",
       price: "£97",
       period: "/month",
@@ -40,6 +85,7 @@ const PricingSection = () => {
       popular: false
     },
     {
+      id: "pro",
       name: "PRO",
       price: "£397",
       period: "/month",
@@ -54,7 +100,7 @@ const PricingSection = () => {
         "Dark web monitoring",
         "Proactive content strategy"
       ],
-      buttonText: "Most Popular",
+      buttonText: "Subscribe to PRO",
       popular: true
     }
   ];
@@ -116,17 +162,23 @@ const PricingSection = () => {
                 ))}
               </ul>
               
-              <Button 
-                asChild 
+              <Button
+                onClick={() => handleCheckout(plan.id)}
+                disabled={loadingPlan !== null}
                 className={`w-full py-3 ${
-                  plan.popular 
-                    ? 'bg-primary hover:bg-primary/90 text-primary-foreground' 
+                  plan.popular
+                    ? 'bg-primary hover:bg-primary/90 text-primary-foreground'
                     : 'bg-secondary hover:bg-secondary/80 text-secondary-foreground border border-border'
                 }`}
               >
-                <Link to="/contact">
-                  {plan.buttonText}
-                </Link>
+                {loadingPlan === plan.id ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  plan.buttonText
+                )}
               </Button>
             </div>
           ))}
