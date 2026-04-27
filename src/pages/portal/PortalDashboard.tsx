@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import PortalLayout from '@/components/portal/PortalLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { ShieldAlert, FileText, Sparkles, Activity } from 'lucide-react';
+import { ShieldAlert, FileText, Sparkles, Activity, ArrowUpCircle } from 'lucide-react';
 
 interface Stats {
   openThreats: number;
@@ -83,6 +84,15 @@ const PortalDashboard = () => {
                 {stats.entityNames.join(', ') || 'No entities linked'}
               </div>
               <div className="text-sm text-orange-400 mt-1 capitalize">{stats.tier} tier</div>
+              {stats.tier?.toLowerCase() === 'basic' && (
+                <Link
+                  to="/portal/upgrade"
+                  className="inline-flex items-center gap-1.5 mt-3 text-xs text-orange-400 hover:text-orange-300 border border-orange-500/30 bg-orange-500/10 hover:bg-orange-500/15 rounded-md px-2.5 py-1.5 transition-colors"
+                >
+                  <ArrowUpCircle className="h-3.5 w-3.5" />
+                  Upgrade to unlock Reputation Defence
+                </Link>
+              )}
             </CardContent>
           </Card>
 

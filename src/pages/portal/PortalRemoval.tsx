@@ -20,6 +20,7 @@ import {
   Sparkles,
   XCircle,
 } from 'lucide-react';
+import UpgradeRequiredCard from '@/components/portal/UpgradeRequiredCard';
 
 type Step = 1 | 2 | 3 | 4;
 
@@ -184,6 +185,17 @@ const PortalRemoval = () => {
       setDispatching(false);
     }
   };
+
+  if (!tierLoading && tier === 'basic') {
+    return (
+      <PortalLayout title="Removal Request">
+        <UpgradeRequiredCard
+          feature="Removal Requests"
+          description="Your current Basic plan includes monitoring and alerts. To submit content for AI-flagged review and trigger the Requiem suppression pipeline, upgrade to the Individual or PRO plan."
+        />
+      </PortalLayout>
+    );
+  }
 
   return (
     <PortalLayout title="Removal Request">
