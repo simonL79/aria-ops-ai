@@ -28,6 +28,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   // Start true so route guards wait for the first admin check before redirecting
   const [isAdminLoading, setIsAdminLoading] = useState(true);
+  const [clientIds, setClientIds] = useState<string[]>([]);
+  const [isPortalLoading, setIsPortalLoading] = useState(true);
+
+  const checkPortalAccess = async (userId: string) => {
+    setIsPortalLoading(true);
+    try {
+      const { data, error } = await (supabase.rpc as any)('get_user_client_ids', { _user_id: userId });
+      if (error) {
+        console.warn('Portal access check failed:', error.message);
+        setClientIds([]);
+        return;
+      }
+      const ids = Array.isArray(data) ? data.map((r: any) => (typeof r === 'string' ? r : r.get_user_client_ids ?? r)) : [];
+      setClientIds(ids.filter(Boolean));
+    } catch (e) {
+      console.error('Portal access exception:', e);
+      setClientIds([]);
+    } finally {
+      setIsPortalLoading(false);
+    }
+  };
 
   // Removed: forceAdminAccess was a security vulnerability (CLIENT_SIDE_AUTH)
   const forceAdminAccess = () => {
