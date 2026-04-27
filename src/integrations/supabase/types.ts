@@ -2983,51 +2983,66 @@ export type Database = {
       }
       requiem_jobs: {
         Row: {
+          client_id: string | null
           completed_at: string | null
           created_at: string
           deployed_domains: Json | null
           entity_config: Json | null
+          entity_name: string | null
           error_message: string | null
           generated_pages: Json | null
           id: string
-          job_type: string
+          job_type: string | null
+          query: string | null
+          result_summary: Json | null
           scan_results: Json | null
+          scheduled_for: string | null
           started_at: string | null
           status: string
           updated_at: string
-          urls: string[]
+          urls: string[] | null
           variant_count: number
         }
         Insert: {
+          client_id?: string | null
           completed_at?: string | null
           created_at?: string
           deployed_domains?: Json | null
           entity_config?: Json | null
+          entity_name?: string | null
           error_message?: string | null
           generated_pages?: Json | null
           id?: string
-          job_type?: string
+          job_type?: string | null
+          query?: string | null
+          result_summary?: Json | null
           scan_results?: Json | null
+          scheduled_for?: string | null
           started_at?: string | null
           status?: string
           updated_at?: string
-          urls?: string[]
+          urls?: string[] | null
           variant_count?: number
         }
         Update: {
+          client_id?: string | null
           completed_at?: string | null
           created_at?: string
           deployed_domains?: Json | null
           entity_config?: Json | null
+          entity_name?: string | null
           error_message?: string | null
           generated_pages?: Json | null
           id?: string
-          job_type?: string
+          job_type?: string | null
+          query?: string | null
+          result_summary?: Json | null
           scan_results?: Json | null
+          scheduled_for?: string | null
           started_at?: string | null
           status?: string
           updated_at?: string
-          urls?: string[]
+          urls?: string[] | null
           variant_count?: number
         }
         Relationships: []
