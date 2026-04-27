@@ -110,6 +110,9 @@ function App() {
                       <Route path="/admin/system-completion" element={<SystemCompletionPage />} />
                       <Route path="/admin/eidetic/preferences" element={<EideticAlertPreferencesPage />} />
                       <Route path="/admin/notifications" element={<AdminNotificationsPage />} />
+                      <Route path="/admin/shield" element={<ShieldDashboard />} />
+                      <Route path="/admin/shield/alerts" element={<ShieldAlertsList />} />
+                      <Route path="/admin/shield/alerts/:id" element={<ShieldAlertDetail />} />
                       <Route path="/qa-system-test" element={<QASystemTestPage />} />
                     </Route>
                     
