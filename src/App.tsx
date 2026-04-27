@@ -41,6 +41,7 @@ import PortalAccount from './pages/portal/PortalAccount';
 import PortalNoAccess from './pages/portal/PortalNoAccess';
 import PortalRemoval from './pages/portal/PortalRemoval';
 import PortalUpgrade from './pages/portal/PortalUpgrade';
+import CybersecurityFrameworkPage from './pages/CybersecurityFrameworkPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -71,6 +72,7 @@ function App() {
                     <Route path="/" element={<Index />} />
                     <Route path="/home" element={<HomePage />} />
                     <Route path="/auth" element={<Authentication />} />
+                    <Route path="/cybersecurity-framework" element={<CybersecurityFrameworkPage />} />
 
                     {/* Client Portal — read-only */}
                     <Route path="/portal/no-access" element={<PortalNoAccess />} />
