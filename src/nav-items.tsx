@@ -71,7 +71,7 @@ import SentinelPage from "./pages/admin/SentinelPage";
 import SentinelOperatorPage from "./pages/admin/SentinelOperatorPage";
 import IntelligenceCorePage from "./pages/admin/IntelligenceCorePage";
 import LegalOpsPage from "./pages/admin/LegalOpsPage";
-import AnubisMemoryPage from "./pages/admin/AnubisMemoryPage";
+// AnubisMemoryPage removed (legacy)
 
 // Dashboard imports
 import DashboardPage from "./pages/dashboard/DashboardPage";
@@ -478,12 +478,6 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     to: "/admin/legal-ops-page",
     icon: <Gavel className="h-4 w-4" />,
     page: <LegalOpsPage />,
-  },
-  {
-    title: "Anubis Memory",
-    to: "/admin/anubis-memory-page",
-    icon: <Database className="h-4 w-4" />,
-    page: <AnubisMemoryPage />,
   },
   // Dashboard Routes
   {
