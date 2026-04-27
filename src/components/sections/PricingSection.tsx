@@ -10,13 +10,27 @@ const PricingSection = () => {
 
   const plans = [
     {
+      name: "Basic",
+      price: "£29",
+      period: "/month",
+      description: "Essential reputation monitoring",
+      features: [
+        "Personal reputation monitoring",
+        "Basic threat detection",
+        "Monthly reports",
+        "Email support"
+      ],
+      buttonText: "Get Started",
+      popular: false
+    },
+    {
       name: "Individual",
       price: "£97",
       period: "/month",
       description: "Personal reputation monitoring",
       features: [
         "Personal reputation monitoring",
-        "Basic threat detection",
+        "Advanced threat detection",
         "Monthly reports",
         "Email support",
         "Social media monitoring",
@@ -27,7 +41,7 @@ const PricingSection = () => {
     },
     {
       name: "PRO",
-      price: "£297",
+      price: "£397",
       period: "/month",
       description: "Executive protection suite",
       features: [
@@ -42,26 +56,26 @@ const PricingSection = () => {
       ],
       buttonText: "Most Popular",
       popular: true
-    },
-    {
-      name: "Enterprise",
-      price: "Custom",
-      period: "pricing",
-      description: "Full organization coverage",
-      features: [
-        "Full organization coverage",
-        "Custom threat models",
-        "Dedicated account manager",
-        "API access",
-        "Daily reports",
-        "24/7 support",
-        "Multi-entity monitoring",
-        "Advanced analytics dashboard"
-      ],
-      buttonText: "Contact Sales",
-      popular: false
     }
   ];
+
+  const enterprisePlan = {
+    name: "Enterprise",
+    price: "Custom",
+    period: "pricing",
+    description: "Full organization coverage",
+    features: [
+      "Full organization coverage",
+      "Custom threat models",
+      "Dedicated account manager",
+      "API access",
+      "Daily reports",
+      "24/7 support",
+      "Multi-entity monitoring",
+      "Advanced analytics dashboard"
+    ],
+    buttonText: "Contact Sales"
+  };
 
   return (
     <section className="py-24 bg-gradient-to-b from-black via-gray-950 to-black">
