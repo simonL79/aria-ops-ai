@@ -23,7 +23,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [isAdminLoading, setIsAdminLoading] = useState(false);
+  // Start true so route guards wait for the first admin check before redirecting
+  const [isAdminLoading, setIsAdminLoading] = useState(true);
 
   // Removed: forceAdminAccess was a security vulnerability (CLIENT_SIDE_AUTH)
   const forceAdminAccess = () => {
@@ -54,32 +55,48 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     console.log('✅ FORCE RESET: Complete');
   };
 
-  // Enhanced admin check with business owner email override
-  const checkAdminStatus = async (userId: string, userEmail: string) => {
+  // Enhanced admin check - tries RPC first, falls back to direct user_roles query
+  const checkAdminStatus = async (userId: string, _userEmail: string) => {
     setIsAdminLoading(true);
     try {
       console.log('🔍 Checking admin status for:', userId);
-      
+
       const { data, error } = await (supabase.rpc as any)('is_current_user_admin');
-      
+
+      if (!error && data === true) {
+        console.log('✅ Admin confirmed via RPC');
+        setIsAdmin(true);
+        return true;
+      }
+
       if (error) {
-        console.error('Error checking admin status:', error);
+        console.warn('RPC is_current_user_admin failed, falling back to direct query:', error.message);
+      }
+
+      // Fallback: direct query (RLS allows users to read their own role)
+      const { data: roleRow, error: roleErr } = await (supabase
+        .from('user_roles') as any)
+        .select('role')
+        .eq('user_id', userId)
+        .eq('role', 'admin')
+        .maybeSingle();
+
+      if (roleErr) {
+        console.error('❌ Fallback admin query failed:', roleErr);
         setIsAdmin(false);
-        setIsAdminLoading(false);
         return false;
       }
 
-      console.log('✅ Admin status from function:', data);
-      const isAdminUser = data === true;
+      const isAdminUser = !!roleRow;
+      console.log(isAdminUser ? '✅ Admin confirmed via fallback' : 'ℹ️ User is not admin');
       setIsAdmin(isAdminUser);
-      setIsAdminLoading(false);
       return isAdminUser;
-      
     } catch (error) {
       console.error('❌ Error checking admin status:', error);
       setIsAdmin(false);
-      setIsAdminLoading(false);
       return false;
+    } finally {
+      setIsAdminLoading(false);
     }
   };
 
@@ -107,45 +124,55 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
         
-        // Check admin if user exists
+        // Check admin if user exists; otherwise mark admin check complete
         if (currentSession?.user) {
           await checkAdminStatus(currentSession.user.id, currentSession.user.email || '');
-          
+
           // Initialize database
           try {
             await initializeDatabase();
           } catch (dbError) {
             console.error('Database init error:', dbError);
           }
+        } else {
+          setIsAdmin(false);
+          setIsAdminLoading(false);
         }
-        
+
         setIsLoading(false);
         console.log('✅ Auth initialization complete');
-        
+
       } catch (error) {
         console.error('❌ Auth initialization error:', error);
         if (mounted) {
           setIsLoading(false);
+          setIsAdminLoading(false);
         }
       }
     };
 
     // Set up auth listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, newSession) => {
+      (event, newSession) => {
         if (!mounted) return;
-        
+
         console.log('🔄 Auth state change:', event);
-        
+
         setSession(newSession);
         setUser(newSession?.user ?? null);
-        
+
         if (event === 'SIGNED_IN' && newSession?.user) {
-          await checkAdminStatus(newSession.user.id, newSession.user.email || '');
+          // Defer Supabase calls out of the listener callback to avoid deadlocks
+          setIsAdminLoading(true);
+          setTimeout(() => {
+            if (!mounted) return;
+            checkAdminStatus(newSession.user.id, newSession.user.email || '');
+          }, 0);
         }
-        
+
         if (event === 'SIGNED_OUT') {
           setIsAdmin(false);
+          setIsAdminLoading(false);
           localStorage.removeItem('force_admin_access');
         }
       }
