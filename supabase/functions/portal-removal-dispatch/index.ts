@@ -64,10 +64,10 @@ serve(async (req) => {
         status: 'queued',
         urls,
         variant_count: 20,
-        metadata: {
+        client_id: sub.client_id,
+        entity_config: {
           source: 'client_portal',
           submission_id,
-          client_id: sub.client_id,
           requested_by: auth.user.id,
           item_count: confirmed.length,
         },
