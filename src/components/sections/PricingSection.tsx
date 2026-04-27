@@ -1,12 +1,46 @@
 
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { Check } from 'lucide-react';
+import { Check, Loader2 } from 'lucide-react';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+
+type PlanId = 'basic' | 'individual' | 'pro';
 
 const PricingSection = () => {
   const { ref, visible } = useScrollReveal(0.1);
+  const navigate = useNavigate();
+  const [loadingPlan, setLoadingPlan] = useState<PlanId | null>(null);
+
+  const handleCheckout = async (planId: PlanId) => {
+    setLoadingPlan(planId);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.info('Please sign in to subscribe');
+        navigate(`/auth?redirect=/pricing&plan=${planId}`);
+        return;
+      }
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: { planId },
+      });
+      if (error) throw error;
+      if (data?.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error('No checkout URL returned');
+      }
+    } catch (err) {
+      console.error('Checkout error:', err);
+      toast.error('Unable to start checkout', {
+        description: 'Please try again later or contact support.',
+      });
+    } finally {
+      setLoadingPlan(null);
+    }
+  };
 
   const plans = [
     {
