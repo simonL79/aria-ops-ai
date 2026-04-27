@@ -294,11 +294,3 @@ verify_jwt = true
 verify_jwt = false
 
 
-[functions.shield-promote-threat]
-verify_jwt = false
-
-[functions.shield-transition-alert]
-verify_jwt = false
-
-[functions.shield-capture-url-metadata]
-verify_jwt = false
