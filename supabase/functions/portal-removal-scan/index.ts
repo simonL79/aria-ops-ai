@@ -1,4 +1,4 @@
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+// Using built-in Deno.serve
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { requireUser, isUser } from '../_shared/userAuth.ts';
 
@@ -16,7 +16,7 @@ interface FlaggedItem {
   ai_rationale: string;
 }
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
 
   try {
