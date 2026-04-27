@@ -73,13 +73,14 @@ serve(async (req) => {
               name: plan.name,
             },
             unit_amount: plan.amount,
+            recurring: { interval: "month" },
           },
           quantity: 1,
         },
       ],
-      mode: "payment",
+      mode: "subscription",
       success_url: `${req.headers.get("origin")}/thank-you?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.get("origin")}/payment`,
+      cancel_url: `${req.headers.get("origin")}/pricing`,
     });
 
     return new Response(JSON.stringify({ url: session.url }), {
