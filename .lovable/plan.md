@@ -1,83 +1,47 @@
-# QA Test Plan — Phases 2, 3, 4 across all device sizes
+## Plan: restore admin authorization after login
 
-Verify Requiem (Phase 2), Black Vertex (Phase 3), and Oblivion (Phase 4) work end-to-end on Desktop, Tablet, and Mobile viewports before moving on.
+I found that your Supabase login succeeds for `simon@ariaops.co.uk`, and the database already has an `admin` role row for your user ID. The failure is happening after sign-in when the frontend checks `is_current_user_admin()` and the route guard waits/redirects based on that result.
 
-## Scope
+### What I will change
 
-Three admin pages, three viewports each = 9 verification passes:
+1. **Make the admin check more reliable in `useAuth.tsx`**
+   - Stop relying only on the zero-argument RPC `is_current_user_admin()` immediately after login.
+   - Check the signed-in user’s role directly with:
+     - `user_roles.user_id = current user id`
+     - `role = 'admin'`
+   - Keep using the existing Supabase session token, so this remains server/RLS-backed rather than client-side bypass logic.
+   - Ensure `isAdminLoading` is always cleared, even when the role query errors.
 
-| Page | Route | Phase |
-|---|---|---|
-| Requiem Dashboard | `/admin/requiem` | 2 |
-| Black Vertex | `/admin/black-vertex` | 3 |
-| Oblivion | `/admin/oblivion` | 4 |
+2. **Fix the login/routing timing issue**
+   - After a successful password sign-in, have `signIn()` return the session/user from Supabase so the auth provider can synchronously verify the admin role.
+   - Prevent `/auth` from redirecting to `/admin` before the admin check has finished.
+   - Keep the post-login redirect to the originally requested admin page.
 
-Viewports:
-- Desktop: 1366×768
-- Tablet: 820×1180
-- Mobile: 390×844
+3. **Remove non-admin dashboard fallbacks from admin-only flows**
+   - Because only admins log in, replace old `/dashboard` redirects in admin auth components with `/auth` or `/` as appropriate.
+   - This avoids users being bounced to legacy dashboard routes when the admin check is simply still loading.
 
-## What gets tested per page
+4. **Add a database hardening migration if needed**
+   - Confirm `user_roles` RLS allows users to read their own role, which appears to already exist.
+   - If the deployed DB function is inconsistent, add/refresh a safe `SECURITY DEFINER` function:
+     - `public.is_current_user_admin()` checks `public.user_roles` for `auth.uid()` + `admin`
+     - fixed `search_path = public`
+   - No data will be deleted or dropped.
 
-**Layout & responsiveness**
-- Header, back button, refresh button visible and tappable
-- Form fields (Select, Input, Textarea) stack correctly on narrow widths
-- Tabs (Pending / History) remain usable on mobile
-- Cards in queue/history don't overflow horizontally; long URLs truncate
-- Action buttons (Approve/Reject, Submit, Draft) reachable without horizontal scroll
+### Validation
 
-**Functional smoke test (live, no mocks)**
-- Requiem: queue a scan for a benign query (`ariaops.co.uk`), confirm job row appears, snapshot drawer opens
-- Black Vertex: queue a `notify_only` action, approve it, confirm status flips to `completed` and result JSON renders
-- Oblivion: draft a takedown for a test URL, verify Gemini-generated letter renders and copy-to-clipboard works; do NOT submit to real platforms
+After implementation, I’ll verify the flow by checking:
 
-**Backend checks**
-- Edge function logs clean (no 500s) for: `requiem-scan`, `black-vertex-queue`, `black-vertex-approve`, `black-vertex-execute`, `oblivion-draft`
-- `aria_ops_log` / `ops_audit_log` receive entries for each action
-- RLS still blocks non-admin access (spot check via anon call)
+```text
+Unauthenticated /admin/requiem -> /auth
+Successful login -> returns to /admin/requiem
+Direct /auth while already signed in -> /admin
+Admin role query returns true for your current user
+```
 
-## Process
+### Files likely touched
 
-1. Use the browser tool to navigate to each route at each viewport size
-2. Screenshot + observe layout issues
-3. Execute one functional action per page (live data, benign inputs)
-4. Tail edge function logs after each action
-5. Compile a single QA report listing: ✅ pass, ⚠️ minor issue, ❌ blocker — per page per viewport
-
-## Fix policy
-
-- **Blockers** (broken layout, function errors, data not persisting): fix immediately in the same loop, then re-test that viewport
-- **Minor issues** (cosmetic spacing, truncation tweaks): list in report, fix in a follow-up pass
-- **Pass**: move on
-
-## Out of scope
-
-- Real takedown submissions to YouTube/Google/etc.
-- Load/perf testing
-- Cross-browser (Chrome only via the browser tool)
-- Phase 5 work — gated on this QA passing
-
-## Deliverable
-
-A QA report in chat with a 3×3 matrix (page × viewport) of statuses, screenshots of any issues found, and a summary of fixes applied. Then await your go-ahead for Phase 5.
-
----
-
-## Phase 5 — DEFERRED (parked for later)
-
-**Client Portal** — role-isolated read-only experience for end clients.
-
-- New `client` value on `user_roles.role` + new `client_accounts` table linking `auth.users.id` → existing client/entity record
-- Helper functions: `is_current_user_client()`, `current_user_client_id()` (SECURITY DEFINER, no recursion)
-- Additive RLS SELECT policies on reports / sentiment / findings / scans tables, scoped by `current_user_client_id()`
-- Routes: `/portal/*` (Overview, Reports, Findings, Sentiment, Account) behind new `ClientProtectedRoute`
-- Post-login redirect: admin → `/admin`, client → `/portal`
-- `useAuth` extended with `isClient`, `clientId`
-- Admin-gated `invite-client` edge function (creates auth user + role + link + sends invite via existing transactional email)
-- `portal-report-download` edge function returns short-lived signed URLs from a private storage bucket
-- No admin surface exposure to clients (UI hidden + RLS enforced — defense in depth)
-
-Open questions to resolve before starting Phase 5:
-1. Confirm exact existing table names for reports / sentiment / findings to attach client-read RLS policies
-2. Confirm v1 portal scope (5 sections above vs. trimmed)
-3. Confirm report storage format (existing files vs. on-demand render)
+- `src/hooks/useAuth.tsx`
+- `src/pages/Authentication.tsx`
+- possibly `src/components/auth/AdminGuard.tsx` / `src/pages/AdminLogin.tsx` for legacy `/dashboard` redirects
+- possibly one additive Supabase migration to refresh the admin-check function
