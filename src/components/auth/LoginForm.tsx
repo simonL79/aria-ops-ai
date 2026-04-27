@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { LogIn, Mail, Lock, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,7 +25,8 @@ const LoginForm = () => {
   const [isMagicLinkMode, setIsMagicLinkMode] = useState(false);
   const [resetSent, setResetSent] = useState(false);
   const [magicLinkSent, setMagicLinkSent] = useState(false);
-  const navigate = useNavigate();
+  const location = useLocation();
+  const fromPath = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname || "/admin";
   const { signIn } = useAuth();
   
   const form = useForm<LoginFormValues>({
@@ -79,13 +80,14 @@ const LoginForm = () => {
     setIsLoading(true);
     
     try {
+      const magicRedirect = `${window.location.origin}${fromPath}`;
       console.log("Sending magic link to:", email);
-      console.log("Redirect URL:", `${window.location.origin}/dashboard`);
-      
+      console.log("Redirect URL:", magicRedirect);
+
       const { error, data } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`,
+          emailRedirectTo: magicRedirect,
         },
       });
       
@@ -120,7 +122,7 @@ const LoginForm = () => {
         });
       } else {
         toast.success("Login successful!");
-        setTimeout(() => navigate("/dashboard"), 500);
+        // Redirect handled by Authentication.tsx via isAuthenticated + location.state.from
       }
     } catch (error: any) {
       console.error("Error signing in:", error);
