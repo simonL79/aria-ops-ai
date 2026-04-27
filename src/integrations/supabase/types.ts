@@ -3507,6 +3507,626 @@ export type Database = {
         }
         Relationships: []
       }
+      shield_ai_outputs: {
+        Row: {
+          alert_id: string | null
+          created_at: string
+          created_by: string | null
+          function_name: string
+          id: string
+          input_summary: string | null
+          model_used: string | null
+          output_text: string | null
+        }
+        Insert: {
+          alert_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          function_name: string
+          id?: string
+          input_summary?: string | null
+          model_used?: string | null
+          output_text?: string | null
+        }
+        Update: {
+          alert_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          function_name?: string
+          id?: string
+          input_summary?: string | null
+          model_used?: string | null
+          output_text?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shield_ai_outputs_alert_id_fkey"
+            columns: ["alert_id"]
+            isOneToOne: false
+            referencedRelation: "shield_alerts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shield_alert_events: {
+        Row: {
+          actor_id: string | null
+          alert_id: string
+          created_at: string
+          event_type: string
+          from_status: Database["public"]["Enums"]["shield_alert_status"] | null
+          id: string
+          metadata: Json
+          notes: string | null
+          to_status: Database["public"]["Enums"]["shield_alert_status"] | null
+        }
+        Insert: {
+          actor_id?: string | null
+          alert_id: string
+          created_at?: string
+          event_type: string
+          from_status?:
+            | Database["public"]["Enums"]["shield_alert_status"]
+            | null
+          id?: string
+          metadata?: Json
+          notes?: string | null
+          to_status?: Database["public"]["Enums"]["shield_alert_status"] | null
+        }
+        Update: {
+          actor_id?: string | null
+          alert_id?: string
+          created_at?: string
+          event_type?: string
+          from_status?:
+            | Database["public"]["Enums"]["shield_alert_status"]
+            | null
+          id?: string
+          metadata?: Json
+          notes?: string | null
+          to_status?: Database["public"]["Enums"]["shield_alert_status"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shield_alert_events_alert_id_fkey"
+            columns: ["alert_id"]
+            isOneToOne: false
+            referencedRelation: "shield_alerts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shield_alerts: {
+        Row: {
+          alert_type: Database["public"]["Enums"]["shield_alert_type"]
+          assigned_to: string | null
+          client_id: string | null
+          client_visible: boolean
+          confidence_score: number
+          created_at: string
+          created_by: string | null
+          detected_at: string
+          entity_name: string | null
+          harm_score: number
+          id: string
+          legal_risk_score: number
+          public_risk_score: number
+          reach_score: number
+          severity: Database["public"]["Enums"]["shield_severity"]
+          source: string | null
+          source_platform: string | null
+          source_threat_id: string | null
+          source_url: string | null
+          status: Database["public"]["Enums"]["shield_alert_status"]
+          summary: string | null
+          title: string
+          total_score: number
+          updated_at: string
+          urgency_score: number
+        }
+        Insert: {
+          alert_type?: Database["public"]["Enums"]["shield_alert_type"]
+          assigned_to?: string | null
+          client_id?: string | null
+          client_visible?: boolean
+          confidence_score?: number
+          created_at?: string
+          created_by?: string | null
+          detected_at?: string
+          entity_name?: string | null
+          harm_score?: number
+          id?: string
+          legal_risk_score?: number
+          public_risk_score?: number
+          reach_score?: number
+          severity?: Database["public"]["Enums"]["shield_severity"]
+          source?: string | null
+          source_platform?: string | null
+          source_threat_id?: string | null
+          source_url?: string | null
+          status?: Database["public"]["Enums"]["shield_alert_status"]
+          summary?: string | null
+          title: string
+          total_score?: number
+          updated_at?: string
+          urgency_score?: number
+        }
+        Update: {
+          alert_type?: Database["public"]["Enums"]["shield_alert_type"]
+          assigned_to?: string | null
+          client_id?: string | null
+          client_visible?: boolean
+          confidence_score?: number
+          created_at?: string
+          created_by?: string | null
+          detected_at?: string
+          entity_name?: string | null
+          harm_score?: number
+          id?: string
+          legal_risk_score?: number
+          public_risk_score?: number
+          reach_score?: number
+          severity?: Database["public"]["Enums"]["shield_severity"]
+          source?: string | null
+          source_platform?: string | null
+          source_threat_id?: string | null
+          source_url?: string | null
+          status?: Database["public"]["Enums"]["shield_alert_status"]
+          summary?: string | null
+          title?: string
+          total_score?: number
+          updated_at?: string
+          urgency_score?: number
+        }
+        Relationships: []
+      }
+      shield_decision_logs: {
+        Row: {
+          actor_id: string | null
+          alert_id: string | null
+          created_at: string
+          decision: string
+          id: string
+          incident_id: string | null
+          reason: string | null
+        }
+        Insert: {
+          actor_id?: string | null
+          alert_id?: string | null
+          created_at?: string
+          decision: string
+          id?: string
+          incident_id?: string | null
+          reason?: string | null
+        }
+        Update: {
+          actor_id?: string | null
+          alert_id?: string | null
+          created_at?: string
+          decision?: string
+          id?: string
+          incident_id?: string | null
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shield_decision_logs_alert_id_fkey"
+            columns: ["alert_id"]
+            isOneToOne: false
+            referencedRelation: "shield_alerts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shield_decision_logs_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "shield_incidents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shield_evidence_items: {
+        Row: {
+          alert_id: string
+          captured_at: string
+          captured_by: string | null
+          captured_text: string | null
+          content_hash: string | null
+          evidence_type: string
+          id: string
+          metadata: Json
+          notes: string | null
+          source_platform: string | null
+          source_url: string | null
+          storage_path: string | null
+        }
+        Insert: {
+          alert_id: string
+          captured_at?: string
+          captured_by?: string | null
+          captured_text?: string | null
+          content_hash?: string | null
+          evidence_type: string
+          id?: string
+          metadata?: Json
+          notes?: string | null
+          source_platform?: string | null
+          source_url?: string | null
+          storage_path?: string | null
+        }
+        Update: {
+          alert_id?: string
+          captured_at?: string
+          captured_by?: string | null
+          captured_text?: string | null
+          content_hash?: string | null
+          evidence_type?: string
+          id?: string
+          metadata?: Json
+          notes?: string | null
+          source_platform?: string | null
+          source_url?: string | null
+          storage_path?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shield_evidence_items_alert_id_fkey"
+            columns: ["alert_id"]
+            isOneToOne: false
+            referencedRelation: "shield_alerts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shield_incident_alerts: {
+        Row: {
+          alert_id: string
+          incident_id: string
+        }
+        Insert: {
+          alert_id: string
+          incident_id: string
+        }
+        Update: {
+          alert_id?: string
+          incident_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shield_incident_alerts_alert_id_fkey"
+            columns: ["alert_id"]
+            isOneToOne: false
+            referencedRelation: "shield_alerts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shield_incident_alerts_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "shield_incidents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shield_incident_tasks: {
+        Row: {
+          created_at: string
+          due_at: string | null
+          id: string
+          incident_id: string
+          owner_id: string | null
+          status: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          due_at?: string | null
+          id?: string
+          incident_id: string
+          owner_id?: string | null
+          status?: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          due_at?: string | null
+          id?: string
+          incident_id?: string
+          owner_id?: string | null
+          status?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shield_incident_tasks_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "shield_incidents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shield_incidents: {
+        Row: {
+          client_id: string | null
+          created_at: string
+          id: string
+          owner_id: string | null
+          severity: Database["public"]["Enums"]["shield_severity"]
+          status: string
+          summary: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          client_id?: string | null
+          created_at?: string
+          id?: string
+          owner_id?: string | null
+          severity?: Database["public"]["Enums"]["shield_severity"]
+          status?: string
+          summary?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string | null
+          created_at?: string
+          id?: string
+          owner_id?: string | null
+          severity?: Database["public"]["Enums"]["shield_severity"]
+          status?: string
+          summary?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      shield_public_warnings: {
+        Row: {
+          alert_id: string | null
+          approved_at: string | null
+          approved_by: string | null
+          body: string
+          client_id: string | null
+          created_at: string
+          id: string
+          published_url: string | null
+          status: string
+          title: string
+        }
+        Insert: {
+          alert_id?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          body: string
+          client_id?: string | null
+          created_at?: string
+          id?: string
+          published_url?: string | null
+          status?: string
+          title: string
+        }
+        Update: {
+          alert_id?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          body?: string
+          client_id?: string | null
+          created_at?: string
+          id?: string
+          published_url?: string | null
+          status?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shield_public_warnings_alert_id_fkey"
+            columns: ["alert_id"]
+            isOneToOne: false
+            referencedRelation: "shield_alerts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shield_route_templates: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          provider: string | null
+          route: string
+          template_body: string
+          title: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          provider?: string | null
+          route: string
+          template_body: string
+          title: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          provider?: string | null
+          route?: string
+          template_body?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      shield_score_events: {
+        Row: {
+          actor_id: string | null
+          alert_id: string
+          confidence_score: number
+          created_at: string
+          harm_score: number
+          id: string
+          legal_risk_score: number
+          metadata: Json
+          public_risk_score: number
+          reach_score: number
+          reason: string | null
+          severity: Database["public"]["Enums"]["shield_severity"]
+          total_score: number
+          urgency_score: number
+        }
+        Insert: {
+          actor_id?: string | null
+          alert_id: string
+          confidence_score?: number
+          created_at?: string
+          harm_score?: number
+          id?: string
+          legal_risk_score?: number
+          metadata?: Json
+          public_risk_score?: number
+          reach_score?: number
+          reason?: string | null
+          severity?: Database["public"]["Enums"]["shield_severity"]
+          total_score?: number
+          urgency_score?: number
+        }
+        Update: {
+          actor_id?: string | null
+          alert_id?: string
+          confidence_score?: number
+          created_at?: string
+          harm_score?: number
+          id?: string
+          legal_risk_score?: number
+          metadata?: Json
+          public_risk_score?: number
+          reach_score?: number
+          reason?: string | null
+          severity?: Database["public"]["Enums"]["shield_severity"]
+          total_score?: number
+          urgency_score?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shield_score_events_alert_id_fkey"
+            columns: ["alert_id"]
+            isOneToOne: false
+            referencedRelation: "shield_alerts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shield_takedown_cases: {
+        Row: {
+          abuse_contact: string | null
+          alert_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          legal_basis: string | null
+          notes: string | null
+          oblivion_takedown_id: string | null
+          removed_at: string | null
+          response_due_at: string | null
+          route: string
+          status: Database["public"]["Enums"]["shield_takedown_status"]
+          submitted_at: string | null
+          target_provider: string | null
+          target_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          abuse_contact?: string | null
+          alert_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          legal_basis?: string | null
+          notes?: string | null
+          oblivion_takedown_id?: string | null
+          removed_at?: string | null
+          response_due_at?: string | null
+          route: string
+          status?: Database["public"]["Enums"]["shield_takedown_status"]
+          submitted_at?: string | null
+          target_provider?: string | null
+          target_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          abuse_contact?: string | null
+          alert_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          legal_basis?: string | null
+          notes?: string | null
+          oblivion_takedown_id?: string | null
+          removed_at?: string | null
+          response_due_at?: string | null
+          route?: string
+          status?: Database["public"]["Enums"]["shield_takedown_status"]
+          submitted_at?: string | null
+          target_provider?: string | null
+          target_url?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shield_takedown_cases_alert_id_fkey"
+            columns: ["alert_id"]
+            isOneToOne: false
+            referencedRelation: "shield_alerts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shield_takedown_submissions: {
+        Row: {
+          body: string
+          channel: string
+          created_at: string
+          external_ref: string | null
+          id: string
+          recipient: string | null
+          subject: string | null
+          submitted_by: string | null
+          takedown_case_id: string
+        }
+        Insert: {
+          body: string
+          channel?: string
+          created_at?: string
+          external_ref?: string | null
+          id?: string
+          recipient?: string | null
+          subject?: string | null
+          submitted_by?: string | null
+          takedown_case_id: string
+        }
+        Update: {
+          body?: string
+          channel?: string
+          created_at?: string
+          external_ref?: string | null
+          id?: string
+          recipient?: string | null
+          subject?: string | null
+          submitted_by?: string | null
+          takedown_case_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shield_takedown_submissions_takedown_case_id_fkey"
+            columns: ["takedown_case_id"]
+            isOneToOne: false
+            referencedRelation: "shield_takedown_cases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       strategy_responses: {
         Row: {
           actions: Json | null
@@ -3859,7 +4479,44 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      shield_alert_status:
+        | "new"
+        | "triaged"
+        | "evidence_required"
+        | "evidence_captured"
+        | "action_required"
+        | "takedown_opened"
+        | "legal_review"
+        | "law_enforcement_review"
+        | "monitoring"
+        | "resolved"
+        | "false_positive"
+      shield_alert_type:
+        | "impersonation"
+        | "spoofed_domain"
+        | "phishing"
+        | "scam_ad"
+        | "fake_endorsement"
+        | "deepfake"
+        | "data_leak"
+        | "doxxing"
+        | "harassment"
+        | "defamation_risk"
+        | "misinformation"
+        | "hostile_narrative"
+        | "account_takeover"
+        | "dark_web_exposure"
+        | "search_result_risk"
+        | "unknown"
+      shield_severity: "p1_critical" | "p2_high" | "p3_medium" | "p4_low"
+      shield_takedown_status:
+        | "draft"
+        | "submitted"
+        | "acknowledged"
+        | "removed"
+        | "rejected"
+        | "escalated"
+        | "closed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -3986,6 +4643,48 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      shield_alert_status: [
+        "new",
+        "triaged",
+        "evidence_required",
+        "evidence_captured",
+        "action_required",
+        "takedown_opened",
+        "legal_review",
+        "law_enforcement_review",
+        "monitoring",
+        "resolved",
+        "false_positive",
+      ],
+      shield_alert_type: [
+        "impersonation",
+        "spoofed_domain",
+        "phishing",
+        "scam_ad",
+        "fake_endorsement",
+        "deepfake",
+        "data_leak",
+        "doxxing",
+        "harassment",
+        "defamation_risk",
+        "misinformation",
+        "hostile_narrative",
+        "account_takeover",
+        "dark_web_exposure",
+        "search_result_risk",
+        "unknown",
+      ],
+      shield_severity: ["p1_critical", "p2_high", "p3_medium", "p4_low"],
+      shield_takedown_status: [
+        "draft",
+        "submitted",
+        "acknowledged",
+        "removed",
+        "rejected",
+        "escalated",
+        "closed",
+      ],
+    },
   },
 } as const
