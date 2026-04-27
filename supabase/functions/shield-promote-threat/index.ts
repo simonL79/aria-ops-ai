@@ -1,9 +1,9 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
-import { requireAdmin, isAuthenticated } from '../_shared/auth.ts';
+import { verifyShieldToken } from '../_shared/shieldToken.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-shield-token',
 };
 
 function mapThreatTypeToShield(t: string | null): string {
@@ -44,8 +44,12 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   try {
-    const auth = await requireAdmin(req);
-    if (!isAuthenticated(auth)) return auth;
+    let auth: { userId: string };
+    try {
+      auth = await verifyShieldToken(req.headers.get('x-shield-token'), 'promote');
+    } catch {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
 
     const { threat_id } = await req.json();
     if (!threat_id || typeof threat_id !== 'string') {
