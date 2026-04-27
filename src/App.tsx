@@ -32,6 +32,13 @@ import OblivionPage from './pages/admin/OblivionPage';
 import EideticAlertPreferencesPage from './pages/admin/EideticAlertPreferencesPage';
 import AdminNotificationsPage from './pages/admin/AdminNotificationsPage';
 import Authentication from './pages/Authentication';
+import ClientPortalRoute from '@/components/auth/ClientPortalRoute';
+import PortalDashboard from './pages/portal/PortalDashboard';
+import PortalReports from './pages/portal/PortalReports';
+import PortalThreats from './pages/portal/PortalThreats';
+import PortalFindings from './pages/portal/PortalFindings';
+import PortalAccount from './pages/portal/PortalAccount';
+import PortalNoAccess from './pages/portal/PortalNoAccess';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -62,6 +69,16 @@ function App() {
                     <Route path="/" element={<Index />} />
                     <Route path="/home" element={<HomePage />} />
                     <Route path="/auth" element={<Authentication />} />
+
+                    {/* Client Portal — read-only */}
+                    <Route path="/portal/no-access" element={<PortalNoAccess />} />
+                    <Route element={<ClientPortalRoute />}>
+                      <Route path="/portal" element={<PortalDashboard />} />
+                      <Route path="/portal/reports" element={<PortalReports />} />
+                      <Route path="/portal/threats" element={<PortalThreats />} />
+                      <Route path="/portal/findings" element={<PortalFindings />} />
+                      <Route path="/portal/account" element={<PortalAccount />} />
+                    </Route>
                     
                     {/* Admin/Backend Routes - Protected */}
                     <Route element={<ProtectedRoute requireAdmin redirectTo="/auth" />}>

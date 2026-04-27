@@ -10,6 +10,9 @@ interface AuthContextType {
   isLoading: boolean;
   isAdmin: boolean;
   isAdminLoading: boolean;
+  clientIds: string[];
+  isPortalUser: boolean;
+  isPortalLoading: boolean;
   signOut: () => Promise<void>;
   signIn: (email: string, password: string) => Promise<{ error?: any }>;
   forceReset: () => Promise<void>;
@@ -25,6 +28,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   // Start true so route guards wait for the first admin check before redirecting
   const [isAdminLoading, setIsAdminLoading] = useState(true);
+  const [clientIds, setClientIds] = useState<string[]>([]);
+  const [isPortalLoading, setIsPortalLoading] = useState(true);
+
+  const checkPortalAccess = async (userId: string) => {
+    setIsPortalLoading(true);
+    try {
+      const { data, error } = await (supabase.rpc as any)('get_user_client_ids', { _user_id: userId });
+      if (error) {
+        console.warn('Portal access check failed:', error.message);
+        setClientIds([]);
+        return;
+      }
+      const ids = Array.isArray(data) ? data.map((r: any) => (typeof r === 'string' ? r : r.get_user_client_ids ?? r)) : [];
+      setClientIds(ids.filter(Boolean));
+    } catch (e) {
+      console.error('Portal access exception:', e);
+      setClientIds([]);
+    } finally {
+      setIsPortalLoading(false);
+    }
+  };
 
   // Removed: forceAdminAccess was a security vulnerability (CLIENT_SIDE_AUTH)
   const forceAdminAccess = () => {
@@ -127,6 +151,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         // Check admin if user exists; otherwise mark admin check complete
         if (currentSession?.user) {
           await checkAdminStatus(currentSession.user.id, currentSession.user.email || '');
+          await checkPortalAccess(currentSession.user.id);
 
           // Initialize database
           try {
@@ -137,6 +162,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         } else {
           setIsAdmin(false);
           setIsAdminLoading(false);
+          setClientIds([]);
+          setIsPortalLoading(false);
         }
 
         setIsLoading(false);
@@ -164,15 +191,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (event === 'SIGNED_IN' && newSession?.user) {
           // Defer Supabase calls out of the listener callback to avoid deadlocks
           setIsAdminLoading(true);
+          setIsPortalLoading(true);
           setTimeout(() => {
             if (!mounted) return;
             checkAdminStatus(newSession.user.id, newSession.user.email || '');
+            checkPortalAccess(newSession.user.id);
           }, 0);
         }
 
         if (event === 'SIGNED_OUT') {
           setIsAdmin(false);
           setIsAdminLoading(false);
+          setClientIds([]);
+          setIsPortalLoading(false);
           localStorage.removeItem('force_admin_access');
         }
       }
@@ -227,6 +258,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     isLoading,
     isAdmin,
     isAdminLoading,
+    clientIds,
+    isPortalUser: clientIds.length > 0,
+    isPortalLoading,
     signOut,
     signIn,
     forceReset,

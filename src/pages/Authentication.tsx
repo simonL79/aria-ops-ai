@@ -8,10 +8,10 @@ import LoginForm from "@/components/auth/LoginForm";
 
 const Authentication = () => {
   const [isLoading, setIsLoading] = useState(true);
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isAdmin, isAdminLoading, isPortalUser, isPortalLoading } = useAuth();
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const from = location.state?.from?.pathname || "/admin"; // Changed from /dashboard to /admin
+  const requestedFrom = location.state?.from?.pathname as string | undefined;
   const authType = searchParams.get('type');
   const error = searchParams.get('error');
   const errorDescription = searchParams.get('error_description');
@@ -39,9 +39,10 @@ const Authentication = () => {
     );
   }
   
-  // If already authenticated, redirect to the admin dashboard or previous page
-  if (isAuthenticated) {
-    return <Navigate to={from} replace />;
+  // If already authenticated, route by role
+  if (isAuthenticated && !isAdminLoading && !isPortalLoading) {
+    const dest = requestedFrom || (isAdmin ? '/admin' : isPortalUser ? '/portal' : '/portal/no-access');
+    return <Navigate to={dest} replace />;
   }
 
   // Message for different auth types
