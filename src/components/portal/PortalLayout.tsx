@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, FileText, ShieldAlert, Sparkles, User, LogOut, Shield } from 'lucide-react';
+import { LayoutDashboard, FileText, ShieldAlert, Sparkles, User, LogOut, Shield, Send } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 
@@ -9,6 +9,7 @@ const navItems = [
   { to: '/portal/reports', label: 'Reports', icon: FileText },
   { to: '/portal/threats', label: 'Threats', icon: ShieldAlert },
   { to: '/portal/findings', label: 'New Findings', icon: Sparkles },
+  { to: '/portal/removal', label: 'Removal Request', icon: Send },
   { to: '/portal/account', label: 'Account', icon: User },
 ];
 
