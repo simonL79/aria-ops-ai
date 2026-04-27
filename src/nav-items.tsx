@@ -34,25 +34,22 @@ import DPARequestPage from "./pages/DPARequestPage";
 import RequestDataAccessPage from "./pages/RequestDataAccessPage";
 import PaymentPage from "./pages/PaymentPage";
 import ContactFormPage from "./pages/ContactFormPage";
-import CleanLaunchPage from "./pages/CleanLaunchPage";
+// CleanLaunchPage removed (legacy)
 import CalendarPage from "./pages/CalendarPage";
 import ThreatsPage from "./pages/ThreatsPage";
 import Discovery from "./pages/Discovery";
 import NewCoPage from "./pages/NewCoPage";
 import InfluencerRadar from "./pages/InfluencerRadar";
-import OutreachPipelinePage from "./pages/OutreachPipelinePage";
-import RSI from "./pages/RSI";
+// OutreachPipelinePage and RSI removed (legacy)
 import EideticPage from "./pages/EideticPage";
-import GraveyardPage from "./pages/GraveyardPage";
-import SovraPage from "./pages/SovraPage";
+// GraveyardPage and SovraPage removed (legacy)
 import EmergencyStrikePage from "./pages/EmergencyStrikePage";
 import StrikeManagementPage from "./pages/StrikeManagementPage";
 import EmployeeBrandRiskPage from "./pages/EmployeeBrandRiskPage";
-import SeoCenterPage from "./pages/SeoCenterPage";
+// SeoCenterPage removed (legacy)
 import OperatorConsole from "./pages/OperatorConsole";
 import AriaCommand from "./pages/AriaCommand";
-import HyperCorePage from "./pages/HyperCorePage";
-import AnubisCockpitPage from "./pages/AnubisCockpitPage";
+// HyperCorePage and AnubisCockpitPage removed (legacy)
 import AiScrapingPage from "./pages/AiScrapingPage";
 import EnhancedIntelligence from "./pages/EnhancedIntelligence";
 import IntelligenceWorkbench from "./pages/IntelligenceWorkbench";
@@ -314,13 +311,6 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     isPublic: true,
   },
   {
-    title: "Clean Launch",
-    to: "/clean-launch",
-    icon: <Zap className="h-4 w-4" />,
-    page: <CleanLaunchPage />,
-    isPublic: true,
-  },
-  {
     title: "Calendar",
     to: "/calendar",
     icon: <Calendar className="h-4 w-4" />,
@@ -352,34 +342,10 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     page: <InfluencerRadar />,
   },
   {
-    title: "Outreach Pipeline",
-    to: "/outreach-pipeline",
-    icon: <TrendingUp className="h-4 w-4" />,
-    page: <OutreachPipelinePage />,
-  },
-  {
-    title: "RSI",
-    to: "/rsi",
-    icon: <TrendingUp className="h-4 w-4" />,
-    page: <RSI />,
-  },
-  {
     title: "Eidetic",
     to: "/eidetic",
     icon: <Brain className="h-4 w-4" />,
     page: <EideticPage />,
-  },
-  {
-    title: "Graveyard",
-    to: "/graveyard",
-    icon: <Gavel className="h-4 w-4" />,
-    page: <GraveyardPage />,
-  },
-  {
-    title: "Sovra",
-    to: "/sovra",
-    icon: <Globe className="h-4 w-4" />,
-    page: <SovraPage />,
   },
   {
     title: "Emergency Strike",
@@ -400,12 +366,6 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     page: <EmployeeBrandRiskPage />,
   },
   {
-    title: "SEO Center",
-    to: "/seo-center",
-    icon: <Search className="h-4 w-4" />,
-    page: <SeoCenterPage />,
-  },
-  {
     title: "Operator Console",
     to: "/operator-console",
     icon: <Command className="h-4 w-4" />,
@@ -416,18 +376,6 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     to: "/aria-command",
     icon: <Command className="h-4 w-4" />,
     page: <AriaCommand />,
-  },
-  {
-    title: "HyperCore",
-    to: "/hypercore",
-    icon: <Network className="h-4 w-4" />,
-    page: <HyperCorePage />,
-  },
-  {
-    title: "Anubis Cockpit",
-    to: "/anubis-cockpit",
-    icon: <Gauge className="h-4 w-4" />,
-    page: <AnubisCockpitPage />,
   },
   {
     title: "AI Scraping",
