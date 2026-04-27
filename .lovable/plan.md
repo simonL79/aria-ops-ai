@@ -1,55 +1,83 @@
+# A.R.I.A Ops Executive — Phase 0 & 1 Plan
 
-## Tier 9: Hook Execution Engine
+Confirmed:
+- **Archive, don't drop** legacy tables (rename to `_archived_<name>`)
+- **SerpApi** as the search provider for Requiem (key added later)
 
-Currently both `eidetic-dispatch-response` and `eidetic-approve-dispatch` only insert "queued" / "draft" / "pending" rows into downstream tables. They never actually trigger Requiem's pipeline, generate a legal document, or publish a counter-narrative. This tier wires them through to live execution.
+---
 
-### Approach
+## Phase 0 — Codebase & Database Pruning
 
-Refactor the per-action logic into a single shared executor (`_shared/eidetic-executors.ts`) used by both auto-dispatch and the approval flow, so behaviour is identical whether an action fires automatically or after operator approval.
+### 0.1 Archive legacy tables (rename only — fully reversible)
+Rename to `_archived_<name>`:
+- **Anubis layer**: `anubis_entity_memory`, `anubis_pattern_log`
+- **Eris layer**: `eris_attack_simulations`, `eris_response_strategies`
+- **Graveyard**: `graveyard_simulations`
+- **Sentience / experiments**: `sentience_*`, `narrative_clusters`, `multilingual_threats`, `llm_watchdog_*`, `recalibrator_*` (whichever exist)
+- **Persona / RSI**: `persona_saturation_campaigns`, `rsi_*`
+- **Genesis / Darkweb**: `genesis_entities`, `darkweb_agents`
+- **Employee/B2B**: `employee_scan_queue`, `prospect_alerts`, `strike_requests` (if present)
 
-### What each action will actually do
+Keep untouched: `clients`, `client_entities`, `entities`, `entity_*`, `eidetic_*`, `executive_reports`, `aria_*`, `contact_submissions`, `lead_magnets`, `blog_posts`, `data_subject_requests`, `dpia_records`, `lia_records`, `data_retention_schedule`, `data_breach_incidents`, `activity_logs`, `live_status`, `counter_narratives`, `content_sources`.
 
-**1. `requiem` → real Requiem pipeline launch**
-- Insert `persona_saturation_campaigns` row (audit trail, status `dispatched`).
-- Then `supabase.functions.invoke('requiem-pipeline', { body: { urls: [event.content_url], variantCount: payload.config.variantCount ?? 10 } })`.
-- Store the returned `jobId`, `payloadsGenerated`, and `meshSize` in `eidetic_dispatched_responses.result` so operators can jump to `/admin/requiem/<jobId>`.
+### 0.2 Delete edge functions
+- `anubis-*` (all)
+- `rsi-threat-simulator`
+- `headless-scraper`
+- `local-memory-search`, `local-threat-analysis`, `local-inference` (Ollama fallback — switching to cloud-only)
+- Any `eris-*`, `graveyard-*`, `sentience-*`, `persona-saturation-*` if present
 
-**2. `legal_erasure` → real legal document generation**
-- Insert `data_subject_requests` row (status `pending`).
-- Then `supabase.functions.invoke('legal-document-generator', { body: { action: 'generate_document', entityName, documentType: payload.config.documentType ?? 'privacy_violation', details: { sourceUrl, excerpt, eventId, dsrId } } })`.
-- Link the returned `document_id` back to the DSR via metadata, store both IDs in `result`.
+### 0.3 Delete frontend pages & routes
+Remove from `App.tsx` and delete the files:
+- `AnubisCockpitPage`, `GraveyardPage`, `RSI.tsx`
+- Legacy product pages: `HyperCorePage`, `SovraPage`, `CleanLaunch`, `EngagementHubPage`, `SeoCenterPage`, `OutreachPipelinePage`
+- Any sidebar/nav links pointing to the above
 
-**3. `counter_narrative` → generate + publish**
-- Insert `counter_narratives` row.
-- Then `supabase.functions.invoke('persona-saturation', { body: { action: 'deploy', payload: { title, content, platforms: payload.config.platforms ?? ['github-pages'] } } })` to actually publish.
-- Store deployed URLs in `result.deployments`.
+### 0.4 Cron / workflow cleanup
+- Edit `.github/workflows/aria-health-check.yml` to remove pings to deleted functions
+- Remove cron schedules (in `supabase/config.toml` or pg_cron) referencing archived tables
 
-### Failure handling & observability
+---
 
-- Each downstream invoke is wrapped: a queue-row is always created first (so we keep an audit trail even if downstream fails), then the live action runs; failures mark the dispatch `failed` with `error_message` but leave the queued artifact for manual retry.
-- New `result` shape: `{ artifact_id, downstream: { function, ok, data?, error? } }`.
-- All steps `console.log` with `[EIDETIC-EXEC]` prefix for log filtering.
+## Phase 1 — Schema alignment for Ops Executive
 
-### Retry path
+### New tables
+1. `profiles` — user metadata (id → auth.users.id, email, display_name, avatar_url)
+2. `client_identities` — primary names, aliases, handles per client (FK clients.id)
+3. `reputation_scores` — periodic threat/sentiment score snapshots per client
+4. `requiem_jobs` — SEO/reputation suppression job queue (entity, query, status, serpapi_payload)
+5. `requiem_serp_snapshots` — captured SERP results per query (raw + parsed)
+6. `black_vertex_actions` — offensive/defensive content actions (status, target_url, action_type)
+7. `oblivion_takedowns` — takedown requests lifecycle (legal basis, target, status, evidence)
+8. `ops_audit_log` — unified audit trail across Requiem/Vertex/Oblivion
 
-Add a small `eidetic-retry-dispatch` edge function: takes a `dispatch_id` that is `failed`, re-runs only the downstream invoke (not the artifact insert), updates `result`/`status`. Wire a "Retry" button in `AdminNotificationsPage` (or wherever dispatched responses are listed) — if no list exists yet, add a minimal `DispatchedResponsesPanel` to `EideticDashboard` showing recent dispatches with status badges + retry.
+All tables: RLS enabled, admin-only via `has_role(auth.uid(),'admin')`.
 
-### Files
+### Extend existing
+- `clients`: add `tier` (individual|pro|enterprise), `onboarded_at`, `primary_contact_user_id`
+- `scan_results`: add `serpapi_query_id`, `rank_position`, `domain_authority`
+- `executive_reports`: add `client_id` FK, `pdf_url`
+- `eidetic_resurfacing_events`: add `client_id` FK
 
-**New**
-- `supabase/functions/_shared/eidetic-executors.ts` — `executeRequiem`, `executeLegalErasure`, `executeCounterNarrative`, plus `executeAction` dispatcher.
-- `supabase/functions/eidetic-retry-dispatch/index.ts` — admin-guarded retry endpoint.
-- `src/components/eidetic/DispatchedResponsesPanel.tsx` — recent dispatches with status + retry button.
+### Triggers / functions
+- `update_updated_at_column()` triggers on new tables
+- `handle_new_user()` → auto-insert `profiles` on auth signup
 
-**Modified**
-- `supabase/functions/eidetic-dispatch-response/index.ts` — replace inline `executeAction` with shared import.
-- `supabase/functions/eidetic-approve-dispatch/index.ts` — same.
-- `src/components/eidetic/EideticDashboard.tsx` — mount the new panel.
+---
 
-### Notes / dependencies
+## Phase 2+ (preview, built later)
+- **Phase 2 — Requiem engine**: SerpApi integration edge function (`requiem-scan`), cron, dashboard at `/admin/requiem`
+- **Phase 3 — Black Vertex**: counter-content dispatch
+- **Phase 4 — Oblivion**: takedown automation tied to Legal Ops module
 
-- No DB migration required — existing `eidetic_dispatched_responses.result` (jsonb) already accommodates the new shape.
-- `persona-saturation` requires `GITHUB_TOKEN` (and optionally Reddit creds) to actually publish; without them counter_narrative deployment will record a `failed` downstream but the draft narrative still exists. I'll surface this clearly in the result payload rather than silently failing.
-- `requiem-pipeline` and `legal-document-generator` already exist and are admin-guarded; since we invoke them service-side using the service role key from the dispatcher, auth passes.
+---
 
-Approve to implement.
+## Required from you later
+- `SERPAPI_API_KEY` (added via Lovable secrets when Phase 2 starts)
+
+## Risk notes
+- Archive-rename is reversible: `ALTER TABLE _archived_x RENAME TO x;`
+- Edge function & page deletions are git-tracked and recoverable
+- No live cron will break — health-check workflow updated in same phase
+
+Approving this plan switches to build mode and I execute Phase 0 → Phase 1 in order.
