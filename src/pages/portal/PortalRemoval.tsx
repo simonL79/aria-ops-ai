@@ -20,6 +20,7 @@ import {
   Sparkles,
   XCircle,
 } from 'lucide-react';
+import UpgradeRequiredCard from '@/components/portal/UpgradeRequiredCard';
 
 type Step = 1 | 2 | 3 | 4;
 
@@ -63,7 +64,28 @@ const PortalRemoval = () => {
   const [items, setItems] = useState<RemovalItem[]>([]);
   const [requiemRunId, setRequiemRunId] = useState<string | null>(null);
 
+  const [tier, setTier] = useState<string | null>(null);
+  const [tierLoading, setTierLoading] = useState(true);
+
   const clientId = clientIds[0];
+
+  useEffect(() => {
+    const loadTier = async () => {
+      if (clientIds.length === 0) {
+        setTierLoading(false);
+        return;
+      }
+      const { data } = await (supabase.from('client_portal_clients') as any)
+        .select('tier')
+        .in('id', clientIds)
+        .limit(1)
+        .maybeSingle();
+      setTier((data?.tier ?? 'basic').toLowerCase());
+      setTierLoading(false);
+    };
+    loadTier();
+  }, [clientIds]);
+
 
   // Load items when entering review/confirm steps
   useEffect(() => {
@@ -163,6 +185,17 @@ const PortalRemoval = () => {
       setDispatching(false);
     }
   };
+
+  if (!tierLoading && tier === 'basic') {
+    return (
+      <PortalLayout title="Removal Request">
+        <UpgradeRequiredCard
+          feature="Removal Requests"
+          description="Your current Basic plan includes monitoring and alerts. To submit content for AI-flagged review and trigger the Requiem suppression pipeline, upgrade to the Individual or PRO plan."
+        />
+      </PortalLayout>
+    );
+  }
 
   return (
     <PortalLayout title="Removal Request">
