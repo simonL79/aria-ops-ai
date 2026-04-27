@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
+import { invokeShield } from '@/lib/shield/invokeShield';
 import { toast } from 'sonner';
 import { Plus } from 'lucide-react';
 
@@ -55,7 +56,7 @@ export default function EvidenceUploadDialog({ alertId, onAdded }: { alertId: st
   const submitUrl = async () => {
     if (!url) return;
     setWorking(true);
-    const { error } = await supabase.functions.invoke('shield-capture-url-metadata', { body: { alert_id: alertId, url } });
+    const { error } = await invokeShield('shield-capture-url-metadata', { alert_id: alertId, url });
     setWorking(false);
     if (error) { toast.error('Capture failed'); return; }
     toast.success('URL captured'); reset(); setOpen(false); onAdded();

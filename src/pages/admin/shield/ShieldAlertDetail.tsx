@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { invokeShield } from '@/lib/shield/invokeShield';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -45,8 +46,8 @@ export default function ShieldAlertDetail() {
   const handleTransition = async () => {
     if (!nextStatus) return;
     setWorking(true);
-    const { error } = await supabase.functions.invoke('shield-transition-alert', {
-      body: { alert_id: id, to_status: nextStatus, notes: transitionNotes || undefined },
+    const { error } = await invokeShield('shield-transition-alert', {
+      alert_id: id, to_status: nextStatus, notes: transitionNotes || undefined,
     });
     setWorking(false);
     if (error) { toast.error('Transition failed'); return; }
