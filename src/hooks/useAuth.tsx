@@ -191,15 +191,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (event === 'SIGNED_IN' && newSession?.user) {
           // Defer Supabase calls out of the listener callback to avoid deadlocks
           setIsAdminLoading(true);
+          setIsPortalLoading(true);
           setTimeout(() => {
             if (!mounted) return;
             checkAdminStatus(newSession.user.id, newSession.user.email || '');
+            checkPortalAccess(newSession.user.id);
           }, 0);
         }
 
         if (event === 'SIGNED_OUT') {
           setIsAdmin(false);
           setIsAdminLoading(false);
+          setClientIds([]);
+          setIsPortalLoading(false);
           localStorage.removeItem('force_admin_access');
         }
       }
