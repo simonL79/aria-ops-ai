@@ -31,6 +31,9 @@ import BlackVertexPage from './pages/admin/BlackVertexPage';
 import OblivionPage from './pages/admin/OblivionPage';
 import EideticAlertPreferencesPage from './pages/admin/EideticAlertPreferencesPage';
 import AdminNotificationsPage from './pages/admin/AdminNotificationsPage';
+import ShieldDashboard from './pages/admin/shield/ShieldDashboard';
+import ShieldAlertsList from './pages/admin/shield/ShieldAlertsList';
+import ShieldAlertDetail from './pages/admin/shield/ShieldAlertDetail';
 import Authentication from './pages/Authentication';
 import ClientPortalRoute from '@/components/auth/ClientPortalRoute';
 import PortalDashboard from './pages/portal/PortalDashboard';
@@ -107,6 +110,9 @@ function App() {
                       <Route path="/admin/system-completion" element={<SystemCompletionPage />} />
                       <Route path="/admin/eidetic/preferences" element={<EideticAlertPreferencesPage />} />
                       <Route path="/admin/notifications" element={<AdminNotificationsPage />} />
+                      <Route path="/admin/shield" element={<ShieldDashboard />} />
+                      <Route path="/admin/shield/alerts" element={<ShieldAlertsList />} />
+                      <Route path="/admin/shield/alerts/:id" element={<ShieldAlertDetail />} />
                       <Route path="/qa-system-test" element={<QASystemTestPage />} />
                     </Route>
                     
