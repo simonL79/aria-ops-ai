@@ -14,40 +14,7 @@ export type Database = {
   }
   public: {
     Tables: {
-      activity_logs: {
-        Row: {
-          action: string
-          created_at: string
-          details: string | null
-          entity_id: string | null
-          entity_type: string | null
-          id: string
-          user_email: string | null
-          user_id: string | null
-        }
-        Insert: {
-          action: string
-          created_at?: string
-          details?: string | null
-          entity_id?: string | null
-          entity_type?: string | null
-          id?: string
-          user_email?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          action?: string
-          created_at?: string
-          details?: string | null
-          entity_id?: string | null
-          entity_type?: string | null
-          id?: string
-          user_email?: string | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
-      anubis_entity_memory: {
+      _archived_anubis_entity_memory: {
         Row: {
           content: string | null
           created_at: string
@@ -80,7 +47,7 @@ export type Database = {
         }
         Relationships: []
       }
-      anubis_pattern_log: {
+      _archived_anubis_pattern_log: {
         Row: {
           confidence: number | null
           created_at: string
@@ -107,6 +74,537 @@ export type Database = {
           metadata?: Json | null
           pattern_fingerprint?: string | null
           pattern_type?: string | null
+        }
+        Relationships: []
+      }
+      _archived_darkweb_agents: {
+        Row: {
+          agent_name: string | null
+          created_at: string
+          id: string
+          metadata: Json | null
+          results: Json | null
+          started_at: string | null
+          status: string | null
+          target: string | null
+        }
+        Insert: {
+          agent_name?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          results?: Json | null
+          started_at?: string | null
+          status?: string | null
+          target?: string | null
+        }
+        Update: {
+          agent_name?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          results?: Json | null
+          started_at?: string | null
+          status?: string | null
+          target?: string | null
+        }
+        Relationships: []
+      }
+      _archived_employee_scan_queue: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          employee_id: string | null
+          error_message: string | null
+          id: string
+          priority: number | null
+          started_at: string | null
+          status: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          employee_id?: string | null
+          error_message?: string | null
+          id?: string
+          priority?: number | null
+          started_at?: string | null
+          status?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          employee_id?: string | null
+          error_message?: string | null
+          id?: string
+          priority?: number | null
+          started_at?: string | null
+          status?: string | null
+        }
+        Relationships: []
+      }
+      _archived_eris_attack_simulations: {
+        Row: {
+          attack_vector: string | null
+          created_at: string
+          id: string
+          metadata: Json | null
+          origin_source: string | null
+          scenario_description: string | null
+          status: string | null
+          target_entity: string | null
+          threat_score: number | null
+        }
+        Insert: {
+          attack_vector?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          origin_source?: string | null
+          scenario_description?: string | null
+          status?: string | null
+          target_entity?: string | null
+          threat_score?: number | null
+        }
+        Update: {
+          attack_vector?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          origin_source?: string | null
+          scenario_description?: string | null
+          status?: string | null
+          target_entity?: string | null
+          threat_score?: number | null
+        }
+        Relationships: []
+      }
+      _archived_eris_response_strategies: {
+        Row: {
+          created_at: string
+          effectiveness_score: number | null
+          executed: boolean | null
+          gpt_recommendation: string | null
+          id: string
+          metadata: Json | null
+          simulation_id: string | null
+          strategy_type: string | null
+        }
+        Insert: {
+          created_at?: string
+          effectiveness_score?: number | null
+          executed?: boolean | null
+          gpt_recommendation?: string | null
+          id?: string
+          metadata?: Json | null
+          simulation_id?: string | null
+          strategy_type?: string | null
+        }
+        Update: {
+          created_at?: string
+          effectiveness_score?: number | null
+          executed?: boolean | null
+          gpt_recommendation?: string | null
+          id?: string
+          metadata?: Json | null
+          simulation_id?: string | null
+          strategy_type?: string | null
+        }
+        Relationships: []
+      }
+      _archived_genesis_entities: {
+        Row: {
+          created_at: string
+          entity_type: string | null
+          id: string
+          metadata: Json | null
+          name: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          entity_type?: string | null
+          id?: string
+          metadata?: Json | null
+          name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          entity_type?: string | null
+          id?: string
+          metadata?: Json | null
+          name?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      _archived_graveyard_simulations: {
+        Row: {
+          created_at: string
+          expected_trigger_module: string | null
+          id: string
+          injected_at: string | null
+          leak_title: string | null
+          suppression_status: string | null
+        }
+        Insert: {
+          created_at?: string
+          expected_trigger_module?: string | null
+          id?: string
+          injected_at?: string | null
+          leak_title?: string | null
+          suppression_status?: string | null
+        }
+        Update: {
+          created_at?: string
+          expected_trigger_module?: string | null
+          id?: string
+          injected_at?: string | null
+          leak_title?: string | null
+          suppression_status?: string | null
+        }
+        Relationships: []
+      }
+      _archived_llm_watchdog_logs: {
+        Row: {
+          created_at: string
+          entity_name: string | null
+          id: string
+          llm_provider: string | null
+          metadata: Json | null
+          query: string | null
+          response: string | null
+          risk_level: string | null
+          timestamp: string | null
+        }
+        Insert: {
+          created_at?: string
+          entity_name?: string | null
+          id?: string
+          llm_provider?: string | null
+          metadata?: Json | null
+          query?: string | null
+          response?: string | null
+          risk_level?: string | null
+          timestamp?: string | null
+        }
+        Update: {
+          created_at?: string
+          entity_name?: string | null
+          id?: string
+          llm_provider?: string | null
+          metadata?: Json | null
+          query?: string | null
+          response?: string | null
+          risk_level?: string | null
+          timestamp?: string | null
+        }
+        Relationships: []
+      }
+      _archived_multilingual_threats: {
+        Row: {
+          content: string | null
+          created_at: string
+          detected_at: string | null
+          entity_name: string | null
+          id: string
+          language: string | null
+          metadata: Json | null
+          severity: string | null
+          source: string | null
+          translated_content: string | null
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          detected_at?: string | null
+          entity_name?: string | null
+          id?: string
+          language?: string | null
+          metadata?: Json | null
+          severity?: string | null
+          source?: string | null
+          translated_content?: string | null
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          detected_at?: string | null
+          entity_name?: string | null
+          id?: string
+          language?: string | null
+          metadata?: Json | null
+          severity?: string | null
+          source?: string | null
+          translated_content?: string | null
+        }
+        Relationships: []
+      }
+      _archived_narrative_clusters: {
+        Row: {
+          cluster_data: Json | null
+          created_at: string
+          entity_name: string | null
+          id: string
+          intent_label: string | null
+          narrative_snippet: string | null
+          source_platform: string | null
+        }
+        Insert: {
+          cluster_data?: Json | null
+          created_at?: string
+          entity_name?: string | null
+          id?: string
+          intent_label?: string | null
+          narrative_snippet?: string | null
+          source_platform?: string | null
+        }
+        Update: {
+          cluster_data?: Json | null
+          created_at?: string
+          entity_name?: string | null
+          id?: string
+          intent_label?: string | null
+          narrative_snippet?: string | null
+          source_platform?: string | null
+        }
+        Relationships: []
+      }
+      _archived_persona_saturation_campaigns: {
+        Row: {
+          campaign_name: string | null
+          content: Json | null
+          created_at: string
+          entity_name: string | null
+          id: string
+          metrics: Json | null
+          platforms: string[] | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          campaign_name?: string | null
+          content?: Json | null
+          created_at?: string
+          entity_name?: string | null
+          id?: string
+          metrics?: Json | null
+          platforms?: string[] | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          campaign_name?: string | null
+          content?: Json | null
+          created_at?: string
+          entity_name?: string | null
+          id?: string
+          metrics?: Json | null
+          platforms?: string[] | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      _archived_prospect_alerts: {
+        Row: {
+          alert_type: string | null
+          created_at: string
+          entity: string | null
+          id: string
+          source_module: string | null
+          status: string | null
+        }
+        Insert: {
+          alert_type?: string | null
+          created_at?: string
+          entity?: string | null
+          id?: string
+          source_module?: string | null
+          status?: string | null
+        }
+        Update: {
+          alert_type?: string | null
+          created_at?: string
+          entity?: string | null
+          id?: string
+          source_module?: string | null
+          status?: string | null
+        }
+        Relationships: []
+      }
+      _archived_rsi_queue: {
+        Row: {
+          created_at: string
+          entity_name: string | null
+          id: string
+          payload: Json | null
+          priority: string | null
+          status: string | null
+          task_type: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          entity_name?: string | null
+          id?: string
+          payload?: Json | null
+          priority?: string | null
+          status?: string | null
+          task_type?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          entity_name?: string | null
+          id?: string
+          payload?: Json | null
+          priority?: string | null
+          status?: string | null
+          task_type?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      _archived_sentience_memory_log: {
+        Row: {
+          context: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          insight_level: number | null
+          metadata: Json | null
+          reflection: string | null
+          timestamp: string | null
+        }
+        Insert: {
+          context?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          insight_level?: number | null
+          metadata?: Json | null
+          reflection?: string | null
+          timestamp?: string | null
+        }
+        Update: {
+          context?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          insight_level?: number | null
+          metadata?: Json | null
+          reflection?: string | null
+          timestamp?: string | null
+        }
+        Relationships: []
+      }
+      _archived_sentience_recalibration_decisions: {
+        Row: {
+          applied: boolean | null
+          confidence: number | null
+          created_at: string
+          decision_type: string | null
+          id: string
+          memory_log_id: string | null
+          metadata: Json | null
+          rationale: string | null
+        }
+        Insert: {
+          applied?: boolean | null
+          confidence?: number | null
+          created_at?: string
+          decision_type?: string | null
+          id?: string
+          memory_log_id?: string | null
+          metadata?: Json | null
+          rationale?: string | null
+        }
+        Update: {
+          applied?: boolean | null
+          confidence?: number | null
+          created_at?: string
+          decision_type?: string | null
+          id?: string
+          memory_log_id?: string | null
+          metadata?: Json | null
+          rationale?: string | null
+        }
+        Relationships: []
+      }
+      _archived_strike_requests: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          entity_name: string | null
+          id: string
+          metadata: Json | null
+          platform: string | null
+          reason: string | null
+          status: string | null
+          updated_at: string
+          url: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          entity_name?: string | null
+          id?: string
+          metadata?: Json | null
+          platform?: string | null
+          reason?: string | null
+          status?: string | null
+          updated_at?: string
+          url?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          entity_name?: string | null
+          id?: string
+          metadata?: Json | null
+          platform?: string | null
+          reason?: string | null
+          status?: string | null
+          updated_at?: string
+          url?: string | null
+        }
+        Relationships: []
+      }
+      activity_logs: {
+        Row: {
+          action: string
+          created_at: string
+          details: string | null
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          user_email: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          details?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          user_email?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          details?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          user_email?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -217,6 +715,59 @@ export type Database = {
           success?: boolean | null
         }
         Relationships: []
+      }
+      black_vertex_actions: {
+        Row: {
+          action_type: string
+          approved_at: string | null
+          approved_by: string | null
+          client_id: string | null
+          created_at: string
+          executed_at: string | null
+          id: string
+          payload: Json | null
+          result: Json | null
+          status: string
+          target_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          action_type: string
+          approved_at?: string | null
+          approved_by?: string | null
+          client_id?: string | null
+          created_at?: string
+          executed_at?: string | null
+          id?: string
+          payload?: Json | null
+          result?: Json | null
+          status?: string
+          target_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          action_type?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          client_id?: string | null
+          created_at?: string
+          executed_at?: string | null
+          id?: string
+          payload?: Json | null
+          result?: Json | null
+          status?: string
+          target_url?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "black_vertex_actions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       blog_posts: {
         Row: {
@@ -337,6 +888,47 @@ export type Database = {
           },
         ]
       }
+      client_identities: {
+        Row: {
+          client_id: string
+          created_at: string
+          id: string
+          identity_type: string
+          is_primary: boolean
+          metadata: Json | null
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          id?: string
+          identity_type?: string
+          is_primary?: boolean
+          metadata?: Json | null
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          id?: string
+          identity_type?: string
+          is_primary?: boolean
+          metadata?: Json | null
+          updated_at?: string
+          value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_identities_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_intake_submissions: {
         Row: {
           brand_or_alias: string | null
@@ -405,7 +997,10 @@ export type Database = {
           keywordtargets: string | null
           name: string
           notes: string | null
+          onboarded_at: string | null
+          primary_contact_user_id: string | null
           status: string | null
+          tier: string | null
           updated_at: string
           website: string | null
         }
@@ -419,7 +1014,10 @@ export type Database = {
           keywordtargets?: string | null
           name: string
           notes?: string | null
+          onboarded_at?: string | null
+          primary_contact_user_id?: string | null
           status?: string | null
+          tier?: string | null
           updated_at?: string
           website?: string | null
         }
@@ -433,7 +1031,10 @@ export type Database = {
           keywordtargets?: string | null
           name?: string
           notes?: string | null
+          onboarded_at?: string | null
+          primary_contact_user_id?: string | null
           status?: string | null
+          tier?: string | null
           updated_at?: string
           website?: string | null
         }
@@ -553,39 +1154,6 @@ export type Database = {
           status?: string | null
           theme?: string | null
           updated_at?: string
-        }
-        Relationships: []
-      }
-      darkweb_agents: {
-        Row: {
-          agent_name: string | null
-          created_at: string
-          id: string
-          metadata: Json | null
-          results: Json | null
-          started_at: string | null
-          status: string | null
-          target: string | null
-        }
-        Insert: {
-          agent_name?: string | null
-          created_at?: string
-          id?: string
-          metadata?: Json | null
-          results?: Json | null
-          started_at?: string | null
-          status?: string | null
-          target?: string | null
-        }
-        Update: {
-          agent_name?: string | null
-          created_at?: string
-          id?: string
-          metadata?: Json | null
-          results?: Json | null
-          started_at?: string | null
-          status?: string | null
-          target?: string | null
         }
         Relationships: []
       }
@@ -1248,6 +1816,7 @@ export type Database = {
           acknowledged_at: string | null
           acknowledged_by: string | null
           assigned_to: string | null
+          client_id: string | null
           content_excerpt: string | null
           content_url: string | null
           created_at: string
@@ -1275,6 +1844,7 @@ export type Database = {
           acknowledged_at?: string | null
           acknowledged_by?: string | null
           assigned_to?: string | null
+          client_id?: string | null
           content_excerpt?: string | null
           content_url?: string | null
           created_at?: string
@@ -1302,6 +1872,7 @@ export type Database = {
           acknowledged_at?: string | null
           acknowledged_by?: string | null
           assigned_to?: string | null
+          client_id?: string | null
           content_excerpt?: string | null
           content_url?: string | null
           created_at?: string
@@ -1326,6 +1897,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "eidetic_resurfacing_events_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "eidetic_resurfacing_events_footprint_id_fkey"
             columns: ["footprint_id"]
             isOneToOne: false
@@ -1333,39 +1911,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      employee_scan_queue: {
-        Row: {
-          completed_at: string | null
-          created_at: string
-          employee_id: string | null
-          error_message: string | null
-          id: string
-          priority: number | null
-          started_at: string | null
-          status: string | null
-        }
-        Insert: {
-          completed_at?: string | null
-          created_at?: string
-          employee_id?: string | null
-          error_message?: string | null
-          id?: string
-          priority?: number | null
-          started_at?: string | null
-          status?: string | null
-        }
-        Update: {
-          completed_at?: string | null
-          created_at?: string
-          employee_id?: string | null
-          error_message?: string | null
-          id?: string
-          priority?: number | null
-          started_at?: string | null
-          status?: string | null
-        }
-        Relationships: []
       }
       entities: {
         Row: {
@@ -1514,82 +2059,15 @@ export type Database = {
         }
         Relationships: []
       }
-      eris_attack_simulations: {
-        Row: {
-          attack_vector: string | null
-          created_at: string
-          id: string
-          metadata: Json | null
-          origin_source: string | null
-          scenario_description: string | null
-          status: string | null
-          target_entity: string | null
-          threat_score: number | null
-        }
-        Insert: {
-          attack_vector?: string | null
-          created_at?: string
-          id?: string
-          metadata?: Json | null
-          origin_source?: string | null
-          scenario_description?: string | null
-          status?: string | null
-          target_entity?: string | null
-          threat_score?: number | null
-        }
-        Update: {
-          attack_vector?: string | null
-          created_at?: string
-          id?: string
-          metadata?: Json | null
-          origin_source?: string | null
-          scenario_description?: string | null
-          status?: string | null
-          target_entity?: string | null
-          threat_score?: number | null
-        }
-        Relationships: []
-      }
-      eris_response_strategies: {
-        Row: {
-          created_at: string
-          effectiveness_score: number | null
-          executed: boolean | null
-          gpt_recommendation: string | null
-          id: string
-          metadata: Json | null
-          simulation_id: string | null
-          strategy_type: string | null
-        }
-        Insert: {
-          created_at?: string
-          effectiveness_score?: number | null
-          executed?: boolean | null
-          gpt_recommendation?: string | null
-          id?: string
-          metadata?: Json | null
-          simulation_id?: string | null
-          strategy_type?: string | null
-        }
-        Update: {
-          created_at?: string
-          effectiveness_score?: number | null
-          executed?: boolean | null
-          gpt_recommendation?: string | null
-          id?: string
-          metadata?: Json | null
-          simulation_id?: string | null
-          strategy_type?: string | null
-        }
-        Relationships: []
-      }
       executive_reports: {
         Row: {
+          client_id: string | null
           created_at: string
           executive_summary: string | null
           id: string
           key_metrics: Json | null
           metadata: Json | null
+          pdf_url: string | null
           period_end: string | null
           period_start: string | null
           report_type: string | null
@@ -1598,11 +2076,13 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          client_id?: string | null
           created_at?: string
           executive_summary?: string | null
           id?: string
           key_metrics?: Json | null
           metadata?: Json | null
+          pdf_url?: string | null
           period_end?: string | null
           period_start?: string | null
           report_type?: string | null
@@ -1611,11 +2091,13 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          client_id?: string | null
           created_at?: string
           executive_summary?: string | null
           id?: string
           key_metrics?: Json | null
           metadata?: Json | null
+          pdf_url?: string | null
           period_end?: string | null
           period_start?: string | null
           report_type?: string | null
@@ -1623,61 +2105,15 @@ export type Database = {
           title?: string | null
           updated_at?: string
         }
-        Relationships: []
-      }
-      genesis_entities: {
-        Row: {
-          created_at: string
-          entity_type: string | null
-          id: string
-          metadata: Json | null
-          name: string | null
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          entity_type?: string | null
-          id?: string
-          metadata?: Json | null
-          name?: string | null
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          entity_type?: string | null
-          id?: string
-          metadata?: Json | null
-          name?: string | null
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      graveyard_simulations: {
-        Row: {
-          created_at: string
-          expected_trigger_module: string | null
-          id: string
-          injected_at: string | null
-          leak_title: string | null
-          suppression_status: string | null
-        }
-        Insert: {
-          created_at?: string
-          expected_trigger_module?: string | null
-          id?: string
-          injected_at?: string | null
-          leak_title?: string | null
-          suppression_status?: string | null
-        }
-        Update: {
-          created_at?: string
-          expected_trigger_module?: string | null
-          id?: string
-          injected_at?: string | null
-          leak_title?: string | null
-          suppression_status?: string | null
-        }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "executive_reports_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       lead_magnets: {
         Row: {
@@ -1829,42 +2265,6 @@ export type Database = {
           name?: string
           system_status?: string
           updated_at?: string
-        }
-        Relationships: []
-      }
-      llm_watchdog_logs: {
-        Row: {
-          created_at: string
-          entity_name: string | null
-          id: string
-          llm_provider: string | null
-          metadata: Json | null
-          query: string | null
-          response: string | null
-          risk_level: string | null
-          timestamp: string | null
-        }
-        Insert: {
-          created_at?: string
-          entity_name?: string | null
-          id?: string
-          llm_provider?: string | null
-          metadata?: Json | null
-          query?: string | null
-          response?: string | null
-          risk_level?: string | null
-          timestamp?: string | null
-        }
-        Update: {
-          created_at?: string
-          entity_name?: string | null
-          id?: string
-          llm_provider?: string | null
-          metadata?: Json | null
-          query?: string | null
-          response?: string | null
-          risk_level?: string | null
-          timestamp?: string | null
         }
         Relationships: []
       }
@@ -2148,74 +2548,64 @@ export type Database = {
         }
         Relationships: []
       }
-      multilingual_threats: {
+      oblivion_takedowns: {
         Row: {
-          content: string | null
+          client_id: string | null
           created_at: string
-          detected_at: string | null
-          entity_name: string | null
+          evidence: Json | null
           id: string
-          language: string | null
+          legal_basis: string | null
           metadata: Json | null
-          severity: string | null
-          source: string | null
-          translated_content: string | null
+          platform: string | null
+          request_type: string | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          status: string
+          submitted_at: string | null
+          target_url: string
+          updated_at: string
         }
         Insert: {
-          content?: string | null
+          client_id?: string | null
           created_at?: string
-          detected_at?: string | null
-          entity_name?: string | null
+          evidence?: Json | null
           id?: string
-          language?: string | null
+          legal_basis?: string | null
           metadata?: Json | null
-          severity?: string | null
-          source?: string | null
-          translated_content?: string | null
+          platform?: string | null
+          request_type?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          status?: string
+          submitted_at?: string | null
+          target_url: string
+          updated_at?: string
         }
         Update: {
-          content?: string | null
+          client_id?: string | null
           created_at?: string
-          detected_at?: string | null
-          entity_name?: string | null
+          evidence?: Json | null
           id?: string
-          language?: string | null
+          legal_basis?: string | null
           metadata?: Json | null
-          severity?: string | null
-          source?: string | null
-          translated_content?: string | null
+          platform?: string | null
+          request_type?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          status?: string
+          submitted_at?: string | null
+          target_url?: string
+          updated_at?: string
         }
-        Relationships: []
-      }
-      narrative_clusters: {
-        Row: {
-          cluster_data: Json | null
-          created_at: string
-          entity_name: string | null
-          id: string
-          intent_label: string | null
-          narrative_snippet: string | null
-          source_platform: string | null
-        }
-        Insert: {
-          cluster_data?: Json | null
-          created_at?: string
-          entity_name?: string | null
-          id?: string
-          intent_label?: string | null
-          narrative_snippet?: string | null
-          source_platform?: string | null
-        }
-        Update: {
-          cluster_data?: Json | null
-          created_at?: string
-          entity_name?: string | null
-          id?: string
-          intent_label?: string | null
-          narrative_snippet?: string | null
-          source_platform?: string | null
-        }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "oblivion_takedowns_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       operator_command_log: {
         Row: {
@@ -2274,6 +2664,39 @@ export type Database = {
           metadata?: Json | null
           processed_by?: string | null
           response_text?: string | null
+        }
+        Relationships: []
+      }
+      ops_audit_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          details: Json | null
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          module: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          details?: Json | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          module: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          details?: Json | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          module?: string
         }
         Relationships: []
       }
@@ -2343,42 +2766,6 @@ export type Database = {
           metadata?: Json | null
           sensor_name?: string | null
           sync_status?: string | null
-        }
-        Relationships: []
-      }
-      persona_saturation_campaigns: {
-        Row: {
-          campaign_name: string | null
-          content: Json | null
-          created_at: string
-          entity_name: string | null
-          id: string
-          metrics: Json | null
-          platforms: string[] | null
-          status: string | null
-          updated_at: string
-        }
-        Insert: {
-          campaign_name?: string | null
-          content?: Json | null
-          created_at?: string
-          entity_name?: string | null
-          id?: string
-          metrics?: Json | null
-          platforms?: string[] | null
-          status?: string | null
-          updated_at?: string
-        }
-        Update: {
-          campaign_name?: string | null
-          content?: Json | null
-          created_at?: string
-          entity_name?: string | null
-          id?: string
-          metrics?: Json | null
-          platforms?: string[] | null
-          status?: string | null
-          updated_at?: string
         }
         Relationships: []
       }
@@ -2472,30 +2859,33 @@ export type Database = {
         }
         Relationships: []
       }
-      prospect_alerts: {
+      profiles: {
         Row: {
-          alert_type: string | null
+          avatar_url: string | null
           created_at: string
-          entity: string | null
+          display_name: string | null
+          email: string | null
           id: string
-          source_module: string | null
-          status: string | null
+          updated_at: string
+          user_id: string
         }
         Insert: {
-          alert_type?: string | null
+          avatar_url?: string | null
           created_at?: string
-          entity?: string | null
+          display_name?: string | null
+          email?: string | null
           id?: string
-          source_module?: string | null
-          status?: string | null
+          updated_at?: string
+          user_id: string
         }
         Update: {
-          alert_type?: string | null
+          avatar_url?: string | null
           created_at?: string
-          entity?: string | null
+          display_name?: string | null
+          email?: string | null
           id?: string
-          source_module?: string | null
-          status?: string | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -2546,6 +2936,50 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      reputation_scores: {
+        Row: {
+          client_id: string | null
+          computed_at: string
+          created_at: string
+          entity_name: string | null
+          id: string
+          metadata: Json | null
+          sentiment_score: number | null
+          threat_score: number | null
+          visibility_score: number | null
+        }
+        Insert: {
+          client_id?: string | null
+          computed_at?: string
+          created_at?: string
+          entity_name?: string | null
+          id?: string
+          metadata?: Json | null
+          sentiment_score?: number | null
+          threat_score?: number | null
+          visibility_score?: number | null
+        }
+        Update: {
+          client_id?: string | null
+          computed_at?: string
+          created_at?: string
+          entity_name?: string | null
+          id?: string
+          metadata?: Json | null
+          sentiment_score?: number | null
+          threat_score?: number | null
+          visibility_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reputation_scores_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       requiem_jobs: {
         Row: {
@@ -2705,38 +3139,49 @@ export type Database = {
           },
         ]
       }
-      rsi_queue: {
+      requiem_serp_snapshots: {
         Row: {
+          captured_at: string
           created_at: string
-          entity_name: string | null
           id: string
-          payload: Json | null
-          priority: string | null
-          status: string | null
-          task_type: string | null
-          updated_at: string
+          job_id: string | null
+          parsed_results: Json | null
+          query: string
+          raw_response: Json | null
+          search_engine: string | null
+          total_results: number | null
         }
         Insert: {
+          captured_at?: string
           created_at?: string
-          entity_name?: string | null
           id?: string
-          payload?: Json | null
-          priority?: string | null
-          status?: string | null
-          task_type?: string | null
-          updated_at?: string
+          job_id?: string | null
+          parsed_results?: Json | null
+          query: string
+          raw_response?: Json | null
+          search_engine?: string | null
+          total_results?: number | null
         }
         Update: {
+          captured_at?: string
           created_at?: string
-          entity_name?: string | null
           id?: string
-          payload?: Json | null
-          priority?: string | null
-          status?: string | null
-          task_type?: string | null
-          updated_at?: string
+          job_id?: string | null
+          parsed_results?: Json | null
+          query?: string
+          raw_response?: Json | null
+          search_engine?: string | null
+          total_results?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "requiem_serp_snapshots_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "requiem_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       scan_results: {
         Row: {
@@ -2745,6 +3190,7 @@ export type Database = {
           content: string | null
           created_at: string
           detected_entities: Json | null
+          domain_authority: number | null
           entity_name: string | null
           id: string
           incident_playbook: string | null
@@ -2752,7 +3198,9 @@ export type Database = {
           metadata: Json | null
           platform: string | null
           potential_reach: number | null
+          rank_position: number | null
           sentiment: string | null
+          serpapi_query_id: string | null
           severity: string | null
           source_credibility_score: number | null
           source_type: string | null
@@ -2767,6 +3215,7 @@ export type Database = {
           content?: string | null
           created_at?: string
           detected_entities?: Json | null
+          domain_authority?: number | null
           entity_name?: string | null
           id?: string
           incident_playbook?: string | null
@@ -2774,7 +3223,9 @@ export type Database = {
           metadata?: Json | null
           platform?: string | null
           potential_reach?: number | null
+          rank_position?: number | null
           sentiment?: string | null
+          serpapi_query_id?: string | null
           severity?: string | null
           source_credibility_score?: number | null
           source_type?: string | null
@@ -2789,6 +3240,7 @@ export type Database = {
           content?: string | null
           created_at?: string
           detected_entities?: Json | null
+          domain_authority?: number | null
           entity_name?: string | null
           id?: string
           incident_playbook?: string | null
@@ -2796,7 +3248,9 @@ export type Database = {
           metadata?: Json | null
           platform?: string | null
           potential_reach?: number | null
+          rank_position?: number | null
           sentiment?: string | null
+          serpapi_query_id?: string | null
           severity?: string | null
           source_credibility_score?: number | null
           source_type?: string | null
@@ -2843,72 +3297,6 @@ export type Database = {
           results_matched_entity?: number | null
           source?: string | null
           total_results_returned?: number | null
-        }
-        Relationships: []
-      }
-      sentience_memory_log: {
-        Row: {
-          context: string | null
-          created_at: string
-          created_by: string | null
-          id: string
-          insight_level: number | null
-          metadata: Json | null
-          reflection: string | null
-          timestamp: string | null
-        }
-        Insert: {
-          context?: string | null
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          insight_level?: number | null
-          metadata?: Json | null
-          reflection?: string | null
-          timestamp?: string | null
-        }
-        Update: {
-          context?: string | null
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          insight_level?: number | null
-          metadata?: Json | null
-          reflection?: string | null
-          timestamp?: string | null
-        }
-        Relationships: []
-      }
-      sentience_recalibration_decisions: {
-        Row: {
-          applied: boolean | null
-          confidence: number | null
-          created_at: string
-          decision_type: string | null
-          id: string
-          memory_log_id: string | null
-          metadata: Json | null
-          rationale: string | null
-        }
-        Insert: {
-          applied?: boolean | null
-          confidence?: number | null
-          created_at?: string
-          decision_type?: string | null
-          id?: string
-          memory_log_id?: string | null
-          metadata?: Json | null
-          rationale?: string | null
-        }
-        Update: {
-          applied?: boolean | null
-          confidence?: number | null
-          created_at?: string
-          decision_type?: string | null
-          id?: string
-          memory_log_id?: string | null
-          metadata?: Json | null
-          rationale?: string | null
         }
         Relationships: []
       }
@@ -2969,48 +3357,6 @@ export type Database = {
           timeframe?: string | null
           title?: string | null
           updated_at?: string
-        }
-        Relationships: []
-      }
-      strike_requests: {
-        Row: {
-          approved_at: string | null
-          approved_by: string | null
-          created_at: string
-          entity_name: string | null
-          id: string
-          metadata: Json | null
-          platform: string | null
-          reason: string | null
-          status: string | null
-          updated_at: string
-          url: string | null
-        }
-        Insert: {
-          approved_at?: string | null
-          approved_by?: string | null
-          created_at?: string
-          entity_name?: string | null
-          id?: string
-          metadata?: Json | null
-          platform?: string | null
-          reason?: string | null
-          status?: string | null
-          updated_at?: string
-          url?: string | null
-        }
-        Update: {
-          approved_at?: string | null
-          approved_by?: string | null
-          created_at?: string
-          entity_name?: string | null
-          id?: string
-          metadata?: Json | null
-          platform?: string | null
-          reason?: string | null
-          status?: string | null
-          updated_at?: string
-          url?: string | null
         }
         Relationships: []
       }
