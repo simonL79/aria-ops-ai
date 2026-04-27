@@ -51,7 +51,7 @@ Deno.serve(async (req) => {
     await (admin as any).from('shield_alerts').update(updatePatch).eq('id', alert_id);
 
     await (admin as any).from('shield_alert_events').insert({
-      alert_id, actor_id: auth.user.id, from_status: current.status, to_status,
+      alert_id, actor_id: auth.userId, from_status: current.status, to_status,
       event_type: 'status_change', notes: notes || null,
     });
 

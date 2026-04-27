@@ -53,7 +53,7 @@ Deno.serve(async (req) => {
     const { data, error } = await (admin as any).from('shield_evidence_items').insert({
       alert_id, evidence_type: 'url_metadata', source_url: parsed.toString(),
       source_platform: parsed.hostname, captured_text: bodySnippet, content_hash: hash,
-      captured_by: auth.user.id, notes: title || null,
+      captured_by: auth.userId, notes: title || null,
       metadata: { http_status: status, content_type: contentType, hostname: parsed.hostname },
     }).select('id').single();
 
