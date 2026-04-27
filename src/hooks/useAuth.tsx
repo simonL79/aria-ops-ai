@@ -124,45 +124,55 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
         
-        // Check admin if user exists
+        // Check admin if user exists; otherwise mark admin check complete
         if (currentSession?.user) {
           await checkAdminStatus(currentSession.user.id, currentSession.user.email || '');
-          
+
           // Initialize database
           try {
             await initializeDatabase();
           } catch (dbError) {
             console.error('Database init error:', dbError);
           }
+        } else {
+          setIsAdmin(false);
+          setIsAdminLoading(false);
         }
-        
+
         setIsLoading(false);
         console.log('✅ Auth initialization complete');
-        
+
       } catch (error) {
         console.error('❌ Auth initialization error:', error);
         if (mounted) {
           setIsLoading(false);
+          setIsAdminLoading(false);
         }
       }
     };
 
     // Set up auth listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, newSession) => {
+      (event, newSession) => {
         if (!mounted) return;
-        
+
         console.log('🔄 Auth state change:', event);
-        
+
         setSession(newSession);
         setUser(newSession?.user ?? null);
-        
+
         if (event === 'SIGNED_IN' && newSession?.user) {
-          await checkAdminStatus(newSession.user.id, newSession.user.email || '');
+          // Defer Supabase calls out of the listener callback to avoid deadlocks
+          setIsAdminLoading(true);
+          setTimeout(() => {
+            if (!mounted) return;
+            checkAdminStatus(newSession.user.id, newSession.user.email || '');
+          }, 0);
         }
-        
+
         if (event === 'SIGNED_OUT') {
           setIsAdmin(false);
+          setIsAdminLoading(false);
           localStorage.removeItem('force_admin_access');
         }
       }
