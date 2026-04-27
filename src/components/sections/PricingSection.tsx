@@ -42,8 +42,18 @@ const PricingSection = () => {
     }
   };
 
-  const plans = [
+  const plans: Array<{
+    id: PlanId;
+    name: string;
+    price: string;
+    period: string;
+    description: string;
+    features: string[];
+    buttonText: string;
+    popular: boolean;
+  }> = [
     {
+      id: "basic",
       name: "Basic",
       price: "£29",
       period: "/month",
@@ -58,6 +68,7 @@ const PricingSection = () => {
       popular: false
     },
     {
+      id: "individual",
       name: "Individual",
       price: "£97",
       period: "/month",
@@ -74,6 +85,7 @@ const PricingSection = () => {
       popular: false
     },
     {
+      id: "pro",
       name: "PRO",
       price: "£397",
       period: "/month",
@@ -88,7 +100,7 @@ const PricingSection = () => {
         "Dark web monitoring",
         "Proactive content strategy"
       ],
-      buttonText: "Most Popular",
+      buttonText: "Subscribe to PRO",
       popular: true
     }
   ];
