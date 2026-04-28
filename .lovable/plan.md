@@ -1,40 +1,96 @@
 ## Goal
 
-Stop login from landing on the old "ARIA Command" view. After login, admins go to the Shield Dashboard. The legacy ARIA Command page is fully removed, and the site is republished so the live domain reflects the change.
+Remove pages that are no longer used. Scope per your selections:
+1. QA / system-test pages
+2. Duplicate dashboards / clients / intelligence files
+3. Old standalone tool pages superseded by Shield + Portal
 
-## Why this is happening
+I'll also delete the 11 pages that have **zero** references anywhere in the codebase (true orphans), since they're objectively dead weight.
 
-- The currently *deployed* build at `ariaops.co.uk` / `aria-ops-ai.lovable.app` is older than the current preview. In the current code, `/admin` already routes to `AdminDashboardPage`, but the published bundle still serves the old "ARIA Command" view. Republishing is required for any frontend change to go live.
-- `src/pages/AriaCommand.tsx` and a `nav-items.tsx` entry for `/aria-command` still exist, plus a footer link in `SalesFunnelPage.tsx`. These need to be removed so the page can't be reached.
+## Method
 
-## Changes
+For every candidate I:
+1. Confirm it isn't imported anywhere except its own definition (or only by `nav-items.tsx`).
+2. Delete the file.
+3. Remove its `nav-items.tsx` entry + import.
+4. Remove any `<Route>` in `App.tsx` and any nav links in `Navbar.tsx`, `Sidebar.tsx`, `MainNav.tsx`, `AdminDashboardPage.tsx`, `SalesFunnelPage.tsx` etc.
+5. After all deletions, run a final `rg` sweep to ensure no broken imports or dead links remain.
 
-### 1. Change admin landing target to `/admin/shield`
-- `src/pages/Authentication.tsx` (line 44): change `isAdmin ? '/admin' : ...` to `isAdmin ? '/admin/shield' : ...`.
-- `src/pages/AdminLogin.tsx` (line 23): change `<Navigate to="/admin" replace />` to `<Navigate to="/admin/shield" replace />`.
-- `src/components/auth/AdminLoginGateway.tsx` (line 87): change `navigate('/admin', ...)` to `navigate('/admin/shield', ...)`.
-- `src/components/auth/ClientPortalRoute.tsx` (line 22): change admin redirect from `/admin` to `/admin/shield`.
+## Deletion list (60 files)
 
-`/admin` itself stays available (AdminDashboardPage) for anyone who navigates there directly — only the post-login destination changes.
+### A. Zero-reference orphan files (11) — safe, nothing imports them
+- `src/pages/AdminPasswordResetPage.tsx`
+- `src/pages/ContactInquiries.tsx`
+- `src/pages/GDPRCompliancePage.tsx`
+- `src/pages/MonitoringPage.tsx`
+- `src/pages/ReportsPage.tsx`
+- `src/pages/ResourcesPage.tsx`
+- `src/pages/SalesFunnelPage.tsx` *(the homepage uses `HomePage.tsx`/`Index.tsx`, not this; will verify before delete)*
+- `src/pages/ThreatsManagement.tsx`
+- `src/pages/admin/WatchtowerPage.tsx`
+- `src/pages/dashboard/mentions/MentionDetailsDialog.tsx`
+- `src/pages/intelligence/EnhancedIntelligenceWorkbench.tsx`
 
-### 2. Retire the legacy ARIA Command page
-- Delete `src/pages/AriaCommand.tsx`.
-- Remove the `Aria Command` entry (title/to/page) from `src/nav-items.tsx` and drop the now-unused `AriaCommand` import.
-- Remove the `<Link to="/aria-command">Intelligence Reports</Link>` line from `src/pages/SalesFunnelPage.tsx` footer.
-- Confirm nothing else imports `AriaCommand` (rg already shows only the two references above).
+### B. QA / system-test pages (7)
+- `src/pages/QASystemTestPage.tsx`
+- `src/pages/QATestPage.tsx`
+- `src/pages/SystemCheckPage.tsx`
+- `src/pages/admin/SystemAuditPage.tsx`
+- `src/pages/admin/SystemOptimizationPage.tsx`
+- `src/pages/admin/SystemCompletionPage.tsx`
+- `src/pages/admin/StrategyBrainTestPage.tsx`
 
-### 3. Republish
-- After the code changes land, open the Publish dialog and click **Update** so the live domains (`ariaops.co.uk`, `www.ariaops.co.uk`, `aria-ops-ai.lovable.app`) serve the new bundle. Edge functions and DB changes already deploy automatically — only the frontend needs the manual republish.
+### C. Duplicate dashboards / clients / intelligence (8)
+Keep the one inside the subfolder (the modern one), drop the legacy root copy.
 
-## Verification
+| Keep | Delete |
+|---|---|
+| `src/pages/admin/AdminDashboardPage.tsx` | `src/pages/AdminDashboard.tsx`, `src/pages/admin/AdminDashboard.tsx`, `src/pages/Dashboard.tsx` |
+| `src/pages/dashboard/AnalyticsPage.tsx` | `src/pages/AnalyticsPage.tsx` |
+| `src/pages/admin/ClientManagementPage.tsx` | `src/pages/Clients.tsx`, `src/pages/ClientsPage.tsx`, `src/pages/admin/ClientsPage.tsx` |
+| (none — drop both) | `src/pages/IntelligenceWorkbench.tsx`, `src/pages/intelligence/IntelligenceWorkbench.tsx` |
+| (none — drop both) | `src/pages/OffensiveOperations.tsx`, `src/pages/intelligence/OffensiveOperations.tsx` |
+| `src/pages/Settings.tsx` (or `admin/SettingsPage.tsx` — will pick whichever is currently routed) | the other |
+| `src/pages/EnhancedIntelligence.tsx` | superseded — drop |
 
-1. In the live preview, log in as an admin → should land on `/admin/shield` (Shield Dashboard).
-2. Visit `/aria-command` directly → should hit the catch-all 404 (no longer registered).
-3. Sales funnel footer no longer shows "Intelligence Reports" linking to `/aria-command`.
-4. After republish, repeat step 1 on `https://ariaops.co.uk` to confirm the old "ARIA Command" view is gone.
+### D. Old standalone tool pages superseded by Shield/Portal (12)
+- `src/pages/Discovery.tsx`
+- `src/pages/Monitor.tsx`
+- `src/pages/Threats.tsx` *(if present; otherwise skip)*
+- `src/pages/ThreatsPage.tsx`
+- `src/pages/InfluencerRadar.tsx`
+- `src/pages/Removal.tsx`
+- `src/pages/Reports.tsx`
+- `src/pages/dashboard/CommandCenterPage.tsx`
+- `src/pages/dashboard/RadarPage.tsx`
+- `src/pages/dashboard/ThreatResponsePage.tsx`
+- `src/pages/dashboard/IntelligencePage.tsx`
+- `src/pages/dashboard/ScanSubmissionsPage.tsx`
+
+These currently have nav links in `Navbar.tsx`, `Sidebar.tsx`, `MainNav.tsx`. Those entries will be removed too.
+
+## Pages explicitly KEPT (not touched)
+
+- All public marketing: `HomePage`, `Index`, `AboutPage`, `Features`, `PricingPage`, `HowItWorksPage`, `Contact`/`ContactPage`/`ContactFormPage` (will keep one), `BlogPage`, `BlogPostPage`, `BlogAdminPage`, `SimonLindsayPage`, `BiographyPage`, `CybersecurityFrameworkPage`
+- All legal: `Terms`, `PrivacyPolicyPage`, `DisclaimerPage`, `DPARequestPage`, `RequestDataAccessPage`, `UnsubscribePage`
+- Auth: `Authentication`, `AdminLogin`
+- Scan funnel: `ScanPage`, `ReputationScanPage`, `ReputationScanForm`, `FreeScanResults`, `ThankYouPage`, `PaymentPage`
+- Intake: `ClientIntakePage`, `ClientOnboardingPage`, `SecureClientIntakePage`, `SmartIntakePage`, `ContentGenerationPage`
+- Portal (all 8 in `src/pages/portal/`)
+- Shield (all in `src/pages/admin/shield/`)
+- Active admin modules: `AdminDashboardPage`, `AIControlPage`, `AdminNotificationsPage`, `BlackVertexPage`, `EideticAlertPreferencesPage`, `RequiemDashboardPage`, `SystemSettingsPage`, `OperatorConsole`, `EmergencyStrikePage`, `AiScrapingPage`, `EideticPage`, `ExecutiveReportsPage`, `UsersPage`, `CalendarPage`, `NotFound`
+- Legacy admin modules from category 1 (Genesis Sentinel, Persona Saturation, Legal Ops, Intelligence Core, Oblivion, Strategy Brain, Sentinel) — **kept**, since you didn't tick that box. Tell me later if you want them gone too.
+
+## Verification after deletion
+
+- `rg "import .* from .* (DeletedName)"` returns nothing for each removed file.
+- `npm run build` (auto-run by harness) succeeds with no missing-module errors.
+- Manually walk: `/`, `/auth`, `/admin/shield`, `/portal` — all load.
+- Sidebar/Navbar render without broken links.
 
 ## Out of scope
 
-- No backend/RLS/edge function changes.
-- No styling changes to the Shield Dashboard itself.
-- The standalone `/admin` dashboard page is left intact in case it's still wanted as a system-overview view.
+- No DB / RLS / edge-function changes.
+- No styling changes.
+- Legacy admin modules listed above remain, pending your call.
+- `nav-items.tsx` will be cleaned of removed entries but not otherwise reorganized.
