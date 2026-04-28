@@ -343,31 +343,5 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     icon: <Gavel className="h-4 w-4" />,
     page: <LegalOpsPage />,
   },
-  // Dashboard Routes
-  {
-    title: "Dashboard Page",
-    to: "/dashboard/dashboard-page",
-    icon: <HomeIcon className="h-4 w-4" />,
-    page: <DashboardPage />,
-  },
-  {
-    title: "Aria Ingest",
-    to: "/dashboard/aria-ingest-page",
-    icon: <Zap className="h-4 w-4" />,
-    page: <AriaIngestPage />,
-  },
-  {
-    title: "Analytics",
-    to: "/dashboard/analytics-page",
-    icon: <BarChart3 className="h-4 w-4" />,
-    page: <AnalyticsPage />,
-  },
-  // Command Center, Intelligence, Threat Response, Scan Submissions removed (legacy)
-  {
-    title: "Mentions",
-    to: "/dashboard/mentions-page",
-    icon: <MessageSquare className="h-4 w-4" />,
-    page: <MentionsPage />,
-  },
-  // Radar removed (legacy)
+  // Dashboard /dashboard/*-page routes removed (use /admin and /dashboard/mentions in App.tsx)
 ];
