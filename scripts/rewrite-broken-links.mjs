@@ -205,4 +205,6 @@ if (skippedExternal.length) {
   console.log(`\n${DIM}ℹ Skipped ${skippedExternal.length} external link(s) (http/https/mailto/tel/protocol-relative).${RESET}`);
 }
 console.log();
-process.exit(0);
+// Exit non-zero if any link remained unresolved — CI must fail so a human adds
+// a canonical mapping or allowlist entry instead of leaving a dead link.
+process.exit(unresolved.length > 0 ? 1 : 0);
