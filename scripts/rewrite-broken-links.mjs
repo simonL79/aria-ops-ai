@@ -97,53 +97,75 @@ function findRewrite(path) {
   return null;
 }
 
+// ---------- internal vs external classification ----------
+// Schemes that mean "definitely not an internal app route".
+const EXTERNAL_SCHEME_RE = /^[a-z][a-z0-9+.-]*:/i; // http:, https:, mailto:, tel:, sms:, ftp:, ws:, file:, data:, blob:, javascript:, chrome-extension:, etc.
+// Protocol-relative URLs (//cdn.example.com/...) are external.
+const PROTOCOL_RELATIVE_RE = /^\/\//;
+
+/**
+ * True only for app-internal route paths we may rewrite.
+ * Rejects: external schemes, protocol-relative URLs, anchors, query-only,
+ * relative paths, template-literal interpolations, empty strings.
+ */
+function isInternalPath(raw) {
+  if (typeof raw !== "string" || raw.length === 0) return false;
+  if (raw.includes("${")) return false;          // template literal with interpolation
+  if (PROTOCOL_RELATIVE_RE.test(raw)) return false;
+  if (EXTERNAL_SCHEME_RE.test(raw)) return false; // mailto:, tel:, http(s):, etc.
+  if (raw.startsWith("#")) return false;          // pure fragment
+  if (raw.startsWith("?")) return false;          // pure query
+  if (!raw.startsWith("/")) return false;         // must be absolute app path
+  return true;
+}
+
+// Capture group 1 = quote char, group 2 = path content. Accepts ", ', and `.
 const linkPatterns = [
-  { re: /\bto=["'](\/[^"']*)["']/g, wrap: (p) => `to="${p}"` },
-  { re: /\bto=\{["'](\/[^"']*)["']\}/g, wrap: (p) => `to={"${p}"}` },
-  { re: /\bhref=["'](\/[^"']*)["']/g, wrap: (p) => `href="${p}"` },
-  { re: /\bnavigate\(\s*["'](\/[^"']*)["']/g, wrap: (p) => `navigate("${p}"` },
-  { re: /<Navigate([^>]*?)\sto=["'](\/[^"']*)["']/g, wrap: (p, attrs) => `<Navigate${attrs} to="${p}"` },
+  { name: "to=\"...\"",      re: /\bto=(["'`])([^"'`\n]+)\1/g },
+  { name: "to={\"...\"}",    re: /\bto=\{\s*(["'`])([^"'`\n]+)\1\s*\}/g },
+  { name: "href=\"...\"",    re: /\bhref=(["'`])([^"'`\n]+)\1/g },
+  { name: "navigate(\"...\")", re: /\bnavigate\(\s*(["'`])([^"'`\n]+)\1/g },
+  { name: "<Navigate to=>",  re: /<Navigate\b[^>]*?\sto=(["'`])([^"'`\n]+)\1/g },
 ];
 
 const files = walk(SRC).filter((f) => f !== join(SRC, "App.tsx") && f !== join(SRC, "nav-items.tsx"));
 const rewrites = [];
 const unresolved = [];
+const skippedExternal = []; // for diagnostics only
 let filesChanged = 0;
+
+function rewritePath(file, fullPath) {
+  const bare = fullPath.split(/[?#]/)[0];
+  if (isRegistered(bare)) return null;
+  const target = findRewrite(bare);
+  if (!target) {
+    unresolved.push({ file: relative(ROOT, file), path: bare });
+    return null;
+  }
+  const suffix = fullPath.slice(bare.length); // preserve ?query / #hash
+  const newPath = target + suffix;
+  rewrites.push({ file: relative(ROOT, file), from: fullPath, to: newPath });
+  return newPath;
+}
 
 for (const file of files) {
   const original = readFileSync(file, "utf8");
   let updated = original;
 
-  // Pattern 1-4: single-capture
-  for (const { re } of linkPatterns.slice(0, 4)) {
-    updated = updated.replace(re, (match, path) => {
-      const bare = path.split(/[?#]/)[0];
-      if (isRegistered(bare)) return match;
-      const target = findRewrite(bare);
-      if (!target) {
-        unresolved.push({ file: relative(ROOT, file), path: bare });
+  for (const { re } of linkPatterns) {
+    updated = updated.replace(re, (match, quote, path) => {
+      if (!isInternalPath(path)) {
+        if (EXTERNAL_SCHEME_RE.test(path) || PROTOCOL_RELATIVE_RE.test(path)) {
+          skippedExternal.push({ file: relative(ROOT, file), path });
+        }
         return match;
       }
-      const suffix = path.slice(bare.length); // preserve query/hash
-      const newPath = target + suffix;
-      rewrites.push({ file: relative(ROOT, file), from: path, to: newPath });
-      return match.replace(path, newPath);
+      const newPath = rewritePath(file, path);
+      if (!newPath) return match;
+      // Replace only the captured path; keep surrounding quotes/attrs intact.
+      return match.replace(quote + path + quote, quote + newPath + quote);
     });
   }
-  // Pattern 5: <Navigate ... to="...">
-  updated = updated.replace(linkPatterns[4].re, (match, attrs, path) => {
-    const bare = path.split(/[?#]/)[0];
-    if (isRegistered(bare)) return match;
-    const target = findRewrite(bare);
-    if (!target) {
-      unresolved.push({ file: relative(ROOT, file), path: bare });
-      return match;
-    }
-    const suffix = path.slice(bare.length);
-    const newPath = target + suffix;
-    rewrites.push({ file: relative(ROOT, file), from: path, to: newPath });
-    return match.replace(path, newPath);
-  });
 
   if (updated !== original) {
     writeFileSync(file, updated);
@@ -178,6 +200,9 @@ if (unresolved.length) {
     console.log(`  ${path}  ${DIM}(${file})${RESET}`);
   }
   console.log(`  ${DIM}Add to scripts/route-canonical-map.json or scripts/route-integrity.allowlist.json.${RESET}`);
+}
+if (skippedExternal.length) {
+  console.log(`\n${DIM}ℹ Skipped ${skippedExternal.length} external link(s) (http/https/mailto/tel/protocol-relative).${RESET}`);
 }
 console.log();
 process.exit(0);
