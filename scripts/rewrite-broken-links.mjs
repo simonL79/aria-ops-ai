@@ -12,13 +12,15 @@
  *
  * Allowlisted patterns (scripts/route-integrity.allowlist.json) are skipped.
  */
-import { readFileSync, writeFileSync, readdirSync, statSync, existsSync } from "node:fs";
+import { readFileSync, writeFileSync, readdirSync, statSync, existsSync, mkdirSync } from "node:fs";
 import { join, resolve, relative, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
 const SRC = join(ROOT, "src");
+const REPORTS_DIR = join(ROOT, "reports");
+const REPORT_PATH = join(REPORTS_DIR, "route-rewrite.json");
 
 const GREEN = "\x1b[32m";
 const YELLOW = "\x1b[33m";
