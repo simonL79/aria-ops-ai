@@ -1,0 +1,37 @@
+name: Route Integrity
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  route-integrity:
+    name: Verify routes & internal links
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Run heal loop (rewrite + integrity check)
+        # Fails the build if:
+        #   - rewriter encounters a broken link with no canonical mapping
+        #   - integrity check finds missing pages, orphan files, or duplicate routes
+        run: node scripts/heal-routes.mjs
+
+      - name: Fail if rewriter modified tracked files
+        # The heal loop should be a no-op on a healthy main branch. If it
+        # rewrote anything, the source contains stale links that must be
+        # committed by a human, not silently patched in CI.
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "::error::Heal loop modified files. Internal links are out of date — run 'node scripts/heal-routes.mjs' locally and commit the changes."
+            git --no-pager diff
+            exit 1
+          fi
