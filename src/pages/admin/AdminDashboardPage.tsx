@@ -100,7 +100,7 @@ const AdminDashboardPage = () => {
               <Button 
                 variant="outline" 
                 className="h-24 flex-col"
-                onClick={() => navigate('/admin/control-center')}
+                onClick={() => navigate('/admin')}
               >
                 <Shield className="h-6 w-6 mb-2" />
                 Control Center

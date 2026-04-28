@@ -34,7 +34,7 @@ const AdminDashboardWelcome = () => {
           <Button
             variant="outline"
             size="lg"
-            onClick={() => navigate("/clients")}
+            onClick={() => navigate("/admin/clients")}
           >
             Manage Clients
           </Button>

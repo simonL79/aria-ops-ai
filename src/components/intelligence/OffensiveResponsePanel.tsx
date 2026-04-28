@@ -60,7 +60,7 @@ const OffensiveResponsePanel = ({ selectedThreats = [], threatId }: OffensiveRes
           </div>
           
           <Button 
-            onClick={() => navigate('/intelligence/offensive-operations')}
+            onClick={() => navigate('/admin/shield')}
             className="bg-red-600 hover:bg-red-700"
           >
             <Target className="h-4 w-4 mr-2" />

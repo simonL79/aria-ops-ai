@@ -73,7 +73,7 @@ const DashboardMainContent = ({
 
   const handleGenerateReport = () => {
     toast.info('📊 Generating Executive Report...');
-    navigate('/reports/executive');
+    navigate('/portal/reports');
   };
 
   const handleActivateRealTime = () => {
@@ -208,7 +208,7 @@ const DashboardMainContent = ({
             </TabsTrigger>
             <TabsTrigger 
               value="completion" 
-              onClick={() => navigate('/admin/system-completion')}
+              onClick={() => navigate('/admin')}
               className="data-[state=active]:bg-corporate-accent data-[state=active]:text-black text-corporate-lightGray"
             >
               System Completion
