@@ -31,6 +31,8 @@
     "admin/RequiemDashboardPage.tsx",
     "admin/EideticAlertPreferencesPage.tsx",
     "admin/AdminNotificationsPage.tsx",
-    "dashboard/mentions/index.tsx"
+    "dashboard/mentions/index.tsx",
+    "dashboard/mentions/MentionsTab.tsx",
+    "dashboard/mentions/ClassifyTab.tsx"
   ]
 }

@@ -69,7 +69,7 @@ function App() {
                   <Routes>
                     {/* Protected Public Routes - DO NOT MODIFY */}
                     <Route path="/" element={<Index />} />
-                    <Route path="/home" element={<HomePage />} />
+                    {/* /home registered via nav-items (isPublic) */}
                     <Route path="/auth" element={<Authentication />} />
                     <Route path="/cybersecurity-framework" element={<CybersecurityFrameworkPage />} />
 

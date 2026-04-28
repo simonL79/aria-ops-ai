@@ -159,7 +159,7 @@ const OperatorConsole = () => {
             </div>
             <div className="flex items-center gap-4">
               <Button
-                onClick={() => navigate('/dashboard')}
+                onClick={() => navigate('/admin')}
                 variant="outline"
                 size="sm"
                 className="border-green-500/50 text-green-400 hover:bg-green-500/20 hover:text-green-300"

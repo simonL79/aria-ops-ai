@@ -35,7 +35,7 @@ const RouteProtection = ({
 
   // Redirect to dashboard if admin required but user not admin
   if (requireAdmin && (!isAuthenticated || !isAdmin)) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/admin" replace />;
   }
 
   return <>{children}</>;

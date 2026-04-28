@@ -53,7 +53,7 @@ const Navbar = () => {
         <div className="flex justify-between h-16">
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
-              <Link to="/discovery" className="flex items-center gap-2">
+              <Link to="/admin/shield" className="flex items-center gap-2">
                 <Logo variant="default" size="md" />
               </Link>
             </div>

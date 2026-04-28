@@ -63,13 +63,13 @@ export function MainNav({
                     </Link>
                   </NavigationMenuLink>
                 </li>
-                <ListItem to="/discovery" title="Discovery">
+                <ListItem to="/admin/shield" title="Discovery">
                   Threat intelligence and monitoring dashboard
                 </ListItem>
-                <ListItem to="/employee-risk" title="Employee Risk">
+                <ListItem to="/admin/shield" title="Employee Risk">
                   Monitor employee and brand risk
                 </ListItem>
-                <ListItem to="/compliance" title="Compliance">
+                <ListItem to="/cybersecurity-framework" title="Compliance">
                   GDPR compliance and data protection
                 </ListItem>
               </ul>

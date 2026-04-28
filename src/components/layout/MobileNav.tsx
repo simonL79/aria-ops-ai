@@ -88,7 +88,7 @@ const MobileNav = ({ isOpen, setIsOpen }: MobileNavProps) => {
                 {isAuthenticated ? (
                   <>
                     <Link
-                      to="/dashboard"
+                      to="/admin"
                       className="block text-lg font-medium hover:text-primary transition-colors"
                       onClick={handleLinkClick}
                     >

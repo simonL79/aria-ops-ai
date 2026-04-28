@@ -29,7 +29,7 @@ const AdminGuard = ({ children, redirectTo = '/auth' }: AdminGuardProps) => {
   
   // Redirect if not admin
   if (!isAdmin) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/admin" replace />;
   }
   
   // User is authenticated and is admin
