@@ -1,77 +1,59 @@
-# Cleanup Plan: Delete flagged pages & repair all references
+# Build-time route integrity check
 
-Implements the audit report. Deletes orphans/duplicates, removes their imports + route registrations, and fixes the few inbound links so the app builds cleanly.
+Add a script that runs during the Vite build (via a plugin) and **fails the build** if any route or page is unreachable. This enforces what we just cleaned up so it never regresses.
 
-## 1. Files to delete (24)
+## What it validates
 
-**Orphan public pages (13):**
-- `src/pages/BlogAdminPage.tsx`
-- `src/pages/ReputationScanPage.tsx`
-- `src/pages/ReputationScanForm.tsx`
-- `src/pages/FreeScanResults.tsx`
-- `src/pages/ThankYouPage.tsx`
-- `src/pages/PaymentPage.tsx`
-- `src/pages/DPARequestPage.tsx`
-- `src/pages/CalendarPage.tsx`
-- `src/pages/UsersPage.tsx`
-- `src/pages/ExecutiveReportsPage.tsx`
-- `src/pages/OperatorConsole.tsx`
-- `src/pages/AiScrapingPage.tsx`
-- `src/pages/EideticPage.tsx`
-- `src/pages/EmergencyStrikePage.tsx`
+For every build, the check parses `src/App.tsx`, `src/nav-items.tsx`, and every file under `src/pages/`, then enforces these rules:
 
-**Duplicate/orphan admin pages (10):**
-- `src/pages/admin/GenesisSentinel.tsx` (wrapper)
-- `src/pages/admin/SentinelPage.tsx`
-- `src/pages/admin/SentinelOperatorPage.tsx`
-- `src/pages/admin/IntelligenceCorePage.tsx`
-- `src/pages/admin/LegalOpsPage.tsx`
-- `src/pages/admin/PersonaSaturationPage.tsx`
-- `src/pages/admin/BlackVertexPage.tsx`
-- `src/pages/admin/OblivionPage.tsx`
-- `src/pages/admin/StrategyBrainStage3Page.tsx`
-- `src/pages/admin/AIControlPage.tsx`
+1. **No missing page modules** — every `import` from `./pages/...` must resolve to a real `.tsx` file. (Catches dangling imports after a deletion.)
+2. **No orphan page files** — every `.tsx` under `src/pages/` (excluding `NotFound.tsx`, `Index.tsx`, and `*/index.tsx` barrels) must be imported by either `App.tsx` or `nav-items.tsx`.
+3. **No broken internal links** — every literal `to="/..."` and `navigate("/...")` string in `src/**/*.{ts,tsx}` must match a registered route in `App.tsx` or `nav-items.tsx`. Dynamic params (`/blog/:slug`) match by prefix. URLs with query strings/hashes are normalized.
+4. **No duplicate routes** — the same path cannot be registered twice across `App.tsx` and `nav-items.tsx`.
 
-**Note — kept (despite no inbound link, per memory/active modules):**
-- `RequiemDashboardPage` — referenced in project memory as canonical `/admin/requiem` surface.
-- `ContentGenerationPage` — actively linked from `AdminDashboardPage`.
+Strings inside `node_modules`, generated files, comments, and template-literal expressions are skipped. A small allowlist file (`scripts/route-integrity.allowlist.json`) covers external URLs and intentional exceptions (e.g., `/portal/*` sub-routes generated dynamically).
 
-Also kept: `BlogPostPage` static `/blog-post` nav-items entry will be removed but the file stays (still mounted at `/blog/:slug` in App.tsx).
+## Implementation
 
-## 2. Routing updates
+**New files:**
+- `scripts/check-route-integrity.mjs` — pure Node script. Uses regex parsing (no AST deps) to extract:
+  - imports from `./pages/...` in `App.tsx` + `nav-items.tsx`
+  - `<Route path="...">` entries in `App.tsx`
+  - `to: "/..."` entries in the `navItems` array
+  - `to="/..."`, `to={"..."}`, `href="/..."`, and `navigate("/...")` literals across `src/**`
+  - all `.tsx` files under `src/pages/`
+  Then cross-references them and prints a categorized report. Exits `1` on any violation.
+- `scripts/route-integrity.allowlist.json` — array of regex patterns for paths to ignore (external URLs, wildcards, anchors).
+- `vite-plugins/route-integrity.ts` — tiny Vite plugin that runs the script in `buildStart` and throws on failure. Only active during `vite build` (skipped in `vite dev` to avoid slowing HMR).
 
-**`src/App.tsx`** — remove imports + `<Route>` lines for:
-- `BlackVertexPage`, `OblivionPage`, `AIControlPage`, `StrategyBrainStage3Page`
+**Edited files:**
+- `vite.config.ts` — register the plugin.
+- `package.json` — add a `check:routes` script (`node scripts/check-route-integrity.mjs`) so it can also be run manually.
 
-`/admin/genesis-sentinel` keeps working: route updated to render `GenesisSentinelPage` directly (drop the wrapper).
+## Output example
 
-**`src/nav-items.tsx`** — remove imports + nav entries for:
-- `BlogAdminPage`, `BlogPostPage` (the `/blog-post` static entry only), `ReputationScanPage`, `ReputationScanForm`, `FreeScanResults`, `ThankYouPage`, `PaymentPage`, `DPARequestPage`, `CalendarPage`, `UsersPage`, `ExecutiveReportsPage`, `OperatorConsole`, `AiScrapingPage`, `EideticPage`, `EmergencyStrikePage`, `PersonaSaturationPage`, `GenesisSentinel` (wrapper), `GenesisSentinelPage` (`-page` suffix duplicate route), `SentinelPage`, `SentinelOperatorPage`, `IntelligenceCorePage`, `LegalOpsPage`.
+```
+Route Integrity Check
+─────────────────────
+✓ 27 page modules imported
+✓ 41 routes registered (0 duplicates)
+✓ 138 internal links validated
 
-The `/admin/genesis-sentinel` route is kept (declared in App.tsx now using `GenesisSentinelPage` directly).
+✗ FAIL: src/pages/admin/FooPage.tsx is not imported anywhere
+✗ FAIL: src/components/x.tsx links to "/old-route" which is not registered
+```
 
-## 3. Inbound link repairs
+Clean run prints only the green summary lines and exits `0`.
 
-Discovered references that would break:
+## Verification
 
-| File | Current link | Fix |
-|---|---|---|
-| `src/components/sections/EnhancedCTASection.tsx` | `<Link to="/calendar">` | Change to `<Link to="/contact">` (book consultation) |
-| `src/components/admin/NotificationCenter.tsx` | `to="/admin/notifications"` | Keep (page retained) |
-| `src/components/eidetic/EideticDashboard.tsx` | `to="/admin/eidetic/preferences"` | Keep (page retained) |
+After implementation, run:
+- `node scripts/check-route-integrity.mjs` — must exit 0 against the current cleaned-up tree.
+- Temporarily add a `<Link to="/does-not-exist">` somewhere → script exits 1.
+- The Vite build (run automatically by the harness) must succeed.
 
-`/admin/genesis-sentinel` callers (TacticalActionPanel, AriaCommandCenter, AnubisValidationPanel, SigmaIntelligencePanel, AnubisCreeperLogViewer, DashboardMainContent) — no change, route still exists.
+## Out of scope
 
-`PrivacyPolicyPage` link to `/request-data-access` — no change, page retained.
-
-## 4. Verification
-
-- `rg "from.*pages/(BlogAdminPage|ReputationScanPage|ReputationScanForm|FreeScanResults|ThankYouPage|PaymentPage|DPARequestPage|CalendarPage|UsersPage|ExecutiveReportsPage|OperatorConsole|AiScrapingPage|EideticPage|EmergencyStrikePage)"` returns no results.
-- `rg "from.*pages/admin/(GenesisSentinel'|SentinelPage|SentinelOperatorPage|IntelligenceCorePage|LegalOpsPage|PersonaSaturationPage|BlackVertexPage|OblivionPage|StrategyBrainStage3Page|AIControlPage)"` returns no results.
-- `rg "to=\"/calendar\"|to=\"/payment\"|to=\"/thank-you\"|to=\"/dpa-request\"|to=\"/blog-admin\"|to=\"/users\"|to=\"/eidetic\"|to=\"/operator-console\"|to=\"/ai-scraping\"|to=\"/emergency-strike\"|to=\"/executive-reports\"|to=\"/reputation-scan\"|to=\"/scan-results\"|to=\"/blog-post\""` returns no results.
-- Build (auto-run by harness) succeeds with no missing-module errors.
-
-## 5. Out of scope
-
-- No memory updates (unless build reveals an issue with `/admin/ai-control` — its memory entry will stand as a known-removed surface noted in summary).
-- No layout-component pruning beyond the one CTA fix above (DashboardSidebar/MainNav cleanup is a separate pass).
+- No new test framework (Vitest/Jest install) — this is a build-time guard, not a unit test. Lighter, faster, and runs every build.
+- No runtime navigation testing.
+- No cleanup of layout sidebars (`DashboardSidebar`, `MainNav`) — but the new check will surface their stale links so they can be addressed next.

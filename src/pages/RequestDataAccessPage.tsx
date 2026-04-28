@@ -68,7 +68,7 @@ const RequestDataAccessPage = () => {
           <Button
             variant="outline"
             className="mb-6"
-            onClick={() => navigate('/gdpr-compliance')}
+            onClick={() => navigate('/request-data-access')}
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to GDPR Compliance

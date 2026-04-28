@@ -26,7 +26,7 @@ const AdminDashboardWelcome = () => {
           <Button
             variant="action"
             size="lg"
-            onClick={() => navigate("/dashboard")}
+            onClick={() => navigate("/admin")}
             className="shadow-lg"
           >
             Go to Dashboard
@@ -34,7 +34,7 @@ const AdminDashboardWelcome = () => {
           <Button
             variant="outline"
             size="lg"
-            onClick={() => navigate("/clients")}
+            onClick={() => navigate("/admin/clients")}
           >
             Manage Clients
           </Button>

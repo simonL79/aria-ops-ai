@@ -30,7 +30,7 @@ const DashboardSidebar = () => {
           </Link>
           <div className="space-y-1">
             <Link
-              to="/dashboard"
+              to="/admin"
               className={`flex items-center justify-between rounded-md px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
                 location.pathname === '/dashboard' ? 'bg-accent text-accent-foreground' : ''
               }`}

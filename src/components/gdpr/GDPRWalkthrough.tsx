@@ -228,7 +228,7 @@ const GDPRWalkthrough = () => {
                   </Button>
                 ) : (
                   <Button 
-                    onClick={() => navigate('/gdpr-compliance')}
+                    onClick={() => navigate('/request-data-access')}
                     className="bg-emerald-600 hover:bg-emerald-700"
                   >
                     View Full GDPR Details
@@ -275,7 +275,7 @@ const GDPRWalkthrough = () => {
                   className="shadow-sm" 
                   size="sm"
                   variant="outline"
-                  onClick={() => navigate('/gdpr-compliance')}
+                  onClick={() => navigate('/request-data-access')}
                 >
                   <FileText className="h-4 w-4 mr-1" />
                   GDPR Compliance Details

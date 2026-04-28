@@ -26,7 +26,7 @@ const AdminLogin = () => {
   // If authenticated but not admin, redirect to regular dashboard
   if (isAuthenticated && !isAdmin) {
     console.log('🔄 Authenticated but not admin, redirecting to dashboard');
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/admin" replace />;
   }
 
   const handleLoginComplete = (success: boolean) => {

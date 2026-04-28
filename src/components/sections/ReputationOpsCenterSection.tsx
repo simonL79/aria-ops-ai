@@ -63,7 +63,7 @@ const ReputationOpsCenterSection = () => {
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button asChild size="lg" className="bg-white text-premium-black px-8 py-3 text-lg font-semibold rounded-md shadow-lg hover:bg-gray-200">
-              <Link to="/dashboard" className="flex items-center gap-2">
+              <Link to="/admin" className="flex items-center gap-2">
                 Access Command Center <ArrowRight className="w-5 h-5" />
               </Link>
             </Button>

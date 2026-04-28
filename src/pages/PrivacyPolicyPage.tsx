@@ -27,7 +27,7 @@ const PrivacyPolicyPage = () => {
             <Button 
               variant="outline" 
               className="flex items-center gap-2"
-              onClick={() => navigate('/gdpr-compliance')}
+              onClick={() => navigate('/request-data-access')}
             >
               <Shield className="h-4 w-4" />
               GDPR Compliance
@@ -109,7 +109,7 @@ const PrivacyPolicyPage = () => {
                 variant="deliver" 
                 size="sm"
                 className="flex items-center gap-2"
-                onClick={() => navigate('/gdpr-compliance')}
+                onClick={() => navigate('/request-data-access')}
               >
                 <FileText className="h-4 w-4" />
                 View GDPR Details
