@@ -57,9 +57,6 @@ Deno.serve(async (req) => {
     if (!threat_id || typeof threat_id !== 'string') {
       return new Response(JSON.stringify({ error: 'threat_id required' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
-
-    const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
-
     // Already promoted?
     const { data: existing } = await (admin as any).from('shield_alerts').select('id').eq('source_threat_id', threat_id).maybeSingle();
     if (existing) {
