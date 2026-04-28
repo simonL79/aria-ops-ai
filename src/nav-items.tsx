@@ -274,24 +274,7 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     icon: <Calendar className="h-4 w-4" />,
     page: <CalendarPage />,
   },
-  {
-    title: "Threats",
-    to: "/threats",
-    icon: <AlertTriangle className="h-4 w-4" />,
-    page: <ThreatsPage />,
-  },
-  {
-    title: "Discovery",
-    to: "/discovery",
-    icon: <Search className="h-4 w-4" />,
-    page: <Discovery />,
-  },
-  {
-    title: "Influencer Radar",
-    to: "/influencer-radar",
-    icon: <Radar className="h-4 w-4" />,
-    page: <InfluencerRadar />,
-  },
+  // Threats, Discovery, Influencer Radar removed (legacy)
   {
     title: "Eidetic",
     to: "/eidetic",
@@ -317,24 +300,7 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     icon: <Zap className="h-4 w-4" />,
     page: <AiScrapingPage />,
   },
-  {
-    title: "Enhanced Intelligence",
-    to: "/enhanced-intelligence",
-    icon: <Brain className="h-4 w-4" />,
-    page: <EnhancedIntelligence />,
-  },
-  {
-    title: "Intelligence Workbench",
-    to: "/intelligence-workbench",
-    icon: <Brain className="h-4 w-4" />,
-    page: <IntelligenceWorkbench />,
-  },
-  {
-    title: "Offensive Operations",
-    to: "/offensive-operations",
-    icon: <Gavel className="h-4 w-4" />,
-    page: <OffensiveOperations />,
-  },
+  // Enhanced Intelligence, Intelligence Workbench, Offensive Operations removed (legacy)
   {
     title: "Not Found",
     to: "/404",
@@ -348,18 +314,7 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     icon: <FileText className="h-4 w-4" />,
     page: <ExecutiveReportsPage />,
   },
-  {
-    title: "System Check",
-    to: "/system-check",
-    icon: <CheckSquare className="h-4 w-4" />,
-    page: <SystemCheckPage />,
-  },
-  {
-    title: "QA Test",
-    to: "/qa-test",
-    icon: <CheckSquare className="h-4 w-4" />,
-    page: <QATestPage />,
-  },
+  // System Check, QA Test removed (legacy)
   {
     title: "Users",
     to: "/users",
@@ -367,18 +322,7 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     page: <UsersPage />,
   },
   // Admin Routes (unique to navItems — not duplicated in App.tsx)
-  {
-    title: "System Optimization",
-    to: "/admin/system-optimization",
-    icon: <TrendingUp className="h-4 w-4" />,
-    page: <SystemOptimizationPage />,
-  },
-  {
-    title: "System Audit",
-    to: "/admin/system-audit",
-    icon: <FileText className="h-4 w-4" />,
-    page: <SystemAuditPage />,
-  },
+  // System Optimization, System Audit removed (legacy)
   {
     title: "Persona Saturation",
     to: "/admin/persona-saturation",
