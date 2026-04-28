@@ -30,8 +30,16 @@ jobs:
         # rewrote anything, the source contains stale links that must be
         # committed by a human, not silently patched in CI.
         run: |
-          if [ -n "$(git status --porcelain)" ]; then
+          if [ -n "$(git status --porcelain -- ':!reports')" ]; then
             echo "::error::Heal loop modified files. Internal links are out of date — run 'node scripts/heal-routes.mjs' locally and commit the changes."
-            git --no-pager diff
+            git --no-pager diff -- ':!reports'
             exit 1
           fi
+
+      - name: Upload route reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: route-reports
+          path: reports/
+          if-no-files-found: ignore

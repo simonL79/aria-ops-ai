@@ -12,13 +12,15 @@
  *
  * Allowlisted patterns (scripts/route-integrity.allowlist.json) are skipped.
  */
-import { readFileSync, writeFileSync, readdirSync, statSync, existsSync } from "node:fs";
+import { readFileSync, writeFileSync, readdirSync, statSync, existsSync, mkdirSync } from "node:fs";
 import { join, resolve, relative, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
 const SRC = join(ROOT, "src");
+const REPORTS_DIR = join(ROOT, "reports");
+const REPORT_PATH = join(REPORTS_DIR, "route-rewrite.json");
 
 const GREEN = "\x1b[32m";
 const YELLOW = "\x1b[33m";
@@ -204,7 +206,50 @@ if (unresolved.length) {
 if (skippedExternal.length) {
   console.log(`\n${DIM}ℹ Skipped ${skippedExternal.length} external link(s) (http/https/mailto/tel/protocol-relative).${RESET}`);
 }
-console.log();
+// ---------- JSON report ----------
+function groupByFile(items, valueKey) {
+  const out = {};
+  for (const item of items) {
+    if (!out[item.file]) out[item.file] = [];
+    out[item.file].push(item[valueKey] ?? item);
+  }
+  return out;
+}
+
+const report = {
+  schemaVersion: 1,
+  generatedAt: new Date().toISOString(),
+  filesScanned: files.length,
+  filesChanged,
+  summary: {
+    rewritten: rewrites.length,
+    unresolved: unresolved.length,
+    skippedExternal: skippedExternal.length,
+  },
+  rewritten: {
+    total: rewrites.length,
+    items: rewrites.map(({ file, from, to }) => ({ file, from, to })),
+    byFile: groupByFile(
+      rewrites.map(({ file, from, to }) => ({ file, change: { from, to } })),
+      "change"
+    ),
+  },
+  unresolved: {
+    total: unresolved.length,
+    items: unresolved.map(({ file, path }) => ({ file, path })),
+    byFile: groupByFile(unresolved, "path"),
+  },
+  skippedExternal: {
+    total: skippedExternal.length,
+    items: skippedExternal.map(({ file, path }) => ({ file, path })),
+    byFile: groupByFile(skippedExternal, "path"),
+  },
+};
+
+mkdirSync(REPORTS_DIR, { recursive: true });
+writeFileSync(REPORT_PATH, JSON.stringify(report, null, 2));
+console.log(`${DIM}Report: ${relative(ROOT, REPORT_PATH)}${RESET}\n`);
+
 // Exit non-zero if any link remained unresolved — CI must fail so a human adds
 // a canonical mapping or allowlist entry instead of leaving a dead link.
 process.exit(unresolved.length > 0 ? 1 : 0);
