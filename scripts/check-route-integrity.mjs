@@ -172,7 +172,7 @@ console.log(`${GREEN}✓${RESET} ${importedPageFiles.size} page modules imported
 console.log(
   `${duplicateRoutes.length === 0 ? GREEN + "✓" : RED + "✗"}${RESET} ${registeredRoutes.length} routes registered (${duplicateRoutes.length} duplicates)`
 );
-console.log(`${GREEN}✓${RESET} ${totalLinks} internal links scanned\n`);
+console.log(`${GREEN}✓${RESET} ${totalLinks} internal links scanned ${DIM}(${skippedExternal} external skipped)${RESET}\n`);
 
 if (missingImports.length) {
   failures.push("missing imports");
