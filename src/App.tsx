@@ -18,15 +18,12 @@ import ContentGenerationPage from "./pages/ContentGenerationPage";
 // KeywordToArticleSystemPage removed (legacy)
 // ControlCenterPage removed (legacy)
 import ClientOnboardingPage from "./pages/ClientOnboardingPage";
-import StrategyBrainStage3Page from "./pages/admin/StrategyBrainStage3Page";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 import ClientManagementPage from "./pages/admin/ClientManagementPage";
 import SystemSettingsPage from "./pages/admin/SystemSettingsPage";
-// StrategyBrainTestPage, SystemCompletionPage, QASystemTestPage removed (legacy)
-import AIControlPage from './pages/admin/AIControlPage';
+// StrategyBrainTestPage, SystemCompletionPage, QASystemTestPage, AIControlPage, BlackVertexPage, OblivionPage, StrategyBrainStage3Page removed (legacy)
+import GenesisSentinelPage from './pages/admin/GenesisSentinelPage';
 import RequiemDashboardPage from './pages/admin/RequiemDashboardPage';
-import BlackVertexPage from './pages/admin/BlackVertexPage';
-import OblivionPage from './pages/admin/OblivionPage';
 import EideticAlertPreferencesPage from './pages/admin/EideticAlertPreferencesPage';
 import AdminNotificationsPage from './pages/admin/AdminNotificationsPage';
 import ShieldDashboard from './pages/admin/shield/ShieldDashboard';
@@ -97,16 +94,12 @@ function App() {
                       {/* /admin/control-center route removed (legacy) */}
                       
                       <Route path="/admin/client-onboarding" element={<ClientOnboardingPage />} />
-                      <Route path="/admin/strategy-brain-stage3" element={<StrategyBrainStage3Page />} />
                       <Route path="/admin" element={<AdminDashboardPage />} />
                       <Route path="/admin/clients" element={<ClientManagementPage />} />
                       <Route path="/admin/settings" element={<SystemSettingsPage />} />
-                      {/* /admin/strategy-brain-test removed (legacy) */}
-                      <Route path="/admin/ai-control" element={<AIControlPage />} />
+                      <Route path="/admin/genesis-sentinel" element={<GenesisSentinelPage />} />
                       <Route path="/admin/requiem" element={<RequiemDashboardPage />} />
-                      <Route path="/admin/black-vertex" element={<BlackVertexPage />} />
-                      <Route path="/admin/oblivion" element={<OblivionPage />} />
-                      {/* /admin/system-completion removed (legacy) */}
+                      {/* /admin/ai-control, /admin/black-vertex, /admin/oblivion, /admin/strategy-brain-stage3, /admin/system-completion removed (legacy) */}
                       <Route path="/admin/eidetic/preferences" element={<EideticAlertPreferencesPage />} />
                       <Route path="/admin/notifications" element={<AdminNotificationsPage />} />
                       <Route path="/admin/shield" element={<ShieldDashboard />} />
