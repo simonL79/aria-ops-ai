@@ -106,5 +106,5 @@ export async function verifyShieldToken(
   if (payload.act !== expectedAction) throw new Error('action mismatch');
   if (!payload.sub) throw new Error('missing subject');
 
-  return { userId: payload.sub, jti: payload.jti };
+  return { userId: payload.sub, jti: payload.jti, action: payload.act, iat: payload.iat, exp: payload.exp };
 }
