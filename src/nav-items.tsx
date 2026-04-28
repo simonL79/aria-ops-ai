@@ -47,7 +47,7 @@ import EmergencyStrikePage from "./pages/EmergencyStrikePage";
 // StrikeManagementPage and EmployeeBrandRiskPage removed (legacy)
 // SeoCenterPage removed (legacy)
 import OperatorConsole from "./pages/OperatorConsole";
-import AriaCommand from "./pages/AriaCommand";
+// AriaCommand removed (legacy)
 // HyperCorePage and AnubisCockpitPage removed (legacy)
 import AiScrapingPage from "./pages/AiScrapingPage";
 import EnhancedIntelligence from "./pages/EnhancedIntelligence";
@@ -351,12 +351,7 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     icon: <Command className="h-4 w-4" />,
     page: <OperatorConsole />,
   },
-  {
-    title: "Aria Command",
-    to: "/aria-command",
-    icon: <Command className="h-4 w-4" />,
-    page: <AriaCommand />,
-  },
+  // Aria Command removed (legacy)
   {
     title: "AI Scraping",
     to: "/ai-scraping",

@@ -436,7 +436,7 @@ const SalesFunnelPage = () => {
               <div className="space-y-2 text-sm text-gray-400">
                 <Link to="/scan" className="block hover:text-white transition-colors">Threat Detection</Link>
                 <Link to="/pricing" className="block hover:text-white transition-colors">Crisis Management</Link>
-                <Link to="/aria-command" className="block hover:text-white transition-colors">Intelligence Reports</Link>
+                
               </div>
             </div>
             

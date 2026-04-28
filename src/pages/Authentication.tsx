@@ -41,7 +41,7 @@ const Authentication = () => {
   
   // If already authenticated, route by role
   if (isAuthenticated && !isAdminLoading && !isPortalLoading) {
-    const dest = requestedFrom || (isAdmin ? '/admin' : isPortalUser ? '/portal' : '/portal/no-access');
+    const dest = requestedFrom || (isAdmin ? '/admin/shield' : isPortalUser ? '/portal' : '/portal/no-access');
     return <Navigate to={dest} replace />;
   }
 

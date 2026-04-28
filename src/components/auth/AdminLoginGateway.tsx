@@ -84,7 +84,7 @@ const AdminLoginGateway = ({ onComplete }: AdminLoginGatewayProps) => {
         // Force navigation to admin dashboard
         setTimeout(() => {
           console.log('🔄 Redirecting to admin dashboard...');
-          navigate('/admin', { replace: true });
+          navigate('/admin/shield', { replace: true });
           onComplete(true);
         }, 1000);
       }
