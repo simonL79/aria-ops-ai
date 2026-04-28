@@ -29,7 +29,7 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
 
   const scrollToServices = () => {
     // If we're on the home page, scroll to services section
-    if (location.pathname === '/' || location.pathname === '/sales-funnel') {
+    if (location.pathname === '/') {
       const servicesSection = document.querySelector('#services') || document.querySelector('[data-section="services"]');
       if (servicesSection) {
         servicesSection.scrollIntoView({ behavior: 'smooth' });
@@ -41,7 +41,7 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
   };
 
   // Check if we're on the home page
-  const isHomePage = location.pathname === '/' || location.pathname === '/sales-funnel';
+  const isHomePage = location.pathname === '/';
 
   return (
     <div className="flex min-h-screen flex-col bg-corporate-dark">
