@@ -80,7 +80,7 @@ const EnhancedCTASection = () => {
           
           <div className="inline-block mt-8">
             <Button asChild variant="link" className="text-white hover:text-gray-200">
-              <Link to="/calendar" className="flex items-center">
+              <Link to="/contact" className="flex items-center">
                 Or schedule a 1-on-1 consultation <ArrowRight className="ml-1 h-4 w-4" />
               </Link>
             </Button>
