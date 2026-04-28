@@ -1,96 +1,82 @@
 ## Goal
 
-Remove pages that are no longer used. Scope per your selections:
-1. QA / system-test pages
-2. Duplicate dashboards / clients / intelligence files
-3. Old standalone tool pages superseded by Shield + Portal
+Consolidate the remaining duplicated pages so each concept (Dashboard, Clients/Intake, Mentions, Contact) maps to **one canonical file + route**. Remove the leftover variants registered in `nav-items.tsx` that nothing actually navigates to.
 
-I'll also delete the 11 pages that have **zero** references anywhere in the codebase (true orphans), since they're objectively dead weight.
+## Audit results
 
-## Method
+After the previous cleanup, no two files share the same basename anymore — but several **conceptual duplicates** remain:
 
-For every candidate I:
-1. Confirm it isn't imported anywhere except its own definition (or only by `nav-items.tsx`).
-2. Delete the file.
-3. Remove its `nav-items.tsx` entry + import.
-4. Remove any `<Route>` in `App.tsx` and any nav links in `Navbar.tsx`, `Sidebar.tsx`, `MainNav.tsx`, `AdminDashboardPage.tsx`, `SalesFunnelPage.tsx` etc.
-5. After all deletions, run a final `rg` sweep to ensure no broken imports or dead links remain.
+### A. Mentions (3 files, 2 implementations)
+- `src/pages/dashboard/MentionsPage.tsx` — 3-line re-export shim → `./mentions`
+- `src/pages/dashboard/mentions.tsx` — 383-line full implementation
+- `src/pages/dashboard/mentions/index.tsx` — 218-line different implementation (uses `MentionsTab` + `ClassifyTab`)
 
-## Deletion list (60 files)
+`./mentions` resolves to the **directory** (`mentions/index.tsx`), not the `mentions.tsx` file. So `mentions.tsx` is dead — its 383 lines are never imported. The shim + directory version is the live one.
 
-### A. Zero-reference orphan files (11) — safe, nothing imports them
-- `src/pages/AdminPasswordResetPage.tsx`
-- `src/pages/ContactInquiries.tsx`
-- `src/pages/GDPRCompliancePage.tsx`
-- `src/pages/MonitoringPage.tsx`
-- `src/pages/ReportsPage.tsx`
-- `src/pages/ResourcesPage.tsx`
-- `src/pages/SalesFunnelPage.tsx` *(the homepage uses `HomePage.tsx`/`Index.tsx`, not this; will verify before delete)*
-- `src/pages/ThreatsManagement.tsx`
-- `src/pages/admin/WatchtowerPage.tsx`
-- `src/pages/dashboard/mentions/MentionDetailsDialog.tsx`
-- `src/pages/intelligence/EnhancedIntelligenceWorkbench.tsx`
+### B. Contact (3 files, only one reachable)
+- `src/pages/ContactPage.tsx` (99 lines) → routed at `/contact` — **linked from Footer, PricingPage, PricingSection** ✅ keep
+- `src/pages/Contact.tsx` (192 lines) → routed at `/contact-us` — no link anywhere ❌
+- `src/pages/ContactFormPage.tsx` (252 lines) → routed at `/contact-form` — no link anywhere ❌
 
-### B. QA / system-test pages (7)
-- `src/pages/QASystemTestPage.tsx`
-- `src/pages/QATestPage.tsx`
-- `src/pages/SystemCheckPage.tsx`
-- `src/pages/admin/SystemAuditPage.tsx`
-- `src/pages/admin/SystemOptimizationPage.tsx`
-- `src/pages/admin/SystemCompletionPage.tsx`
-- `src/pages/admin/StrategyBrainTestPage.tsx`
+### C. Dashboard variants registered but unreachable
+`nav-items.tsx` still registers 4 admin-only `/dashboard/*-page` routes that nothing links to:
+- `/dashboard/dashboard-page` → `DashboardPage`
+- `/dashboard/aria-ingest-page` → `AriaIngestPage`
+- `/dashboard/analytics-page` → `AnalyticsPage`
+- `/dashboard/mentions-page` → `MentionsPage` (shim)
 
-### C. Duplicate dashboards / clients / intelligence (8)
-Keep the one inside the subfolder (the modern one), drop the legacy root copy.
+The real dashboards in use are `/admin` (`AdminDashboardPage`), `/admin/shield` (`ShieldDashboard`), `/admin/requiem` (`RequiemDashboardPage`), and `/portal` (`PortalDashboard`). The four `/dashboard/*-page` URLs are dead.
 
-| Keep | Delete |
-|---|---|
-| `src/pages/admin/AdminDashboardPage.tsx` | `src/pages/AdminDashboard.tsx`, `src/pages/admin/AdminDashboard.tsx`, `src/pages/Dashboard.tsx` |
-| `src/pages/dashboard/AnalyticsPage.tsx` | `src/pages/AnalyticsPage.tsx` |
-| `src/pages/admin/ClientManagementPage.tsx` | `src/pages/Clients.tsx`, `src/pages/ClientsPage.tsx`, `src/pages/admin/ClientsPage.tsx` |
-| (none — drop both) | `src/pages/IntelligenceWorkbench.tsx`, `src/pages/intelligence/IntelligenceWorkbench.tsx` |
-| (none — drop both) | `src/pages/OffensiveOperations.tsx`, `src/pages/intelligence/OffensiveOperations.tsx` |
-| `src/pages/Settings.tsx` (or `admin/SettingsPage.tsx` — will pick whichever is currently routed) | the other |
-| `src/pages/EnhancedIntelligence.tsx` | superseded — drop |
+### D. Client intake variants
+- `src/pages/ClientIntakePage.tsx` → `/client-intake` (registered in nav-items, no link)
+- `src/pages/SmartIntakePage.tsx` → `/smart-intake` (App.tsx)
+- `src/pages/SecureClientIntakePage.tsx` → `/secure-intake` (App.tsx)
+- `src/pages/ClientOnboardingPage.tsx` → `/admin/client-onboarding` (App.tsx)
 
-### D. Old standalone tool pages superseded by Shield/Portal (12)
-- `src/pages/Discovery.tsx`
-- `src/pages/Monitor.tsx`
-- `src/pages/Threats.tsx` *(if present; otherwise skip)*
-- `src/pages/ThreatsPage.tsx`
-- `src/pages/InfluencerRadar.tsx`
-- `src/pages/Removal.tsx`
-- `src/pages/Reports.tsx`
-- `src/pages/dashboard/CommandCenterPage.tsx`
-- `src/pages/dashboard/RadarPage.tsx`
-- `src/pages/dashboard/ThreatResponsePage.tsx`
-- `src/pages/dashboard/IntelligencePage.tsx`
-- `src/pages/dashboard/ScanSubmissionsPage.tsx`
+All four exist; `ClientIntakePage` is the unlinked one. The other three serve different intake flows. **Will only remove `ClientIntakePage`.**
 
-These currently have nav links in `Navbar.tsx`, `Sidebar.tsx`, `MainNav.tsx`. Those entries will be removed too.
+## Changes
 
-## Pages explicitly KEPT (not touched)
+### Delete (7 files)
+1. `src/pages/dashboard/mentions.tsx` — orphan implementation, superseded by `mentions/index.tsx`
+2. `src/pages/dashboard/MentionsPage.tsx` — re-export shim no longer needed
+3. `src/pages/dashboard/DashboardPage.tsx` — only referenced by the dead `/dashboard/dashboard-page` nav entry
+4. `src/pages/dashboard/AriaIngestPage.tsx` — only referenced by the dead `/dashboard/aria-ingest-page` nav entry
+5. `src/pages/dashboard/AnalyticsPage.tsx` — only referenced by the dead `/dashboard/analytics-page` nav entry
+6. `src/pages/Contact.tsx` — `/contact-us` route is unlinked
+7. `src/pages/ContactFormPage.tsx` — `/contact-form` route is unlinked
+8. `src/pages/ClientIntakePage.tsx` — `/client-intake` route is unlinked
 
-- All public marketing: `HomePage`, `Index`, `AboutPage`, `Features`, `PricingPage`, `HowItWorksPage`, `Contact`/`ContactPage`/`ContactFormPage` (will keep one), `BlogPage`, `BlogPostPage`, `BlogAdminPage`, `SimonLindsayPage`, `BiographyPage`, `CybersecurityFrameworkPage`
-- All legal: `Terms`, `PrivacyPolicyPage`, `DisclaimerPage`, `DPARequestPage`, `RequestDataAccessPage`, `UnsubscribePage`
-- Auth: `Authentication`, `AdminLogin`
-- Scan funnel: `ScanPage`, `ReputationScanPage`, `ReputationScanForm`, `FreeScanResults`, `ThankYouPage`, `PaymentPage`
-- Intake: `ClientIntakePage`, `ClientOnboardingPage`, `SecureClientIntakePage`, `SmartIntakePage`, `ContentGenerationPage`
-- Portal (all 8 in `src/pages/portal/`)
-- Shield (all in `src/pages/admin/shield/`)
-- Active admin modules: `AdminDashboardPage`, `AIControlPage`, `AdminNotificationsPage`, `BlackVertexPage`, `EideticAlertPreferencesPage`, `RequiemDashboardPage`, `SystemSettingsPage`, `OperatorConsole`, `EmergencyStrikePage`, `AiScrapingPage`, `EideticPage`, `ExecutiveReportsPage`, `UsersPage`, `CalendarPage`, `NotFound`
-- Legacy admin modules from category 1 (Genesis Sentinel, Persona Saturation, Legal Ops, Intelligence Core, Oblivion, Strategy Brain, Sentinel) — **kept**, since you didn't tick that box. Tell me later if you want them gone too.
+### Update routes
+- Add a **route alias** in `App.tsx`: `/dashboard/mentions` → the canonical `mentions/index.tsx` (admin-protected). This preserves the existing `navigate('/dashboard/mentions?alert=...')` call in `src/components/dashboard/MentionMonitor/index.tsx`.
+- Remove the four `/dashboard/*-page` entries and their imports from `nav-items.tsx`.
+- Remove the `/contact-us`, `/contact-form`, `/client-intake` entries and their imports from `nav-items.tsx`.
 
-## Verification after deletion
+### Keep (canonical mapping)
+| Concept | File | Route |
+|---|---|---|
+| Public homepage | `Index.tsx` (wraps `HomePage.tsx`) | `/` |
+| Marketing home | `HomePage.tsx` | `/home` |
+| Public contact | `ContactPage.tsx` | `/contact` |
+| Admin dashboard | `admin/AdminDashboardPage.tsx` | `/admin` |
+| Shield dashboard | `admin/shield/ShieldDashboard.tsx` | `/admin/shield` |
+| Requiem dashboard | `admin/RequiemDashboardPage.tsx` | `/admin/requiem` |
+| Client portal dashboard | `portal/PortalDashboard.tsx` | `/portal` |
+| Mentions workspace | `dashboard/mentions/index.tsx` | `/dashboard/mentions` |
+| Client management | `admin/ClientManagementPage.tsx` | `/admin/clients` |
+| Intake flows | `SmartIntakePage`, `SecureClientIntakePage`, `ClientOnboardingPage` | `/smart-intake`, `/secure-intake`, `/admin/client-onboarding` |
 
-- `rg "import .* from .* (DeletedName)"` returns nothing for each removed file.
-- `npm run build` (auto-run by harness) succeeds with no missing-module errors.
-- Manually walk: `/`, `/auth`, `/admin/shield`, `/portal` — all load.
-- Sidebar/Navbar render without broken links.
+## Verification
+
+1. `rg "from .*['\"].*pages/(Contact\b|ContactFormPage|ClientIntakePage|dashboard/MentionsPage|dashboard/DashboardPage|dashboard/AriaIngestPage|dashboard/AnalyticsPage)['\"]"` returns nothing after cleanup.
+2. `rg "dashboard/mentions"` shows the new `App.tsx` route + the existing `MentionMonitor` navigate call resolve to `mentions/index.tsx`.
+3. Build passes (auto-run by harness).
+4. Footer and Pricing page "Contact" links still work (`/contact` → `ContactPage`).
+5. `/admin`, `/admin/shield`, `/portal`, `/dashboard/mentions` all load.
 
 ## Out of scope
 
-- No DB / RLS / edge-function changes.
+- Not touching legacy nav-link references in `Sidebar.tsx`, `MainNav.tsx`, `Navbar.tsx`, `DashboardSidebar.tsx`, `MobileNav.tsx`, `DashboardSidebarContent.tsx`, `DashboardNavigation.tsx` (they point to many of the routes already removed in the previous turn — that's a separate cleanup pass; will surface as a follow-up).
+- Not removing intake flows (they each serve a different funnel step).
+- No DB / edge-function changes.
 - No styling changes.
-- Legacy admin modules listed above remain, pending your call.
-- `nav-items.tsx` will be cleaned of removed entries but not otherwise reorganized.

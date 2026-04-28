@@ -17,7 +17,7 @@ import ReputationScanForm from "./pages/ReputationScanForm";
 import ThankYouPage from "./pages/ThankYouPage";
 // Monitor, Reports, Clients removed (legacy)
 import SettingsPage from "./pages/Settings";
-import Contact from "./pages/Contact";
+// Contact removed (duplicate of ContactPage)
 import Terms from "./pages/Terms";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import DisclaimerPage from "./pages/DisclaimerPage";
@@ -26,11 +26,11 @@ import BiographyPage from "./pages/BiographyPage";
 import BlogPage from "./pages/BlogPage";
 import BlogPostPage from "./pages/BlogPostPage";
 import BlogAdminPage from "./pages/BlogAdminPage";
-import ClientIntakePage from "./pages/ClientIntakePage";
+// ClientIntakePage removed (use SmartIntakePage / SecureClientIntakePage)
 import DPARequestPage from "./pages/DPARequestPage";
 import RequestDataAccessPage from "./pages/RequestDataAccessPage";
 import PaymentPage from "./pages/PaymentPage";
-import ContactFormPage from "./pages/ContactFormPage";
+// ContactFormPage removed (duplicate of ContactPage)
 // CleanLaunchPage removed (legacy)
 import CalendarPage from "./pages/CalendarPage";
 // ThreatsPage, Discovery, InfluencerRadar removed (legacy)
@@ -64,11 +64,7 @@ import LegalOpsPage from "./pages/admin/LegalOpsPage";
 // AnubisMemoryPage removed (legacy)
 
 // Dashboard imports
-import DashboardPage from "./pages/dashboard/DashboardPage";
-import AriaIngestPage from "./pages/dashboard/AriaIngestPage";
-import AnalyticsPage from "./pages/dashboard/AnalyticsPage";
-// CommandCenterPage, IntelligencePage, ThreatResponsePage, ScanSubmissionsPage removed (legacy)
-import MentionsPage from "./pages/dashboard/MentionsPage";
+// DashboardPage, AriaIngestPage, AnalyticsPage, MentionsPage shim removed (use canonical /admin and /dashboard/mentions routes)
 // RadarPage removed (legacy)
 
 export const navItems: { title: string; to: string; icon: React.ReactElement; page: React.ReactElement; isPublic?: boolean }[] = [
@@ -171,13 +167,7 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     icon: <Settings className="h-4 w-4" />,
     page: <SettingsPage />,
   },
-  {
-    title: "Contact Us",
-    to: "/contact-us",
-    icon: <Mail className="h-4 w-4" />,
-    page: <Contact />,
-    isPublic: true,
-  },
+  // Contact Us removed (use /contact)
   {
     title: "Terms of Service",
     to: "/terms",
@@ -233,13 +223,7 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     icon: <Command className="h-4 w-4" />,
     page: <BlogAdminPage />,
   },
-  {
-    title: "Client Intake",
-    to: "/client-intake",
-    icon: <FileText className="h-4 w-4" />,
-    page: <ClientIntakePage />,
-    isPublic: true,
-  },
+  // Client Intake removed (use /smart-intake or /secure-intake)
   {
     title: "DPA Request",
     to: "/dpa-request",
@@ -261,13 +245,7 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     page: <PaymentPage />,
     isPublic: true,
   },
-  {
-    title: "Contact Form",
-    to: "/contact-form",
-    icon: <Mail className="h-4 w-4" />,
-    page: <ContactFormPage />,
-    isPublic: true,
-  },
+  // Contact Form removed (use /contact)
   {
     title: "Calendar",
     to: "/calendar",
@@ -365,31 +343,5 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     icon: <Gavel className="h-4 w-4" />,
     page: <LegalOpsPage />,
   },
-  // Dashboard Routes
-  {
-    title: "Dashboard Page",
-    to: "/dashboard/dashboard-page",
-    icon: <HomeIcon className="h-4 w-4" />,
-    page: <DashboardPage />,
-  },
-  {
-    title: "Aria Ingest",
-    to: "/dashboard/aria-ingest-page",
-    icon: <Zap className="h-4 w-4" />,
-    page: <AriaIngestPage />,
-  },
-  {
-    title: "Analytics",
-    to: "/dashboard/analytics-page",
-    icon: <BarChart3 className="h-4 w-4" />,
-    page: <AnalyticsPage />,
-  },
-  // Command Center, Intelligence, Threat Response, Scan Submissions removed (legacy)
-  {
-    title: "Mentions",
-    to: "/dashboard/mentions-page",
-    icon: <MessageSquare className="h-4 w-4" />,
-    page: <MentionsPage />,
-  },
-  // Radar removed (legacy)
+  // Dashboard /dashboard/*-page routes removed (use /admin and /dashboard/mentions in App.tsx)
 ];
