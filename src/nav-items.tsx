@@ -17,7 +17,7 @@ import ReputationScanForm from "./pages/ReputationScanForm";
 import ThankYouPage from "./pages/ThankYouPage";
 // Monitor, Reports, Clients removed (legacy)
 import SettingsPage from "./pages/Settings";
-import Contact from "./pages/Contact";
+// Contact removed (duplicate of ContactPage)
 import Terms from "./pages/Terms";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import DisclaimerPage from "./pages/DisclaimerPage";
@@ -26,11 +26,11 @@ import BiographyPage from "./pages/BiographyPage";
 import BlogPage from "./pages/BlogPage";
 import BlogPostPage from "./pages/BlogPostPage";
 import BlogAdminPage from "./pages/BlogAdminPage";
-import ClientIntakePage from "./pages/ClientIntakePage";
+// ClientIntakePage removed (use SmartIntakePage / SecureClientIntakePage)
 import DPARequestPage from "./pages/DPARequestPage";
 import RequestDataAccessPage from "./pages/RequestDataAccessPage";
 import PaymentPage from "./pages/PaymentPage";
-import ContactFormPage from "./pages/ContactFormPage";
+// ContactFormPage removed (duplicate of ContactPage)
 // CleanLaunchPage removed (legacy)
 import CalendarPage from "./pages/CalendarPage";
 // ThreatsPage, Discovery, InfluencerRadar removed (legacy)
@@ -64,11 +64,7 @@ import LegalOpsPage from "./pages/admin/LegalOpsPage";
 // AnubisMemoryPage removed (legacy)
 
 // Dashboard imports
-import DashboardPage from "./pages/dashboard/DashboardPage";
-import AriaIngestPage from "./pages/dashboard/AriaIngestPage";
-import AnalyticsPage from "./pages/dashboard/AnalyticsPage";
-// CommandCenterPage, IntelligencePage, ThreatResponsePage, ScanSubmissionsPage removed (legacy)
-import MentionsPage from "./pages/dashboard/MentionsPage";
+// DashboardPage, AriaIngestPage, AnalyticsPage, MentionsPage shim removed (use canonical /admin and /dashboard/mentions routes)
 // RadarPage removed (legacy)
 
 export const navItems: { title: string; to: string; icon: React.ReactElement; page: React.ReactElement; isPublic?: boolean }[] = [
