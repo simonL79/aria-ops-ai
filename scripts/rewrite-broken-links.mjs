@@ -201,5 +201,8 @@ if (unresolved.length) {
   }
   console.log(`  ${DIM}Add to scripts/route-canonical-map.json or scripts/route-integrity.allowlist.json.${RESET}`);
 }
+if (skippedExternal.length) {
+  console.log(`\n${DIM}ℹ Skipped ${skippedExternal.length} external link(s) (http/https/mailto/tel/protocol-relative).${RESET}`);
+}
 console.log();
 process.exit(0);
