@@ -1,5 +1,5 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
-import { verifyShieldToken } from '../_shared/shieldToken.ts';
+import { consumeShieldToken } from '../_shared/shieldTokenConsume.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -23,9 +23,11 @@ const ALLOWED: Record<string, string[]> = {
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   try {
+    const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+
     let auth: { userId: string };
     try {
-      auth = await verifyShieldToken(req.headers.get('x-shield-token'), 'transition');
+      auth = await consumeShieldToken({ req, supabaseAdmin: admin, expectedAction: 'transition', functionName: 'shield-transition-alert' });
     } catch {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
@@ -34,8 +36,6 @@ Deno.serve(async (req) => {
     if (!alert_id || !to_status) {
       return new Response(JSON.stringify({ error: 'alert_id and to_status required' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
-
-    const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
 
     const { data: current } = await (admin as any).from('shield_alerts').select('status').eq('id', alert_id).maybeSingle();
     if (!current) return new Response(JSON.stringify({ error: 'Alert not found' }), { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
