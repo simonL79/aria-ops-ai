@@ -124,10 +124,10 @@ const AdminDashboardPage = () => {
               <Button 
                 variant="outline" 
                 className="h-24 flex-col"
-                onClick={() => navigate('/admin/system-optimization')}
+                onClick={() => navigate('/admin/shield')}
               >
                 <Activity className="h-6 w-6 mb-2" />
-                System Monitor
+                Shield Dashboard
               </Button>
             </div>
           </CardContent>

@@ -7,8 +7,7 @@ import ContactPage from "./pages/ContactPage";
 import PricingPage from "./pages/PricingPage";
 import Features from "./pages/Features";
 import HowItWorksPage from "./pages/HowItWorksPage";
-import Dashboard from "./pages/Dashboard";
-import AdminDashboard from "./pages/AdminDashboard";
+// Dashboard, AdminDashboard removed (legacy)
 import Authentication from "./pages/Authentication";
 import AdminLogin from "./pages/AdminLogin";
 import ScanPage from "./pages/ScanPage";
@@ -16,9 +15,7 @@ import FreeScanResults from "./pages/FreeScanResults";
 import ReputationScanPage from "./pages/ReputationScanPage";
 import ReputationScanForm from "./pages/ReputationScanForm";
 import ThankYouPage from "./pages/ThankYouPage";
-import Monitor from "./pages/Monitor";
-import Reports from "./pages/Reports";
-import Clients from "./pages/Clients";
+// Monitor, Reports, Clients removed (legacy)
 import SettingsPage from "./pages/Settings";
 import Contact from "./pages/Contact";
 import Terms from "./pages/Terms";
@@ -36,10 +33,7 @@ import PaymentPage from "./pages/PaymentPage";
 import ContactFormPage from "./pages/ContactFormPage";
 // CleanLaunchPage removed (legacy)
 import CalendarPage from "./pages/CalendarPage";
-import ThreatsPage from "./pages/ThreatsPage";
-import Discovery from "./pages/Discovery";
-// NewCoPage removed (legacy)
-import InfluencerRadar from "./pages/InfluencerRadar";
+// ThreatsPage, Discovery, InfluencerRadar removed (legacy)
 // OutreachPipelinePage and RSI removed (legacy)
 import EideticPage from "./pages/EideticPage";
 // GraveyardPage and SovraPage removed (legacy)
@@ -50,18 +44,14 @@ import OperatorConsole from "./pages/OperatorConsole";
 // AriaCommand removed (legacy)
 // HyperCorePage and AnubisCockpitPage removed (legacy)
 import AiScrapingPage from "./pages/AiScrapingPage";
-import EnhancedIntelligence from "./pages/EnhancedIntelligence";
-import IntelligenceWorkbench from "./pages/IntelligenceWorkbench";
-import OffensiveOperations from "./pages/OffensiveOperations";
+// EnhancedIntelligence, IntelligenceWorkbench, OffensiveOperations removed (legacy)
 import NotFound from "./pages/NotFound";
 import ExecutiveReportsPage from "./pages/ExecutiveReportsPage";
-import SystemCheckPage from "./pages/SystemCheckPage";
-import QATestPage from "./pages/QATestPage";
+// SystemCheckPage, QATestPage removed (legacy)
 import UsersPage from "./pages/UsersPage";
 
 // Admin imports
-import SystemOptimizationPage from "./pages/admin/SystemOptimizationPage";
-import SystemAuditPage from "./pages/admin/SystemAuditPage";
+// SystemOptimizationPage, SystemAuditPage removed (legacy)
 // QATestingPage removed (legacy)
 // StrategyBrainStage3TestPage removed (legacy)
 import PersonaSaturationPage from "./pages/admin/PersonaSaturationPage";
@@ -77,12 +67,9 @@ import LegalOpsPage from "./pages/admin/LegalOpsPage";
 import DashboardPage from "./pages/dashboard/DashboardPage";
 import AriaIngestPage from "./pages/dashboard/AriaIngestPage";
 import AnalyticsPage from "./pages/dashboard/AnalyticsPage";
-import CommandCenterPage from "./pages/dashboard/CommandCenterPage";
-import IntelligencePage from "./pages/dashboard/IntelligencePage";
-import ThreatResponsePage from "./pages/dashboard/ThreatResponsePage";
-import ScanSubmissionsPage from "./pages/dashboard/ScanSubmissionsPage";
+// CommandCenterPage, IntelligencePage, ThreatResponsePage, ScanSubmissionsPage removed (legacy)
 import MentionsPage from "./pages/dashboard/MentionsPage";
-import RadarPage from "./pages/dashboard/RadarPage";
+// RadarPage removed (legacy)
 
 export const navItems: { title: string; to: string; icon: React.ReactElement; page: React.ReactElement; isPublic?: boolean }[] = [
   {
@@ -127,18 +114,7 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     page: <HowItWorksPage />,
     isPublic: true,
   },
-  {
-    title: "Dashboard",
-    to: "/dashboard",
-    icon: <BarChart3 className="h-4 w-4" />,
-    page: <Dashboard />,
-  },
-  {
-    title: "Admin Dashboard",
-    to: "/admin/dashboard",
-    icon: <Command className="h-4 w-4" />,
-    page: <AdminDashboard />,
-  },
+  // Dashboard, Admin Dashboard removed (legacy)
   {
     title: "Authentication",
     to: "/authentication",
@@ -188,24 +164,7 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     page: <ThankYouPage />,
     isPublic: true,
   },
-  {
-    title: "Monitor",
-    to: "/monitor",
-    icon: <Activity className="h-4 w-4" />,
-    page: <Monitor />,
-  },
-  {
-    title: "Reports",
-    to: "/reports",
-    icon: <FileText className="h-4 w-4" />,
-    page: <Reports />,
-  },
-  {
-    title: "Clients",
-    to: "/clients",
-    icon: <Users className="h-4 w-4" />,
-    page: <Clients />,
-  },
+  // Monitor, Reports, Clients removed (legacy)
   {
     title: "Settings",
     to: "/settings",
@@ -315,24 +274,7 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     icon: <Calendar className="h-4 w-4" />,
     page: <CalendarPage />,
   },
-  {
-    title: "Threats",
-    to: "/threats",
-    icon: <AlertTriangle className="h-4 w-4" />,
-    page: <ThreatsPage />,
-  },
-  {
-    title: "Discovery",
-    to: "/discovery",
-    icon: <Search className="h-4 w-4" />,
-    page: <Discovery />,
-  },
-  {
-    title: "Influencer Radar",
-    to: "/influencer-radar",
-    icon: <Radar className="h-4 w-4" />,
-    page: <InfluencerRadar />,
-  },
+  // Threats, Discovery, Influencer Radar removed (legacy)
   {
     title: "Eidetic",
     to: "/eidetic",
@@ -358,24 +300,7 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     icon: <Zap className="h-4 w-4" />,
     page: <AiScrapingPage />,
   },
-  {
-    title: "Enhanced Intelligence",
-    to: "/enhanced-intelligence",
-    icon: <Brain className="h-4 w-4" />,
-    page: <EnhancedIntelligence />,
-  },
-  {
-    title: "Intelligence Workbench",
-    to: "/intelligence-workbench",
-    icon: <Brain className="h-4 w-4" />,
-    page: <IntelligenceWorkbench />,
-  },
-  {
-    title: "Offensive Operations",
-    to: "/offensive-operations",
-    icon: <Gavel className="h-4 w-4" />,
-    page: <OffensiveOperations />,
-  },
+  // Enhanced Intelligence, Intelligence Workbench, Offensive Operations removed (legacy)
   {
     title: "Not Found",
     to: "/404",
@@ -389,18 +314,7 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     icon: <FileText className="h-4 w-4" />,
     page: <ExecutiveReportsPage />,
   },
-  {
-    title: "System Check",
-    to: "/system-check",
-    icon: <CheckSquare className="h-4 w-4" />,
-    page: <SystemCheckPage />,
-  },
-  {
-    title: "QA Test",
-    to: "/qa-test",
-    icon: <CheckSquare className="h-4 w-4" />,
-    page: <QATestPage />,
-  },
+  // System Check, QA Test removed (legacy)
   {
     title: "Users",
     to: "/users",
@@ -408,18 +322,7 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     page: <UsersPage />,
   },
   // Admin Routes (unique to navItems — not duplicated in App.tsx)
-  {
-    title: "System Optimization",
-    to: "/admin/system-optimization",
-    icon: <TrendingUp className="h-4 w-4" />,
-    page: <SystemOptimizationPage />,
-  },
-  {
-    title: "System Audit",
-    to: "/admin/system-audit",
-    icon: <FileText className="h-4 w-4" />,
-    page: <SystemAuditPage />,
-  },
+  // System Optimization, System Audit removed (legacy)
   {
     title: "Persona Saturation",
     to: "/admin/persona-saturation",
@@ -481,40 +384,12 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     icon: <BarChart3 className="h-4 w-4" />,
     page: <AnalyticsPage />,
   },
-  {
-    title: "Command Center",
-    to: "/dashboard/command-center-page",
-    icon: <Command className="h-4 w-4" />,
-    page: <CommandCenterPage />,
-  },
-  {
-    title: "Intelligence",
-    to: "/dashboard/intelligence-page",
-    icon: <Brain className="h-4 w-4" />,
-    page: <IntelligencePage />,
-  },
-  {
-    title: "Threat Response",
-    to: "/dashboard/threat-response-page",
-    icon: <AlertTriangle className="h-4 w-4" />,
-    page: <ThreatResponsePage />,
-  },
-  {
-    title: "Scan Submissions",
-    to: "/dashboard/scan-submissions-page",
-    icon: <FileText className="h-4 w-4" />,
-    page: <ScanSubmissionsPage />,
-  },
+  // Command Center, Intelligence, Threat Response, Scan Submissions removed (legacy)
   {
     title: "Mentions",
     to: "/dashboard/mentions-page",
     icon: <MessageSquare className="h-4 w-4" />,
     page: <MentionsPage />,
   },
-  {
-    title: "Radar",
-    to: "/dashboard/radar-page",
-    icon: <Radar className="h-4 w-4" />,
-    page: <RadarPage />,
-  },
+  // Radar removed (legacy)
 ];

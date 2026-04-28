@@ -22,9 +22,7 @@ import StrategyBrainStage3Page from "./pages/admin/StrategyBrainStage3Page";
 import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
 import ClientManagementPage from "./pages/admin/ClientManagementPage";
 import SystemSettingsPage from "./pages/admin/SystemSettingsPage";
-import StrategyBrainTestPage from "./pages/admin/StrategyBrainTestPage";
-import SystemCompletionPage from '@/pages/admin/SystemCompletionPage';
-import QASystemTestPage from '@/pages/QASystemTestPage';
+// StrategyBrainTestPage, SystemCompletionPage, QASystemTestPage removed (legacy)
 import AIControlPage from './pages/admin/AIControlPage';
 import RequiemDashboardPage from './pages/admin/RequiemDashboardPage';
 import BlackVertexPage from './pages/admin/BlackVertexPage';
@@ -102,18 +100,18 @@ function App() {
                       <Route path="/admin" element={<AdminDashboardPage />} />
                       <Route path="/admin/clients" element={<ClientManagementPage />} />
                       <Route path="/admin/settings" element={<SystemSettingsPage />} />
-                      <Route path="/admin/strategy-brain-test" element={<StrategyBrainTestPage />} />
+                      {/* /admin/strategy-brain-test removed (legacy) */}
                       <Route path="/admin/ai-control" element={<AIControlPage />} />
                       <Route path="/admin/requiem" element={<RequiemDashboardPage />} />
                       <Route path="/admin/black-vertex" element={<BlackVertexPage />} />
                       <Route path="/admin/oblivion" element={<OblivionPage />} />
-                      <Route path="/admin/system-completion" element={<SystemCompletionPage />} />
+                      {/* /admin/system-completion removed (legacy) */}
                       <Route path="/admin/eidetic/preferences" element={<EideticAlertPreferencesPage />} />
                       <Route path="/admin/notifications" element={<AdminNotificationsPage />} />
                       <Route path="/admin/shield" element={<ShieldDashboard />} />
                       <Route path="/admin/shield/alerts" element={<ShieldAlertsList />} />
                       <Route path="/admin/shield/alerts/:id" element={<ShieldAlertDetail />} />
-                      <Route path="/qa-system-test" element={<QASystemTestPage />} />
+                      {/* /qa-system-test removed (legacy) */}
                     </Route>
                     
                     {/* Blog Routes */}
