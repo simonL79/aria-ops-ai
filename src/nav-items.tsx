@@ -114,18 +114,7 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     page: <HowItWorksPage />,
     isPublic: true,
   },
-  {
-    title: "Dashboard",
-    to: "/dashboard",
-    icon: <BarChart3 className="h-4 w-4" />,
-    page: <Dashboard />,
-  },
-  {
-    title: "Admin Dashboard",
-    to: "/admin/dashboard",
-    icon: <Command className="h-4 w-4" />,
-    page: <AdminDashboard />,
-  },
+  // Dashboard, Admin Dashboard removed (legacy)
   {
     title: "Authentication",
     to: "/authentication",
@@ -175,24 +164,7 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     page: <ThankYouPage />,
     isPublic: true,
   },
-  {
-    title: "Monitor",
-    to: "/monitor",
-    icon: <Activity className="h-4 w-4" />,
-    page: <Monitor />,
-  },
-  {
-    title: "Reports",
-    to: "/reports",
-    icon: <FileText className="h-4 w-4" />,
-    page: <Reports />,
-  },
-  {
-    title: "Clients",
-    to: "/clients",
-    icon: <Users className="h-4 w-4" />,
-    page: <Clients />,
-  },
+  // Monitor, Reports, Clients removed (legacy)
   {
     title: "Settings",
     to: "/settings",
