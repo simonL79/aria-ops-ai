@@ -1,5 +1,5 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
-import { verifyShieldToken } from '../_shared/shieldToken.ts';
+import { consumeShieldToken } from '../_shared/shieldTokenConsume.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -44,9 +44,11 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   try {
+    const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+
     let auth: { userId: string };
     try {
-      auth = await verifyShieldToken(req.headers.get('x-shield-token'), 'promote');
+      auth = await consumeShieldToken({ req, supabaseAdmin: admin, expectedAction: 'promote', functionName: 'shield-promote-threat' });
     } catch {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
