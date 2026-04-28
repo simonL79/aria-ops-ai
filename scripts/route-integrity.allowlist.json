@@ -1,0 +1,36 @@
+{
+  "_comment": "Path patterns (regex, anchored) that the route integrity check should ignore.",
+  "ignoredLinkPaths": [
+    "^/$",
+    "^/portal(/.*)?$",
+    "^/admin/shield(/.*)?$",
+    "^/blog/.+$",
+    "^/api/.*$",
+    "^/functions/.*$",
+    "^/auth/callback.*$",
+    "^/#",
+    "^#"
+  ],
+  "ignoredOrphanPages": [
+    "Index.tsx",
+    "NotFound.tsx",
+    "HomePage.tsx",
+    "Authentication.tsx",
+    "AdminLogin.tsx",
+    "CybersecurityFrameworkPage.tsx",
+    "SecureClientIntakePage.tsx",
+    "SmartIntakePage.tsx",
+    "ContentGenerationPage.tsx",
+    "ClientOnboardingPage.tsx",
+    "BlogPostPage.tsx",
+    "UnsubscribePage.tsx",
+    "admin/AdminDashboardPage.tsx",
+    "admin/ClientManagementPage.tsx",
+    "admin/SystemSettingsPage.tsx",
+    "admin/GenesisSentinelPage.tsx",
+    "admin/RequiemDashboardPage.tsx",
+    "admin/EideticAlertPreferencesPage.tsx",
+    "admin/AdminNotificationsPage.tsx",
+    "dashboard/mentions/index.tsx"
+  ]
+}
