@@ -3,7 +3,7 @@
  * Route integrity check.
  * Fails the build if pages are missing, orphaned, links are broken, or routes duplicated.
  */
-import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
+import { readFileSync, readdirSync, statSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join, relative, resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -11,6 +11,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
 const SRC = join(ROOT, "src");
 const PAGES = join(SRC, "pages");
+const REPORTS_DIR = join(ROOT, "reports");
+const REPORT_PATH = join(REPORTS_DIR, "route-integrity.json");
 
 const RED = "\x1b[31m";
 const GREEN = "\x1b[32m";
