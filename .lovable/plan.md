@@ -1,82 +1,69 @@
-## Goal
+# Page Audit Report
 
-Consolidate the remaining duplicated pages so each concept (Dashboard, Clients/Intake, Mentions, Contact) maps to **one canonical file + route**. Remove the leftover variants registered in `nav-items.tsx` that nothing actually navigates to.
+Audit of every page registered in `src/App.tsx` and `src/nav-items.tsx`. Each entry has been cross-checked against internal `<Link>`, `navigate()` and `href` references across `src/` (excluding the route registries themselves).
 
-## Audit results
+Pages with valid links from layouts, sections, or other pages are NOT flagged. Only orphans (no inbound link) and duplicates (multiple files implementing the same concept) appear below.
 
-After the previous cleanup, no two files share the same basename anymore — but several **conceptual duplicates** remain:
+---
 
-### A. Mentions (3 files, 2 implementations)
-- `src/pages/dashboard/MentionsPage.tsx` — 3-line re-export shim → `./mentions`
-- `src/pages/dashboard/mentions.tsx` — 383-line full implementation
-- `src/pages/dashboard/mentions/index.tsx` — 218-line different implementation (uses `MentionsTab` + `ClassifyTab`)
+## A. Orphan public pages (registered route, no inbound link anywhere)
 
-`./mentions` resolves to the **directory** (`mentions/index.tsx`), not the `mentions.tsx` file. So `mentions.tsx` is dead — its 383 lines are never imported. The shim + directory version is the live one.
-
-### B. Contact (3 files, only one reachable)
-- `src/pages/ContactPage.tsx` (99 lines) → routed at `/contact` — **linked from Footer, PricingPage, PricingSection** ✅ keep
-- `src/pages/Contact.tsx` (192 lines) → routed at `/contact-us` — no link anywhere ❌
-- `src/pages/ContactFormPage.tsx` (252 lines) → routed at `/contact-form` — no link anywhere ❌
-
-### C. Dashboard variants registered but unreachable
-`nav-items.tsx` still registers 4 admin-only `/dashboard/*-page` routes that nothing links to:
-- `/dashboard/dashboard-page` → `DashboardPage`
-- `/dashboard/aria-ingest-page` → `AriaIngestPage`
-- `/dashboard/analytics-page` → `AnalyticsPage`
-- `/dashboard/mentions-page` → `MentionsPage` (shim)
-
-The real dashboards in use are `/admin` (`AdminDashboardPage`), `/admin/shield` (`ShieldDashboard`), `/admin/requiem` (`RequiemDashboardPage`), and `/portal` (`PortalDashboard`). The four `/dashboard/*-page` URLs are dead.
-
-### D. Client intake variants
-- `src/pages/ClientIntakePage.tsx` → `/client-intake` (registered in nav-items, no link)
-- `src/pages/SmartIntakePage.tsx` → `/smart-intake` (App.tsx)
-- `src/pages/SecureClientIntakePage.tsx` → `/secure-intake` (App.tsx)
-- `src/pages/ClientOnboardingPage.tsx` → `/admin/client-onboarding` (App.tsx)
-
-All four exist; `ClientIntakePage` is the unlinked one. The other three serve different intake flows. **Will only remove `ClientIntakePage`.**
-
-## Changes
-
-### Delete (7 files)
-1. `src/pages/dashboard/mentions.tsx` — orphan implementation, superseded by `mentions/index.tsx`
-2. `src/pages/dashboard/MentionsPage.tsx` — re-export shim no longer needed
-3. `src/pages/dashboard/DashboardPage.tsx` — only referenced by the dead `/dashboard/dashboard-page` nav entry
-4. `src/pages/dashboard/AriaIngestPage.tsx` — only referenced by the dead `/dashboard/aria-ingest-page` nav entry
-5. `src/pages/dashboard/AnalyticsPage.tsx` — only referenced by the dead `/dashboard/analytics-page` nav entry
-6. `src/pages/Contact.tsx` — `/contact-us` route is unlinked
-7. `src/pages/ContactFormPage.tsx` — `/contact-form` route is unlinked
-8. `src/pages/ClientIntakePage.tsx` — `/client-intake` route is unlinked
-
-### Update routes
-- Add a **route alias** in `App.tsx`: `/dashboard/mentions` → the canonical `mentions/index.tsx` (admin-protected). This preserves the existing `navigate('/dashboard/mentions?alert=...')` call in `src/components/dashboard/MentionMonitor/index.tsx`.
-- Remove the four `/dashboard/*-page` entries and their imports from `nav-items.tsx`.
-- Remove the `/contact-us`, `/contact-form`, `/client-intake` entries and their imports from `nav-items.tsx`.
-
-### Keep (canonical mapping)
-| Concept | File | Route |
+| Page file | Route | Why flagged |
 |---|---|---|
-| Public homepage | `Index.tsx` (wraps `HomePage.tsx`) | `/` |
-| Marketing home | `HomePage.tsx` | `/home` |
-| Public contact | `ContactPage.tsx` | `/contact` |
-| Admin dashboard | `admin/AdminDashboardPage.tsx` | `/admin` |
-| Shield dashboard | `admin/shield/ShieldDashboard.tsx` | `/admin/shield` |
-| Requiem dashboard | `admin/RequiemDashboardPage.tsx` | `/admin/requiem` |
-| Client portal dashboard | `portal/PortalDashboard.tsx` | `/portal` |
-| Mentions workspace | `dashboard/mentions/index.tsx` | `/dashboard/mentions` |
-| Client management | `admin/ClientManagementPage.tsx` | `/admin/clients` |
-| Intake flows | `SmartIntakePage`, `SecureClientIntakePage`, `ClientOnboardingPage` | `/smart-intake`, `/secure-intake`, `/admin/client-onboarding` |
+| `BlogAdminPage.tsx` | `/blog-admin` | Admin-only blog editor; no link from any layout, sidebar, or admin dashboard. Reachable only by typing the URL. |
+| `BlogPostPage.tsx` (nav-items copy) | `/blog-post` | Duplicate registration. Real blog posts use `/blog/:slug` (declared directly in `App.tsx`). The static `/blog-post` route renders the same component with no slug and no inbound links. |
+| `ReputationScanPage.tsx` | `/reputation-scan` | No inbound link. All CTAs across the site point to `/scan`. Superseded by `ScanPage`. |
+| `ReputationScanForm.tsx` | `/reputation-scan-form` | No inbound link. Same purpose as `/scan` (`ConcernSubmissionForm`). |
+| `FreeScanResults.tsx` | `/scan-results` | No inbound link. Result rendering is handled inline by the scan flow. |
+| `ThankYouPage.tsx` | `/thank-you` | No `navigate('/thank-you')` or `<Link>` references; never reached after form submissions. |
+| `PaymentPage.tsx` | `/payment` | No inbound link. Payment is handled via Stripe redirect / pricing CTAs that go to `/contact`, not an in-app page. |
+| `DPARequestPage.tsx` | `/dpa-request` | No inbound link. GDPR flows route users to `/request-data-access` instead. |
+| `CalendarPage.tsx` | `/calendar` | Linked once from `EnhancedCTASection`, but is admin-protected (`!isPublic`) — anonymous CTA users hit the auth wall. Flag as orphan-from-public-CTA. |
+| `UsersPage.tsx` | `/users` | No inbound link. User management is done in `/admin/clients` (`ClientManagementPage`). |
+| `ExecutiveReportsPage.tsx` | `/executive-reports` | No inbound link. Reporting surfaces live under `/portal/reports` and `/admin/shield`. |
+| `OperatorConsole.tsx` | `/operator-console` | No inbound link. Superseded by `/admin/shield` and `/admin/sentinel-operator-page`. |
+| `AiScrapingPage.tsx` | `/ai-scraping` | No inbound link. Scraping config lives inside admin tools now. |
+| `EideticPage.tsx` | `/eidetic` | No inbound link from any nav. The active Eidetic surface is `/admin/eidetic/preferences`. |
+| `EmergencyStrikePage.tsx` | `/emergency-strike` | No inbound link. Strike actions are exposed inside Shield/Genesis panels. |
+| `ContentGenerationPage.tsx` | `/content-generation` | Linked from `AdminDashboardPage` and one control-center module — keep, but note it has no nav-item entry (admin-only direct link). NOT flagged — kept here for completeness. |
 
-## Verification
+## B. Duplicate / redundant admin pages
 
-1. `rg "from .*['\"].*pages/(Contact\b|ContactFormPage|ClientIntakePage|dashboard/MentionsPage|dashboard/DashboardPage|dashboard/AriaIngestPage|dashboard/AnalyticsPage)['\"]"` returns nothing after cleanup.
-2. `rg "dashboard/mentions"` shows the new `App.tsx` route + the existing `MentionMonitor` navigate call resolve to `mentions/index.tsx`.
-3. Build passes (auto-run by harness).
-4. Footer and Pricing page "Contact" links still work (`/contact` → `ContactPage`).
-5. `/admin`, `/admin/shield`, `/portal`, `/dashboard/mentions` all load.
+| Page file | Route | Why flagged |
+|---|---|---|
+| `admin/GenesisSentinel.tsx` | `/admin/genesis-sentinel` | Wrapper file — the entire body is `return <GenesisSentinelPage />`. Pure indirection. |
+| `admin/GenesisSentinelPage.tsx` | `/admin/genesis-sentinel-page` | Same component reachable at two different routes. All inbound links (TacticalActionPanel, AriaCommandCenter, AnubisValidationPanel, SigmaIntelligencePanel, AnubisCreeperLogViewer, DashboardMainContent) point to `/admin/genesis-sentinel`. The `-page` suffix route is unreferenced. |
+| `admin/SentinelPage.tsx` | `/admin/sentinel-page` | No inbound link. Older standalone Sentinel screen. Superseded by `SentinelOperatorPage` which uses the modern `SentinelOperatorConsole` component. |
+| `admin/SentinelOperatorPage.tsx` | `/admin/sentinel-operator-page` | No inbound link from any layout/sidebar; only reachable by URL. Canonical operator surface is `/admin/shield`. Flag for review — keep one of {SentinelPage, SentinelOperatorPage} or fold into Shield. |
+| `admin/IntelligenceCorePage.tsx` | `/admin/intelligence-core-page` | No inbound link. Conceptual overlap with Genesis Sentinel and Shield Dashboard. |
+| `admin/LegalOpsPage.tsx` | `/admin/legal-ops-page` | No inbound link. Legal-ops surfaces appear inside Shield. Route uses `-page` suffix nobody links to. |
+| `admin/PersonaSaturationPage.tsx` | `/admin/persona-saturation` | No inbound link. RSI / Persona Saturation is invoked from Shield/Genesis modules. |
+| `admin/AIControlPage.tsx` | `/admin/ai-control` | No inbound link found in components. Reachable only by URL (documented in memory but unlinked). Flag for nav addition or removal. |
+| `admin/BlackVertexPage.tsx` | `/admin/black-vertex` | No inbound link. Standalone module without nav entry. |
+| `admin/OblivionPage.tsx` | `/admin/oblivion` | No inbound link. Standalone module without nav entry. |
+| `admin/RequiemDashboardPage.tsx` | `/admin/requiem` | No inbound link in components (only the `mem://` reference). Flag — likely should be linked from Admin Dashboard. |
+| `admin/StrategyBrainStage3Page.tsx` | `/admin/strategy-brain-stage3` | No inbound link. Stage-3 testing surface, likely legacy. |
+| `admin/AdminNotificationsPage.tsx` | `/admin/notifications` | Linked once from `NotificationCenter` dropdown — keep. NOT flagged. |
+| `admin/EideticAlertPreferencesPage.tsx` | `/admin/eidetic/preferences` | Linked from `EideticDashboard` — keep. NOT flagged. |
 
-## Out of scope
+## C. Pages that are kept (verified inbound links)
 
-- Not touching legacy nav-link references in `Sidebar.tsx`, `MainNav.tsx`, `Navbar.tsx`, `DashboardSidebar.tsx`, `MobileNav.tsx`, `DashboardSidebarContent.tsx`, `DashboardNavigation.tsx` (they point to many of the routes already removed in the previous turn — that's a separate cleanup pass; will surface as a follow-up).
-- Not removing intake flows (they each serve a different funnel step).
-- No DB / edge-function changes.
-- No styling changes.
+For transparency:
+`Index`, `HomePage`, `AboutPage`, `ContactPage`, `PricingPage`, `Features`, `HowItWorksPage`, `BlogPage`, `BlogPostPage` (at `/blog/:slug`), `ScanPage`, `SimonLindsayPage`, `BiographyPage`, `Terms`, `PrivacyPolicyPage`, `DisclaimerPage`, `CybersecurityFrameworkPage`, `RequestDataAccessPage`, `Authentication`, `AdminLogin`, `UnsubscribePage`, `NotFound`, `Settings`, `SecureClientIntakePage`, `SmartIntakePage`, `ContentGenerationPage`, `ClientOnboardingPage`, `AdminDashboardPage`, `ClientManagementPage`, `SystemSettingsPage`, all `portal/*` pages, all `admin/shield/*` pages, `dashboard/mentions/index`.
+
+---
+
+## Summary counts
+
+- **Orphan public pages**: 14
+- **Duplicate / orphan admin pages**: 12
+- **Total flagged for review**: 26
+
+## Next step
+
+After you review this report, approve a follow-up plan to:
+1. Delete the clear orphans in section A (no inbound links, superseded by other flows).
+2. Resolve the Genesis Sentinel duplication (`GenesisSentinel.tsx` wrapper + `GenesisSentinelPage.tsx`) by keeping one route.
+3. Decide per admin page in section B whether to (a) add a nav entry / dashboard link, or (b) delete.
+
+No files will be changed in this plan — it is reporting only.
