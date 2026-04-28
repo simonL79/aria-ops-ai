@@ -3,7 +3,7 @@
  * Route integrity check.
  * Fails the build if pages are missing, orphaned, links are broken, or routes duplicated.
  */
-import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
+import { readFileSync, readdirSync, statSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join, relative, resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -11,6 +11,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dirname, "..");
 const SRC = join(ROOT, "src");
 const PAGES = join(SRC, "pages");
+const REPORTS_DIR = join(ROOT, "reports");
+const REPORT_PATH = join(REPORTS_DIR, "route-integrity.json");
 
 const RED = "\x1b[31m";
 const GREEN = "\x1b[32m";
@@ -206,6 +208,45 @@ if (brokenLinks.length) {
   }
   console.log(`  ${DIM}If intentional (external/dynamic), add a regex to scripts/route-integrity.allowlist.json → ignoredLinkPaths.${RESET}\n`);
 }
+
+// ---------- JSON report ----------
+function groupByFile(items, valueKey) {
+  const out = {};
+  for (const item of items) {
+    if (!out[item.file]) out[item.file] = [];
+    out[item.file].push(item[valueKey] ?? item);
+  }
+  return out;
+}
+
+const report = {
+  schemaVersion: 1,
+  generatedAt: new Date().toISOString(),
+  passed: failures.length === 0,
+  failures,
+  summary: {
+    pageModulesImported: importedPageFiles.size,
+    routesRegistered: registeredRoutes.length,
+    duplicateRoutes: duplicateRoutes.length,
+    orphanPages: orphans.length,
+    missingImports: missingImports.length,
+    internalLinksScanned: totalLinks,
+    brokenLinks: brokenLinks.length,
+    skippedExternalLinks: skippedExternal,
+  },
+  missingImports,
+  duplicateRoutes: duplicateRoutes.map(([path, count]) => ({ path, count })),
+  orphanPages: orphans.map((rel) => `src/pages/${rel}`),
+  brokenLinks: {
+    total: brokenLinks.length,
+    items: brokenLinks.map(({ file, path }) => ({ file, path })),
+    byFile: groupByFile(brokenLinks, "path"),
+  },
+};
+
+mkdirSync(REPORTS_DIR, { recursive: true });
+writeFileSync(REPORT_PATH, JSON.stringify(report, null, 2));
+console.log(`${DIM}Report: ${relative(ROOT, REPORT_PATH)}${RESET}\n`);
 
 if (failures.length) {
   console.log(`${RED}Route integrity check FAILED: ${failures.join(", ")}.${RESET}\n`);
