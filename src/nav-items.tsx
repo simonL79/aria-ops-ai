@@ -384,40 +384,12 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     icon: <BarChart3 className="h-4 w-4" />,
     page: <AnalyticsPage />,
   },
-  {
-    title: "Command Center",
-    to: "/dashboard/command-center-page",
-    icon: <Command className="h-4 w-4" />,
-    page: <CommandCenterPage />,
-  },
-  {
-    title: "Intelligence",
-    to: "/dashboard/intelligence-page",
-    icon: <Brain className="h-4 w-4" />,
-    page: <IntelligencePage />,
-  },
-  {
-    title: "Threat Response",
-    to: "/dashboard/threat-response-page",
-    icon: <AlertTriangle className="h-4 w-4" />,
-    page: <ThreatResponsePage />,
-  },
-  {
-    title: "Scan Submissions",
-    to: "/dashboard/scan-submissions-page",
-    icon: <FileText className="h-4 w-4" />,
-    page: <ScanSubmissionsPage />,
-  },
+  // Command Center, Intelligence, Threat Response, Scan Submissions removed (legacy)
   {
     title: "Mentions",
     to: "/dashboard/mentions-page",
     icon: <MessageSquare className="h-4 w-4" />,
     page: <MentionsPage />,
   },
-  {
-    title: "Radar",
-    to: "/dashboard/radar-page",
-    icon: <Radar className="h-4 w-4" />,
-    page: <RadarPage />,
-  },
+  // Radar removed (legacy)
 ];
