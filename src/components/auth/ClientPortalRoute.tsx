@@ -19,7 +19,7 @@ const ClientPortalRoute = () => {
 
   // Admins go to admin area, not the client portal
   if (isAdmin) {
-    return <Navigate to="/admin" replace />;
+    return <Navigate to="/admin/shield" replace />;
   }
 
   if (!isPortalUser) {

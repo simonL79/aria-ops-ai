@@ -20,7 +20,7 @@ const AdminLogin = () => {
   // If already authenticated and admin, redirect to admin dashboard
   if (isAuthenticated && isAdmin) {
     console.log('🔄 Already authenticated admin, redirecting to dashboard');
-    return <Navigate to="/admin" replace />;
+    return <Navigate to="/admin/shield" replace />;
   }
 
   // If authenticated but not admin, redirect to regular dashboard
