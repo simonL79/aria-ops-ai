@@ -52,9 +52,9 @@ const ScanRequestForm = () => {
       setFormSubmitted(true);
       toast.success("Your scan request has been submitted successfully!");
       
-      // Redirect to thank you page
+      // Redirect home after success
       setTimeout(() => {
-        navigate("/thank-you");
+        navigate("/");
       }, 1500);
     } catch (error) {
       console.error("Form submission error:", error);
