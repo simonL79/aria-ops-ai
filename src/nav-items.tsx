@@ -167,13 +167,7 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     icon: <Settings className="h-4 w-4" />,
     page: <SettingsPage />,
   },
-  {
-    title: "Contact Us",
-    to: "/contact-us",
-    icon: <Mail className="h-4 w-4" />,
-    page: <Contact />,
-    isPublic: true,
-  },
+  // Contact Us removed (use /contact)
   {
     title: "Terms of Service",
     to: "/terms",
@@ -229,13 +223,7 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     icon: <Command className="h-4 w-4" />,
     page: <BlogAdminPage />,
   },
-  {
-    title: "Client Intake",
-    to: "/client-intake",
-    icon: <FileText className="h-4 w-4" />,
-    page: <ClientIntakePage />,
-    isPublic: true,
-  },
+  // Client Intake removed (use /smart-intake or /secure-intake)
   {
     title: "DPA Request",
     to: "/dpa-request",
@@ -257,13 +245,7 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     page: <PaymentPage />,
     isPublic: true,
   },
-  {
-    title: "Contact Form",
-    to: "/contact-form",
-    icon: <Mail className="h-4 w-4" />,
-    page: <ContactFormPage />,
-    isPublic: true,
-  },
+  // Contact Form removed (use /contact)
   {
     title: "Calendar",
     to: "/calendar",
