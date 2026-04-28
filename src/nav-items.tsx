@@ -7,8 +7,7 @@ import ContactPage from "./pages/ContactPage";
 import PricingPage from "./pages/PricingPage";
 import Features from "./pages/Features";
 import HowItWorksPage from "./pages/HowItWorksPage";
-import Dashboard from "./pages/Dashboard";
-import AdminDashboard from "./pages/AdminDashboard";
+// Dashboard, AdminDashboard removed (legacy)
 import Authentication from "./pages/Authentication";
 import AdminLogin from "./pages/AdminLogin";
 import ScanPage from "./pages/ScanPage";
@@ -16,9 +15,7 @@ import FreeScanResults from "./pages/FreeScanResults";
 import ReputationScanPage from "./pages/ReputationScanPage";
 import ReputationScanForm from "./pages/ReputationScanForm";
 import ThankYouPage from "./pages/ThankYouPage";
-import Monitor from "./pages/Monitor";
-import Reports from "./pages/Reports";
-import Clients from "./pages/Clients";
+// Monitor, Reports, Clients removed (legacy)
 import SettingsPage from "./pages/Settings";
 import Contact from "./pages/Contact";
 import Terms from "./pages/Terms";
@@ -36,10 +33,7 @@ import PaymentPage from "./pages/PaymentPage";
 import ContactFormPage from "./pages/ContactFormPage";
 // CleanLaunchPage removed (legacy)
 import CalendarPage from "./pages/CalendarPage";
-import ThreatsPage from "./pages/ThreatsPage";
-import Discovery from "./pages/Discovery";
-// NewCoPage removed (legacy)
-import InfluencerRadar from "./pages/InfluencerRadar";
+// ThreatsPage, Discovery, InfluencerRadar removed (legacy)
 // OutreachPipelinePage and RSI removed (legacy)
 import EideticPage from "./pages/EideticPage";
 // GraveyardPage and SovraPage removed (legacy)
@@ -50,18 +44,14 @@ import OperatorConsole from "./pages/OperatorConsole";
 // AriaCommand removed (legacy)
 // HyperCorePage and AnubisCockpitPage removed (legacy)
 import AiScrapingPage from "./pages/AiScrapingPage";
-import EnhancedIntelligence from "./pages/EnhancedIntelligence";
-import IntelligenceWorkbench from "./pages/IntelligenceWorkbench";
-import OffensiveOperations from "./pages/OffensiveOperations";
+// EnhancedIntelligence, IntelligenceWorkbench, OffensiveOperations removed (legacy)
 import NotFound from "./pages/NotFound";
 import ExecutiveReportsPage from "./pages/ExecutiveReportsPage";
-import SystemCheckPage from "./pages/SystemCheckPage";
-import QATestPage from "./pages/QATestPage";
+// SystemCheckPage, QATestPage removed (legacy)
 import UsersPage from "./pages/UsersPage";
 
 // Admin imports
-import SystemOptimizationPage from "./pages/admin/SystemOptimizationPage";
-import SystemAuditPage from "./pages/admin/SystemAuditPage";
+// SystemOptimizationPage, SystemAuditPage removed (legacy)
 // QATestingPage removed (legacy)
 // StrategyBrainStage3TestPage removed (legacy)
 import PersonaSaturationPage from "./pages/admin/PersonaSaturationPage";
@@ -77,12 +67,9 @@ import LegalOpsPage from "./pages/admin/LegalOpsPage";
 import DashboardPage from "./pages/dashboard/DashboardPage";
 import AriaIngestPage from "./pages/dashboard/AriaIngestPage";
 import AnalyticsPage from "./pages/dashboard/AnalyticsPage";
-import CommandCenterPage from "./pages/dashboard/CommandCenterPage";
-import IntelligencePage from "./pages/dashboard/IntelligencePage";
-import ThreatResponsePage from "./pages/dashboard/ThreatResponsePage";
-import ScanSubmissionsPage from "./pages/dashboard/ScanSubmissionsPage";
+// CommandCenterPage, IntelligencePage, ThreatResponsePage, ScanSubmissionsPage removed (legacy)
 import MentionsPage from "./pages/dashboard/MentionsPage";
-import RadarPage from "./pages/dashboard/RadarPage";
+// RadarPage removed (legacy)
 
 export const navItems: { title: string; to: string; icon: React.ReactElement; page: React.ReactElement; isPublic?: boolean }[] = [
   {
