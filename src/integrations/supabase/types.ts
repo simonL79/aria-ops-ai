@@ -4127,6 +4127,87 @@ export type Database = {
           },
         ]
       }
+      shield_token_audit_events: {
+        Row: {
+          action: string | null
+          created_at: string
+          event_type: string
+          failure_reason: string | null
+          function_name: string | null
+          id: string
+          ip_address: string | null
+          jti: string | null
+          metadata: Json
+          success: boolean
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action?: string | null
+          created_at?: string
+          event_type: string
+          failure_reason?: string | null
+          function_name?: string | null
+          id?: string
+          ip_address?: string | null
+          jti?: string | null
+          metadata?: Json
+          success: boolean
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string | null
+          created_at?: string
+          event_type?: string
+          failure_reason?: string | null
+          function_name?: string | null
+          id?: string
+          ip_address?: string | null
+          jti?: string | null
+          metadata?: Json
+          success?: boolean
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      shield_used_jtis: {
+        Row: {
+          action: string
+          consumed_at: string
+          consumed_by_function: string
+          expires_at: string
+          ip_address: string | null
+          jti: string
+          minted_at: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          consumed_at?: string
+          consumed_by_function: string
+          expires_at: string
+          ip_address?: string | null
+          jti: string
+          minted_at?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          consumed_at?: string
+          consumed_by_function?: string
+          expires_at?: string
+          ip_address?: string | null
+          jti?: string
+          minted_at?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       strategy_responses: {
         Row: {
           actions: Json | null

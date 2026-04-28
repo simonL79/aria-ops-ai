@@ -1,5 +1,5 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
-import { verifyShieldToken } from '../_shared/shieldToken.ts';
+import { consumeShieldToken } from '../_shared/shieldTokenConsume.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -15,9 +15,11 @@ async function sha256Hex(input: string) {
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   try {
+    const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+
     let auth: { userId: string };
     try {
-      auth = await verifyShieldToken(req.headers.get('x-shield-token'), 'capture');
+      auth = await consumeShieldToken({ req, supabaseAdmin: admin, expectedAction: 'capture', functionName: 'shield-capture-url-metadata' });
     } catch {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
@@ -30,8 +32,6 @@ Deno.serve(async (req) => {
     try { parsed = new URL(url); } catch {
       return new Response(JSON.stringify({ error: 'Invalid URL' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
-
-    const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
 
     let status = 0, contentType = '', title = '', bodySnippet = '', hash = '';
     try {

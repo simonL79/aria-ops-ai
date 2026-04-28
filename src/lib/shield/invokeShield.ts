@@ -1,33 +1,25 @@
 import { supabase } from '@/integrations/supabase/client';
+import {
+  SHIELD_FUNCTION_ACTIONS,
+  type ShieldAction,
+  type ShieldFunctionName,
+} from './actions';
 
-export type ShieldAction = 'promote' | 'transition' | 'capture';
-
-const FN_TO_ACTION: Record<string, ShieldAction> = {
-  'shield-promote-threat': 'promote',
-  'shield-transition-alert': 'transition',
-  'shield-capture-url-metadata': 'capture',
-};
-
-let cached: { action: ShieldAction; token: string; expires_at: number } | null = null;
-
+// Tokens are now single-use server-side (jti replay protection).
+// We mint fresh per call and do NOT cache across calls.
 async function mint(action: ShieldAction): Promise<string> {
-  const now = Math.floor(Date.now() / 1000);
-  if (cached && cached.action === action && cached.expires_at - 30 > now) {
-    return cached.token;
-  }
   const { data, error } = await supabase.functions.invoke('shield-mint-token', {
     body: { action },
   });
   if (error || !data?.token) throw new Error(error?.message || 'Failed to mint shield token');
-  cached = { action, token: data.token as string, expires_at: data.expires_at as number };
-  return cached.token;
+  return data.token as string;
 }
 
 export async function invokeShield<T = any>(
-  fn: keyof typeof FN_TO_ACTION,
+  fn: ShieldFunctionName,
   body: Record<string, unknown>,
 ): Promise<{ data: T | null; error: Error | null }> {
-  const action = FN_TO_ACTION[fn];
+  const action = SHIELD_FUNCTION_ACTIONS[fn];
   if (!action) return { data: null, error: new Error(`Unknown shield function: ${fn}`) };
   try {
     const token = await mint(action);

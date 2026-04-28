@@ -70,10 +70,18 @@ export async function signShieldToken(
   return { token: `${payloadB64}.${b64urlEncode(sig)}`, expires_at: payload.exp };
 }
 
+export interface VerifiedShieldPayload {
+  userId: string;
+  jti: string;
+  action: ShieldAction;
+  iat: number;
+  exp: number;
+}
+
 export async function verifyShieldToken(
   token: string | null,
   expectedAction: ShieldAction,
-): Promise<{ userId: string; jti: string }> {
+): Promise<VerifiedShieldPayload> {
   if (!token || typeof token !== 'string') throw new Error('missing token');
   const parts = token.split('.');
   if (parts.length !== 2) throw new Error('malformed token');
@@ -98,5 +106,5 @@ export async function verifyShieldToken(
   if (payload.act !== expectedAction) throw new Error('action mismatch');
   if (!payload.sub) throw new Error('missing subject');
 
-  return { userId: payload.sub, jti: payload.jti };
+  return { userId: payload.sub, jti: payload.jti, action: payload.act, iat: payload.iat, exp: payload.exp };
 }
