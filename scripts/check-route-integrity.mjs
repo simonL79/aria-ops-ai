@@ -106,16 +106,32 @@ function isRegistered(path) {
 }
 
 // ---------- scan internal links ----------
+// Only consider absolute app paths. Reject external schemes (http:, mailto:,
+// tel:, ws:, data:, blob:, javascript:, …), protocol-relative URLs (//cdn…),
+// fragments, query-only strings, and template literals with interpolations.
+const EXTERNAL_SCHEME_RE = /^[a-z][a-z0-9+.-]*:/i;
+const PROTOCOL_RELATIVE_RE = /^\/\//;
+function isInternalPath(raw) {
+  if (typeof raw !== "string" || raw.length === 0) return false;
+  if (raw.includes("${")) return false;
+  if (PROTOCOL_RELATIVE_RE.test(raw)) return false;
+  if (EXTERNAL_SCHEME_RE.test(raw)) return false;
+  if (raw.startsWith("#") || raw.startsWith("?")) return false;
+  return raw.startsWith("/");
+}
+
+// Quote group then content group; supports ", ', and `.
 const linkPatterns = [
-  /\bto=["'](\/[^"']*)["']/g,
-  /\bto=\{["'](\/[^"']*)["']\}/g,
-  /\bhref=["'](\/[^"']*)["']/g,
-  /\bnavigate\(\s*["'](\/[^"']*)["']/g,
-  /<Navigate[^>]*\sto=["'](\/[^"']*)["']/g,
+  /\bto=(["'`])([^"'`\n]+)\1/g,
+  /\bto=\{\s*(["'`])([^"'`\n]+)\1\s*\}/g,
+  /\bhref=(["'`])([^"'`\n]+)\1/g,
+  /\bnavigate\(\s*(["'`])([^"'`\n]+)\1/g,
+  /<Navigate\b[^>]*?\sto=(["'`])([^"'`\n]+)\1/g,
 ];
 
 const brokenLinks = [];
 let totalLinks = 0;
+let skippedExternal = 0;
 for (const file of allSrcFiles) {
   if (file === appPath || file === navPath) continue;
   const src = stripComments(readFileSync(file, "utf8"));
@@ -123,7 +139,14 @@ for (const file of allSrcFiles) {
     re.lastIndex = 0;
     let m;
     while ((m = re.exec(src))) {
-      const raw = m[1].split(/[?#]/)[0]; // strip query/hash
+      const candidate = m[2];
+      if (!isInternalPath(candidate)) {
+        if (EXTERNAL_SCHEME_RE.test(candidate) || PROTOCOL_RELATIVE_RE.test(candidate)) {
+          skippedExternal++;
+        }
+        continue;
+      }
+      const raw = candidate.split(/[?#]/)[0];
       totalLinks++;
       if (!isRegistered(raw)) {
         brokenLinks.push({ file: relative(ROOT, file), path: raw });
