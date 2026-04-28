@@ -19,6 +19,12 @@ jobs:
         with:
           node-version: "20"
 
+      - name: Test rewrite scanner (external/template/dynamic invariants)
+        # Catches regressions in link classification before the heal loop runs:
+        # the scanner must NEVER rewrite external URLs, mailto/tel, protocol-
+        # relative URLs, or template literals with interpolation.
+        run: node scripts/test-rewrite-scanner.mjs
+
       - name: Run heal loop (rewrite + integrity check)
         # Fails the build if:
         #   - rewriter encounters a broken link with no canonical mapping
