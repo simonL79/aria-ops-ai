@@ -1,5 +1,6 @@
 // Bulk triage actions for EIDETIC resurfacing alerts
 import { createClient } from 'npm:@supabase/supabase-js@2';
+import { requireAdmin, isAuthenticated } from '../_shared/auth.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
