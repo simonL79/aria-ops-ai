@@ -21,19 +21,16 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   try {
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
-      return json({ error: 'Unauthorized' }, 401);
-    }
+    const auth = await requireAdmin(req);
+    if (!isAuthenticated(auth)) return auth;
+    const actor = auth.user.id;
+
+    const authHeader = req.headers.get('Authorization')!;
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_ANON_KEY')!,
       { global: { headers: { Authorization: authHeader } } }
     );
-    const token = authHeader.replace('Bearer ', '');
-    const { data: claims, error: aerr } = await supabase.auth.getClaims(token);
-    if (aerr || !claims?.claims) return json({ error: 'Unauthorized' }, 401);
-    const actor = claims.claims.sub as string;
 
     const body = (await req.json()) as Body;
     if (!Array.isArray(body.alert_ids) || body.alert_ids.length === 0) {
