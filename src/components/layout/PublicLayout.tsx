@@ -79,7 +79,7 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
               >
                 Services
               </button>
-              <Link to="/pricing" className="text-corporate-lightGray hover:text-white transition-colors text-sm lg:text-base">
+              <Link to="/home#pricing" className="text-corporate-lightGray hover:text-white transition-colors text-sm lg:text-base">
                 Pricing
               </Link>
               {isAuthenticated ? (
@@ -163,7 +163,7 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
                   Services
                 </button>
                 <Link 
-                  to="/pricing" 
+                  to="/home#pricing" 
                   className="text-corporate-lightGray hover:text-white transition-colors py-2"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
