@@ -1,5 +1,6 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import PublicPagesProtection from '@/components/layout/PublicPagesProtection';
 import PublicLayout from '@/components/layout/PublicLayout';
 import HeroSection from '@/components/sections/HeroSection';
@@ -19,6 +20,18 @@ import SectionDivider from '@/components/ui/SectionDivider';
 import ChatWidget from '@/components/widgets/ChatWidget';
 
 const HomePage = () => {
+  const { hash } = useLocation();
+
+  useEffect(() => {
+    if (!hash) return;
+    const id = hash.replace('#', '');
+    const t = setTimeout(() => {
+      const el = document.getElementById(id);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+    return () => clearTimeout(t);
+  }, [hash]);
+
   return (
     <PublicPagesProtection>
       <PublicLayout>
