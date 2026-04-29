@@ -29,7 +29,7 @@ Deno.serve(async (req) => {
     if (!alert_id || !url) {
       return new Response(JSON.stringify({ error: 'alert_id and url required' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
-    const guard = validatePublicUrl(url);
+    const guard = await validatePublicUrl(url);
     if (!guard.ok) {
       return new Response(JSON.stringify({ error: guard.error || 'Invalid URL' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
