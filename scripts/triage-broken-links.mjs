@@ -87,19 +87,40 @@ for (const m of appSrc.matchAll(/<Route[^>]*\spath=["']([^"']+)["']/g)) register
 for (const m of navSrc.matchAll(/to:\s*["']([^"']+)["']/g)) registered.add(m[1]);
 const registeredArr = [...registered].filter((r) => !r.includes(":") && !r.endsWith("*")).sort();
 
-// Suggest the closest existing route (longest shared prefix).
-function suggest(path) {
-  let best = "";
-  for (const r of registeredArr) {
-    const len = sharedPrefix(path, r);
-    if (len > best.length) best = r;
-  }
-  return best || "/";
+// Rank registered routes by closeness to the unresolved path.
+// Score = (shared path segments * 100) + (shared chars) - (extra segments penalty).
+// Returns a sorted array of { route, score, sharedSegments } (best first).
+function segments(p) {
+  return p.split("/").filter(Boolean);
 }
-function sharedPrefix(a, b) {
+function sharedSegmentCount(a, b) {
+  const sa = segments(a);
+  const sb = segments(b);
+  let i = 0;
+  while (i < sa.length && i < sb.length && sa[i] === sb[i]) i++;
+  return i;
+}
+function sharedCharPrefix(a, b) {
   let i = 0;
   while (i < a.length && i < b.length && a[i] === b[i]) i++;
-  return a.slice(0, i);
+  return i;
+}
+function rankRoutes(path) {
+  const pSegs = segments(path);
+  return registeredArr
+    .map((route) => {
+      const rSegs = segments(route);
+      const segs = sharedSegmentCount(path, route);
+      const chars = sharedCharPrefix(path, route);
+      const extraPenalty = Math.abs(rSegs.length - pSegs.length);
+      const score = segs * 100 + chars - extraPenalty;
+      return { route, score, sharedSegments: segs };
+    })
+    .sort((a, b) => b.score - a.score || a.route.length - b.route.length);
+}
+function suggest(path) {
+  const ranked = rankRoutes(path);
+  return ranked[0]?.route || "/";
 }
 
 // Escape a literal path into an anchored regex for the allowlist.
