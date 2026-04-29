@@ -65,7 +65,7 @@ Deno.serve(async (req) => {
     // Build prompt context
     let context = '';
     if (sub.source_url) {
-      const guard = validatePublicUrl(sub.source_url);
+      const guard = await validatePublicUrl(sub.source_url);
       if (!guard.ok) {
         context = `URL: ${sub.source_url}\n\n(URL rejected by SSRF guard: ${guard.error}; analyzing URL string only.)`;
       } else try {
