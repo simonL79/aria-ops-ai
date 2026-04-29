@@ -1,5 +1,6 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { consumeShieldToken } from '../_shared/shieldTokenConsume.ts';
+import { validatePublicUrl } from '../_shared/ssrfGuard.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -28,16 +29,17 @@ Deno.serve(async (req) => {
     if (!alert_id || !url) {
       return new Response(JSON.stringify({ error: 'alert_id and url required' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
-    let parsed: URL;
-    try { parsed = new URL(url); } catch {
-      return new Response(JSON.stringify({ error: 'Invalid URL' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    const guard = validatePublicUrl(url);
+    if (!guard.ok) {
+      return new Response(JSON.stringify({ error: guard.error || 'Invalid URL' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
+    const parsed = guard.url!;
 
     let status = 0, contentType = '', title = '', bodySnippet = '', hash = '';
     try {
       const ctrl = new AbortController();
       const t = setTimeout(() => ctrl.abort(), 10000);
-      const res = await fetch(parsed.toString(), { signal: ctrl.signal, redirect: 'follow', headers: { 'User-Agent': 'ARIA-Shield-Capture/1.0' } });
+      const res = await fetch(parsed.toString(), { signal: ctrl.signal, redirect: 'manual', headers: { 'User-Agent': 'ARIA-Shield-Capture/1.0' } });
       clearTimeout(t);
       status = res.status;
       contentType = res.headers.get('content-type') || '';
