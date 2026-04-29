@@ -84,20 +84,71 @@ export function isPrivateIp(ip: string): boolean {
   return false;
 }
 
+// Short-lived in-memory DNS cache to reduce repeated lookups across calls
+// within the same isolate. TTL is intentionally short to limit DNS-rebinding
+// risk while still cutting latency for bursty traffic.
+const DNS_CACHE_TTL_MS = 30_000;
+const DNS_CACHE_MAX_ENTRIES = 512;
+const DNS_NEGATIVE_TTL_MS = 5_000;
+
+interface DnsCacheEntry {
+  ips: string[];
+  expiresAt: number;
+}
+
+const dnsCache: Map<string, DnsCacheEntry> = new Map();
+
+function dnsCacheGet(hostname: string): string[] | null {
+  const key = hostname.toLowerCase();
+  const entry = dnsCache.get(key);
+  if (!entry) return null;
+  if (Date.now() >= entry.expiresAt) {
+    dnsCache.delete(key);
+    return null;
+  }
+  // refresh LRU position
+  dnsCache.delete(key);
+  dnsCache.set(key, entry);
+  return entry.ips;
+}
+
+function dnsCacheSet(hostname: string, ips: string[]) {
+  const key = hostname.toLowerCase();
+  const ttl = ips.length === 0 ? DNS_NEGATIVE_TTL_MS : DNS_CACHE_TTL_MS;
+  dnsCache.set(key, { ips, expiresAt: Date.now() + ttl });
+  if (dnsCache.size > DNS_CACHE_MAX_ENTRIES) {
+    // evict oldest (first inserted) entry
+    const oldest = dnsCache.keys().next().value;
+    if (oldest !== undefined) dnsCache.delete(oldest);
+  }
+}
+
+export function _clearDnsCacheForTests() {
+  dnsCache.clear();
+}
+
 async function resolveHostname(hostname: string): Promise<string[]> {
+  const cached = dnsCacheGet(hostname);
+  if (cached !== null) return cached;
+
   const ips = new Set<string>();
   // Deno.resolveDns is available in the edge runtime.
   const resolver: any = (globalThis as any).Deno?.resolveDns;
-  if (typeof resolver !== 'function') return [];
+  if (typeof resolver !== 'function') {
+    dnsCacheSet(hostname, []);
+    return [];
+  }
   for (const rtype of ['A', 'AAAA'] as const) {
     try {
       const records: string[] = await resolver(hostname, rtype);
       for (const r of records) ips.add(r);
     } catch {
-      // ignore — type may not exist
+      // ignore — record type may not exist
     }
   }
-  return [...ips];
+  const result = [...ips];
+  dnsCacheSet(hostname, result);
+  return result;
 }
 
 export async function validatePublicUrl(input: unknown): Promise<SsrfCheckResult> {
