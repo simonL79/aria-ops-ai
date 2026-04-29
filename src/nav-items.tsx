@@ -4,7 +4,7 @@ import Index from "./pages/Index";
 import HomePage from "./pages/HomePage";
 import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
-import PricingPage from "./pages/PricingPage";
+
 import Features from "./pages/Features";
 import HowItWorksPage from "./pages/HowItWorksPage";
 import Authentication from "./pages/Authentication";
@@ -40,13 +40,6 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     to: "/contact",
     icon: <Phone className="h-4 w-4" />,
     page: <ContactPage />,
-    isPublic: true,
-  },
-  {
-    title: "Pricing",
-    to: "/pricing",
-    icon: <DollarSign className="h-4 w-4" />,
-    page: <PricingPage />,
     isPublic: true,
   },
   {

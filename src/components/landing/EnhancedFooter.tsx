@@ -64,7 +64,7 @@ const EnhancedFooter = () => {
             <h3 className="text-white font-bold mb-4 font-['Space_Grotesk']">Legal</h3>
             <ul className="space-y-2">
               <li><a href="/contact" className="text-[#D8DEE9] hover:text-white transition-colors text-sm font-['Inter']">Contact</a></li>
-              <li><a href="/pricing" className="text-[#D8DEE9] hover:text-white transition-colors text-sm font-['Inter']">Pricing</a></li>
+              <li><a href="/home#pricing" className="text-[#D8DEE9] hover:text-white transition-colors text-sm font-['Inter']">Pricing</a></li>
               <li><span className="text-[#D8DEE9]/60 text-sm font-['Inter']">Privacy Policy</span></li>
               <li><span className="text-[#D8DEE9]/60 text-sm font-['Inter']">Terms of Service</span></li>
             </ul>
@@ -75,7 +75,7 @@ const EnhancedFooter = () => {
             <h3 className="text-white font-bold mb-4 font-['Space_Grotesk']">Get Started</h3>
             <ul className="space-y-2">
               <li><a href="/scan" className="text-[#D8DEE9] hover:text-white transition-colors text-sm font-['Inter']">Request Scan</a></li>
-              <li><a href="/pricing" className="text-[#D8DEE9] hover:text-white transition-colors text-sm font-['Inter']">Pricing</a></li>
+              <li><a href="/home#pricing" className="text-[#D8DEE9] hover:text-white transition-colors text-sm font-['Inter']">Pricing</a></li>
               <li><button onClick={handleAdminAccess} className="text-[#D8DEE9] hover:text-white transition-colors text-sm font-['Inter'] text-left">Admin Access</button></li>
             </ul>
           </div>
