@@ -87,19 +87,40 @@ for (const m of appSrc.matchAll(/<Route[^>]*\spath=["']([^"']+)["']/g)) register
 for (const m of navSrc.matchAll(/to:\s*["']([^"']+)["']/g)) registered.add(m[1]);
 const registeredArr = [...registered].filter((r) => !r.includes(":") && !r.endsWith("*")).sort();
 
-// Suggest the closest existing route (longest shared prefix).
-function suggest(path) {
-  let best = "";
-  for (const r of registeredArr) {
-    const len = sharedPrefix(path, r);
-    if (len > best.length) best = r;
-  }
-  return best || "/";
+// Rank registered routes by closeness to the unresolved path.
+// Score = (shared path segments * 100) + (shared chars) - (extra segments penalty).
+// Returns a sorted array of { route, score, sharedSegments } (best first).
+function segments(p) {
+  return p.split("/").filter(Boolean);
 }
-function sharedPrefix(a, b) {
+function sharedSegmentCount(a, b) {
+  const sa = segments(a);
+  const sb = segments(b);
+  let i = 0;
+  while (i < sa.length && i < sb.length && sa[i] === sb[i]) i++;
+  return i;
+}
+function sharedCharPrefix(a, b) {
   let i = 0;
   while (i < a.length && i < b.length && a[i] === b[i]) i++;
-  return a.slice(0, i);
+  return i;
+}
+function rankRoutes(path) {
+  const pSegs = segments(path);
+  return registeredArr
+    .map((route) => {
+      const rSegs = segments(route);
+      const segs = sharedSegmentCount(path, route);
+      const chars = sharedCharPrefix(path, route);
+      const extraPenalty = Math.abs(rSegs.length - pSegs.length);
+      const score = segs * 100 + chars - extraPenalty;
+      return { route, score, sharedSegments: segs };
+    })
+    .sort((a, b) => b.score - a.score || a.route.length - b.route.length);
+}
+function suggest(path) {
+  const ranked = rankRoutes(path);
+  return ranked[0]?.route || "/";
 }
 
 // Escape a literal path into an anchored regex for the allowlist.
@@ -127,8 +148,26 @@ for (const [path, files] of byPath) {
     continue;
   }
 
-  const suggested = suggest(path);
-  console.log(`  ${DIM}Suggested target: ${CYAN}${suggested}${RESET}`);
+  const ranked = rankRoutes(path);
+  const suggested = ranked[0]?.route || "/";
+  const topMatch = ranked[0];
+  const matchQuality =
+    topMatch?.sharedSegments >= 2
+      ? `${GREEN}strong match${RESET}`
+      : topMatch?.sharedSegments === 1
+        ? `${YELLOW}partial match${RESET}`
+        : `${RED}no shared segments${RESET}`;
+  console.log(
+    `  ${DIM}Closest route:${RESET} ${BOLD}${GREEN}▶ ${suggested}${RESET}  ${DIM}(${matchQuality}${DIM}, ${topMatch?.sharedSegments ?? 0} shared segment${topMatch?.sharedSegments === 1 ? "" : "s"})${RESET}`
+  );
+  // Show next 3 alternatives so the operator sees nearby options at a glance.
+  const alternatives = ranked.slice(1, 4).filter((r) => r.score > 0);
+  if (alternatives.length) {
+    console.log(`  ${DIM}Other candidates:${RESET}`);
+    alternatives.forEach((r) =>
+      console.log(`    ${DIM}· ${r.route}  (${r.sharedSegments} seg)${RESET}`)
+    );
+  }
   console.log(
     `  ${BOLD}m${RESET})ap to route   ${BOLD}a${RESET})llowlist (regex)   ${BOLD}s${RESET})kip   ${BOLD}q${RESET})uit`
   );
@@ -146,12 +185,20 @@ for (const [path, files] of byPath) {
     continue;
   }
   if (choice === "m") {
+    // Show ranked candidates first (most relevant to this path), then fall back to all routes.
     console.log(`    ${DIM}Pick a registered route or type a custom path.${RESET}`);
-    registeredArr.slice(0, 15).forEach((r, i) => console.log(`      ${i + 1}) ${r}`));
+    const picker = [
+      ...ranked.slice(0, 5).map((r) => r.route),
+      ...registeredArr.filter((r) => !ranked.slice(0, 5).some((x) => x.route === r)).slice(0, 10),
+    ];
+    picker.forEach((r, i) => {
+      const marker = i === 0 ? `${GREEN}▶${RESET}` : " ";
+      console.log(`      ${marker} ${i + 1}) ${r}`);
+    });
     const t = await ask(`    Target [Enter=${suggested}]: `);
     let target = t || suggested;
     const idx = parseInt(t, 10);
-    if (!isNaN(idx) && registeredArr[idx - 1]) target = registeredArr[idx - 1];
+    if (!isNaN(idx) && picker[idx - 1]) target = picker[idx - 1];
     if (!target.startsWith("/")) {
       console.log(`    ${RED}Target must start with /. Skipping.${RESET}`);
       decisions.push({ path, action: "skip" });
