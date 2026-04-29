@@ -1,59 +1,70 @@
-# Build-time route integrity check
+# A.R.I.A SIGMA — Ops Plan ("Ease of Usage")
 
-Add a script that runs during the Vite build (via a plugin) and **fails the build** if any route or page is unreachable. This enforces what we just cleaned up so it never regresses.
+A combined handbook covering daily ops for the whole team — operators, on-call, and new hires. Single source of truth in the repo, mirrored as a searchable in-app page so admins never have to leave the dashboard.
 
-## What it validates
+## Goals
 
-For every build, the check parses `src/App.tsx`, `src/nav-items.tsx`, and every file under `src/pages/`, then enforces these rules:
+- Anyone on the team can perform a routine task (onboard a client, triage a Shield alert, dispatch an EIDETIC response, run a Requiem sweep, publish a blog post) without asking another operator.
+- New hires can be productive on day 1 by reading one document.
+- On-call has a quick-glance recovery checklist for the most common breakages.
 
-1. **No missing page modules** — every `import` from `./pages/...` must resolve to a real `.tsx` file. (Catches dangling imports after a deletion.)
-2. **No orphan page files** — every `.tsx` under `src/pages/` (excluding `NotFound.tsx`, `Index.tsx`, and `*/index.tsx` barrels) must be imported by either `App.tsx` or `nav-items.tsx`.
-3. **No broken internal links** — every literal `to="/..."` and `navigate("/...")` string in `src/**/*.{ts,tsx}` must match a registered route in `App.tsx` or `nav-items.tsx`. Dynamic params (`/blog/:slug`) match by prefix. URLs with query strings/hashes are normalized.
-4. **No duplicate routes** — the same path cannot be registered twice across `App.tsx` and `nav-items.tsx`.
+## Deliverables
 
-Strings inside `node_modules`, generated files, comments, and template-literal expressions are skipped. A small allowlist file (`scripts/route-integrity.allowlist.json`) covers external URLs and intentional exceptions (e.g., `/portal/*` sub-routes generated dynamically).
+1. **`docs/OPS.md`** — version-controlled markdown handbook (source of truth).
+2. **`/admin/ops`** — in-app page that renders the same handbook with search, anchor links, and a left-hand section nav. Admin-gated via existing `ProtectedRoute` + `requireAdmin` pattern.
+3. **Sidebar entry** — "Ops Handbook" link in the admin layout for one-click access.
 
-## Implementation
+Both surfaces stay in sync: the React page imports the markdown at build time (via Vite's `?raw` import) and renders it with `react-markdown` + `remark-gfm`, so editing `docs/OPS.md` is the only place changes are made.
 
-**New files:**
-- `scripts/check-route-integrity.mjs` — pure Node script. Uses regex parsing (no AST deps) to extract:
-  - imports from `./pages/...` in `App.tsx` + `nav-items.tsx`
-  - `<Route path="...">` entries in `App.tsx`
-  - `to: "/..."` entries in the `navItems` array
-  - `to="/..."`, `to={"..."}`, `href="/..."`, and `navigate("/...")` literals across `src/**`
-  - all `.tsx` files under `src/pages/`
-  Then cross-references them and prints a categorized report. Exits `1` on any violation.
-- `scripts/route-integrity.allowlist.json` — array of regex patterns for paths to ignore (external URLs, wildcards, anchors).
-- `vite-plugins/route-integrity.ts` — tiny Vite plugin that runs the script in `buildStart` and throws on failure. Only active during `vite build` (skipped in `vite dev` to avoid slowing HMR).
+## Handbook structure (sections)
 
-**Edited files:**
-- `vite.config.ts` — register the plugin.
-- `package.json` — add a `check:routes` script (`node scripts/check-route-integrity.mjs`) so it can also be run manually.
+Each section follows the same shape: **What it is → Where to click → Daily checklist → Common issues → Who to escalate to**.
 
-## Output example
+1. **At-a-glance map** — one-page diagram of the platform: Public site → Intake → Admin (Clients, Shield, EIDETIC, Requiem, Blog/AutoSEO, Genesis Sentinel) → Edge Functions → Supabase.
+2. **Access & login** — `/admin/login`, admin role grant via `user_roles` table, password reset, lockout recovery.
+3. **Client onboarding** — `/admin/client-onboarding` walkthrough: client info → entity discovery → threat assessment → defense config → activation.
+4. **Client management** — `/admin/clients`: searching, editing, archiving (additive only — never delete), exporting.
+5. **Shield (alerts & evidence)** — `/admin/shield`: triage queue, capturing URL evidence (uses SSRF-guarded `shield-capture-url-metadata`), promoting threats, transitioning alert states.
+6. **EIDETIC (memory & dispatches)** — preferences at `/admin/eidetic/preferences`, approving pending dispatches, retrying failed ones, reading the decay timeline.
+7. **Requiem (bulk SEO defense)** — `/admin/requiem`: launching a sweep, monitoring runs, reading the pipeline log.
+8. **Genesis Sentinel** — `/admin/genesis-sentinel`: verification queue, approval workflow.
+9. **Blog & AutoSEO** — webhook-driven publishing via `receive-article`, manually triggering `sync-blog-posts`, sanitization notes.
+10. **Notifications** — `/admin/notifications`: digest cadence, transactional email via `notify.ariaops.co.uk`.
+11. **Daily / weekly / monthly checklists** — short tickable lists (e.g. daily: clear Shield triage, check EIDETIC pending dispatches, scan notifications; weekly: Requiem sweep review; monthly: rotate secrets, review user_roles).
+12. **Common issues & quick fixes** — top 10 things that break in production, with the exact button/page that resolves each.
+13. **Escalation matrix** — who owns Shield, EIDETIC, Requiem, billing, infra; how to reach them; severity definitions.
+14. **Glossary** — Shield, EIDETIC, Requiem, Anubis, Genesis Sentinel, RSI, Clean Launch, AutoSEO.
 
-```
-Route Integrity Check
-─────────────────────
-✓ 27 page modules imported
-✓ 41 routes registered (0 duplicates)
-✓ 138 internal links validated
+(Edge functions, cron, and security internals are intentionally **out of scope** per the chosen scope — they will get their own separate runbook later if needed.)
 
-✗ FAIL: src/pages/admin/FooPage.tsx is not imported anywhere
-✗ FAIL: src/components/x.tsx links to "/old-route" which is not registered
-```
+## In-app page details
 
-Clean run prints only the green summary lines and exits `0`.
+- Route: `/admin/ops` (admin-only, wrapped by existing protection).
+- Layout: existing dark/glassmorphism aesthetic, orange (#F97316) accents, no new design tokens.
+- Components: sticky left nav (auto-generated from `##` headings), markdown body in the main column, top search box that filters visible sections by substring match.
+- Print-friendly CSS so an operator can print the handbook for offline reference.
 
-## Verification
+## Files to add / change (technical)
 
-After implementation, run:
-- `node scripts/check-route-integrity.mjs` — must exit 0 against the current cleaned-up tree.
-- Temporarily add a `<Link to="/does-not-exist">` somewhere → script exits 1.
-- The Vite build (run automatically by the harness) must succeed.
+- `docs/OPS.md` — new file, the handbook content.
+- `src/pages/admin/OpsHandbookPage.tsx` — new page, imports `../../../docs/OPS.md?raw`, renders with `react-markdown` + `remark-gfm` and a small TOC component.
+- `src/App.tsx` — register `<Route path="/admin/ops" element={<OpsHandbookPage />} />`.
+- `src/components/admin/AdminLayout.tsx` (or whichever sidebar component is used) — add "Ops Handbook" nav link.
+- `package.json` — add `react-markdown` and `remark-gfm` if not already present.
 
-## Out of scope
+No database changes, no edge function changes, no schema migrations.
 
-- No new test framework (Vitest/Jest install) — this is a build-time guard, not a unit test. Lighter, faster, and runs every build.
-- No runtime navigation testing.
-- No cleanup of layout sidebars (`DashboardSidebar`, `MainNav`) — but the new check will surface their stale links so they can be addressed next.
+## Out of scope (explicit)
+
+- Edge function reference / cron schedules / log locations.
+- Security internals (RLS, SSRF guard, secret rotation procedures).
+- Incident-response runbooks beyond the "common issues" quick fixes.
+
+These can be added as `docs/OPS-EDGE.md` and `docs/OPS-SECURITY.md` in a follow-up if the team wants them.
+
+## Acceptance criteria
+
+- `docs/OPS.md` exists and covers all 14 sections above.
+- `/admin/ops` renders the handbook for admin users and 404s/redirects for non-admins.
+- Admin sidebar shows an "Ops Handbook" link.
+- Edits to `docs/OPS.md` show up on `/admin/ops` after the next build with no other changes required.

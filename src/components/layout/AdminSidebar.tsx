@@ -22,7 +22,8 @@ import {
   Radar,
   FileText,
   ListChecks,
-  Skull
+  Skull,
+  BookOpen
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -132,6 +133,12 @@ const AdminSidebar = () => {
       href: '/qa-system-test',
       icon: ListChecks,
       description: 'Full system validation & live data compliance'
+    },
+    {
+      title: 'Ops Handbook',
+      href: '/admin/ops',
+      icon: BookOpen,
+      description: 'Day-to-day operations runbook'
     }
   ];
 
