@@ -1,6 +1,7 @@
 // Using built-in Deno.serve
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { requireUser, isUser } from '../_shared/userAuth.ts';
+import { validatePublicUrl } from '../_shared/ssrfGuard.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -64,10 +65,18 @@ Deno.serve(async (req) => {
     // Build prompt context
     let context = '';
     if (sub.source_url) {
-      try {
-        const r = await fetch(sub.source_url, {
+      const guard = validatePublicUrl(sub.source_url);
+      if (!guard.ok) {
+        context = `URL: ${sub.source_url}\n\n(URL rejected by SSRF guard: ${guard.error}; analyzing URL string only.)`;
+      } else try {
+        const ctrl = new AbortController();
+        const t = setTimeout(() => ctrl.abort(), 10000);
+        const r = await fetch(guard.url!.toString(), {
           headers: { 'User-Agent': 'ARIA-PortalScanner/1.0' },
+          redirect: 'manual',
+          signal: ctrl.signal,
         });
+        clearTimeout(t);
         if (r.ok) {
           const html = await r.text();
           const text = html.replace(/<script[\s\S]*?<\/script>/gi, ' ')
