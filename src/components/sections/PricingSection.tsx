@@ -20,7 +20,7 @@ const PricingSection = () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         toast.info('Please sign in to subscribe');
-        navigate(`/auth?redirect=/pricing&plan=${planId}`);
+        navigate(`/auth?redirect=/home%23pricing&plan=${planId}`);
         return;
       }
       const { data, error } = await supabase.functions.invoke('create-checkout', {
@@ -124,7 +124,7 @@ const PricingSection = () => {
   };
 
   return (
-    <section className="py-24 bg-gradient-to-b from-black via-gray-950 to-black">
+    <section id="pricing" className="scroll-mt-24 py-24 bg-gradient-to-b from-black via-gray-950 to-black">
       <div ref={ref} className={`container mx-auto px-6 transition-all duration-1000 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
         <h2 className="text-4xl md:text-5xl font-bold mb-16 text-center text-white">
           Pricing

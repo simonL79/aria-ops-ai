@@ -43,7 +43,7 @@ const EnhancedCTASection = () => {
             <h3 className="text-xl font-bold mb-2 text-white">Take Action</h3>
             <p className="text-white mb-4">Implement our recommendations or let us handle it for you.</p>
             <Button asChild variant="outline" className="mt-auto border-white text-white hover:bg-white hover:text-premium-darkGray">
-              <Link to="/pricing">View Plans</Link>
+              <Link to="/home#pricing">View Plans</Link>
             </Button>
           </div>
         </div>
