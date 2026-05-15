@@ -151,4 +151,5 @@ jobs:
           path: |
             og-tracking/*.json
             og-tracking/*.csv
+            og-tracking/*.html
           if-no-files-found: warn
