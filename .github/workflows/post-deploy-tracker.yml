@@ -82,7 +82,10 @@ jobs:
           NPM_PRIMARY_KEY:  ${{ steps.npm-cache.outputs.cache-primary-key }}
           NPM_MATCHED_KEY:  ${{ steps.npm-cache.outputs.cache-matched-key }}
           NPM_RESTORE_KEYS: "npm-cache-playwright-"
-          REQUIRE_PW_CACHE: ${{ vars.REQUIRE_PW_CACHE || 'false' }}
+          # Strict by default: a cache miss fails the job. The very first run
+          # after a Playwright version bump will legitimately miss — set repo
+          # variable ALLOW_PW_CACHE_MISS=true (or pass workflow input) to bypass.
+          ALLOW_PW_CACHE_MISS: ${{ github.event.inputs.allow_pw_cache_miss || vars.ALLOW_PW_CACHE_MISS || 'false' }}
         run: |
           echo "──────── Playwright cache ────────"
           echo "  primary key   : ${PW_PRIMARY_KEY}"
