@@ -13,4 +13,4 @@ Allow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://aria-ops-ai.lovable.app/sitemap.xml
+Sitemap: https://www.ariaops.co.uk/sitemap.xml

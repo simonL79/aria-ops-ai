@@ -1,0 +1,22 @@
+# A.R.I.A™ — AI Reputation Intelligence Agent
+
+> Always-on reputation operations for high-profile individuals and entities. A.R.I.A SIGMA detects, classifies, and responds to coordinated reputation threats across the open web at machine speed.
+
+## Pages
+
+- [Home](/): Overview of A.R.I.A™ reputation defense.
+- [About](/about): Company background and mission.
+- [Features](/features): Threat detection, narrative defense, identity protection, search positioning.
+- [How it Works](/how-it-works): End-to-end detection-to-response workflow.
+- [Free Scan](/scan): Run a public reputation threat scan.
+- [Cybersecurity Framework](/cybersecurity-framework): SOC II / ISO 27001 / GDPR alignment.
+- [Simon Lindsay](/simon-lindsay): Founder profile and commercial strategy.
+- [Biography](/biography): Founder biography.
+- [Contact](/contact): Get in touch.
+
+## Optional
+
+- [Privacy Policy](/privacy-policy)
+- [Terms of Service](/terms)
+- [Disclaimer](/disclaimer)
+- [Request Data Access](/request-data-access)
