@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/accordion';
 import ReadingProgressBar from '@/components/blog/ReadingProgressBar';
 
-const SITE_URL = 'https://aria-ops-ai.lovable.app';
+const SITE_URL = 'https://www.ariaops.co.uk';
 const SITE_NAME = 'A.R.I.A™ Ops';
 
 const formatDate = (dateStr: string | null) => {
