@@ -103,6 +103,34 @@ jobs:
           echo "  exact hit     : ${NPM_HIT:-false}"
           echo "───────────────────────────────────"
 
+          # Determine status labels
+          if [ "${PW_HIT}" = "true" ]; then
+            PW_STATUS="✅ HIT"; PW_DETAIL="exact match on \`${PW_PRIMARY_KEY}\` — browser download skipped."
+          elif [ -n "${PW_MATCHED_KEY}" ]; then
+            PW_STATUS="🟡 PARTIAL"; PW_DETAIL="restored from fallback \`${PW_MATCHED_KEY}\` (primary \`${PW_PRIMARY_KEY}\` not found). Install will top up."
+          else
+            PW_STATUS="❌ MISS"; PW_DETAIL="neither \`${PW_PRIMARY_KEY}\` nor restore-key \`${PW_RESTORE_KEYS}\` matched."
+          fi
+          if [ "${NPM_HIT}" = "true" ]; then
+            NPM_STATUS="✅ HIT"; NPM_DETAIL="exact match on \`${NPM_PRIMARY_KEY}\`."
+          elif [ -n "${NPM_MATCHED_KEY}" ]; then
+            NPM_STATUS="🟡 PARTIAL"; NPM_DETAIL="restored from fallback \`${NPM_MATCHED_KEY}\`."
+          else
+            NPM_STATUS="❌ MISS"; NPM_DETAIL="neither \`${NPM_PRIMARY_KEY}\` nor restore-key \`${NPM_RESTORE_KEYS}\` matched."
+          fi
+
+          # Job Summary table — visible on the run's Summary page.
+          {
+            echo "## 🎭 Cache status"
+            echo ""
+            echo "| Cache | Status | Primary key | Matched key | Detail |"
+            echo "|---|---|---|---|---|"
+            echo "| Playwright browsers | ${PW_STATUS} | \`${PW_PRIMARY_KEY}\` | \`${PW_MATCHED_KEY:-<none>}\` | ${PW_DETAIL} |"
+            echo "| npm tarballs        | ${NPM_STATUS} | \`${NPM_PRIMARY_KEY}\` | \`${NPM_MATCHED_KEY:-<none>}\` | ${NPM_DETAIL} |"
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          # Annotations + strict-mode gate (existing behaviour)
           if [ "${PW_HIT}" = "true" ]; then
             echo "::notice title=Playwright cache::HIT (exact: ${PW_PRIMARY_KEY}) — skipping browser download."
           elif [ -n "${PW_MATCHED_KEY}" ]; then
@@ -111,8 +139,10 @@ jobs:
             echo "::error title=Playwright cache::MISS — neither ${PW_PRIMARY_KEY} nor any restore-key matched. Chromium would be downloaded (~120MB)."
             if [ "${ALLOW_PW_CACHE_MISS}" = "true" ]; then
               echo "::warning title=Playwright cache::ALLOW_PW_CACHE_MISS=true — proceeding with download despite strict mode."
+              echo "> ⚠️ Strict mode bypassed via \`ALLOW_PW_CACHE_MISS=true\`." >> "$GITHUB_STEP_SUMMARY"
             else
               echo "::error title=Playwright cache::Strict mode is on by default. Re-run with workflow input allow_pw_cache_miss=true (or set repo variable ALLOW_PW_CACHE_MISS=true) to permit a one-off download — e.g. immediately after a Playwright version bump."
+              echo "> ❌ Strict mode failed the run on cache miss. Set \`allow_pw_cache_miss=true\` to bypass." >> "$GITHUB_STEP_SUMMARY"
               exit 1
             fi
           fi
@@ -151,16 +181,28 @@ jobs:
             BYTES=$(du -sb "$HOME/.cache/ms-playwright" | cut -f1)
             echo "total: ${TOTAL} (${BYTES} bytes)"
             du -sh "$HOME/.cache/ms-playwright"/* 2>/dev/null | sort -h || true
-            echo "file count: $(find "$HOME/.cache/ms-playwright" -type f | wc -l)"
+            FILES=$(find "$HOME/.cache/ms-playwright" -type f | wc -l)
+            echo "file count: ${FILES}"
             # Sanity floor: chromium alone is ~120MB. Anything under 50MB
             # means the cache is effectively empty even if the dir exists.
             if [ "${BYTES}" -lt 52428800 ]; then
               echo "::warning title=Playwright cache::Suspicious — cache directory is under 50MB after install (${TOTAL}). Subsequent runs may not benefit from caching."
+              SIZE_NOTE="⚠️ Suspicious size — under 50MB."
             else
               echo "::notice title=Playwright cache::Cache populated (${TOTAL}). Will be saved as '${{ steps.pw-cache.outputs.cache-primary-key }}' if this is a new key."
+              SIZE_NOTE="Will be saved as \`${{ steps.pw-cache.outputs.cache-primary-key }}\` at job end if new."
             fi
+            {
+              echo "### 📦 Playwright cache size (post-install)"
+              echo ""
+              echo "| Total | Bytes | Files | Note |"
+              echo "|---|---|---|---|"
+              echo "| ${TOTAL} | ${BYTES} | ${FILES} | ${SIZE_NOTE} |"
+              echo ""
+            } >> "$GITHUB_STEP_SUMMARY"
           else
             echo "::error title=Playwright cache::Cache directory missing after install — something is very wrong."
+            echo "> ❌ Cache directory missing after install." >> "$GITHUB_STEP_SUMMARY"
             exit 1
           fi
 
