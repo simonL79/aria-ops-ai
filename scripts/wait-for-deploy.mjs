@@ -19,6 +19,7 @@
  *   node scripts/wait-for-deploy.mjs
  */
 import { chromium } from 'playwright';
+import { writeFileSync, mkdirSync } from 'node:fs';
 
 const BASE = (process.env.BASE_URL || 'https://www.ariaops.co.uk').replace(/\/$/, '');
 const TIMEOUT_MS = Number(process.env.TIMEOUT_MS || 30 * 60 * 1000); // 30 min
@@ -73,12 +74,80 @@ async function readOg(ctx, probe) {
   throw lastErr;
 }
 
+const REPORT_DIR = process.env.REPORT_DIR || 'og-tracking';
+const startWall = new Date().toISOString();
 const start = Date.now();
 const browser = await chromium.launch();
 const ctx = await browser.newContext();
 const pending = new Map(PROBES.map((p) => [p.path, p]));
 const lastSeen = new Map();
+const attemptLog = []; // [{ attempt, ts, results: [{ path, expected, og, ok, error, retries }] }]
 let attempt = 0;
+
+function writeReport(status) {
+  try {
+    mkdirSync(REPORT_DIR, { recursive: true });
+    const finishedAt = new Date().toISOString();
+    const elapsedMs = Date.now() - start;
+    const finalRows = PROBES.map((p) => ({
+      path: p.path,
+      expected: p.expected,
+      lastSeen: lastSeen.get(p.path) || null,
+      live: lastSeen.get(p.path) === p.expected,
+      stillPending: pending.has(p.path),
+    }));
+    const report = {
+      base: BASE,
+      status,
+      startedAt: startWall,
+      finishedAt,
+      elapsedMs,
+      attempts: attempt,
+      total: PROBES.length,
+      live: finalRows.filter((r) => r.live).length,
+      stale: finalRows.filter((r) => !r.live).length,
+      pages: finalRows,
+      attemptLog,
+    };
+    const jsonPath = `${REPORT_DIR}/wait-for-deploy.json`;
+    writeFileSync(jsonPath, JSON.stringify(report, null, 2));
+
+    const rowHtml = finalRows.map((r) => `
+      <tr class="${r.live ? 'ok' : 'bad'}">
+        <td>${r.live ? '✅' : '❌'}</td>
+        <td><code>${r.path}</code></td>
+        <td><code>${r.expected}</code></td>
+        <td><code>${r.lastSeen ?? '(none)'}</code></td>
+      </tr>`).join('');
+    const html = `<!doctype html><meta charset="utf-8">
+<title>wait-for-deploy report — ${status}</title>
+<style>
+  body{font:14px/1.4 -apple-system,system-ui,sans-serif;background:#0b0b0b;color:#eee;padding:24px;max-width:1100px;margin:0 auto}
+  h1{margin:0 0 4px;font-size:20px}
+  .meta{color:#888;margin-bottom:18px}
+  .status-pass{color:#4ade80}.status-fail{color:#f97316}
+  table{border-collapse:collapse;width:100%;margin-bottom:24px}
+  th,td{padding:8px 10px;text-align:left;border-bottom:1px solid #222;vertical-align:top}
+  th{color:#aaa;font-weight:500}
+  tr.bad{background:rgba(249,115,22,.08)}
+  code{font:12px/1.3 ui-monospace,Menlo,monospace;color:#cbd5e1;word-break:break-all}
+  details{margin-top:8px}
+  pre{background:#111;padding:10px;overflow:auto;border-radius:6px;font-size:12px}
+</style>
+<h1>wait-for-deploy: <span class="status-${status === 'pass' ? 'pass' : 'fail'}">${status.toUpperCase()}</span></h1>
+<div class="meta">${BASE} · ${attempt} attempt(s) · ${Math.round(elapsedMs / 1000)}s · ${report.live}/${report.total} live · started ${startWall}</div>
+<table>
+  <thead><tr><th></th><th>Path</th><th>Expected og:image</th><th>Last seen og:image</th></tr></thead>
+  <tbody>${rowHtml}</tbody>
+</table>
+<details><summary>Per-attempt log (${attemptLog.length})</summary><pre>${JSON.stringify(attemptLog, null, 2).replace(/[<&]/g, (c) => ({ '<': '&lt;', '&': '&amp;' }[c]))}</pre></details>`;
+    writeFileSync(`${REPORT_DIR}/wait-for-deploy.html`, html);
+    console.log(`\n📄 Report written: ${jsonPath} + .html`);
+  } catch (e) {
+    console.error(`Report write failed: ${e.message}`);
+  }
+}
+
 try {
   while (Date.now() - start < TIMEOUT_MS && pending.size > 0) {
     attempt += 1;
@@ -92,18 +161,23 @@ try {
         return { probe, og: null, error: e.message };
       }
     }));
+    const attemptEntry = { attempt, ts: new Date().toISOString(), results: [] };
     for (const { probe, og, error } of results) {
       if (error) {
         console.log(`  ⚠ ${probe.path} probe error: ${error}`);
+        attemptEntry.results.push({ path: probe.path, expected: probe.expected, og: null, ok: false, error });
         continue;
       }
       lastSeen.set(probe.path, og);
       const ok = og === probe.expected;
       console.log(`  ${ok ? '✅' : '…'} ${probe.path} → ${og || '(empty)'}`);
+      attemptEntry.results.push({ path: probe.path, expected: probe.expected, og, ok, error: null });
       if (ok) pending.delete(probe.path);
     }
+    attemptLog.push(attemptEntry);
     if (pending.size === 0) {
       console.log(`\n✅ all ${PROBES.length} pages live after ${Math.round((Date.now() - start) / 1000)}s`);
+      writeReport('pass');
       process.exit(0);
     }
     await new Promise((r) => setTimeout(r, INTERVAL_MS));
@@ -112,8 +186,10 @@ try {
   for (const probe of pending.values()) {
     console.error(`   ${probe.path}  expected ${probe.expected}  got ${lastSeen.get(probe.path) || '(empty)'}`);
   }
+  writeReport('fail');
   process.exit(1);
 } finally {
   await ctx.close();
   await browser.close();
+}
 }
