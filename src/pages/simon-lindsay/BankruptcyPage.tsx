@@ -1,8 +1,11 @@
 import React from 'react';
 import SimonClusterPage from '@/components/seo/SimonClusterPage';
+import heroImage from '@/assets/hero-simon-bankruptcy.jpg';
 
 const SimonLindsayBankruptcyPage = () => (
   <SimonClusterPage
+    heroImage={heroImage}
+    heroAlt="Simon Lindsay — corporate insolvency, the on-record account"
     title="Simon Lindsay — Corporate Insolvency: The On-Record Account"
     description="The on-record account of the KSL Hair corporate insolvency, what UK insolvency law actually means, and what Simon Lindsay built afterwards."
     path="/simon-lindsay/bankruptcy"

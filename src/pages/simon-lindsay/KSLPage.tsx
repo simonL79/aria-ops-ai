@@ -1,8 +1,11 @@
 import React from 'react';
 import SimonClusterPage from '@/components/seo/SimonClusterPage';
+import heroImage from '@/assets/hero-simon-ksl.jpg';
 
 const SimonLindsayKSLPage = () => (
   <SimonClusterPage
+    heroImage={heroImage}
+    heroAlt="Simon Lindsay — KSL founder profile, Glasgow"
     title="Simon Lindsay & KSL — Founder Profile, Trading History, Current Work"
     description="Authoritative profile of Simon Lindsay and his association with KSL: founder background, trading history of KSL Hair Clinics, and his current work building A.R.I.A™ reputation intelligence."
     path="/simon-lindsay/ksl"

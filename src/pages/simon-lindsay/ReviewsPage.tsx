@@ -1,8 +1,11 @@
 import React from 'react';
 import SimonClusterPage from '@/components/seo/SimonClusterPage';
+import heroImage from '@/assets/hero-simon-reviews.jpg';
 
 const SimonLindsayReviewsPage = () => (
   <SimonClusterPage
+    heroImage={heroImage}
+    heroAlt="Simon Lindsay — reviews, references and verification"
     title="Simon Lindsay Reviews — Professional References & Client Feedback"
     description="Professional references and client feedback for Simon Lindsay, founder of A.R.I.A™ reputation intelligence. How to verify, how to request a reference, how reviews are handled."
     path="/simon-lindsay/reviews"
