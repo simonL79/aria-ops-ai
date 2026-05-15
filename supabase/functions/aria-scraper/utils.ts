@@ -1,7 +1,10 @@
 
 // Load environment variables
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!;
-const ARIA_INGEST_KEY = Deno.env.get('ARIA_INGEST_KEY') || 'H7zYd0N6R9xM3bKpLqE1jUvTnZqF5sBgXwPm9QCeLd0=';
+const ARIA_INGEST_KEY = Deno.env.get('ARIA_INGEST_KEY');
+if (!ARIA_INGEST_KEY) {
+  throw new Error('ARIA_INGEST_KEY not configured');
+}
 
 // UK Celebrity and Sports threat keywords
 export const THREAT_KEYWORDS = [
