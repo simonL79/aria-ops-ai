@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Shield, AlertCircle, CheckCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import LoginForm from "@/components/auth/LoginForm";
+import SEO from "@/components/seo/SEO";
 
 const Authentication = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -102,6 +103,7 @@ const Authentication = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
+      <SEO title="Sign in — A.R.I.A™" description="Sign in to A.R.I.A™." path="/auth" noIndex />
       <div className="mb-8 flex flex-col items-center">
         <div className="flex items-center gap-2 mb-2">
           <Shield className="h-8 w-8 text-primary" />

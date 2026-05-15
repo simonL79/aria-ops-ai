@@ -9,6 +9,7 @@ import Logo from '@/components/ui/logo';
 import PublicLayout from '@/components/layout/PublicLayout';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Helmet } from 'react-helmet-async';
+import SEO from '@/components/seo/SEO';
 
 class PageErrorBoundary extends React.Component<
   { children: React.ReactNode },
@@ -63,13 +64,12 @@ const BiographyPage = () => {
 
   return (
     <PublicLayout>
-      <Helmet>
-        <title>Simon Lindsay – Founder of A.R.I.A™ | AI Reputation Intelligence</title>
-        <meta name="description" content="Simon Lindsay is the creator of A.R.I.A™, an AI-powered platform protecting digital reputations for influencers, founders, and public figures." />
-        <script type="application/ld+json">
-          {JSON.stringify(simonLindseySchema)}
-        </script>
-      </Helmet>
+      <SEO
+        title="Biography — Simon Lindsay, Founder of A.R.I.A™"
+        description="Biography of Simon Lindsay, founder of A.R.I.A™, the AI-powered reputation intelligence platform protecting public figures and brands."
+        path="/biography"
+        jsonLd={simonLindseySchema}
+      />
       
       <PageErrorBoundary>
         <div className="container mx-auto px-6 py-12">
