@@ -59,6 +59,24 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-chromium-1.47.0-${{ runner.os }}
 
+      - name: Report Playwright cache status
+        if: ${{ github.event.inputs.skip_wait != 'true' }}
+        env:
+          CACHE_HIT: ${{ steps.pw-cache.outputs.cache-hit }}
+          REQUIRE_PW_CACHE: ${{ vars.REQUIRE_PW_CACHE || 'false' }}
+        run: |
+          echo "Playwright cache key: playwright-chromium-1.47.0-${{ runner.os }}"
+          echo "Cache hit: ${CACHE_HIT:-false}"
+          if [ "${CACHE_HIT}" = "true" ]; then
+            echo "::notice title=Playwright cache::HIT — skipping browser download."
+          else
+            echo "::warning title=Playwright cache::MISS — chromium will be downloaded (~120MB). First run after a Playwright version bump always misses."
+            if [ "${REQUIRE_PW_CACHE}" = "true" ]; then
+              echo "::error title=Playwright cache::REQUIRE_PW_CACHE=true and cache missed — failing run."
+              exit 1
+            fi
+          fi
+
       - name: Install Playwright (chromium)
         if: ${{ github.event.inputs.skip_wait != 'true' }}
         run: |
