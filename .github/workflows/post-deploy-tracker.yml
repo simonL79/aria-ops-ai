@@ -118,6 +118,19 @@ jobs:
           fi
 
 
+
+      - name: Playwright cache size — before install
+        if: ${{ github.event.inputs.skip_wait != 'true' }}
+        run: |
+          echo "── ~/.cache/ms-playwright (before install) ──"
+          if [ -d "$HOME/.cache/ms-playwright" ]; then
+            du -sh "$HOME/.cache/ms-playwright" || true
+            du -sh "$HOME/.cache/ms-playwright"/* 2>/dev/null | sort -h || true
+            echo "file count: $(find "$HOME/.cache/ms-playwright" -type f | wc -l)"
+          else
+            echo "(directory does not exist — cache fully missed)"
+          fi
+
       - name: Install Playwright (chromium)
         if: ${{ github.event.inputs.skip_wait != 'true' }}
         run: |
@@ -126,6 +139,31 @@ jobs:
           else
             npx --yes playwright@1.47.0 install --with-deps chromium
           fi
+
+      - name: Playwright cache size — after install
+        if: ${{ github.event.inputs.skip_wait != 'true' }}
+        env:
+          PW_HIT: ${{ steps.pw-cache.outputs.cache-hit }}
+        run: |
+          echo "── ~/.cache/ms-playwright (after install) ──"
+          if [ -d "$HOME/.cache/ms-playwright" ]; then
+            TOTAL=$(du -sh "$HOME/.cache/ms-playwright" | cut -f1)
+            BYTES=$(du -sb "$HOME/.cache/ms-playwright" | cut -f1)
+            echo "total: ${TOTAL} (${BYTES} bytes)"
+            du -sh "$HOME/.cache/ms-playwright"/* 2>/dev/null | sort -h || true
+            echo "file count: $(find "$HOME/.cache/ms-playwright" -type f | wc -l)"
+            # Sanity floor: chromium alone is ~120MB. Anything under 50MB
+            # means the cache is effectively empty even if the dir exists.
+            if [ "${BYTES}" -lt 52428800 ]; then
+              echo "::warning title=Playwright cache::Suspicious — cache directory is under 50MB after install (${TOTAL}). Subsequent runs may not benefit from caching."
+            else
+              echo "::notice title=Playwright cache::Cache populated (${TOTAL}). Will be saved as '${{ steps.pw-cache.outputs.cache-primary-key }}' if this is a new key."
+            fi
+          else
+            echo "::error title=Playwright cache::Cache directory missing after install — something is very wrong."
+            exit 1
+          fi
+
 
       - name: Wait for production deploy to reflect new og:image
         if: ${{ github.event.inputs.skip_wait != 'true' }}
