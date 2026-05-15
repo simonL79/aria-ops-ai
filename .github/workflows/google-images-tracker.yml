@@ -1,0 +1,26 @@
+name: Google Images tracker
+
+on:
+  schedule:
+    - cron: '0 7 * * *'  # daily 07:00 UTC
+  workflow_dispatch:
+
+jobs:
+  track:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node_version: '20'
+      - name: Track Google Images pickup
+        env:
+          SERPAPI_API_KEY: ${{ secrets.SERPAPI_API_KEY }}
+        run: |
+          mkdir -p /mnt/documents/og-tracking || true
+          node scripts/track-google-images.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: og-tracking-${{ github.run_id }}
+          path: /mnt/documents/og-tracking/*.json
+          if-no-files-found: ignore
