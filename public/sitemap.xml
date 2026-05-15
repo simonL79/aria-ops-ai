@@ -9,6 +9,9 @@
   <url><loc>https://www.ariaops.co.uk/scan</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://www.ariaops.co.uk/auth</loc><changefreq>yearly</changefreq><priority>0.4</priority></url>
   <url><loc>https://www.ariaops.co.uk/cybersecurity-framework</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://www.ariaops.co.uk/services/remove-google-reviews</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://www.ariaops.co.uk/services/online-impersonation-uk</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://www.ariaops.co.uk/services/brand-protection</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
   <url><loc>https://www.ariaops.co.uk/simon-lindsay</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://www.ariaops.co.uk/biography</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
   <url><loc>https://www.ariaops.co.uk/terms</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>

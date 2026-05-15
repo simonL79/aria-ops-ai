@@ -42,6 +42,9 @@ import PortalNoAccess from './pages/portal/PortalNoAccess';
 import PortalRemoval from './pages/portal/PortalRemoval';
 import PortalUpgrade from './pages/portal/PortalUpgrade';
 import CybersecurityFrameworkPage from './pages/CybersecurityFrameworkPage';
+import RemoveGoogleReviewsPage from './pages/services/RemoveGoogleReviewsPage';
+import OnlineImpersonationUKPage from './pages/services/OnlineImpersonationUKPage';
+import BrandProtectionPage from './pages/services/BrandProtectionPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -73,6 +76,9 @@ function App() {
                     {/* /home registered via nav-items (isPublic) */}
                     <Route path="/auth" element={<Authentication />} />
                     <Route path="/cybersecurity-framework" element={<CybersecurityFrameworkPage />} />
+                    <Route path="/services/remove-google-reviews" element={<RemoveGoogleReviewsPage />} />
+                    <Route path="/services/online-impersonation-uk" element={<OnlineImpersonationUKPage />} />
+                    <Route path="/services/brand-protection" element={<BrandProtectionPage />} />
 
                     {/* Client Portal — read-only */}
                     <Route path="/portal/no-access" element={<PortalNoAccess />} />
