@@ -42,11 +42,27 @@ if (!existsSync(HISTORY)) {
   );
 }
 
-const lines = [`## ${stamp} — _${trigger}_`, '', '| Query | Page rank | Image rank | Hero live |', '|---|---|---|---|'];
+const esc = (v) => String(v ?? '').replace(/\|/g, '\\|').replace(/\n/g, ' ');
+const short = (url, max = 60) => {
+  if (!url) return '—';
+  return url.length > max ? `${url.slice(0, max - 1)}…` : url;
+};
+
+const lines = [
+  `## ${stamp} — _${trigger}_`,
+  '',
+  '| Query | Hero live (raw) | Page rank | Image rank | Expected page | Expected image | Matched source | Matched thumbnail |',
+  '|---|---|---|---|---|---|---|---|',
+];
 for (const r of data.rows ?? []) {
+  const heroLiveBool = r.imageMatchRank !== null; // raw boolean
+  const heroLiveCell = `\`${heroLiveBool}\`${heroLiveBool ? ' ✅' : ''}`;
   lines.push(
-    `| ${r.query} | ${r.pageMatchRank ?? '—'} | ${r.imageMatchRank ?? '—'} | ${r.imageMatchRank !== null ? '✅ yes' : 'no'} |`,
+    `| ${esc(r.query)} | ${heroLiveCell} | ${r.pageMatchRank ?? '—'} | ${r.imageMatchRank ?? '—'} | ${esc(short(r.expectedPage))} | ${esc(short(r.expectedImg))} | ${esc(short(r.matchedSource))} | ${esc(short(r.matchedThumbnail, 50))} |`,
   );
+  if (r.error) {
+    lines.push(`| ${esc(r.query)} | — | — | — | — | — | _error: ${esc(r.error)}_ | — |`);
+  }
 }
 lines.push('', '');
 appendFileSync(HISTORY, lines.join('\n'));
