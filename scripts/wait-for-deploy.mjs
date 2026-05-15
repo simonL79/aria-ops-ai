@@ -6,11 +6,13 @@
  * page-specific /og/<slug>.jpg hero (not the legacy
  * /lovable-uploads/*.png fallback).
  *
- * Uses Playwright (chromium) so we read the post-hydration DOM, the
- * same way Googlebot's rendering pipeline does. A page is considered
- * "live" once it matches; matched pages are skipped on subsequent
- * polls so we converge on the slowest CDN edge. Exits 0 once all
- * pages match, non-zero on timeout.
+ * Optimisations vs. the naive version:
+ *   - All pending pages are probed in parallel each attempt.
+ *   - A single BrowserContext is reused for the whole run; we just
+ *     open/close lightweight pages.
+ *   - We use waitUntil:'domcontentloaded' and then poll the actual
+ *     og:image meta until it equals the expected value (capped),
+ *     instead of a fixed networkidle + sleep.
  *
  *   BASE_URL=https://www.ariaops.co.uk \
  *   TIMEOUT_MS=1800000 \
@@ -21,6 +23,7 @@ import { chromium } from 'playwright';
 const BASE = (process.env.BASE_URL || 'https://www.ariaops.co.uk').replace(/\/$/, '');
 const TIMEOUT_MS = Number(process.env.TIMEOUT_MS || 30 * 60 * 1000); // 30 min
 const INTERVAL_MS = Number(process.env.INTERVAL_MS || 30 * 1000);    // 30 s
+const PROBE_TIMEOUT_MS = Number(process.env.PROBE_TIMEOUT_MS || 15_000);
 
 const PROBES = [
   { path: '/simon-lindsay/ksl',                 slug: 'simon-ksl' },
@@ -31,39 +34,53 @@ const PROBES = [
   { path: '/simon-lindsay/ksl-hair-complaints', slug: 'simon-ksl-hair-complaints' },
 ].map((p) => ({ ...p, expected: `${BASE}/og/${p.slug}.jpg` }));
 
-async function readOg(browser, path) {
-  const ctx = await browser.newContext();
+async function readOg(ctx, probe) {
   const page = await ctx.newPage();
   try {
-    await page.goto(`${BASE}${path}`, { waitUntil: 'networkidle', timeout: 60_000 });
-    // Helmet may swap tags after hydration — wait a beat.
-    await page.waitForTimeout(2000);
-    const og = await page.locator('meta[property="og:image"]').first().getAttribute('content');
-    return og || '';
+    await page.goto(`${BASE}${probe.path}`, { waitUntil: 'domcontentloaded', timeout: 60_000 });
+    // Helmet swaps og:image after hydration; poll the actual value
+    // until it equals what we expect (or the probe timeout fires).
+    try {
+      await page.waitForFunction(
+        (expected) => document.querySelector('meta[property="og:image"]')?.content === expected,
+        probe.expected,
+        { timeout: PROBE_TIMEOUT_MS, polling: 500 },
+      );
+    } catch { /* fall through — read whatever's there now */ }
+    return (await page.locator('meta[property="og:image"]').first().getAttribute('content')) || '';
   } finally {
-    await ctx.close();
+    await page.close();
   }
 }
 
 const start = Date.now();
 const browser = await chromium.launch();
+const ctx = await browser.newContext();
 const pending = new Map(PROBES.map((p) => [p.path, p]));
-const lastSeen = new Map(); // path -> last og:image observed
+const lastSeen = new Map();
 let attempt = 0;
 try {
   while (Date.now() - start < TIMEOUT_MS && pending.size > 0) {
     attempt += 1;
     console.log(`\n— attempt ${attempt} (${pending.size} pending / ${PROBES.length}) —`);
-    for (const probe of [...pending.values()]) {
+    const probes = [...pending.values()];
+    const results = await Promise.all(probes.map(async (probe) => {
       try {
-        const og = await readOg(browser, probe.path);
-        lastSeen.set(probe.path, og);
-        const ok = og === probe.expected;
-        console.log(`  ${ok ? '✅' : '…'} ${probe.path} → ${og || '(empty)'}`);
-        if (ok) pending.delete(probe.path);
+        const og = await readOg(ctx, probe);
+        return { probe, og, error: null };
       } catch (e) {
-        console.log(`  ⚠ ${probe.path} probe error: ${e.message}`);
+        return { probe, og: null, error: e.message };
       }
+    }));
+    for (const { probe, og, error } of results) {
+      if (error) {
+        console.log(`  ⚠ ${probe.path} probe error: ${error}`);
+        continue;
+      }
+      lastSeen.set(probe.path, og);
+      const ok = og === probe.expected;
+      console.log(`  ${ok ? '✅' : '…'} ${probe.path} → ${og || '(empty)'}`);
+      if (ok) pending.delete(probe.path);
     }
     if (pending.size === 0) {
       console.log(`\n✅ all ${PROBES.length} pages live after ${Math.round((Date.now() - start) / 1000)}s`);
@@ -77,5 +94,6 @@ try {
   }
   process.exit(1);
 } finally {
+  await ctx.close();
   await browser.close();
 }
