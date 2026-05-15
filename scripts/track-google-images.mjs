@@ -10,13 +10,13 @@
  *      (image source) matches the expected page or hero image.
  *   3. Report rank, thumbnail, and whether the expected hero is live.
  *
- * Exit code is always 0 — this is a tracker, not a gate. Run on a
- * schedule and watch the JSON log under /mnt/documents/og-tracking/.
+ * All target queries are fanned out in parallel — SerpAPI handles
+ * concurrent requests fine and this cuts wall time roughly N×.
  *
  *   SERPAPI_API_KEY=... node scripts/track-google-images.mjs
  */
 
-import { writeFileSync, mkdirSync } from 'node:fs';
+import { writeFileSync, mkdirSync, readdirSync, readFileSync } from 'node:fs';
 
 const KEY = process.env.SERPAPI_API_KEY;
 if (!KEY) {
@@ -48,10 +48,7 @@ async function searchImages(q) {
   return json.images_results ?? [];
 }
 
-const stamp = new Date().toISOString();
-const rows = [];
-
-for (const t of TARGETS) {
+async function trackOne(t) {
   const expectedPage = `${BASE}${t.page}`;
   const expectedImg  = `${BASE}${t.image}`;
   const row = {
@@ -61,27 +58,31 @@ for (const t of TARGETS) {
   };
   try {
     const results = await searchImages(t.query);
-    results.forEach((r, idx) => {
-      const rank = idx + 1;
-      const linkHit = r.link && r.link.startsWith(expectedPage);
-      const imgHit  = r.original && r.original === expectedImg;
-      if (linkHit && row.pageMatchRank === null) {
-        row.pageMatchRank = rank;
-        row.matchedThumbnail = r.thumbnail;
-        row.matchedSource = r.original;
-      }
-      if (imgHit && row.imageMatchRank === null) {
-        row.imageMatchRank = rank;
-        row.matchedThumbnail = r.thumbnail;
-        row.matchedSource = r.original;
-      }
-    });
     row.totalResults = results.length;
+    for (let idx = 0; idx < results.length; idx++) {
+      const r = results[idx];
+      const rank = idx + 1;
+      if (row.pageMatchRank === null && r.link && r.link.startsWith(expectedPage)) {
+        row.pageMatchRank = rank;
+        row.matchedThumbnail ??= r.thumbnail;
+        row.matchedSource ??= r.original;
+      }
+      if (row.imageMatchRank === null && r.original === expectedImg) {
+        row.imageMatchRank = rank;
+        row.matchedThumbnail ??= r.thumbnail;
+        row.matchedSource ??= r.original;
+      }
+      if (row.pageMatchRank !== null && row.imageMatchRank !== null) break;
+    }
   } catch (e) {
     row.error = e.message;
   }
-  rows.push(row);
+  return row;
 }
+
+const stamp = new Date().toISOString();
+// Fan out — SerpAPI tolerates parallelism and this is the dominant cost.
+const rows = await Promise.all(TARGETS.map(trackOne));
 
 const summary = rows.map((r) => ({
   query: r.query,
@@ -99,32 +100,28 @@ const outFile = `${REPORT_DIR}/${safeStamp}.json`;
 writeFileSync(outFile, JSON.stringify({ stamp, rows }, null, 2));
 console.log(`\nFull report: ${outFile}`);
 
-// CSV export — one row per tracked query, RFC 4180-ish quoting so it
-// opens cleanly in Excel/Google Sheets without further munging.
+// CSV export — RFC 4180-ish quoting so it opens cleanly in Excel/Sheets.
 const csvEscape = (v) => {
   if (v === null || v === undefined) return '';
   const s = String(v);
   return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 };
 const csvHeader = ['stamp', 'query', 'pageMatchRank', 'imageMatchRank', 'heroLive', 'expectedPage', 'expectedImg', 'matchedSource', 'matchedThumbnail', 'totalResults', 'error'];
-const csvLines = [csvHeader.join(',')];
-for (const r of rows) {
-  csvLines.push([
-    stamp,
-    r.query,
-    r.pageMatchRank ?? '',
-    r.imageMatchRank ?? '',
-    r.imageMatchRank !== null,   // raw boolean
-    r.expectedPage,
-    r.expectedImg,
-    r.matchedSource ?? '',
-    r.matchedThumbnail ?? '',
-    r.totalResults ?? '',
-    r.error ?? '',
-  ].map(csvEscape).join(','));
-}
+const csvBody = rows.map((r) => [
+  stamp,
+  r.query,
+  r.pageMatchRank ?? '',
+  r.imageMatchRank ?? '',
+  r.imageMatchRank !== null,
+  r.expectedPage,
+  r.expectedImg,
+  r.matchedSource ?? '',
+  r.matchedThumbnail ?? '',
+  r.totalResults ?? '',
+  r.error ?? '',
+].map(csvEscape).join(','));
 const csvFile = `${REPORT_DIR}/${safeStamp}.csv`;
-writeFileSync(csvFile, csvLines.join('\n') + '\n');
+writeFileSync(csvFile, [csvHeader.join(','), ...csvBody].join('\n') + '\n');
 console.log(`CSV export:  ${csvFile}`);
 
 // -----------------------------------------------------------------
@@ -135,7 +132,6 @@ console.log(`CSV export:  ${csvFile}`);
 //   strict     — fail if ANY query has heroLive=false this run
 //   regression — fail only if a query was heroLive=true in the previous
 //                snapshot but is now false (real regression)
-// Default is "strict" for post-deploy runs so missed pickups are loud.
 // -----------------------------------------------------------------
 const FAIL_MODE = (process.env.FAIL_MODE || 'off').toLowerCase();
 const dead = rows.filter((r) => r.imageMatchRank === null);
@@ -156,8 +152,6 @@ if (FAIL_MODE === 'strict' && dead.length > 0) {
 }
 
 if (FAIL_MODE === 'regression') {
-  // Compare against the most recent prior snapshot in REPORT_DIR.
-  const { readdirSync, readFileSync } = await import('node:fs');
   const prior = readdirSync(REPORT_DIR)
     .filter((f) => f.endsWith('.json') && f !== `${safeStamp}.json`)
     .sort();
@@ -176,4 +170,3 @@ if (FAIL_MODE === 'regression') {
     console.log(`No regressions vs ${last}.`);
   }
 }
-
