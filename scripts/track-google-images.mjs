@@ -126,3 +126,54 @@ for (const r of rows) {
 const csvFile = `${REPORT_DIR}/${safeStamp}.csv`;
 writeFileSync(csvFile, csvLines.join('\n') + '\n');
 console.log(`CSV export:  ${csvFile}`);
+
+// -----------------------------------------------------------------
+// Regression / strict gating.
+//
+// FAIL_MODE controls when this script exits non-zero:
+//   off        — never fail (default behaviour, used by tracker-only runs)
+//   strict     — fail if ANY query has heroLive=false this run
+//   regression — fail only if a query was heroLive=true in the previous
+//                snapshot but is now false (real regression)
+// Default is "strict" for post-deploy runs so missed pickups are loud.
+// -----------------------------------------------------------------
+const FAIL_MODE = (process.env.FAIL_MODE || 'off').toLowerCase();
+const dead = rows.filter((r) => r.imageMatchRank === null);
+const live = rows.filter((r) => r.imageMatchRank !== null);
+
+console.log(`\nheroLive summary: ${live.length}/${rows.length} live, ${dead.length} not-live`);
+
+if (FAIL_MODE === 'strict' && dead.length > 0) {
+  console.error('\n❌ STRICT mode: heroLive=false for the following queries:');
+  for (const r of dead) {
+    console.error(`   • ${r.query}`);
+    console.error(`       expected image: ${r.expectedImg}`);
+    console.error(`       expected page:  ${r.expectedPage}`);
+    console.error(`       SerpAPI hits:   ${r.totalResults ?? 0}${r.error ? ` (error: ${r.error})` : ''}`);
+  }
+  console.error(`\nFix: confirm /og/<slug>.jpg is live, image-sitemap.xml is submitted in GSC, and the page is indexable. Re-run when Google has had time to recrawl.`);
+  process.exit(1);
+}
+
+if (FAIL_MODE === 'regression') {
+  // Compare against the most recent prior snapshot in REPORT_DIR.
+  const { readdirSync, readFileSync } = await import('node:fs');
+  const prior = readdirSync(REPORT_DIR)
+    .filter((f) => f.endsWith('.json') && f !== `${safeStamp}.json`)
+    .sort();
+  const last = prior.at(-1);
+  if (!last) {
+    console.log('No prior snapshot to diff against — regression check skipped.');
+  } else {
+    const prev = JSON.parse(readFileSync(`${REPORT_DIR}/${last}`, 'utf8'));
+    const prevLive = new Set((prev.rows ?? []).filter((r) => r.imageMatchRank !== null).map((r) => r.query));
+    const regressed = rows.filter((r) => prevLive.has(r.query) && r.imageMatchRank === null);
+    if (regressed.length > 0) {
+      console.error(`\n❌ REGRESSION vs ${last}: ${regressed.length} query(ies) lost heroLive:`);
+      for (const r of regressed) console.error(`   • ${r.query}  (expected ${r.expectedImg})`);
+      process.exit(1);
+    }
+    console.log(`No regressions vs ${last}.`);
+  }
+}
+
