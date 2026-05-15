@@ -181,16 +181,28 @@ jobs:
             BYTES=$(du -sb "$HOME/.cache/ms-playwright" | cut -f1)
             echo "total: ${TOTAL} (${BYTES} bytes)"
             du -sh "$HOME/.cache/ms-playwright"/* 2>/dev/null | sort -h || true
-            echo "file count: $(find "$HOME/.cache/ms-playwright" -type f | wc -l)"
+            FILES=$(find "$HOME/.cache/ms-playwright" -type f | wc -l)
+            echo "file count: ${FILES}"
             # Sanity floor: chromium alone is ~120MB. Anything under 50MB
             # means the cache is effectively empty even if the dir exists.
             if [ "${BYTES}" -lt 52428800 ]; then
               echo "::warning title=Playwright cache::Suspicious — cache directory is under 50MB after install (${TOTAL}). Subsequent runs may not benefit from caching."
+              SIZE_NOTE="⚠️ Suspicious size — under 50MB."
             else
               echo "::notice title=Playwright cache::Cache populated (${TOTAL}). Will be saved as '${{ steps.pw-cache.outputs.cache-primary-key }}' if this is a new key."
+              SIZE_NOTE="Will be saved as \`${{ steps.pw-cache.outputs.cache-primary-key }}\` at job end if new."
             fi
+            {
+              echo "### 📦 Playwright cache size (post-install)"
+              echo ""
+              echo "| Total | Bytes | Files | Note |"
+              echo "|---|---|---|---|"
+              echo "| ${TOTAL} | ${BYTES} | ${FILES} | ${SIZE_NOTE} |"
+              echo ""
+            } >> "$GITHUB_STEP_SUMMARY"
           else
             echo "::error title=Playwright cache::Cache directory missing after install — something is very wrong."
+            echo "> ❌ Cache directory missing after install." >> "$GITHUB_STEP_SUMMARY"
             exit 1
           fi
 
