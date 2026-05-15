@@ -59,12 +59,27 @@ const SimonClusterPage: React.FC<SimonClusterPageProps> = ({
   heroImage,
   heroAlt,
 }) => {
+  const heroAbsUrl = heroImage ? `https://www.ariaops.co.uk${heroImage}` : undefined;
+  const imageObjectJsonLd = heroAbsUrl
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'ImageObject',
+        contentUrl: heroAbsUrl,
+        url: heroAbsUrl,
+        width: 1920,
+        height: 1080,
+        encodingFormat: 'image/jpeg',
+        caption: heroAlt || h1,
+        representativeOfPage: true,
+      }
+    : null;
+
   const personJsonLd = {
     ...PERSON_BASE,
     jobTitle: personJobTitle,
     knowsAbout: personKnowsAbout,
     mainEntityOfPage: `https://www.ariaops.co.uk${path}`,
-    ...(heroImage ? { image: `https://www.ariaops.co.uk${heroImage}` } : {}),
+    ...(imageObjectJsonLd ? { image: imageObjectJsonLd } : {}),
   };
 
   const breadcrumbJsonLd = {
@@ -89,7 +104,12 @@ const SimonClusterPage: React.FC<SimonClusterPageProps> = ({
       }
     : null;
 
-  const jsonLd = [personJsonLd, breadcrumbJsonLd, ...(faqJsonLd ? [faqJsonLd] : [])];
+  const jsonLd = [
+    personJsonLd,
+    breadcrumbJsonLd,
+    ...(imageObjectJsonLd ? [imageObjectJsonLd] : []),
+    ...(faqJsonLd ? [faqJsonLd] : []),
+  ];
 
   return (
     <PublicLayout>
@@ -101,8 +121,8 @@ const SimonClusterPage: React.FC<SimonClusterPageProps> = ({
             <img
               src={heroImage}
               alt={heroAlt || h1}
-              width={1600}
-              height={896}
+              width={1920}
+              height={1080}
               className="w-full h-auto object-cover max-h-[480px]"
             />
           </div>
