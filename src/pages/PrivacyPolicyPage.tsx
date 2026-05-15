@@ -5,6 +5,7 @@ import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { FileText, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import SEO from '@/components/seo/SEO';
 
 const PrivacyPolicyPage = () => {
   const navigate = useNavigate();
@@ -16,6 +17,11 @@ const PrivacyPolicyPage = () => {
 
   return (
     <div className="min-h-screen bg-premium-silver/20">
+      <SEO
+        title="Privacy Policy — A.R.I.A™"
+        description="How A.R.I.A™ collects, processes, and protects personal data in line with UK GDPR and ICO guidance."
+        path="/privacy-policy"
+      />
       {/* Sticky Navigation */}
       <StickyHeader isScrolled={true} />
 

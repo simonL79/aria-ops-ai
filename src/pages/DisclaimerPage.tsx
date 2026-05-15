@@ -2,6 +2,7 @@
 import React from 'react';
 import StickyHeader from '@/components/layout/StickyHeader';
 import Footer from '@/components/layout/Footer';
+import SEO from '@/components/seo/SEO';
 
 const DisclaimerPage = () => {
   const currentDate = new Date().toLocaleDateString('en-US', {
@@ -12,6 +13,11 @@ const DisclaimerPage = () => {
 
   return (
     <div className="min-h-screen bg-premium-silver/20">
+      <SEO
+        title="Disclaimer — A.R.I.A™"
+        description="Legal disclaimer covering the information and services provided by A.R.I.A™."
+        path="/disclaimer"
+      />
       {/* Sticky Navigation */}
       <StickyHeader isScrolled={true} />
 
