@@ -37,7 +37,7 @@ const Logo = ({ variant = 'default', size = 'md', className }: LogoProps) => {
         alt="A.R.I.A Logo"
         width={512}
         height={512}
-        className={cn(logoSize.logo, 'max-w-full h-auto')}
+        className={cn(logoSize.logo, 'max-w-full w-auto')}
       />
     </div>
   );
