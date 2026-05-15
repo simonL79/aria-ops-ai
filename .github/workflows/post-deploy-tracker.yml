@@ -53,6 +53,7 @@ jobs:
 
       - name: Cache npm tarball cache (~/.npm)
         if: ${{ github.event.inputs.skip_wait != 'true' }}
+        id: npm-cache
         uses: actions/cache@v4
         with:
           path: ~/.npm
@@ -67,24 +68,46 @@ jobs:
         with:
           path: ~/.cache/ms-playwright
           key: playwright-chromium-1.47.0-${{ runner.os }}
+          restore-keys: |
+            playwright-chromium-
 
-      - name: Report Playwright cache status
+      - name: Report cache status (npm + Playwright)
         if: ${{ github.event.inputs.skip_wait != 'true' }}
         env:
-          CACHE_HIT: ${{ steps.pw-cache.outputs.cache-hit }}
+          PW_HIT:           ${{ steps.pw-cache.outputs.cache-hit }}
+          PW_PRIMARY_KEY:   ${{ steps.pw-cache.outputs.cache-primary-key }}
+          PW_MATCHED_KEY:   ${{ steps.pw-cache.outputs.cache-matched-key }}
+          PW_RESTORE_KEYS:  "playwright-chromium-"
+          NPM_HIT:          ${{ steps.npm-cache.outputs.cache-hit }}
+          NPM_PRIMARY_KEY:  ${{ steps.npm-cache.outputs.cache-primary-key }}
+          NPM_MATCHED_KEY:  ${{ steps.npm-cache.outputs.cache-matched-key }}
+          NPM_RESTORE_KEYS: "npm-cache-playwright-"
           REQUIRE_PW_CACHE: ${{ vars.REQUIRE_PW_CACHE || 'false' }}
         run: |
-          echo "Playwright cache key: playwright-chromium-1.47.0-${{ runner.os }}"
-          echo "Cache hit: ${CACHE_HIT:-false}"
-          if [ "${CACHE_HIT}" = "true" ]; then
-            echo "::notice title=Playwright cache::HIT — skipping browser download."
+          echo "──────── Playwright cache ────────"
+          echo "  primary key   : ${PW_PRIMARY_KEY}"
+          echo "  restore keys  : ${PW_RESTORE_KEYS}"
+          echo "  matched key   : ${PW_MATCHED_KEY:-<none>}"
+          echo "  exact hit     : ${PW_HIT:-false}"
+          echo "──────── npm tarball cache ────────"
+          echo "  primary key   : ${NPM_PRIMARY_KEY}"
+          echo "  restore keys  : ${NPM_RESTORE_KEYS}"
+          echo "  matched key   : ${NPM_MATCHED_KEY:-<none>}"
+          echo "  exact hit     : ${NPM_HIT:-false}"
+          echo "───────────────────────────────────"
+
+          if [ "${PW_HIT}" = "true" ]; then
+            echo "::notice title=Playwright cache::HIT (exact: ${PW_PRIMARY_KEY}) — skipping browser download."
+          elif [ -n "${PW_MATCHED_KEY}" ]; then
+            echo "::notice title=Playwright cache::PARTIAL (matched ${PW_MATCHED_KEY}) — primary key ${PW_PRIMARY_KEY} not found, but restored from a fallback. Browsers may still need re-install."
           else
-            echo "::warning title=Playwright cache::MISS — chromium will be downloaded (~120MB). First run after a Playwright version bump always misses."
+            echo "::warning title=Playwright cache::MISS — neither ${PW_PRIMARY_KEY} nor any restore-key matched. Chromium will be downloaded (~120MB). First run after a Playwright version bump always misses."
             if [ "${REQUIRE_PW_CACHE}" = "true" ]; then
               echo "::error title=Playwright cache::REQUIRE_PW_CACHE=true and cache missed — failing run."
               exit 1
             fi
           fi
+
 
       - name: Install Playwright (chromium)
         if: ${{ github.event.inputs.skip_wait != 'true' }}
