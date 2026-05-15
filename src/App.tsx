@@ -30,6 +30,7 @@ import ShieldDashboard from './pages/admin/shield/ShieldDashboard';
 import ShieldAlertsList from './pages/admin/shield/ShieldAlertsList';
 import ShieldAlertDetail from './pages/admin/shield/ShieldAlertDetail';
 import OpsHandbookPage from './pages/admin/OpsHandbookPage';
+import SeoStatusPage from './pages/admin/SeoStatusPage';
 import MentionsWorkspace from './pages/dashboard/mentions';
 import Authentication from './pages/Authentication';
 import ClientPortalRoute from '@/components/auth/ClientPortalRoute';
@@ -137,6 +138,7 @@ function App() {
                       <Route path="/admin/shield/alerts" element={<ShieldAlertsList />} />
                       <Route path="/admin/shield/alerts/:id" element={<ShieldAlertDetail />} />
                       <Route path="/admin/ops" element={<OpsHandbookPage />} />
+                      <Route path="/admin/seo-status" element={<SeoStatusPage />} />
                       <Route path="/dashboard/mentions" element={<MentionsWorkspace />} />
                       {/* /qa-system-test removed (legacy) */}
                     </Route>

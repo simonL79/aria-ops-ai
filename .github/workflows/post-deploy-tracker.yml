@@ -72,11 +72,14 @@ jobs:
           TRIGGER_LABEL: ${{ github.event_name == 'workflow_dispatch' && 'manual post-publish' || format('push {0}', github.sha) }}
         run: node scripts/append-tracker-history.mjs
 
-      - name: Commit updated history
+      - name: Build dashboard payload (public/seo-status/tracker-history.json)
+        run: node scripts/build-seo-status.mjs
+
+      - name: Commit updated history + dashboard payload
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add og-tracking/history.md og-tracking/*.json || true
+          git add og-tracking/history.md og-tracking/*.json public/seo-status/tracker-history.json || true
           if git diff --cached --quiet; then
             echo "No history changes to commit."
           else
