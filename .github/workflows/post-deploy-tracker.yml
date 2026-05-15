@@ -1,0 +1,91 @@
+name: Post-deploy Google Images tracker
+
+# Runs after a SEO-affecting push lands on main:
+#   1. Polls production until the new build is live (rendered og:image
+#      on /simon-lindsay/ksl points at /og/simon-ksl.jpg).
+#   2. Runs the SerpAPI tracker.
+#   3. Appends the result to og-tracking/history.md and commits it
+#      back to main so the heroLive trajectory is visible in-repo.
+#   4. Uploads the raw JSON as a build artifact.
+#
+# Also exposed as workflow_dispatch so you can fire it manually right
+# after clicking Publish → Update in Lovable.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/components/seo/**'
+      - 'src/pages/simon-lindsay/**'
+      - 'public/og/**'
+      - 'public/image-sitemap.xml'
+      - 'scripts/track-google-images.mjs'
+      - 'scripts/append-tracker-history.mjs'
+      - 'scripts/wait-for-deploy.mjs'
+      - '.github/workflows/post-deploy-tracker.yml'
+  workflow_dispatch:
+    inputs:
+      skip_wait:
+        description: 'Skip the production-live probe (run tracker immediately)'
+        required: false
+        default: 'false'
+
+permissions:
+  contents: write   # needed to commit history.md back
+
+concurrency:
+  group: post-deploy-tracker
+  cancel-in-progress: false
+
+jobs:
+  track:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node_version: '20'
+
+      - name: Install Playwright (chromium)
+        if: ${{ github.event.inputs.skip_wait != 'true' }}
+        run: npx --yes playwright@1.47.0 install --with-deps chromium
+
+      - name: Wait for production deploy to reflect new og:image
+        if: ${{ github.event.inputs.skip_wait != 'true' }}
+        env:
+          BASE_URL: https://www.ariaops.co.uk
+          TIMEOUT_MS: '1800000'   # 30 min — Lovable publish is manual
+          INTERVAL_MS: '30000'
+        run: node scripts/wait-for-deploy.mjs
+
+      - name: Run Google Images tracker
+        env:
+          SERPAPI_API_KEY: ${{ secrets.SERPAPI_API_KEY }}
+          REPORT_DIR: og-tracking
+        run: |
+          mkdir -p og-tracking
+          node scripts/track-google-images.mjs
+
+      - name: Append run to og-tracking/history.md
+        env:
+          TRIGGER_LABEL: ${{ github.event_name == 'workflow_dispatch' && 'manual post-publish' || format('push {0}', github.sha) }}
+        run: node scripts/append-tracker-history.mjs
+
+      - name: Commit updated history
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add og-tracking/history.md og-tracking/*.json || true
+          if git diff --cached --quiet; then
+            echo "No history changes to commit."
+          else
+            git commit -m "chore(seo): post-deploy heroLive snapshot [skip ci]"
+            git push
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: og-tracking-${{ github.run_id }}
+          path: og-tracking/*.json
+          if-no-files-found: warn

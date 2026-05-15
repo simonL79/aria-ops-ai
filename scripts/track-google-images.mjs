@@ -92,7 +92,8 @@ const summary = rows.map((r) => ({
 console.log(`Google Images tracking @ ${stamp}`);
 console.table(summary);
 
-mkdirSync('/mnt/documents/og-tracking', { recursive: true });
-const outFile = `/mnt/documents/og-tracking/${stamp.replace(/[:.]/g, '-')}.json`;
+const REPORT_DIR = process.env.REPORT_DIR || '/mnt/documents/og-tracking';
+mkdirSync(REPORT_DIR, { recursive: true });
+const outFile = `${REPORT_DIR}/${stamp.replace(/[:.]/g, '-')}.json`;
 writeFileSync(outFile, JSON.stringify({ stamp, rows }, null, 2));
 console.log(`\nFull report: ${outFile}`);
