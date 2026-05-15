@@ -73,7 +73,7 @@ const RemoveGoogleReviewsPage = () => {
           </h1>
           <p className="text-xl text-muted-foreground leading-relaxed">
             Fake, malicious, or off-topic Google reviews can cost a UK business 30%+ of new
-            enquiries. Here\'s exactly how to get them removed — the official Google route first,
+            enquiries. Here's exactly how to get them removed — the official Google route first,
             UK legal escalation second, and what to do when both fail.
           </p>
         </section>
@@ -157,10 +157,10 @@ const RemoveGoogleReviewsPage = () => {
         {/* CTA */}
         <section className="container mx-auto px-6 py-16 max-w-4xl">
           <div className="bg-card border border-primary/40 rounded-lg p-10 text-center">
-            <h2 className="text-2xl md:text-3xl font-bold mb-4">When Google won\'t act, A.R.I.A™ does.</h2>
+            <h2 className="text-2xl md:text-3xl font-bold mb-4">When Google won't act, A.R.I.A™ does.</h2>
             <p className="text-muted-foreground text-lg mb-8 max-w-2xl mx-auto">
               Our Legal Ops team handles Defamation Act notices, evidence preparation, and direct
-              negotiation with Google\'s legal team. Average resolution time: 14 days.
+              negotiation with Google's legal team. Average resolution time: 14 days.
             </p>
             <Button asChild size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
               <Link to="/scan">

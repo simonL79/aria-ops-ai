@@ -123,7 +123,7 @@ const OnlineImpersonationUKPage = () => {
           <ul className="list-disc pl-6 space-y-2 text-muted-foreground text-lg">
             <li>Full-page screenshots showing the URL, timestamp, and browser address bar.</li>
             <li>Archive snapshots from <a className="text-primary hover:underline" href="https://web.archive.org" rel="noopener">web.archive.org</a> and <a className="text-primary hover:underline" href="https://archive.today" rel="noopener">archive.today</a>.</li>
-            <li>The impersonator\'s profile URL and any account ID/handle.</li>
+            <li>The impersonator's profile URL and any account ID/handle.</li>
             <li>Date you first became aware. Date of first known impersonation post.</li>
             <li>Copies of any messages sent to your contacts in your name.</li>
             <li>Witness statements from contacts who were deceived.</li>
@@ -138,7 +138,7 @@ const OnlineImpersonationUKPage = () => {
           <div className="grid md:grid-cols-2 gap-6">
             <div className="bg-card border border-border rounded-lg p-5">
               <h3 className="font-bold mb-2">Meta (Facebook & Instagram)</h3>
-              <p className="text-sm text-muted-foreground">Use the dedicated <em>"Report an account that\'s pretending to be you or someone you know"</em> form. Requires government photo ID. Typical action: 24–72 hours.</p>
+              <p className="text-sm text-muted-foreground">Use the dedicated <em>"Report an account that's pretending to be you or someone you know"</em> form. Requires government photo ID. Typical action: 24–72 hours.</p>
             </div>
             <div className="bg-card border border-border rounded-lg p-5">
               <h3 className="font-bold mb-2">LinkedIn</h3>
