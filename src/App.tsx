@@ -51,6 +51,12 @@ import SimonLindsayAriaPage from './pages/simon-lindsay/AriaPage';
 import SimonLindsayCommercialStrategistPage from './pages/simon-lindsay/CommercialStrategistPage';
 import SimonLindsayBoxingPage from './pages/simon-lindsay/BoxingPage';
 import SimonLindsayReputationIntelligencePage from './pages/simon-lindsay/ReputationIntelligencePage';
+import SimonLindsayKSLPage from './pages/simon-lindsay/KSLPage';
+import SimonLindsayGlasgowPage from './pages/simon-lindsay/GlasgowPage';
+import SimonLindsayKSLHairPage from './pages/simon-lindsay/KSLHairPage';
+import SimonLindsayReviewsPage from './pages/simon-lindsay/ReviewsPage';
+import SimonLindsayBankruptcyPage from './pages/simon-lindsay/BankruptcyPage';
+import SimonLindsayKSLHairComplaintsPage from './pages/simon-lindsay/KSLHairComplaintsPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -91,6 +97,12 @@ function App() {
                     <Route path="/simon-lindsay/commercial-strategist" element={<SimonLindsayCommercialStrategistPage />} />
                     <Route path="/simon-lindsay/boxing" element={<SimonLindsayBoxingPage />} />
                     <Route path="/simon-lindsay/reputation-intelligence" element={<SimonLindsayReputationIntelligencePage />} />
+                    <Route path="/simon-lindsay/ksl" element={<SimonLindsayKSLPage />} />
+                    <Route path="/simon-lindsay/glasgow" element={<SimonLindsayGlasgowPage />} />
+                    <Route path="/simon-lindsay/ksl-hair" element={<SimonLindsayKSLHairPage />} />
+                    <Route path="/simon-lindsay/reviews" element={<SimonLindsayReviewsPage />} />
+                    <Route path="/simon-lindsay/bankruptcy" element={<SimonLindsayBankruptcyPage />} />
+                    <Route path="/simon-lindsay/ksl-hair-complaints" element={<SimonLindsayKSLHairComplaintsPage />} />
 
                     {/* Client Portal — read-only */}
                     <Route path="/portal/no-access" element={<PortalNoAccess />} />
