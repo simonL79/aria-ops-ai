@@ -18,6 +18,7 @@ import SocialLinksSection from '@/components/sections/SocialLinksSection';
 import AINewsFeedSection from '@/components/sections/AINewsFeedSection';
 import SectionDivider from '@/components/ui/SectionDivider';
 import ChatWidget from '@/components/widgets/ChatWidget';
+import SEO from '@/components/seo/SEO';
 
 const HomePage = () => {
   const { hash } = useLocation();

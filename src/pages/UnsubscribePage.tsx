@@ -70,6 +70,7 @@ const UnsubscribePage = () => {
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center px-6">
+      <SEO title="Unsubscribe — A.R.I.A™" description="Unsubscribe from A.R.I.A™ communications." path="/unsubscribe" noIndex />
       <Card className="bg-gray-900 border-gray-800 p-8 max-w-md w-full text-center">
         {status === 'loading' && (
           <>

@@ -1,10 +1,16 @@
 
 import React from 'react';
 import PublicLayout from '@/components/layout/PublicLayout';
+import SEO from '@/components/seo/SEO';
 
 const AboutPage = () => {
   return (
     <PublicLayout>
+      <SEO
+        title="About A.R.I.A™ — AI Reputation Intelligence Platform"
+        description="A.R.I.A™ is an enterprise-grade AI reputation defense platform protecting executives, public figures, and organisations across the global digital landscape."
+        path="/about"
+      />
       <div className="min-h-screen bg-background text-foreground py-16">
         <div className="container mx-auto px-6">
           <div className="max-w-4xl mx-auto">
