@@ -41,8 +41,10 @@ export function SEO({ title, description, path, noIndex, ogType = "website", ima
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
       {absImage ? <meta property="og:image" content={absImage} /> : null}
-      {absImage ? <meta property="og:image:width" content="1600" /> : null}
-      {absImage ? <meta property="og:image:height" content="896" /> : null}
+      {absImage ? <meta property="og:image:width" content="1920" /> : null}
+      {absImage ? <meta property="og:image:height" content="1080" /> : null}
+      {absImage ? <meta property="og:image:type" content="image/jpeg" /> : null}
+      {absImage ? <meta property="og:image:alt" content={title} /> : null}
       {absImage ? <meta name="twitter:card" content="summary_large_image" /> : null}
       {absImage ? <meta name="twitter:image" content={absImage} /> : null}
       {noIndex ? <meta name="robots" content="noindex, nofollow" /> : null}

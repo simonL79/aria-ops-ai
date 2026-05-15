@@ -17,8 +17,8 @@
  */
 
 const BASE_URL = (process.env.BASE_URL || 'https://www.ariaops.co.uk').replace(/\/$/, '');
-const EXPECTED_W = 1600;
-const EXPECTED_H = 896;
+const EXPECTED_W = 1920;
+const EXPECTED_H = 1080;
 
 const PAGES = [
   { path: '/simon-lindsay/ksl',                  image: '/og/simon-ksl.jpg' },
