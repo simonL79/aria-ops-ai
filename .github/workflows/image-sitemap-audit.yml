@@ -1,0 +1,31 @@
+name: Image sitemap audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'public/image-sitemap.xml'
+      - 'public/og/**'
+      - 'scripts/audit-image-sitemap.mjs'
+      - '.github/workflows/image-sitemap-audit.yml'
+  schedule:
+    - cron: '45 6 * * *'  # daily 06:45 UTC
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: 'Base URL to audit (defaults to production)'
+        required: false
+        default: 'https://www.ariaops.co.uk'
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node_version: '20'
+      - name: Audit image sitemap (local + remote 200/JPEG as Googlebot-Image)
+        env:
+          BASE_URL: ${{ github.event.inputs.base_url || 'https://www.ariaops.co.uk' }}
+        run: node scripts/audit-image-sitemap.mjs
