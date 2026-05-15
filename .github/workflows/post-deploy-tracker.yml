@@ -33,6 +33,10 @@ on:
         description: 'Tracker fail policy: strict (fail if any heroLive=false), regression (fail only on regressions vs prior snapshot), off (never fail)'
         required: false
         default: 'strict'
+      allow_pw_cache_miss:
+        description: 'Permit a Playwright cache miss for this run (use after a Playwright version bump). Default: strict mode fails on miss.'
+        required: false
+        default: 'false'
 
 permissions:
   contents: write   # needed to commit history.md back
@@ -82,7 +86,10 @@ jobs:
           NPM_PRIMARY_KEY:  ${{ steps.npm-cache.outputs.cache-primary-key }}
           NPM_MATCHED_KEY:  ${{ steps.npm-cache.outputs.cache-matched-key }}
           NPM_RESTORE_KEYS: "npm-cache-playwright-"
-          REQUIRE_PW_CACHE: ${{ vars.REQUIRE_PW_CACHE || 'false' }}
+          # Strict by default: a cache miss fails the job. The very first run
+          # after a Playwright version bump will legitimately miss — set repo
+          # variable ALLOW_PW_CACHE_MISS=true (or pass workflow input) to bypass.
+          ALLOW_PW_CACHE_MISS: ${{ github.event.inputs.allow_pw_cache_miss || vars.ALLOW_PW_CACHE_MISS || 'false' }}
         run: |
           echo "──────── Playwright cache ────────"
           echo "  primary key   : ${PW_PRIMARY_KEY}"
@@ -101,9 +108,11 @@ jobs:
           elif [ -n "${PW_MATCHED_KEY}" ]; then
             echo "::notice title=Playwright cache::PARTIAL (matched ${PW_MATCHED_KEY}) — primary key ${PW_PRIMARY_KEY} not found, but restored from a fallback. Browsers may still need re-install."
           else
-            echo "::warning title=Playwright cache::MISS — neither ${PW_PRIMARY_KEY} nor any restore-key matched. Chromium will be downloaded (~120MB). First run after a Playwright version bump always misses."
-            if [ "${REQUIRE_PW_CACHE}" = "true" ]; then
-              echo "::error title=Playwright cache::REQUIRE_PW_CACHE=true and cache missed — failing run."
+            echo "::error title=Playwright cache::MISS — neither ${PW_PRIMARY_KEY} nor any restore-key matched. Chromium would be downloaded (~120MB)."
+            if [ "${ALLOW_PW_CACHE_MISS}" = "true" ]; then
+              echo "::warning title=Playwright cache::ALLOW_PW_CACHE_MISS=true — proceeding with download despite strict mode."
+            else
+              echo "::error title=Playwright cache::Strict mode is on by default. Re-run with workflow input allow_pw_cache_miss=true (or set repo variable ALLOW_PW_CACHE_MISS=true) to permit a one-off download — e.g. immediately after a Playwright version bump."
               exit 1
             fi
           fi
