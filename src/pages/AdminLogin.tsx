@@ -3,6 +3,7 @@ import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import AdminLoginGateway from '@/components/auth/AdminLoginGateway';
+import SEO from '@/components/seo/SEO';
 
 const AdminLogin = () => {
   const { isAuthenticated, isAdmin, isLoading } = useAuth();
@@ -36,7 +37,12 @@ const AdminLogin = () => {
     }
   };
 
-  return <AdminLoginGateway onComplete={handleLoginComplete} />;
+  return (
+    <>
+      <SEO title="Admin sign in — A.R.I.A™" description="Administrator sign in." path="/admin/login" noIndex />
+      <AdminLoginGateway onComplete={handleLoginComplete} />
+    </>
+  );
 };
 
 export default AdminLogin;

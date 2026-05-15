@@ -32,10 +32,12 @@ const Logo = ({ variant = 'default', size = 'md', className }: LogoProps) => {
 
   return (
     <div className={cn('flex items-center', className)}>
-      <img 
-        src="/lovable-uploads/37370275-bf62-4eab-b0e3-e184ce3fa142.png" 
-        alt="A.R.I.A Logo" 
-        className={cn(logoSize.logo, 'max-w-full')}
+      <img
+        src="/lovable-uploads/37370275-bf62-4eab-b0e3-e184ce3fa142.png"
+        alt="A.R.I.A Logo"
+        width={512}
+        height={512}
+        className={cn(logoSize.logo, 'max-w-full h-auto')}
       />
     </div>
   );

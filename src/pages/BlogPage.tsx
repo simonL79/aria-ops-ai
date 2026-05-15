@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Helmet } from 'react-helmet-async';
+import SEO from '@/components/seo/SEO';
 import PublicLayout from '@/components/layout/PublicLayout';
 import { useBlogPosts } from '@/hooks/useBlogPosts';
 import { Link } from 'react-router-dom';
@@ -39,9 +40,12 @@ const BlogPage = () => {
 
   return (
     <PublicLayout>
+      <SEO
+        title="Blog — A.R.I.A™ Reputation Intelligence Insights"
+        description="Articles and insights on digital reputation management, online security, brand protection, and AI threat defence from the A.R.I.A™ team."
+        path="/blog"
+      />
       <Helmet>
-        <title>Blog | A.R.I.A™ Ops</title>
-        <meta name="description" content="Read our latest articles and insights on digital reputation management, online security, and brand protection." />
         <link rel="alternate" type="application/json" title="Blog Feed" href="https://getautoseo.com/feeds/14237/jk-unsGNI0FWRs6DS_Mx0WJqmzRFLgcEoG39QeOCWN0.json" />
       </Helmet>
       <div className="min-h-screen bg-background py-12 sm:py-16">

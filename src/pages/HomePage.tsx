@@ -18,6 +18,7 @@ import SocialLinksSection from '@/components/sections/SocialLinksSection';
 import AINewsFeedSection from '@/components/sections/AINewsFeedSection';
 import SectionDivider from '@/components/ui/SectionDivider';
 import ChatWidget from '@/components/widgets/ChatWidget';
+import SEO from '@/components/seo/SEO';
 
 const HomePage = () => {
   const { hash } = useLocation();
@@ -35,6 +36,11 @@ const HomePage = () => {
   return (
     <PublicPagesProtection>
       <PublicLayout>
+        <SEO
+          title="A.R.I.A™ — AI Reputation Defence & Threat Intelligence"
+          description="A.R.I.A™ is an AI-powered reputation defence platform: real-time threat detection, narrative protection, and identity defence for executives and brands."
+          path="/"
+        />
         <div className="bg-background text-foreground min-h-screen">
           <HeroSection />
           

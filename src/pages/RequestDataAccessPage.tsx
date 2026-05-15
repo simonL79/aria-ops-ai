@@ -12,6 +12,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from '@/components/ui/checkbox';
 import { Shield, Send, ArrowLeft, Check } from 'lucide-react';
 import { toast } from 'sonner';
+import SEO from '@/components/seo/SEO';
 
 const RequestDataAccessPage = () => {
   const navigate = useNavigate();
@@ -54,6 +55,11 @@ const RequestDataAccessPage = () => {
 
   return (
     <div className="min-h-screen bg-premium-silver/20">
+      <SEO
+        title="Request Data Access — A.R.I.A™ Subject Access Request"
+        description="Submit a UK GDPR data subject access request to A.R.I.A™. We respond within statutory timeframes."
+        path="/request-data-access"
+      />
       {/* Sticky Navigation */}
       <StickyHeader isScrolled={true} />
 

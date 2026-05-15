@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import SEO from '@/components/seo/SEO';
 
 type Status = 'loading' | 'valid' | 'already_unsubscribed' | 'invalid' | 'success' | 'error';
 
@@ -70,6 +71,7 @@ const UnsubscribePage = () => {
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center px-6">
+      <SEO title="Unsubscribe — A.R.I.A™" description="Unsubscribe from A.R.I.A™ communications." path="/unsubscribe" noIndex />
       <Card className="bg-gray-900 border-gray-800 p-8 max-w-md w-full text-center">
         {status === 'loading' && (
           <>

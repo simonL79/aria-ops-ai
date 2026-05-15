@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/accordion';
 import ReadingProgressBar from '@/components/blog/ReadingProgressBar';
 
-const SITE_URL = 'https://aria-ops-ai.lovable.app';
+const SITE_URL = 'https://www.ariaops.co.uk';
 const SITE_NAME = 'A.R.I.A™ Ops';
 
 const formatDate = (dateStr: string | null) => {
@@ -135,11 +135,12 @@ const BlogPostPage = () => {
 
             {/* Hero image */}
             {(post.hero_image_url || post.image_url) && (
-              <div className="mb-8 rounded-lg overflow-hidden border border-border" style={{ maxHeight: 400 }}>
+              <div className="mb-8 rounded-lg overflow-hidden border border-border aspect-video">
                 <img
                   src={post.hero_image_url || post.image_url!}
                   alt={post.hero_image_alt || post.title}
                   className="w-full h-full object-cover"
+                  loading="eager"
                   onError={(e) => { (e.target as HTMLElement).parentElement!.style.display = 'none'; }}
                 />
               </div>

@@ -3,10 +3,16 @@ import React from 'react';
 import PublicLayout from '@/components/layout/PublicLayout';
 import { Button } from '@/components/ui/button';
 import { Mail, Phone, MapPin } from 'lucide-react';
+import SEO from '@/components/seo/SEO';
 
 const ContactPage = () => {
   return (
     <PublicLayout>
+      <SEO
+        title="Contact A.R.I.A™ — Reputation Intelligence Specialists UK"
+        description="Speak to A.R.I.A™ about online reputation defence, threat detection and narrative protection. UK-based reputation intelligence experts."
+        path="/contact"
+      />
       <div className="min-h-screen bg-background text-foreground py-16">
         <div className="container mx-auto px-6">
           <div className="max-w-4xl mx-auto">
