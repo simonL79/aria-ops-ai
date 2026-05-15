@@ -33,6 +33,10 @@ on:
         description: 'Tracker fail policy: strict (fail if any heroLive=false), regression (fail only on regressions vs prior snapshot), off (never fail)'
         required: false
         default: 'strict'
+      allow_pw_cache_miss:
+        description: 'Permit a Playwright cache miss for this run (use after a Playwright version bump). Default: strict mode fails on miss.'
+        required: false
+        default: 'false'
 
 permissions:
   contents: write   # needed to commit history.md back
