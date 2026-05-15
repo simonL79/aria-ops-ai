@@ -1,0 +1,127 @@
+name: Post-publish SEO checks
+
+# After a SEO-affecting push to main (or manual dispatch right after
+# clicking Lovable Publish → Update), wait for the new build to go
+# live, then run all three SEO validators in parallel and surface a
+# pass/fail summary in the workflow run.
+#
+#   1. check-og-images.mjs         — /og/*.jpg present + 1920x1080
+#   2. test-og-rendered.mjs        — rendered og:image + twitter:image
+#                                    meta on each page point at
+#                                    /og/<slug>.jpg with correct dims
+#   3. check-jsonld-images.mjs     — Person.image is an ImageObject
+#                                    with width 1920 + height 1080
+#
+# Any failing job fails the workflow; the summary step prints which
+# checks passed or failed and links to each job log.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/components/seo/**'
+      - 'src/pages/simon-lindsay/**'
+      - 'public/og/**'
+      - 'public/image-sitemap.xml'
+      - 'scripts/check-og-images.mjs'
+      - 'scripts/test-og-rendered.mjs'
+      - 'scripts/check-jsonld-images.mjs'
+      - 'scripts/wait-for-deploy.mjs'
+      - '.github/workflows/post-publish-seo-checks.yml'
+  workflow_dispatch:
+    inputs:
+      skip_wait:
+        description: 'Skip the production-live probe (run checks immediately)'
+        required: false
+        default: 'false'
+      base_url:
+        description: 'Base URL to validate against'
+        required: false
+        default: 'https://www.ariaops.co.uk'
+
+concurrency:
+  group: post-publish-seo-checks
+  cancel-in-progress: false
+
+jobs:
+  wait-for-live:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node_version: '20' }
+      - name: Install Playwright (chromium)
+        if: ${{ github.event.inputs.skip_wait != 'true' }}
+        run: npx --yes playwright@1.47.0 install --with-deps chromium
+      - name: Wait for production deploy
+        if: ${{ github.event.inputs.skip_wait != 'true' }}
+        env:
+          BASE_URL: ${{ github.event.inputs.base_url || 'https://www.ariaops.co.uk' }}
+          TIMEOUT_MS: '1800000'
+          INTERVAL_MS: '30000'
+        run: node scripts/wait-for-deploy.mjs
+
+  og-files:
+    needs: wait-for-live
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node_version: '20' }
+      - name: Verify /og/*.jpg present at 1920x1080
+        env:
+          BASE_URL: ${{ github.event.inputs.base_url || 'https://www.ariaops.co.uk' }}
+        run: node scripts/check-og-images.mjs
+
+  og-rendered:
+    needs: wait-for-live
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node_version: '20' }
+      - name: Install Playwright (chromium)
+        run: npx --yes playwright@1.47.0 install --with-deps chromium
+      - name: Verify rendered og:image + twitter:image meta
+        env:
+          BASE_URL: ${{ github.event.inputs.base_url || 'https://www.ariaops.co.uk' }}
+        run: node scripts/test-og-rendered.mjs
+
+  jsonld:
+    needs: wait-for-live
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node_version: '20' }
+      - name: Install Playwright (chromium)
+        run: npx --yes playwright@1.47.0 install --with-deps chromium
+      - name: Verify Person.image ImageObject (1920x1080)
+        env:
+          BASE_URL: ${{ github.event.inputs.base_url || 'https://www.ariaops.co.uk' }}
+          RENDER: '1'
+        run: node scripts/check-jsonld-images.mjs
+
+  summary:
+    needs: [og-files, og-rendered, jsonld]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Summarize results
+        run: |
+          {
+            echo "## Post-publish SEO check summary"
+            echo ""
+            echo "| Check | Result |"
+            echo "|---|---|"
+            echo "| /og/*.jpg files (1920x1080) | ${{ needs.og-files.result }} |"
+            echo "| Rendered og:image + twitter:image | ${{ needs.og-rendered.result }} |"
+            echo "| JSON-LD Person.image ImageObject | ${{ needs.jsonld.result }} |"
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ "${{ needs.og-files.result }}" != "success" ] || \
+             [ "${{ needs.og-rendered.result }}" != "success" ] || \
+             [ "${{ needs.jsonld.result }}" != "success" ]; then
+            echo "❌ One or more SEO checks failed — see job logs."
+            exit 1
+          fi
+          echo "✅ All post-publish SEO checks passed."
