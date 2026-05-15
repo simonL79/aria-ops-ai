@@ -1,8 +1,11 @@
 import React from 'react';
 import SimonClusterPage from '@/components/seo/SimonClusterPage';
+import heroImage from '@/assets/hero-simon-glasgow.jpg';
 
 const SimonLindsayGlasgowPage = () => (
   <SimonClusterPage
+    heroImage={heroImage}
+    heroAlt="Simon Lindsay — Glasgow-based founder of A.R.I.A™"
     title="Simon Lindsay Glasgow — Founder, A.R.I.A™ Reputation Intelligence"
     description="Simon Lindsay is a Glasgow-based entrepreneur and founder of A.R.I.A™, a UK reputation intelligence platform. Background, current work, and how to engage."
     path="/simon-lindsay/glasgow"

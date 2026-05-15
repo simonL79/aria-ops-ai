@@ -23,6 +23,9 @@ export interface SimonClusterPageProps {
   /** Person JSON-LD knowsAbout / jobTitle override for keyword targeting. */
   personJobTitle?: string;
   personKnowsAbout?: string[];
+  /** Hero image — rendered above the H1 and emitted as og:image / twitter:image. */
+  heroImage?: string;
+  heroAlt?: string;
 }
 
 const PERSON_BASE = {
@@ -53,12 +56,15 @@ const SimonClusterPage: React.FC<SimonClusterPageProps> = ({
   related = [],
   personJobTitle = 'Founder, A.R.I.A™ Reputation Intelligence',
   personKnowsAbout = [],
+  heroImage,
+  heroAlt,
 }) => {
   const personJsonLd = {
     ...PERSON_BASE,
     jobTitle: personJobTitle,
     knowsAbout: personKnowsAbout,
     mainEntityOfPage: `https://www.ariaops.co.uk${path}`,
+    ...(heroImage ? { image: `https://www.ariaops.co.uk${heroImage}` } : {}),
   };
 
   const breadcrumbJsonLd = {
@@ -87,9 +93,20 @@ const SimonClusterPage: React.FC<SimonClusterPageProps> = ({
 
   return (
     <PublicLayout>
-      <SEO title={title} description={description} path={path} ogType="article" jsonLd={jsonLd} />
+      <SEO title={title} description={description} path={path} ogType="article" image={heroImage} jsonLd={jsonLd} />
 
       <article className="bg-background text-foreground">
+        {heroImage && (
+          <div className="w-full border-b border-border/40">
+            <img
+              src={heroImage}
+              alt={heroAlt || h1}
+              width={1600}
+              height={896}
+              className="w-full h-auto object-cover max-h-[480px]"
+            />
+          </div>
+        )}
         <section className="container mx-auto px-6 pt-20 pb-10 max-w-4xl">
           <p className="text-sm uppercase tracking-widest text-primary mb-4">{eyebrow}</p>
           <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">{h1}</h1>

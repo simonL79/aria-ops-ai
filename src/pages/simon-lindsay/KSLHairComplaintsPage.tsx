@@ -1,8 +1,11 @@
 import React from 'react';
 import SimonClusterPage from '@/components/seo/SimonClusterPage';
+import heroImage from '@/assets/hero-simon-ksl-hair-complaints.jpg';
 
 const SimonLindsayKSLHairComplaintsPage = () => (
   <SimonClusterPage
+    heroImage={heroImage}
+    heroAlt="KSL Hair complaints — official statement and resolution routes"
     title="KSL Hair Complaints — Official Statement & Resolution Routes"
     description="Official statement on historical KSL Hair complaints, the formal UK insolvency wind-down, and the routes available to former customers seeking resolution."
     path="/simon-lindsay/ksl-hair-complaints"
