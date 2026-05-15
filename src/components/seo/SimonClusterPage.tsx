@@ -23,6 +23,9 @@ export interface SimonClusterPageProps {
   /** Person JSON-LD knowsAbout / jobTitle override for keyword targeting. */
   personJobTitle?: string;
   personKnowsAbout?: string[];
+  /** Hero image — rendered above the H1 and emitted as og:image / twitter:image. */
+  heroImage?: string;
+  heroAlt?: string;
 }
 
 const PERSON_BASE = {
@@ -53,12 +56,15 @@ const SimonClusterPage: React.FC<SimonClusterPageProps> = ({
   related = [],
   personJobTitle = 'Founder, A.R.I.A™ Reputation Intelligence',
   personKnowsAbout = [],
+  heroImage,
+  heroAlt,
 }) => {
   const personJsonLd = {
     ...PERSON_BASE,
     jobTitle: personJobTitle,
     knowsAbout: personKnowsAbout,
     mainEntityOfPage: `https://www.ariaops.co.uk${path}`,
+    ...(heroImage ? { image: `https://www.ariaops.co.uk${heroImage}` } : {}),
   };
 
   const breadcrumbJsonLd = {
