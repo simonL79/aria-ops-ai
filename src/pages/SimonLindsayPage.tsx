@@ -64,6 +64,18 @@ const SimonLindsayPage = () => {
                   </div>
                 </div>
               </div>
+
+              <div className="bg-card border border-border rounded-lg p-8">
+                <h2 className="text-2xl font-bold text-primary mb-6">Explore Simon's work</h2>
+                <ul className="grid sm:grid-cols-2 gap-3 text-primary">
+                  <li><a href="/simon-lindsay/ai" className="hover:underline">→ Simon Lindsay & AI</a></li>
+                  <li><a href="/simon-lindsay/aria" className="hover:underline">→ Simon Lindsay & A.R.I.A™</a></li>
+                  <li><a href="/simon-lindsay/reputation-intelligence" className="hover:underline">→ Reputation Intelligence</a></li>
+                  <li><a href="/simon-lindsay/commercial-strategist" className="hover:underline">→ Commercial Strategist</a></li>
+                  <li><a href="/simon-lindsay/entrepreneur" className="hover:underline">→ Entrepreneur</a></li>
+                  <li><a href="/simon-lindsay/boxing" className="hover:underline">→ Boxing & BKFC</a></li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
