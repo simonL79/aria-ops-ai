@@ -1,0 +1,36 @@
+name: JSON-LD ImageObject check
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/components/seo/**'
+      - 'src/pages/simon-lindsay/**'
+      - 'scripts/check-jsonld-images.mjs'
+      - '.github/workflows/jsonld-image-check.yml'
+  schedule:
+    - cron: '15 6 * * *'  # daily 06:15 UTC
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: 'Base URL to check (defaults to production)'
+        required: false
+        default: 'https://www.ariaops.co.uk'
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node_version: '20'
+      - name: Install Playwright (for SPA hydration)
+        run: |
+          npm i --no-save playwright
+          npx playwright install --with-deps chromium
+      - name: Verify Person.image is ImageObject 1920x1080
+        env:
+          BASE_URL: ${{ github.event.inputs.base_url || 'https://www.ariaops.co.uk' }}
+          RENDER: '1'
+        run: node scripts/check-jsonld-images.mjs
