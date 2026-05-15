@@ -101,7 +101,10 @@ jobs:
           BASE_URL: https://www.ariaops.co.uk
           TIMEOUT_MS: '1800000'   # 30 min — Lovable publish is manual
           INTERVAL_MS: '30000'
-        run: node scripts/wait-for-deploy.mjs
+          REPORT_DIR: og-tracking
+        run: |
+          mkdir -p og-tracking
+          node scripts/wait-for-deploy.mjs
 
       - name: Run Google Images tracker
         id: tracker
