@@ -14,3 +14,4 @@ User-agent: *
 Allow: /
 
 Sitemap: https://www.ariaops.co.uk/sitemap.xml
+Sitemap: https://www.ariaops.co.uk/image-sitemap.xml

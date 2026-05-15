@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <url>
+    <loc>https://www.ariaops.co.uk/simon-lindsay/ksl</loc>
+    <image:image>
+      <image:loc>https://www.ariaops.co.uk/og/simon-ksl.jpg</image:loc>
+      <image:title>Simon Lindsay — KSL</image:title>
+      <image:caption>Simon Lindsay, founder of KSL Hair and A.R.I.A reputation intelligence.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.ariaops.co.uk/simon-lindsay/glasgow</loc>
+    <image:image>
+      <image:loc>https://www.ariaops.co.uk/og/simon-glasgow.jpg</image:loc>
+      <image:title>Simon Lindsay — Glasgow</image:title>
+      <image:caption>Glasgow-based founder Simon Lindsay and A.R.I.A reputation intelligence.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.ariaops.co.uk/simon-lindsay/ksl-hair</loc>
+    <image:image>
+      <image:loc>https://www.ariaops.co.uk/og/simon-ksl-hair.jpg</image:loc>
+      <image:title>KSL Hair — Brand history</image:title>
+      <image:caption>The verified history of KSL Hair Clinics and founder Simon Lindsay.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.ariaops.co.uk/simon-lindsay/reviews</loc>
+    <image:image>
+      <image:loc>https://www.ariaops.co.uk/og/simon-reviews.jpg</image:loc>
+      <image:title>Simon Lindsay — Reviews & References</image:title>
+      <image:caption>On-record references and review context for Simon Lindsay.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.ariaops.co.uk/simon-lindsay/bankruptcy</loc>
+    <image:image>
+      <image:loc>https://www.ariaops.co.uk/og/simon-bankruptcy.jpg</image:loc>
+      <image:title>Simon Lindsay — The record on insolvency</image:title>
+      <image:caption>Factual account of corporate insolvency proceedings tied to Simon Lindsay's prior ventures.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.ariaops.co.uk/simon-lindsay/ksl-hair-complaints</loc>
+    <image:image>
+      <image:loc>https://www.ariaops.co.uk/og/simon-ksl-hair-complaints.jpg</image:loc>
+      <image:title>KSL Hair — Complaints handling</image:title>
+      <image:caption>How complaints relating to KSL Hair Clinics are addressed on record.</image:caption>
+    </image:image>
+  </url>
+</urlset>
