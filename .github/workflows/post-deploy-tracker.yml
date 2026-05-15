@@ -29,6 +29,10 @@ on:
         description: 'Skip the production-live probe (run tracker immediately)'
         required: false
         default: 'false'
+      fail_mode:
+        description: 'Tracker fail policy: strict (fail if any heroLive=false), regression (fail only on regressions vs prior snapshot), off (never fail)'
+        required: false
+        default: 'strict'
 
 permissions:
   contents: write   # needed to commit history.md back
@@ -60,14 +64,23 @@ jobs:
         run: node scripts/wait-for-deploy.mjs
 
       - name: Run Google Images tracker
+        id: tracker
         env:
           SERPAPI_API_KEY: ${{ secrets.SERPAPI_API_KEY }}
           REPORT_DIR: og-tracking
+          # Fail the job if any tracked query has heroLive=false.
+          # Override per-run via workflow_dispatch input or change to
+          # "regression" to only fail on previously-live queries
+          # going dark.
+          FAIL_MODE: ${{ github.event.inputs.fail_mode || 'strict' }}
         run: |
           mkdir -p og-tracking
           node scripts/track-google-images.mjs
 
+      # Always append history + commit, even when the tracker fails,
+      # so the regression is captured in-repo + on the dashboard.
       - name: Append run to og-tracking/history.md
+        if: always()
         env:
           TRIGGER_LABEL: ${{ github.event_name == 'workflow_dispatch' && 'manual post-publish' || format('push {0}', github.sha) }}
         run: node scripts/append-tracker-history.mjs
