@@ -81,11 +81,25 @@ async function fetchRenderedHtml(url) {
     const page = await browser.newPage();
     await page.goto(url, { waitUntil: 'networkidle', timeout: 30_000 });
     // Helmet typically injects within a tick of hydration.
-    await page.waitForFunction(
-      () => document.querySelectorAll('script[type="application/ld+json"]').length > 0,
-      null,
-      { timeout: 10_000 },
-    ).catch(() => {});
+    // Wait for a Person node specifically (sitewide Organization/WebSite blocks
+    // ship in the static HTML; Person is Helmet-injected after hydration).
+    await page.waitForFunction(() => {
+      const scripts = document.querySelectorAll('script[type="application/ld+json"]');
+      for (const s of scripts) {
+        try {
+          const j = JSON.parse(s.textContent || '');
+          const stack = Array.isArray(j) ? [...j] : [j];
+          while (stack.length) {
+            const n = stack.pop();
+            if (!n || typeof n !== 'object') continue;
+            const t = n['@type'];
+            if (t === 'Person' || (Array.isArray(t) && t.includes('Person'))) return true;
+            if (Array.isArray(n['@graph'])) stack.push(...n['@graph']);
+          }
+        } catch {}
+      }
+      return false;
+    }, null, { timeout: 15_000 }).catch(() => {});
     return await page.content();
   } finally {
     await browser.close();
