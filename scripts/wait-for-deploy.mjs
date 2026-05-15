@@ -24,6 +24,8 @@ const BASE = (process.env.BASE_URL || 'https://www.ariaops.co.uk').replace(/\/$/
 const TIMEOUT_MS = Number(process.env.TIMEOUT_MS || 30 * 60 * 1000); // 30 min
 const INTERVAL_MS = Number(process.env.INTERVAL_MS || 30 * 1000);    // 30 s
 const PROBE_TIMEOUT_MS = Number(process.env.PROBE_TIMEOUT_MS || 15_000);
+const PROBE_RETRIES   = Number(process.env.PROBE_RETRIES   || 2);   // extra tries on transient failure
+const RETRY_BACKOFF_MS = Number(process.env.RETRY_BACKOFF_MS || 1_500);
 
 const PROBES = [
   { path: '/simon-lindsay/ksl',                 slug: 'simon-ksl' },
@@ -34,7 +36,7 @@ const PROBES = [
   { path: '/simon-lindsay/ksl-hair-complaints', slug: 'simon-ksl-hair-complaints' },
 ].map((p) => ({ ...p, expected: `${BASE}/og/${p.slug}.jpg` }));
 
-async function readOg(ctx, probe) {
+async function readOgOnce(ctx, probe) {
   const page = await ctx.newPage();
   try {
     await page.goto(`${BASE}${probe.path}`, { waitUntil: 'domcontentloaded', timeout: 60_000 });
@@ -51,6 +53,24 @@ async function readOg(ctx, probe) {
   } finally {
     await page.close();
   }
+}
+
+// Wraps readOgOnce with bounded retry + exponential backoff so a single
+// transient navigation/network blip doesn't waste a whole 30s outer cycle.
+async function readOg(ctx, probe) {
+  let lastErr;
+  for (let attempt = 0; attempt <= PROBE_RETRIES; attempt++) {
+    try {
+      return await readOgOnce(ctx, probe);
+    } catch (e) {
+      lastErr = e;
+      if (attempt === PROBE_RETRIES) break;
+      const delay = RETRY_BACKOFF_MS * Math.pow(2, attempt);
+      console.log(`    ↻ ${probe.path} retry ${attempt + 1}/${PROBE_RETRIES} after ${delay}ms (${e.message})`);
+      await new Promise((r) => setTimeout(r, delay));
+    }
+  }
+  throw lastErr;
 }
 
 const start = Date.now();
