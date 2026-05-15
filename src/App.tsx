@@ -45,6 +45,12 @@ import CybersecurityFrameworkPage from './pages/CybersecurityFrameworkPage';
 import RemoveGoogleReviewsPage from './pages/services/RemoveGoogleReviewsPage';
 import OnlineImpersonationUKPage from './pages/services/OnlineImpersonationUKPage';
 import BrandProtectionPage from './pages/services/BrandProtectionPage';
+import SimonLindsayAIPage from './pages/simon-lindsay/AIPage';
+import SimonLindsayEntrepreneurPage from './pages/simon-lindsay/EntrepreneurPage';
+import SimonLindsayAriaPage from './pages/simon-lindsay/AriaPage';
+import SimonLindsayCommercialStrategistPage from './pages/simon-lindsay/CommercialStrategistPage';
+import SimonLindsayBoxingPage from './pages/simon-lindsay/BoxingPage';
+import SimonLindsayReputationIntelligencePage from './pages/simon-lindsay/ReputationIntelligencePage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -79,6 +85,12 @@ function App() {
                     <Route path="/services/remove-google-reviews" element={<RemoveGoogleReviewsPage />} />
                     <Route path="/services/online-impersonation-uk" element={<OnlineImpersonationUKPage />} />
                     <Route path="/services/brand-protection" element={<BrandProtectionPage />} />
+                    <Route path="/simon-lindsay/ai" element={<SimonLindsayAIPage />} />
+                    <Route path="/simon-lindsay/entrepreneur" element={<SimonLindsayEntrepreneurPage />} />
+                    <Route path="/simon-lindsay/aria" element={<SimonLindsayAriaPage />} />
+                    <Route path="/simon-lindsay/commercial-strategist" element={<SimonLindsayCommercialStrategistPage />} />
+                    <Route path="/simon-lindsay/boxing" element={<SimonLindsayBoxingPage />} />
+                    <Route path="/simon-lindsay/reputation-intelligence" element={<SimonLindsayReputationIntelligencePage />} />
 
                     {/* Client Portal — read-only */}
                     <Route path="/portal/no-access" element={<PortalNoAccess />} />
