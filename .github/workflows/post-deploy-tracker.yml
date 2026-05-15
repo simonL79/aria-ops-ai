@@ -104,9 +104,11 @@ jobs:
           elif [ -n "${PW_MATCHED_KEY}" ]; then
             echo "::notice title=Playwright cache::PARTIAL (matched ${PW_MATCHED_KEY}) — primary key ${PW_PRIMARY_KEY} not found, but restored from a fallback. Browsers may still need re-install."
           else
-            echo "::warning title=Playwright cache::MISS — neither ${PW_PRIMARY_KEY} nor any restore-key matched. Chromium will be downloaded (~120MB). First run after a Playwright version bump always misses."
-            if [ "${REQUIRE_PW_CACHE}" = "true" ]; then
-              echo "::error title=Playwright cache::REQUIRE_PW_CACHE=true and cache missed — failing run."
+            echo "::error title=Playwright cache::MISS — neither ${PW_PRIMARY_KEY} nor any restore-key matched. Chromium would be downloaded (~120MB)."
+            if [ "${ALLOW_PW_CACHE_MISS}" = "true" ]; then
+              echo "::warning title=Playwright cache::ALLOW_PW_CACHE_MISS=true — proceeding with download despite strict mode."
+            else
+              echo "::error title=Playwright cache::Strict mode is on by default. Re-run with workflow input allow_pw_cache_miss=true (or set repo variable ALLOW_PW_CACHE_MISS=true) to permit a one-off download — e.g. immediately after a Playwright version bump."
               exit 1
             fi
           fi
