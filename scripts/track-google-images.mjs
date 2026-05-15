@@ -94,6 +94,35 @@ console.table(summary);
 
 const REPORT_DIR = process.env.REPORT_DIR || '/mnt/documents/og-tracking';
 mkdirSync(REPORT_DIR, { recursive: true });
-const outFile = `${REPORT_DIR}/${stamp.replace(/[:.]/g, '-')}.json`;
+const safeStamp = stamp.replace(/[:.]/g, '-');
+const outFile = `${REPORT_DIR}/${safeStamp}.json`;
 writeFileSync(outFile, JSON.stringify({ stamp, rows }, null, 2));
 console.log(`\nFull report: ${outFile}`);
+
+// CSV export — one row per tracked query, RFC 4180-ish quoting so it
+// opens cleanly in Excel/Google Sheets without further munging.
+const csvEscape = (v) => {
+  if (v === null || v === undefined) return '';
+  const s = String(v);
+  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+};
+const csvHeader = ['stamp', 'query', 'pageMatchRank', 'imageMatchRank', 'heroLive', 'expectedPage', 'expectedImg', 'matchedSource', 'matchedThumbnail', 'totalResults', 'error'];
+const csvLines = [csvHeader.join(',')];
+for (const r of rows) {
+  csvLines.push([
+    stamp,
+    r.query,
+    r.pageMatchRank ?? '',
+    r.imageMatchRank ?? '',
+    r.imageMatchRank !== null,   // raw boolean
+    r.expectedPage,
+    r.expectedImg,
+    r.matchedSource ?? '',
+    r.matchedThumbnail ?? '',
+    r.totalResults ?? '',
+    r.error ?? '',
+  ].map(csvEscape).join(','));
+}
+const csvFile = `${REPORT_DIR}/${safeStamp}.csv`;
+writeFileSync(csvFile, csvLines.join('\n') + '\n');
+console.log(`CSV export:  ${csvFile}`);
