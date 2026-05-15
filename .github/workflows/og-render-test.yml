@@ -1,0 +1,36 @@
+name: OG render test (strict)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'public/og/**'
+      - 'src/components/seo/**'
+      - 'src/pages/simon-lindsay/**'
+      - 'scripts/test-og-rendered.mjs'
+      - '.github/workflows/og-render-test.yml'
+  schedule:
+    - cron: '30 6 * * *'  # daily 06:30 UTC
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: 'Base URL to test (defaults to production)'
+        required: false
+        default: 'https://www.ariaops.co.uk'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node_version: '20'
+      - name: Install Playwright + chromium
+        run: |
+          npm i --no-save playwright
+          npx playwright install --with-deps chromium
+      - name: Strict og:image render test
+        env:
+          BASE_URL: ${{ github.event.inputs.base_url || 'https://www.ariaops.co.uk' }}
+        run: node scripts/test-og-rendered.mjs
