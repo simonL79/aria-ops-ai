@@ -29,6 +29,10 @@ on:
         description: 'Skip the production-live probe (run tracker immediately)'
         required: false
         default: 'false'
+      fail_mode:
+        description: 'Tracker fail policy: strict (fail if any heroLive=false), regression (fail only on regressions vs prior snapshot), off (never fail)'
+        required: false
+        default: 'strict'
 
 permissions:
   contents: write   # needed to commit history.md back
