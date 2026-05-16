@@ -151,6 +151,45 @@ jobs:
             fi
           fi
 
+      # Warm-cache mode: when the Playwright cache missed (no exact hit) and
+      # we just paid the ~120MB chromium download, optionally tar up the
+      # freshly-populated cache and upload it as a workflow artifact. The next
+      # run (or a human) can download it and seed ~/.cache/ms-playwright
+      # manually if actions/cache@v4 hasn't yet saved at job end (e.g. job
+      # cancelled, or first run on a new key while debugging).
+      - name: Pack warm Playwright cache (on miss)
+        id: warm-pack
+        if: ${{ github.event.inputs.skip_wait != 'true' && steps.pw-cache.outputs.cache-hit != 'true' && (github.event.inputs.warm_cache_on_miss || 'true') == 'true' }}
+        env:
+          PW_PRIMARY_KEY: ${{ steps.pw-cache.outputs.cache-primary-key }}
+        run: |
+          mkdir -p /tmp/pw-warm
+          TARBALL="/tmp/pw-warm/${PW_PRIMARY_KEY}.tar.gz"
+          echo "Packing ~/.cache/ms-playwright → ${TARBALL}"
+          tar -czf "${TARBALL}" -C "$HOME/.cache" ms-playwright
+          SIZE=$(du -sh "${TARBALL}" | cut -f1)
+          echo "warm_tarball=${TARBALL}" >> "$GITHUB_OUTPUT"
+          echo "warm_size=${SIZE}" >> "$GITHUB_OUTPUT"
+          echo "::notice title=Playwright warm cache::Packed ${SIZE} → will upload as artifact 'playwright-warm-cache-${PW_PRIMARY_KEY}'."
+          {
+            echo "### 🔥 Warm Playwright cache packed"
+            echo ""
+            echo "| Key | Tarball | Size |"
+            echo "|---|---|---|"
+            echo "| \`${PW_PRIMARY_KEY}\` | \`${PW_PRIMARY_KEY}.tar.gz\` | ${SIZE} |"
+            echo ""
+            echo "> Uploaded as artifact \`playwright-warm-cache-${PW_PRIMARY_KEY}\`. Download and extract into \`~/.cache/ms-playwright\` to seed a runner if \`actions/cache@v4\` didn't save."
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload warm Playwright cache artifact
+        if: ${{ steps.warm-pack.outputs.warm_tarball != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-warm-cache-${{ steps.pw-cache.outputs.cache-primary-key }}
+          path: ${{ steps.warm-pack.outputs.warm_tarball }}
+          if-no-files-found: error
+          retention-days: 7
 
 
       - name: Playwright cache size — before install
