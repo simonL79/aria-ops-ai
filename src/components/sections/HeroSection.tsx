@@ -130,7 +130,10 @@ const HeroSection = () => {
                 )}
               </React.Fragment>
             ))}
-            {!done && <span className="inline-block w-[3px] h-[0.9em] bg-primary ml-1 animate-pulse align-text-bottom" />}
+            <span
+              aria-hidden="true"
+              className={`inline-block w-[3px] h-[0.9em] bg-primary ml-1 align-text-bottom animate-pulse transition-opacity duration-300 ${done ? 'opacity-0' : 'opacity-100'}`}
+            />
           </h1>
 
           <p className="text-lg md:text-xl lg:text-2xl leading-relaxed text-muted-foreground max-w-3xl mx-auto">

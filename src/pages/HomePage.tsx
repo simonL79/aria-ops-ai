@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, lazy, Suspense } from 'react';
 import { useLocation } from 'react-router-dom';
 import PublicPagesProtection from '@/components/layout/PublicPagesProtection';
 import PublicLayout from '@/components/layout/PublicLayout';
@@ -7,18 +7,20 @@ import HeroSection from '@/components/sections/HeroSection';
 
 import ThreatScoreSection from '@/components/sections/ThreatScoreSection';
 import ServicesSection from '@/components/sections/ServicesSection';
-import HowItWorksSection from '@/components/sections/HowItWorksSection';
-import TrustSection from '@/components/sections/TrustSection';
-import TestimonialsSection from '@/components/sections/TestimonialsSection';
-import PricingSection from '@/components/sections/PricingSection';
-import FAQSection from '@/components/sections/FAQSection';
-import ContactFormSection from '@/components/sections/ContactFormSection';
-import CTASection from '@/components/sections/CTASection';
-import SocialLinksSection from '@/components/sections/SocialLinksSection';
-import AINewsFeedSection from '@/components/sections/AINewsFeedSection';
 import SectionDivider from '@/components/ui/SectionDivider';
-import ChatWidget from '@/components/widgets/ChatWidget';
 import SEO from '@/components/seo/SEO';
+
+// Below-the-fold sections — lazy-loaded so they don't block FCP / LCP
+const HowItWorksSection = lazy(() => import('@/components/sections/HowItWorksSection'));
+const TrustSection = lazy(() => import('@/components/sections/TrustSection'));
+const TestimonialsSection = lazy(() => import('@/components/sections/TestimonialsSection'));
+const PricingSection = lazy(() => import('@/components/sections/PricingSection'));
+const FAQSection = lazy(() => import('@/components/sections/FAQSection'));
+const ContactFormSection = lazy(() => import('@/components/sections/ContactFormSection'));
+const CTASection = lazy(() => import('@/components/sections/CTASection'));
+const SocialLinksSection = lazy(() => import('@/components/sections/SocialLinksSection'));
+const AINewsFeedSection = lazy(() => import('@/components/sections/AINewsFeedSection'));
+const ChatWidget = lazy(() => import('@/components/widgets/ChatWidget'));
 
 const HomePage = () => {
   const { hash } = useLocation();
@@ -43,24 +45,28 @@ const HomePage = () => {
         />
         <div className="bg-background text-foreground min-h-screen">
           <HeroSection />
-          
+
           <ThreatScoreSection />
           <SectionDivider glow />
           <ServicesSection />
-          <AINewsFeedSection />
-          <SectionDivider glow />
-          <HowItWorksSection />
-          <TrustSection />
-          <TestimonialsSection />
-          <SectionDivider glow />
-          <PricingSection />
-          <FAQSection />
-          <SectionDivider />
-          <ContactFormSection />
-          <CTASection />
-          <SocialLinksSection />
+          <Suspense fallback={null}>
+            <AINewsFeedSection />
+            <SectionDivider glow />
+            <HowItWorksSection />
+            <TrustSection />
+            <TestimonialsSection />
+            <SectionDivider glow />
+            <PricingSection />
+            <FAQSection />
+            <SectionDivider />
+            <ContactFormSection />
+            <CTASection />
+            <SocialLinksSection />
+          </Suspense>
         </div>
-        <ChatWidget />
+        <Suspense fallback={null}>
+          <ChatWidget />
+        </Suspense>
       </PublicLayout>
     </PublicPagesProtection>
   );
