@@ -208,6 +208,52 @@ jobs:
             exit 1
           fi
 
+      # Warm-cache mode: when the Playwright cache missed (no exact hit) and
+      # we just paid the ~120MB chromium download, tar up the freshly-populated
+      # cache and upload it as a workflow artifact. The next run (or a human)
+      # can download it and seed ~/.cache/ms-playwright manually if
+      # actions/cache@v4 hasn't yet saved at job end (e.g. the job was
+      # cancelled, or you're debugging cache key issues).
+      - name: Pack warm Playwright cache (on miss)
+        id: warm-pack
+        if: ${{ github.event.inputs.skip_wait != 'true' && steps.pw-cache.outputs.cache-hit != 'true' && (github.event.inputs.warm_cache_on_miss || 'true') == 'true' }}
+        env:
+          PW_PRIMARY_KEY: ${{ steps.pw-cache.outputs.cache-primary-key }}
+        run: |
+          if [ ! -d "$HOME/.cache/ms-playwright" ]; then
+            echo "::warning title=Playwright warm cache::~/.cache/ms-playwright missing — nothing to pack."
+            exit 0
+          fi
+          mkdir -p /tmp/pw-warm
+          SAFE_KEY="$(echo "${PW_PRIMARY_KEY}" | tr -c 'A-Za-z0-9._-' '_')"
+          TARBALL="/tmp/pw-warm/${SAFE_KEY}.tar.gz"
+          echo "Packing ~/.cache/ms-playwright → ${TARBALL}"
+          tar -czf "${TARBALL}" -C "$HOME/.cache" ms-playwright
+          SIZE=$(du -sh "${TARBALL}" | cut -f1)
+          BYTES=$(stat -c '%s' "${TARBALL}")
+          echo "warm_tarball=${TARBALL}" >> "$GITHUB_OUTPUT"
+          echo "warm_size=${SIZE}"        >> "$GITHUB_OUTPUT"
+          echo "warm_bytes=${BYTES}"      >> "$GITHUB_OUTPUT"
+          echo "::notice title=Playwright warm cache::Packed ${SIZE} (${BYTES} bytes) — uploading as artifact 'playwright-warm-cache-${{ github.run_id }}'."
+          {
+            echo "### 🔥 Warm Playwright cache packed (cache miss)"
+            echo ""
+            echo "| Key | Tarball | Size | Bytes |"
+            echo "|---|---|---|---|"
+            echo "| \`${PW_PRIMARY_KEY}\` | \`${SAFE_KEY}.tar.gz\` | ${SIZE} | ${BYTES} |"
+            echo ""
+            echo "> Uploaded as artifact \`playwright-warm-cache-${{ github.run_id }}\` (retained 7 days). Download, then \`tar -xzf <file> -C ~/.cache\` to seed \`~/.cache/ms-playwright\` on another runner if \`actions/cache@v4\` did not save (e.g. job cancelled before post-step)."
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload warm Playwright cache artifact
+        if: ${{ steps.warm-pack.outputs.warm_tarball != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-warm-cache-${{ github.run_id }}
+          path: ${{ steps.warm-pack.outputs.warm_tarball }}
+          if-no-files-found: error
+          retention-days: 7
 
       - name: Wait for production deploy to reflect new og:image
         if: ${{ github.event.inputs.skip_wait != 'true' }}
