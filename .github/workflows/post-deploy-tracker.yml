@@ -37,6 +37,10 @@ on:
         description: 'Permit a Playwright cache miss for this run (use after a Playwright version bump). Default: strict mode fails on miss.'
         required: false
         default: 'false'
+      warm_cache_on_miss:
+        description: 'On a Playwright cache miss, upload the freshly-populated ~/.cache/ms-playwright as an artifact so the next run can seed it manually. Requires allow_pw_cache_miss=true to have effect.'
+        required: false
+        default: 'true'
 
 permissions:
   contents: write   # needed to commit history.md back
