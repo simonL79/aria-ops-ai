@@ -1,14 +1,8 @@
 name: OG render test (strict)
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'public/og/**'
-      - 'src/components/seo/**'
-      - 'src/pages/simon-lindsay/**'
-      - 'scripts/test-og-rendered.mjs'
-      - '.github/workflows/og-render-test.yml'
+  # Push trigger removed — was firing failure emails on every commit.
+  # Daily cron + manual dispatch is enough signal for OG render regressions.
   schedule:
     - cron: '30 6 * * *'  # daily 06:30 UTC
   workflow_dispatch:
