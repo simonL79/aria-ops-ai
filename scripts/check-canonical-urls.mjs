@@ -48,12 +48,25 @@ for (const extra of ["index.html", "public/sitemap.xml", "public/image-sitemap.x
   if (existsSync(p)) files.push(p);
 }
 
-// Resolve simple `const NAME = "literal"` declarations per file.
+// Resolve `const NAME = "literal"` and `const name = `tpl`` declarations per file.
+// Lowercase identifiers are resolved by substituting any UPPERCASE constants
+// they reference; remaining ${...} segments are left in place — what matters
+// is whether the URL *starts with* the canonical base.
 function fileConstants(src) {
   const map = new Map();
-  const re = /\bconst\s+([A-Z_][A-Z0-9_]*)\s*=\s*(['"`])([^'"`\n]+)\2/g;
+  const strRe = /\b(?:const|let|var)\s+([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(['"])([^'"\n]+)\2/g;
   let m;
-  while ((m = re.exec(src))) map.set(m[1], m[3]);
+  while ((m = strRe.exec(src))) map.set(m[1], m[3]);
+  const tplRe = /\b(?:const|let|var)\s+([A-Za-z_][A-Za-z0-9_]*)\s*=\s*`([^`\n]+)`/g;
+  while ((m = tplRe.exec(src))) {
+    let val = m[2];
+    let prev;
+    do {
+      prev = val;
+      val = val.replace(/\$\{([A-Za-z_][A-Za-z0-9_]*)\}/g, (_, n) => map.get(n) ?? `\${${n}}`);
+    } while (val !== prev);
+    map.set(m[1], val);
+  }
   return map;
 }
 
