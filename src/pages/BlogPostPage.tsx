@@ -15,6 +15,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import ReadingProgressBar from '@/components/blog/ReadingProgressBar';
+import BlogComments from '@/components/blog/BlogComments';
 
 const SITE_URL = 'https://www.ariaops.co.uk';
 const SITE_NAME = 'A.R.I.A™ Ops';
@@ -238,6 +239,9 @@ const BlogPostPage = () => {
                 </div>
               </div>
             )}
+
+            {/* Comments */}
+            <BlogComments postId={post.id} />
 
             {/* CTA */}
             <div className="mt-12 pt-8 border-t border-border text-center">
