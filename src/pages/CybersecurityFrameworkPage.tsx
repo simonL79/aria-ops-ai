@@ -272,7 +272,7 @@ const CybersecurityFrameworkPage = () => {
           name="description"
           content="A.R.I.A™ Cybersecurity Framework — governance, AI security, client data protection, and incident response aligned to ISO 27001, NCSC CAF, Cyber Essentials Plus, and UK GDPR."
         />
-        <link rel="canonical" href="https://ariaops.co.uk/cybersecurity-framework" />
+        <link rel="canonical" href="https://www.ariaops.co.uk/cybersecurity-framework" />
       </Helmet>
 
       <div className="min-h-screen bg-black text-white">
