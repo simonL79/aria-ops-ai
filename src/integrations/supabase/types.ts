@@ -776,6 +776,85 @@ export type Database = {
           },
         ]
       }
+      blog_comment_reports: {
+        Row: {
+          comment_id: string
+          created_at: string
+          id: string
+          reason: string | null
+          reporter_ip_hash: string
+        }
+        Insert: {
+          comment_id: string
+          created_at?: string
+          id?: string
+          reason?: string | null
+          reporter_ip_hash: string
+        }
+        Update: {
+          comment_id?: string
+          created_at?: string
+          id?: string
+          reason?: string | null
+          reporter_ip_hash?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blog_comment_reports_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "blog_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      blog_comments: {
+        Row: {
+          author_name: string
+          content: string
+          created_at: string
+          hidden_reason: string | null
+          id: string
+          post_id: string
+          report_count: number
+          reporter_ip_hash: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          author_name: string
+          content: string
+          created_at?: string
+          hidden_reason?: string | null
+          id?: string
+          post_id: string
+          report_count?: number
+          reporter_ip_hash?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          author_name?: string
+          content?: string
+          created_at?: string
+          hidden_reason?: string | null
+          id?: string
+          post_id?: string
+          report_count?: number
+          reporter_ip_hash?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blog_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "blog_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       blog_posts: {
         Row: {
           canonical_url: string | null
@@ -2555,6 +2634,68 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      moderation_audit_log: {
+        Row: {
+          action: string
+          actor_user_id: string | null
+          comment_id: string | null
+          created_at: string
+          id: string
+          metadata: Json
+          reason: string | null
+        }
+        Insert: {
+          action: string
+          actor_user_id?: string | null
+          comment_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          reason?: string | null
+        }
+        Update: {
+          action?: string
+          actor_user_id?: string | null
+          comment_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "moderation_audit_log_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "blog_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      moderation_blocklist: {
+        Row: {
+          added_by: string | null
+          created_at: string
+          id: string
+          severity: string
+          term: string
+        }
+        Insert: {
+          added_by?: string | null
+          created_at?: string
+          id?: string
+          severity?: string
+          term: string
+        }
+        Update: {
+          added_by?: string | null
+          created_at?: string
+          id?: string
+          severity?: string
+          term?: string
+        }
+        Relationships: []
       }
       monitored_platforms: {
         Row: {
