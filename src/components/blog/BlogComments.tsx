@@ -1,10 +1,51 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { Flag, MessageSquare, ShieldCheck } from 'lucide-react';
+
+declare global {
+  interface Window {
+    grecaptcha?: {
+      ready: (cb: () => void) => void;
+      execute: (siteKey: string, opts: { action: string }) => Promise<string>;
+    };
+  }
+}
+
+let recaptchaLoader: Promise<string | null> | null = null;
+const loadRecaptcha = (): Promise<string | null> => {
+  if (recaptchaLoader) return recaptchaLoader;
+  recaptchaLoader = (async () => {
+    try {
+      const { data } = await supabase.functions.invoke('get-public-config');
+      const siteKey: string | undefined = data?.recaptcha_site_key;
+      if (!siteKey) return null;
+      if (!document.querySelector(`script[data-recaptcha="${siteKey}"]`)) {
+        await new Promise<void>((resolve, reject) => {
+          const s = document.createElement('script');
+          s.src = `https://www.google.com/recaptcha/api.js?render=${siteKey}`;
+          s.async = true;
+          s.defer = true;
+          s.dataset.recaptcha = siteKey;
+          s.onload = () => resolve();
+          s.onerror = () => reject(new Error('recaptcha load failed'));
+          document.head.appendChild(s);
+        });
+      }
+      await new Promise<void>((resolve) => {
+        const check = () => (window.grecaptcha ? window.grecaptcha.ready(resolve) : setTimeout(check, 100));
+        check();
+      });
+      return siteKey;
+    } catch {
+      return null;
+    }
+  })();
+  return recaptchaLoader;
+};
 
 interface Comment {
   id: string;
