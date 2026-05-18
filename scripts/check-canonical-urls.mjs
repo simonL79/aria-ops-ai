@@ -85,17 +85,14 @@ function resolveValue(raw, consts) {
     let prev;
     do {
       prev = out;
-      out = out.replace(/\$\{([A-Z_][A-Z0-9_]*)\}/g, (_, n) => consts.get(n) ?? `\u0000UNRESOLVED:${n}\u0000`);
+      out = out.replace(/\$\{([A-Za-z_][A-Za-z0-9_]*)\}/g, (_, n) => consts.get(n) ?? `\${${n}}`);
     } while (out !== prev);
-    if (out.includes("\u0000")) return null;
-    // Template might still contain ${expr} we can't resolve
-    if (/\$\{/.test(out)) return null;
     return out;
   }
-  // Bare identifier
-  if (/^[A-Z_][A-Z0-9_]*$/.test(expr)) return consts.get(expr) ?? null;
+  // Bare identifier (any case)
+  if (/^[A-Za-z_][A-Za-z0-9_]*$/.test(expr)) return consts.get(expr) ?? null;
   // String concat: SITE_URL + "/x"
-  const concat = expr.match(/^([A-Z_][A-Z0-9_]*)\s*\+\s*(["'])([^"'\n]*)\2$/);
+  const concat = expr.match(/^([A-Za-z_][A-Za-z0-9_]*)\s*\+\s*(["'])([^"'\n]*)\2$/);
   if (concat) {
     const base = consts.get(concat[1]);
     return base ? base + concat[3] : null;
