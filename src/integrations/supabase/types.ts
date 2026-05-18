@@ -933,6 +933,24 @@ export type Database = {
         }
         Relationships: []
       }
+      blog_report_rate_limits: {
+        Row: {
+          id: string
+          ip_hash: string
+          reported_at: string
+        }
+        Insert: {
+          id?: string
+          ip_hash: string
+          reported_at?: string
+        }
+        Update: {
+          id?: string
+          ip_hash?: string
+          reported_at?: string
+        }
+        Relationships: []
+      }
       client_entities: {
         Row: {
           alias: string | null

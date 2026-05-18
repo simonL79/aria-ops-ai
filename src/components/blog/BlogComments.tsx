@@ -6,6 +6,47 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { Flag, MessageSquare, ShieldCheck } from 'lucide-react';
 
+declare global {
+  interface Window {
+    grecaptcha?: {
+      ready: (cb: () => void) => void;
+      execute: (siteKey: string, opts: { action: string }) => Promise<string>;
+    };
+  }
+}
+
+let recaptchaLoader: Promise<string | null> | null = null;
+const loadRecaptcha = (): Promise<string | null> => {
+  if (recaptchaLoader) return recaptchaLoader;
+  recaptchaLoader = (async () => {
+    try {
+      const { data } = await supabase.functions.invoke('get-public-config');
+      const siteKey: string | undefined = data?.recaptcha_site_key;
+      if (!siteKey) return null;
+      if (!document.querySelector(`script[data-recaptcha="${siteKey}"]`)) {
+        await new Promise<void>((resolve, reject) => {
+          const s = document.createElement('script');
+          s.src = `https://www.google.com/recaptcha/api.js?render=${siteKey}`;
+          s.async = true;
+          s.defer = true;
+          s.dataset.recaptcha = siteKey;
+          s.onload = () => resolve();
+          s.onerror = () => reject(new Error('recaptcha load failed'));
+          document.head.appendChild(s);
+        });
+      }
+      await new Promise<void>((resolve) => {
+        const check = () => (window.grecaptcha ? window.grecaptcha.ready(resolve) : setTimeout(check, 100));
+        check();
+      });
+      return siteKey;
+    } catch {
+      return null;
+    }
+  })();
+  return recaptchaLoader;
+};
+
 interface Comment {
   id: string;
   author_name: string;
@@ -69,10 +110,28 @@ const BlogComments: React.FC<Props> = ({ postId }) => {
     void load();
   };
 
+  useEffect(() => {
+    void loadRecaptcha();
+  }, []);
+
   const report = async (id: string) => {
     setReportingId(id);
+    let captcha_token = '';
+    try {
+      const siteKey = await loadRecaptcha();
+      if (siteKey && window.grecaptcha) {
+        captcha_token = await window.grecaptcha.execute(siteKey, { action: 'report_comment' });
+      }
+    } catch {
+      // fall through; backend will reject if token missing
+    }
+    if (!captcha_token) {
+      setReportingId(null);
+      toast.error('Could not verify you are human. Please try again.');
+      return;
+    }
     const { data, error } = await supabase.functions.invoke('report-blog-comment', {
-      body: { comment_id: id },
+      body: { comment_id: id, captcha_token },
     });
     setReportingId(null);
     if (error || data?.error) {
