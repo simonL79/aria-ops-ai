@@ -4,18 +4,21 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { 
-  Shield, 
-  Activity, 
-  Users, 
-  Database, 
-  Server, 
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import {
+  Shield,
+  Activity,
+  Users,
+  Database,
+  Server,
   AlertTriangle,
   TrendingUp,
   Eye,
-  Zap
+  Zap,
+  MessageSquare,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import ModerationQueue from '@/components/admin/ModerationQueue';
 
 const AdminDashboardPage = () => {
   const navigate = useNavigate();
