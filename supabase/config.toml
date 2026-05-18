@@ -294,3 +294,12 @@ verify_jwt = true
 verify_jwt = false
 
 
+
+[functions.submit-blog-comment]
+verify_jwt = false
+
+[functions.report-blog-comment]
+verify_jwt = false
+
+[functions.moderate-comment]
+verify_jwt = true
