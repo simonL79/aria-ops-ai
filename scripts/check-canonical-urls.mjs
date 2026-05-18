@@ -168,7 +168,7 @@ console.log(`${DIM}Files scanned:${RESET} ${files.length}`);
 console.log(`${DIM}Tags checked:${RESET} ${checked}\n`);
 
 if (findings.length === 0) {
-  console.log(`${GREEN}✓ All canonical and og:url values use ${CANONICAL_BASE}${RESET}\n`);
+  console.log(`${GREEN}✓ All canonical, og:url and JSON-LD url/@id values use ${CANONICAL_BASE}${RESET}\n`);
   process.exit(0);
 }
 
