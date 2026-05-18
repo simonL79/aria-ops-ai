@@ -240,6 +240,9 @@ const BlogPostPage = () => {
               </div>
             )}
 
+            {/* Comments */}
+            <BlogComments postId={post.id} />
+
             {/* CTA */}
             <div className="mt-12 pt-8 border-t border-border text-center">
               <h3 className="text-xl font-bold text-foreground mb-3">Ready to Protect Your Reputation?</h3>
