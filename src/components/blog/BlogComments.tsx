@@ -110,10 +110,28 @@ const BlogComments: React.FC<Props> = ({ postId }) => {
     void load();
   };
 
+  useEffect(() => {
+    void loadRecaptcha();
+  }, []);
+
   const report = async (id: string) => {
     setReportingId(id);
+    let captcha_token = '';
+    try {
+      const siteKey = await loadRecaptcha();
+      if (siteKey && window.grecaptcha) {
+        captcha_token = await window.grecaptcha.execute(siteKey, { action: 'report_comment' });
+      }
+    } catch {
+      // fall through; backend will reject if token missing
+    }
+    if (!captcha_token) {
+      setReportingId(null);
+      toast.error('Could not verify you are human. Please try again.');
+      return;
+    }
     const { data, error } = await supabase.functions.invoke('report-blog-comment', {
-      body: { comment_id: id },
+      body: { comment_id: id, captcha_token },
     });
     setReportingId(null);
     if (error || data?.error) {
