@@ -146,6 +146,19 @@ for (const file of files) {
       }
     }
   }
+
+  // JSON-LD "url" / "@id" fields. Catches both:
+  //   - <script type="application/ld+json">{ ... "url": "https://..." }</script>
+  //   - JS object literals passed to JSON.stringify({ ..., url: "https://..." })
+  // Matches any *ariaops.co.uk URL under url/@id keys and asserts the www host.
+  const jsonLdRe = /["']?(url|@id)["']?\s*:\s*["'](https?:\/\/[^"'\s]*ariaops\.co\.uk[^"'\s]*)["']/g;
+  let jm;
+  while ((jm = jsonLdRe.exec(src))) {
+    checked++;
+    if (!jm[2].startsWith(CANONICAL_BASE)) {
+      findings.push({ file: rel, kind: `jsonld:${jm[1]}`, value: jm[2], reason: "wrong-host" });
+    }
+  }
 }
 
 console.log("\nCanonical / og:url audit");
