@@ -54,15 +54,23 @@ const appSrc = stripComments(readFileSync(appPath, "utf8"));
 const navSrc = stripComments(readFileSync(navPath, "utf8"));
 
 function extractImports(src, fromFile) {
-  const re = /import\s+(?:[\w*\s{},]+?\s+from\s+)?["']([^"']+)["']/g;
+  // Match both static `import x from "y"` / `import "y"` AND dynamic
+  // `import("y")` (used by React.lazy() for code-split routes).
+  const patterns = [
+    /import\s+(?:[\w*\s{},]+?\s+from\s+)?["']([^"']+)["']/g,
+    /\bimport\s*\(\s*["']([^"']+)["']\s*\)/g,
+  ];
   const imports = [];
-  let m;
-  while ((m = re.exec(src))) {
-    const spec = m[1];
-    if (!spec.startsWith(".")) continue;
-    if (!/\/pages\//.test(spec) && !spec.startsWith("./pages/")) continue;
-    const abs = resolve(dirname(fromFile), spec);
-    imports.push({ spec, abs });
+  for (const re of patterns) {
+    re.lastIndex = 0;
+    let m;
+    while ((m = re.exec(src))) {
+      const spec = m[1];
+      if (!spec.startsWith(".")) continue;
+      if (!/\/pages\//.test(spec) && !spec.startsWith("./pages/")) continue;
+      const abs = resolve(dirname(fromFile), spec);
+      imports.push({ spec, abs });
+    }
   }
   return imports;
 }
