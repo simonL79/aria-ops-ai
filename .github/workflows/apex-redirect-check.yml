@@ -1,0 +1,19 @@
+name: Apex redirect check
+
+on:
+  schedule:
+    - cron: "0 8 * * 1"   # weekly, Monday 08:00 UTC
+  workflow_dispatch:
+
+jobs:
+  redirects:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Verify ariaops.co.uk/* → 301 → www.ariaops.co.uk/*
+        run: node scripts/check-apex-redirects.mjs
+        env:
+          CONCURRENCY: "8"
