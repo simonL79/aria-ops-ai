@@ -146,6 +146,19 @@ for (const file of files) {
       }
     }
   }
+
+  // JSON-LD "url" / "@id" fields. Catches both:
+  //   - <script type="application/ld+json">{ ... "url": "https://..." }</script>
+  //   - JS object literals passed to JSON.stringify({ ..., url: "https://..." })
+  // Matches any *ariaops.co.uk URL under url/@id keys and asserts the www host.
+  const jsonLdRe = /["']?(url|@id)["']?\s*:\s*["'](https?:\/\/[^"'\s]*ariaops\.co\.uk[^"'\s]*)["']/g;
+  let jm;
+  while ((jm = jsonLdRe.exec(src))) {
+    checked++;
+    if (!jm[2].startsWith(CANONICAL_BASE)) {
+      findings.push({ file: rel, kind: `jsonld:${jm[1]}`, value: jm[2], reason: "wrong-host" });
+    }
+  }
 }
 
 console.log("\nCanonical / og:url audit");
@@ -155,7 +168,7 @@ console.log(`${DIM}Files scanned:${RESET} ${files.length}`);
 console.log(`${DIM}Tags checked:${RESET} ${checked}\n`);
 
 if (findings.length === 0) {
-  console.log(`${GREEN}✓ All canonical and og:url values use ${CANONICAL_BASE}${RESET}\n`);
+  console.log(`${GREEN}✓ All canonical, og:url and JSON-LD url/@id values use ${CANONICAL_BASE}${RESET}\n`);
   process.exit(0);
 }
 
