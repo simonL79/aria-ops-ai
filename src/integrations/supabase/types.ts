@@ -2286,6 +2286,57 @@ export type Database = {
           },
         ]
       }
+      keyword_targets: {
+        Row: {
+          active: boolean
+          assigned_module: string
+          category: string
+          created_at: string
+          entity: string
+          id: string
+          intent_type: string | null
+          keyword: string
+          last_checked_at: string | null
+          notes: string | null
+          priority: number
+          sentiment_target: string
+          suppression_page_path: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          assigned_module?: string
+          category: string
+          created_at?: string
+          entity: string
+          id?: string
+          intent_type?: string | null
+          keyword: string
+          last_checked_at?: string | null
+          notes?: string | null
+          priority?: number
+          sentiment_target?: string
+          suppression_page_path?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          assigned_module?: string
+          category?: string
+          created_at?: string
+          entity?: string
+          id?: string
+          intent_type?: string | null
+          keyword?: string
+          last_checked_at?: string | null
+          notes?: string | null
+          priority?: number
+          sentiment_target?: string
+          suppression_page_path?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       lead_magnets: {
         Row: {
           company: string | null
