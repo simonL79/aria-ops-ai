@@ -129,6 +129,7 @@ function App() {
                         <Route path="/admin/settings" element={<SystemSettingsPage />} />
                         <Route path="/admin/genesis-sentinel" element={<GenesisSentinelPage />} />
                         <Route path="/admin/requiem" element={<RequiemDashboardPage />} />
+                        <Route path="/admin/keyword-targets" element={<KeywordTargetsPage />} />
                         <Route path="/admin/eidetic/preferences" element={<EideticAlertPreferencesPage />} />
                         <Route path="/admin/notifications" element={<AdminNotificationsPage />} />
                         <Route path="/admin/shield" element={<ShieldDashboard />} />
