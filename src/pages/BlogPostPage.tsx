@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/accordion';
 import ReadingProgressBar from '@/components/blog/ReadingProgressBar';
 import BlogComments from '@/components/blog/BlogComments';
+import blogDefaultHero from '@/assets/blog-default-hero.jpg';
 
 const SITE_URL = 'https://www.ariaops.co.uk';
 const SITE_NAME = 'A.R.I.A™ Ops';
@@ -134,18 +135,16 @@ const BlogPostPage = () => {
               Back to all articles
             </Link>
 
-            {/* Hero image */}
-            {(post.hero_image_url || post.image_url) && (
-              <div className="mb-8 rounded-lg overflow-hidden border border-border aspect-video">
-                <img
-                  src={post.hero_image_url || post.image_url!}
-                  alt={post.hero_image_alt || post.title}
-                  className="w-full h-full object-cover"
-                  loading="eager"
-                  onError={(e) => { (e.target as HTMLElement).parentElement!.style.display = 'none'; }}
-                />
-              </div>
-            )}
+            {/* Hero image (falls back to branded default when post has none) */}
+            <div className="mb-8 rounded-lg overflow-hidden border border-border aspect-video">
+              <img
+                src={post.hero_image_url || post.image_url || blogDefaultHero}
+                alt={post.hero_image_alt || post.title}
+                className="w-full h-full object-cover"
+                loading="eager"
+                onError={(e) => { (e.target as HTMLImageElement).src = blogDefaultHero; }}
+              />
+            </div>
 
             {/* Title */}
             <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-4 leading-tight">
