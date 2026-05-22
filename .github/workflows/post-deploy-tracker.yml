@@ -57,7 +57,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node_version: '20'
+          node-version: '20'
 
       - name: Cache npm tarball cache (~/.npm)
         if: ${{ github.event.inputs.skip_wait != 'true' }}
