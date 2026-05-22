@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/accordion';
 import ReadingProgressBar from '@/components/blog/ReadingProgressBar';
 import BlogComments from '@/components/blog/BlogComments';
+import blogDefaultHero from '@/assets/blog-default-hero.jpg';
 
 const SITE_URL = 'https://www.ariaops.co.uk';
 const SITE_NAME = 'A.R.I.A™ Ops';
