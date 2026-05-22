@@ -88,12 +88,22 @@ const DashboardMockup = () => {
   );
 };
 
+const HERO_HEADLINE = 'AI Reputation Intelligence That Detects Risk Before It Escalates';
+
+const renderHeadlineWords = (text: string) =>
+  text.split(' ').map((word, i) => (
+    <React.Fragment key={i}>
+      {i > 0 && ' '}
+      {['Intelligence', 'Risk'].includes(word) ? (
+        <span className="text-primary">{word}</span>
+      ) : (
+        <span>{word}</span>
+      )}
+    </React.Fragment>
+  ));
+
 const HeroSection = () => {
-  const { displayed, done } = useTypewriter(
-    'AI Reputation Intelligence That Detects Risk Before It Escalates',
-    40,
-    800
-  );
+  const { displayed, done } = useTypewriter(HERO_HEADLINE, 40, 800);
 
   const scrollToThreatScore = () => {
     const el = document.getElementById('threat-score');
@@ -119,21 +129,23 @@ const HeroSection = () => {
             <Logo variant="light" size="3xl" />
           </div>
 
-          <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-light leading-tight text-white min-h-[2.4em]">
-            {displayed.split(' ').map((word, i) => (
-              <React.Fragment key={i}>
-                {i > 0 && ' '}
-                {['Intelligence', 'Risk'].includes(word) ? (
-                  <span className="text-primary">{word}</span>
-                ) : (
-                  <span>{word}</span>
-                )}
-              </React.Fragment>
-            ))}
-            <span
-              aria-hidden="true"
-              className={`inline-block w-[3px] h-[0.9em] bg-primary ml-1 align-text-bottom animate-pulse transition-opacity duration-300 ${done ? 'opacity-0' : 'opacity-100'}`}
-            />
+          {/*
+            CLS lock: an invisible copy of the final headline reserves the full
+            wrapped height at every breakpoint, while the typed text overlays it.
+            This prevents the h1 (and the blinking cursor) from shifting as
+            characters appear, which was the main CLS offender.
+          */}
+          <h1 className="relative text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-light leading-tight text-white">
+            <span aria-hidden="true" className="invisible block">
+              {renderHeadlineWords(HERO_HEADLINE)}
+            </span>
+            <span className="absolute inset-0 block">
+              {renderHeadlineWords(displayed)}
+              <span
+                aria-hidden="true"
+                className={`inline-block w-[3px] h-[0.9em] bg-primary ml-1 align-text-bottom animate-pulse transition-opacity duration-300 ${done ? 'opacity-0' : 'opacity-100'}`}
+              />
+            </span>
           </h1>
 
           <p className="text-lg md:text-xl lg:text-2xl leading-relaxed text-muted-foreground max-w-3xl mx-auto">
