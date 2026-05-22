@@ -192,4 +192,3 @@ try {
   await ctx.close();
   await browser.close();
 }
-}
