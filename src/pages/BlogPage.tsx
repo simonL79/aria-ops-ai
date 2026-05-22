@@ -155,6 +155,8 @@ const BlogPage = () => {
                 )}
               </>
             )}
+
+            <SoroEmbed />
           </div>
         </div>
       </div>
