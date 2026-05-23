@@ -1,18 +1,22 @@
-## Fix OG render test (strict) workflow + sweep `node_version` typo
+## Fix JSON-LD ImageObject check (failing in CI)
 
 ### Root cause
-Same bug as the Google Images tracker: `actions/setup-node@v4` is given `node_version:` (underscore) instead of `node-version:` (hyphen). Without the correct key, setup-node errors out / doesn't pin Node, and downstream `npx playwright install --with-deps chromium` ran for ~3 min before the job ultimately failed.
+The source already emits `Person.image` as a proper `ImageObject` 1920×1080 from `SimonClusterPage.tsx`, and all six suppression pages pass a `heroImage`. The check still failed because `.github/workflows/jsonld-image-check.yml` triggers on `push: branches: [main]` and runs `scripts/check-jsonld-images.mjs` against `https://www.ariaops.co.uk` **immediately** — before the Lovable production deploy of that same commit has gone live. The headless Playwright probe times out waiting (max 15s) for a `Person` JSON-LD node that production hasn't shipped yet, `findPerson` returns null on the stale HTML, and the script exits 1.
 
-Six workflows have the same typo:
-- `.github/workflows/og-render-test.yml`
-- `.github/workflows/image-sitemap-audit.yml`
-- `.github/workflows/jsonld-image-check.yml`
-- `.github/workflows/og-image-check.yml`
-- `.github/workflows/post-deploy-tracker.yml`
-- `.github/workflows/post-publish-seo-checks.yml`
+(`post-publish-seo-checks.yml` already gates itself on `wait-for-deploy.mjs` for exactly this reason. The standalone `jsonld-image-check` workflow does not.)
 
 ### Change
-Sed-replace `node_version:` → `node-version:` in each of the six workflow files. No script changes; no other logic touched.
+In `.github/workflows/jsonld-image-check.yml`, add a `wait-for-deploy` step before running the check, mirroring the pattern in `post-publish-seo-checks.yml`:
+
+1. Keep the existing Playwright install (it's already required for `check-jsonld-images.mjs` with `RENDER=1`).
+2. Add a new step that runs `node scripts/wait-for-deploy.mjs` with `BASE_URL` set to the same target. This polls each suppression page until the rendered `og:image` matches the page-specific `/og/<slug>.jpg`, which is a reliable "the latest build is live" signal.
+3. Then run `node scripts/check-jsonld-images.mjs` as today.
+
+Schedule runs (`cron 06:15 UTC`) and `workflow_dispatch` runs will sail through `wait-for-deploy` instantly (production is already live), so this only adds latency on the push trigger — which is exactly where the race lives.
+
+No script changes. No JSON-LD changes. Source already satisfies the assertion.
 
 ### Out of scope
-If the OG render test continues to fail after the Node fix (e.g. real og:image mismatches against production), that's a content/asset issue we'd address in a follow-up — this plan only repairs the workflow plumbing.
+- Re-tuning `wait-for-deploy.mjs` timeouts.
+- Any change to the Person/ImageObject schema or hero images.
+- The other workflows we already repaired for the `node_version` typo.
