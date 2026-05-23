@@ -74,7 +74,7 @@ async function readOg(ctx, probe) {
     } catch (e) {
       lastErr = e;
       if (attempt === PROBE_RETRIES) break;
-      const delay = RETRY_BACKOFF_MS * Math.pow(2, attempt);
+      const delay = jitter(RETRY_BACKOFF_MS * Math.pow(2, attempt));
       console.log(`    ↻ ${probe.path} retry ${attempt + 1}/${PROBE_RETRIES} after ${delay}ms (${e.message})`);
       await new Promise((r) => setTimeout(r, delay));
     }
