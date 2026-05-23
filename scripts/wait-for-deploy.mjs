@@ -170,6 +170,7 @@ try {
       }
     }));
     const attemptEntry = { attempt, ts: new Date().toISOString(), results: [] };
+    const pendingBefore = pending.size;
     for (const { probe, og, error } of results) {
       if (error) {
         console.log(`  ⚠ ${probe.path} probe error: ${error}`);
@@ -188,7 +189,22 @@ try {
       writeReport('pass');
       process.exit(0);
     }
-    await new Promise((r) => setTimeout(r, INTERVAL_MS));
+    // Exponential backoff between outer attempts when no progress was made;
+    // reset to base interval as soon as a page flips live.
+    if (pending.size < pendingBefore) {
+      backoffStreak = 0;
+    } else {
+      backoffStreak += 1;
+    }
+    const rawDelay = Math.min(
+      INTERVAL_MS * Math.pow(BACKOFF_FACTOR, backoffStreak),
+      MAX_INTERVAL_MS,
+    );
+    const delay = jitter(rawDelay);
+    const remaining = TIMEOUT_MS - (Date.now() - start);
+    const sleepFor = Math.max(0, Math.min(delay, remaining));
+    console.log(`  ⏲ next attempt in ${Math.round(sleepFor / 1000)}s (streak ${backoffStreak})`);
+    await new Promise((r) => setTimeout(r, sleepFor));
   }
   console.error(`\n❌ timed out after ${Math.round(TIMEOUT_MS / 1000)}s — ${pending.size} page(s) still stale:`);
   for (const probe of pending.values()) {
