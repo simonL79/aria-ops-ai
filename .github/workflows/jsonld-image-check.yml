@@ -29,8 +29,13 @@ jobs:
         run: |
           npm i --no-save playwright
           npx playwright install --with-deps chromium
+      - name: Wait for production deploy to go live
+        env:
+          BASE_URL: ${{ github.event.inputs.base_url || 'https://www.ariaops.co.uk' }}
+        run: node scripts/wait-for-deploy.mjs
       - name: Verify Person.image is ImageObject 1920x1080
         env:
           BASE_URL: ${{ github.event.inputs.base_url || 'https://www.ariaops.co.uk' }}
           RENDER: '1'
         run: node scripts/check-jsonld-images.mjs
+
