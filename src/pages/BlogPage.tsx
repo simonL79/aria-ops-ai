@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet-async';
 import SEO from '@/components/seo/SEO';
 import PublicLayout from '@/components/layout/PublicLayout';
@@ -8,6 +8,25 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Clock, RefreshCw } from 'lucide-react';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
+
+const SoroEmbed = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (document.getElementById('soro-blog-script')) return;
+    const script = document.createElement('script');
+    script.id = 'soro-blog-script';
+    script.src = 'https://app.trysoro.com/api/embed/642bc77d-b039-487e-a779-e3f50396aa02';
+    script.defer = true;
+    document.body.appendChild(script);
+    return () => {
+      document.getElementById('soro-blog-script')?.remove();
+    };
+  }, []);
+
+  return <div id="soro-blog" ref={containerRef} className="soro-themed" />;
+};
+
 
 
 const SkeletonCard = () => (
