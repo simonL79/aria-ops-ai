@@ -91,6 +91,7 @@ const pending = new Map(PROBES.map((p) => [p.path, p]));
 const lastSeen = new Map();
 const attemptLog = []; // [{ attempt, ts, results: [{ path, expected, og, ok, error, retries }] }]
 let attempt = 0;
+let backoffStreak = 0;
 
 function writeReport(status) {
   try {
