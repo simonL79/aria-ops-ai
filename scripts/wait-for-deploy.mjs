@@ -23,10 +23,18 @@ import { writeFileSync, mkdirSync } from 'node:fs';
 
 const BASE = (process.env.BASE_URL || 'https://www.ariaops.co.uk').replace(/\/$/, '');
 const TIMEOUT_MS = Number(process.env.TIMEOUT_MS || 30 * 60 * 1000); // 30 min
-const INTERVAL_MS = Number(process.env.INTERVAL_MS || 30 * 1000);    // 30 s
+const INTERVAL_MS = Number(process.env.INTERVAL_MS || 30 * 1000);    // 30 s base
+const MAX_INTERVAL_MS = Number(process.env.MAX_INTERVAL_MS || 4 * 60 * 1000); // cap 4 min
+const BACKOFF_FACTOR = Number(process.env.BACKOFF_FACTOR || 1.5);
+const JITTER_RATIO = Number(process.env.JITTER_RATIO || 0.2); // ±20%
 const PROBE_TIMEOUT_MS = Number(process.env.PROBE_TIMEOUT_MS || 15_000);
 const PROBE_RETRIES   = Number(process.env.PROBE_RETRIES   || 2);   // extra tries on transient failure
 const RETRY_BACKOFF_MS = Number(process.env.RETRY_BACKOFF_MS || 1_500);
+
+const jitter = (ms) => {
+  const delta = ms * JITTER_RATIO;
+  return Math.max(0, Math.round(ms + (Math.random() * 2 - 1) * delta));
+};
 
 const PROBES = [
   { path: '/simon-lindsay/ksl',                 slug: 'simon-ksl' },
@@ -66,7 +74,7 @@ async function readOg(ctx, probe) {
     } catch (e) {
       lastErr = e;
       if (attempt === PROBE_RETRIES) break;
-      const delay = RETRY_BACKOFF_MS * Math.pow(2, attempt);
+      const delay = jitter(RETRY_BACKOFF_MS * Math.pow(2, attempt));
       console.log(`    ↻ ${probe.path} retry ${attempt + 1}/${PROBE_RETRIES} after ${delay}ms (${e.message})`);
       await new Promise((r) => setTimeout(r, delay));
     }
@@ -83,6 +91,7 @@ const pending = new Map(PROBES.map((p) => [p.path, p]));
 const lastSeen = new Map();
 const attemptLog = []; // [{ attempt, ts, results: [{ path, expected, og, ok, error, retries }] }]
 let attempt = 0;
+let backoffStreak = 0;
 
 function writeReport(status) {
   try {
@@ -162,6 +171,7 @@ try {
       }
     }));
     const attemptEntry = { attempt, ts: new Date().toISOString(), results: [] };
+    const pendingBefore = pending.size;
     for (const { probe, og, error } of results) {
       if (error) {
         console.log(`  ⚠ ${probe.path} probe error: ${error}`);
@@ -180,7 +190,22 @@ try {
       writeReport('pass');
       process.exit(0);
     }
-    await new Promise((r) => setTimeout(r, INTERVAL_MS));
+    // Exponential backoff between outer attempts when no progress was made;
+    // reset to base interval as soon as a page flips live.
+    if (pending.size < pendingBefore) {
+      backoffStreak = 0;
+    } else {
+      backoffStreak += 1;
+    }
+    const rawDelay = Math.min(
+      INTERVAL_MS * Math.pow(BACKOFF_FACTOR, backoffStreak),
+      MAX_INTERVAL_MS,
+    );
+    const delay = jitter(rawDelay);
+    const remaining = TIMEOUT_MS - (Date.now() - start);
+    const sleepFor = Math.max(0, Math.min(delay, remaining));
+    console.log(`  ⏲ next attempt in ${Math.round(sleepFor / 1000)}s (streak ${backoffStreak})`);
+    await new Promise((r) => setTimeout(r, sleepFor));
   }
   console.error(`\n❌ timed out after ${Math.round(TIMEOUT_MS / 1000)}s — ${pending.size} page(s) still stale:`);
   for (const probe of pending.values()) {
