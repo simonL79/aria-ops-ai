@@ -23,10 +23,18 @@ import { writeFileSync, mkdirSync } from 'node:fs';
 
 const BASE = (process.env.BASE_URL || 'https://www.ariaops.co.uk').replace(/\/$/, '');
 const TIMEOUT_MS = Number(process.env.TIMEOUT_MS || 30 * 60 * 1000); // 30 min
-const INTERVAL_MS = Number(process.env.INTERVAL_MS || 30 * 1000);    // 30 s
+const INTERVAL_MS = Number(process.env.INTERVAL_MS || 30 * 1000);    // 30 s base
+const MAX_INTERVAL_MS = Number(process.env.MAX_INTERVAL_MS || 4 * 60 * 1000); // cap 4 min
+const BACKOFF_FACTOR = Number(process.env.BACKOFF_FACTOR || 1.5);
+const JITTER_RATIO = Number(process.env.JITTER_RATIO || 0.2); // ±20%
 const PROBE_TIMEOUT_MS = Number(process.env.PROBE_TIMEOUT_MS || 15_000);
 const PROBE_RETRIES   = Number(process.env.PROBE_RETRIES   || 2);   // extra tries on transient failure
 const RETRY_BACKOFF_MS = Number(process.env.RETRY_BACKOFF_MS || 1_500);
+
+const jitter = (ms) => {
+  const delta = ms * JITTER_RATIO;
+  return Math.max(0, Math.round(ms + (Math.random() * 2 - 1) * delta));
+};
 
 const PROBES = [
   { path: '/simon-lindsay/ksl',                 slug: 'simon-ksl' },
