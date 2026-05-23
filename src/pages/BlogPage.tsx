@@ -156,7 +156,11 @@ const BlogPage = () => {
               </>
             )}
 
+            <div className="mt-16">
+              <SoroEmbed />
+            </div>
           </div>
+
         </div>
       </div>
     </PublicLayout>
