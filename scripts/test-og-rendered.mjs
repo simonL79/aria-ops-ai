@@ -63,7 +63,7 @@ async function fetchImage(url) {
 }
 
 async function readMetaFromPage(page, url, expectedAbs) {
-  await page.goto(url, { waitUntil: 'networkidle', timeout: 30_000 });
+  await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 60_000 });
   // Wait until Helmet has rewritten og:image to the page-specific value (not
   // the sitewide default). Time out gracefully so we still capture whatever
   // is there for the report.

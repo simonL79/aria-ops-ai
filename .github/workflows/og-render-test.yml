@@ -11,6 +11,10 @@ on:
         description: 'Base URL to test (defaults to production)'
         required: false
         default: 'https://www.ariaops.co.uk'
+      skip_wait:
+        description: 'Skip the production-live probe (run check immediately)'
+        required: false
+        default: 'false'
 
 jobs:
   test:
@@ -21,9 +25,14 @@ jobs:
         with:
           node-version: '20'
       - name: Install Playwright + chromium
-        run: |
-          npm i --no-save playwright
-          npx playwright install --with-deps chromium
+        run: npx --yes playwright@1.47.0 install --with-deps chromium
+      - name: Wait for production deploy
+        if: ${{ github.event.inputs.skip_wait != 'true' }}
+        env:
+          BASE_URL: ${{ github.event.inputs.base_url || 'https://www.ariaops.co.uk' }}
+          TIMEOUT_MS: '1800000'
+          INTERVAL_MS: '30000'
+        run: node scripts/wait-for-deploy.mjs
       - name: Strict og:image render test
         env:
           BASE_URL: ${{ github.event.inputs.base_url || 'https://www.ariaops.co.uk' }}
