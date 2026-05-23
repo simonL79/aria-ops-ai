@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import SEO from '@/components/seo/SEO';
 import PublicLayout from '@/components/layout/PublicLayout';
