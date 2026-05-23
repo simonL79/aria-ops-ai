@@ -262,3 +262,65 @@
 .blog-prose strong {
   color: #ffffff;
 }
+
+/* Soro embed — match A.R.I.A dark card style */
+#soro-blog {
+  color: hsl(var(--foreground));
+}
+#soro-blog * {
+  font-family: inherit !important;
+  color: inherit;
+  box-sizing: border-box;
+}
+#soro-blog a {
+  color: hsl(var(--foreground)) !important;
+  text-decoration: none !important;
+}
+#soro-blog h1, #soro-blog h2, #soro-blog h3, #soro-blog h4 {
+  color: hsl(var(--foreground)) !important;
+  font-weight: 600 !important;
+}
+#soro-blog p, #soro-blog span, #soro-blog time, #soro-blog small {
+  color: hsl(var(--muted-foreground)) !important;
+}
+#soro-blog article,
+#soro-blog [class*="card"],
+#soro-blog [class*="Card"],
+#soro-blog [class*="post"],
+#soro-blog [class*="Post"],
+#soro-blog li {
+  background: hsl(var(--card)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  border-radius: 0.5rem !important;
+  overflow: hidden !important;
+  transition: all 0.3s ease !important;
+}
+#soro-blog article:hover,
+#soro-blog [class*="card"]:hover,
+#soro-blog [class*="Card"]:hover,
+#soro-blog [class*="post"]:hover,
+#soro-blog [class*="Post"]:hover,
+#soro-blog li:hover {
+  border-color: hsl(var(--primary) / 0.5) !important;
+  box-shadow: 0 0 30px rgba(245, 158, 11, 0.1) !important;
+  transform: translateY(-4px) !important;
+}
+#soro-blog a:hover h1,
+#soro-blog a:hover h2,
+#soro-blog a:hover h3 {
+  color: hsl(var(--primary)) !important;
+}
+#soro-blog img {
+  border-radius: 0 !important;
+}
+#soro-blog button {
+  background: transparent !important;
+  border: 1px solid hsl(var(--primary) / 0.5) !important;
+  color: hsl(var(--primary)) !important;
+  border-radius: 0.375rem !important;
+  padding: 0.5rem 1rem !important;
+}
+#soro-blog button:hover {
+  background: hsl(var(--primary) / 0.1) !important;
+  border-color: hsl(var(--primary)) !important;
+}
