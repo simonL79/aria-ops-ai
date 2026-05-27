@@ -9,7 +9,205 @@ import { ArrowRight, Search, Brain, Bot, CheckCircle2 } from 'lucide-react';
 const PATH = '/ai-reputation-readiness';
 const TITLE = 'AI Reputation Readiness — A.R.I.A™';
 const DESCRIPTION =
-  'Reputation intelligence for the AI-driven internet. A.R.I.A™ ensures you are understood correctly by Google, LLMs and emerging AI agents — before reputation risk becomes commercial damage.';
+  'AI reputation management, monitoring and repair for founders, executives, athletes and brands. A.R.I.A™ protects how Google, ChatGPT, Gemini and Perplexity understand you — across the human, LLM and agentic web.';
+
+const CAPABILITY_CLUSTERS: { title: string; items: string[] }[] = [
+  {
+    title: 'AI Reputation Management & Intelligence',
+    items: [
+      'AI reputation management',
+      'AI reputation intelligence',
+      'AI reputation protection',
+      'AI reputation monitoring',
+      'AI reputation defence',
+      'AI reputation repair',
+      'AI-powered reputation management',
+      'Reputation intelligence platform',
+      'Reputation command centre',
+      'Autonomous reputation monitoring',
+    ],
+  },
+  {
+    title: 'Online Reputation Management (UK & Global)',
+    items: [
+      'Online reputation management',
+      'Online reputation management UK',
+      'Reputation management agency',
+      'Reputation management company UK',
+      'Reputation repair UK',
+      'Online reputation repair',
+      'ORM consultant UK',
+      'Online reputation consultant UK',
+      'Reputation specialist UK',
+      'Reputation management Glasgow',
+      'Reputation management Scotland',
+    ],
+  },
+  {
+    title: 'Personal, Executive & Public-Figure Protection',
+    items: [
+      'Personal reputation management',
+      'Executive reputation management',
+      'Founder reputation management',
+      'Celebrity reputation management',
+      'Athlete reputation management',
+      'Public figure reputation management',
+      'High-profile individual reputation management',
+      'Family reputation protection',
+      'Reputation protection for founders',
+      'Reputation protection for athletes',
+      'Reputation protection for public figures',
+    ],
+  },
+  {
+    title: 'Brand, Corporate & Digital Reputation',
+    items: [
+      'Brand reputation management',
+      'Corporate reputation management',
+      'Digital reputation management',
+      'Digital reputation protection',
+      'Reputation protection service',
+      'Reputation defence service',
+      'Personal brand protection',
+      'Influencer reputation management',
+      'Sports reputation management',
+    ],
+  },
+  {
+    title: 'Monitoring, Threat Scoring & Risk Audits',
+    items: [
+      'Reputation monitoring software',
+      'Reputation monitoring platform',
+      'Real-time reputation monitoring',
+      'Reputation threat monitoring',
+      'Online threat monitoring',
+      'Digital threat intelligence',
+      'Reputation risk analysis',
+      'Reputation risk score',
+      'Online threat score',
+      'Digital threat score',
+      'AI threat score',
+      'Reputation audit',
+      'Online reputation audit',
+      'Personal brand audit',
+      'Executive reputation audit',
+      'Brand risk audit',
+    ],
+  },
+  {
+    title: 'Search Suppression & Content Removal',
+    items: [
+      'Google reputation management',
+      'Google search reputation repair',
+      'Negative search result suppression',
+      'Search result suppression',
+      'SEO suppression',
+      'Negative article suppression',
+      'Negative content suppression',
+      'Negative review suppression',
+      'Remove negative search results',
+      'Bury negative search results',
+      'Suppress negative Google results',
+      'Right to be forgotten UK',
+      'Delisting request UK',
+      'Content removal UK',
+      'Harmful content removal',
+      'Defamation removal',
+      'False content removal',
+      'Outdated content removal',
+    ],
+  },
+  {
+    title: 'Crisis Response & Narrative Defence',
+    items: [
+      'Crisis reputation management',
+      'Reputation crisis response',
+      'Media crisis management',
+      'Online crisis management',
+      'Smear campaign response',
+      'False allegation response',
+      'Online attack response',
+      'Digital PR for reputation',
+      'Positive content strategy',
+      'Authority content strategy',
+      'AI narrative control',
+      'Online narrative monitoring',
+    ],
+  },
+  {
+    title: 'AI Search, LLM & Generative Engine Visibility',
+    items: [
+      'AI search visibility',
+      'AI search optimisation',
+      'AI search reputation',
+      'LLM reputation management',
+      'LLM visibility',
+      'Generative engine optimisation (GEO)',
+      'GEO agency',
+      'Answer engine optimisation',
+      'AI Overview optimisation',
+      'Google AI Overview reputation',
+      'ChatGPT reputation visibility',
+      'Perplexity visibility',
+      'Gemini search visibility',
+      'Brand visibility in AI search',
+      'AI brand monitoring',
+      'AI misinformation monitoring',
+      'AI hallucination monitoring',
+    ],
+  },
+  {
+    title: 'Entity, Schema & Machine-Readable Identity',
+    items: [
+      'Entity optimisation',
+      'Knowledge panel optimisation',
+      'Entity reputation management',
+      'Machine-readable brand data',
+      'Data provenance SEO',
+      'Structured data reputation',
+      'Schema markup reputation',
+      'Reputation SEO',
+    ],
+  },
+  {
+    title: 'Privacy, Identity & Harassment Protection',
+    items: [
+      'Digital identity protection',
+      'Personal data removal',
+      'Data broker removal',
+      'Privacy protection service',
+      'Executive privacy protection',
+      'Founder privacy protection',
+      'Doxxing protection',
+      'Online harassment protection',
+      'Athlete digital protection',
+    ],
+  },
+  {
+    title: 'Listening, Detection & Predictive Intelligence',
+    items: [
+      'Social media reputation monitoring',
+      'Brand sentiment monitoring',
+      'Media monitoring AI',
+      'Social listening reputation',
+      'Dark web reputation monitoring',
+      'Public perception monitoring',
+      'AI crisis detection',
+      'Predictive reputation analysis',
+      'Early warning reputation system',
+    ],
+  },
+  {
+    title: 'Recovery, Trust & Authority Rebuilding',
+    items: [
+      'Reputation recovery strategy',
+      'Trust rebuilding strategy',
+      'Digital credibility strategy',
+      'Authority rebuilding',
+      'AI ORM UK',
+    ],
+  },
+];
 
 const WEBS = [
   {
@@ -182,9 +380,44 @@ const AIReputationReadinessPage: React.FC = () => {
           </blockquote>
         </section>
 
+        {/* Capabilities / keyword coverage */}
+        <section className="container mx-auto px-6 py-16 max-w-6xl">
+          <div className="mb-10">
+            <p className="text-sm uppercase tracking-widest text-primary mb-3">What A.R.I.A covers</p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              The full reputation surface — human, AI and agentic.
+            </h2>
+            <p className="text-muted-foreground text-lg max-w-3xl">
+              A.R.I.A operates across every discipline modern reputation defence now touches:
+              from classical online reputation management and Google search suppression, to LLM
+              visibility, generative engine optimisation, entity and schema work, privacy and
+              identity protection, predictive crisis detection and authority rebuilding.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {CAPABILITY_CLUSTERS.map((cluster) => (
+              <Card
+                key={cluster.title}
+                className="bg-card border-border p-6 hover:border-primary/40 transition-colors"
+              >
+                <h3 className="text-lg font-semibold mb-4 text-foreground">{cluster.title}</h3>
+                <ul className="space-y-2">
+                  {cluster.items.map((item) => (
+                    <li key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+            ))}
+          </div>
+        </section>
+
         {/* FAQ */}
         <section className="container mx-auto px-6 py-12 max-w-4xl">
           <h2 className="text-3xl md:text-4xl font-bold mb-8">Frequently asked questions</h2>
+
           <div className="space-y-4">
             {FAQS.map((f) => (
               <div key={f.q} className="bg-card border border-border rounded-lg p-6">

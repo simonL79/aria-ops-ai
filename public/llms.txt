@@ -7,7 +7,7 @@
 - [Home](/): Overview of A.R.I.A™ reputation defense.
 - [About](/about): Company background and mission.
 - [Features](/features): Threat detection, narrative defense, identity protection, search positioning.
-- [AI Reputation Readiness](/ai-reputation-readiness): Reputation intelligence for the human, LLM and agentic web.
+- [AI Reputation Readiness](/ai-reputation-readiness): Reputation intelligence for the human, LLM and agentic web. Covers AI reputation management, AI reputation monitoring, AI reputation repair, online reputation management UK, reputation management agency, executive and founder reputation management, athlete and public figure reputation protection, Google search reputation repair, negative search result suppression, right to be forgotten UK, crisis reputation management, LLM visibility, generative engine optimisation (GEO), answer engine optimisation, ChatGPT / Gemini / Perplexity reputation visibility, AI Overview optimisation, entity and knowledge panel optimisation, schema markup reputation, digital identity protection, doxxing protection, dark web reputation monitoring, predictive reputation analysis, and reputation recovery strategy.
 - [How it Works](/how-it-works): End-to-end detection-to-response workflow.
 - [Free Scan](/scan): Run a public reputation threat scan.
 - [Cybersecurity Framework](/cybersecurity-framework): SOC II / ISO 27001 / GDPR alignment.
