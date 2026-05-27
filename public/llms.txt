@@ -14,6 +14,14 @@
 - [Simon Lindsay](/simon-lindsay): Founder profile and commercial strategy.
 - [Biography](/biography): Founder biography.
 - [Contact](/contact): Get in touch.
+## Solutions
+
+- [AI Reputation Management](/ai-reputation-management): AI-native reputation management, monitoring, defence and repair. Defends across ChatGPT, Gemini, Perplexity and Google AI Overviews — not just tracking, but active change. Covers AI reputation intelligence, AI reputation protection, AI brand monitoring, AI narrative control, AI misinformation and hallucination monitoring, reputation risk score, AI threat score, predictive reputation analysis, autonomous reputation monitoring.
+- [Online Reputation Management UK](/online-reputation-management-uk): UK-based reputation management agency with an AI defence layer. Reputation repair, suppression and monitoring for founders, executives and brands across the UK, Scotland and Glasgow. Covers reputation management agency, reputation repair UK, online reputation repair, ORM consultant UK, reputation specialist UK, AI ORM UK, reputation audit, executive reputation audit.
+- [Suppress Negative Google Results](/suppress-negative-google-results): Negative search result suppression, harmful content removal, right to be forgotten UK, outdated content delisting, defamation removal, smear campaign response. Legal and SEO pathways pursued in parallel.
+- [Generative Engine Optimisation](/generative-engine-optimisation): GEO, AEO, AI search visibility and AI search optimisation for ChatGPT, Gemini, Perplexity, Copilot and Google AI Overviews. Includes entity optimisation, knowledge panel optimisation, schema markup reputation, structured data reputation, machine-readable brand data and data provenance SEO.
+- [Executive Reputation Protection](/executive-reputation-protection): Personal, executive, founder, athlete, celebrity and public-figure reputation management. Privacy protection, executive privacy protection, founder privacy protection, doxxing protection, online harassment protection, family reputation protection, personal data removal, data broker removal, athlete digital protection.
+
 
 ## Optional
 

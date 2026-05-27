@@ -11,13 +11,22 @@ const Footer = () => {
           <div className="flex items-center mb-2 md:mb-0">
             <Logo variant="light" size="xl" />
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-x-8 gap-y-3 text-sm">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-3 text-sm">
             <div className="flex flex-col gap-2">
               <span className="text-white/60 uppercase tracking-wider text-xs mb-1">Services</span>
               <Link to="/services/brand-protection" className="text-premium-silver hover:text-white transition-colors">Brand Protection</Link>
               <Link to="/services/remove-google-reviews" className="text-premium-silver hover:text-white transition-colors">Remove Google Reviews</Link>
               <Link to="/services/online-impersonation-uk" className="text-premium-silver hover:text-white transition-colors">Online Impersonation (UK)</Link>
               <Link to="/scan" className="text-premium-silver hover:text-white transition-colors">Free Threat Scan</Link>
+            </div>
+            <div className="flex flex-col gap-2">
+              <span className="text-white/60 uppercase tracking-wider text-xs mb-1">Solutions</span>
+              <Link to="/ai-reputation-readiness" className="text-premium-silver hover:text-white transition-colors">AI Reputation Readiness</Link>
+              <Link to="/ai-reputation-management" className="text-premium-silver hover:text-white transition-colors">AI Reputation Management</Link>
+              <Link to="/online-reputation-management-uk" className="text-premium-silver hover:text-white transition-colors">Online Reputation Management UK</Link>
+              <Link to="/suppress-negative-google-results" className="text-premium-silver hover:text-white transition-colors">Suppress Negative Google Results</Link>
+              <Link to="/generative-engine-optimisation" className="text-premium-silver hover:text-white transition-colors">Generative Engine Optimisation</Link>
+              <Link to="/executive-reputation-protection" className="text-premium-silver hover:text-white transition-colors">Executive Reputation Protection</Link>
             </div>
             <div className="flex flex-col gap-2">
               <span className="text-white/60 uppercase tracking-wider text-xs mb-1">Company</span>
