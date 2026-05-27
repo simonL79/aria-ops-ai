@@ -88,6 +88,7 @@ const SimonLindsayKSLPage = () => (
       },
     ]}
     related={[
+      { label: 'KSL Hair — the truth (on the record)', href: '/simon-lindsay/ksl-hair-the-truth' },
       { label: 'Simon Lindsay — Glasgow', href: '/simon-lindsay/glasgow' },
       { label: 'Simon Lindsay — KSL Hair (history)', href: '/simon-lindsay/ksl-hair' },
       { label: 'Simon Lindsay — Reputation Intelligence', href: '/simon-lindsay/reputation-intelligence' },

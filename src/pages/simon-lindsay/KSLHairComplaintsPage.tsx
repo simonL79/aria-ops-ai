@@ -85,6 +85,7 @@ const SimonLindsayKSLHairComplaintsPage = () => (
       },
     ]}
     related={[
+      { label: 'KSL Hair — the truth (on the record)', href: '/simon-lindsay/ksl-hair-the-truth' },
       { label: 'KSL Hair — full history', href: '/simon-lindsay/ksl-hair' },
       { label: 'Simon Lindsay — Reviews & References', href: '/simon-lindsay/reviews' },
       { label: 'Online Impersonation (UK)', href: '/services/online-impersonation-uk' },
