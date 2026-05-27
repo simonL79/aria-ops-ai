@@ -98,7 +98,7 @@ export default function OutdatedContentRemovalPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground py-10 px-4">
-      <SEO title="Outdated Content Removal | A.R.I.A Ops" description="Submit and track Google Remove Outdated Content requests." noIndex />
+      <SEO title="Outdated Content Removal | A.R.I.A Ops" description="Submit and track Google Remove Outdated Content requests." path="/admin/outdated-content" noIndex />
       <div className="max-w-5xl mx-auto space-y-6">
         <div>
           <h1 className="text-3xl font-bold">Google: Remove Outdated Content</h1>
