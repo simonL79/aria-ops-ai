@@ -2991,6 +2991,48 @@ export type Database = {
         }
         Relationships: []
       }
+      outdated_content_requests: {
+        Row: {
+          created_at: string
+          expected_change: string | null
+          google_ticket_ref: string | null
+          id: string
+          notes: string | null
+          reason: string | null
+          status: string
+          submitted_at: string | null
+          submitted_by: string | null
+          target_url: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          expected_change?: string | null
+          google_ticket_ref?: string | null
+          id?: string
+          notes?: string | null
+          reason?: string | null
+          status?: string
+          submitted_at?: string | null
+          submitted_by?: string | null
+          target_url: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          expected_change?: string | null
+          google_ticket_ref?: string | null
+          id?: string
+          notes?: string | null
+          reason?: string | null
+          status?: string
+          submitted_at?: string | null
+          submitted_by?: string | null
+          target_url?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       panoptica_sensor_events: {
         Row: {
           created_at: string
