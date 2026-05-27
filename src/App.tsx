@@ -31,6 +31,7 @@ const ShieldAlertsList = lazy(() => import("./pages/admin/shield/ShieldAlertsLis
 const ShieldAlertDetail = lazy(() => import("./pages/admin/shield/ShieldAlertDetail"));
 const OpsHandbookPage = lazy(() => import("./pages/admin/OpsHandbookPage"));
 const SeoStatusPage = lazy(() => import("./pages/admin/SeoStatusPage"));
+const OutdatedContentRemovalPage = lazy(() => import("./pages/admin/OutdatedContentRemovalPage"));
 const MentionsWorkspace = lazy(() => import("./pages/dashboard/mentions"));
 const Authentication = lazy(() => import("./pages/Authentication"));
 const PortalDashboard = lazy(() => import("./pages/portal/PortalDashboard"));
@@ -140,6 +141,7 @@ function App() {
                         <Route path="/admin/shield/alerts/:id" element={<ShieldAlertDetail />} />
                         <Route path="/admin/ops" element={<OpsHandbookPage />} />
                         <Route path="/admin/seo-status" element={<SeoStatusPage />} />
+                        <Route path="/admin/outdated-content" element={<OutdatedContentRemovalPage />} />
                         <Route path="/dashboard/mentions" element={<MentionsWorkspace />} />
                       </Route>
 
