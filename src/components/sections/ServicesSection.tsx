@@ -1,7 +1,7 @@
 
 import React, { useRef, useCallback } from 'react';
 import { Card } from '@/components/ui/card';
-import { Shield, Swords, Fingerprint, Search } from 'lucide-react';
+import { Shield, Swords, Fingerprint, Search, Brain } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 
@@ -95,6 +95,17 @@ const ServicesSection = () => {
         "Long-term search resilience",
       ],
     },
+    {
+      icon: Brain,
+      title: "AI Reputation Readiness",
+      capabilities: [
+        "What ChatGPT, Gemini & Perplexity say about you",
+        "LLM interpretation & trust signal audit",
+        "Agent-recommendation likelihood scoring",
+        "Structured presence for the agentic web",
+      ],
+      href: "/ai-reputation-readiness",
+    },
   ];
 
   return (
@@ -109,9 +120,15 @@ const ServicesSection = () => {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
           {services.map((service, index) => (
-            <ServiceCard key={index} service={service} index={index} visible={visible} />
+            service.href ? (
+              <Link key={index} to={service.href} className="block">
+                <ServiceCard service={service} index={index} visible={visible} />
+              </Link>
+            ) : (
+              <ServiceCard key={index} service={service} index={index} visible={visible} />
+            )
           ))}
         </div>
 
