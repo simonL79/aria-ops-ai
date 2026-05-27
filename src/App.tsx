@@ -59,6 +59,7 @@ const SimonLindsayReviewsPage = lazy(() => import("./pages/simon-lindsay/Reviews
 const SimonLindsayBankruptcyPage = lazy(() => import("./pages/simon-lindsay/BankruptcyPage"));
 const SimonLindsayKSLHairComplaintsPage = lazy(() => import("./pages/simon-lindsay/KSLHairComplaintsPage"));
 const SimonLindsayKSLHairTheTruthPage = lazy(() => import("./pages/simon-lindsay/KSLHairTheTruthPage"));
+const AIReputationReadinessPage = lazy(() => import("./pages/AIReputationReadinessPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -96,6 +97,7 @@ function App() {
                       <Route path="/services/remove-google-reviews" element={<RemoveGoogleReviewsPage />} />
                       <Route path="/services/online-impersonation-uk" element={<OnlineImpersonationUKPage />} />
                       <Route path="/services/brand-protection" element={<BrandProtectionPage />} />
+                      <Route path="/ai-reputation-readiness" element={<AIReputationReadinessPage />} />
                       <Route path="/simon-lindsay/ai" element={<SimonLindsayAIPage />} />
                       <Route path="/simon-lindsay/entrepreneur" element={<SimonLindsayEntrepreneurPage />} />
                       <Route path="/simon-lindsay/aria" element={<SimonLindsayAriaPage />} />

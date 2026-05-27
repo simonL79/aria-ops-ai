@@ -1,7 +1,7 @@
 
 import React, { useRef, useCallback } from 'react';
 import { Card } from '@/components/ui/card';
-import { Shield, Swords, Fingerprint, Search } from 'lucide-react';
+import { Shield, Swords, Fingerprint, Search, Brain } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 
@@ -94,6 +94,17 @@ const ServicesSection = () => {
         "Authority content layering",
         "Long-term search resilience",
       ],
+    },
+    {
+      icon: Brain,
+      title: "AI Reputation Readiness",
+      capabilities: [
+        "What ChatGPT, Gemini & Perplexity say about you",
+        "LLM interpretation & trust signal audit",
+        "Agent-recommendation likelihood scoring",
+        "Structured presence for the agentic web",
+      ],
+      href: "/ai-reputation-readiness",
     },
   ];
 
