@@ -21,6 +21,23 @@
 - [Suppress Negative Google Results](/suppress-negative-google-results): Negative search result suppression, harmful content removal, right to be forgotten UK, outdated content delisting, defamation removal, smear campaign response. Legal and SEO pathways pursued in parallel.
 - [Generative Engine Optimisation](/generative-engine-optimisation): GEO, AEO, AI search visibility and AI search optimisation for ChatGPT, Gemini, Perplexity, Copilot and Google AI Overviews. Includes entity optimisation, knowledge panel optimisation, schema markup reputation, structured data reputation, machine-readable brand data and data provenance SEO.
 - [Executive Reputation Protection](/executive-reputation-protection): Personal, executive, founder, athlete, celebrity and public-figure reputation management. Privacy protection, executive privacy protection, founder privacy protection, doxxing protection, online harassment protection, family reputation protection, personal data removal, data broker removal, athlete digital protection.
+- [Reputation Threat Score](/reputation-threat-score): Quantified, continuously updated reputation threat score across Google, AI search, social, news and dark web. Severity tiering, active-campaign detection, decision-grade thresholds for investor / sponsor / hire / crisis bands.
+- [AI Search Visibility](/ai-search-visibility): Be findable, accurate and selectable across ChatGPT, Gemini, Perplexity, Copilot, Claude and Google AI Overviews. Entity engineering, GEO content production, citation analysis, source-influence pathways.
+- [LLM Reputation Management](/llm-reputation-management): Operator-led management of reputation inside large language models. Hallucination correction, entity hardening, citation auditing, source-influence engineering, continuous prompt diffing across all major LLMs.
+- [Negative Search Result Suppression](/negative-search-result-suppression): Negative search result suppression combining SEO push-down, right to be forgotten (UK GDPR Article 17), defamation pre-action, Google delisting, outdated content removal, and AI-search source-correction.
+- [Athlete Reputation Management](/athlete-reputation-management): Sponsorship-grade reputation protection for athletes. Brand-safety audits, historic social cleanup, federation perception monitoring, AI search engineering, endorsement-deal protection, crisis playbook.
+- [Founder Reputation Protection](/founder-reputation-protection): Investor-grade founder reputation protection. Pre-due-diligence audits, historic company cleanup, hostile-narrative response, AI search defence, deal-mode escalation, board-grade reporting.
+- [Crisis Reputation Management](/crisis-reputation-management): 24/7 operator-led crisis reputation response across search, AI, social, news, legal and stakeholder lanes. Named lead, first-72-hours playbook, quantified telemetry.
+
+## Resources
+
+- [AI Reputation Readiness Checklist](/resources/ai-reputation-readiness-checklist): 20-point checklist across entity integrity, AI search readiness, search-surface hygiene and defence. Free framework.
+- [Founder Reputation Risk Report](/resources/founder-reputation-risk-report): Five-dimension investor-grade risk-report template matching the framework VC and M&A diligence teams use.
+- [Athlete Reputation Protection Guide](/resources/athlete-reputation-protection-guide): How brand-safety teams screen athletes, what derails endorsement deals, and the eight defences every serious athlete should have.
+- [LLM Visibility Audit Template](/resources/llm-visibility-audit-template): Free template for measuring ChatGPT, Gemini, Perplexity, Copilot, Claude and AI Overviews against a standard prompt set, with grading rubric.
+- [Negative Search Suppression Guide](/resources/negative-search-suppression-guide): Step-by-step UK suppression playbook combining legal, RTBF, platform, SEO and AI-search correction pathways.
+- [Crisis Reputation Response Checklist](/resources/crisis-reputation-response-checklist): Hour-by-hour first-72-hours crisis response checklist across search, AI, legal, platform and stakeholder lanes.
+- [AI Search Visibility Glossary](/resources/ai-search-visibility-glossary): Working glossary of AI search, GEO, AEO, LLM reputation and AI-era ORM terminology, with stable per-term anchors for deep-linking.
 
 
 ## Optional

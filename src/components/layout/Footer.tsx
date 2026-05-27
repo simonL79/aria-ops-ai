@@ -11,7 +11,7 @@ const Footer = () => {
           <div className="flex items-center mb-2 md:mb-0">
             <Logo variant="light" size="xl" />
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-3 text-sm">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-x-8 gap-y-3 text-sm">
             <div className="flex flex-col gap-2">
               <span className="text-white/60 uppercase tracking-wider text-xs mb-1">Services</span>
               <Link to="/services/brand-protection" className="text-premium-silver hover:text-white transition-colors">Brand Protection</Link>
@@ -24,9 +24,29 @@ const Footer = () => {
               <Link to="/ai-reputation-readiness" className="text-premium-silver hover:text-white transition-colors">AI Reputation Readiness</Link>
               <Link to="/ai-reputation-management" className="text-premium-silver hover:text-white transition-colors">AI Reputation Management</Link>
               <Link to="/online-reputation-management-uk" className="text-premium-silver hover:text-white transition-colors">Online Reputation Management UK</Link>
-              <Link to="/suppress-negative-google-results" className="text-premium-silver hover:text-white transition-colors">Suppress Negative Google Results</Link>
+              <Link to="/llm-reputation-management" className="text-premium-silver hover:text-white transition-colors">LLM Reputation Management</Link>
+              <Link to="/ai-search-visibility" className="text-premium-silver hover:text-white transition-colors">AI Search Visibility</Link>
               <Link to="/generative-engine-optimisation" className="text-premium-silver hover:text-white transition-colors">Generative Engine Optimisation</Link>
-              <Link to="/executive-reputation-protection" className="text-premium-silver hover:text-white transition-colors">Executive Reputation Protection</Link>
+              <Link to="/reputation-threat-score" className="text-premium-silver hover:text-white transition-colors">Reputation Threat Score</Link>
+            </div>
+            <div className="flex flex-col gap-2">
+              <span className="text-white/60 uppercase tracking-wider text-xs mb-1">For</span>
+              <Link to="/founder-reputation-protection" className="text-premium-silver hover:text-white transition-colors">Founders</Link>
+              <Link to="/athlete-reputation-management" className="text-premium-silver hover:text-white transition-colors">Athletes</Link>
+              <Link to="/executive-reputation-protection" className="text-premium-silver hover:text-white transition-colors">Executives</Link>
+              <Link to="/crisis-reputation-management" className="text-premium-silver hover:text-white transition-colors">Crisis Response</Link>
+              <Link to="/suppress-negative-google-results" className="text-premium-silver hover:text-white transition-colors">Suppress Google Results</Link>
+              <Link to="/negative-search-result-suppression" className="text-premium-silver hover:text-white transition-colors">Negative Search Suppression</Link>
+            </div>
+            <div className="flex flex-col gap-2">
+              <span className="text-white/60 uppercase tracking-wider text-xs mb-1">Resources</span>
+              <Link to="/resources/ai-reputation-readiness-checklist" className="text-premium-silver hover:text-white transition-colors">AI Readiness Checklist</Link>
+              <Link to="/resources/founder-reputation-risk-report" className="text-premium-silver hover:text-white transition-colors">Founder Risk Report</Link>
+              <Link to="/resources/athlete-reputation-protection-guide" className="text-premium-silver hover:text-white transition-colors">Athlete Protection Guide</Link>
+              <Link to="/resources/llm-visibility-audit-template" className="text-premium-silver hover:text-white transition-colors">LLM Visibility Audit</Link>
+              <Link to="/resources/negative-search-suppression-guide" className="text-premium-silver hover:text-white transition-colors">Suppression Guide</Link>
+              <Link to="/resources/crisis-reputation-response-checklist" className="text-premium-silver hover:text-white transition-colors">Crisis Checklist</Link>
+              <Link to="/resources/ai-search-visibility-glossary" className="text-premium-silver hover:text-white transition-colors">AI Search Glossary</Link>
             </div>
             <div className="flex flex-col gap-2">
               <span className="text-white/60 uppercase tracking-wider text-xs mb-1">Company</span>
@@ -35,13 +55,9 @@ const Footer = () => {
               <Link to="/home#pricing" className="text-premium-silver hover:text-white transition-colors">Pricing</Link>
               <Link to="/blog" className="text-premium-silver hover:text-white transition-colors">Blog</Link>
               <Link to="/contact" className="text-premium-silver hover:text-white transition-colors">Contact</Link>
-            </div>
-            <div className="flex flex-col gap-2">
-              <span className="text-white/60 uppercase tracking-wider text-xs mb-1">Trust</span>
               <Link to="/cybersecurity-framework" className="text-premium-silver hover:text-white transition-colors">Security</Link>
               <Link to="/privacy-policy" className="text-premium-silver hover:text-white transition-colors">Privacy</Link>
               <Link to="/terms" className="text-premium-silver hover:text-white transition-colors">Terms</Link>
-              <Link to="/admin/login" className="text-premium-silver hover:text-white transition-colors">Admin Login</Link>
             </div>
           </div>
         </div>
