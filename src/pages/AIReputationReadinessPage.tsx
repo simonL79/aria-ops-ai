@@ -380,9 +380,44 @@ const AIReputationReadinessPage: React.FC = () => {
           </blockquote>
         </section>
 
+        {/* Capabilities / keyword coverage */}
+        <section className="container mx-auto px-6 py-16 max-w-6xl">
+          <div className="mb-10">
+            <p className="text-sm uppercase tracking-widest text-primary mb-3">What A.R.I.A covers</p>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              The full reputation surface — human, AI and agentic.
+            </h2>
+            <p className="text-muted-foreground text-lg max-w-3xl">
+              A.R.I.A operates across every discipline modern reputation defence now touches:
+              from classical online reputation management and Google search suppression, to LLM
+              visibility, generative engine optimisation, entity and schema work, privacy and
+              identity protection, predictive crisis detection and authority rebuilding.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {CAPABILITY_CLUSTERS.map((cluster) => (
+              <Card
+                key={cluster.title}
+                className="bg-card border-border p-6 hover:border-primary/40 transition-colors"
+              >
+                <h3 className="text-lg font-semibold mb-4 text-foreground">{cluster.title}</h3>
+                <ul className="space-y-2">
+                  {cluster.items.map((item) => (
+                    <li key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+            ))}
+          </div>
+        </section>
+
         {/* FAQ */}
         <section className="container mx-auto px-6 py-12 max-w-4xl">
           <h2 className="text-3xl md:text-4xl font-bold mb-8">Frequently asked questions</h2>
+
           <div className="space-y-4">
             {FAQS.map((f) => (
               <div key={f.q} className="bg-card border border-border rounded-lg p-6">
