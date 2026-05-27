@@ -91,6 +91,8 @@ const SimonLindsayKSLHairPage = () => (
       },
     ]}
     related={[
+      { label: 'KSL Hair — the truth (on the record)', href: '/simon-lindsay/ksl-hair-the-truth' },
+      { label: 'KSL Hair — complaints (official statement)', href: '/simon-lindsay/ksl-hair-complaints' },
       { label: 'Simon Lindsay — KSL', href: '/simon-lindsay/ksl' },
       { label: 'Simon Lindsay — Bankruptcy (the record)', href: '/simon-lindsay/bankruptcy' },
       { label: 'Simon Lindsay — Reviews & References', href: '/simon-lindsay/reviews' },

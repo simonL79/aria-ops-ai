@@ -57,6 +57,7 @@ const SimonLindsayKSLHairPage = lazy(() => import("./pages/simon-lindsay/KSLHair
 const SimonLindsayReviewsPage = lazy(() => import("./pages/simon-lindsay/ReviewsPage"));
 const SimonLindsayBankruptcyPage = lazy(() => import("./pages/simon-lindsay/BankruptcyPage"));
 const SimonLindsayKSLHairComplaintsPage = lazy(() => import("./pages/simon-lindsay/KSLHairComplaintsPage"));
+const SimonLindsayKSLHairTheTruthPage = lazy(() => import("./pages/simon-lindsay/KSLHairTheTruthPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -106,6 +107,7 @@ function App() {
                       <Route path="/simon-lindsay/reviews" element={<SimonLindsayReviewsPage />} />
                       <Route path="/simon-lindsay/bankruptcy" element={<SimonLindsayBankruptcyPage />} />
                       <Route path="/simon-lindsay/ksl-hair-complaints" element={<SimonLindsayKSLHairComplaintsPage />} />
+                      <Route path="/simon-lindsay/ksl-hair-the-truth" element={<SimonLindsayKSLHairTheTruthPage />} />
 
                       {/* Client Portal — read-only */}
                       <Route path="/portal/no-access" element={<PortalNoAccess />} />
