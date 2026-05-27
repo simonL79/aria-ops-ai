@@ -60,6 +60,11 @@ const SimonLindsayBankruptcyPage = lazy(() => import("./pages/simon-lindsay/Bank
 const SimonLindsayKSLHairComplaintsPage = lazy(() => import("./pages/simon-lindsay/KSLHairComplaintsPage"));
 const SimonLindsayKSLHairTheTruthPage = lazy(() => import("./pages/simon-lindsay/KSLHairTheTruthPage"));
 const AIReputationReadinessPage = lazy(() => import("./pages/AIReputationReadinessPage"));
+const StealthAIReputationManagementPage = lazy(() => import("./pages/stealth/AIReputationManagementPage"));
+const StealthOnlineReputationManagementUKPage = lazy(() => import("./pages/stealth/OnlineReputationManagementUKPage"));
+const StealthSuppressNegativeGoogleResultsPage = lazy(() => import("./pages/stealth/SuppressNegativeGoogleResultsPage"));
+const StealthGenerativeEngineOptimisationPage = lazy(() => import("./pages/stealth/GenerativeEngineOptimisationPage"));
+const StealthExecutiveReputationProtectionPage = lazy(() => import("./pages/stealth/ExecutiveReputationProtectionPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -98,6 +103,11 @@ function App() {
                       <Route path="/services/online-impersonation-uk" element={<OnlineImpersonationUKPage />} />
                       <Route path="/services/brand-protection" element={<BrandProtectionPage />} />
                       <Route path="/ai-reputation-readiness" element={<AIReputationReadinessPage />} />
+                      <Route path="/ai-reputation-management" element={<StealthAIReputationManagementPage />} />
+                      <Route path="/online-reputation-management-uk" element={<StealthOnlineReputationManagementUKPage />} />
+                      <Route path="/suppress-negative-google-results" element={<StealthSuppressNegativeGoogleResultsPage />} />
+                      <Route path="/generative-engine-optimisation" element={<StealthGenerativeEngineOptimisationPage />} />
+                      <Route path="/executive-reputation-protection" element={<StealthExecutiveReputationProtectionPage />} />
                       <Route path="/simon-lindsay/ai" element={<SimonLindsayAIPage />} />
                       <Route path="/simon-lindsay/entrepreneur" element={<SimonLindsayEntrepreneurPage />} />
                       <Route path="/simon-lindsay/aria" element={<SimonLindsayAriaPage />} />
