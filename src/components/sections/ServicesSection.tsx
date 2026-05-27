@@ -120,9 +120,15 @@ const ServicesSection = () => {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
           {services.map((service, index) => (
-            <ServiceCard key={index} service={service} index={index} visible={visible} />
+            service.href ? (
+              <Link key={index} to={service.href} className="block">
+                <ServiceCard service={service} index={index} visible={visible} />
+              </Link>
+            ) : (
+              <ServiceCard key={index} service={service} index={index} visible={visible} />
+            )
           ))}
         </div>
 
