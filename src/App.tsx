@@ -65,6 +65,20 @@ const StealthOnlineReputationManagementUKPage = lazy(() => import("./pages/steal
 const StealthSuppressNegativeGoogleResultsPage = lazy(() => import("./pages/stealth/SuppressNegativeGoogleResultsPage"));
 const StealthGenerativeEngineOptimisationPage = lazy(() => import("./pages/stealth/GenerativeEngineOptimisationPage"));
 const StealthExecutiveReputationProtectionPage = lazy(() => import("./pages/stealth/ExecutiveReputationProtectionPage"));
+const StealthReputationThreatScorePage = lazy(() => import("./pages/stealth/ReputationThreatScorePage"));
+const StealthAISearchVisibilityPage = lazy(() => import("./pages/stealth/AISearchVisibilityPage"));
+const StealthLLMReputationManagementPage = lazy(() => import("./pages/stealth/LLMReputationManagementPage"));
+const StealthNegativeSearchResultSuppressionPage = lazy(() => import("./pages/stealth/NegativeSearchResultSuppressionPage"));
+const StealthAthleteReputationManagementPage = lazy(() => import("./pages/stealth/AthleteReputationManagementPage"));
+const StealthFounderReputationProtectionPage = lazy(() => import("./pages/stealth/FounderReputationProtectionPage"));
+const StealthCrisisReputationManagementPage = lazy(() => import("./pages/stealth/CrisisReputationManagementPage"));
+const ResourceAIReputationReadinessChecklistPage = lazy(() => import("./pages/resources/AIReputationReadinessChecklistPage"));
+const ResourceFounderReputationRiskReportPage = lazy(() => import("./pages/resources/FounderReputationRiskReportPage"));
+const ResourceAthleteReputationProtectionGuidePage = lazy(() => import("./pages/resources/AthleteReputationProtectionGuidePage"));
+const ResourceLLMVisibilityAuditTemplatePage = lazy(() => import("./pages/resources/LLMVisibilityAuditTemplatePage"));
+const ResourceNegativeSearchSuppressionGuidePage = lazy(() => import("./pages/resources/NegativeSearchSuppressionGuidePage"));
+const ResourceCrisisReputationResponseChecklistPage = lazy(() => import("./pages/resources/CrisisReputationResponseChecklistPage"));
+const ResourceAISearchVisibilityGlossaryPage = lazy(() => import("./pages/resources/AISearchVisibilityGlossaryPage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -108,6 +122,20 @@ function App() {
                       <Route path="/suppress-negative-google-results" element={<StealthSuppressNegativeGoogleResultsPage />} />
                       <Route path="/generative-engine-optimisation" element={<StealthGenerativeEngineOptimisationPage />} />
                       <Route path="/executive-reputation-protection" element={<StealthExecutiveReputationProtectionPage />} />
+                      <Route path="/reputation-threat-score" element={<StealthReputationThreatScorePage />} />
+                      <Route path="/ai-search-visibility" element={<StealthAISearchVisibilityPage />} />
+                      <Route path="/llm-reputation-management" element={<StealthLLMReputationManagementPage />} />
+                      <Route path="/negative-search-result-suppression" element={<StealthNegativeSearchResultSuppressionPage />} />
+                      <Route path="/athlete-reputation-management" element={<StealthAthleteReputationManagementPage />} />
+                      <Route path="/founder-reputation-protection" element={<StealthFounderReputationProtectionPage />} />
+                      <Route path="/crisis-reputation-management" element={<StealthCrisisReputationManagementPage />} />
+                      <Route path="/resources/ai-reputation-readiness-checklist" element={<ResourceAIReputationReadinessChecklistPage />} />
+                      <Route path="/resources/founder-reputation-risk-report" element={<ResourceFounderReputationRiskReportPage />} />
+                      <Route path="/resources/athlete-reputation-protection-guide" element={<ResourceAthleteReputationProtectionGuidePage />} />
+                      <Route path="/resources/llm-visibility-audit-template" element={<ResourceLLMVisibilityAuditTemplatePage />} />
+                      <Route path="/resources/negative-search-suppression-guide" element={<ResourceNegativeSearchSuppressionGuidePage />} />
+                      <Route path="/resources/crisis-reputation-response-checklist" element={<ResourceCrisisReputationResponseChecklistPage />} />
+                      <Route path="/resources/ai-search-visibility-glossary" element={<ResourceAISearchVisibilityGlossaryPage />} />
                       <Route path="/simon-lindsay/ai" element={<SimonLindsayAIPage />} />
                       <Route path="/simon-lindsay/entrepreneur" element={<SimonLindsayEntrepreneurPage />} />
                       <Route path="/simon-lindsay/aria" element={<SimonLindsayAriaPage />} />
