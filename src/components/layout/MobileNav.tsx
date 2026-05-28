@@ -38,7 +38,7 @@ const MobileNav = ({ isOpen, setIsOpen }: MobileNavProps) => {
       {/* Mobile menu overlay */}
       {isOpen && (
         <div className="fixed inset-0 z-50 md:hidden">
-          <div className="fixed inset-0 bg-black/50" onClick={() => setIsOpen(false)} />
+          <div className="fixed inset-0 bg-background/50" onClick={() => setIsOpen(false)} />
           <div className="fixed top-0 right-0 h-full w-64 bg-white shadow-lg">
             <div className="flex items-center justify-between p-4 border-b">
               <div className="flex items-center gap-2">

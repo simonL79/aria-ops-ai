@@ -94,7 +94,7 @@ const Navbar = () => {
             <Button
               variant="ghost"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
+              className="inline-flex items-center justify-center p-2 rounded-md text-muted-foreground hover:text-gray-500 hover:bg-gray-100"
             >
               {mobileMenuOpen ? (
                 <X className="h-6 w-6" />

@@ -94,7 +94,7 @@ const AnimatedScore = ({ target }: { target: number }) => {
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-4xl font-bold text-white">{current}</span>
+          <span className="text-4xl font-bold text-foreground">{current}</span>
           <span className="text-xs text-muted-foreground">/100</span>
         </div>
       </div>
@@ -167,10 +167,10 @@ const ThreatScoreSection = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
 
   return (
-    <section id="threat-score" className="py-24 bg-black relative">
+    <section id="threat-score" className="py-24 bg-background relative">
       <div className="container mx-auto px-6">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4">
             Get Your Free <span className="text-primary">Reputation Threat Score</span>
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
@@ -183,22 +183,22 @@ const ThreatScoreSection = () => {
             <form onSubmit={handleSubmit} className="glass-card p-8 md:p-10 space-y-6">
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm text-white mb-2">Full Name / Brand Name *</label>
+                  <label className="block text-sm text-foreground mb-2">Full Name / Brand Name *</label>
                   <input
                     type="text"
                     value={formData.fullName}
                     onChange={e => update('fullName', e.target.value)}
-                    className="w-full px-4 py-3 bg-secondary border border-border rounded-lg text-white placeholder-muted-foreground focus:border-primary focus:outline-none transition-colors"
+                    className="w-full px-4 py-3 bg-secondary border border-border rounded-lg text-foreground placeholder-muted-foreground focus:border-primary focus:outline-none transition-colors"
                     placeholder="Enter name"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-white mb-2">Industry *</label>
+                  <label className="block text-sm text-foreground mb-2">Industry *</label>
                   <select
                     value={formData.industry}
                     onChange={e => update('industry', e.target.value)}
-                    className="w-full px-4 py-3 bg-secondary border border-border rounded-lg text-white focus:border-primary focus:outline-none transition-colors"
+                    className="w-full px-4 py-3 bg-secondary border border-border rounded-lg text-foreground focus:border-primary focus:outline-none transition-colors"
                     required
                   >
                     <option value="">Select industry</option>
@@ -208,18 +208,18 @@ const ThreatScoreSection = () => {
               </div>
 
               <div>
-                <label className="block text-sm text-white mb-2">Website or Main Social Profile</label>
+                <label className="block text-sm text-foreground mb-2">Website or Main Social Profile</label>
                 <input
                   type="url"
                   value={formData.website}
                   onChange={e => update('website', e.target.value)}
-                  className="w-full px-4 py-3 bg-secondary border border-border rounded-lg text-white placeholder-muted-foreground focus:border-primary focus:outline-none transition-colors"
+                  className="w-full px-4 py-3 bg-secondary border border-border rounded-lg text-foreground placeholder-muted-foreground focus:border-primary focus:outline-none transition-colors"
                   placeholder="https://..."
                 />
               </div>
 
               <div>
-                <label className="block text-sm text-white mb-3">Public Visibility Level *</label>
+                <label className="block text-sm text-foreground mb-3">Public Visibility Level *</label>
                 <div className="flex gap-4">
                   {(['low', 'medium', 'high'] as const).map(level => (
                     <button
@@ -239,7 +239,7 @@ const ThreatScoreSection = () => {
               </div>
 
               <div>
-                <label className="block text-sm text-white mb-3">Recent Press or Controversy?</label>
+                <label className="block text-sm text-foreground mb-3">Recent Press or Controversy?</label>
                 <div className="flex gap-4">
                   {[true, false].map(val => (
                     <button
@@ -260,23 +260,23 @@ const ThreatScoreSection = () => {
 
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm text-white mb-2">Email Address *</label>
+                  <label className="block text-sm text-foreground mb-2">Email Address *</label>
                   <input
                     type="email"
                     value={formData.email}
                     onChange={e => update('email', e.target.value)}
-                    className="w-full px-4 py-3 bg-secondary border border-border rounded-lg text-white placeholder-muted-foreground focus:border-primary focus:outline-none transition-colors"
+                    className="w-full px-4 py-3 bg-secondary border border-border rounded-lg text-foreground placeholder-muted-foreground focus:border-primary focus:outline-none transition-colors"
                     placeholder="you@email.com"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-white mb-2">Social Handle</label>
+                  <label className="block text-sm text-foreground mb-2">Social Handle</label>
                   <input
                     type="text"
                     value={formData.socialHandle}
                     onChange={e => update('socialHandle', e.target.value)}
-                    className="w-full px-4 py-3 bg-secondary border border-border rounded-lg text-white placeholder-muted-foreground focus:border-primary focus:outline-none transition-colors"
+                    className="w-full px-4 py-3 bg-secondary border border-border rounded-lg text-foreground placeholder-muted-foreground focus:border-primary focus:outline-none transition-colors"
                     placeholder="@username"
                   />
                 </div>
@@ -296,7 +296,7 @@ const ThreatScoreSection = () => {
             </form>
           ) : (
             <div className="glass-card p-8 md:p-12 text-center space-y-8 animate-fade-in">
-              <h3 className="text-2xl font-bold text-white">Your Reputation Threat Score</h3>
+              <h3 className="text-2xl font-bold text-foreground">Your Reputation Threat Score</h3>
               
               <AnimatedScore target={score} />
 

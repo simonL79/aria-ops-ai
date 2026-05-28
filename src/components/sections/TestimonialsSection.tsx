@@ -41,9 +41,9 @@ const TestimonialsSection = () => {
   ];
 
   return (
-    <section className="bg-black py-16">
+    <section className="bg-background py-16">
       <div className="container mx-auto px-6">
-        <h2 className="text-3xl md:text-4xl font-bold text-white text-center mb-4">What Our Clients Say</h2>
+        <h2 className="text-3xl md:text-4xl font-bold text-foreground text-center mb-4">What Our Clients Say</h2>
         <p className="text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
           Trusted by executives, founders, and public figures to protect what matters most — their reputation.
         </p>
@@ -76,7 +76,7 @@ const TestimonialsSection = () => {
           {testimonials.map((testimonial, index) => (
             <div
               key={index}
-              className={`glass-card p-8 text-white transition-all duration-700 ${
+              className={`glass-card p-8 text-foreground transition-all duration-700 ${
                 cardsVisible
                   ? 'opacity-100 translate-y-0'
                   : 'opacity-0 translate-y-6'

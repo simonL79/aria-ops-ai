@@ -70,26 +70,26 @@ const UnsubscribePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center px-6">
+    <div className="min-h-screen bg-background flex items-center justify-center px-6">
       <SEO title="Unsubscribe — A.R.I.A™" description="Unsubscribe from A.R.I.A™ communications." path="/unsubscribe" noIndex />
-      <Card className="bg-gray-900 border-gray-800 p-8 max-w-md w-full text-center">
+      <Card className="bg-card border-border p-8 max-w-md w-full text-center">
         {status === 'loading' && (
           <>
             <Loader2 className="h-10 w-10 animate-spin text-orange-500 mx-auto mb-4" />
-            <p className="text-gray-400">Validating your request...</p>
+            <p className="text-muted-foreground">Validating your request...</p>
           </>
         )}
 
         {status === 'valid' && (
           <>
-            <h1 className="text-2xl font-bold text-white mb-4">Unsubscribe</h1>
-            <p className="text-gray-400 mb-6">
+            <h1 className="text-2xl font-bold text-foreground mb-4">Unsubscribe</h1>
+            <p className="text-muted-foreground mb-6">
               Are you sure you want to unsubscribe from A.R.I.A™ emails?
             </p>
             <Button
               onClick={handleUnsubscribe}
               disabled={processing}
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+              className="w-full bg-orange-500 hover:bg-orange-600 text-foreground"
             >
               {processing ? 'Processing...' : 'Confirm Unsubscribe'}
             </Button>
@@ -99,32 +99,32 @@ const UnsubscribePage = () => {
         {status === 'success' && (
           <>
             <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-white mb-2">Unsubscribed</h1>
-            <p className="text-gray-400">You've been successfully unsubscribed.</p>
+            <h1 className="text-2xl font-bold text-foreground mb-2">Unsubscribed</h1>
+            <p className="text-muted-foreground">You've been successfully unsubscribed.</p>
           </>
         )}
 
         {status === 'already_unsubscribed' && (
           <>
             <CheckCircle className="h-12 w-12 text-gray-500 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-white mb-2">Already Unsubscribed</h1>
-            <p className="text-gray-400">You've already been unsubscribed from our emails.</p>
+            <h1 className="text-2xl font-bold text-foreground mb-2">Already Unsubscribed</h1>
+            <p className="text-muted-foreground">You've already been unsubscribed from our emails.</p>
           </>
         )}
 
         {status === 'invalid' && (
           <>
             <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-white mb-2">Invalid Link</h1>
-            <p className="text-gray-400">This unsubscribe link is invalid or has expired.</p>
+            <h1 className="text-2xl font-bold text-foreground mb-2">Invalid Link</h1>
+            <p className="text-muted-foreground">This unsubscribe link is invalid or has expired.</p>
           </>
         )}
 
         {status === 'error' && (
           <>
             <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-white mb-2">Something Went Wrong</h1>
-            <p className="text-gray-400">Please try again later or contact support.</p>
+            <h1 className="text-2xl font-bold text-foreground mb-2">Something Went Wrong</h1>
+            <p className="text-muted-foreground">Please try again later or contact support.</p>
           </>
         )}
       </Card>

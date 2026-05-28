@@ -275,14 +275,14 @@ const CybersecurityFrameworkPage = () => {
         <link rel="canonical" href="https://www.ariaops.co.uk/cybersecurity-framework" />
       </Helmet>
 
-      <div className="min-h-screen bg-black text-white">
+      <div className="min-h-screen bg-background text-foreground">
         {/* Header */}
-        <div className="relative border-b border-white/10">
+        <div className="relative border-b border-border">
           <div className="absolute inset-0 bg-gradient-to-b from-orange-500/10 via-transparent to-transparent pointer-events-none" />
           <div className="container mx-auto max-w-6xl px-6 py-16 relative">
             <Link
               to="/"
-              className="inline-flex items-center gap-2 text-sm text-white/60 hover:text-orange-500 transition-colors mb-8"
+              className="inline-flex items-center gap-2 text-sm text-foreground/60 hover:text-orange-500 transition-colors mb-8"
             >
               <ArrowLeft className="h-4 w-4" />
               Back to home
@@ -296,7 +296,7 @@ const CybersecurityFrameworkPage = () => {
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-6">
               A.R.I.A™ Cybersecurity Framework
             </h1>
-            <p className="text-lg md:text-xl text-white/70 max-w-3xl leading-relaxed">
+            <p className="text-lg md:text-xl text-foreground/70 max-w-3xl leading-relaxed">
               The control model governing how A.R.I.A™ protects client intelligence,
               executive data, and platform integrity — aligned to ISO 27001, NCSC CAF,
               Cyber Essentials Plus, and UK GDPR.
@@ -305,17 +305,17 @@ const CybersecurityFrameworkPage = () => {
         </div>
 
         {/* TOC */}
-        <div className="container mx-auto max-w-6xl px-6 py-10 border-b border-white/10">
-          <h2 className="text-xs uppercase tracking-[0.2em] text-white/40 mb-4">Contents</h2>
+        <div className="container mx-auto max-w-6xl px-6 py-10 border-b border-border">
+          <h2 className="text-xs uppercase tracking-[0.2em] text-foreground/40 mb-4">Contents</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
             {sections.map((s) => (
               <a
                 key={s.id}
                 href={`#${s.id}`}
-                className="group flex items-start gap-2 p-3 rounded-lg border border-white/5 hover:border-orange-500/40 hover:bg-white/[0.02] transition-all"
+                className="group flex items-start gap-2 p-3 rounded-lg border border-border hover:border-orange-500/40 hover:bg-white/[0.02] transition-all"
               >
                 <span className="text-xs font-mono text-orange-500/70 mt-0.5">{s.number}</span>
-                <span className="text-sm text-white/80 group-hover:text-white transition-colors">
+                <span className="text-sm text-foreground/80 group-hover:text-foreground transition-colors">
                   {s.title}
                 </span>
               </a>
@@ -342,7 +342,7 @@ const CybersecurityFrameworkPage = () => {
                 </div>
 
                 {section.intro && (
-                  <p className="text-white/70 leading-relaxed mb-8 text-lg">
+                  <p className="text-foreground/70 leading-relaxed mb-8 text-lg">
                     {section.intro}
                   </p>
                 )}
@@ -351,7 +351,7 @@ const CybersecurityFrameworkPage = () => {
                   {section.groups.map((group, gi) => (
                     <div key={gi}>
                       {group.heading && (
-                        <h3 className="text-sm uppercase tracking-wider text-white/50 mb-4 font-medium">
+                        <h3 className="text-sm uppercase tracking-wider text-foreground/50 mb-4 font-medium">
                           {group.heading}
                         </h3>
                       )}
@@ -359,10 +359,10 @@ const CybersecurityFrameworkPage = () => {
                         {group.items.map((item, ii) => (
                           <li
                             key={ii}
-                            className="flex items-start gap-3 p-4 rounded-lg bg-white/[0.02] border border-white/5"
+                            className="flex items-start gap-3 p-4 rounded-lg bg-white/[0.02] border border-border"
                           >
                             <CheckCircle2 className="h-5 w-5 text-orange-500 mt-0.5 flex-shrink-0" />
-                            <span className="text-white/85 leading-relaxed">{item}</span>
+                            <span className="text-foreground/85 leading-relaxed">{item}</span>
                           </li>
                         ))}
                       </ul>
@@ -386,7 +386,7 @@ const CybersecurityFrameworkPage = () => {
                     <span className="flex-shrink-0 w-8 h-8 rounded-full bg-orange-500 text-black font-bold text-sm flex items-center justify-center">
                       {i + 1}
                     </span>
-                    <span className="text-white/90 leading-relaxed pt-1">{step}</span>
+                    <span className="text-foreground/90 leading-relaxed pt-1">{step}</span>
                   </li>
                 ))}
               </ol>
@@ -394,15 +394,15 @@ const CybersecurityFrameworkPage = () => {
           </section>
 
           {/* Compliance badges */}
-          <section className="text-center pt-8 border-t border-white/10">
-            <p className="text-sm text-white/50 mb-6">
+          <section className="text-center pt-8 border-t border-border">
+            <p className="text-sm text-foreground/50 mb-6">
               Aligned to internationally recognised standards
             </p>
             <div className="flex flex-wrap justify-center gap-3">
               {['ISO 27001', 'NCSC CAF', 'Cyber Essentials Plus', 'UK GDPR', 'SOC II'].map((b) => (
                 <div
                   key={b}
-                  className="px-4 py-2 rounded-full border border-white/10 bg-white/[0.02] text-sm text-white/80"
+                  className="px-4 py-2 rounded-full border border-border bg-white/[0.02] text-sm text-foreground/80"
                 >
                   {b}
                 </div>

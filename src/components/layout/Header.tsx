@@ -21,7 +21,7 @@ const Header = ({ variant = 'default' }: HeaderProps) => {
 
   const headerClass = variant === 'transparent' 
     ? "absolute top-0 z-40 w-full bg-transparent"
-    : "sticky top-0 z-40 w-full bg-black/95 backdrop-blur border-b border-gray-800";
+    : "sticky top-0 z-40 w-full bg-card/95 backdrop-blur border-b border-border";
 
   return (
     <header className={headerClass}>
@@ -32,13 +32,13 @@ const Header = ({ variant = 'default' }: HeaderProps) => {
           </Link>
           
           <nav className="hidden md:flex items-center space-x-8">
-            <Link to="/about" className="text-gray-300 hover:text-white transition-colors">About</Link>
-            <Link to="/blog" className="text-gray-300 hover:text-white transition-colors">Blog</Link>
-            <Link to="/simon-lindsay" className="text-gray-300 hover:text-white transition-colors">Simon Lindsay</Link>
+            <Link to="/about" className="text-muted-foreground hover:text-foreground transition-colors">About</Link>
+            <Link to="/blog" className="text-muted-foreground hover:text-foreground transition-colors">Blog</Link>
+            <Link to="/simon-lindsay" className="text-muted-foreground hover:text-foreground transition-colors">Simon Lindsay</Link>
             
             <Link
               to="/secure-intake"
-              className="text-gray-300 hover:text-corporate-accent transition-colors"
+              className="text-muted-foreground hover:text-accent transition-colors"
             >
               A.R.I.A™ Intake
             </Link>
@@ -48,14 +48,14 @@ const Header = ({ variant = 'default' }: HeaderProps) => {
                 variant="ghost" 
                 size="sm" 
                 onClick={handleAuthAction}
-                className="ml-4 text-sm font-medium text-gray-300 hover:text-white"
+                className="ml-4 text-sm font-medium text-muted-foreground hover:text-foreground"
               >
                 <LogOut className="mr-2 h-4 w-4" />
                 Sign Out
               </Button>
             ) : (
               <Link to="/admin/login">
-                <Button variant="outline" size="sm" className="border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-white">
+                <Button variant="outline" size="sm" className="border-orange-500 text-orange-500 hover:bg-orange-500 hover:text-foreground">
                   <LogIn className="mr-2 h-4 w-4" />
                   Admin Login
                 </Button>
@@ -64,7 +64,7 @@ const Header = ({ variant = 'default' }: HeaderProps) => {
           </nav>
 
           {/* Mobile Menu Button */}
-          <button className="md:hidden text-gray-300">
+          <button className="md:hidden text-muted-foreground">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>

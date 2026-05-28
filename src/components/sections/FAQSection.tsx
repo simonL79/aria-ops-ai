@@ -31,9 +31,9 @@ const FAQSection = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
-    <section className="py-24 bg-black">
+    <section className="py-24 bg-background">
       <div ref={ref} className={`container mx-auto px-6 max-w-3xl transition-all duration-1000 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-        <h2 className="text-4xl md:text-5xl font-bold mb-16 text-center text-white">
+        <h2 className="text-4xl md:text-5xl font-bold mb-16 text-center text-foreground">
           Frequently Asked Questions
         </h2>
 
@@ -45,7 +45,7 @@ const FAQSection = () => {
             >
               <button
                 onClick={() => setOpenIndex(openIndex === index ? null : index)}
-                className="w-full flex items-center justify-between px-6 py-5 text-left text-white font-medium text-lg"
+                className="w-full flex items-center justify-between px-6 py-5 text-left text-foreground font-medium text-lg"
               >
                 {faq.question}
                 <ChevronDown

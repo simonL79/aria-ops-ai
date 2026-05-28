@@ -28,9 +28,9 @@ const AddOnServiceCard = ({ service, index, visible }: { service: { title: strin
       className={`transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
       style={{ transitionDelay: visible ? `${index * 120}ms` : '0ms', transformStyle: 'preserve-3d' }}
     >
-      <Card className="bg-gray-800/60 backdrop-blur-md border border-gray-700/50 p-6 text-white hover:border-orange-500/50 hover:shadow-[0_0_25px_rgba(245,158,11,0.12)] transition-all duration-500 h-full">
+      <Card className="bg-muted/60 backdrop-blur-md border border-border/50 p-6 text-foreground hover:border-orange-500/50 hover:shadow-[0_0_25px_rgba(245,158,11,0.12)] transition-all duration-500 h-full">
         <h4 className="font-bold mb-3 text-orange-400">{service.title}</h4>
-        <p className="text-gray-300 text-sm">{service.description}</p>
+        <p className="text-muted-foreground text-sm">{service.description}</p>
       </Card>
     </div>
   );
@@ -59,7 +59,7 @@ const AddOnServicesSection = () => {
   ];
 
   return (
-    <section className="bg-gray-900 py-12">
+    <section className="bg-card py-12">
       <div ref={ref} className="container mx-auto px-6">
         <h3 className={`text-2xl font-bold text-orange-500 text-center mb-8 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>Add-On Services</h3>
         
