@@ -27,6 +27,19 @@ const Terms = () => {
       seoTitle="Terms & Conditions — A.R.I.A™"
       seoDescription="Terms and conditions governing the use of A.R.I.A™ reputation intelligence and defence services, operated by Simon Lindsay Consultancy."
       path="/terms"
+      seoImage="/lovable-uploads/37370275-bf62-4eab-b0e3-e184ce3fa142.png"
+      jsonLd={{
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "Terms & Conditions — A.R.I.A™",
+        "description": "Terms and conditions governing the use of A.R.I.A™ reputation intelligence and defence services.",
+        "url": "https://www.ariaops.co.uk/terms",
+        "publisher": {
+          "@type": "Organization",
+          "name": "A.R.I.A™",
+          "url": "https://www.ariaops.co.uk/",
+        },
+      }}
       sections={sections}
       intro="These Terms govern your access to and use of A.R.I.A™ reputation intelligence, monitoring, suppression-support and advisory services. By engaging A.R.I.A™ or using ariaops.co.uk, you accept these Terms in full."
       footerLinks={[
