@@ -10,6 +10,7 @@ import AppErrorBoundary from "@/components/common/AppErrorBoundary";
 import { navItems } from "./nav-items";
 import Index from "./pages/Index";
 import ClientPortalRoute from "@/components/auth/ClientPortalRoute";
+import ScrollToTop from "@/components/layout/ScrollToTop";
 
 // Lazy-loaded routes — every other page is split into its own chunk
 const UnsubscribePage = lazy(() => import("./pages/UnsubscribePage"));
@@ -107,6 +108,7 @@ function App() {
           <RbacProvider>
             <TooltipProvider>
               <Router>
+                <ScrollToTop />
                 <div className="min-h-screen bg-corporate-dark">
                   <Suspense fallback={<RouteFallback />}>
                     <Routes>
