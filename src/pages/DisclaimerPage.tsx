@@ -124,8 +124,8 @@ const DisclaimerPage = () => {
         <p>
           Using the A.R.I.A™ platform, services or any deliverable indicates your agreement to this
           Acceptable Use & Service Disclaimer alongside our{' '}
-          <a href="/terms" className="text-primary hover:underline">Terms & Conditions</a> and{' '}
-          <a href="/privacy-policy" className="text-primary hover:underline">Privacy Policy</a>.
+          <Link to="/terms" className="text-primary hover:underline">Terms & Conditions</Link> and{' '}
+          <Link to="/privacy-policy" className="text-primary hover:underline">Privacy Policy</Link>.
         </p>
       </LegalSectionBlock>
     </LegalDocument>
