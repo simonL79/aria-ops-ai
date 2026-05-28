@@ -35,6 +35,8 @@ const LegalDocument: React.FC<LegalDocumentProps> = ({
   sections,
   children,
   footerLinks,
+  seoImage,
+  jsonLd,
 }) => {
   const updated =
     lastUpdated ??
