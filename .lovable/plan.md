@@ -1,42 +1,28 @@
-## Objective
-Add a sixth service pillar — **Legal Defence & Compliance** — to the homepage "Intelligence-Grade Protection" section, and create a matching stealth SEO landing page.
+## Problem
+`BrandProtectionPage.tsx` still refers to "Four pillars" and "four overlapping disciplines" even though A.R.I.A™ now has six integrated defence layers. This creates inconsistency with `ServicesSection.tsx`.
+
+## Scope
+Update `src/pages/services/BrandProtectionPage.tsx` only. No other files need changes.
 
 ## Changes
+1. **Heading (line 114):** `Four pillars, one system` → `Six pillars, one system`
+2. **FAQ answer (line 17):** Update the sentence to say "six overlapping disciplines" and expand the list to include all six service pillars:
+   - AI-driven threat detection
+   - Narrative defence
+   - Identity protection
+   - Search positioning
+   - AI reputation readiness
+   - Legal removal & compliance
+3. **Pillars grid (lines 65–86):** Expand the `pillars` array from 4 to 6 cards, adding:
+   - **Search Positioning** (Search icon) — defensive ranking strategy, authority content layering
+   - **AI Reputation Readiness** (Brain icon) — ChatGPT/Gemini/Perplexity interpretation, structured presence for the agentic web
+4. **SEO/meta description (line 92):** Update to mention six disciplines.
+5. **JSON-LD description (line 52):** Update to mention all six disciplines.
 
-### 1. Homepage — `src/components/sections/ServicesSection.tsx`
-- Add sixth service object to the `services` array:
-  - **Title:** Legal Defence & Compliance
-  - **Icon:** `Scale` (from `lucide-react`)
-  - **Capabilities:**
-    1. GDPR takedowns & right-to-erasure enforcement
-    2. Cease & desist automation
-    3. Defamation case preparation & evidence packaging
-    4. Regulatory compliance logging (SOC II / ISO 27001 aligned)
-- Update subtitle copy from "Four integrated defence layers" to "Six integrated defence layers".
+## Out of scope
+- No routing, layout, or component changes.
+- No pricing, database, or edge function work.
+- No visual redesign — reuse existing card component.
 
-### 2. New Stealth Landing Page — `src/pages/stealth/LegalDefenceCompliancePage.tsx`
-- Reuse the `StealthLandingPage` template pattern.
-- Target keywords: `legal reputation defence`, `GDPR reputation takedown`, `defamation protection UK`, `compliance reputation management`, `cease and desist online reputation`
-- Include: Hero H1, capability grid, methodology, competitor differentiation (vs traditional legal firms / ORM agencies), FAQ block, JSON-LD schema.
-
-### 3. Routing — `src/App.tsx`
-- Add lazy-loaded route: `/legal-defence-compliance`
-
-### 4. Sitemap & LLM Visibility
-- Add `<url>` entry in `public/sitemap.xml` (priority 0.8).
-- Add solution alias in `public/llms.txt` under `## Solutions`.
-
-### 5. Footer Internal Link
-- Add link in Footer "Solutions" column pointing to `/legal-defence-compliance`.
-
-## Out of Scope
-- No new database tables or edge functions.
-- No changes to pricing or existing service cards.
-
-## Files
-- Edit: `src/components/sections/ServicesSection.tsx`
-- Edit: `src/App.tsx`
-- Edit: `public/sitemap.xml`
-- Edit: `public/llms.txt`
-- Edit: `src/components/layout/Footer.tsx`
-- Create: `src/pages/stealth/LegalDefenceCompliancePage.tsx`
+## Files changed
+- `src/pages/services/BrandProtectionPage.tsx` (edits only)
