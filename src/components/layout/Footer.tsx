@@ -1,9 +1,16 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import Logo from '@/components/ui/logo';
 
 const Footer = () => {
+  const { pathname } = useLocation();
+
+  const linkClass = (path: string) =>
+    pathname === path
+      ? "text-[#C6A15B] font-medium"
+      : "text-premium-silver hover:text-foreground transition-colors";
+
   return (
     <footer className="bg-premium-black text-premium-silver py-8 text-center">
       <div className="container mx-auto px-6">
