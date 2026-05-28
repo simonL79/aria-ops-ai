@@ -108,6 +108,7 @@ function App() {
           <RbacProvider>
             <TooltipProvider>
               <Router>
+                <ScrollToTop />
                 <div className="min-h-screen bg-corporate-dark">
                   <Suspense fallback={<RouteFallback />}>
                     <Routes>
