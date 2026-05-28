@@ -1,7 +1,7 @@
 
 import React, { useRef, useCallback } from 'react';
 import { Card } from '@/components/ui/card';
-import { Shield, Swords, Fingerprint, Search, Brain } from 'lucide-react';
+import { Shield, Swords, Fingerprint, Search, Brain, Scale } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 
@@ -106,6 +106,17 @@ const ServicesSection = () => {
       ],
       href: "/ai-reputation-readiness",
     },
+    {
+      icon: Scale,
+      title: "Legal Defence & Compliance",
+      capabilities: [
+        "GDPR takedowns & right-to-erasure enforcement",
+        "Cease & desist automation with evidence pack",
+        "Defamation case preparation & counsel hand-off",
+        "SOC II / ISO 27001-aligned audit trail",
+      ],
+      href: "/legal-defence-compliance",
+    },
   ];
 
   return (
@@ -116,7 +127,7 @@ const ServicesSection = () => {
             Intelligence-Grade <span className="text-primary">Protection</span>
           </h2>
           <p className="text-muted-foreground max-w-3xl mx-auto text-lg">
-            Four integrated defence layers powered by A.R.I.A™ — built for high-profile individuals, brands, and organisations that cannot afford reputational exposure.
+            Six integrated defence layers powered by A.R.I.A™ — built for high-profile individuals, brands, and organisations that cannot afford reputational exposure.
           </p>
         </div>
 

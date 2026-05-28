@@ -28,6 +28,7 @@
 - [Athlete Reputation Management](/athlete-reputation-management): Sponsorship-grade reputation protection for athletes. Brand-safety audits, historic social cleanup, federation perception monitoring, AI search engineering, endorsement-deal protection, crisis playbook.
 - [Founder Reputation Protection](/founder-reputation-protection): Investor-grade founder reputation protection. Pre-due-diligence audits, historic company cleanup, hostile-narrative response, AI search defence, deal-mode escalation, board-grade reporting.
 - [Crisis Reputation Management](/crisis-reputation-management): 24/7 operator-led crisis reputation response across search, AI, social, news, legal and stakeholder lanes. Named lead, first-72-hours playbook, quantified telemetry.
+- [Legal Defence & Compliance](/legal-defence-compliance): Statutory reputation defence — GDPR takedowns, UK GDPR Article 17 right to erasure, defamation pre-action, automated cease & desist with evidence pack, ICO escalation, data broker delisting, SOC II / ISO 27001-aligned audit trail and board-grade compliance reporting.
 
 ## Resources
 
