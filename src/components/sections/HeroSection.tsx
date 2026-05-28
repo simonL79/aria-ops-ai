@@ -111,16 +111,19 @@ const HeroSection = () => {
   };
 
   return (
-    <section className="relative bg-gradient-to-b from-background to-background text-foreground min-h-screen flex items-center overflow-hidden">
+    <section className="relative bg-gradient-to-b from-background via-background to-muted/40 text-foreground min-h-screen flex items-center overflow-hidden">
       {/* Grid overlay */}
-      <div className="absolute inset-0 opacity-[0.04]" style={{
-        backgroundImage: `linear-gradient(rgba(17,24,39,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(17,24,39,0.08) 1px, transparent 1px)`,
-        backgroundSize: '60px 60px'
+      <div className="absolute inset-0 opacity-[0.05]" style={{
+        backgroundImage: `linear-gradient(hsl(var(--primary) / 0.15) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary) / 0.15) 1px, transparent 1px)`,
+        backgroundSize: '64px 64px',
+        maskImage: 'radial-gradient(ellipse at center, black 40%, transparent 80%)',
+        WebkitMaskImage: 'radial-gradient(ellipse at center, black 40%, transparent 80%)'
       }} />
 
-      {/* Ambient glow */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-orange-500/5 rounded-full blur-[120px]" />
-      <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-orange-500/3 rounded-full blur-[100px]" />
+      {/* Ambient brand glow — soft blue, not orange */}
+      <div className="absolute top-1/3 left-1/4 w-[32rem] h-[32rem] bg-primary/[0.06] rounded-full blur-[140px]" />
+      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-secondary/40 rounded-full blur-[120px]" />
+
 
       <div className="container mx-auto px-6 relative z-10 w-full py-20">
         <div className="max-w-4xl mx-auto text-center space-y-10">
