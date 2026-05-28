@@ -72,6 +72,7 @@ const StealthNegativeSearchResultSuppressionPage = lazy(() => import("./pages/st
 const StealthAthleteReputationManagementPage = lazy(() => import("./pages/stealth/AthleteReputationManagementPage"));
 const StealthFounderReputationProtectionPage = lazy(() => import("./pages/stealth/FounderReputationProtectionPage"));
 const StealthCrisisReputationManagementPage = lazy(() => import("./pages/stealth/CrisisReputationManagementPage"));
+const StealthLegalDefenceCompliancePage = lazy(() => import("./pages/stealth/LegalDefenceCompliancePage"));
 const ResourceAIReputationReadinessChecklistPage = lazy(() => import("./pages/resources/AIReputationReadinessChecklistPage"));
 const ResourceFounderReputationRiskReportPage = lazy(() => import("./pages/resources/FounderReputationRiskReportPage"));
 const ResourceAthleteReputationProtectionGuidePage = lazy(() => import("./pages/resources/AthleteReputationProtectionGuidePage"));
@@ -129,6 +130,7 @@ function App() {
                       <Route path="/athlete-reputation-management" element={<StealthAthleteReputationManagementPage />} />
                       <Route path="/founder-reputation-protection" element={<StealthFounderReputationProtectionPage />} />
                       <Route path="/crisis-reputation-management" element={<StealthCrisisReputationManagementPage />} />
+                      <Route path="/legal-defence-compliance" element={<StealthLegalDefenceCompliancePage />} />
                       <Route path="/resources/ai-reputation-readiness-checklist" element={<ResourceAIReputationReadinessChecklistPage />} />
                       <Route path="/resources/founder-reputation-risk-report" element={<ResourceFounderReputationRiskReportPage />} />
                       <Route path="/resources/athlete-reputation-protection-guide" element={<ResourceAthleteReputationProtectionGuidePage />} />

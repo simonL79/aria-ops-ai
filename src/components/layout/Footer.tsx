@@ -28,6 +28,7 @@ const Footer = () => {
               <Link to="/ai-search-visibility" className="text-premium-silver hover:text-white transition-colors">AI Search Visibility</Link>
               <Link to="/generative-engine-optimisation" className="text-premium-silver hover:text-white transition-colors">Generative Engine Optimisation</Link>
               <Link to="/reputation-threat-score" className="text-premium-silver hover:text-white transition-colors">Reputation Threat Score</Link>
+              <Link to="/legal-defence-compliance" className="text-premium-silver hover:text-white transition-colors">Legal Defence & Compliance</Link>
             </div>
             <div className="flex flex-col gap-2">
               <span className="text-white/60 uppercase tracking-wider text-xs mb-1">For</span>
