@@ -13,6 +13,7 @@ import ClientPortalRoute from "@/components/auth/ClientPortalRoute";
 import ScrollToTop from "@/components/layout/ScrollToTop";
 
 // Lazy-loaded routes — every other page is split into its own chunk
+const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
 const UnsubscribePage = lazy(() => import("./pages/UnsubscribePage"));
 const BlogPostPage = lazy(() => import("./pages/BlogPostPage"));
 const SecureClientIntakePage = lazy(() => import("./pages/SecureClientIntakePage"));
@@ -210,6 +211,9 @@ function App() {
                             <Route key={to} path={to} element={page} />
                           ))}
                       </Route>
+
+                      {/* Catch-all 404 */}
+                      <Route path="*" element={<NotFoundPage />} />
                     </Routes>
                   </Suspense>
                 </div>
