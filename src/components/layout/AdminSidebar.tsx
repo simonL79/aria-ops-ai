@@ -154,23 +154,23 @@ const AdminSidebar = () => {
 
   return (
     <div className={cn(
-      "flex flex-col h-full bg-corporate-dark border-r border-corporate-border transition-all duration-300 relative z-10",
+      "flex flex-col h-full bg-background border-r border-border transition-all duration-300 relative z-10",
       collapsed ? "w-16" : "w-72"
     )}>
       {/* Header */}
-      <div className="p-4 border-b border-corporate-border">
+      <div className="p-4 border-b border-border">
         <div className="flex items-center justify-between">
           {!collapsed && (
             <div>
               <h2 className="text-lg font-bold text-foreground">A.R.I.A™ Command</h2>
-              <p className="text-xs text-corporate-lightGray">Live Intelligence Only</p>
+              <p className="text-xs text-muted-foreground">Live Intelligence Only</p>
             </div>
           )}
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setCollapsed(!collapsed)}
-            className="text-corporate-lightGray hover:text-foreground hover:bg-corporate-darkSecondary shrink-0"
+            className="text-muted-foreground hover:text-foreground hover:bg-card shrink-0"
           >
             {collapsed ? <Activity className="h-4 w-4" /> : <Target className="h-4 w-4" />}
           </Button>
@@ -198,8 +198,8 @@ const AdminSidebar = () => {
         <div className="space-y-2 mb-6">
           {!collapsed && (
             <div className="flex items-center gap-2 px-2 py-1">
-              <Lock className="h-3 w-3 text-corporate-accent shrink-0" />
-              <h3 className="text-xs font-semibold text-corporate-accent uppercase tracking-wider">
+              <Lock className="h-3 w-3 text-accent shrink-0" />
+              <h3 className="text-xs font-semibold text-accent uppercase tracking-wider">
                 Core Modules
               </h3>
             </div>
@@ -210,17 +210,17 @@ const AdminSidebar = () => {
               <Button
                 variant="ghost"
                 className={cn(
-                  "w-full justify-start h-auto p-3 text-left hover:bg-corporate-darkSecondary relative z-20",
-                  isActiveRoute(item.href) && "bg-corporate-accent text-black hover:bg-corporate-accent/90",
+                  "w-full justify-start h-auto p-3 text-left hover:bg-card relative z-20",
+                  isActiveRoute(item.href) && "bg-accent text-black hover:bg-accent/90",
                   collapsed && "px-2 justify-center",
-                  item.isFeature && "border border-corporate-accent/30 bg-corporate-accent/5"
+                  item.isFeature && "border border-accent/30 bg-accent/5"
                 )}
               >
                 <item.icon className={cn("h-4 w-4 shrink-0", collapsed ? "" : "mr-3")} />
                 {!collapsed && (
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                      <span className={cn("font-medium truncate", item.isFeature && "text-corporate-accent")}>
+                      <span className={cn("font-medium truncate", item.isFeature && "text-accent")}>
                         {item.isFeature ? 'A.R.I.A vX™' : item.title}
                       </span>
                       <div className="flex items-center gap-1">
@@ -244,8 +244,8 @@ const AdminSidebar = () => {
         <div className="space-y-2 mt-6">
           {!collapsed && (
             <div className="flex items-center gap-2 px-2 py-1">
-              <Settings className="h-3 w-3 text-corporate-lightGray shrink-0" />
-              <h3 className="text-xs font-semibold text-corporate-lightGray uppercase tracking-wider">
+              <Settings className="h-3 w-3 text-muted-foreground shrink-0" />
+              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 Operations
               </h3>
             </div>
@@ -256,8 +256,8 @@ const AdminSidebar = () => {
               <Button
                 variant="ghost"
                 className={cn(
-                  "w-full justify-start h-auto p-3 text-left hover:bg-corporate-darkSecondary text-corporate-lightGray relative z-20",
-                  isActiveRoute(item.href) && "bg-corporate-accent text-black hover:bg-corporate-accent/90",
+                  "w-full justify-start h-auto p-3 text-left hover:bg-card text-muted-foreground relative z-20",
+                  isActiveRoute(item.href) && "bg-accent text-black hover:bg-accent/90",
                   collapsed && "px-2 justify-center"
                 )}
               >
@@ -275,11 +275,11 @@ const AdminSidebar = () => {
       </ScrollArea>
 
       {/* Footer */}
-      <div className="p-3 border-t border-corporate-border">
+      <div className="p-3 border-t border-border">
         {!collapsed && (
           <div className="text-center">
-            <p className="text-xs text-corporate-lightGray">A.R.I.A™ v2.0</p>
-            <p className="text-xs text-corporate-accent">Weapons Grade Intelligence</p>
+            <p className="text-xs text-muted-foreground">A.R.I.A™ v2.0</p>
+            <p className="text-xs text-accent">Weapons Grade Intelligence</p>
           </div>
         )}
       </div>

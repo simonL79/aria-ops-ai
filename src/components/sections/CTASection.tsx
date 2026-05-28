@@ -32,7 +32,7 @@ const CTASection = () => {
               onClick={() => document.getElementById('threat-score')?.scrollIntoView({ behavior: 'smooth' })}
               variant="outline"
               size="lg"
-              className="border-border text-foreground hover:bg-white/5 px-10 py-6 text-lg font-medium rounded-xl transition-all duration-300"
+              className="border-border text-foreground hover:bg-muted/40 px-10 py-6 text-lg font-medium rounded-xl transition-all duration-300"
             >
               Get Free Threat Score
             </Button>

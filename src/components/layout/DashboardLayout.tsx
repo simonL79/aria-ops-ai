@@ -9,7 +9,7 @@ interface DashboardLayoutProps {
 
 const DashboardLayout = ({ children, showSidebar = true }: DashboardLayoutProps) => {
   return (
-    <div className="min-h-screen bg-corporate-dark flex w-full">
+    <div className="min-h-screen bg-background flex w-full">
       {showSidebar && <AdminSidebar />}
       <main className="flex-1 overflow-auto relative">
         <div className="p-6">

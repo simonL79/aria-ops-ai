@@ -12,11 +12,11 @@ const DashboardMainHeader = () => {
         <SidebarTrigger />
         <div>
           <h1 className="text-2xl font-bold text-foreground corporate-heading">{title}</h1>
-          <p className="text-corporate-lightGray corporate-subtext">{description}</p>
+          <p className="text-muted-foreground corporate-subtext">{description}</p>
         </div>
       </div>
       <div className="flex items-center gap-4">
-        <div className="text-sm text-corporate-lightGray">
+        <div className="text-sm text-muted-foreground">
           <span className="font-medium text-foreground">Last scan:</span> Today, 10:30 AM
         </div>
       </div>

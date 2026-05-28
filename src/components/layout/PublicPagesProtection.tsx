@@ -14,7 +14,7 @@ const PublicErrorFallback = ({ error, resetErrorBoundary }: any) => {
         <p className="text-muted-foreground mb-4">Public page temporarily unavailable</p>
         <button 
           onClick={resetErrorBoundary}
-          className="bg-corporate-accent text-black px-4 py-2 rounded hover:bg-corporate-accent/90"
+          className="bg-accent text-black px-4 py-2 rounded hover:bg-accent/90"
         >
           Reload Page
         </button>

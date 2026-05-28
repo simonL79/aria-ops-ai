@@ -21,7 +21,7 @@ const Header = ({ variant = 'default' }: HeaderProps) => {
 
   const headerClass = variant === 'transparent' 
     ? "absolute top-0 z-40 w-full bg-transparent"
-    : "sticky top-0 z-40 w-full bg-background/95 backdrop-blur border-b border-border";
+    : "sticky top-0 z-40 w-full bg-card/95 backdrop-blur border-b border-border";
 
   return (
     <header className={headerClass}>
@@ -38,7 +38,7 @@ const Header = ({ variant = 'default' }: HeaderProps) => {
             
             <Link
               to="/secure-intake"
-              className="text-muted-foreground hover:text-corporate-accent transition-colors"
+              className="text-muted-foreground hover:text-accent transition-colors"
             >
               A.R.I.A™ Intake
             </Link>

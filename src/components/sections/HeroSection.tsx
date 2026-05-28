@@ -36,7 +36,7 @@ const DashboardMockup = () => {
         style={{ transform: 'rotateX(4deg)', transformOrigin: 'center bottom' }}
       >
         {/* Top bar */}
-        <div className="flex items-center justify-between px-4 py-2.5 border-b border-border bg-white/[0.03]">
+        <div className="flex items-center justify-between px-4 py-2.5 border-b border-border bg-muted/40">
           <div className="flex items-center gap-2">
             <div className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
             <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/80" />
@@ -52,7 +52,7 @@ const DashboardMockup = () => {
         </div>
 
         {/* Metrics row */}
-        <div className="grid grid-cols-3 gap-px bg-white/5">
+        <div className="grid grid-cols-3 gap-px bg-muted/40">
           {/* Threat Score */}
           <div className="p-5 bg-background/20 text-center space-y-2">
             <div className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Threat Score</div>
@@ -74,7 +74,7 @@ const DashboardMockup = () => {
         </div>
 
         {/* Scanning bar */}
-        <div className="relative h-1 bg-white/5 overflow-hidden">
+        <div className="relative h-1 bg-muted/40 overflow-hidden">
           <div className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-primary/60 to-transparent animate-[scanline-bar_3s_ease-in-out_infinite]" />
         </div>
 
@@ -165,7 +165,7 @@ const HeroSection = () => {
               asChild
               variant="outline"
               size="lg"
-              className="border-border text-foreground hover:bg-white/5 px-10 py-6 text-lg font-medium rounded-xl transition-all duration-300"
+              className="border-border text-foreground hover:bg-muted/40 px-10 py-6 text-lg font-medium rounded-xl transition-all duration-300"
             >
               <Link to="/scan">
                 Book Private Consultation
