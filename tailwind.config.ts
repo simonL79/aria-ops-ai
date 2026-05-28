@@ -45,6 +45,18 @@ export default {
 					DEFAULT: 'hsl(var(--accent))',
 					foreground: 'hsl(var(--accent-foreground))'
 				},
+				success: {
+					DEFAULT: 'hsl(var(--success))',
+					foreground: 'hsl(var(--success-foreground))'
+				},
+				warning: {
+					DEFAULT: 'hsl(var(--warning))',
+					foreground: 'hsl(var(--warning-foreground))'
+				},
+				danger: {
+					DEFAULT: 'hsl(var(--destructive))',
+					foreground: 'hsl(var(--destructive-foreground))'
+				},
 				popover: {
 					DEFAULT: 'hsl(var(--popover))',
 					foreground: 'hsl(var(--popover-foreground))'
@@ -63,37 +75,35 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Corporate/Goldman Sachs inspired color palette
+				// A.R.I.A enterprise palette (light theme)
 				corporate: {
-					dark: '#0A0B0D', // Primary dark background
-					darkSecondary: '#111214', // Secondary dark background  
-					darkTertiary: '#1A1B1E', // Card backgrounds
-					gray: '#6B7280', // Muted text
-					lightGray: '#9CA3AF', // Secondary text
-					accent: '#F59E0B', // Amber/gold accent
-					accentDark: '#D97706', // Darker amber for hover states
-					border: '#374151', // Border color
-					borderLight: '#4B5563' // Lighter border
+					dark: '#123C69',          // deep intelligence blue (was dark bg)
+					darkSecondary: '#2E5EAA', // operational blue
+					darkTertiary: '#FFFFFF',  // card surface
+					gray: '#6B7280',
+					lightGray: '#9CA3AF',
+					accent: '#FFB020',        // amber CTA / threat
+					accentDark: '#E69A0A',
+					border: '#E5E7EB',
+					borderLight: '#F1F3F5'
 				},
-				// Updated premium theme colors
 				brand: {
-					DEFAULT: '#0A0B0D', // Corporate dark
-					light: '#6B7280', // Corporate gray
-					dark: '#000000', // Pure black
-					accent: '#F59E0B' // Corporate amber
+					DEFAULT: '#123C69',
+					light: '#2E5EAA',
+					dark: '#0B2742',
+					accent: '#FFB020'
 				},
 				alert: {
-					negative: '#EF4444', // Red for negative content
-					warning: '#F59E0B', // Amber for warnings
-					positive: '#10B981' // Green for positive content
+					negative: '#DC2626',
+					warning: '#FFB020',
+					positive: '#16A34A'
 				},
-				// Premium UI palette - corporate theme
 				premium: {
-					black: '#0A0B0D',
-					darkGray: '#111214',
+					black: '#111827',
+					darkGray: '#374151',
 					gray: '#6B7280',
 					silver: '#9CA3AF',
-					gold: '#F59E0B'
+					gold: '#FFB020'
 				}
 			},
 			borderRadius: {

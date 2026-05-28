@@ -5,86 +5,83 @@
 
 @layer base {
   :root {
-    /* Corporate Dark Theme - Goldman Sachs inspired */
-    --background: 0 0% 0%; /* Pure black */
-    --foreground: 0 0% 98%; /* Near white */
+    /* A.R.I.A Light Enterprise Theme */
+    --background: 210 17% 97%;          /* #F4F6F8 soft intelligence grey */
+    --foreground: 220 39% 11%;          /* #111827 authority text */
 
-    --card: 0 0% 5%; /* Very dark gray */
-    --card-foreground: 0 0% 95%; /* Light gray */
+    --card: 0 0% 100%;                  /* pure white surfaces */
+    --card-foreground: 220 39% 11%;
 
-    --popover: 0 0% 5%; /* Very dark gray */
-    --popover-foreground: 0 0% 95%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 39% 11%;
 
-    --primary: 43 96% 56%; /* #F59E0B - Corporate amber */
-    --primary-foreground: 0 0% 0%; /* Black text on amber */
+    --primary: 211 71% 24%;             /* #123C69 deep intelligence blue */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 10%; /* Dark gray */
-    --secondary-foreground: 0 0% 85%;
+    --secondary: 215 58% 42%;           /* #2E5EAA operational blue */
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 0 0% 10%; /* Dark gray */
-    --muted-foreground: 220 9% 55%; /* #6B7280 */
+    --muted: 220 14% 96%;               /* #F1F3F5 */
+    --muted-foreground: 220 9% 46%;     /* #6B7280 */
 
-    --accent: 43 96% 56%; /* #F59E0B */
-    --accent-foreground: 0 0% 0%;
+    --accent: 38 100% 56%;              /* #FFB020 amber CTA / threat */
+    --accent-foreground: 220 39% 11%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
+    --success: 142 76% 36%;             /* #16A34A protected */
+    --success-foreground: 0 0% 100%;
 
-    --border: 220 13% 22%; /* #374151 */
-    --input: 220 13% 22%;
-    --ring: 43 96% 56%; /* Amber focus ring */
+    --warning: 38 100% 56%;             /* #FFB020 */
+    --warning-foreground: 220 39% 11%;
+
+    --destructive: 0 84% 60%;           /* #DC2626 high threat */
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 13% 91%;              /* #E5E7EB */
+    --input: 220 13% 91%;
+    --ring: 211 71% 24%;
 
     --radius: 0.5rem;
 
-    /* Sidebar colors */
-    --sidebar-background: 0 0% 0%; /* Pure black */
-    --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 43 96% 56%; /* Amber */
-    --sidebar-primary-foreground: 0 0% 0%;
-    --sidebar-accent: 0 0% 10%; /* Dark gray */
-    --sidebar-accent-foreground: 0 0% 85%;
-    --sidebar-border: 220 13% 22%; /* #374151 */
-    --sidebar-ring: 43 96% 56%;
+    /* Sidebar — light surface, blue active state */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 220 39% 11%;
+    --sidebar-primary: 211 71% 24%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 17% 97%;
+    --sidebar-accent-foreground: 220 39% 11%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 211 71% 24%;
   }
 
   .dark {
-    /* Dark mode uses the same corporate theme */
+    /* Dark variant preserved for /admin operator surfaces */
     --background: 0 0% 0%;
     --foreground: 0 0% 98%;
-
     --card: 0 0% 5%;
     --card-foreground: 0 0% 95%;
-
     --popover: 0 0% 5%;
     --popover-foreground: 0 0% 95%;
-
-    --primary: 43 96% 56%;
+    --primary: 38 100% 56%;
     --primary-foreground: 0 0% 0%;
-
     --secondary: 0 0% 10%;
     --secondary-foreground: 0 0% 85%;
-
     --muted: 0 0% 10%;
     --muted-foreground: 220 9% 55%;
-
-    --accent: 43 96% 56%;
+    --accent: 38 100% 56%;
     --accent-foreground: 0 0% 0%;
-
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-
     --border: 220 13% 22%;
     --input: 220 13% 22%;
-    --ring: 43 96% 56%;
-    
+    --ring: 38 100% 56%;
     --sidebar-background: 0 0% 0%;
     --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 43 96% 56%;
+    --sidebar-primary: 38 100% 56%;
     --sidebar-primary-foreground: 0 0% 0%;
     --sidebar-accent: 0 0% 10%;
     --sidebar-accent-foreground: 0 0% 85%;
     --sidebar-border: 220 13% 22%;
-    --sidebar-ring: 43 96% 56%;
+    --sidebar-ring: 38 100% 56%;
   }
 }
 
@@ -93,189 +90,142 @@
     @apply border-border;
   }
 
-  html {
-    background-color: #000000 !important;
-    color: #F9FAFB !important;
+  html, body, #root {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    min-height: 100vh;
   }
 
   body {
-    @apply bg-black text-foreground;
-    /* Set pure black background globally */
-    background-color: #000000 !important;
-    color: #F9FAFB !important;
-    min-height: 100vh;
-  }
-
-  #root {
-    background-color: #000000 !important;
-    min-height: 100vh;
+    @apply bg-background text-foreground;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 }
 
 @layer components {
+  /* Light enterprise gradient — subtle, professional */
   .corporate-gradient {
-    @apply bg-gradient-to-br from-black via-gray-900 to-gray-800;
+    background: linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--muted)) 100%);
   }
-  
+
   .corporate-card {
-    @apply bg-gray-900 border border-corporate-border shadow-lg hover:shadow-xl transition-shadow duration-300;
+    @apply bg-card border border-border shadow-sm hover:shadow-md transition-shadow duration-300 rounded-lg;
   }
-  
+
   .corporate-button {
-    @apply bg-corporate-accent text-black border border-corporate-accent hover:bg-corporate-accentDark transition-colors duration-300;
+    @apply bg-primary text-primary-foreground border border-primary hover:bg-secondary transition-colors duration-300;
   }
-  
+
   .aria-logo {
-    filter: drop-shadow(0px 2px 4px rgba(245, 158, 11, 0.2));
+    filter: drop-shadow(0px 1px 2px rgba(18, 60, 105, 0.15));
   }
-  
-  /* Corporate typography */
+
   .corporate-heading {
-    @apply text-white font-bold tracking-tight;
+    @apply text-foreground font-bold tracking-tight;
   }
-  
+
   .corporate-subtext {
-    @apply text-corporate-lightGray;
+    @apply text-muted-foreground;
   }
 }
 
 @layer utilities {
+  /* Repurposed: white card with soft shadow + faint blue ring */
   .glass-card {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
     border-radius: 1rem;
+    box-shadow: 0 1px 3px rgba(17, 24, 39, 0.04), 0 1px 2px rgba(17, 24, 39, 0.06);
   }
 
-  .text-shadow-sm {
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-  }
-  
-  .text-shadow {
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  }
-  
-  .text-shadow-lg {
-    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
-  }
-  
-  /* Corporate glow effects */
+  .text-shadow-sm { text-shadow: none; }
+  .text-shadow    { text-shadow: none; }
+  .text-shadow-lg { text-shadow: none; }
+
+  /* Accent ring glow — used sparingly for CTAs / threat scores */
   .amber-glow {
-    box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+    box-shadow: 0 0 0 4px hsl(var(--accent) / 0.18);
   }
-  
   .amber-glow-lg {
-    box-shadow: 0 0 40px rgba(245, 158, 11, 0.4);
+    box-shadow: 0 0 0 8px hsl(var(--accent) / 0.20);
+  }
+  .blue-glow {
+    box-shadow: 0 0 0 4px hsl(var(--primary) / 0.18);
   }
 }
 
-/* Blog prose styles */
+/* Blog prose — light theme */
 .blog-prose h2 {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin-top: 1.75rem;
-  margin-bottom: 0.75rem;
-  color: #ffffff;
+  font-size: 1.5rem; font-weight: 700;
+  margin-top: 1.75rem; margin-bottom: 0.75rem;
+  color: hsl(var(--foreground));
 }
 .blog-prose h3 {
-  font-size: 1.25rem;
-  font-weight: 700;
-  margin-top: 1.5rem;
-  margin-bottom: 0.5rem;
-  color: #f3f4f6;
+  font-size: 1.25rem; font-weight: 700;
+  margin-top: 1.5rem; margin-bottom: 0.5rem;
+  color: hsl(var(--foreground));
 }
 .blog-prose p {
-  font-size: 1.05rem;
-  line-height: 1.8;
+  font-size: 1.05rem; line-height: 1.8;
   margin-bottom: 1rem;
-  color: #9ca3af;
+  color: hsl(var(--muted-foreground));
 }
-.blog-prose ul, .blog-prose ol {
-  margin-bottom: 1rem;
-  padding-left: 1.5rem;
-}
+.blog-prose ul, .blog-prose ol { margin-bottom: 1rem; padding-left: 1.5rem; }
 .blog-prose ul { list-style-type: disc; }
 .blog-prose ol { list-style-type: decimal; }
 .blog-prose li {
   margin-bottom: 0.5rem;
-  color: #9ca3af;
+  color: hsl(var(--muted-foreground));
   line-height: 1.7;
 }
 .blog-prose blockquote {
-  border-left: 4px solid #f97316;
+  border-left: 4px solid hsl(var(--primary));
   padding-left: 1rem;
   font-style: italic;
-  color: #6b7280;
+  color: hsl(var(--muted-foreground));
   margin: 1.5rem 0;
 }
 .blog-prose code {
-  background: #1f2937;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-family: monospace;
-  font-size: 0.9em;
-  color: #e5e7eb;
+  background: hsl(var(--muted));
+  padding: 2px 6px; border-radius: 4px;
+  font-family: monospace; font-size: 0.9em;
+  color: hsl(var(--foreground));
 }
 .blog-prose pre > code {
   display: block;
-  background: #111827;
-  color: #e5e7eb;
-  padding: 1rem;
-  border-radius: 0.5rem;
+  background: hsl(var(--muted));
+  color: hsl(var(--foreground));
+  padding: 1rem; border-radius: 0.5rem;
   overflow-x: auto;
 }
 .blog-prose table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 1rem 0;
-  overflow-x: auto;
-  display: block;
+  width: 100%; border-collapse: collapse;
+  margin: 1rem 0; overflow-x: auto; display: block;
 }
 .blog-prose th, .blog-prose td {
-  border: 1px solid #374151;
+  border: 1px solid hsl(var(--border));
   padding: 0.5rem 0.75rem;
   text-align: left;
-  color: #d1d5db;
-}
-.blog-prose th {
-  color: #ffffff;
-}
-.blog-prose tr:nth-child(even) {
-  background: rgba(31, 41, 55, 0.3);
-}
-.blog-prose img {
-  max-width: 100%;
-  height: auto;
-  border-radius: 0.5rem;
-  margin: 1rem auto;
-  display: block;
-}
-.blog-prose a {
-  color: #f97316;
-  text-decoration: none;
-}
-.blog-prose a:hover {
-  text-decoration: underline;
-  color: #fb923c;
-}
-.blog-prose strong {
-  color: #ffffff;
-}
-
-/* Soro embed — match A.R.I.A dark card style */
-#soro-blog {
   color: hsl(var(--foreground));
 }
-#soro-blog * {
-  font-family: inherit !important;
-  color: inherit;
-  box-sizing: border-box;
+.blog-prose th { color: hsl(var(--foreground)); font-weight: 600; }
+.blog-prose tr:nth-child(even) { background: hsl(var(--muted) / 0.5); }
+.blog-prose img {
+  max-width: 100%; height: auto;
+  border-radius: 0.5rem;
+  margin: 1rem auto; display: block;
 }
-#soro-blog a {
-  color: hsl(var(--foreground)) !important;
-  text-decoration: none !important;
+.blog-prose a {
+  color: hsl(var(--primary));
+  text-decoration: none;
 }
+.blog-prose a:hover { text-decoration: underline; color: hsl(var(--secondary)); }
+.blog-prose strong { color: hsl(var(--foreground)); }
+
+/* Soro embed — light card style */
+#soro-blog { color: hsl(var(--foreground)); }
+#soro-blog * { font-family: inherit !important; color: inherit; box-sizing: border-box; }
+#soro-blog a { color: hsl(var(--foreground)) !important; text-decoration: none !important; }
 #soro-blog h1, #soro-blog h2, #soro-blog h3, #soro-blog h4 {
   color: hsl(var(--foreground)) !important;
   font-weight: 600 !important;
@@ -302,7 +252,7 @@
 #soro-blog [class*="Post"]:hover,
 #soro-blog li:hover {
   border-color: hsl(var(--primary) / 0.5) !important;
-  box-shadow: 0 0 30px rgba(245, 158, 11, 0.1) !important;
+  box-shadow: 0 4px 16px rgba(18, 60, 105, 0.08) !important;
   transform: translateY(-4px) !important;
 }
 #soro-blog a:hover h1,
@@ -310,9 +260,7 @@
 #soro-blog a:hover h3 {
   color: hsl(var(--primary)) !important;
 }
-#soro-blog img {
-  border-radius: 0 !important;
-}
+#soro-blog img { border-radius: 0 !important; }
 #soro-blog button {
   background: transparent !important;
   border: 1px solid hsl(var(--primary) / 0.5) !important;
@@ -321,6 +269,6 @@
   padding: 0.5rem 1rem !important;
 }
 #soro-blog button:hover {
-  background: hsl(var(--primary) / 0.1) !important;
+  background: hsl(var(--primary) / 0.08) !important;
   border-color: hsl(var(--primary)) !important;
 }
