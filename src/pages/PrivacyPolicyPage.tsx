@@ -1,167 +1,147 @@
-
 import React from 'react';
-import StickyHeader from '@/components/layout/StickyHeader';
-import Footer from '@/components/layout/Footer';
-import { Button } from '@/components/ui/button';
-import { FileText, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import SEO from '@/components/seo/SEO';
+import { Button } from '@/components/ui/button';
+import { Shield, FileText } from 'lucide-react';
+import LegalDocument, { LegalSectionBlock, LegalSection } from '@/components/legal/LegalDocument';
+
+const sections: LegalSection[] = [
+  { id: 'who-we-are', title: 'Who We Are' },
+  { id: 'data-collected', title: 'What Information We Collect' },
+  { id: 'lawful-basis', title: 'Lawful Basis for Processing' },
+  { id: 'use', title: 'How We Use Your Information' },
+  { id: 'storage', title: 'Storage, Security & Retention' },
+  { id: 'sharing', title: 'Sharing & Third-Party Processors' },
+  { id: 'rights', title: 'Your Rights Under UK GDPR' },
+  { id: 'cookies', title: 'Cookies' },
+  { id: 'changes', title: 'Changes & Contact' },
+];
+
+const Bullet = ({ children }: { children: React.ReactNode }) => (
+  <ul className="list-disc pl-6 space-y-1.5 marker:text-primary/70">{children}</ul>
+);
 
 const PrivacyPolicyPage = () => {
   const navigate = useNavigate();
-  const currentDate = new Date().toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  });
 
   return (
-    <div className="min-h-screen bg-premium-silver/20">
-      <SEO
-        title="Privacy Policy — A.R.I.A™"
-        description="How A.R.I.A™ collects, processes, and protects personal data in line with UK GDPR and ICO guidance."
-        path="/privacy-policy"
-      />
-      {/* Sticky Navigation */}
-      <StickyHeader isScrolled={true} />
+    <LegalDocument
+      title="Privacy Policy"
+      seoTitle="Privacy Policy — A.R.I.A™"
+      seoDescription="How A.R.I.A™ collects, processes and protects personal data in line with UK GDPR and ICO guidance."
+      path="/privacy-policy"
+      sections={sections}
+      intro="This Privacy Policy explains how A.R.I.A™ collects, uses and protects personal data when you visit ariaops.co.uk or engage our reputation intelligence services. We process data in line with the UK GDPR and the Data Protection Act 2018."
+      footerLinks={[
+        { to: '/terms', label: 'Terms & Conditions' },
+        { to: '/disclaimer', label: 'Acceptable Use & Disclaimer' },
+        { to: '/request-data-access', label: 'Submit Data Request' },
+      ]}
+    >
+      <LegalSectionBlock id="who-we-are" index={1} title="Who We Are">
+        <p>
+          This website is operated by <strong>Simon Lindsay Consultancy, trading as A.R.I.A™</strong>.
+          We are the data controller for personal data collected through ariaops.co.uk and our
+          client engagements.
+        </p>
+      </LegalSectionBlock>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-6 py-16 md:py-24">
-        <div className="max-w-4xl mx-auto prose prose-slate">
-          <div className="flex justify-between items-start mb-8">
-            <h1 className="text-4xl font-bold mb-8">Privacy Policy for A.R.I.A™</h1>
-            <Button 
-              variant="outline" 
-              className="flex items-center gap-2"
-              onClick={() => navigate('/request-data-access')}
-            >
-              <Shield className="h-4 w-4" />
-              GDPR Compliance
-            </Button>
-          </div>
-          
-          <p className="text-gray-600 mb-8">Last updated: {currentDate}</p>
-          
-          <p>
-            This Privacy Policy outlines how we collect, use, and protect your information when you visit www.ariaops.co.uk and use A.R.I.A™ (AI Reputation Intelligence Agent), our reputation monitoring platform.
-          </p>
-          
-          <h2 className="text-2xl font-bold mt-8 mb-4">1. Who We Are</h2>
-          <p>
-            This website is operated by A.R.I.A™, a brand founded by Simon Lindsay. We are committed to protecting your privacy and maintaining your trust.
-          </p>
-          
-          <h2 className="text-2xl font-bold mt-8 mb-4">2. What Information We Collect</h2>
-          <p>
-            We may collect the following types of personal data:
-          </p>
-          <ul className="list-disc pl-6">
-            <li>Name and contact information (email, phone)</li>
-            <li>Keywords or brand names you request to monitor</li>
-            <li>IP address and browser data</li>
-            <li>Communication data (emails, messages)</li>
-          </ul>
-          
-          <h2 className="text-2xl font-bold mt-8 mb-4">3. How We Use Your Information</h2>
-          <p>
-            We use your information to:
-          </p>
-          <ul className="list-disc pl-6">
-            <li>Deliver threat monitoring and reporting services</li>
-            <li>Notify you of mentions or risks</li>
-            <li>Contact you about new features or updates</li>
-            <li>Maintain security and comply with legal obligations</li>
-          </ul>
-          <p>
-            We do <strong>not</strong> sell your personal data to third parties.
-          </p>
-          
-          <h2 className="text-2xl font-bold mt-8 mb-4">4. How We Store and Protect Data</h2>
-          <p>
-            Your data is stored securely using encrypted tools and limited-access systems. We retain it only as long as necessary for the purposes stated.
-          </p>
-          
-          <h2 className="text-2xl font-bold mt-8 mb-4">5. Your Rights Under GDPR</h2>
-          <p>
-            You have the right to:
-          </p>
-          <ul className="list-disc pl-6">
-            <li>Access your data</li>
-            <li>Correct inaccuracies</li>
-            <li>Request deletion</li>
-            <li>Withdraw consent</li>
-            <li>Lodge complaints with the ICO</li>
-          </ul>
-          <p>
-            To make a data request, email: privacy@ariaops.co.uk or use our <a href="/request-data-access" className="text-blue-600 hover:underline">data request form</a>.
-          </p>
-          
-          <div className="bg-blue-50 p-6 rounded-lg my-8">
-            <h3 className="text-xl font-semibold mb-3">GDPR Compliance</h3>
-            <p className="mb-4">
-              A.R.I.A™ is fully compliant with the General Data Protection Regulation (GDPR).
-              We process data under the following legal bases:
-            </p>
-            <ul className="list-disc pl-6 mb-4">
-              <li>Legitimate Interest - for monitoring publicly available information</li>
-              <li>Consent - for client onboarding and personalized services</li>
-            </ul>
-            <p className="mb-2">
-              For more detailed information about our GDPR compliance measures, please visit our dedicated
-              GDPR Compliance page.
-            </p>
-            <div className="mt-4">
-              <Button 
-                variant="deliver" 
-                size="sm"
-                className="flex items-center gap-2"
-                onClick={() => navigate('/request-data-access')}
-              >
-                <FileText className="h-4 w-4" />
-                View GDPR Details
-              </Button>
-            </div>
-          </div>
-          
-          <h2 className="text-2xl font-bold mt-8 mb-4">6. Cookies</h2>
-          <p>
-            This site uses cookies to improve your experience and analyze traffic. You can manage cookie preferences via your browser settings.
-          </p>
-          
-          <h2 className="text-2xl font-bold mt-8 mb-4">7. Third-Party Tools</h2>
-          <p>
-            We may use tools like Google Analytics or OpenAI APIs. These third-party services may collect anonymized usage data under their own privacy policies.
-          </p>
-          
-          <h2 className="text-2xl font-bold mt-8 mb-4">8. Changes to This Policy</h2>
-          <p>
-            We may update this Privacy Policy occasionally. Revisions will be posted here with a new effective date.
-          </p>
-          
-          <h2 className="text-2xl font-bold mt-8 mb-4">9. Contact</h2>
-          <p>
-            If you have questions about our privacy practices, please email: privacy@ariaops.co.uk
-          </p>
-          <p>
-            For GDPR-specific inquiries, contact our Data Protection Officer at: dpo@ariaops.co.uk
-          </p>
-          
-          <div className="mt-12 pt-6 border-t border-gray-200">
-            <Button 
-              variant="deliver" 
-              onClick={() => navigate('/request-data-access')}
-              className="flex items-center gap-2"
-            >
-              <FileText className="h-5 w-5" />
-              Submit Data Request
-            </Button>
-          </div>
+      <LegalSectionBlock id="data-collected" index={2} title="What Information We Collect">
+        <Bullet>
+          <li>Name and contact details (email, phone, company)</li>
+          <li>Keywords, names or brands you ask us to monitor</li>
+          <li>Public reputation signals collected from open sources on your behalf</li>
+          <li>IP address, browser metadata and basic device data</li>
+          <li>Communications you send to us (emails, messages, form submissions)</li>
+          <li>Billing details processed by our payment provider</li>
+        </Bullet>
+      </LegalSectionBlock>
+
+      <LegalSectionBlock id="lawful-basis" index={3} title="Lawful Basis for Processing">
+        <p>We process personal data under the following bases:</p>
+        <Bullet>
+          <li><strong>Contract</strong> — to deliver services you have engaged us for.</li>
+          <li><strong>Legitimate interests</strong> — to monitor publicly available information for reputation risk.</li>
+          <li><strong>Consent</strong> — where you opt in to communications or specific processing.</li>
+          <li><strong>Legal obligation</strong> — to meet tax, accounting and regulatory duties.</li>
+        </Bullet>
+      </LegalSectionBlock>
+
+      <LegalSectionBlock id="use" index={4} title="How We Use Your Information">
+        <Bullet>
+          <li>Deliver monitoring, analysis and reporting services</li>
+          <li>Notify you of mentions, risks or escalations</li>
+          <li>Operate, secure and improve the platform</li>
+          <li>Communicate about your engagement, invoices and updates</li>
+          <li>Comply with legal and regulatory obligations</li>
+        </Bullet>
+        <p>We do <strong>not</strong> sell personal data to third parties.</p>
+      </LegalSectionBlock>
+
+      <LegalSectionBlock id="storage" index={5} title="Storage, Security & Retention">
+        <p>
+          Data is stored in access-controlled, encrypted systems hosted by our infrastructure
+          providers. We retain personal data only for as long as necessary to deliver the service
+          and to meet legal obligations, after which it is securely deleted or anonymised.
+        </p>
+      </LegalSectionBlock>
+
+      <LegalSectionBlock id="sharing" index={6} title="Sharing & Third-Party Processors">
+        <p>
+          We share data only with vetted processors needed to run the service, including hosting
+          providers, database providers, email/transactional services, analytics tools and AI
+          providers used to generate analysis. Each processor is bound by their own data-processing
+          terms. We may also disclose data where required by law.
+        </p>
+      </LegalSectionBlock>
+
+      <LegalSectionBlock id="rights" index={7} title="Your Rights Under UK GDPR">
+        <Bullet>
+          <li>Access the personal data we hold about you</li>
+          <li>Correct inaccurate or incomplete data</li>
+          <li>Request deletion ("right to be forgotten") where applicable</li>
+          <li>Restrict or object to processing</li>
+          <li>Withdraw consent at any time</li>
+          <li>Lodge a complaint with the UK Information Commissioner's Office (ICO)</li>
+        </Bullet>
+        <div className="mt-4 flex flex-wrap gap-3">
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            onClick={() => navigate('/request-data-access')}
+          >
+            <Shield className="h-4 w-4" />
+            GDPR Compliance
+          </Button>
+          <Button
+            size="sm"
+            className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90"
+            onClick={() => navigate('/request-data-access')}
+          >
+            <FileText className="h-4 w-4" />
+            Submit Data Request
+          </Button>
         </div>
-      </main>
+      </LegalSectionBlock>
 
-      {/* Footer */}
-      <Footer />
-    </div>
+      <LegalSectionBlock id="cookies" index={8} title="Cookies">
+        <p>
+          We use a small number of cookies to operate the site, remember preferences and measure
+          aggregate traffic. You can manage cookie behaviour through your browser settings.
+        </p>
+      </LegalSectionBlock>
+
+      <LegalSectionBlock id="changes" index={9} title="Changes & Contact">
+        <p>
+          We may update this policy from time to time. Material changes will be posted here with a
+          revised "last updated" date. For privacy queries, use our{' '}
+          <a href="/contact" className="text-primary hover:underline">
+            contact page
+          </a>{' '}
+          or the data-request form linked above.
+        </p>
+      </LegalSectionBlock>
+    </LegalDocument>
   );
 };
 

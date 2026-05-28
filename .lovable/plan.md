@@ -1,52 +1,60 @@
-## Goal
-Replace the current dark cinematic theme with a light enterprise-SaaS palette across the entire app — A.R.I.A should look like an AI intelligence / risk command platform, not a luxury brand.
+# Terms, Privacy & Disclaimer — Rebuild
 
-## New design tokens (HSL conversions of your hex)
+Operator: **Simon Lindsay Consultancy T/A A.R.I.A™** — ariaops.co.uk
+Governing law: **Scotland / Scottish courts**
 
-| Role | Hex | HSL |
-|---|---|---|
-| Background | `#F4F6F8` | `210 17% 97%` |
-| Card / surface | `#FFFFFF` | `0 0% 100%` |
-| Foreground (text) | `#111827` | `220 39% 11%` |
-| Primary (brand) | `#123C69` | `211 71% 24%` |
-| Secondary (operational blue) | `#2E5EAA` | `215 58% 42%` |
-| Accent (threat/CTA amber) | `#FFB020` | `38 100% 56%` |
-| Success | `#16A34A` | `142 76% 36%` |
-| Danger | `#DC2626` | `0 84% 60%` |
-| Border / muted | `~#E5E7EB` | `220 13% 91%` |
-| Muted foreground | `~#6B7280` | `220 9% 46%` |
+## 1. Shared legal layout component
 
-## Files to change
+Create `src/components/legal/LegalDocument.tsx`:
+- Wraps content in `PublicLayout` (Header + Footer already themed)
+- Dark luxury surface: `bg-background` page, `bg-card` panel with `border-border/40`, champagne `text-primary` accent rule, gold underline on H1
+- Props: `title`, `lastUpdated`, `children`
+- Typography: serif/display H1, `text-foreground` body, `text-muted-foreground` for fine print, anchored section IDs for ToC
+- Sticky table-of-contents on `lg:` viewports, collapsible on mobile
+- Includes `<SEO>` with title/description/path
 
-1. **`src/index.css`**
-   - Rewrite `:root` with the light tokens above. Remove `.dark` override (or mirror it to light) so the whole site renders light.
-   - Strip the hard-coded `!important` black backgrounds on `html`, `body`, `#root` (lines 96–112). Replace with `@apply bg-background text-foreground`.
-   - Update component utilities (`.corporate-gradient`, `.corporate-card`, glassmorphism helpers) to white-card / soft-grey variants. Remove gold-accented shadows; replace with subtle blue ring shadows.
+## 2. Rebuild `src/pages/Terms.tsx`
 
-2. **`tailwind.config.ts`**
-   - Add `secondary-blue`, `success`, `danger`, `warning` color tokens mapping to the new CSS vars so components can reference them.
-   - Keep existing semantic names (`primary`, `accent`, `destructive`) — only their HSL values change.
+Replace placeholder with full content following the user's blueprint, organised as 12 numbered sections:
 
-3. **Component sweep — replace hardcoded dark colors with tokens.** Search-and-replace targets:
-   - `bg-black`, `bg-gray-950`, `bg-gray-900` → `bg-background` or `bg-card`
-   - `from-black via-gray-* to-black` gradients → remove or replace with `bg-background`
-   - `text-white` (on dark surfaces) → `text-foreground`
-   - `border-white/10`, `border-primary/20` glassmorphism → `border-border`
-   - `.glass-card` class → repurpose to white card with soft border + subtle shadow
-   - Particle-network background (dark canvas) → either remove on light sections or restyle with low-opacity blue dots
+1. Business identity — Simon Lindsay T/A A.R.I.A™, ariaops.co.uk, Scottish law
+2. What A.R.I.A provides — service list (monitoring, scoring, suppression support…), with explicit "no guaranteed removal/control" disclaimer wording
+3. No guaranteed outcome — bullet list of what cannot be guaranteed
+4. AI disclaimer — outputs are advisory; may be incomplete/delayed/inaccurate
+5. Not legal/financial/medical advice — instruct qualified solicitors for legal action
+6. Client responsibilities — accuracy, lawfulness, authorisation, no harassment
+7. Lawful use — prohibited uses (silence criticism, impersonate, manipulate reviews, etc.)
+8. Third-party platforms — no control over Google/Meta/TikTok/X/YouTube/Reddit/news/review sites/ChatGPT/Gemini/Perplexity/Copilot
+9. Payments & cancellations — pay before work, 3-day onboarding, 90-day initial term, cancel after initial term, no refunds for work commenced
+10. Confidentiality — mutual, with lawful exceptions
+11. Limitation of liability — cap + excluded loss types; preserve non-excludable liabilities (death, personal injury, fraud)
+12. Governing law & contact — Scotland; contact route via `/contact`
 
-   Primary files touched (non-exhaustive, based on grep): `ServicesSection.tsx`, `HeroSection.tsx`, `Footer.tsx`, `PublicLayout.tsx`, `Navbar*.tsx`, all `src/pages/stealth/*`, `src/pages/services/*`, `src/pages/resources/*`, the homepage sections.
+Add "Last updated" date and link to Privacy Policy + Disclaimer at the foot.
 
-4. **Memory update (`mem://style/visual-identity` + `mem://index.md` Core)**
-   - Replace the "Dark AI aesthetic bg #000000, accent #F97316, glassmorphism" core rule with the new light enterprise palette so future work stays on-brand.
+## 3. Refresh `src/pages/PrivacyPolicyPage.tsx`
+
+Check current contents; if placeholder/light-themed, rewrite to cover: data collected, lawful basis (UK GDPR), purpose, retention, sharing (Supabase/edge providers), security, data subject rights, contact route (`/request-data-access`). Use the new `LegalDocument` shell.
+
+## 4. Refresh `src/pages/DisclaimerPage.tsx` as Acceptable Use / Service Disclaimer
+
+Combine acceptable-use rules (section 7 of Terms expanded) + service disclaimer (AI accuracy + no guarantees). Use the new `LegalDocument` shell.
+
+## 5. Cross-link & footer
+
+Verify `Footer.tsx` links to `/terms`, `/privacy-policy`, `/disclaimer`. No new routes needed (all three already exist in `nav-items.tsx`).
 
 ## Out of scope
-- No copy/content changes.
-- No layout restructuring — same sections, same components, only color/surface/shadow tokens shift.
-- Admin/operator dashboards (`/admin/*`) keep their current dark theme unless you tell me otherwise — they're internal tools and a dark command-centre look still fits there.
 
-## Risk / heads-up
-This is a global visual change. Every page will look different on the next reload. I'll do the token swap first, then sweep components in a logical order (layout → homepage → stealth pages → resource pages) and verify in the preview after each major batch.
+- No backend / DB changes
+- No new routes
+- No copy for cookie banner (separate task if needed)
+- Final legal sign-off remains the user's responsibility; copy is a strong working draft, not solicitor-reviewed advice
 
-## Question before I start
-**Should the `/admin/*` operator panels stay dark, or go light too?** They're currently the most dashboard-heavy surfaces and a dark command-centre look arguably suits operator UX. Default I'll assume: **admin stays dark, public site goes light.**
+## Files touched
+
+- new: `src/components/legal/LegalDocument.tsx`
+- edit: `src/pages/Terms.tsx`
+- edit: `src/pages/PrivacyPolicyPage.tsx`
+- edit: `src/pages/DisclaimerPage.tsx`
+- possible edit: `src/components/layout/Footer.tsx` (only if links missing)
