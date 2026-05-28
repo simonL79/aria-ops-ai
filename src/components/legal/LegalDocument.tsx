@@ -19,6 +19,10 @@ interface LegalDocumentProps {
   sections: LegalSection[];
   children: React.ReactNode;
   footerLinks?: { to: string; label: string }[];
+  /** Root-relative or absolute image path for Open Graph / Twitter cards. */
+  seoImage?: string;
+  /** Optional JSON-LD structured data object(s). */
+  jsonLd?: object | object[];
 }
 
 const LegalDocument: React.FC<LegalDocumentProps> = ({
