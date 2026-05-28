@@ -19,6 +19,10 @@ interface LegalDocumentProps {
   sections: LegalSection[];
   children: React.ReactNode;
   footerLinks?: { to: string; label: string }[];
+  /** Root-relative or absolute image path for Open Graph / Twitter cards. */
+  seoImage?: string;
+  /** Optional JSON-LD structured data object(s). */
+  jsonLd?: object | object[];
 }
 
 const LegalDocument: React.FC<LegalDocumentProps> = ({
@@ -31,6 +35,8 @@ const LegalDocument: React.FC<LegalDocumentProps> = ({
   sections,
   children,
   footerLinks,
+  seoImage,
+  jsonLd,
 }) => {
   const updated =
     lastUpdated ??
@@ -42,7 +48,7 @@ const LegalDocument: React.FC<LegalDocumentProps> = ({
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <SEO title={seoTitle} description={seoDescription} path={path} />
+      <SEO title={seoTitle} description={seoDescription} path={path} image={seoImage} jsonLd={jsonLd} />
       <StickyHeader isScrolled={true} />
 
       <main className="container mx-auto px-6 py-16 md:py-24">

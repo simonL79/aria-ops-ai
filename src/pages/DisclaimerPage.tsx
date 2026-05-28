@@ -25,6 +25,19 @@ const DisclaimerPage = () => {
       seoTitle="Acceptable Use & Disclaimer — A.R.I.A™"
       seoDescription="Acceptable use rules and service disclaimer for the A.R.I.A™ reputation intelligence platform."
       path="/disclaimer"
+      seoImage="/lovable-uploads/37370275-bf62-4eab-b0e3-e184ce3fa142.png"
+      jsonLd={{
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "Acceptable Use & Disclaimer — A.R.I.A™",
+        "description": "Acceptable use rules and service disclaimer for the A.R.I.A™ reputation intelligence platform.",
+        "url": "https://www.ariaops.co.uk/disclaimer",
+        "publisher": {
+          "@type": "Organization",
+          "name": "A.R.I.A™",
+          "url": "https://www.ariaops.co.uk/",
+        },
+      }}
       sections={sections}
       intro="This document sets out the acceptable use of A.R.I.A™ services and the disclaimers that apply to information, reports and AI-generated outputs supplied through ariaops.co.uk."
       footerLinks={[
