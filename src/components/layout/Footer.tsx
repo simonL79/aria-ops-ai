@@ -1,9 +1,16 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import Logo from '@/components/ui/logo';
 
 const Footer = () => {
+  const { pathname } = useLocation();
+
+  const linkClass = (path: string) =>
+    pathname === path
+      ? "text-[#C6A15B] font-medium"
+      : "text-premium-silver hover:text-foreground transition-colors";
+
   return (
     <footer className="bg-premium-black text-premium-silver py-8 text-center">
       <div className="container mx-auto px-6">
@@ -57,9 +64,9 @@ const Footer = () => {
               <Link to="/blog" className="text-premium-silver hover:text-foreground transition-colors">Blog</Link>
               <Link to="/contact" className="text-premium-silver hover:text-foreground transition-colors">Contact</Link>
               <Link to="/cybersecurity-framework" className="text-premium-silver hover:text-foreground transition-colors">Security</Link>
-              <Link to="/privacy-policy" className="text-premium-silver hover:text-foreground transition-colors">Privacy</Link>
-              <Link to="/terms" className="text-premium-silver hover:text-foreground transition-colors">Terms</Link>
-              <Link to="/disclaimer" className="text-premium-silver hover:text-foreground transition-colors">Disclaimer</Link>
+              <Link to="/privacy-policy" className={linkClass("/privacy-policy")}>Privacy</Link>
+              <Link to="/terms" className={linkClass("/terms")}>Terms</Link>
+              <Link to="/disclaimer" className={linkClass("/disclaimer")}>Disclaimer</Link>
             </div>
           </div>
         </div>
