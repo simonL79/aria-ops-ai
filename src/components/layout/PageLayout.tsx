@@ -76,7 +76,7 @@ const PageLayout = ({
           `}
         </style>
       </Helmet>
-      <div className={`min-h-screen bg-corporate-dark text-white ${className}`} style={{ backgroundColor: '#0A0B0D', color: '#F9FAFB' }}>
+      <div className={`min-h-screen bg-corporate-dark text-foreground ${className}`} style={{ backgroundColor: '#0A0B0D', color: '#F9FAFB' }}>
         {children}
       </div>
     </>

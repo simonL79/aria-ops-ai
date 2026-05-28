@@ -79,7 +79,7 @@ const MobileMenu = ({ isOpen, setIsOpen, isScrolled }: MobileMenuProps) => {
             </Link>
           </li>
           <li className="pt-4">
-            <Button asChild className="w-full bg-blue-600 text-white hover:bg-blue-700" onClick={() => setIsOpen(false)}>
+            <Button asChild className="w-full bg-blue-600 text-foreground hover:bg-blue-700" onClick={() => setIsOpen(false)}>
               <Link to="/scan">Scan My Name Now</Link>
             </Button>
           </li>
@@ -87,7 +87,7 @@ const MobileMenu = ({ isOpen, setIsOpen, isScrolled }: MobileMenuProps) => {
             <Button 
               asChild 
               variant="outline" 
-              className="w-full border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white"
+              className="w-full border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-foreground"
               onClick={() => setIsOpen(false)}
             >
               <Link to="/auth">Login</Link>

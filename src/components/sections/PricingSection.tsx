@@ -124,9 +124,9 @@ const PricingSection = () => {
   };
 
   return (
-    <section id="pricing" className="scroll-mt-24 py-24 bg-gradient-to-b from-black via-gray-950 to-black">
+    <section id="pricing" className="scroll-mt-24 py-24 bg-gradient-to-b from-background via-background to-background">
       <div ref={ref} className={`container mx-auto px-6 transition-all duration-1000 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-        <h2 className="text-4xl md:text-5xl font-bold mb-16 text-center text-white">
+        <h2 className="text-4xl md:text-5xl font-bold mb-16 text-center text-foreground">
           Pricing
         </h2>
         
@@ -148,7 +148,7 @@ const PricingSection = () => {
               
               <h3 className="text-2xl font-bold mb-4 text-primary">{plan.name}</h3>
               <div className="mb-6">
-                <span className="text-3xl font-bold text-white">{plan.price}</span>
+                <span className="text-3xl font-bold text-foreground">{plan.price}</span>
                 <span className="text-muted-foreground">{plan.period}</span>
               </div>
               <p className="text-card-foreground mb-6">{plan.description}</p>
@@ -189,7 +189,7 @@ const PricingSection = () => {
             <div className="flex-1">
               <h3 className="text-2xl font-bold mb-2 text-primary">{enterprisePlan.name}</h3>
               <div className="mb-3">
-                <span className="text-3xl font-bold text-white">{enterprisePlan.price}</span>
+                <span className="text-3xl font-bold text-foreground">{enterprisePlan.price}</span>
                 <span className="text-muted-foreground ml-1">{enterprisePlan.period}</span>
               </div>
               <p className="text-card-foreground mb-4">{enterprisePlan.description}</p>

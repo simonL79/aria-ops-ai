@@ -15,10 +15,10 @@ const SocialLinksSection = () => {
   const { ref, visible } = useScrollReveal(0.3);
 
   return (
-    <section className="bg-black py-8">
+    <section className="bg-background py-8">
       <div ref={ref} className={`container mx-auto px-6 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
         <div className="text-center mb-6">
-          <p className="text-white text-lg mb-2">Trusted Across Social Platforms</p>
+          <p className="text-foreground text-lg mb-2">Trusted Across Social Platforms</p>
         </div>
         <div className="flex justify-center items-center space-x-8">
           {socialLinks.map(({ Icon, href, label }) => (

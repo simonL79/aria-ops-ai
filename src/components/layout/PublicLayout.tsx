@@ -45,7 +45,7 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
 
   return (
     <div className="flex min-h-screen flex-col bg-corporate-dark">
-      <header className="sticky top-0 z-50 w-full bg-black/95 backdrop-blur border-b border-corporate-border">
+      <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur border-b border-corporate-border">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between py-3 sm:py-4">
             <div className="flex items-center gap-2 sm:gap-4">
@@ -64,22 +64,22 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
             
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-6 lg:space-x-8">
-              <Link to="/blog" className="text-corporate-lightGray hover:text-white transition-colors text-sm lg:text-base">
+              <Link to="/blog" className="text-corporate-lightGray hover:text-foreground transition-colors text-sm lg:text-base">
                 Blog
               </Link>
-              <Link to="/simon-lindsay" className="text-corporate-lightGray hover:text-white transition-colors text-sm lg:text-base">
+              <Link to="/simon-lindsay" className="text-corporate-lightGray hover:text-foreground transition-colors text-sm lg:text-base">
                 About Simon
               </Link>
-              <Link to="/scan" className="text-corporate-lightGray hover:text-white transition-colors text-sm lg:text-base">
+              <Link to="/scan" className="text-corporate-lightGray hover:text-foreground transition-colors text-sm lg:text-base">
                 Get Started
               </Link>
               <button 
                 onClick={scrollToServices} 
-                className="text-corporate-lightGray hover:text-white transition-colors text-sm lg:text-base"
+                className="text-corporate-lightGray hover:text-foreground transition-colors text-sm lg:text-base"
               >
                 Services
               </button>
-              <Link to="/home#pricing" className="text-corporate-lightGray hover:text-white transition-colors text-sm lg:text-base">
+              <Link to="/home#pricing" className="text-corporate-lightGray hover:text-foreground transition-colors text-sm lg:text-base">
                 Pricing
               </Link>
               {isAuthenticated ? (
@@ -87,7 +87,7 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
                   variant="ghost" 
                   size="sm" 
                   onClick={handleAuthAction}
-                  className="ml-4 text-sm font-medium text-corporate-lightGray hover:text-white"
+                  className="ml-4 text-sm font-medium text-corporate-lightGray hover:text-foreground"
                 >
                   <LogOut className="mr-2 h-4 w-4" />
                   Sign Out
@@ -119,7 +119,7 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
 
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
-          <div className="md:hidden bg-black/98 backdrop-blur border-t border-corporate-border">
+          <div className="md:hidden bg-background/98 backdrop-blur border-t border-corporate-border">
             <nav className="container mx-auto px-4 py-4">
               <div className="flex flex-col space-y-4">
                 {!isHomePage && (
@@ -134,21 +134,21 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
                 )}
                 <Link 
                   to="/blog" 
-                  className="text-corporate-lightGray hover:text-white transition-colors py-2"
+                  className="text-corporate-lightGray hover:text-foreground transition-colors py-2"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Blog
                 </Link>
                 <Link 
                   to="/simon-lindsay" 
-                  className="text-corporate-lightGray hover:text-white transition-colors py-2"
+                  className="text-corporate-lightGray hover:text-foreground transition-colors py-2"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   About Simon
                 </Link>
                 <Link 
                   to="/scan" 
-                  className="text-corporate-lightGray hover:text-white transition-colors py-2"
+                  className="text-corporate-lightGray hover:text-foreground transition-colors py-2"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Get Started
@@ -158,13 +158,13 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
                     scrollToServices();
                     setIsMobileMenuOpen(false);
                   }} 
-                  className="text-corporate-lightGray hover:text-white transition-colors py-2 text-left"
+                  className="text-corporate-lightGray hover:text-foreground transition-colors py-2 text-left"
                 >
                   Services
                 </button>
                 <Link 
                   to="/home#pricing" 
-                  className="text-corporate-lightGray hover:text-white transition-colors py-2"
+                  className="text-corporate-lightGray hover:text-foreground transition-colors py-2"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Pricing
@@ -177,7 +177,7 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
                       handleAuthAction();
                       setIsMobileMenuOpen(false);
                     }}
-                    className="text-sm font-medium text-corporate-lightGray hover:text-white justify-start px-0"
+                    className="text-sm font-medium text-corporate-lightGray hover:text-foreground justify-start px-0"
                   >
                     <LogOut className="mr-2 h-4 w-4" />
                     Sign Out

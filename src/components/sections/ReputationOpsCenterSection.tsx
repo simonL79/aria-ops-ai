@@ -29,7 +29,7 @@ const ReputationOpsCenterSection = () => {
   ];
 
   return (
-    <section className="py-16 bg-gradient-to-r from-premium-darkGray to-premium-black text-white">
+    <section className="py-16 bg-gradient-to-r from-premium-darkGray to-premium-black text-foreground">
       <div className="container mx-auto px-6">
         <div className="max-w-4xl mx-auto text-center">
           <div className="flex justify-center mb-6">
@@ -42,7 +42,7 @@ const ReputationOpsCenterSection = () => {
             Your Reputation Ops Center
           </h2>
           
-          <p className="text-xl mb-8 text-white/90">
+          <p className="text-xl mb-8 text-foreground/90">
             ARIA doesn't just send alerts. It gives you a fully operational Command Center:
           </p>
           
@@ -52,12 +52,12 @@ const ReputationOpsCenterSection = () => {
                 <div className="text-blue-400">
                   {feature.icon}
                 </div>
-                <span className="text-white">{feature.text}</span>
+                <span className="text-foreground">{feature.text}</span>
               </div>
             ))}
           </div>
           
-          <p className="text-lg mb-8 text-white/80 italic">
+          <p className="text-lg mb-8 text-foreground/80 italic">
             It's like having your own digital Langley — without the complexity.
           </p>
           
@@ -67,7 +67,7 @@ const ReputationOpsCenterSection = () => {
                 Access Command Center <ArrowRight className="w-5 h-5" />
               </Link>
             </Button>
-            <Button asChild variant="outline" size="lg" className="border-white text-white hover:bg-white hover:text-premium-black px-8 py-3">
+            <Button asChild variant="outline" size="lg" className="border-white text-foreground hover:bg-white hover:text-premium-black px-8 py-3">
               <Link to="/scan">
                 Request Demo
               </Link>

@@ -115,7 +115,7 @@ const PlatformsSection = () => {
           </div>
         </div>
         
-        <div className="max-w-3xl mx-auto text-center bg-premium-black rounded-lg p-8 text-white shadow-xl">
+        <div className="max-w-3xl mx-auto text-center bg-premium-black rounded-lg p-8 text-foreground shadow-xl">
           <h4 className="text-xl font-bold mb-4">
             "If your name appears, A.R.I.A™ knows about it."
           </h4>

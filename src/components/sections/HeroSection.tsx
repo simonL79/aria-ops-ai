@@ -36,7 +36,7 @@ const DashboardMockup = () => {
         style={{ transform: 'rotateX(4deg)', transformOrigin: 'center bottom' }}
       >
         {/* Top bar */}
-        <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/10 bg-white/[0.03]">
+        <div className="flex items-center justify-between px-4 py-2.5 border-b border-border bg-white/[0.03]">
           <div className="flex items-center gap-2">
             <div className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
             <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/80" />
@@ -54,19 +54,19 @@ const DashboardMockup = () => {
         {/* Metrics row */}
         <div className="grid grid-cols-3 gap-px bg-white/5">
           {/* Threat Score */}
-          <div className="p-5 bg-black/20 text-center space-y-2">
+          <div className="p-5 bg-background/20 text-center space-y-2">
             <div className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Threat Score</div>
             <div className="text-3xl font-light text-primary">12</div>
             <div className="text-[10px] text-green-400/70">▼ Low Risk</div>
           </div>
           {/* Signals */}
-          <div className="p-5 bg-black/20 text-center space-y-2 border-x border-white/5">
+          <div className="p-5 bg-background/20 text-center space-y-2 border-x border-border">
             <div className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Signals Monitored</div>
-            <div className="text-3xl font-light text-white">2,847</div>
+            <div className="text-3xl font-light text-foreground">2,847</div>
             <div className="text-[10px] text-muted-foreground">across 14 platforms</div>
           </div>
           {/* Risk Level */}
-          <div className="p-5 bg-black/20 text-center space-y-2">
+          <div className="p-5 bg-background/20 text-center space-y-2">
             <div className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Risk Level</div>
             <div className="text-3xl font-light text-green-400">Stable</div>
             <div className="text-[10px] text-muted-foreground">no escalation detected</div>
@@ -111,7 +111,7 @@ const HeroSection = () => {
   };
 
   return (
-    <section className="relative bg-gradient-to-b from-gray-950 to-black text-foreground min-h-screen flex items-center overflow-hidden">
+    <section className="relative bg-gradient-to-b from-background to-background text-foreground min-h-screen flex items-center overflow-hidden">
       {/* Grid overlay */}
       <div className="absolute inset-0 opacity-[0.04]" style={{
         backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
@@ -135,7 +135,7 @@ const HeroSection = () => {
             This prevents the h1 (and the blinking cursor) from shifting as
             characters appear, which was the main CLS offender.
           */}
-          <h1 className="relative text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-light leading-tight text-white">
+          <h1 className="relative text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-light leading-tight text-foreground">
             <span aria-hidden="true" className="invisible block">
               {renderHeadlineWords(HERO_HEADLINE)}
             </span>
@@ -165,7 +165,7 @@ const HeroSection = () => {
               asChild
               variant="outline"
               size="lg"
-              className="border-border text-white hover:bg-white/5 px-10 py-6 text-lg font-medium rounded-xl transition-all duration-300"
+              className="border-border text-foreground hover:bg-white/5 px-10 py-6 text-lg font-medium rounded-xl transition-all duration-300"
             >
               <Link to="/scan">
                 Book Private Consultation

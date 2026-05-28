@@ -70,7 +70,7 @@ const StickyHeader = ({ isScrolled }: StickyHeaderProps) => {
               </NavigationMenuList>
             </NavigationMenu>
             
-            <Button asChild size="sm" className="ml-4 bg-blue-600 text-white hover:bg-blue-700">
+            <Button asChild size="sm" className="ml-4 bg-blue-600 text-foreground hover:bg-blue-700">
               <Link to="/scan">Scan My Name Now</Link>
             </Button>
             
@@ -78,8 +78,8 @@ const StickyHeader = ({ isScrolled }: StickyHeaderProps) => {
               variant="outline" 
               size="sm" 
               className={`ml-2 ${isScrolled 
-                ? 'border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white' 
-                : 'border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white'}`}
+                ? 'border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-foreground' 
+                : 'border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-foreground'}`}
               onClick={() => navigate("/auth")}
             >
               Login

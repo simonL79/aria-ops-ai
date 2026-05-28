@@ -41,7 +41,7 @@ const NOCFeaturesSection = () => {
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
           {features.map((feature, index) => (
             <div key={index} className="text-center">
-              <div className="bg-premium-black text-white rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+              <div className="bg-premium-black text-foreground rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
                 {feature.icon}
               </div>
               <h3 className="text-xl font-semibold mb-3 text-premium-black">

@@ -162,7 +162,7 @@ const AdminSidebar = () => {
         <div className="flex items-center justify-between">
           {!collapsed && (
             <div>
-              <h2 className="text-lg font-bold text-white">A.R.I.A™ Command</h2>
+              <h2 className="text-lg font-bold text-foreground">A.R.I.A™ Command</h2>
               <p className="text-xs text-corporate-lightGray">Live Intelligence Only</p>
             </div>
           )}
@@ -170,7 +170,7 @@ const AdminSidebar = () => {
             variant="ghost"
             size="sm"
             onClick={() => setCollapsed(!collapsed)}
-            className="text-corporate-lightGray hover:text-white hover:bg-corporate-darkSecondary shrink-0"
+            className="text-corporate-lightGray hover:text-foreground hover:bg-corporate-darkSecondary shrink-0"
           >
             {collapsed ? <Activity className="h-4 w-4" /> : <Target className="h-4 w-4" />}
           </Button>
