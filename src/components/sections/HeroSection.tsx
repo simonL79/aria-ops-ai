@@ -54,19 +54,19 @@ const DashboardMockup = () => {
         {/* Metrics row */}
         <div className="grid grid-cols-3 gap-px bg-muted/40">
           {/* Threat Score */}
-          <div className="p-5 bg-background/20 text-center space-y-2">
+          <div className="p-5 bg-card text-center space-y-2">
             <div className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Threat Score</div>
             <div className="text-3xl font-light text-primary">12</div>
             <div className="text-[10px] text-green-400/70">▼ Low Risk</div>
           </div>
           {/* Signals */}
-          <div className="p-5 bg-background/20 text-center space-y-2 border-x border-border">
+          <div className="p-5 bg-card text-center space-y-2 border-x border-border">
             <div className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Signals Monitored</div>
             <div className="text-3xl font-light text-foreground">2,847</div>
             <div className="text-[10px] text-muted-foreground">across 14 platforms</div>
           </div>
           {/* Risk Level */}
-          <div className="p-5 bg-background/20 text-center space-y-2">
+          <div className="p-5 bg-card text-center space-y-2">
             <div className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Risk Level</div>
             <div className="text-3xl font-light text-green-400">Stable</div>
             <div className="text-[10px] text-muted-foreground">no escalation detected</div>
@@ -79,7 +79,7 @@ const DashboardMockup = () => {
         </div>
 
         {/* Status footer */}
-        <div className="px-4 py-2.5 bg-white/[0.02] flex items-center justify-between">
+        <div className="px-4 py-2.5 bg-muted/30 flex items-center justify-between">
           <span className="text-[10px] text-muted-foreground tracking-wide">Real-time monitoring active</span>
           <span className="text-[10px] text-muted-foreground">Last scan: 4s ago</span>
         </div>
@@ -114,7 +114,7 @@ const HeroSection = () => {
     <section className="relative bg-gradient-to-b from-background to-background text-foreground min-h-screen flex items-center overflow-hidden">
       {/* Grid overlay */}
       <div className="absolute inset-0 opacity-[0.04]" style={{
-        backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
+        backgroundImage: `linear-gradient(rgba(17,24,39,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(17,24,39,0.08) 1px, transparent 1px)`,
         backgroundSize: '60px 60px'
       }} />
 
