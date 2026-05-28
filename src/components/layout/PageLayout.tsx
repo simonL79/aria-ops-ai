@@ -14,10 +14,10 @@ const PageLayout = ({
   description = "Monitor, protect, and repair your digital reputation with A.R.I.A™ — the AI-powered reputation defense system built for founders, influencers, and businesses.",
   className = ""
 }: PageLayoutProps) => {
-  // Ensure the light enterprise theme is active on public pages
+  // Luxury dark intelligence theme on public pages
   useEffect(() => {
-    document.documentElement.classList.remove('dark');
-    document.documentElement.classList.add('light');
+    document.documentElement.classList.add('dark');
+    document.documentElement.classList.remove('light');
   }, []);
 
   return (

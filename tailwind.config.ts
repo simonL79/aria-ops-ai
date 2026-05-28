@@ -75,35 +75,37 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// A.R.I.A enterprise palette (light theme)
+				// A.R.I.A luxury dark intelligence palette
 				corporate: {
-					dark: '#123C69',          // deep intelligence blue (was dark bg)
-					darkSecondary: '#2E5EAA', // operational blue
-					darkTertiary: '#FFFFFF',  // card surface
-					gray: '#6B7280',
-					lightGray: '#9CA3AF',
-					accent: '#FFB020',        // amber CTA / threat
-					accentDark: '#E69A0A',
-					border: '#E5E7EB',
-					borderLight: '#F1F3F5'
+					dark: '#111827',          // primary background
+					darkSecondary: '#1F2937', // panel surfaces
+					darkTertiary: '#182231',  // card surface
+					gray: '#94A3B8',
+					lightGray: '#CBD5E1',
+					accent: '#C6A15B',        // champagne gold
+					accentDark: '#A8853F',
+					info: '#38BDF8',          // AI blue
+					border: '#2A3441',
+					borderLight: '#1F2937'
 				},
 				brand: {
-					DEFAULT: '#123C69',
-					light: '#2E5EAA',
-					dark: '#0B2742',
-					accent: '#FFB020'
+					DEFAULT: '#C6A15B',
+					light: '#D9BC85',
+					dark: '#A8853F',
+					navy: '#111827',
+					panel: '#1F2937'
 				},
 				alert: {
-					negative: '#DC2626',
-					warning: '#FFB020',
-					positive: '#16A34A'
+					negative: '#B91C1C',
+					warning: '#F59E0B',
+					positive: '#15803D'
 				},
 				premium: {
 					black: '#111827',
-					darkGray: '#374151',
-					gray: '#6B7280',
-					silver: '#9CA3AF',
-					gold: '#FFB020'
+					darkGray: '#1F2937',
+					gray: '#94A3B8',
+					silver: '#CBD5E1',
+					gold: '#C6A15B'
 				}
 			},
 			borderRadius: {

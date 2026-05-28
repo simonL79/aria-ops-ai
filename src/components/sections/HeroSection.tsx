@@ -111,18 +111,19 @@ const HeroSection = () => {
   };
 
   return (
-    <section className="relative bg-gradient-to-b from-background via-background to-muted/40 text-foreground min-h-screen flex items-center overflow-hidden">
-      {/* Grid overlay */}
-      <div className="absolute inset-0 opacity-[0.05]" style={{
-        backgroundImage: `linear-gradient(hsl(var(--primary) / 0.15) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary) / 0.15) 1px, transparent 1px)`,
+    <section className="relative bg-gradient-to-b from-background via-background to-secondary/40 text-foreground min-h-screen flex items-center overflow-hidden">
+      {/* Grid overlay — faint gold lattice */}
+      <div className="absolute inset-0 opacity-[0.06]" style={{
+        backgroundImage: `linear-gradient(hsl(38 47% 57% / 0.35) 1px, transparent 1px), linear-gradient(90deg, hsl(38 47% 57% / 0.35) 1px, transparent 1px)`,
         backgroundSize: '64px 64px',
-        maskImage: 'radial-gradient(ellipse at center, black 40%, transparent 80%)',
-        WebkitMaskImage: 'radial-gradient(ellipse at center, black 40%, transparent 80%)'
+        maskImage: 'radial-gradient(ellipse at center, black 35%, transparent 80%)',
+        WebkitMaskImage: 'radial-gradient(ellipse at center, black 35%, transparent 80%)'
       }} />
 
-      {/* Ambient brand glow — soft blue, not orange */}
-      <div className="absolute top-1/3 left-1/4 w-[32rem] h-[32rem] bg-primary/[0.06] rounded-full blur-[140px]" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-secondary/40 rounded-full blur-[120px]" />
+      {/* Champagne ambient light */}
+      <div className="absolute top-1/3 left-1/4 w-[36rem] h-[36rem] bg-primary/[0.10] rounded-full blur-[160px]" />
+      <div className="absolute bottom-1/4 right-1/4 w-[28rem] h-[28rem] bg-[hsl(199_92%_60%/0.08)] rounded-full blur-[140px]" />
+
 
 
       <div className="container mx-auto px-6 relative z-10 w-full py-20">
