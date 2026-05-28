@@ -9,12 +9,12 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { Brain, ShieldCheck, Scale, Activity, ArrowRight } from 'lucide-react';
+import { Brain, ShieldCheck, Scale, Activity, Search, Sparkles, ArrowRight } from 'lucide-react';
 
 const faqs: { q: string; a: string }[] = [
   {
     q: 'What does brand protection actually cover?',
-    a: 'In the A.R.I.A™ model, brand protection covers four overlapping disciplines: AI-driven threat detection (catching attacks before they escalate), narrative defence (counter-content that pushes harmful material off page one), identity protection (executive impersonation and deepfake monitoring), and legal removal (DMCA, defamation notices, trademark enforcement). Most agencies only deliver the last one.',
+    a: 'In the A.R.I.A™ model, brand protection covers six overlapping disciplines: AI-driven threat detection (catching attacks before they escalate), narrative defence (counter-content that pushes harmful material off page one), identity protection (executive impersonation and deepfake monitoring), search positioning (defensive page-one ranking), AI reputation readiness (how ChatGPT, Gemini and Perplexity describe you), and legal removal & compliance (DMCA, defamation notices, GDPR takedowns, trademark enforcement). Most agencies only deliver the last one.',
   },
   {
     q: 'How is brand protection different from PR or reputation management?',
@@ -49,7 +49,7 @@ const BrandProtectionPage = () => {
     provider: { '@type': 'Organization', name: 'A.R.I.A™', url: 'https://www.ariaops.co.uk/' },
     areaServed: { '@type': 'Country', name: 'United Kingdom' },
     description:
-      'AI-driven brand protection: threat detection, narrative defence, identity protection, and legal removal for UK businesses, executives, and public figures.',
+      'AI-driven brand protection across six disciplines: threat detection, narrative defence, identity protection, search positioning, AI reputation readiness, and legal removal & compliance — for UK businesses, executives, and public figures.',
   };
 
   const breadcrumbJsonLd = {
@@ -79,9 +79,19 @@ const BrandProtectionPage = () => {
       body: 'Executive impersonation, deepfake voice/video monitoring, fake-account discovery across Meta, X, LinkedIn, TikTok, and Telegram. Takedown lifecycle handled end-to-end.',
     },
     {
+      icon: Search,
+      title: 'Search Positioning',
+      body: 'Defensive ranking strategy and authority content layering that keeps page one yours — the only durable way to suppress hostile search results long-term.',
+    },
+    {
+      icon: Sparkles,
+      title: 'AI Reputation Readiness',
+      body: 'Audit and shape how ChatGPT, Gemini, Perplexity and agentic search interpret you. Structured presence, citation control, and trust-signal optimisation for the agentic web.',
+    },
+    {
       icon: Scale,
-      title: 'Legal Removal',
-      body: 'Defamation Act notices, DMCA takedowns, trademark enforcement, GDPR data removal requests, and Norwich Pharmacal Orders to unmask anonymous attackers.',
+      title: 'Legal Removal & Compliance',
+      body: 'Defamation Act notices, DMCA takedowns, GDPR right-to-erasure, trademark enforcement, and Norwich Pharmacal Orders — backed by SOC II / ISO 27001-aligned audit trails.',
     },
   ];
 
@@ -89,7 +99,7 @@ const BrandProtectionPage = () => {
     <PublicLayout>
       <SEO
         title="Brand Protection UK — AI Threat Detection & Reputation Defence"
-        description="UK-based brand protection: AI threat detection, narrative defence, executive identity protection, and legal removal. Built for businesses and high-profile clients."
+        description="UK brand protection across six disciplines: AI threat detection, narrative defence, identity protection, search positioning, AI reputation readiness, and legal removal & compliance."
         path="/services/brand-protection"
         jsonLd={[faqJsonLd, serviceJsonLd, breadcrumbJsonLd]}
       />
@@ -111,7 +121,7 @@ const BrandProtectionPage = () => {
 
         {/* Pillars */}
         <section className="container mx-auto px-6 py-12 max-w-4xl">
-          <h2 className="text-3xl font-bold mb-8">Four pillars, one system</h2>
+          <h2 className="text-3xl font-bold mb-8">Six pillars, one system</h2>
           <div className="grid md:grid-cols-2 gap-6">
             {pillars.map(({ icon: Icon, title, body }) => (
               <div key={title} className="bg-card border border-border rounded-lg p-6">
