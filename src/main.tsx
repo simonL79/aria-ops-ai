@@ -7,20 +7,19 @@ import { HelmetProvider } from "react-helmet-async";
 import { initializeARIACore } from "@/services/ariaCore";
 import { initializeDatabase } from "@/utils/initializeMonitoring";
 
-// Apply initial light theme styles immediately to prevent flash
+// Apply initial luxury dark theme to prevent flash
 const applyInitialTheme = () => {
   const root = document.documentElement;
   const body = document.body;
 
-  root.style.backgroundColor = '#F4F6F8';
-  root.style.color = '#111827';
-  body.style.backgroundColor = '#F4F6F8';
-  body.style.color = '#111827';
+  root.style.backgroundColor = '#111827';
+  root.style.color = '#F8FAFC';
+  body.style.backgroundColor = '#111827';
+  body.style.color = '#F8FAFC';
   body.style.minHeight = '100vh';
 
-  // Default to light mode for public site; /admin re-enables `.dark`
-  root.classList.remove('dark');
-  root.classList.add('light');
+  root.classList.add('dark');
+  root.classList.remove('light');
 };
 
 applyInitialTheme();
