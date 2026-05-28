@@ -211,6 +211,9 @@ function App() {
                             <Route key={to} path={to} element={page} />
                           ))}
                       </Route>
+
+                      {/* Catch-all 404 */}
+                      <Route path="*" element={<NotFoundPage />} />
                     </Routes>
                   </Suspense>
                 </div>
