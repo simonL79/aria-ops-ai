@@ -33,6 +33,8 @@
     "admin/AdminNotificationsPage.tsx",
     "dashboard/mentions/index.tsx",
     "dashboard/mentions/MentionsTab.tsx",
-    "dashboard/mentions/ClassifyTab.tsx"
+    "dashboard/mentions/ClassifyTab.tsx",
+    "resources/ResourceLayout.tsx",
+    "stealth/StealthLandingPage.tsx"
   ]
 }
