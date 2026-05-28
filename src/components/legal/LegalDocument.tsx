@@ -48,7 +48,7 @@ const LegalDocument: React.FC<LegalDocumentProps> = ({
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <SEO title={seoTitle} description={seoDescription} path={path} />
+      <SEO title={seoTitle} description={seoDescription} path={path} image={seoImage} jsonLd={jsonLd} />
       <StickyHeader isScrolled={true} />
 
       <main className="container mx-auto px-6 py-16 md:py-24">
