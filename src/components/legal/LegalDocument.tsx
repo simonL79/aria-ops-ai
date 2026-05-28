@@ -64,6 +64,16 @@ const LegalDocument: React.FC<LegalDocumentProps> = ({
                   <a
                     key={s.id}
                     href={`#${s.id}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const el = document.getElementById(s.id);
+                      if (el) {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        if (window.history.replaceState) {
+                          window.history.replaceState(null, '', `#${s.id}`);
+                        }
+                      }
+                    }}
                     className="text-muted-foreground hover:text-primary transition-colors leading-snug"
                   >
                     <span className="text-primary/70 mr-2 font-medium">
