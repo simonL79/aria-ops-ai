@@ -29,6 +29,19 @@ const PrivacyPolicyPage = () => {
       seoTitle="Privacy Policy — A.R.I.A™"
       seoDescription="How A.R.I.A™ collects, processes and protects personal data in line with UK GDPR and ICO guidance."
       path="/privacy-policy"
+      seoImage="/lovable-uploads/37370275-bf62-4eab-b0e3-e184ce3fa142.png"
+      jsonLd={{
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "Privacy Policy — A.R.I.A™",
+        "description": "How A.R.I.A™ collects, processes and protects personal data in line with UK GDPR and ICO guidance.",
+        "url": "https://www.ariaops.co.uk/privacy-policy",
+        "publisher": {
+          "@type": "Organization",
+          "name": "A.R.I.A™",
+          "url": "https://www.ariaops.co.uk/",
+        },
+      }}
       sections={sections}
       intro="This Privacy Policy explains how A.R.I.A™ collects, uses and protects personal data when you visit ariaops.co.uk or engage our reputation intelligence services. We process data in line with the UK GDPR and the Data Protection Act 2018."
       footerLinks={[
