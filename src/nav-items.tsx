@@ -14,6 +14,8 @@ import SettingsPage from "./pages/Settings";
 import Terms from "./pages/Terms";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import DisclaimerPage from "./pages/DisclaimerPage";
+import CookiePolicyPage from "./pages/CookiePolicyPage";
+import AcceptableUsePolicyPage from "./pages/AcceptableUsePolicyPage";
 import SimonLindsayPage from "./pages/SimonLindsayPage";
 import BiographyPage from "./pages/BiographyPage";
 import BlogPage from "./pages/BlogPage";
@@ -102,6 +104,20 @@ export const navItems: { title: string; to: string; icon: React.ReactElement; pa
     to: "/disclaimer",
     icon: <AlertTriangle className="h-4 w-4" />,
     page: <DisclaimerPage />,
+    isPublic: true,
+  },
+  {
+    title: "Cookie Policy",
+    to: "/cookie-policy",
+    icon: <FileText className="h-4 w-4" />,
+    page: <CookiePolicyPage />,
+    isPublic: true,
+  },
+  {
+    title: "Acceptable Use Policy",
+    to: "/acceptable-use",
+    icon: <Gavel className="h-4 w-4" />,
+    page: <AcceptableUsePolicyPage />,
     isPublic: true,
   },
   {
