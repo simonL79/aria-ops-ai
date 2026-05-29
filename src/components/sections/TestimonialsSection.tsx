@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Star, Shield } from 'lucide-react';
 import { useScrollReveal, useCountUp } from '@/hooks/useScrollReveal';
+import StatDisclaimer from '@/components/legal/StatDisclaimer';
 
 const TestimonialsSection = () => {
   const { ref: statsRef, visible: statsVisible } = useScrollReveal(0.3);
