@@ -11,6 +11,7 @@ import { navItems } from "./nav-items";
 import Index from "./pages/Index";
 import ClientPortalRoute from "@/components/auth/ClientPortalRoute";
 import ScrollToTop from "@/components/layout/ScrollToTop";
+import CookieConsent from "@/components/legal/CookieConsent";
 
 // Lazy-loaded routes — every other page is split into its own chunk
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
@@ -218,6 +219,7 @@ function App() {
                   </Suspense>
                 </div>
                 <Toaster />
+                <CookieConsent />
               </Router>
             </TooltipProvider>
           </RbacProvider>
