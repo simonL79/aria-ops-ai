@@ -59,6 +59,9 @@ const TrustSection = () => {
               </div>
             ))}
           </div>
+          <p className="text-xs text-muted-foreground/80 text-center max-w-3xl mx-auto mt-8 leading-relaxed">
+            Representative outcomes from anonymised client engagements. Figures are illustrative and not a guarantee of results. Outcomes vary depending on platform, content type, jurisdiction and the nature of the threat. No reputable provider can guarantee removal or suppression of online content.
+          </p>
         </div>
 
         {/* Methodology */}
