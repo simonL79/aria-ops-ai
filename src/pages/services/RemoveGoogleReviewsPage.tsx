@@ -10,6 +10,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { ShieldAlert, Scale, Search, ArrowRight } from 'lucide-react';
+import StatDisclaimer from '@/components/legal/StatDisclaimer';
 
 const faqs: { q: string; a: string }[] = [
   {
@@ -192,6 +193,10 @@ const RemoveGoogleReviewsPage = () => {
             <li><Link to="/services/online-impersonation-uk" className="hover:underline">→ Online impersonation — UK legal guide</Link></li>
             <li><Link to="/services/brand-protection" className="hover:underline">→ Brand protection</Link></li>
           </ul>
+        </section>
+
+        <section className="container mx-auto px-6 pb-16 max-w-4xl">
+          <StatDisclaimer />
         </section>
       </article>
     </PublicLayout>
