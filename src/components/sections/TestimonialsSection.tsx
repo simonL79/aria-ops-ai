@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Star, Shield } from 'lucide-react';
 import { useScrollReveal, useCountUp } from '@/hooks/useScrollReveal';
+import StatDisclaimer from '@/components/legal/StatDisclaimer';
 
 const TestimonialsSection = () => {
   const { ref: statsRef, visible: statsVisible } = useScrollReveal(0.3);
@@ -71,6 +72,8 @@ const TestimonialsSection = () => {
             <p className="text-muted-foreground text-sm mt-1">Threats Detected Today</p>
           </div>
         </div>
+        <StatDisclaimer className="mb-12" />
+
         
         <div ref={cardsRef} className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
           {testimonials.map((testimonial, index) => (

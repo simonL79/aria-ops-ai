@@ -2,6 +2,7 @@
 import React from 'react';
 import { Shield, Clock, Brain, Lock, Users, Trophy, Briefcase, Crown } from 'lucide-react';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
+import StatDisclaimer from '@/components/legal/StatDisclaimer';
 
 const TrustSection = () => {
   const { ref, visible } = useScrollReveal(0.1);
@@ -59,10 +60,9 @@ const TrustSection = () => {
               </div>
             ))}
           </div>
-          <p className="text-xs text-muted-foreground/80 text-center max-w-3xl mx-auto mt-8 leading-relaxed">
-            Representative outcomes from anonymised client engagements. Figures are illustrative and not a guarantee of results. Outcomes vary depending on platform, content type, jurisdiction and the nature of the threat. No reputable provider can guarantee removal or suppression of online content.
-          </p>
+          <StatDisclaimer className="mt-8" />
         </div>
+
 
         {/* Methodology */}
         <div className={`transition-all duration-700 delay-400 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>

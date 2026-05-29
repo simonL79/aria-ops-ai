@@ -67,6 +67,8 @@ const Footer = () => {
               <Link to="/privacy-policy" className={linkClass("/privacy-policy")}>Privacy</Link>
               <Link to="/terms" className={linkClass("/terms")}>Terms</Link>
               <Link to="/disclaimer" className={linkClass("/disclaimer")}>Disclaimer</Link>
+              <Link to="/cookie-policy" className={linkClass("/cookie-policy")}>Cookie Policy</Link>
+              <Link to="/acceptable-use" className={linkClass("/acceptable-use")}>Acceptable Use</Link>
             </div>
           </div>
         </div>

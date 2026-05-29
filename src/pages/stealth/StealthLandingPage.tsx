@@ -5,6 +5,7 @@ import SEO from '@/components/seo/SEO';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ArrowRight, CheckCircle2, XCircle, type LucideIcon } from 'lucide-react';
+import StatDisclaimer from '@/components/legal/StatDisclaimer';
 
 export interface StealthPageConfig {
   path: string;
@@ -306,6 +307,11 @@ const StealthLandingPage: React.FC<{ cfg: StealthPageConfig }> = ({ cfg }) => {
               </Button>
             </div>
           </div>
+        </section>
+
+        {/* Site-wide outcome disclaimer */}
+        <section className="container mx-auto px-6 pb-16 max-w-4xl">
+          <StatDisclaimer />
         </section>
       </article>
     </PublicLayout>
