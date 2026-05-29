@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import Logo from '../ui/logo';
+import heroHeader from '@/assets/aria-hero-header.png';
 
 const useTypewriter = (text: string, speed = 45, delay = 600) => {
   const [displayed, setDisplayed] = useState('');
@@ -128,9 +128,14 @@ const HeroSection = () => {
 
       <div className="container mx-auto px-6 relative z-10 w-full py-20">
         <div className="max-w-4xl mx-auto text-center space-y-10">
-          {/* Simple logo */}
+          {/* Hero header image */}
           <div className="flex justify-center mb-6">
-            <Logo variant="light" size="3xl" />
+            <img
+              src={heroHeader}
+              alt="A.R.I.A — AI Reputation Intelligence Agent reputation operations command center"
+              className="w-full max-w-3xl h-auto rounded-xl shadow-2xl"
+              loading="eager"
+            />
           </div>
 
           {/*
