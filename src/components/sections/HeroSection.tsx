@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import Logo from '../ui/logo';
+import heroHeader from '@/assets/aria-hero-header.png';
 
 const useTypewriter = (text: string, speed = 45, delay = 600) => {
   const [displayed, setDisplayed] = useState('');
