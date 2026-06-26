@@ -67,6 +67,7 @@ const ServicesSection = () => {
     {
       icon: Shield,
       title: "AI Threat Detection",
+      href: "/reputation-threat-score",
       capabilities: [
         "Emerging narrative risk identification",
         "Hostile content discovery & tracking",
@@ -77,6 +78,7 @@ const ServicesSection = () => {
     {
       icon: Swords,
       title: "Narrative Defense",
+      href: "/crisis-reputation-management",
       capabilities: [
         "Strategic response architecture",
         "Content counterweight deployment",
@@ -87,6 +89,7 @@ const ServicesSection = () => {
     {
       icon: Fingerprint,
       title: "Identity Protection",
+      href: "/services/online-impersonation-uk",
       capabilities: [
         "Impersonation scanning & alerts",
         "Profile cloning risk assessment",
@@ -97,6 +100,7 @@ const ServicesSection = () => {
     {
       icon: Search,
       title: "Search Positioning",
+      href: "/ai-search-visibility",
       capabilities: [
         "Defensive ranking strategy",
         "Reputation-safe visibility",
@@ -107,24 +111,24 @@ const ServicesSection = () => {
     {
       icon: Brain,
       title: "AI Reputation Readiness",
+      href: "/ai-reputation-readiness",
       capabilities: [
         "What ChatGPT, Gemini & Perplexity say about you",
         "LLM interpretation & trust signal audit",
         "Agent-recommendation likelihood scoring",
         "Structured presence for the agentic web",
       ],
-      href: "/ai-reputation-readiness",
     },
     {
       icon: Scale,
       title: "Legal Defence & Compliance",
+      href: "/legal-defence-compliance",
       capabilities: [
         "GDPR takedowns & right-to-erasure enforcement",
         "Cease & desist automation with evidence pack",
         "Defamation case preparation & counsel hand-off",
         "SOC II / ISO 27001-aligned audit trail",
       ],
-      href: "/legal-defence-compliance",
     },
   ];
 
@@ -136,21 +140,16 @@ const ServicesSection = () => {
             Intelligence-Grade <span className="text-primary">Protection</span>
           </h2>
           <p className="text-muted-foreground max-w-3xl mx-auto text-lg">
-            Six integrated defence layers powered by A.R.I.A™ — built for high-profile individuals, brands, and organisations that cannot afford reputational exposure.
+            Six integrated defence layers powered by A.R.I.A™ — built for high-profile individuals, brands, and organisations that cannot afford reputational exposure. Select any layer below to explore it in detail.
           </p>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
           {services.map((service, index) => (
-            service.href ? (
-              <Link key={index} to={service.href} className="block">
-                <ServiceCard service={service} index={index} visible={visible} />
-              </Link>
-            ) : (
-              <ServiceCard key={index} service={service} index={index} visible={visible} />
-            )
+            <ServiceCard key={index} service={service} index={index} visible={visible} />
           ))}
         </div>
+
 
         <div className={`text-center transition-all duration-700 delay-500 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
           <Link to="/scan">
