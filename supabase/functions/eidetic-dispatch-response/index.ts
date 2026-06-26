@@ -18,9 +18,18 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   try {
+    // Allow either an admin user OR an internal service-role caller (autopilot/cron).
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const authHeader = req.headers.get('authorization') ?? '';
+    const isServiceRole = authHeader === `Bearer ${serviceRoleKey}`;
+    if (!isServiceRole) {
+      const auth = await requireAdmin(req);
+      if (!isAuthenticated(auth)) return auth;
+    }
+
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+      serviceRoleKey,
     );
 
     const { event_id } = (await req.json()) as Body;
