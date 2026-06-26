@@ -286,7 +286,7 @@ const LegalShieldPage = () => {
       <article className="bg-background text-foreground">
         {/* Hero */}
         <section className="container mx-auto px-6 pt-20 pb-12 max-w-4xl">
-          <p className="text-sm uppercase tracking-widest text-primary mb-4">ARIA Legal Shield™</p>
+          <p className="text-sm uppercase tracking-widest text-primary mb-4">ARIA Legal Shield™ — Your AI Legal Protection Platform</p>
           <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
             Make legal understanding accessible to everyone
           </h1>
