@@ -31,6 +31,7 @@ import {
   Paperclip,
   X,
   FileText,
+  Sparkles,
 } from 'lucide-react';
 
 const MAX_FILES = 10;
