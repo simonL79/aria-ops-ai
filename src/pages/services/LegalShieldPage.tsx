@@ -258,7 +258,7 @@ const LegalShieldPage = () => {
                 </p>
                 <p className="text-muted-foreground leading-relaxed mb-6">{forWho}</p>
                 <Button asChild variant={featured ? 'default' : 'outline'} className="w-full">
-                  <Link to="/contact">Get {name}</Link>
+                  <Link to="/services/legal-shield/intake">Get {name}</Link>
                 </Button>
               </div>
             ))}
