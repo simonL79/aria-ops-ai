@@ -143,6 +143,8 @@ const StealthLandingPage: React.FC<{ cfg: StealthPageConfig }> = ({ cfg }) => {
           </blockquote>
         </section>
 
+        <ScrollSpy sections={scrollSections} />
+
         {/* Problem */}
         <section id="problem" tabIndex={-1} className="container mx-auto px-6 py-16 max-w-4xl scroll-mt-24">
           <h2 className="text-3xl md:text-4xl font-bold mb-6">{cfg.problem.heading}</h2>
