@@ -121,6 +121,36 @@ const LegalShieldIntakePage = () => {
   const [form, setForm] = useState<FormState>(initialState);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [files, setFiles] = useState<File[]>([]);
+
+  const addFiles = (incoming: FileList | null) => {
+    if (!incoming) return;
+    const selected = Array.from(incoming);
+    setFiles((prev) => {
+      const next = [...prev];
+      for (const file of selected) {
+        if (next.length >= MAX_FILES) {
+          toast.error(`You can attach up to ${MAX_FILES} files.`);
+          break;
+        }
+        if (!ACCEPTED_TYPES.includes(file.type)) {
+          toast.error(`${file.name}: unsupported file type. Use images or PDFs.`);
+          continue;
+        }
+        if (file.size > MAX_FILE_BYTES) {
+          toast.error(`${file.name}: file is larger than 15MB.`);
+          continue;
+        }
+        if (next.some((f) => f.name === file.name && f.size === file.size)) continue;
+        next.push(file);
+      }
+      return next;
+    });
+  };
+
+  const removeFile = (index: number) =>
+    setFiles((prev) => prev.filter((_, i) => i !== index));
+
 
   const update = (field: keyof FormState, value: string | boolean) =>
     setForm((prev) => ({ ...prev, [field]: value }));
