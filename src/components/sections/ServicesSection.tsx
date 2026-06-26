@@ -31,11 +31,16 @@ const ServiceCard = ({ service, index, visible }: { service: any; index: number;
       style={{ transitionDelay: visible ? `${index * 120}ms` : '0ms', transformStyle: 'preserve-3d' }}
     >
       <Card className="glass-card p-8 text-foreground hover:border-primary/30 hover:shadow-[0_0_30px_rgba(245,158,11,0.1)] transition-all duration-500 h-full flex flex-col">
-        <div className="flex items-center gap-4 mb-6">
+        <div className="flex items-center gap-4 mb-4">
           <div className="w-12 h-12 bg-primary/10 border border-primary/20 rounded-xl flex items-center justify-center">
             <service.icon className="h-6 w-6 text-primary" />
           </div>
-          <h3 className="text-xl font-bold">{service.title}</h3>
+          <div>
+            <span className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full ${service.category === 'Legal Response' ? 'bg-blue-500/15 text-blue-400' : 'bg-primary/15 text-primary'}`}>
+              {service.category}
+            </span>
+            <h3 className="text-xl font-bold mt-1">{service.title}</h3>
+          </div>
         </div>
 
         <ul className="text-muted-foreground space-y-2 mb-6 flex-1">
