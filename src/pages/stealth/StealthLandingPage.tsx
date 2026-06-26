@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import PublicLayout from '@/components/layout/PublicLayout';
 import SEO from '@/components/seo/SEO';
@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ArrowRight, CheckCircle2, XCircle, type LucideIcon } from 'lucide-react';
 import StatDisclaimer from '@/components/legal/StatDisclaimer';
+import ScrollSpy from '@/components/sections/ScrollSpy';
 
 export interface StealthPageConfig {
   path: string;
@@ -87,6 +88,18 @@ const StealthLandingPage: React.FC<{ cfg: StealthPageConfig }> = ({ cfg }) => {
 
   const positioning = cfg.positioningQuote ?? POSITIONING_DEFAULT;
 
+  const scrollSections = useMemo(
+    () => [
+      { id: 'problem', label: 'The issue' },
+      { id: 'capabilities', label: 'Approach' },
+      { id: 'coverage', label: 'Coverage' },
+      { id: 'methodology', label: 'Execution' },
+      { id: 'comparison', label: 'Comparison' },
+      { id: 'faq', label: 'FAQ' },
+    ],
+    []
+  );
+
   return (
     <PublicLayout>
       <SEO
@@ -129,6 +142,8 @@ const StealthLandingPage: React.FC<{ cfg: StealthPageConfig }> = ({ cfg }) => {
             </p>
           </blockquote>
         </section>
+
+        <ScrollSpy sections={scrollSections} />
 
         {/* Problem */}
         <section id="problem" tabIndex={-1} className="container mx-auto px-6 py-16 max-w-4xl scroll-mt-24">
