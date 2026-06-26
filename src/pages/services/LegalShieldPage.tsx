@@ -198,13 +198,7 @@ const scopeLevels: {
       'Holding itself out as a law firm',
     ],
   },
-] as unknown as {
-  tone: 'green' | 'amber' | 'red';
-  badge: string;
-  title: string;
-  body: string;
-  items: string[];
-}[] as any;
+];
 
 const packages = [
   {
