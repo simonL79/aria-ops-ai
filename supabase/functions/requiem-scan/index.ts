@@ -1,5 +1,6 @@
 // Requiem Scan — runs a SerpApi query, stores snapshot, updates job, writes audit log
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { requireAdmin, isAuthenticated } from "../_shared/auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -22,6 +23,14 @@ const SERPAPI_KEY = Deno.env.get("SERPAPI_API_KEY");
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+
+  // Allow internal service-role callers (cron) OR authenticated admin users
+  const authHeader = req.headers.get("authorization");
+  const isServiceRole = authHeader === `Bearer ${SERVICE_ROLE}`;
+  if (!isServiceRole) {
+    const auth = await requireAdmin(req);
+    if (!isAuthenticated(auth)) return auth;
+  }
 
   const supabase = createClient(SUPABASE_URL, SERVICE_ROLE);
 
