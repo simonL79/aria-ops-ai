@@ -88,13 +88,13 @@ const DashboardMockup = () => {
   );
 };
 
-const HERO_HEADLINE = 'AI Reputation Intelligence That Detects Risk Before It Escalates';
+const HERO_HEADLINE = 'AI Reputation & Legal Intelligence That Detects Risk Before It Escalates';
 
 const renderHeadlineWords = (text: string) =>
   text.split(' ').map((word, i) => (
     <React.Fragment key={i}>
       {i > 0 && ' '}
-      {['Intelligence', 'Risk'].includes(word) ? (
+      {['Reputation', 'Legal', 'Intelligence', 'Risk'].includes(word.replace(/[^a-zA-Z]/g, '')) ? (
         <span className="text-primary">{word}</span>
       ) : (
         <span>{word}</span>
