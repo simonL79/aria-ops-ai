@@ -158,7 +158,7 @@ const HeroSection = () => {
           </h1>
 
           <p className="text-lg md:text-xl lg:text-2xl leading-relaxed text-muted-foreground max-w-3xl mx-auto">
-            ARIA Ops combines AI signal monitoring, predictive threat analysis, and strategic human response systems to protect reputations in real time.
+            ARIA Ops combines AI signal monitoring, predictive threat analysis, and solicitor-ready legal defence to protect reputations and resolve disputes in real time.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
