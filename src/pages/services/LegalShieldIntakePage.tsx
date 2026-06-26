@@ -293,6 +293,31 @@ const LegalShieldIntakePage = () => {
       // Upload evidence files to the private shield-evidence bucket first.
       const uploadedFiles: EvidenceFileMeta[] = [];
       if (files.length > 0) {
+        // Malware-scan every file before it is saved to the submission.
+        const rejected: string[] = [];
+        for (const file of files) {
+          const dataUrl = await fileToDataUrl(file);
+          const { data: scan, error: scanError } = await supabase.functions.invoke(
+            'scan-evidence-file',
+            { body: { dataUrl, type: file.type, name: file.name } },
+          );
+          if (scanError) {
+            rejected.push(`${file.name} (could not be scanned)`);
+            continue;
+          }
+          if (!scan?.safe) {
+            rejected.push(`${file.name}${scan?.reason ? ` — ${scan.reason}` : ''}`);
+          }
+        }
+
+        if (rejected.length > 0) {
+          toast.error(
+            `${rejected.length} file(s) were blocked by the malware scan and not attached:\n${rejected.join('\n')}`,
+          );
+          setIsSubmitting(false);
+          return;
+        }
+
         const folder = `intake/${crypto.randomUUID()}`;
         for (const file of files) {
           const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
