@@ -7,8 +7,8 @@ const AboutPage = () => {
   return (
     <PublicLayout>
       <SEO
-        title="About A.R.I.A™ — AI Reputation Intelligence Platform"
-        description="A.R.I.A™ is an enterprise-grade AI reputation defense platform protecting executives, public figures, and organisations across the global digital landscape."
+        title="About A.R.I.A™ — AI Reputation & Legal Intelligence Platform"
+        description="A.R.I.A™ is an enterprise-grade AI platform combining reputation monitoring with solicitor-ready legal response, protecting executives, public figures, and organisations across the global digital landscape."
         path="/about"
       />
       <div className="min-h-screen bg-background text-foreground py-16">

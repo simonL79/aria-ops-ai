@@ -12,11 +12,11 @@ const CTASection = () => {
       <div className="container mx-auto px-6 relative z-10">
         <div className="max-w-3xl mx-auto text-center space-y-8">
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight">
-            Know Your Risk Before<br />
-            <span className="text-primary">The World Does</span>
+            Detect Threats. Build Cases.<br />
+            <span className="text-primary">Before They Escalate</span>
           </h2>
           <p className="text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-            Request a private consultation with our intelligence team. Every engagement begins with absolute discretion.
+            Request a private consultation with our intelligence and legal preparation team. Every engagement begins with absolute discretion.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
