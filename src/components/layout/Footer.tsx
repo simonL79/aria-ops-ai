@@ -21,11 +21,7 @@ interface FooterGroup {
 
 const Footer = () => {
   const { pathname } = useLocation();
-  const [openItem, setOpenItem] = useState('');
-
-  useEffect(() => {
-    setOpenItem('');
-  }, [pathname]);
+  const [openItem, setOpenItem] = useAccordionResetOnRoute();
 
   const legalPaths = new Set([
     '/privacy-policy',
