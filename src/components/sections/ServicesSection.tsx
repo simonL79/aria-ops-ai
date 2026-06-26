@@ -1,7 +1,7 @@
 
 import React, { useRef, useCallback } from 'react';
 import { Card } from '@/components/ui/card';
-import { Shield, Swords, Fingerprint, Search, Brain, Scale } from 'lucide-react';
+import { Shield, Swords, Fingerprint, Search, Brain, Scale, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 
@@ -30,15 +30,15 @@ const ServiceCard = ({ service, index, visible }: { service: any; index: number;
       className={`transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
       style={{ transitionDelay: visible ? `${index * 120}ms` : '0ms', transformStyle: 'preserve-3d' }}
     >
-      <Card className="glass-card p-8 text-foreground hover:border-primary/30 hover:shadow-[0_0_30px_rgba(245,158,11,0.1)] transition-all duration-500 h-full">
+      <Card className="glass-card p-8 text-foreground hover:border-primary/30 hover:shadow-[0_0_30px_rgba(245,158,11,0.1)] transition-all duration-500 h-full flex flex-col">
         <div className="flex items-center gap-4 mb-6">
           <div className="w-12 h-12 bg-primary/10 border border-primary/20 rounded-xl flex items-center justify-center">
             <service.icon className="h-6 w-6 text-primary" />
           </div>
           <h3 className="text-xl font-bold">{service.title}</h3>
         </div>
-        
-        <ul className="text-muted-foreground space-y-2">
+
+        <ul className="text-muted-foreground space-y-2 mb-6 flex-1">
           {service.capabilities.map((cap: string, idx: number) => (
             <li key={idx} className="text-sm flex items-start gap-2">
               <span className="text-primary mt-1">·</span>
@@ -46,10 +46,19 @@ const ServiceCard = ({ service, index, visible }: { service: any; index: number;
             </li>
           ))}
         </ul>
+
+        <Link
+          to={service.href}
+          className="group/btn mt-auto inline-flex items-center justify-center gap-2 w-full rounded-xl border border-primary/30 bg-primary/10 hover:bg-primary hover:text-primary-foreground text-primary font-medium px-5 py-3 transition-all duration-300"
+        >
+          Explore {service.title}
+          <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover/btn:translate-x-1" />
+        </Link>
       </Card>
     </div>
   );
 };
+
 
 const ServicesSection = () => {
   const { ref, visible } = useScrollReveal(0.1);
@@ -58,6 +67,7 @@ const ServicesSection = () => {
     {
       icon: Shield,
       title: "AI Threat Detection",
+      href: "/reputation-threat-score",
       capabilities: [
         "Emerging narrative risk identification",
         "Hostile content discovery & tracking",
@@ -68,6 +78,7 @@ const ServicesSection = () => {
     {
       icon: Swords,
       title: "Narrative Defense",
+      href: "/crisis-reputation-management",
       capabilities: [
         "Strategic response architecture",
         "Content counterweight deployment",
@@ -78,6 +89,7 @@ const ServicesSection = () => {
     {
       icon: Fingerprint,
       title: "Identity Protection",
+      href: "/services/online-impersonation-uk",
       capabilities: [
         "Impersonation scanning & alerts",
         "Profile cloning risk assessment",
@@ -88,6 +100,7 @@ const ServicesSection = () => {
     {
       icon: Search,
       title: "Search Positioning",
+      href: "/ai-search-visibility",
       capabilities: [
         "Defensive ranking strategy",
         "Reputation-safe visibility",
@@ -98,24 +111,24 @@ const ServicesSection = () => {
     {
       icon: Brain,
       title: "AI Reputation Readiness",
+      href: "/ai-reputation-readiness",
       capabilities: [
         "What ChatGPT, Gemini & Perplexity say about you",
         "LLM interpretation & trust signal audit",
         "Agent-recommendation likelihood scoring",
         "Structured presence for the agentic web",
       ],
-      href: "/ai-reputation-readiness",
     },
     {
       icon: Scale,
       title: "Legal Defence & Compliance",
+      href: "/legal-defence-compliance",
       capabilities: [
         "GDPR takedowns & right-to-erasure enforcement",
         "Cease & desist automation with evidence pack",
         "Defamation case preparation & counsel hand-off",
         "SOC II / ISO 27001-aligned audit trail",
       ],
-      href: "/legal-defence-compliance",
     },
   ];
 
@@ -127,21 +140,16 @@ const ServicesSection = () => {
             Intelligence-Grade <span className="text-primary">Protection</span>
           </h2>
           <p className="text-muted-foreground max-w-3xl mx-auto text-lg">
-            Six integrated defence layers powered by A.R.I.A™ — built for high-profile individuals, brands, and organisations that cannot afford reputational exposure.
+            Six integrated defence layers powered by A.R.I.A™ — built for high-profile individuals, brands, and organisations that cannot afford reputational exposure. Select any layer below to explore it in detail.
           </p>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
           {services.map((service, index) => (
-            service.href ? (
-              <Link key={index} to={service.href} className="block">
-                <ServiceCard service={service} index={index} visible={visible} />
-              </Link>
-            ) : (
-              <ServiceCard key={index} service={service} index={index} visible={visible} />
-            )
+            <ServiceCard key={index} service={service} index={index} visible={visible} />
           ))}
         </div>
+
 
         <div className={`text-center transition-all duration-700 delay-500 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
           <Link to="/scan">
