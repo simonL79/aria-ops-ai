@@ -330,13 +330,13 @@ const LegalShieldPage = () => {
             structured preparation across the situations that matter most.
           </p>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {supportAreas.map(({ icon: Icon, title, items }) => (
-              <div key={title} className="bg-card border border-border rounded-lg p-6">
+            {supportAreas.map(({ icon: Icon, title, items, href, linkLabel }) => (
+              <div key={title} className="bg-card border border-border rounded-lg p-6 flex flex-col">
                 <div className="flex items-center gap-3 mb-4">
                   <Icon className="h-6 w-6 text-primary shrink-0" />
                   <h3 className="text-lg font-bold">{title}</h3>
                 </div>
-                <ul className="space-y-1.5">
+                <ul className="space-y-1.5 mb-6">
                   {items.map((item) => (
                     <li key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
                       <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
@@ -344,6 +344,12 @@ const LegalShieldPage = () => {
                     </li>
                   ))}
                 </ul>
+                <Button asChild variant="outline" className="mt-auto w-full group">
+                  <Link to={href}>
+                    {linkLabel}
+                    <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+                  </Link>
+                </Button>
               </div>
             ))}
           </div>
