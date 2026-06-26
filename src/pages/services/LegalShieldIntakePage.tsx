@@ -31,6 +31,7 @@ import {
   Paperclip,
   X,
   FileText,
+  Sparkles,
 } from 'lucide-react';
 
 const MAX_FILES = 10;
@@ -122,6 +123,79 @@ const LegalShieldIntakePage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
+  const [isAnalysing, setIsAnalysing] = useState(false);
+  const [suggestions, setSuggestions] = useState<TimelineEntry[]>([]);
+
+  const fileToDataUrl = (file: File) =>
+    new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(file);
+    });
+
+  const analyseEvidence = async () => {
+    const analysable = files.filter((f) => f.type !== 'image/heic');
+    if (analysable.length === 0) {
+      toast.error('Add a screenshot, photo or PDF first (HEIC files cannot be read).');
+      return;
+    }
+    setIsAnalysing(true);
+    try {
+      const encoded = await Promise.all(
+        analysable.map(async (f) => ({
+          name: f.name,
+          type: f.type,
+          dataUrl: await fileToDataUrl(f),
+        })),
+      );
+      const { data, error } = await supabase.functions.invoke('extract-evidence-timeline', {
+        body: { files: encoded },
+      });
+      if (error) throw error;
+      const entries: TimelineEntry[] = Array.isArray(data?.entries)
+        ? data.entries
+            .map((e: { date?: string; event?: string }) => ({
+              date: (e.date ?? '').trim(),
+              event: (e.event ?? '').trim(),
+            }))
+            .filter((e: TimelineEntry) => e.event)
+        : [];
+      if (entries.length === 0) {
+        toast.message('No clear timeline events found in the files.');
+      } else {
+        setSuggestions(entries);
+        toast.success(`Found ${entries.length} suggested event${entries.length === 1 ? '' : 's'}.`);
+      }
+    } catch (err) {
+      console.error('Evidence analysis failed');
+      toast.error('Could not analyse the evidence. Please try again.');
+    } finally {
+      setIsAnalysing(false);
+    }
+  };
+
+  const addSuggestion = (index: number) => {
+    setSuggestions((prev) => {
+      const picked = prev[index];
+      if (picked) {
+        setForm((f) => ({
+          ...f,
+          evidence_timeline: [...f.evidence_timeline, picked],
+        }));
+      }
+      return prev.filter((_, i) => i !== index);
+    });
+  };
+
+  const addAllSuggestions = () => {
+    setForm((f) => ({
+      ...f,
+      evidence_timeline: [...f.evidence_timeline, ...suggestions],
+    }));
+    setSuggestions([]);
+    toast.success('All suggestions added to your timeline.');
+  };
 
   const addFiles = (incoming: FileList | null) => {
     if (!incoming) return;
@@ -454,9 +528,52 @@ const LegalShieldIntakePage = () => {
                           </div>
                         ))}
                       </div>
+
+                      {suggestions.length > 0 && (
+                        <div className="mt-4 rounded-lg border border-primary/30 bg-primary/5 p-4">
+                          <div className="flex items-center justify-between gap-2 mb-2">
+                            <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                              <Sparkles className="h-4 w-4 text-primary" />
+                              Suggested from your evidence
+                            </div>
+                            <Button type="button" size="sm" variant="outline" onClick={addAllSuggestions}>
+                              Add all
+                            </Button>
+                          </div>
+                          <p className="text-xs text-muted-foreground mb-3">
+                            Read from your uploaded files. Review each one — add the accurate
+                            ones to your timeline.
+                          </p>
+                          <ul className="space-y-2">
+                            {suggestions.map((s, i) => (
+                              <li
+                                key={`${s.date}-${i}`}
+                                className="flex items-start gap-3 rounded-md border border-border bg-background px-3 py-2"
+                              >
+                                <div className="flex-1 text-sm">
+                                  {s.date && (
+                                    <span className="font-medium text-foreground mr-2">{s.date}</span>
+                                  )}
+                                  <span className="text-muted-foreground">{s.event}</span>
+                                </div>
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => addSuggestion(i)}
+                                >
+                                  <Plus className="mr-1 h-4 w-4" /> Add
+                                </Button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </div>
                     <div>
                       <Label className="text-base">Upload evidence files (optional)</Label>
+
+
                       <p className="text-xs text-muted-foreground mt-1">
                         Attach screenshots, photos or PDFs (emails, messages, contracts,
                         invoices). Up to {MAX_FILES} files, 15MB each. Stored securely with your
@@ -508,6 +625,22 @@ const LegalShieldIntakePage = () => {
                             </li>
                           ))}
                         </ul>
+                      )}
+                      {files.length > 0 && (
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          className="mt-3 w-full sm:w-auto"
+                          onClick={analyseEvidence}
+                          disabled={isAnalysing}
+                        >
+                          {isAnalysing ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ) : (
+                            <Sparkles className="mr-2 h-4 w-4" />
+                          )}
+                          {isAnalysing ? 'Reading your evidence…' : 'Suggest timeline from evidence'}
+                        </Button>
                       )}
                     </div>
                   </div>
