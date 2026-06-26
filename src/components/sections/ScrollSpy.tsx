@@ -18,13 +18,32 @@ interface ScrollSpyProps {
  * - Mobile: a sticky horizontal pill bar below the main header.
  *
  * Uses IntersectionObserver to highlight the section currently in view,
- * and clicking an indicator scrolls smoothly to that section.
+ * syncs the URL hash as the user scrolls, and clicking an indicator
+ * scrolls smoothly to that section.
  */
 export const ScrollSpy = ({ sections, className }: ScrollSpyProps) => {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [isScrolling, setIsScrolling] = useState(false);
   const scrollTimeoutRef = useRef<number | null>(null);
 
+  // Resolve initial active section from URL hash or current viewport.
+  useEffect(() => {
+    const hash = window.location.hash.replace('#', '');
+    if (hash && sections.some((s) => s.id === hash)) {
+      setActiveId(hash);
+      return;
+    }
+
+    const firstVisible = sections.find(({ id }) => {
+      const el = document.getElementById(id);
+      if (!el) return false;
+      const rect = el.getBoundingClientRect();
+      return rect.top <= window.innerHeight * 0.4 && rect.bottom >= window.innerHeight * 0.4;
+    });
+    if (firstVisible) setActiveId(firstVisible.id);
+  }, [sections]);
+
+  // Track sections with IntersectionObserver and update the active id.
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -48,17 +67,17 @@ export const ScrollSpy = ({ sections, className }: ScrollSpyProps) => {
       if (el) observer.observe(el);
     });
 
-    // Set initial active section without waiting for scroll.
-    const firstVisible = sections.find(({ id }) => {
-      const el = document.getElementById(id);
-      if (!el) return false;
-      const rect = el.getBoundingClientRect();
-      return rect.top <= window.innerHeight * 0.4 && rect.bottom >= window.innerHeight * 0.4;
-    });
-    if (firstVisible) setActiveId(firstVisible.id);
-
     return () => observer.disconnect();
   }, [sections, isScrolling]);
+
+  // Sync the URL hash with the active section without scrolling the page.
+  useEffect(() => {
+    if (!activeId || isScrolling) return;
+    const newHash = '#' + activeId;
+    if (window.location.hash !== newHash) {
+      window.history.replaceState(null, '', newHash);
+    }
+  }, [activeId, isScrolling]);
 
   const handleClick = useCallback((id: string) => {
     const el = document.getElementById(id);
@@ -71,6 +90,8 @@ export const ScrollSpy = ({ sections, className }: ScrollSpyProps) => {
       window.clearTimeout(scrollTimeoutRef.current);
     }
 
+    // Update the hash immediately so a refresh lands here.
+    window.history.replaceState(null, '', '#' + id);
     el.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
     // Pause observer updates while the smooth scroll is in progress.
