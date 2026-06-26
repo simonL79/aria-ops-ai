@@ -227,6 +227,19 @@ const LegalShieldIntakePage = () => {
   const [files, setFiles] = useState<File[]>([]);
   const [isAnalysing, setIsAnalysing] = useState(false);
   const [suggestions, setSuggestions] = useState<TimelineEntry[]>([]);
+  const [agreedDisclaimers, setAgreedDisclaimers] = useState<boolean[]>([]);
+
+  const courseOfAction = getCourseOfAction(form.issue_type);
+  const allDisclaimersAgreed =
+    courseOfAction.disclaimers.length > 0 &&
+    courseOfAction.disclaimers.every((_, i) => agreedDisclaimers[i] === true);
+
+  const toggleDisclaimer = (index: number, value: boolean) =>
+    setAgreedDisclaimers((prev) => {
+      const next = [...prev];
+      next[index] = value;
+      return next;
+    });
 
   const fileToDataUrl = (file: File) =>
     new Promise<string>((resolve, reject) => {
