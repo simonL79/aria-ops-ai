@@ -58,8 +58,8 @@ const StickyHeader = ({ isScrolled }: StickyHeaderProps) => {
                   </button>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
-                  <Link to="/simon-lindsay" className={`${navigationMenuTriggerStyle()} font-medium transition-colors duration-300 ${isScrolled ? 'text-blue-900 hover:text-blue-600' : 'text-blue-900 hover:text-blue-600'}`}>
-                    Simon Lindsay
+                  <Link to="/about" className={`${navigationMenuTriggerStyle()} font-medium transition-colors duration-300 ${isScrolled ? 'text-blue-900 hover:text-blue-600' : 'text-blue-900 hover:text-blue-600'}`}>
+                    About
                   </Link>
                 </NavigationMenuItem>
                 <NavigationMenuItem>

@@ -67,8 +67,8 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
               <Link to="/blog" className="text-muted-foreground hover:text-foreground transition-colors text-sm lg:text-base">
                 Blog
               </Link>
-              <Link to="/simon-lindsay" className="text-muted-foreground hover:text-foreground transition-colors text-sm lg:text-base">
-                About Simon
+              <Link to="/about" className="text-muted-foreground hover:text-foreground transition-colors text-sm lg:text-base">
+                About
               </Link>
               <Link to="/scan" className="text-muted-foreground hover:text-foreground transition-colors text-sm lg:text-base">
                 Get Started
@@ -140,11 +140,11 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
                   Blog
                 </Link>
                 <Link 
-                  to="/simon-lindsay" 
+                  to="/about" 
                   className="text-muted-foreground hover:text-foreground transition-colors py-2"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  About Simon
+                  About
                 </Link>
                 <Link 
                   to="/scan" 
