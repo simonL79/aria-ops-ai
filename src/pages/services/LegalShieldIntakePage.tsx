@@ -464,7 +464,7 @@ const LegalShieldIntakePage = () => {
         full_name: form.full_name.trim(),
         email: form.email.trim(),
         phone: form.phone.trim() || null,
-        consent_given: form.consent_given,
+        consent_given: true,
         evidence_files: uploadedFiles,
       });
 
