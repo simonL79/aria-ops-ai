@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
+import { generateCasePack, type TimelineEntry } from '@/lib/legalShieldCasePack';
 import {
   Shield,
   ArrowRight,
@@ -24,6 +25,9 @@ import {
   CheckCircle2,
   Scale,
   Loader2,
+  FileDown,
+  Plus,
+  Trash2,
 } from 'lucide-react';
 
 const issueTypes = [
@@ -67,6 +71,7 @@ type FormState = {
   issue_description: string;
   desired_outcome: string;
   evidence_summary: string;
+  evidence_timeline: TimelineEntry[];
   urgency: string;
   full_name: string;
   email: string;
@@ -79,6 +84,7 @@ const initialState: FormState = {
   issue_description: '',
   desired_outcome: '',
   evidence_summary: '',
+  evidence_timeline: [],
   urgency: 'normal',
   full_name: '',
   email: '',
@@ -97,6 +103,48 @@ const LegalShieldIntakePage = () => {
 
   const update = (field: keyof FormState, value: string | boolean) =>
     setForm((prev) => ({ ...prev, [field]: value }));
+
+  const addTimelineEntry = () =>
+    setForm((prev) => ({
+      ...prev,
+      evidence_timeline: [...prev.evidence_timeline, { date: '', event: '' }],
+    }));
+
+  const updateTimelineEntry = (index: number, field: keyof TimelineEntry, value: string) =>
+    setForm((prev) => ({
+      ...prev,
+      evidence_timeline: prev.evidence_timeline.map((entry, i) =>
+        i === index ? { ...entry, [field]: value } : entry,
+      ),
+    }));
+
+  const removeTimelineEntry = (index: number) =>
+    setForm((prev) => ({
+      ...prev,
+      evidence_timeline: prev.evidence_timeline.filter((_, i) => i !== index),
+    }));
+
+  const downloadCasePack = () => {
+    try {
+      const { reference } = generateCasePack({
+        issue_type: form.issue_type,
+        urgency_label: urgencyLevels.find((u) => u.value === form.urgency)?.label ?? form.urgency,
+        issue_description: form.issue_description.trim(),
+        desired_outcome: form.desired_outcome.trim() || undefined,
+        evidence_summary: form.evidence_summary.trim() || undefined,
+        evidence_timeline: form.evidence_timeline
+          .filter((e) => e.date.trim() || e.event.trim())
+          .map((e) => ({ date: e.date.trim(), event: e.event.trim() })),
+        full_name: form.full_name.trim(),
+        email: form.email.trim(),
+        phone: form.phone.trim() || undefined,
+      });
+      toast.success(`Case pack downloaded (ref ${reference}).`);
+    } catch (err) {
+      console.error('Case pack generation failed');
+      toast.error('Could not generate the case pack. Please try again.');
+    }
+  };
 
   const canContinue = () => {
     if (step === 0) return form.issue_type !== '';
@@ -160,16 +208,23 @@ const LegalShieldIntakePage = () => {
             <div className="bg-card border border-primary/40 rounded-lg p-10 text-center">
               <CheckCircle2 className="h-12 w-12 text-primary mx-auto mb-4" />
               <h1 className="text-3xl font-bold mb-4">Thank you — your intake is in.</h1>
-              <p className="text-muted-foreground text-lg mb-8 max-w-xl mx-auto">
+              <p className="text-muted-foreground text-lg mb-6 max-w-xl mx-auto">
                 We have received your guided intake. Our team will review your situation and respond
                 with your next steps, an evidence checklist and how ARIA Legal Shield can help you
                 prepare. Remember: this is not legal advice and does not replace a solicitor.
               </p>
+              <p className="text-sm text-muted-foreground mb-8 max-w-xl mx-auto">
+                Download your solicitor-ready case pack below — a structured PDF of your account and
+                evidence timeline you can take to any qualified legal professional.
+              </p>
               <div className="flex flex-wrap gap-4 justify-center">
-                <Button asChild size="lg">
-                  <Link to="/services/legal-shield">Back to Legal Shield</Link>
+                <Button size="lg" onClick={downloadCasePack}>
+                  <FileDown className="mr-2 h-4 w-4" /> Download case pack (PDF)
                 </Button>
                 <Button asChild size="lg" variant="outline">
+                  <Link to="/services/legal-shield">Back to Legal Shield</Link>
+                </Button>
+                <Button asChild size="lg" variant="ghost">
                   <Link to="/">Return home</Link>
                 </Button>
               </div>
@@ -282,6 +337,51 @@ const LegalShieldIntakePage = () => {
                         className="mt-2"
                         maxLength={2000}
                       />
+                    </div>
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <Label className="text-base">Evidence timeline (optional)</Label>
+                        <Button type="button" size="sm" variant="outline" onClick={addTimelineEntry}>
+                          <Plus className="mr-1 h-4 w-4" /> Add event
+                        </Button>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Add key dates and what happened. This builds the timeline in your
+                        solicitor-ready case pack.
+                      </p>
+                      <div className="space-y-3 mt-3">
+                        {form.evidence_timeline.length === 0 && (
+                          <p className="text-sm text-muted-foreground italic">
+                            No events added yet.
+                          </p>
+                        )}
+                        {form.evidence_timeline.map((entry, i) => (
+                          <div key={i} className="flex flex-col sm:flex-row gap-2 sm:items-start">
+                            <Input
+                              type="date"
+                              value={entry.date}
+                              onChange={(e) => updateTimelineEntry(i, 'date', e.target.value)}
+                              className="sm:w-44"
+                            />
+                            <Input
+                              value={entry.event}
+                              onChange={(e) => updateTimelineEntry(i, 'event', e.target.value)}
+                              placeholder="What happened on this date?"
+                              maxLength={300}
+                              className="flex-1"
+                            />
+                            <Button
+                              type="button"
+                              size="icon"
+                              variant="ghost"
+                              onClick={() => removeTimelineEntry(i)}
+                              aria-label="Remove event"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 )}
