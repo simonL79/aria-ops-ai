@@ -96,6 +96,7 @@ try {
   log.push(`✓ after navigation all ${state.length} triggers reset to aria-expanded=false with valid aria-controls`);
 } catch (e) {
   failures += 1;
+  failureMessages.push(e.message);
   log.push(`✗ ${e.message}`);
 }
 
@@ -103,6 +104,16 @@ await browser.close();
 
 console.log(`Accordion ARIA reset regression test against ${BASE_URL}`);
 for (const line of log) console.log('  ' + line);
+
+// Emit GitHub Actions annotations so failures surface inline on the PR.
+if (process.env.GITHUB_ACTIONS === 'true') {
+  for (const msg of failureMessages) {
+    const clean = msg.replace(/\r?\n/g, ' ');
+    console.log(
+      `::error file=scripts/test-accordion-aria-reset.mjs,title=Accordion ARIA reset regression::${clean}`,
+    );
+  }
+}
 
 if (failures > 0) {
   console.error(`\n❌ Accordion ARIA reset test failed`);
