@@ -1,0 +1,35 @@
+name: Accordion ARIA reset test
+
+# Regression guard for the footer accordion: after navigating between
+# routes, every accordion trigger must reset to aria-expanded="false"
+# with a valid aria-controls binding and a collapsed panel.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/components/layout/Footer.tsx'
+      - 'src/hooks/useAccordionResetOnRoute.ts'
+      - 'scripts/test-accordion-aria-reset.mjs'
+      - '.github/workflows/accordion-aria-reset.yml'
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: 'Base URL to test'
+        required: false
+        default: 'https://www.ariaops.co.uk'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install Playwright + chromium
+        run: npx --yes playwright@1.47.0 install --with-deps chromium
+      - name: Run accordion ARIA reset regression test
+        env:
+          BASE_URL: ${{ github.event.inputs.base_url || 'https://www.ariaops.co.uk' }}
+        run: node scripts/test-accordion-aria-reset.mjs
