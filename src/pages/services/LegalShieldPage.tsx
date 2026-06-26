@@ -20,7 +20,77 @@ import {
   ShieldCheck,
   FileSearch,
   Users,
+  Home,
+  Briefcase,
+  Trophy,
+  Building2,
+  HeartHandshake,
+  Globe,
+  Check,
+  Smartphone,
+  BrainCircuit,
 } from 'lucide-react';
+
+const supportAreas: { icon: React.ElementType; title: string; items: string[] }[] = [
+  {
+    icon: ShieldCheck,
+    title: 'Personal Legal Protection',
+    items: ['Consumer disputes', 'Debt and finance', 'Insurance issues', 'Parking appeals', 'Small claims preparation', 'Identity theft', 'Fraud guidance', 'Neighbour disputes', 'Harassment evidence organisation'],
+  },
+  {
+    icon: Home,
+    title: 'Home & Property',
+    items: ['Boundary disputes', 'Home improvement disputes', 'Builder disagreements', 'Landlord and tenant matters', 'Housing issues', 'Property damage claims', 'Insurance documentation'],
+  },
+  {
+    icon: Briefcase,
+    title: 'Employment',
+    items: ['Workplace grievances', 'Disciplinary preparation', 'Redundancy guidance', 'Employment rights information', 'Settlement agreement preparation', 'Evidence organisation'],
+  },
+  {
+    icon: Trophy,
+    title: 'Sports & Entertainment',
+    items: ['Athlete contracts', 'Sponsorship agreements', 'Image rights', 'Commercial partnerships', 'Management agreements', 'Intellectual property awareness', 'Dispute preparation'],
+  },
+  {
+    icon: Building2,
+    title: 'Business Protection',
+    items: ['Contract reviews', 'Supplier disputes', 'Client disputes', 'Late payment documentation', 'Terms and conditions guidance', 'HR documentation', 'Compliance checklists'],
+  },
+  {
+    icon: HeartHandshake,
+    title: 'Family & Everyday Legal Matters',
+    items: ['Consumer rights', 'Travel disputes', 'Warranty claims', 'School complaints', 'Local authority complaints', 'Financial disagreements'],
+  },
+  {
+    icon: Globe,
+    title: 'Reputation & Digital Protection',
+    items: ['Online abuse evidence packs', 'Defamation preparation', 'Privacy concerns', 'Copyright issues', 'Platform complaints', 'Digital evidence preservation'],
+  },
+];
+
+const membershipBenefits: string[] = [
+  'Unlimited AI legal guidance and explanations',
+  'Unlimited document drafting',
+  'Contract analysis',
+  'Evidence vault with timestamps',
+  'Case timelines',
+  'Deadline reminders',
+  'Risk assessments',
+  'Letter generation',
+  'Solicitor-ready case packs',
+  'Secure storage of legal documents',
+  'Escalation guidance when a regulated professional is likely to be needed',
+];
+
+const ecosystem: { icon: React.ElementType; name: string; body: string }[] = [
+  { icon: ShieldCheck, name: 'ARIA Reputation™', body: 'Protects your name.' },
+  { icon: Smartphone, name: 'ARIA Mobile™', body: 'Keeps you connected.' },
+  { icon: Scale, name: 'ARIA Legal Shield™', body: 'Protects your legal position.' },
+  { icon: BrainCircuit, name: 'ARIA Intelligence™', body: 'Helps you make informed decisions.' },
+  { icon: Building2, name: 'ARIA Business™', body: 'Supports organisations with AI-powered operations.' },
+];
+
 
 const faqs: { q: string; a: string }[] = [
   {
