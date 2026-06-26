@@ -54,54 +54,57 @@ const PricingSection = () => {
   }> = [
     {
       id: "basic",
-      name: "Basic",
+      name: "Personal Shield",
       price: "£29",
       period: "/month",
-      description: "Essential reputation monitoring",
+      description: "Reputation monitoring + everyday legal protection",
       features: [
         "Personal reputation monitoring",
         "Basic threat detection",
-        "Monthly reports",
-        "Email support"
+        "Legal Shield: guided intake & AI legal information",
+        "Evidence timeline & document organisation",
+        "1 solicitor-ready case pack / month",
+        "Email support",
       ],
       buttonText: "Get Started",
       popular: false
     },
     {
       id: "individual",
-      name: "Individual",
+      name: "Creator Shield",
       price: "£97",
       period: "/month",
-      description: "Personal reputation monitoring",
+      description: "For creators & public figures — reputation + defamation prep",
       features: [
-        "Personal reputation monitoring",
-        "Advanced threat detection",
-        "Monthly reports",
-        "Email support",
-        "Social media monitoring",
-        "Search engine tracking"
+        "Advanced reputation & social media monitoring",
+        "Search engine tracking",
+        "Legal Shield: defamation & harassment evidence prep",
+        "Takedown request preparation",
+        "Unlimited solicitor-ready case packs",
+        "OCR evidence extraction & malware scanning",
+        "Priority email support",
       ],
       buttonText: "Get Started",
-      popular: false
+      popular: true
     },
     {
       id: "pro",
-      name: "PRO",
+      name: "Business Shield",
       price: "£397",
       period: "/month",
-      description: "Executive protection suite",
+      description: "Executive & business protection with full legal support",
       features: [
         "Executive protection suite",
-        "Advanced threat intelligence",
-        "Real-time alerts",
-        "Crisis response team",
-        "Weekly reports",
-        "Priority support",
+        "Advanced threat intelligence & real-time alerts",
         "Dark web monitoring",
-        "Proactive content strategy"
+        "Legal Shield: contracts, invoices & supplier disputes",
+        "Crisis evidence packs & solicitor handover files",
+        "Partner solicitor network access",
+        "Crisis response team",
+        "Priority support",
       ],
-      buttonText: "Subscribe to PRO",
-      popular: true
+      buttonText: "Subscribe",
+      popular: false
     }
   ];
 
@@ -109,16 +112,16 @@ const PricingSection = () => {
     name: "Enterprise",
     price: "Custom",
     period: "pricing",
-    description: "Full organization coverage",
+    description: "Full organization coverage with bespoke legal & reputation cover",
     features: [
       "Full organization coverage",
       "Custom threat models",
+      "Multi-entity reputation & legal monitoring",
       "Dedicated account manager",
-      "API access",
+      "Bespoke solicitor network arrangements",
+      "API access & advanced analytics dashboard",
       "Daily reports",
       "24/7 support",
-      "Multi-entity monitoring",
-      "Advanced analytics dashboard"
     ],
     buttonText: "Contact Sales"
   };
