@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
+import { generateCasePack, type TimelineEntry } from '@/lib/legalShieldCasePack';
 import {
   Shield,
   ArrowRight,
@@ -24,6 +25,9 @@ import {
   CheckCircle2,
   Scale,
   Loader2,
+  FileDown,
+  Plus,
+  Trash2,
 } from 'lucide-react';
 
 const issueTypes = [
