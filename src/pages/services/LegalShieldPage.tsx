@@ -308,7 +308,66 @@ const LegalShieldPage = () => {
           </div>
         </section>
 
-        {/* Packages */}
+        {/* Areas we support */}
+        <section className="container mx-auto px-6 py-12 max-w-5xl">
+          <h2 className="text-3xl font-bold mb-2">Areas ARIA Legal Shield™ can support</h2>
+          <p className="text-muted-foreground mb-8 max-w-3xl">
+            From everyday consumer issues to complex commercial matters — intelligent guidance and
+            structured preparation across the situations that matter most.
+          </p>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {supportAreas.map(({ icon: Icon, title, items }) => (
+              <div key={title} className="bg-card border border-border rounded-lg p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <Icon className="h-6 w-6 text-primary shrink-0" />
+                  <h3 className="text-lg font-bold">{title}</h3>
+                </div>
+                <ul className="space-y-1.5">
+                  {items.map((item) => (
+                    <li key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Membership vision */}
+        <section className="container mx-auto px-6 py-12 max-w-5xl">
+          <div className="rounded-2xl border border-primary/40 bg-card p-8 md:p-12">
+            <p className="text-sm uppercase tracking-widest text-primary mb-3">Always-on legal protection</p>
+            <h2 className="text-3xl font-bold mb-4">Not "AI legal advice" — continuous legal protection</h2>
+            <p className="text-muted-foreground text-lg leading-relaxed mb-8 max-w-3xl">
+              ARIA Legal Shield™ shifts the value from asking an AI a one-off legal question to having
+              an always-on legal support system. One membership keeps your rights, evidence and
+              documents organised — ready the moment you need them.
+            </p>
+            <div className="flex flex-col sm:flex-row sm:items-end gap-2 mb-8">
+              <span className="text-5xl font-bold">£24.99</span>
+              <span className="text-muted-foreground mb-1">/ month — membership</span>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-3">
+              {membershipBenefits.map((b) => (
+                <div key={b} className="flex items-start gap-3 text-muted-foreground">
+                  <Check className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                  <span>{b}</span>
+                </div>
+              ))}
+            </div>
+            <div className="mt-8">
+              <Button asChild size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
+                <Link to="/services/legal-shield/intake">
+                  Start your guided intake <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </section>
+
+
         <section id="packages" className="container mx-auto px-6 py-12 max-w-4xl scroll-mt-24">
           <h2 className="text-3xl font-bold mb-2">Packages</h2>
           <p className="text-muted-foreground mb-8">Choose the level of protection that fits your situation.</p>
