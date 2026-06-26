@@ -28,7 +28,6 @@ const Header = ({ variant = 'default' }: HeaderProps) => {
     { to: '/about', label: 'About' },
     { to: '/services/legal-shield', label: 'Legal Shield', featured: true },
     { to: '/blog', label: 'Blog' },
-    { to: '/simon-lindsay', label: 'Simon Lindsay' },
   ];
 
   const closeMobile = () => setMobileOpen(false);
