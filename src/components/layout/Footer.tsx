@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Logo from '@/components/ui/logo';
 import {
@@ -7,6 +7,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import { useAccordionResetOnRoute } from '@/hooks/useAccordionResetOnRoute';
 
 interface FooterLink {
   to: string;
@@ -20,11 +21,7 @@ interface FooterGroup {
 
 const Footer = () => {
   const { pathname } = useLocation();
-  const [openItem, setOpenItem] = useState('');
-
-  useEffect(() => {
-    setOpenItem('');
-  }, [pathname]);
+  const [openItem, setOpenItem] = useAccordionResetOnRoute();
 
   const legalPaths = new Set([
     '/privacy-policy',
