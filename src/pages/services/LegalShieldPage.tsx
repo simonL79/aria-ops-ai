@@ -190,10 +190,10 @@ const LegalShieldPage = () => {
         <section className="container mx-auto px-6 pb-4 max-w-4xl">
           <div className="bg-card border border-primary/40 rounded-lg p-6">
             <p className="text-muted-foreground leading-relaxed">
-              <strong className="text-foreground">Important:</strong> ARIA Legal Shield is not a law
-              firm and does not replace a solicitor. It provides AI-powered legal information,
-              document preparation and evidence organisation to help customers understand their
-              position and prepare before taking professional legal advice.
+              ARIA Legal Shield™ provides AI-powered legal information, document preparation and
+              case organisation. It is not a law firm and does not provide regulated legal services
+              or act as a substitute for independent legal advice. Where appropriate, you will be
+              encouraged to seek advice from a qualified legal professional.
             </p>
           </div>
         </section>
