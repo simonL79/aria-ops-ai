@@ -16,7 +16,7 @@
     --popover-foreground: 210 40% 98%;
 
     --primary: 258 90% 66%;              /* #C6A15B champagne gold — luxury CTA */
-    --primary-foreground: 258 30% 9%;
+    --primary-foreground: 0 0% 100%;
 
     --secondary: 256 26% 16%;           /* #1F2937 panel surface */
     --secondary-foreground: 210 40% 98%;
@@ -49,7 +49,7 @@
     --sidebar-background: 258 30% 9%;
     --sidebar-foreground: 213 27% 84%;
     --sidebar-primary: 258 90% 66%;
-    --sidebar-primary-foreground: 258 30% 9%;
+    --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 256 26% 16%;
     --sidebar-accent-foreground: 210 40% 98%;
     --sidebar-border: 256 24% 22%;
@@ -65,7 +65,7 @@
     --popover: 257 28% 13%;
     --popover-foreground: 210 40% 98%;
     --primary: 258 90% 66%;
-    --primary-foreground: 258 30% 9%;
+    --primary-foreground: 0 0% 100%;
     --secondary: 256 26% 16%;
     --secondary-foreground: 210 40% 98%;
     --muted: 256 26% 16%;
@@ -80,7 +80,7 @@
     --sidebar-background: 258 30% 9%;
     --sidebar-foreground: 213 27% 84%;
     --sidebar-primary: 258 90% 66%;
-    --sidebar-primary-foreground: 258 30% 9%;
+    --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 256 26% 16%;
     --sidebar-accent-foreground: 210 40% 98%;
     --sidebar-border: 256 24% 22%;
