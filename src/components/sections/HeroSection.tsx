@@ -129,7 +129,7 @@ const renderHeadlineWords = (text: string) =>
   ));
 
 const HeroSection = () => {
-  const { displayed, done } = useTypewriter(HERO_HEADLINE, 40, 800);
+  const { displayed, done } = useTypewriter(HERO_HEADLINE, 40, 250);
 
   const scrollToThreatScore = () => {
     const el = document.getElementById('threat-score');
