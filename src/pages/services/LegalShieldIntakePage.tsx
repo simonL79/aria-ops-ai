@@ -528,9 +528,49 @@ const LegalShieldIntakePage = () => {
                           </div>
                         ))}
                       </div>
+
+                      {suggestions.length > 0 && (
+                        <div className="mt-4 rounded-lg border border-primary/30 bg-primary/5 p-4">
+                          <div className="flex items-center justify-between gap-2 mb-2">
+                            <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                              <Sparkles className="h-4 w-4 text-primary" />
+                              Suggested from your evidence
+                            </div>
+                            <Button type="button" size="sm" variant="outline" onClick={addAllSuggestions}>
+                              Add all
+                            </Button>
+                          </div>
+                          <p className="text-xs text-muted-foreground mb-3">
+                            Read from your uploaded files. Review each one — add the accurate
+                            ones to your timeline.
+                          </p>
+                          <ul className="space-y-2">
+                            {suggestions.map((s, i) => (
+                              <li
+                                key={`${s.date}-${i}`}
+                                className="flex items-start gap-3 rounded-md border border-border bg-background px-3 py-2"
+                              >
+                                <div className="flex-1 text-sm">
+                                  {s.date && (
+                                    <span className="font-medium text-foreground mr-2">{s.date}</span>
+                                  )}
+                                  <span className="text-muted-foreground">{s.event}</span>
+                                </div>
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => addSuggestion(i)}
+                                >
+                                  <Plus className="mr-1 h-4 w-4" /> Add
+                                </Button>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </div>
-                    <div>
-                      <Label className="text-base">Upload evidence files (optional)</Label>
+
                       <p className="text-xs text-muted-foreground mt-1">
                         Attach screenshots, photos or PDFs (emails, messages, contracts,
                         invoices). Up to {MAX_FILES} files, 15MB each. Stored securely with your
