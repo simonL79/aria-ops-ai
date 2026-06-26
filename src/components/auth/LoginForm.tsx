@@ -346,7 +346,7 @@ const LoginForm = ({ defaultSignUp = false }: LoginFormProps) => {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSignIn)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(isSignUpMode ? handleSignUp : handleSignIn)} className="space-y-4">
         <FormField
           control={form.control}
           name="email"
@@ -355,7 +355,7 @@ const LoginForm = ({ defaultSignUp = false }: LoginFormProps) => {
               <FormLabel>Email</FormLabel>
               <FormControl>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input 
                     placeholder="name@example.com" 
                     className="pl-10"
@@ -377,12 +377,12 @@ const LoginForm = ({ defaultSignUp = false }: LoginFormProps) => {
               <FormLabel>Password</FormLabel>
               <FormControl>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     type="password"
-                    placeholder="Enter your password"
+                    placeholder={isSignUpMode ? "Create a password (min. 6 characters)" : "Enter your password"}
                     className="pl-10"
-                    autoComplete="current-password"
+                    autoComplete={isSignUpMode ? "new-password" : "current-password"}
                     {...field}
                   />
                 </div>
@@ -392,56 +392,74 @@ const LoginForm = ({ defaultSignUp = false }: LoginFormProps) => {
           )}
         />
         
-        <div className="flex justify-between text-sm">
-          <Button 
-            type="button" 
-            variant="link" 
-            size="sm" 
-            className="px-0" 
-            onClick={() => setIsResetMode(true)}
-          >
-            Forgot your password?
-          </Button>
-          <Button 
-            type="button" 
-            variant="link" 
-            size="sm" 
-            className="px-0" 
-            onClick={() => setIsMagicLinkMode(true)}
-          >
-            Use Magic Link
-          </Button>
-        </div>
+        {!isSignUpMode && (
+          <div className="flex justify-between text-sm">
+            <Button 
+              type="button" 
+              variant="link" 
+              size="sm" 
+              className="px-0" 
+              onClick={() => setIsResetMode(true)}
+            >
+              Forgot your password?
+            </Button>
+            <Button 
+              type="button" 
+              variant="link" 
+              size="sm" 
+              className="px-0" 
+              onClick={() => setIsMagicLinkMode(true)}
+            >
+              Use Magic Link
+            </Button>
+          </div>
+        )}
         
         <Button 
           type="submit" 
-          className="w-full bg-blue-600 hover:bg-blue-700 transition-colors text-lg font-semibold"
+          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground transition-colors text-lg font-semibold"
           disabled={isLoading}
           size="lg"
         >
           {isLoading ? (
             <span className="flex items-center justify-center">
               <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-              Signing in...
+              {isSignUpMode ? "Creating account..." : "Signing in..."}
             </span>
           ) : (
             <span className="flex items-center justify-center">
               <LogIn className="mr-2 h-5 w-5" />
-              Sign In
+              {isSignUpMode ? "Create account & continue" : "Sign In"}
             </span>
           )}
         </Button>
 
-        <Button 
-          type="button" 
-          variant="outline"
-          className="w-full"
-          onClick={() => setIsMagicLinkMode(true)}
-          disabled={isLoading}
-        >
-          <Mail className="mr-2 h-4 w-4" />
-          Sign In with Magic Link
-        </Button>
+        {!isSignUpMode && (
+          <Button 
+            type="button" 
+            variant="outline"
+            className="w-full"
+            onClick={() => setIsMagicLinkMode(true)}
+            disabled={isLoading}
+          >
+            <Mail className="mr-2 h-4 w-4" />
+            Sign In with Magic Link
+          </Button>
+        )}
+
+        <div className="text-center text-sm text-muted-foreground pt-2">
+          {isSignUpMode ? "Already have an account?" : "Don't have an account?"}{" "}
+          <Button
+            type="button"
+            variant="link"
+            size="sm"
+            className="px-1"
+            onClick={() => setIsSignUpMode((v) => !v)}
+            disabled={isLoading}
+          >
+            {isSignUpMode ? "Sign in" : "Create one"}
+          </Button>
+        </div>
       </form>
     </Form>
   );
