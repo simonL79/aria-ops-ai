@@ -4,11 +4,37 @@ import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import heroHeader from '@/assets/aria-hero-header.png';
 
+const useLayoutReady = () => {
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    const prepare = async () => {
+      // Wait for all web fonts to load so the headline reserve renders at its final metrics.
+      if ('fonts' in document && document.fonts) {
+        try { await document.fonts.ready; } catch { /* ignore unsupported */ }
+      }
+      // Wait for the next paint to ensure the invisible headline has laid out.
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (!cancelled) setReady(true);
+        });
+      });
+    };
+    prepare();
+    return () => { cancelled = true; };
+  }, []);
+
+  return ready;
+};
+
 const useTypewriter = (text: string, speed = 45, delay = 600) => {
   const [displayed, setDisplayed] = useState('');
   const [done, setDone] = useState(false);
+  const ready = useLayoutReady();
 
   useEffect(() => {
+    if (!ready) return;
     let i = 0;
     const timeout = setTimeout(() => {
       const interval = setInterval(() => {
@@ -23,7 +49,7 @@ const useTypewriter = (text: string, speed = 45, delay = 600) => {
       return () => clearInterval(interval);
     }, delay);
     return () => clearTimeout(timeout);
-  }, [text, speed, delay]);
+  }, [text, speed, delay, ready]);
 
   return { displayed, done };
 };
