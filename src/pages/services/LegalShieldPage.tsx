@@ -31,41 +31,55 @@ import {
   BrainCircuit,
 } from 'lucide-react';
 
-const supportAreas: { icon: React.ElementType; title: string; items: string[] }[] = [
+const supportAreas: { icon: React.ElementType; title: string; items: string[]; href: string; linkLabel: string }[] = [
   {
     icon: ShieldCheck,
     title: 'Personal Legal Protection',
     items: ['Consumer disputes', 'Debt and finance', 'Insurance issues', 'Parking appeals', 'Small claims preparation', 'Identity theft', 'Fraud guidance', 'Neighbour disputes', 'Harassment evidence organisation'],
+    href: '/legal-defence-compliance',
+    linkLabel: 'Explore legal defence',
   },
   {
     icon: Home,
     title: 'Home & Property',
     items: ['Boundary disputes', 'Home improvement disputes', 'Builder disagreements', 'Landlord and tenant matters', 'Housing issues', 'Property damage claims', 'Insurance documentation'],
+    href: '/legal-defence-compliance',
+    linkLabel: 'Explore property legal support',
   },
   {
     icon: Briefcase,
     title: 'Employment',
     items: ['Workplace grievances', 'Disciplinary preparation', 'Redundancy guidance', 'Employment rights information', 'Settlement agreement preparation', 'Evidence organisation'],
+    href: '/legal-defence-compliance',
+    linkLabel: 'Explore employment support',
   },
   {
     icon: Trophy,
     title: 'Sports & Entertainment',
     items: ['Athlete contracts', 'Sponsorship agreements', 'Image rights', 'Commercial partnerships', 'Management agreements', 'Intellectual property awareness', 'Dispute preparation'],
+    href: '/athlete-reputation-management',
+    linkLabel: 'Explore athlete reputation',
   },
   {
     icon: Building2,
     title: 'Business Protection',
     items: ['Contract reviews', 'Supplier disputes', 'Client disputes', 'Late payment documentation', 'Terms and conditions guidance', 'HR documentation', 'Compliance checklists'],
+    href: '/legal-defence-compliance',
+    linkLabel: 'Explore business legal defence',
   },
   {
     icon: HeartHandshake,
     title: 'Family & Everyday Legal Matters',
     items: ['Consumer rights', 'Travel disputes', 'Warranty claims', 'School complaints', 'Local authority complaints', 'Financial disagreements'],
+    href: '/legal-defence-compliance',
+    linkLabel: 'Explore everyday legal support',
   },
   {
     icon: Globe,
     title: 'Reputation & Digital Protection',
     items: ['Online abuse evidence packs', 'Defamation preparation', 'Privacy concerns', 'Copyright issues', 'Platform complaints', 'Digital evidence preservation'],
+    href: '/reputation-threat-score',
+    linkLabel: 'Explore reputation threat scoring',
   },
 ];
 
