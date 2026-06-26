@@ -1,7 +1,7 @@
 
 import React, { useRef, useCallback } from 'react';
 import { Card } from '@/components/ui/card';
-import { Shield, Swords, Fingerprint, Search, Brain, Scale } from 'lucide-react';
+import { Shield, Swords, Fingerprint, Search, Brain, Scale, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 
@@ -30,15 +30,15 @@ const ServiceCard = ({ service, index, visible }: { service: any; index: number;
       className={`transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
       style={{ transitionDelay: visible ? `${index * 120}ms` : '0ms', transformStyle: 'preserve-3d' }}
     >
-      <Card className="glass-card p-8 text-foreground hover:border-primary/30 hover:shadow-[0_0_30px_rgba(245,158,11,0.1)] transition-all duration-500 h-full">
+      <Card className="glass-card p-8 text-foreground hover:border-primary/30 hover:shadow-[0_0_30px_rgba(245,158,11,0.1)] transition-all duration-500 h-full flex flex-col">
         <div className="flex items-center gap-4 mb-6">
           <div className="w-12 h-12 bg-primary/10 border border-primary/20 rounded-xl flex items-center justify-center">
             <service.icon className="h-6 w-6 text-primary" />
           </div>
           <h3 className="text-xl font-bold">{service.title}</h3>
         </div>
-        
-        <ul className="text-muted-foreground space-y-2">
+
+        <ul className="text-muted-foreground space-y-2 mb-6 flex-1">
           {service.capabilities.map((cap: string, idx: number) => (
             <li key={idx} className="text-sm flex items-start gap-2">
               <span className="text-primary mt-1">·</span>
@@ -46,10 +46,19 @@ const ServiceCard = ({ service, index, visible }: { service: any; index: number;
             </li>
           ))}
         </ul>
+
+        <Link
+          to={service.href}
+          className="group/btn mt-auto inline-flex items-center justify-center gap-2 w-full rounded-xl border border-primary/30 bg-primary/10 hover:bg-primary hover:text-primary-foreground text-primary font-medium px-5 py-3 transition-all duration-300"
+        >
+          Explore {service.title}
+          <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover/btn:translate-x-1" />
+        </Link>
       </Card>
     </div>
   );
 };
+
 
 const ServicesSection = () => {
   const { ref, visible } = useScrollReveal(0.1);
