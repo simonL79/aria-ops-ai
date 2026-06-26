@@ -570,6 +570,9 @@ const LegalShieldIntakePage = () => {
                         </div>
                       )}
                     </div>
+                    <div>
+                      <Label className="text-base">Upload evidence files (optional)</Label>
+
 
                       <p className="text-xs text-muted-foreground mt-1">
                         Attach screenshots, photos or PDFs (emails, messages, contracts,
