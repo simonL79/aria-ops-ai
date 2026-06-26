@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Check, Loader2 } from 'lucide-react';
@@ -14,7 +14,7 @@ const PricingSection = () => {
   const navigate = useNavigate();
   const [loadingPlan, setLoadingPlan] = useState<PlanId | null>(null);
 
-  const handleCheckout = async (planId: PlanId) => {
+  const handleCheckout = useCallback(async (planId: PlanId) => {
     setLoadingPlan(planId);
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -40,7 +40,25 @@ const PricingSection = () => {
     } finally {
       setLoadingPlan(null);
     }
-  };
+  }, [navigate]);
+
+  // Resume checkout automatically after the user signs in / creates an account
+  useEffect(() => {
+    let plan: string | null = null;
+    try {
+      plan = sessionStorage.getItem('resumeCheckoutPlan');
+    } catch {
+      plan = null;
+    }
+    if (plan && ['basic', 'individual', 'pro'].includes(plan)) {
+      try {
+        sessionStorage.removeItem('resumeCheckoutPlan');
+      } catch {
+        /* ignore */
+      }
+      handleCheckout(plan as PlanId);
+    }
+  }, [handleCheckout]);
 
   const plans: Array<{
     id: PlanId;
