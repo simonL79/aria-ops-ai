@@ -397,11 +397,16 @@ const LegalShieldIntakePage = () => {
   const back = () => setStep((s) => Math.max(s - 1, 0));
 
   const handleSubmit = async () => {
-    const result = intakeSchema.safeParse(form);
+    if (!allDisclaimersAgreed) {
+      toast.error('Please agree to all disclaimers before submitting');
+      return;
+    }
+    const result = intakeSchema.safeParse({ ...form, consent_given: true });
     if (!result.success) {
       toast.error(result.error.errors[0]?.message ?? 'Please check your answers');
       return;
     }
+
 
     setIsSubmitting(true);
     try {
