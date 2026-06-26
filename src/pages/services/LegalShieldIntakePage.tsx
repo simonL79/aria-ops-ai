@@ -626,6 +626,22 @@ const LegalShieldIntakePage = () => {
                           ))}
                         </ul>
                       )}
+                      {files.length > 0 && (
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          className="mt-3 w-full sm:w-auto"
+                          onClick={analyseEvidence}
+                          disabled={isAnalysing}
+                        >
+                          {isAnalysing ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ) : (
+                            <Sparkles className="mr-2 h-4 w-4" />
+                          )}
+                          {isAnalysing ? 'Reading your evidence…' : 'Suggest timeline from evidence'}
+                        </Button>
+                      )}
                     </div>
                   </div>
                 )}
