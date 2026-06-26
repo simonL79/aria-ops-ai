@@ -19,18 +19,47 @@ interface ScrollSpyProps {
  *
  * Uses IntersectionObserver to highlight the section currently in view,
  * syncs the URL hash as the user scrolls, and clicking an indicator
- * scrolls smoothly to that section.
+ * scrolls smoothly to that section. Browser back/forward navigation
+ * is respected so the active indicator and viewport stay in sync.
  */
 export const ScrollSpy = ({ sections, className }: ScrollSpyProps) => {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [isScrolling, setIsScrolling] = useState(false);
+  const [hasScrolled, setHasScrolled] = useState(false);
   const scrollTimeoutRef = useRef<number | null>(null);
+
+  const clearScrollTimeout = useCallback(() => {
+    if (scrollTimeoutRef.current) {
+      window.clearTimeout(scrollTimeoutRef.current);
+      scrollTimeoutRef.current = null;
+    }
+  }, []);
+
+  const activateSection = useCallback((id: string, scroll = true) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    setIsScrolling(true);
+    setActiveId(id);
+    clearScrollTimeout();
+
+    if (scroll) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (el.hasAttribute('tabindex')) {
+        el.focus({ preventScroll: true });
+      }
+    }
+
+    scrollTimeoutRef.current = window.setTimeout(() => {
+      setIsScrolling(false);
+    }, 700);
+  }, [clearScrollTimeout]);
 
   // Resolve initial active section from URL hash or current viewport.
   useEffect(() => {
     const hash = window.location.hash.replace('#', '');
     if (hash && sections.some((s) => s.id === hash)) {
-      setActiveId(hash);
+      activateSection(hash, true);
       return;
     }
 
@@ -41,7 +70,7 @@ export const ScrollSpy = ({ sections, className }: ScrollSpyProps) => {
       return rect.top <= window.innerHeight * 0.4 && rect.bottom >= window.innerHeight * 0.4;
     });
     if (firstVisible) setActiveId(firstVisible.id);
-  }, [sections]);
+  }, [sections, activateSection]);
 
   // Track sections with IntersectionObserver and update the active id.
   useEffect(() => {
@@ -70,43 +99,56 @@ export const ScrollSpy = ({ sections, className }: ScrollSpyProps) => {
     return () => observer.disconnect();
   }, [sections, isScrolling]);
 
-  // Sync the URL hash with the active section without scrolling the page.
+  // Track real user scrolling so the hash only updates after the page has been
+  // interacted with. This prevents the initial observer pass from adding a hash
+  // to a clean URL on first load.
   useEffect(() => {
-    if (!activeId || isScrolling) return;
+    const onScroll = () => setHasScrolled(true);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  // Sync the URL hash with the active section as the user scrolls.
+  // Uses replaceState so we do not pollute the browser history.
+  useEffect(() => {
+    if (!activeId || isScrolling || !hasScrolled) return;
     const newHash = '#' + activeId;
     if (window.location.hash !== newHash) {
       window.history.replaceState(null, '', newHash);
     }
-  }, [activeId, isScrolling]);
+  }, [activeId, isScrolling, hasScrolled]);
 
-  const handleClick = useCallback((id: string) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-
-    setIsScrolling(true);
-    setActiveId(id);
-
-    if (scrollTimeoutRef.current) {
-      window.clearTimeout(scrollTimeoutRef.current);
-    }
-
-    // Update the hash immediately so a refresh lands here.
-    window.history.replaceState(null, '', '#' + id);
-    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-    // Pause observer updates while the smooth scroll is in progress.
-    scrollTimeoutRef.current = window.setTimeout(() => {
-      setIsScrolling(false);
-    }, 700);
-  }, []);
-
+  // Handle browser back/forward buttons: restore the section matching the hash.
   useEffect(() => {
-    return () => {
-      if (scrollTimeoutRef.current) {
-        window.clearTimeout(scrollTimeoutRef.current);
+    const handlePopState = () => {
+      const hash = window.location.hash.replace('#', '');
+      if (hash && sections.some((s) => s.id === hash)) {
+        activateSection(hash, true);
+      } else if (!hash) {
+        // No hash: fall back to the section currently in the reading area.
+        const firstVisible = sections.find(({ id }) => {
+          const el = document.getElementById(id);
+          if (!el) return false;
+          const rect = el.getBoundingClientRect();
+          return rect.top <= window.innerHeight * 0.4 && rect.bottom >= window.innerHeight * 0.4;
+        });
+        if (firstVisible) setActiveId(firstVisible.id);
       }
     };
-  }, []);
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [sections, activateSection]);
+
+  const handleClick = useCallback((id: string) => {
+    // Push a new history entry so back/forward navigation works.
+    window.history.pushState(null, '', '#' + id);
+    activateSection(id, true);
+  }, [activateSection]);
+
+  useEffect(() => {
+    return () => clearScrollTimeout();
+  }, [clearScrollTimeout]);
 
   if (!sections.length) return null;
 

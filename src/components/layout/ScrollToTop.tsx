@@ -25,6 +25,13 @@ const ScrollToTop = () => {
       const tryScroll = () => {
         const el = document.getElementById(id);
         if (el) {
+          // ScrollSpy-managed sections handle their own scroll, focus and
+          // active indicator to keep the URL hash and scroll position in sync
+          // with browser back/forward navigation.
+          if (el.hasAttribute('data-scrollspy-section')) {
+            return;
+          }
+
           el.scrollIntoView({ behavior: 'smooth', block: 'start' });
           if (el.hasAttribute('tabindex')) {
             el.focus({ preventScroll: true });
