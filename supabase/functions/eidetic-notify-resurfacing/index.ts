@@ -82,6 +82,13 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
 
   try {
+    // Allow internal service-role callers (cron) or an admin user.
+    const authHeader = req.headers.get('authorization') ?? '';
+    if (authHeader !== `Bearer ${SERVICE_ROLE}`) {
+      const auth = await requireAdmin(req);
+      if (!isAuthenticated(auth)) return auth;
+    }
+
     const { event_id } = await req.json();
     if (!event_id) {
       return new Response(JSON.stringify({ error: 'event_id required' }), {
