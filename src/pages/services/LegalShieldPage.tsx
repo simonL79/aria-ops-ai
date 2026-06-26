@@ -138,6 +138,74 @@ const produces = [
   { icon: Scale, title: 'Solicitor-ready case pack', body: 'A clean PDF handover file with a "speak to a solicitor if…" escalation trigger.' },
 ];
 
+const workflow: string[] = [
+  'You start a guided interview',
+  'ARIA builds a complete timeline',
+  'Collects and organises your evidence',
+  'Finds the applicable legislation',
+  'Explains the law in plain English',
+  'Identifies your possible options',
+  'Generates documents and letters',
+  'Produces a solicitor-ready case file',
+  'Tells you when to speak to a regulated professional',
+];
+
+const scopeLevels: {
+  tone: 'green' | 'amber' | 'red';
+  badge: string;
+  title: string;
+  body: string;
+  items: string[];
+} = [
+  {
+    tone: 'green',
+    badge: 'What ARIA does',
+    title: 'AI Legal Intelligence',
+    body: 'ARIA asks questions, then helps you understand and prepare — you stay in control of every decision.',
+    items: [
+      'Explains the relevant law',
+      'Points to applicable legislation',
+      'Organises your evidence',
+      'Drafts letters from your facts',
+      'Builds timelines and chronologies',
+      'Generates court forms from your information',
+      'Suggests possible options',
+      'Produces a solicitor-ready case file',
+    ],
+  },
+  {
+    tone: 'amber',
+    badge: 'Where we draw the line',
+    title: 'Personalised legal advice',
+    body: 'ARIA does not tell you what to decide. It informs — it does not direct.',
+    items: [
+      'No "accept this settlement"',
+      'No "reject this contract"',
+      'No "this clause is unenforceable"',
+      'No "you have a 95% chance of winning"',
+    ],
+  },
+  {
+    tone: 'red',
+    badge: 'Not what we do',
+    title: 'Regulated legal practice',
+    body: 'These are reserved legal activities for authorised firms — ARIA hands over to a regulated professional instead.',
+    items: [
+      'Representing clients',
+      'Filing proceedings on your behalf',
+      'Negotiating legal settlements',
+      'Appearing before courts or tribunals',
+      'Holding itself out as a law firm',
+    ],
+  },
+] as unknown as {
+  tone: 'green' | 'amber' | 'red';
+  badge: string;
+  title: string;
+  body: string;
+  items: string[];
+}[] as any;
+
 const packages = [
   {
     name: 'Personal Shield',
