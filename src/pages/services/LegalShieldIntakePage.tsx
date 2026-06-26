@@ -208,16 +208,23 @@ const LegalShieldIntakePage = () => {
             <div className="bg-card border border-primary/40 rounded-lg p-10 text-center">
               <CheckCircle2 className="h-12 w-12 text-primary mx-auto mb-4" />
               <h1 className="text-3xl font-bold mb-4">Thank you — your intake is in.</h1>
-              <p className="text-muted-foreground text-lg mb-8 max-w-xl mx-auto">
+              <p className="text-muted-foreground text-lg mb-6 max-w-xl mx-auto">
                 We have received your guided intake. Our team will review your situation and respond
                 with your next steps, an evidence checklist and how ARIA Legal Shield can help you
                 prepare. Remember: this is not legal advice and does not replace a solicitor.
               </p>
+              <p className="text-sm text-muted-foreground mb-8 max-w-xl mx-auto">
+                Download your solicitor-ready case pack below — a structured PDF of your account and
+                evidence timeline you can take to any qualified legal professional.
+              </p>
               <div className="flex flex-wrap gap-4 justify-center">
-                <Button asChild size="lg">
-                  <Link to="/services/legal-shield">Back to Legal Shield</Link>
+                <Button size="lg" onClick={downloadCasePack}>
+                  <FileDown className="mr-2 h-4 w-4" /> Download case pack (PDF)
                 </Button>
                 <Button asChild size="lg" variant="outline">
+                  <Link to="/services/legal-shield">Back to Legal Shield</Link>
+                </Button>
+                <Button asChild size="lg" variant="ghost">
                   <Link to="/">Return home</Link>
                 </Button>
               </div>
