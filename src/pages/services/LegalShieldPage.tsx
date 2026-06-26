@@ -156,7 +156,7 @@ const scopeLevels: {
   title: string;
   body: string;
   items: string[];
-} = [
+}[] = [
   {
     tone: 'green',
     badge: 'What ARIA does',
