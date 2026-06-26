@@ -331,6 +331,51 @@ const LegalShieldIntakePage = () => {
                         maxLength={2000}
                       />
                     </div>
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <Label className="text-base">Evidence timeline (optional)</Label>
+                        <Button type="button" size="sm" variant="outline" onClick={addTimelineEntry}>
+                          <Plus className="mr-1 h-4 w-4" /> Add event
+                        </Button>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Add key dates and what happened. This builds the timeline in your
+                        solicitor-ready case pack.
+                      </p>
+                      <div className="space-y-3 mt-3">
+                        {form.evidence_timeline.length === 0 && (
+                          <p className="text-sm text-muted-foreground italic">
+                            No events added yet.
+                          </p>
+                        )}
+                        {form.evidence_timeline.map((entry, i) => (
+                          <div key={i} className="flex flex-col sm:flex-row gap-2 sm:items-start">
+                            <Input
+                              type="date"
+                              value={entry.date}
+                              onChange={(e) => updateTimelineEntry(i, 'date', e.target.value)}
+                              className="sm:w-44"
+                            />
+                            <Input
+                              value={entry.event}
+                              onChange={(e) => updateTimelineEntry(i, 'event', e.target.value)}
+                              placeholder="What happened on this date?"
+                              maxLength={300}
+                              className="flex-1"
+                            />
+                            <Button
+                              type="button"
+                              size="icon"
+                              variant="ghost"
+                              onClick={() => removeTimelineEntry(i)}
+                              aria-label="Remove event"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 )}
 
