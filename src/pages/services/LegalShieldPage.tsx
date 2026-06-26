@@ -131,8 +131,8 @@ const LegalShieldPage = () => {
   return (
     <PublicLayout>
       <SEO
-        title="ARIA Legal Shield™ — Affordable Legal Protection Before Costs Spiral"
-        description="AI-powered legal protection, evidence building and solicitor-ready case preparation for individuals, creators and businesses. Not a law firm — clarity, structure and preparation."
+        title="ARIA Legal Shield™ — AI-Powered Legal Support Before You Need a Solicitor"
+        description="AI-powered legal information, document preparation and case organisation for individuals, creators and businesses. Understand your rights, organise evidence, and approach solicitors fully prepared. Not a law firm."
         path="/services/legal-shield"
         jsonLd={[faqJsonLd, serviceJsonLd, breadcrumbJsonLd]}
       />
