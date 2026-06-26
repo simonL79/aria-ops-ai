@@ -70,6 +70,108 @@ const urgencyLevels = [
   { value: 'urgent', label: 'Urgent — active deadline or escalation' },
 ];
 
+type CourseOfAction = {
+  steps: string[];
+  disclaimers: string[];
+};
+
+// Always-required acknowledgements, regardless of issue type.
+const BASE_DISCLAIMERS: string[] = [
+  'I understand the suggested course of action below is AI-generated legal information based only on what I have provided — not advice tailored to my full circumstances.',
+  'I understand ARIA Legal Shield™ is not a law firm, does not provide regulated legal services, and is not a substitute for advice from a qualified solicitor.',
+  'I understand the strength of any course of action depends on the accuracy and completeness of the evidence I have supplied.',
+];
+
+// Issue-specific recommended course of action and extra acknowledgements.
+const courseOfActionByIssue: Record<string, CourseOfAction> = {
+  'Consumer dispute': {
+    steps: [
+      'Gather proof of purchase, the contract/terms and all correspondence with the seller.',
+      'Send a clear written complaint setting out the fault and the outcome you want, with a reasonable deadline.',
+      'If unresolved, escalate to the relevant ombudsman or alternative dispute resolution scheme before considering court.',
+    ],
+    disclaimers: [
+      'I understand strict time limits and consumer-protection rules may apply, and I should confirm deadlines with a qualified professional.',
+    ],
+  },
+  'Employment issue': {
+    steps: [
+      'Collect your contract, payslips, written warnings, policies and any relevant messages.',
+      'Raise the matter through your employer’s internal grievance procedure in writing first.',
+      'Be aware many employment claims have a short limitation period — early Acas Early Conciliation may be required.',
+    ],
+    disclaimers: [
+      'I understand employment claim deadlines can be as short as three months and that I am responsible for confirming my own time limits.',
+    ],
+  },
+  'Landlord / tenant disagreement': {
+    steps: [
+      'Gather the tenancy agreement, deposit-protection details, rent records and photos of any disrepair.',
+      'Put your concerns to the other party in writing and keep copies of everything.',
+      'If unresolved, consider the deposit scheme’s dispute service or appropriate housing/legal routes.',
+    ],
+    disclaimers: [
+      'I understand housing law and deposit rules are complex and that formal action (e.g. eviction or possession) must follow strict legal process.',
+    ],
+  },
+  'Unpaid invoice': {
+    steps: [
+      'Compile the contract/agreement, the invoice, delivery proof and any chaser communications.',
+      'Send a formal letter before action stating the amount owed and a deadline to pay.',
+      'If still unpaid, consider a money claim or debt-recovery route.',
+    ],
+    disclaimers: [
+      'I understand a letter before action and court claims have formal requirements and that interest/limitation rules may apply.',
+    ],
+  },
+  'Online harassment': {
+    steps: [
+      'Preserve evidence: dated screenshots, URLs, usernames and any threats — do not delete anything.',
+      'Report the content to the relevant platform and, where there is a risk to safety, to the police.',
+      'Keep a log of incidents to support any complaint, takedown or legal action.',
+    ],
+    disclaimers: [
+      'I understand that if I feel unsafe or threatened I should contact the police, and ARIA cannot provide emergency assistance.',
+    ],
+  },
+  'Reputational attack / defamation': {
+    steps: [
+      'Capture the defamatory material with dated screenshots and full URLs before it is changed or removed.',
+      'Record the impact (financial, professional, personal) the statements have caused.',
+      'Consider takedown requests and a formal complaint; defamation claims are time-sensitive and complex.',
+    ],
+    disclaimers: [
+      'I understand defamation claims carry a short limitation period (generally one year) and high legal thresholds, and require specialist legal advice.',
+    ],
+  },
+  'Contractual disagreement': {
+    steps: [
+      'Assemble the signed contract, variations, invoices and all correspondence about performance.',
+      'Identify the specific terms you believe were breached and the loss caused.',
+      'Raise the breach in writing, propose resolution, and consider mediation before litigation.',
+    ],
+    disclaimers: [
+      'I understand contract interpretation and remedies depend on the precise wording and facts, which only a qualified professional can fully assess.',
+    ],
+  },
+  Other: {
+    steps: [
+      'Organise all relevant documents and a clear timeline of what happened.',
+      'Set out, in writing, the outcome you are seeking.',
+      'Use your case pack to seek tailored advice from a qualified legal professional.',
+    ],
+    disclaimers: [],
+  },
+};
+
+const getCourseOfAction = (issueType: string): CourseOfAction => {
+  const specific = courseOfActionByIssue[issueType] ?? courseOfActionByIssue.Other;
+  return {
+    steps: specific.steps,
+    disclaimers: [...BASE_DISCLAIMERS, ...specific.disclaimers],
+  };
+};
+
 const intakeSchema = z.object({
   issue_type: z.string().min(1, 'Please choose the type of issue'),
   issue_description: z
@@ -125,6 +227,19 @@ const LegalShieldIntakePage = () => {
   const [files, setFiles] = useState<File[]>([]);
   const [isAnalysing, setIsAnalysing] = useState(false);
   const [suggestions, setSuggestions] = useState<TimelineEntry[]>([]);
+  const [agreedDisclaimers, setAgreedDisclaimers] = useState<boolean[]>([]);
+
+  const courseOfAction = getCourseOfAction(form.issue_type);
+  const allDisclaimersAgreed =
+    courseOfAction.disclaimers.length > 0 &&
+    courseOfAction.disclaimers.every((_, i) => agreedDisclaimers[i] === true);
+
+  const toggleDisclaimer = (index: number, value: boolean) =>
+    setAgreedDisclaimers((prev) => {
+      const next = [...prev];
+      next[index] = value;
+      return next;
+    });
 
   const fileToDataUrl = (file: File) =>
     new Promise<string>((resolve, reject) => {
@@ -282,11 +397,16 @@ const LegalShieldIntakePage = () => {
   const back = () => setStep((s) => Math.max(s - 1, 0));
 
   const handleSubmit = async () => {
-    const result = intakeSchema.safeParse(form);
+    if (!allDisclaimersAgreed) {
+      toast.error('Please agree to all disclaimers before submitting');
+      return;
+    }
+    const result = intakeSchema.safeParse({ ...form, consent_given: true });
     if (!result.success) {
       toast.error(result.error.errors[0]?.message ?? 'Please check your answers');
       return;
     }
+
 
     setIsSubmitting(true);
     try {
@@ -344,7 +464,7 @@ const LegalShieldIntakePage = () => {
         full_name: form.full_name.trim(),
         email: form.email.trim(),
         phone: form.phone.trim() || null,
-        consent_given: form.consent_given,
+        consent_given: true,
         evidence_files: uploadedFiles,
       });
 
@@ -442,7 +562,10 @@ const LegalShieldIntakePage = () => {
                           <button
                             key={t}
                             type="button"
-                            onClick={() => update('issue_type', t)}
+                            onClick={() => {
+                              update('issue_type', t);
+                              setAgreedDisclaimers([]);
+                            }}
                             className={`text-left px-4 py-3 rounded-lg border transition-colors ${
                               form.issue_type === t
                                 ? 'border-primary bg-primary/10 text-foreground'
@@ -739,20 +862,48 @@ const LegalShieldIntakePage = () => {
                       )}
                     </dl>
 
-                    <label className="flex items-start gap-3 cursor-pointer">
-                      <Checkbox
-                        checked={form.consent_given}
-                        onCheckedChange={(v) => update('consent_given', v === true)}
-                        className="mt-1"
-                      />
-                      <span className="text-sm text-muted-foreground">
-                        I understand that ARIA Legal Shield™ provides AI-powered legal information,
-                        document preparation and case organisation. It is not a law firm, does not
-                        provide regulated legal services, and is not a substitute for independent
-                        legal advice. I consent to ARIA processing these details to respond to my
-                        enquiry.
-                      </span>
-                    </label>
+                    {/* Suggested course of action based on the issue & evidence provided */}
+                    <div className="rounded-lg border border-primary/40 bg-primary/5 p-5">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Scale className="h-4 w-4 text-primary" />
+                        <h3 className="text-sm font-semibold uppercase tracking-wide text-foreground">
+                          Suggested course of action
+                        </h3>
+                      </div>
+                      <p className="text-xs text-muted-foreground mb-3">
+                        Based on a <span className="text-foreground font-medium">{form.issue_type || 'your issue'}</span> and
+                        the evidence you have provided, these are the typical next steps. Read and agree
+                        to the points below before submitting.
+                      </p>
+                      <ol className="list-decimal pl-5 space-y-2 text-sm text-foreground/90">
+                        {courseOfAction.steps.map((s, i) => (
+                          <li key={i}>{s}</li>
+                        ))}
+                      </ol>
+                    </div>
+
+                    {/* Required acknowledgements */}
+                    <div className="space-y-3">
+                      <h3 className="text-sm font-semibold text-foreground">
+                        Disclaimers — please confirm you agree to each
+                      </h3>
+                      {courseOfAction.disclaimers.map((text, i) => (
+                        <label key={i} className="flex items-start gap-3 cursor-pointer">
+                          <Checkbox
+                            checked={agreedDisclaimers[i] === true}
+                            onCheckedChange={(v) => toggleDisclaimer(i, v === true)}
+                            className="mt-1"
+                          />
+                          <span className="text-sm text-muted-foreground">{text}</span>
+                        </label>
+                      ))}
+                      {!allDisclaimersAgreed && (
+                        <p className="text-xs text-amber-500">
+                          You must agree to all disclaimers above before submitting.
+                        </p>
+                      )}
+                    </div>
+
                   </div>
                 )}
 
@@ -766,7 +917,7 @@ const LegalShieldIntakePage = () => {
                       Continue <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   ) : (
-                    <Button onClick={handleSubmit} disabled={isSubmitting || !form.consent_given}>
+                    <Button onClick={handleSubmit} disabled={isSubmitting || !allDisclaimersAgreed}>
                       {isSubmitting ? (
                         <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Submitting…</>
                       ) : (
