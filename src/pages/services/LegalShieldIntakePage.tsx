@@ -854,20 +854,48 @@ const LegalShieldIntakePage = () => {
                       )}
                     </dl>
 
-                    <label className="flex items-start gap-3 cursor-pointer">
-                      <Checkbox
-                        checked={form.consent_given}
-                        onCheckedChange={(v) => update('consent_given', v === true)}
-                        className="mt-1"
-                      />
-                      <span className="text-sm text-muted-foreground">
-                        I understand that ARIA Legal Shield™ provides AI-powered legal information,
-                        document preparation and case organisation. It is not a law firm, does not
-                        provide regulated legal services, and is not a substitute for independent
-                        legal advice. I consent to ARIA processing these details to respond to my
-                        enquiry.
-                      </span>
-                    </label>
+                    {/* Suggested course of action based on the issue & evidence provided */}
+                    <div className="rounded-lg border border-primary/40 bg-primary/5 p-5">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Scale className="h-4 w-4 text-primary" />
+                        <h3 className="text-sm font-semibold uppercase tracking-wide text-foreground">
+                          Suggested course of action
+                        </h3>
+                      </div>
+                      <p className="text-xs text-muted-foreground mb-3">
+                        Based on a <span className="text-foreground font-medium">{form.issue_type || 'your issue'}</span> and
+                        the evidence you have provided, these are the typical next steps. Read and agree
+                        to the points below before submitting.
+                      </p>
+                      <ol className="list-decimal pl-5 space-y-2 text-sm text-foreground/90">
+                        {courseOfAction.steps.map((s, i) => (
+                          <li key={i}>{s}</li>
+                        ))}
+                      </ol>
+                    </div>
+
+                    {/* Required acknowledgements */}
+                    <div className="space-y-3">
+                      <h3 className="text-sm font-semibold text-foreground">
+                        Disclaimers — please confirm you agree to each
+                      </h3>
+                      {courseOfAction.disclaimers.map((text, i) => (
+                        <label key={i} className="flex items-start gap-3 cursor-pointer">
+                          <Checkbox
+                            checked={agreedDisclaimers[i] === true}
+                            onCheckedChange={(v) => toggleDisclaimer(i, v === true)}
+                            className="mt-1"
+                          />
+                          <span className="text-sm text-muted-foreground">{text}</span>
+                        </label>
+                      ))}
+                      {!allDisclaimersAgreed && (
+                        <p className="text-xs text-amber-500">
+                          You must agree to all disclaimers above before submitting.
+                        </p>
+                      )}
+                    </div>
+
                   </div>
                 )}
 
