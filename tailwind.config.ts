@@ -81,23 +81,23 @@ export default {
 				},
 				// A.R.I.A luxury dark intelligence palette
 				corporate: {
-					dark: '#111827',          // primary background
-					darkSecondary: '#1F2937', // panel surfaces
-					darkTertiary: '#182231',  // card surface
+					dark: '#15121F',          // primary background
+					darkSecondary: '#211B33', // panel surfaces
+					darkTertiary: '#1C172B',  // card surface
 					gray: '#94A3B8',
 					lightGray: '#CBD5E1',
-					accent: '#C6A15B',        // champagne gold
-					accentDark: '#A8853F',
+					accent: '#8B5CF6',        // champagne gold
+					accentDark: '#6D28D9',
 					info: '#38BDF8',          // AI blue
-					border: '#2A3441',
-					borderLight: '#1F2937'
+					border: '#2A2440',
+					borderLight: '#211B33'
 				},
 				brand: {
-					DEFAULT: '#C6A15B',
-					light: '#D9BC85',
-					dark: '#A8853F',
-					navy: '#111827',
-					panel: '#1F2937'
+					DEFAULT: '#8B5CF6',
+					light: '#A78BFA',
+					dark: '#6D28D9',
+					navy: '#15121F',
+					panel: '#211B33'
 				},
 				alert: {
 					negative: '#B91C1C',
@@ -105,11 +105,11 @@ export default {
 					positive: '#15803D'
 				},
 				premium: {
-					black: '#111827',
-					darkGray: '#1F2937',
+					black: '#15121F',
+					darkGray: '#211B33',
 					gray: '#94A3B8',
 					silver: '#CBD5E1',
-					gold: '#C6A15B'
+					gold: '#8B5CF6'
 				}
 			},
 			borderRadius: {

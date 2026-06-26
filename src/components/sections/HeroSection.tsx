@@ -140,7 +140,7 @@ const HeroSection = () => {
     <section className="relative bg-gradient-to-b from-background via-background to-secondary/40 text-foreground min-h-screen flex items-center overflow-hidden">
       {/* Grid overlay — faint gold lattice */}
       <div className="absolute inset-0 opacity-[0.06]" style={{
-        backgroundImage: `linear-gradient(hsl(38 47% 57% / 0.35) 1px, transparent 1px), linear-gradient(90deg, hsl(38 47% 57% / 0.35) 1px, transparent 1px)`,
+        backgroundImage: `linear-gradient(hsl(258 90% 66% / 0.35) 1px, transparent 1px), linear-gradient(90deg, hsl(258 90% 66% / 0.35) 1px, transparent 1px)`,
         backgroundSize: '64px 64px',
         maskImage: 'radial-gradient(ellipse at center, black 35%, transparent 80%)',
         WebkitMaskImage: 'radial-gradient(ellipse at center, black 35%, transparent 80%)'
