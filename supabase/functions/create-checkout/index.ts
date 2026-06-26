@@ -87,16 +87,21 @@ serve(async (req) => {
             currency: "gbp",
             product_data: {
               name: plan.name,
+              description: plan.description,
             },
             unit_amount: plan.amount,
-            recurring: { interval: "month" },
+            recurring: { interval: plan.interval },
           },
           quantity: 1,
         },
       ],
       mode: "subscription",
+      metadata: { plan_id: planId, user_id: user.id, billing_interval: plan.interval },
+      subscription_data: {
+        metadata: { plan_id: planId, user_id: user.id },
+      },
       success_url: `${req.headers.get("origin")}/thank-you?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.get("origin")}/pricing`,
+      cancel_url: `${req.headers.get("origin")}/home#pricing`,
     });
 
     return new Response(JSON.stringify({ url: session.url }), {
