@@ -51,6 +51,7 @@ const page = await context.newPage();
 
 let failures = 0;
 const log = [];
+const failureMessages = [];
 
 try {
   // 1. Land on home and scroll the footer into view.
