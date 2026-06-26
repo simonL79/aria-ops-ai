@@ -7,22 +7,22 @@ const NOCFeaturesSection = () => {
     {
       icon: <Eye className="h-8 w-8" />,
       title: "Realtime Threat NOC",
-      description: "A mission-style control center to manage threats like a pro."
+      description: "A mission-style control center to manage reputation and legal threats like a pro."
     },
     {
       icon: <Zap className="h-8 w-8" />,
       title: "AI-Augmented Triage",
-      description: "Our smart assistant generates summaries, playbooks, and next steps."
+      description: "Our smart assistant generates threat summaries, legal playbooks, and recommended next steps."
     },
     {
       icon: <Shield className="h-8 w-8" />,
       title: "Case Threading",
-      description: "Group related threats across platforms into centralized investigations."
+      description: "Group related reputation and legal threats across platforms into centralized investigations."
     },
     {
       icon: <Users className="h-8 w-8" />,
       title: "Operator Console",
-      description: "Assign, prioritize, resolve — all from a unified dashboard."
+      description: "Assign, prioritize, resolve reputation issues and legal prep tasks from one unified dashboard."
     }
   ];
 
