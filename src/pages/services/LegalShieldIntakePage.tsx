@@ -562,7 +562,10 @@ const LegalShieldIntakePage = () => {
                           <button
                             key={t}
                             type="button"
-                            onClick={() => update('issue_type', t)}
+                            onClick={() => {
+                              update('issue_type', t);
+                              setAgreedDisclaimers([]);
+                            }}
                             className={`text-left px-4 py-3 rounded-lg border transition-colors ${
                               form.issue_type === t
                                 ? 'border-primary bg-primary/10 text-foreground'
