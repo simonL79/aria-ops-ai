@@ -28,7 +28,28 @@ import {
   FileDown,
   Plus,
   Trash2,
+  Paperclip,
+  X,
+  FileText,
 } from 'lucide-react';
+
+const MAX_FILES = 10;
+const MAX_FILE_BYTES = 15 * 1024 * 1024; // 15MB
+const ACCEPTED_TYPES = [
+  'image/png',
+  'image/jpeg',
+  'image/gif',
+  'image/webp',
+  'image/heic',
+  'application/pdf',
+];
+
+type EvidenceFileMeta = {
+  path: string;
+  name: string;
+  size: number;
+  type: string;
+};
 
 const issueTypes = [
   'Consumer dispute',
