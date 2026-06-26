@@ -8,8 +8,8 @@ const ScanPage = () => {
   return (
     <PublicLayout>
       <SEO
-        title="Free Reputation Scan — A.R.I.A™ Threat Check"
-        description="Run a free reputation scan and get an instant view of online threats, impersonation risks, and harmful content targeting you or your brand."
+        title="Free Reputation & Legal Risk Scan — A.R.I.A™ Threat Check"
+        description="Run a free scan and get an instant view of online threats, impersonation risks, harmful content, and legal exposure targeting you or your brand."
         path="/scan"
       />
       <div className="min-h-screen bg-background py-12">

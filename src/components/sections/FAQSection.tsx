@@ -6,11 +6,15 @@ import { useScrollReveal } from '@/hooks/useScrollReveal';
 const faqs = [
   {
     question: "What is A.R.I.A™?",
-    answer: "A.R.I.A™ (Adaptive Reputation Intelligence & Analysis) is an AI-powered reputation defence system that monitors, protects, and repairs your digital presence across the web — from search engines and social media to forums, news outlets, and the dark web."
+    answer: "A.R.I.A™ (Adaptive Reputation Intelligence & Analysis) is an AI-powered platform that monitors, protects, and repairs your digital reputation, and prepares solicitor-ready legal responses through ARIA Legal Shield™ — from threat detection to evidence packs and case preparation."
+  },
+  {
+    question: "How do AI monitoring and legal response work together?",
+    answer: "A.R.I.A™ watches the web 24/7 for reputation threats. When a threat crosses into legal exposure — defamation, harassment, privacy breaches, contract disputes — ARIA Legal Shield™ organises evidence, drafts letters, and produces a solicitor-ready case pack so you can escalate cleanly."
   },
   {
     question: "How fast do you respond to threats?",
-    answer: "Our AI monitoring runs 24/7. Critical threats trigger instant alerts, and our response team can begin suppression and counter-narrative deployment within hours — not days."
+    answer: "Our AI monitoring runs 24/7. Critical threats trigger instant alerts, and our response team can begin suppression, counter-narrative deployment, or legal preparation within hours — not days."
   },
   {
     question: "Is my data confidential?",
@@ -22,7 +26,7 @@ const faqs = [
   },
   {
     question: "How does pricing work?",
-    answer: "We offer tailored plans based on the scope of monitoring and response you need. Every engagement starts with a confidential assessment — contact us to discuss your situation and we'll recommend the right tier."
+    answer: "We offer unified shields that combine reputation monitoring with legal response: Personal Shield (£29/mo), Creator Shield (£97/mo), and Business Shield (£397/mo). Enterprise pricing is tailored to your scope."
   }
 ];
 

@@ -171,10 +171,10 @@ const ThreatScoreSection = () => {
       <div className="container mx-auto px-6">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4">
-            Get Your Free <span className="text-primary">Reputation Threat Score</span>
+            Get Your Free <span className="text-primary">Reputation & Legal Threat Score</span>
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Instantly assess your online exposure risk. No commitment required.
+            Instantly assess your online exposure and legal risk. No commitment required.
           </p>
         </div>
 

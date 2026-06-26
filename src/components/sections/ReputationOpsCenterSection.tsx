@@ -39,11 +39,11 @@ const ReputationOpsCenterSection = () => {
           </div>
           
           <h2 className="text-3xl md:text-4xl font-bold mb-6">
-            Your Reputation Ops Center
+            Your Reputation & Legal Ops Center
           </h2>
           
           <p className="text-xl mb-8 text-foreground/90">
-            ARIA doesn't just send alerts. It gives you a fully operational Command Center:
+            ARIA doesn't just send alerts. It gives you a fully operational Command Center for both reputation monitoring and legal case preparation:
           </p>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">

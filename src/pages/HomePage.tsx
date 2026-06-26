@@ -39,8 +39,8 @@ const HomePage = () => {
     <PublicPagesProtection>
       <PublicLayout>
         <SEO
-          title="A.R.I.A™ — AI Reputation Defence & Threat Intelligence"
-          description="A.R.I.A™ is an AI-powered reputation defence platform: real-time threat detection, narrative protection, and identity defence for executives and brands."
+          title="A.R.I.A™ — AI Reputation Defence & Legal Response"
+          description="A.R.I.A™ combines AI-powered reputation monitoring with solicitor-ready legal response. Real-time threat detection, narrative defence, identity protection, and AI legal case preparation."
           path="/"
         />
         <div className="bg-background text-foreground min-h-screen">

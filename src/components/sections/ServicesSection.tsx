@@ -31,11 +31,16 @@ const ServiceCard = ({ service, index, visible }: { service: any; index: number;
       style={{ transitionDelay: visible ? `${index * 120}ms` : '0ms', transformStyle: 'preserve-3d' }}
     >
       <Card className="glass-card p-8 text-foreground hover:border-primary/30 hover:shadow-[0_0_30px_rgba(245,158,11,0.1)] transition-all duration-500 h-full flex flex-col">
-        <div className="flex items-center gap-4 mb-6">
+        <div className="flex items-center gap-4 mb-4">
           <div className="w-12 h-12 bg-primary/10 border border-primary/20 rounded-xl flex items-center justify-center">
             <service.icon className="h-6 w-6 text-primary" />
           </div>
-          <h3 className="text-xl font-bold">{service.title}</h3>
+          <div>
+            <span className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full ${service.category === 'Legal Response' ? 'bg-blue-500/15 text-blue-400' : 'bg-primary/15 text-primary'}`}>
+              {service.category}
+            </span>
+            <h3 className="text-xl font-bold mt-1">{service.title}</h3>
+          </div>
         </div>
 
         <ul className="text-muted-foreground space-y-2 mb-6 flex-1">
@@ -67,6 +72,7 @@ const ServicesSection = () => {
     {
       icon: Shield,
       title: "AI Threat Detection",
+      category: "AI Monitoring",
       href: "/reputation-threat-score",
       capabilities: [
         "Emerging narrative risk identification",
@@ -78,6 +84,7 @@ const ServicesSection = () => {
     {
       icon: Swords,
       title: "Narrative Defense",
+      category: "AI Monitoring",
       href: "/crisis-reputation-management",
       capabilities: [
         "Strategic response architecture",
@@ -89,6 +96,7 @@ const ServicesSection = () => {
     {
       icon: Fingerprint,
       title: "Identity Protection",
+      category: "AI Monitoring",
       href: "/services/online-impersonation-uk",
       capabilities: [
         "Impersonation scanning & alerts",
@@ -100,6 +108,7 @@ const ServicesSection = () => {
     {
       icon: Search,
       title: "Search Positioning",
+      category: "AI Monitoring",
       href: "/ai-search-visibility",
       capabilities: [
         "Defensive ranking strategy",
@@ -111,6 +120,7 @@ const ServicesSection = () => {
     {
       icon: Brain,
       title: "AI Reputation Readiness",
+      category: "AI Monitoring",
       href: "/ai-reputation-readiness",
       capabilities: [
         "What ChatGPT, Gemini & Perplexity say about you",
@@ -122,6 +132,7 @@ const ServicesSection = () => {
     {
       icon: Scale,
       title: "Legal Defence & Compliance",
+      category: "Legal Response",
       href: "/legal-defence-compliance",
       capabilities: [
         "GDPR takedowns & right-to-erasure enforcement",
@@ -137,10 +148,10 @@ const ServicesSection = () => {
       <div ref={ref} className="container mx-auto px-6">
         <div className={`text-center mb-16 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4">
-            Intelligence-Grade <span className="text-primary">Protection</span>
+            Intelligence-Grade <span className="text-primary">AI Monitoring & Legal Response</span>
           </h2>
           <p className="text-muted-foreground max-w-3xl mx-auto text-lg">
-            Six integrated defence layers powered by A.R.I.A™ — built for high-profile individuals, brands, and organisations that cannot afford reputational exposure. Select any layer below to explore it in detail.
+            Six integrated defence layers powered by A.R.I.A™ — combining AI monitoring with solicitor-ready legal response. Built for high-profile individuals, brands, and organisations that cannot afford reputational or legal exposure. Select any layer below to explore it in detail.
           </p>
         </div>
 
