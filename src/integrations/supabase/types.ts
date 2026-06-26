@@ -2379,6 +2379,7 @@ export type Database = {
           created_at: string
           desired_outcome: string | null
           email: string
+          evidence_files: Json
           evidence_summary: string | null
           full_name: string
           id: string
@@ -2395,6 +2396,7 @@ export type Database = {
           created_at?: string
           desired_outcome?: string | null
           email: string
+          evidence_files?: Json
           evidence_summary?: string | null
           full_name: string
           id?: string
@@ -2411,6 +2413,7 @@ export type Database = {
           created_at?: string
           desired_outcome?: string | null
           email?: string
+          evidence_files?: Json
           evidence_summary?: string | null
           full_name?: string
           id?: string
