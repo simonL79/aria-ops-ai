@@ -131,8 +131,8 @@ const LegalShieldPage = () => {
   return (
     <PublicLayout>
       <SEO
-        title="ARIA Legal Shield™ — Affordable Legal Protection Before Costs Spiral"
-        description="AI-powered legal protection, evidence building and solicitor-ready case preparation for individuals, creators and businesses. Not a law firm — clarity, structure and preparation."
+        title="ARIA Legal Shield™ — AI-Powered Legal Support Before You Need a Solicitor"
+        description="AI-powered legal information, document preparation and case organisation for individuals, creators and businesses. Understand your rights, organise evidence, and approach solicitors fully prepared. Not a law firm."
         path="/services/legal-shield"
         jsonLd={[faqJsonLd, serviceJsonLd, breadcrumbJsonLd]}
       />
@@ -142,19 +142,38 @@ const LegalShieldPage = () => {
         <section className="container mx-auto px-6 pt-20 pb-12 max-w-4xl">
           <p className="text-sm uppercase tracking-widest text-primary mb-4">ARIA Legal Shield™</p>
           <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
-            Affordable legal protection before legal costs spiral
+            Make legal understanding accessible to everyone
           </h1>
-          <p className="text-xl text-muted-foreground leading-relaxed mb-4">
-            Legal clarity. Evidence protection. Solicitor-ready support. ARIA Legal Shield helps
-            individuals, creators and businesses understand their rights, organise evidence, prepare
-            complaint letters, respond to disputes and build solicitor-ready case packs using
-            AI-powered legal intelligence.
-          </p>
-          <p className="text-lg text-muted-foreground leading-relaxed">
-            Whether you are dealing with online defamation, harassment, unpaid invoices, consumer
-            disputes, landlord issues, employment concerns or reputation damage, ARIA helps you take
-            control before the situation escalates.
-          </p>
+          <div className="space-y-4 text-lg text-muted-foreground leading-relaxed">
+            <p>
+              As ARIA has evolved, one issue has become impossible to ignore: for millions of people
+              and businesses, access to legal support is simply too expensive or too complex.
+            </p>
+            <p>
+              Many individuals do not need a solicitor on day one — they need clarity. They need to
+              understand their rights, organise their evidence, prepare the right documents, and
+              make informed decisions before committing to significant legal costs.
+            </p>
+            <p>
+              That is why we created ARIA Legal Shield™ — an AI-powered legal support platform designed
+              to help individuals, entrepreneurs, creators and businesses confidently navigate legal
+              issues through intelligent guidance, document preparation, evidence organisation and
+              solicitor-ready case preparation.
+            </p>
+            <p>
+              Whether you are facing a consumer dispute, employment issue, landlord disagreement,
+              unpaid invoice, online harassment, reputational attack or contractual disagreement,
+              ARIA Legal Shield™ helps you understand your options, organise your case and take the
+              next step with confidence.
+            </p>
+            <p>
+              Our goal is simple: to make legal understanding accessible to everyone — not just those
+              who can afford expensive legal fees. When specialist legal representation is required,
+              ARIA Legal Shield™ helps ensure you approach regulated legal professionals fully prepared,
+              with organised evidence, clear timelines and professionally structured documentation,
+              saving both time and potentially reducing legal costs.
+            </p>
+          </div>
           <div className="mt-8 flex flex-wrap gap-4">
             <Button asChild size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
               <Link to="/contact">
@@ -171,10 +190,10 @@ const LegalShieldPage = () => {
         <section className="container mx-auto px-6 pb-4 max-w-4xl">
           <div className="bg-card border border-primary/40 rounded-lg p-6">
             <p className="text-muted-foreground leading-relaxed">
-              <strong className="text-foreground">Important:</strong> ARIA Legal Shield is not a law
-              firm and does not replace a solicitor. It provides AI-powered legal information,
-              document preparation and evidence organisation to help customers understand their
-              position and prepare before taking professional legal advice.
+              ARIA Legal Shield™ provides AI-powered legal information, document preparation and
+              case organisation. It is not a law firm and does not provide regulated legal services
+              or act as a substitute for independent legal advice. Where appropriate, you will be
+              encouraged to seek advice from a qualified legal professional.
             </p>
           </div>
         </section>
