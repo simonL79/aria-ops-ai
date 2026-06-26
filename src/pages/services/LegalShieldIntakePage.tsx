@@ -104,6 +104,48 @@ const LegalShieldIntakePage = () => {
   const update = (field: keyof FormState, value: string | boolean) =>
     setForm((prev) => ({ ...prev, [field]: value }));
 
+  const addTimelineEntry = () =>
+    setForm((prev) => ({
+      ...prev,
+      evidence_timeline: [...prev.evidence_timeline, { date: '', event: '' }],
+    }));
+
+  const updateTimelineEntry = (index: number, field: keyof TimelineEntry, value: string) =>
+    setForm((prev) => ({
+      ...prev,
+      evidence_timeline: prev.evidence_timeline.map((entry, i) =>
+        i === index ? { ...entry, [field]: value } : entry,
+      ),
+    }));
+
+  const removeTimelineEntry = (index: number) =>
+    setForm((prev) => ({
+      ...prev,
+      evidence_timeline: prev.evidence_timeline.filter((_, i) => i !== index),
+    }));
+
+  const downloadCasePack = () => {
+    try {
+      const { reference } = generateCasePack({
+        issue_type: form.issue_type,
+        urgency_label: urgencyLevels.find((u) => u.value === form.urgency)?.label ?? form.urgency,
+        issue_description: form.issue_description.trim(),
+        desired_outcome: form.desired_outcome.trim() || undefined,
+        evidence_summary: form.evidence_summary.trim() || undefined,
+        evidence_timeline: form.evidence_timeline
+          .filter((e) => e.date.trim() || e.event.trim())
+          .map((e) => ({ date: e.date.trim(), event: e.event.trim() })),
+        full_name: form.full_name.trim(),
+        email: form.email.trim(),
+        phone: form.phone.trim() || undefined,
+      });
+      toast.success(`Case pack downloaded (ref ${reference}).`);
+    } catch (err) {
+      console.error('Case pack generation failed');
+      toast.error('Could not generate the case pack. Please try again.');
+    }
+  };
+
   const canContinue = () => {
     if (step === 0) return form.issue_type !== '';
     if (step === 1) return form.issue_description.trim().length >= 20;
