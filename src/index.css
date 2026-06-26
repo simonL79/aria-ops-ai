@@ -109,9 +109,10 @@
   }
 
   /* Highlight jumped-to sections with a champagne-gold focus outline */
-  section[id]:target {
-    outline: 2px solid hsl(var(--primary));
-    outline-offset: 12px;
+  section[id]:target,
+  section[id].aria-target-active {
+    outline: 2px solid hsl(var(--primary)) !important;
+    outline-offset: 12px !important;
     border-radius: 0.5rem;
     scroll-margin-top: 6rem;
   }
