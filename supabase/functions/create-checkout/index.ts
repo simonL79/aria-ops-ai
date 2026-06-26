@@ -8,11 +8,27 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Server-side price map — never trust client-supplied prices
-const PLAN_PRICES: Record<string, { name: string; amount: number }> = {
-  "basic": { name: "A.R.I.A™ Basic Plan", amount: 2900 },
-  "individual": { name: "A.R.I.A™ Individual Plan", amount: 9700 },
-  "pro": { name: "A.R.I.A™ PRO Plan", amount: 39700 },
+// Server-side price map — never trust client-supplied prices.
+// amount is in pence; interval is the billing cadence for the subscription.
+const PLAN_PRICES: Record<string, { name: string; description: string; amount: number; interval: "month" | "year" }> = {
+  "basic": {
+    name: "A.R.I.A™ Personal Shield",
+    description: "Reputation monitoring + everyday legal protection",
+    amount: 2900,
+    interval: "month",
+  },
+  "individual": {
+    name: "A.R.I.A™ Creator Shield",
+    description: "Reputation + defamation prep for creators & public figures",
+    amount: 9700,
+    interval: "month",
+  },
+  "pro": {
+    name: "A.R.I.A™ Business Shield",
+    description: "Executive & business protection with full legal support",
+    amount: 39700,
+    interval: "month",
+  },
 };
 
 serve(async (req) => {
