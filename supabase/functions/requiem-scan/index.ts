@@ -1,5 +1,6 @@
 // Requiem Scan — runs a SerpApi query, stores snapshot, updates job, writes audit log
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { requireAdmin, isAuthenticated } from "../_shared/auth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
