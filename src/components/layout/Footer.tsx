@@ -20,6 +20,11 @@ interface FooterGroup {
 
 const Footer = () => {
   const { pathname } = useLocation();
+  const [openItem, setOpenItem] = useState('');
+
+  useEffect(() => {
+    setOpenItem('');
+  }, [pathname]);
 
   const legalPaths = new Set([
     '/privacy-policy',
