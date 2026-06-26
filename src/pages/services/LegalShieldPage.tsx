@@ -146,34 +146,39 @@ const LegalShieldPage = () => {
           </h1>
           <div className="space-y-4 text-lg text-muted-foreground leading-relaxed">
             <p>
-              As ARIA has evolved, one issue has become impossible to ignore: for millions of people
-              and businesses, access to legal support is simply too expensive or too complex.
+              At ARIA, we believe that understanding your legal position should never depend solely
+              on your ability to afford expensive legal fees.
             </p>
             <p>
-              Many individuals do not need a solicitor on day one — they need clarity. They need to
-              understand their rights, organise their evidence, prepare the right documents, and
-              make informed decisions before committing to significant legal costs.
+              Every day, individuals, families, athletes, creators, homeowners and businesses face
+              legal questions that leave them uncertain about their rights, responsibilities and the
+              best course of action. For many, the first obstacle isn't the legal issue itself — it's
+              the cost of knowing where they stand.
             </p>
             <p>
-              That is why we created ARIA Legal Shield™ — an AI-powered legal support platform designed
-              to help individuals, entrepreneurs, creators and businesses confidently navigate legal
-              issues through intelligent guidance, document preparation, evidence organisation and
-              solicitor-ready case preparation.
+              That's why we created ARIA Legal Shield™ — an AI-powered legal intelligence and case
+              preparation platform designed to help people understand complex legal matters, organise
+              evidence, prepare professional documentation and make informed decisions before seeking
+              regulated legal representation where necessary.
             </p>
             <p>
-              Whether you are facing a consumer dispute, employment issue, landlord disagreement,
-              unpaid invoice, online harassment, reputational attack or contractual disagreement,
-              ARIA Legal Shield™ helps you understand your options, organise your case and take the
-              next step with confidence.
+              Whether you're negotiating a contract, dealing with a dispute, protecting your
+              reputation, resolving a consumer issue, challenging a parking charge, navigating
+              employment concerns, managing a property dispute, preparing a sports management
+              agreement or understanding business obligations, ARIA Legal Shield™ provides intelligent
+              guidance, structured preparation and practical support.
             </p>
             <p>
-              Our goal is simple: to make legal understanding accessible to everyone — not just those
-              who can afford expensive legal fees. When specialist legal representation is required,
-              ARIA Legal Shield™ helps ensure you approach regulated legal professionals fully prepared,
-              with organised evidence, clear timelines and professionally structured documentation,
-              saving both time and potentially reducing legal costs.
+              Rather than replacing legal professionals, ARIA Legal Shield™ helps users become better
+              prepared — saving time, reducing unnecessary costs and ensuring that when specialist
+              legal advice is required, they approach it with organised evidence, clear timelines and
+              professionally prepared documentation.
+            </p>
+            <p className="text-foreground font-medium">
+              Because confidence should begin with clarity — not uncertainty.
             </p>
           </div>
+
           <div className="mt-8 flex flex-wrap gap-4">
             <Button asChild size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
               <Link to="/services/legal-shield/intake">
