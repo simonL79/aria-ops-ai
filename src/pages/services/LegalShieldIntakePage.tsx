@@ -71,6 +71,7 @@ type FormState = {
   issue_description: string;
   desired_outcome: string;
   evidence_summary: string;
+  evidence_timeline: TimelineEntry[];
   urgency: string;
   full_name: string;
   email: string;
@@ -83,6 +84,7 @@ const initialState: FormState = {
   issue_description: '',
   desired_outcome: '',
   evidence_summary: '',
+  evidence_timeline: [],
   urgency: 'normal',
   full_name: '',
   email: '',
