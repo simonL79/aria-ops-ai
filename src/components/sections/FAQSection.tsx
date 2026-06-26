@@ -9,8 +9,16 @@ const faqs = [
     answer: "A.R.I.A™ (Adaptive Reputation Intelligence & Analysis) is an AI-powered platform that monitors, protects, and repairs your digital reputation, and prepares solicitor-ready legal responses through ARIA Legal Shield™ — from threat detection to evidence packs and case preparation."
   },
   {
-    question: "How do AI monitoring and legal response work together?",
-    answer: "A.R.I.A™ watches the web 24/7 for reputation threats. When a threat crosses into legal exposure — defamation, harassment, privacy breaches, contract disputes — ARIA Legal Shield™ organises evidence, drafts letters, and produces a solicitor-ready case pack so you can escalate cleanly."
+    question: "What does the AI detect?",
+    answer: "A.R.I.A™ detects emerging reputation threats including hostile narratives, negative press acceleration, impersonation and profile cloning, synthetic content, review manipulation, search-ranking vulnerabilities, and sentiment volatility across news, social platforms, forums, review sites, and dark-web channels."
+  },
+  {
+    question: "How are alerts handled?",
+    answer: "Alerts are triaged by severity in real time. Low-risk items are logged for review; medium-risk items trigger playbook suggestions and notification; high-risk or legal-crossover events escalate to human operators and, where needed, ARIA Legal Shield™ begins evidence collection and solicitor-ready case preparation."
+  },
+  {
+    question: "What legal intelligence outputs are produced?",
+    answer: "ARIA Legal Shield™ produces plain-English legal issue summaries, evidence checklists, chronology timelines, draft complaint or response letters, risk flags, deadline reminders, escalation guidance, and a downloadable solicitor-ready PDF case pack."
   },
   {
     question: "How fast do you respond to threats?",
