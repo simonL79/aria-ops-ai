@@ -148,10 +148,10 @@ const ServicesSection = () => {
       <div ref={ref} className="container mx-auto px-6">
         <div className={`text-center mb-16 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4">
-            Intelligence-Grade <span className="text-primary">Protection</span>
+            Intelligence-Grade <span className="text-primary">AI Monitoring & Legal Response</span>
           </h2>
           <p className="text-muted-foreground max-w-3xl mx-auto text-lg">
-            Six integrated defence layers powered by A.R.I.A™ — built for high-profile individuals, brands, and organisations that cannot afford reputational exposure. Select any layer below to explore it in detail.
+            Six integrated defence layers powered by A.R.I.A™ — combining AI monitoring with solicitor-ready legal response. Built for high-profile individuals, brands, and organisations that cannot afford reputational or legal exposure. Select any layer below to explore it in detail.
           </p>
         </div>
 
