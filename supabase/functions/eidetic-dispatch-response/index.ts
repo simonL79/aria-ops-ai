@@ -3,6 +3,7 @@
 // If hook.requires_approval=false, executes immediately. Otherwise stays pending for operator approval.
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { executeAction } from '../_shared/eidetic-executors.ts';
+import { requireAdmin, isAuthenticated } from '../_shared/auth.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
