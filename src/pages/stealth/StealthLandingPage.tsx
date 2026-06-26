@@ -131,7 +131,7 @@ const StealthLandingPage: React.FC<{ cfg: StealthPageConfig }> = ({ cfg }) => {
         </section>
 
         {/* Problem */}
-        <section className="container mx-auto px-6 py-16 max-w-4xl">
+        <section id="problem" tabIndex={-1} className="container mx-auto px-6 py-16 max-w-4xl scroll-mt-24">
           <h2 className="text-3xl md:text-4xl font-bold mb-6">{cfg.problem.heading}</h2>
           <div className="space-y-4">
             {cfg.problem.body.map((p, i) => (
@@ -143,7 +143,7 @@ const StealthLandingPage: React.FC<{ cfg: StealthPageConfig }> = ({ cfg }) => {
         </section>
 
         {/* Capabilities */}
-        <section className="container mx-auto px-6 py-16 max-w-6xl">
+        <section id="capabilities" tabIndex={-1} className="container mx-auto px-6 py-16 max-w-6xl scroll-mt-24">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">The A.R.I.A approach</h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
@@ -167,7 +167,7 @@ const StealthLandingPage: React.FC<{ cfg: StealthPageConfig }> = ({ cfg }) => {
         </section>
 
         {/* Keyword cluster grid */}
-        <section className="container mx-auto px-6 py-16 max-w-6xl">
+        <section id="coverage" tabIndex={-1} className="container mx-auto px-6 py-16 max-w-6xl scroll-mt-24">
           <div className="mb-10">
             <p className="text-sm uppercase tracking-widest text-primary mb-3">What's covered</p>
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
@@ -202,7 +202,7 @@ const StealthLandingPage: React.FC<{ cfg: StealthPageConfig }> = ({ cfg }) => {
         </section>
 
         {/* Methodology */}
-        <section className="container mx-auto px-6 py-16 max-w-5xl">
+        <section id="methodology" tabIndex={-1} className="container mx-auto px-6 py-16 max-w-5xl scroll-mt-24">
           <h2 className="text-3xl md:text-4xl font-bold mb-10">How A.R.I.A executes</h2>
           <ol className="space-y-6">
             {cfg.methodology.map((m) => (
@@ -220,7 +220,7 @@ const StealthLandingPage: React.FC<{ cfg: StealthPageConfig }> = ({ cfg }) => {
         </section>
 
         {/* Comparison table */}
-        <section className="container mx-auto px-6 py-16 max-w-5xl">
+        <section id="comparison" tabIndex={-1} className="container mx-auto px-6 py-16 max-w-5xl scroll-mt-24">
           <h2 className="text-3xl md:text-4xl font-bold mb-6">
             A.R.I.A vs {cfg.comparison.competitorLabel}
           </h2>
@@ -253,7 +253,7 @@ const StealthLandingPage: React.FC<{ cfg: StealthPageConfig }> = ({ cfg }) => {
         </section>
 
         {/* FAQ */}
-        <section className="container mx-auto px-6 py-12 max-w-4xl">
+        <section id="faq" tabIndex={-1} className="container mx-auto px-6 py-12 max-w-4xl scroll-mt-24">
           <h2 className="text-3xl md:text-4xl font-bold mb-8">Frequently asked questions</h2>
           <div className="space-y-4">
             {cfg.faqs.map((f) => (

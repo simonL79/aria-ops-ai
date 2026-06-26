@@ -99,9 +99,22 @@
     min-height: 100vh;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  /* Highlight jumped-to sections with a champagne-gold focus outline */
+  section[id]:target,
+  section[id].aria-target-active {
+    outline: 2px solid hsl(var(--primary)) !important;
+    outline-offset: 12px !important;
+    border-radius: 0.5rem;
+    scroll-margin-top: 6rem;
   }
 }
 
