@@ -111,6 +111,7 @@ const Footer = () => {
             <Logo variant="light" size="xl" />
           </div>
           <Accordion
+            key={pathname || 'root'}
             type="single"
             collapsible
             value={openItem}
