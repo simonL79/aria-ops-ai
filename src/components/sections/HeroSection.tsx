@@ -88,13 +88,13 @@ const DashboardMockup = () => {
   );
 };
 
-const HERO_HEADLINE = 'AI Reputation Intelligence That Detects Risk Before It Escalates';
+const HERO_HEADLINE = 'AI Reputation & Legal Intelligence That Detects Risk Before It Escalates';
 
 const renderHeadlineWords = (text: string) =>
   text.split(' ').map((word, i) => (
     <React.Fragment key={i}>
       {i > 0 && ' '}
-      {['Intelligence', 'Risk'].includes(word) ? (
+      {['Reputation', 'Legal', 'Intelligence', 'Risk'].includes(word.replace(/[^a-zA-Z]/g, '')) ? (
         <span className="text-primary">{word}</span>
       ) : (
         <span>{word}</span>
@@ -158,7 +158,7 @@ const HeroSection = () => {
           </h1>
 
           <p className="text-lg md:text-xl lg:text-2xl leading-relaxed text-muted-foreground max-w-3xl mx-auto">
-            ARIA Ops combines AI signal monitoring, predictive threat analysis, and strategic human response systems to protect reputations in real time.
+            ARIA Ops combines AI signal monitoring, predictive threat analysis, and solicitor-ready legal defence to protect reputations and resolve disputes in real time.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
