@@ -124,6 +124,7 @@ function App() {
                       <Route path="/services/online-impersonation-uk" element={<OnlineImpersonationUKPage />} />
                       <Route path="/services/brand-protection" element={<BrandProtectionPage />} />
                       <Route path="/services/legal-shield" element={<LegalShieldPage />} />
+                      <Route path="/services/legal-shield/intake" element={<LegalShieldIntakePage />} />
                       <Route path="/ai-reputation-readiness" element={<AIReputationReadinessPage />} />
                       <Route path="/ai-reputation-management" element={<StealthAIReputationManagementPage />} />
                       <Route path="/online-reputation-management-uk" element={<StealthOnlineReputationManagementUKPage />} />
