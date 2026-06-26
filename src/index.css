@@ -24,7 +24,7 @@
     --muted: 256 26% 16%;               /* #1F2937 */
     --muted-foreground: 215 20% 65%;    /* #94A3B8 */
 
-    --accent: 258 90% 66%;               /* champagne gold accent */
+    --accent: 255 92% 76%;               /* champagne gold accent */
     --accent-foreground: 258 30% 9%;
 
     --info: 199 92% 60%;                /* #38BDF8 AI blue — data / signal */
@@ -70,7 +70,7 @@
     --secondary-foreground: 210 40% 98%;
     --muted: 256 26% 16%;
     --muted-foreground: 215 20% 65%;
-    --accent: 258 90% 66%;
+    --accent: 255 92% 76%;
     --accent-foreground: 258 30% 9%;
     --destructive: 0 74% 42%;
     --destructive-foreground: 210 40% 98%;
