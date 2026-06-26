@@ -72,6 +72,7 @@ const ServicesSection = () => {
     {
       icon: Shield,
       title: "AI Threat Detection",
+      category: "AI Monitoring",
       href: "/reputation-threat-score",
       capabilities: [
         "Emerging narrative risk identification",
@@ -83,6 +84,7 @@ const ServicesSection = () => {
     {
       icon: Swords,
       title: "Narrative Defense",
+      category: "AI Monitoring",
       href: "/crisis-reputation-management",
       capabilities: [
         "Strategic response architecture",
@@ -94,6 +96,7 @@ const ServicesSection = () => {
     {
       icon: Fingerprint,
       title: "Identity Protection",
+      category: "AI Monitoring",
       href: "/services/online-impersonation-uk",
       capabilities: [
         "Impersonation scanning & alerts",
@@ -105,6 +108,7 @@ const ServicesSection = () => {
     {
       icon: Search,
       title: "Search Positioning",
+      category: "AI Monitoring",
       href: "/ai-search-visibility",
       capabilities: [
         "Defensive ranking strategy",
@@ -116,6 +120,7 @@ const ServicesSection = () => {
     {
       icon: Brain,
       title: "AI Reputation Readiness",
+      category: "AI Monitoring",
       href: "/ai-reputation-readiness",
       capabilities: [
         "What ChatGPT, Gemini & Perplexity say about you",
@@ -127,6 +132,7 @@ const ServicesSection = () => {
     {
       icon: Scale,
       title: "Legal Defence & Compliance",
+      category: "Legal Response",
       href: "/legal-defence-compliance",
       capabilities: [
         "GDPR takedowns & right-to-erasure enforcement",
