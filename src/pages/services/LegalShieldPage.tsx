@@ -384,6 +384,99 @@ const LegalShieldPage = () => {
           </div>
         </section>
 
+        {/* How it works — workflow */}
+        <section className="container mx-auto px-6 py-12 max-w-4xl">
+          <p className="text-sm uppercase tracking-widest text-primary mb-3">How it works</p>
+          <h2 className="text-3xl font-bold mb-4">From scattered facts to a solicitor-ready case file</h2>
+          <p className="text-muted-foreground text-lg leading-relaxed mb-8 max-w-3xl">
+            ARIA handles everything <span className="text-foreground font-medium">before</span> you
+            instruct a solicitor — the preparation that normally takes hours, done in minutes. You
+            stay in control of every decision.
+          </p>
+          <ol className="space-y-3">
+            {workflow.map((step, i) => (
+              <li key={step} className="flex items-start gap-4 bg-card border border-border rounded-lg px-5 py-4">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary font-bold text-sm">
+                  {i + 1}
+                </span>
+                <span className="text-muted-foreground pt-1">{step}</span>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        {/* Scope — what we do and don't do */}
+        <section className="container mx-auto px-6 py-12 max-w-5xl">
+          <h2 className="text-3xl font-bold mb-2">AI Legal Intelligence — not an "AI lawyer"</h2>
+          <p className="text-muted-foreground mb-8 max-w-3xl">
+            We are deliberate about scope. ARIA informs and prepares; it never directs your decisions
+            or acts as a regulated legal practice. That clear boundary is what keeps you protected.
+          </p>
+          <div className="grid md:grid-cols-3 gap-6">
+            {scopeLevels.map(({ tone, badge, title, body, items }) => {
+              const accent =
+                tone === 'green'
+                  ? 'border-primary/50'
+                  : tone === 'amber'
+                  ? 'border-amber-500/40'
+                  : 'border-destructive/40';
+              const dot =
+                tone === 'green'
+                  ? 'bg-primary'
+                  : tone === 'amber'
+                  ? 'bg-amber-500'
+                  : 'bg-destructive';
+              return (
+                <div key={title} className={`bg-card border ${accent} rounded-lg p-6 flex flex-col`}>
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className={`h-2.5 w-2.5 rounded-full ${dot}`} />
+                    <span className="text-xs uppercase tracking-wider text-muted-foreground">{badge}</span>
+                  </div>
+                  <h3 className="text-lg font-bold mb-2">{title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed mb-4">{body}</p>
+                  <ul className="space-y-1.5 mt-auto">
+                    {items.map((item) => (
+                      <li key={item} className="flex items-start gap-2 text-sm text-muted-foreground">
+                        <span className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${dot}`} />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Solicitor network */}
+        <section className="container mx-auto px-6 py-12 max-w-4xl">
+          <div className="rounded-2xl border border-primary/40 bg-card p-8 md:p-12">
+            <p className="text-sm uppercase tracking-widest text-primary mb-3">Partner solicitor network</p>
+            <h2 className="text-3xl font-bold mb-4">When you do need a solicitor, they start hours ahead</h2>
+            <p className="text-muted-foreground text-lg leading-relaxed mb-8 max-w-3xl">
+              Instead of handing a solicitor 400 random emails, ARIA hands them an organised case pack —
+              so their time goes on legal analysis, strategy and representation, not admin.
+            </p>
+            <div className="grid sm:grid-cols-2 gap-3">
+              {[
+                'Timeline of events',
+                'Evidence, indexed and timestamped',
+                'Draft letters',
+                'Contract summary',
+                'Relevant legislation',
+                'Witness list',
+                'Supporting documents',
+                'Plain-English issue summary',
+              ].map((item) => (
+                <div key={item} className="flex items-start gap-3 text-muted-foreground">
+                  <Check className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                  <span>{item}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* Areas we support */}
         <section className="container mx-auto px-6 py-12 max-w-5xl">
           <h2 className="text-3xl font-bold mb-2">Areas ARIA Legal Shield™ can support</h2>
