@@ -50,6 +50,7 @@ const RemoveGoogleReviewsPage = lazy(() => import("./pages/services/RemoveGoogle
 const OnlineImpersonationUKPage = lazy(() => import("./pages/services/OnlineImpersonationUKPage"));
 const BrandProtectionPage = lazy(() => import("./pages/services/BrandProtectionPage"));
 const LegalShieldPage = lazy(() => import("./pages/services/LegalShieldPage"));
+const LegalShieldIntakePage = lazy(() => import("./pages/services/LegalShieldIntakePage"));
 const SimonLindsayAIPage = lazy(() => import("./pages/simon-lindsay/AIPage"));
 const SimonLindsayEntrepreneurPage = lazy(() => import("./pages/simon-lindsay/EntrepreneurPage"));
 const SimonLindsayAriaPage = lazy(() => import("./pages/simon-lindsay/AriaPage"));
