@@ -909,7 +909,7 @@ const LegalShieldIntakePage = () => {
                       Continue <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                   ) : (
-                    <Button onClick={handleSubmit} disabled={isSubmitting || !form.consent_given}>
+                    <Button onClick={handleSubmit} disabled={isSubmitting || !allDisclaimersAgreed}>
                       {isSubmitting ? (
                         <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Submitting…</>
                       ) : (
