@@ -19,7 +19,7 @@ export interface CasePackData {
 
 // Brand colours
 const GOLD: [number, number, number] = [139, 92, 246]; // #8B5CF6
-const NAVY: [number, number, number] = [17, 24, 39]; // #111827
+const NAVY: [number, number, number] = [21, 18, 31]; // #15121F
 const SLATE: [number, number, number] = [71, 85, 105]; // slate-600
 const LIGHT: [number, number, number] = [148, 163, 184]; // muted
 
