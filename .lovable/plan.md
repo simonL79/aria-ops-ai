@@ -1,60 +1,49 @@
-# Terms, Privacy & Disclaimer — Rebuild
+# A.R.I.A™ — Operational OS, AI Readiness & Competitor Positioning
 
-Operator: **Simon Lindsay Consultancy T/A A.R.I.A™** — ariaops.co.uk
-Governing law: **Scotland / Scottish courts**
+Three workstreams, all wired to live Supabase data (no mock data). Built on the existing `src/pages/admin/*` and `src/pages/portal/*` surfaces rather than new shells.
 
-## 1. Shared legal layout component
+## Workstream 1 — Operational dashboard (admin OS)
 
-Create `src/components/legal/LegalDocument.tsx`:
-- Wraps content in `PublicLayout` (Header + Footer already themed)
-- Dark luxury surface: `bg-background` page, `bg-card` panel with `border-border/40`, champagne `text-primary` accent rule, gold underline on H1
-- Props: `title`, `lastUpdated`, `children`
-- Typography: serif/display H1, `text-foreground` body, `text-muted-foreground` for fine print, anchored section IDs for ToC
-- Sticky table-of-contents on `lg:` viewports, collapsible on mobile
-- Includes `<SEO>` with title/description/path
+The current `AdminDashboardPage` shows hardcoded numbers (`activeThreatScans: 12`, `clientsMonitored: 8`, etc.) and a fake "Recent Activity" list. Replace all of it with live queries.
 
-## 2. Rebuild `src/pages/Terms.tsx`
+- **Live KPI cards**, each from a real table:
+  - Clients monitored → `clients` count
+  - Active threats → `threats` where `status = 'active'`
+  - New findings (7d) → `scan_results` where `created_at >= now()-7d`
+  - Open Shield alerts → `shield_alerts` active count
+- **Recent activity** → real rows from `activity_logs` (action / entity_type / details / created_at), newest first.
+- **System health** → driven by `system_health_checks` / `live_status` instead of the static "Ollama Online" block.
+- A small `useAdminDashboardData` hook centralises the queries; loading + empty states handled (no silent zeros).
+- Quick Actions kept, pointed at existing routes.
 
-Replace placeholder with full content following the user's blueprint, organised as 12 numbered sections:
+### Portal dashboard bug fix
+`PortalDashboard` queries `client_portal_clients`, which does not exist — it should be `clients` filtered by `clientIds`. Fix the table name and the `tier` lookup so the client-facing overview actually populates.
 
-1. Business identity — Simon Lindsay T/A A.R.I.A™, ariaops.co.uk, Scottish law
-2. What A.R.I.A provides — service list (monitoring, scoring, suppression support…), with explicit "no guaranteed removal/control" disclaimer wording
-3. No guaranteed outcome — bullet list of what cannot be guaranteed
-4. AI disclaimer — outputs are advisory; may be incomplete/delayed/inaccurate
-5. Not legal/financial/medical advice — instruct qualified solicitors for legal action
-6. Client responsibilities — accuracy, lawfulness, authorisation, no harassment
-7. Lawful use — prohibited uses (silence criticism, impersonate, manipulate reviews, etc.)
-8. Third-party platforms — no control over Google/Meta/TikTok/X/YouTube/Reddit/news/review sites/ChatGPT/Gemini/Perplexity/Copilot
-9. Payments & cancellations — pay before work, 3-day onboarding, 90-day initial term, cancel after initial term, no refunds for work commenced
-10. Confidentiality — mutual, with lawful exceptions
-11. Limitation of liability — cap + excluded loss types; preserve non-excludable liabilities (death, personal injury, fraud)
-12. Governing law & contact — Scotland; contact route via `/contact`
+## Workstream 2 — AI Reputation Readiness (the differentiator)
 
-Add "Last updated" date and link to Privacy Policy + Disclaimer at the foot.
+Promote "what do LLMs say about you?" from a sub-feature to a named entry point.
 
-## 3. Refresh `src/pages/PrivacyPolicyPage.tsx`
+- **Public lead-magnet page** `/ai-reputation-readiness` (route already referenced in related links but not built): name + entity input → kicks off a readiness check, captures the lead into `reputation_scan_submissions`, and renders a **Readiness Score (0–100)** across categories: Search presence, LLM answer accuracy, Negative-content exposure, Authority/structured-data coverage.
+- **Edge function** `ai-readiness-scan`: takes an entity name, calls the Lovable AI gateway (`LOVABLE_API_KEY`, already set) to assess how an LLM currently describes the entity, returns category scores + summary. Generic error handling, JWT validated in code, `npm:` specifiers per project rules.
+- **Admin readiness report view** inside the operator OS so Simon can review/queue results before they reach a client.
+- Prominent nav/CTA placement so it reads as a headline product, not a buried tool.
 
-Check current contents; if placeholder/light-themed, rewrite to cover: data collected, lawful basis (UK GDPR), purpose, retention, sharing (Supabase/edge providers), security, data subject rights, contact route (`/request-data-access`). Use the new `LegalDocument` shell.
+## Workstream 3 — Competitor positioning
 
-## 4. Refresh `src/pages/DisclaimerPage.tsx` as Acceptable Use / Service Disclaimer
+- A reusable `ComparisonTable` (extending the pattern already in the stealth pages' `comparison` config) rendering A.R.I.A vs **Reputation.com, DeleteMe, BrandYourself** across: AI-native monitoring, LLM readiness, real-time threat scoring, human crisis response, GDPR/RTBF removal, UK base, price.
+- Surfaced as a section on the home/pricing area and as standalone content, with the data defined in one config object for easy editing.
 
-Combine acceptable-use rules (section 7 of Terms expanded) + service disclaimer (AI accuracy + no guarantees). Use the new `LegalDocument` shell.
+## Suggested sequence
+1. Portal dashboard table-name fix (fast win, unblocks client view).
+2. Admin dashboard → live data + activity feed.
+3. AI Readiness scan (edge function + public page + admin view).
+4. Competitor comparison surface.
 
-## 5. Cross-link & footer
+## Technical notes
+- New table likely needed: `ai_readiness_reports` (entity, scores jsonb, summary, client_id nullable, created_at) with GRANTs + RLS (admin full; portal users read own via `user_owns_client`). Migration will include GRANT + RLS in the correct order.
+- Reuse `useAuth().clientIds`, `has_role`, and `user_owns_client` for access control — no new auth model.
+- Cast Supabase table refs with `as any` per project convention to avoid TS deep-instantiation errors.
+- All scores/metrics come from real scans or stored rows; nothing hardcoded.
 
-Verify `Footer.tsx` links to `/terms`, `/privacy-policy`, `/disclaimer`. No new routes needed (all three already exist in `nav-items.tsx`).
-
-## Out of scope
-
-- No backend / DB changes
-- No new routes
-- No copy for cookie banner (separate task if needed)
-- Final legal sign-off remains the user's responsibility; copy is a strong working draft, not solicitor-reviewed advice
-
-## Files touched
-
-- new: `src/components/legal/LegalDocument.tsx`
-- edit: `src/pages/Terms.tsx`
-- edit: `src/pages/PrivacyPolicyPage.tsx`
-- edit: `src/pages/DisclaimerPage.tsx`
-- possible edit: `src/components/layout/Footer.tsx` (only if links missing)
+## Open question
+For pricing optimization (the 4th brief priority you didn't select): leave PRO at £397 for now and revisit after the readiness feature ships? I've excluded it from this plan unless you want it folded in.
