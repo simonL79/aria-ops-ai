@@ -3,6 +3,7 @@
 // If hook.requires_approval=false, executes immediately. Otherwise stays pending for operator approval.
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { executeAction } from '../_shared/eidetic-executors.ts';
+import { requireAdmin, isAuthenticated } from '../_shared/auth.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -17,9 +18,18 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
   try {
+    // Allow either an admin user OR an internal service-role caller (autopilot/cron).
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const authHeader = req.headers.get('authorization') ?? '';
+    const isServiceRole = authHeader === `Bearer ${serviceRoleKey}`;
+    if (!isServiceRole) {
+      const auth = await requireAdmin(req);
+      if (!isAuthenticated(auth)) return auth;
+    }
+
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+      serviceRoleKey,
     );
 
     const { event_id } = (await req.json()) as Body;
