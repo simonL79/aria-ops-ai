@@ -450,6 +450,31 @@ const LegalShieldPage = () => {
           </Accordion>
         </section>
 
+        {/* ARIA ecosystem */}
+        <section className="container mx-auto px-6 py-12 max-w-5xl">
+          <h2 className="text-3xl font-bold mb-2">Part of the wider ARIA ecosystem</h2>
+          <p className="text-muted-foreground mb-8 max-w-3xl">
+            Legal Shield is one layer of an integrated platform built to protect every part of your
+            personal and professional life.
+          </p>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {ecosystem.map(({ icon: Icon, name, body }) => (
+              <div
+                key={name}
+                className={`bg-card border rounded-lg p-6 ${
+                  name === 'ARIA Legal Shield™' ? 'border-primary' : 'border-border'
+                }`}
+              >
+                <Icon className="h-7 w-7 text-primary mb-3" />
+                <h3 className="text-lg font-bold mb-1">{name}</h3>
+                <p className="text-muted-foreground">{body}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+
+
         {/* Related */}
         <section className="container mx-auto px-6 pb-20 max-w-4xl">
           <h2 className="text-xl font-bold mb-4">Related services</h2>
