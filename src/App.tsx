@@ -49,6 +49,7 @@ const CybersecurityFrameworkPage = lazy(() => import("./pages/CybersecurityFrame
 const RemoveGoogleReviewsPage = lazy(() => import("./pages/services/RemoveGoogleReviewsPage"));
 const OnlineImpersonationUKPage = lazy(() => import("./pages/services/OnlineImpersonationUKPage"));
 const BrandProtectionPage = lazy(() => import("./pages/services/BrandProtectionPage"));
+const LegalShieldPage = lazy(() => import("./pages/services/LegalShieldPage"));
 const SimonLindsayAIPage = lazy(() => import("./pages/simon-lindsay/AIPage"));
 const SimonLindsayEntrepreneurPage = lazy(() => import("./pages/simon-lindsay/EntrepreneurPage"));
 const SimonLindsayAriaPage = lazy(() => import("./pages/simon-lindsay/AriaPage"));
@@ -121,6 +122,7 @@ function App() {
                       <Route path="/services/remove-google-reviews" element={<RemoveGoogleReviewsPage />} />
                       <Route path="/services/online-impersonation-uk" element={<OnlineImpersonationUKPage />} />
                       <Route path="/services/brand-protection" element={<BrandProtectionPage />} />
+                      <Route path="/services/legal-shield" element={<LegalShieldPage />} />
                       <Route path="/ai-reputation-readiness" element={<AIReputationReadinessPage />} />
                       <Route path="/ai-reputation-management" element={<StealthAIReputationManagementPage />} />
                       <Route path="/online-reputation-management-uk" element={<StealthOnlineReputationManagementUKPage />} />

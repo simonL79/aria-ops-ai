@@ -22,6 +22,7 @@ const Footer = () => {
             <div className="flex flex-col gap-2">
               <span className="text-foreground/60 uppercase tracking-wider text-xs mb-1">Services</span>
               <Link to="/services/brand-protection" className="text-premium-silver hover:text-foreground transition-colors">Brand Protection</Link>
+              <Link to="/services/legal-shield" className="text-premium-silver hover:text-foreground transition-colors">ARIA Legal Shield</Link>
               <Link to="/services/remove-google-reviews" className="text-premium-silver hover:text-foreground transition-colors">Remove Google Reviews</Link>
               <Link to="/services/online-impersonation-uk" className="text-premium-silver hover:text-foreground transition-colors">Online Impersonation (UK)</Link>
               <Link to="/scan" className="text-premium-silver hover:text-foreground transition-colors">Free Threat Scan</Link>
