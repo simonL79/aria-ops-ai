@@ -34,7 +34,7 @@ const Footer = () => {
   const linkClass = (path: string) => {
     const isLegalActive = legalPaths.has(path) && pathname === path;
     return isLegalActive
-      ? 'text-[#C6A15B] font-medium'
+      ? 'text-[#8B5CF6] font-medium'
       : 'text-premium-silver hover:text-foreground transition-colors';
   };
 

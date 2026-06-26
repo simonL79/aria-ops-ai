@@ -86,16 +86,16 @@ export default {
 					darkTertiary: '#182231',  // card surface
 					gray: '#94A3B8',
 					lightGray: '#CBD5E1',
-					accent: '#C6A15B',        // champagne gold
-					accentDark: '#A8853F',
+					accent: '#8B5CF6',        // champagne gold
+					accentDark: '#6D28D9',
 					info: '#38BDF8',          // AI blue
 					border: '#2A3441',
 					borderLight: '#1F2937'
 				},
 				brand: {
-					DEFAULT: '#C6A15B',
-					light: '#D9BC85',
-					dark: '#A8853F',
+					DEFAULT: '#8B5CF6',
+					light: '#A78BFA',
+					dark: '#6D28D9',
 					navy: '#111827',
 					panel: '#1F2937'
 				},
@@ -109,7 +109,7 @@ export default {
 					darkGray: '#1F2937',
 					gray: '#94A3B8',
 					silver: '#CBD5E1',
-					gold: '#C6A15B'
+					gold: '#8B5CF6'
 				}
 			},
 			borderRadius: {
