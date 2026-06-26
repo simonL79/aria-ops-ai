@@ -573,6 +573,12 @@ const LegalShieldIntakePage = () => {
                         <dt className="text-muted-foreground">Contact</dt>
                         <dd className="text-foreground">{form.full_name} · {form.email}{form.phone ? ` · ${form.phone}` : ''}</dd>
                       </div>
+                      {files.length > 0 && (
+                        <div>
+                          <dt className="text-muted-foreground">Evidence files</dt>
+                          <dd className="text-foreground">{files.length} file{files.length > 1 ? 's' : ''} attached</dd>
+                        </div>
+                      )}
                     </dl>
 
                     <label className="flex items-start gap-3 cursor-pointer">
