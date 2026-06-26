@@ -150,10 +150,12 @@ const HeroSection = () => {
             </span>
             <span className="absolute inset-0 block">
               {renderHeadlineWords(displayed)}
-              <span
-                aria-hidden="true"
-                className={`inline-block w-[3px] h-[0.9em] bg-primary ml-1 align-text-bottom animate-pulse transition-opacity duration-300 ${done ? 'opacity-0' : 'opacity-100'}`}
-              />
+              {!done && (
+                <span
+                  aria-hidden="true"
+                  className="inline-block w-[3px] h-[0.9em] bg-primary ml-1 align-text-bottom animate-pulse"
+                />
+              )}
             </span>
           </h1>
 
