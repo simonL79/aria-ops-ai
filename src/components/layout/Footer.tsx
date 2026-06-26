@@ -111,7 +111,6 @@ const Footer = () => {
           <Accordion
             type="single"
             collapsible
-            defaultValue="Company"
             className="w-full md:w-auto md:grid md:grid-cols-5 gap-x-8 gap-y-3 text-sm text-left"
           >
             {groups.map((group) => (
