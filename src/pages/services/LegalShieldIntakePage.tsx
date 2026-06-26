@@ -123,6 +123,79 @@ const LegalShieldIntakePage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
+  const [isAnalysing, setIsAnalysing] = useState(false);
+  const [suggestions, setSuggestions] = useState<TimelineEntry[]>([]);
+
+  const fileToDataUrl = (file: File) =>
+    new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(file);
+    });
+
+  const analyseEvidence = async () => {
+    const analysable = files.filter((f) => f.type !== 'image/heic');
+    if (analysable.length === 0) {
+      toast.error('Add a screenshot, photo or PDF first (HEIC files cannot be read).');
+      return;
+    }
+    setIsAnalysing(true);
+    try {
+      const encoded = await Promise.all(
+        analysable.map(async (f) => ({
+          name: f.name,
+          type: f.type,
+          dataUrl: await fileToDataUrl(f),
+        })),
+      );
+      const { data, error } = await supabase.functions.invoke('extract-evidence-timeline', {
+        body: { files: encoded },
+      });
+      if (error) throw error;
+      const entries: TimelineEntry[] = Array.isArray(data?.entries)
+        ? data.entries
+            .map((e: { date?: string; event?: string }) => ({
+              date: (e.date ?? '').trim(),
+              event: (e.event ?? '').trim(),
+            }))
+            .filter((e: TimelineEntry) => e.event)
+        : [];
+      if (entries.length === 0) {
+        toast.message('No clear timeline events found in the files.');
+      } else {
+        setSuggestions(entries);
+        toast.success(`Found ${entries.length} suggested event${entries.length === 1 ? '' : 's'}.`);
+      }
+    } catch (err) {
+      console.error('Evidence analysis failed');
+      toast.error('Could not analyse the evidence. Please try again.');
+    } finally {
+      setIsAnalysing(false);
+    }
+  };
+
+  const addSuggestion = (index: number) => {
+    setSuggestions((prev) => {
+      const picked = prev[index];
+      if (picked) {
+        setForm((f) => ({
+          ...f,
+          evidence_timeline: [...f.evidence_timeline, picked],
+        }));
+      }
+      return prev.filter((_, i) => i !== index);
+    });
+  };
+
+  const addAllSuggestions = () => {
+    setForm((f) => ({
+      ...f,
+      evidence_timeline: [...f.evidence_timeline, ...suggestions],
+    }));
+    setSuggestions([]);
+    toast.success('All suggestions added to your timeline.');
+  };
 
   const addFiles = (incoming: FileList | null) => {
     if (!incoming) return;
