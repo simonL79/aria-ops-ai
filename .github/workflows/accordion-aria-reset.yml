@@ -3,8 +3,16 @@ name: Accordion ARIA reset test
 # Regression guard for the footer accordion: after navigating between
 # routes, every accordion trigger must reset to aria-expanded="false"
 # with a valid aria-controls binding and a collapsed panel.
+#
+# - Pull requests: build the app and serve it locally, then run the
+#   Playwright regression against the PR's own code. Failures are
+#   reported as inline GitHub annotations via the test's ::error::
+#   workflow commands.
+# - Push to main / manual dispatch: run against the deployed URL.
 
 on:
+  pull_request:
+    branches: [main]
   push:
     branches: [main]
     paths:
@@ -19,6 +27,15 @@ on:
         required: false
         default: 'https://www.ariaops.co.uk'
 
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
+concurrency:
+  group: accordion-aria-reset-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -29,7 +46,31 @@ jobs:
           node-version: '20'
       - name: Install Playwright + chromium
         run: npx --yes playwright@1.47.0 install --with-deps chromium
-      - name: Run accordion ARIA reset regression test
+
+      # --- Pull request: build + serve the PR code locally ---------------
+      - name: Install dependencies
+        if: github.event_name == 'pull_request'
+        run: npm ci
+      - name: Build app
+        if: github.event_name == 'pull_request'
+        run: npm run build
+      - name: Serve build and run regression
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_URL: http://localhost:8080
+        run: |
+          npx --yes vite preview --port 8080 --strictPort &
+          SERVER_PID=$!
+          npx --yes wait-on http://localhost:8080 --timeout 60000
+          set +e
+          node scripts/test-accordion-aria-reset.mjs
+          STATUS=$?
+          kill $SERVER_PID 2>/dev/null || true
+          exit $STATUS
+
+      # --- Push to main / manual dispatch: test the live deployment ------
+      - name: Run regression against deployed URL
+        if: github.event_name != 'pull_request'
         env:
           BASE_URL: ${{ github.event.inputs.base_url || 'https://www.ariaops.co.uk' }}
         run: node scripts/test-accordion-aria-reset.mjs
