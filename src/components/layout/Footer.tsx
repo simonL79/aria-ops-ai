@@ -1,15 +1,105 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import Logo from '@/components/ui/logo';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+
+interface FooterLink {
+  to: string;
+  label: string;
+}
+
+interface FooterGroup {
+  title: string;
+  links: FooterLink[];
+}
 
 const Footer = () => {
   const { pathname } = useLocation();
 
-  const linkClass = (path: string) =>
-    pathname === path
-      ? "text-[#C6A15B] font-medium"
-      : "text-premium-silver hover:text-foreground transition-colors";
+  const legalPaths = new Set([
+    '/privacy-policy',
+    '/terms',
+    '/disclaimer',
+    '/cookie-policy',
+    '/acceptable-use',
+  ]);
+
+  const linkClass = (path: string) => {
+    const isLegalActive = legalPaths.has(path) && pathname === path;
+    return isLegalActive
+      ? 'text-[#C6A15B] font-medium'
+      : 'text-premium-silver hover:text-foreground transition-colors';
+  };
+
+  const groups: FooterGroup[] = [
+    {
+      title: 'Services',
+      links: [
+        { to: '/services/brand-protection', label: 'Brand Protection' },
+        { to: '/services/legal-shield', label: 'ARIA Legal Shield' },
+        { to: '/services/remove-google-reviews', label: 'Remove Google Reviews' },
+        { to: '/services/online-impersonation-uk', label: 'Online Impersonation (UK)' },
+        { to: '/scan', label: 'Free Threat Scan' },
+      ],
+    },
+    {
+      title: 'Solutions',
+      links: [
+        { to: '/ai-reputation-readiness', label: 'AI Reputation Readiness' },
+        { to: '/ai-reputation-management', label: 'AI Reputation Management' },
+        { to: '/online-reputation-management-uk', label: 'Online Reputation Management UK' },
+        { to: '/llm-reputation-management', label: 'LLM Reputation Management' },
+        { to: '/ai-search-visibility', label: 'AI Search Visibility' },
+        { to: '/generative-engine-optimisation', label: 'Generative Engine Optimisation' },
+        { to: '/reputation-threat-score', label: 'Reputation Threat Score' },
+        { to: '/legal-defence-compliance', label: 'Legal Defence & Compliance' },
+      ],
+    },
+    {
+      title: 'For',
+      links: [
+        { to: '/founder-reputation-protection', label: 'Founders' },
+        { to: '/athlete-reputation-management', label: 'Athletes' },
+        { to: '/executive-reputation-protection', label: 'Executives' },
+        { to: '/crisis-reputation-management', label: 'Crisis Response' },
+        { to: '/suppress-negative-google-results', label: 'Suppress Google Results' },
+        { to: '/negative-search-result-suppression', label: 'Negative Search Suppression' },
+      ],
+    },
+    {
+      title: 'Resources',
+      links: [
+        { to: '/resources/ai-reputation-readiness-checklist', label: 'AI Readiness Checklist' },
+        { to: '/resources/founder-reputation-risk-report', label: 'Founder Risk Report' },
+        { to: '/resources/athlete-reputation-protection-guide', label: 'Athlete Protection Guide' },
+        { to: '/resources/llm-visibility-audit-template', label: 'LLM Visibility Audit' },
+        { to: '/resources/negative-search-suppression-guide', label: 'Suppression Guide' },
+        { to: '/resources/crisis-reputation-response-checklist', label: 'Crisis Checklist' },
+        { to: '/resources/ai-search-visibility-glossary', label: 'AI Search Glossary' },
+      ],
+    },
+    {
+      title: 'Company',
+      links: [
+        { to: '/about', label: 'About' },
+        { to: '/simon-lindsay', label: 'Simon Lindsay' },
+        { to: '/home#pricing', label: 'Pricing' },
+        { to: '/blog', label: 'Blog' },
+        { to: '/contact', label: 'Contact' },
+        { to: '/cybersecurity-framework', label: 'Security' },
+        { to: '/privacy-policy', label: 'Privacy' },
+        { to: '/terms', label: 'Terms' },
+        { to: '/disclaimer', label: 'Disclaimer' },
+        { to: '/cookie-policy', label: 'Cookie Policy' },
+        { to: '/acceptable-use', label: 'Acceptable Use' },
+      ],
+    },
+  ];
 
   return (
     <footer className="bg-premium-black text-premium-silver py-8 text-center">
@@ -18,60 +108,37 @@ const Footer = () => {
           <div className="flex items-center mb-2 md:mb-0">
             <Logo variant="light" size="xl" />
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-x-8 gap-y-3 text-sm">
-            <div className="flex flex-col gap-2">
-              <span className="text-foreground/60 uppercase tracking-wider text-xs mb-1">Services</span>
-              <Link to="/services/brand-protection" className="text-premium-silver hover:text-foreground transition-colors">Brand Protection</Link>
-              <Link to="/services/legal-shield" className="text-premium-silver hover:text-foreground transition-colors">ARIA Legal Shield</Link>
-              <Link to="/services/remove-google-reviews" className="text-premium-silver hover:text-foreground transition-colors">Remove Google Reviews</Link>
-              <Link to="/services/online-impersonation-uk" className="text-premium-silver hover:text-foreground transition-colors">Online Impersonation (UK)</Link>
-              <Link to="/scan" className="text-premium-silver hover:text-foreground transition-colors">Free Threat Scan</Link>
-            </div>
-            <div className="flex flex-col gap-2">
-              <span className="text-foreground/60 uppercase tracking-wider text-xs mb-1">Solutions</span>
-              <Link to="/ai-reputation-readiness" className="text-premium-silver hover:text-foreground transition-colors">AI Reputation Readiness</Link>
-              <Link to="/ai-reputation-management" className="text-premium-silver hover:text-foreground transition-colors">AI Reputation Management</Link>
-              <Link to="/online-reputation-management-uk" className="text-premium-silver hover:text-foreground transition-colors">Online Reputation Management UK</Link>
-              <Link to="/llm-reputation-management" className="text-premium-silver hover:text-foreground transition-colors">LLM Reputation Management</Link>
-              <Link to="/ai-search-visibility" className="text-premium-silver hover:text-foreground transition-colors">AI Search Visibility</Link>
-              <Link to="/generative-engine-optimisation" className="text-premium-silver hover:text-foreground transition-colors">Generative Engine Optimisation</Link>
-              <Link to="/reputation-threat-score" className="text-premium-silver hover:text-foreground transition-colors">Reputation Threat Score</Link>
-              <Link to="/legal-defence-compliance" className="text-premium-silver hover:text-foreground transition-colors">Legal Defence & Compliance</Link>
-            </div>
-            <div className="flex flex-col gap-2">
-              <span className="text-foreground/60 uppercase tracking-wider text-xs mb-1">For</span>
-              <Link to="/founder-reputation-protection" className="text-premium-silver hover:text-foreground transition-colors">Founders</Link>
-              <Link to="/athlete-reputation-management" className="text-premium-silver hover:text-foreground transition-colors">Athletes</Link>
-              <Link to="/executive-reputation-protection" className="text-premium-silver hover:text-foreground transition-colors">Executives</Link>
-              <Link to="/crisis-reputation-management" className="text-premium-silver hover:text-foreground transition-colors">Crisis Response</Link>
-              <Link to="/suppress-negative-google-results" className="text-premium-silver hover:text-foreground transition-colors">Suppress Google Results</Link>
-              <Link to="/negative-search-result-suppression" className="text-premium-silver hover:text-foreground transition-colors">Negative Search Suppression</Link>
-            </div>
-            <div className="flex flex-col gap-2">
-              <span className="text-foreground/60 uppercase tracking-wider text-xs mb-1">Resources</span>
-              <Link to="/resources/ai-reputation-readiness-checklist" className="text-premium-silver hover:text-foreground transition-colors">AI Readiness Checklist</Link>
-              <Link to="/resources/founder-reputation-risk-report" className="text-premium-silver hover:text-foreground transition-colors">Founder Risk Report</Link>
-              <Link to="/resources/athlete-reputation-protection-guide" className="text-premium-silver hover:text-foreground transition-colors">Athlete Protection Guide</Link>
-              <Link to="/resources/llm-visibility-audit-template" className="text-premium-silver hover:text-foreground transition-colors">LLM Visibility Audit</Link>
-              <Link to="/resources/negative-search-suppression-guide" className="text-premium-silver hover:text-foreground transition-colors">Suppression Guide</Link>
-              <Link to="/resources/crisis-reputation-response-checklist" className="text-premium-silver hover:text-foreground transition-colors">Crisis Checklist</Link>
-              <Link to="/resources/ai-search-visibility-glossary" className="text-premium-silver hover:text-foreground transition-colors">AI Search Glossary</Link>
-            </div>
-            <div className="flex flex-col gap-2">
-              <span className="text-foreground/60 uppercase tracking-wider text-xs mb-1">Company</span>
-              <Link to="/about" className="text-premium-silver hover:text-foreground transition-colors">About</Link>
-              <Link to="/simon-lindsay" className="text-premium-silver hover:text-foreground transition-colors">Simon Lindsay</Link>
-              <Link to="/home#pricing" className="text-premium-silver hover:text-foreground transition-colors">Pricing</Link>
-              <Link to="/blog" className="text-premium-silver hover:text-foreground transition-colors">Blog</Link>
-              <Link to="/contact" className="text-premium-silver hover:text-foreground transition-colors">Contact</Link>
-              <Link to="/cybersecurity-framework" className="text-premium-silver hover:text-foreground transition-colors">Security</Link>
-              <Link to="/privacy-policy" className={linkClass("/privacy-policy")}>Privacy</Link>
-              <Link to="/terms" className={linkClass("/terms")}>Terms</Link>
-              <Link to="/disclaimer" className={linkClass("/disclaimer")}>Disclaimer</Link>
-              <Link to="/cookie-policy" className={linkClass("/cookie-policy")}>Cookie Policy</Link>
-              <Link to="/acceptable-use" className={linkClass("/acceptable-use")}>Acceptable Use</Link>
-            </div>
-          </div>
+          <Accordion
+            type="single"
+            collapsible
+            defaultValue="Company"
+            className="w-full md:w-auto md:grid md:grid-cols-5 gap-x-8 gap-y-3 text-sm text-left"
+          >
+            {groups.map((group) => (
+              <AccordionItem
+                key={group.title}
+                value={group.title}
+                className="border-b border-premium-darkGray md:border-none"
+              >
+                <AccordionTrigger className="text-foreground/60 uppercase tracking-wider text-xs py-3 hover:no-underline">
+                  {group.title}
+                </AccordionTrigger>
+                <AccordionContent className="pb-3 pt-0">
+                  <div className="flex flex-col gap-2">
+                    {group.links.map((link) => (
+                      <Link
+                        key={link.to}
+                        to={link.to}
+                        className={linkClass(link.to)}
+                      >
+                        {link.label}
+                      </Link>
+                    ))}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
         </div>
         <div className="border-t border-premium-darkGray pt-6 mt-6">
           <div className="flex flex-col items-center gap-4">
