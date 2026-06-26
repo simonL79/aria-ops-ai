@@ -140,11 +140,11 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
                   Blog
                 </Link>
                 <Link 
-                  to="/simon-lindsay" 
+                  to="/about" 
                   className="text-muted-foreground hover:text-foreground transition-colors py-2"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  About Simon
+                  About
                 </Link>
                 <Link 
                   to="/scan" 
