@@ -12,9 +12,9 @@ const applyInitialTheme = () => {
   const root = document.documentElement;
   const body = document.body;
 
-  root.style.backgroundColor = '#111827';
+  root.style.backgroundColor = '#15121F';
   root.style.color = '#F8FAFC';
-  body.style.backgroundColor = '#111827';
+  body.style.backgroundColor = '#15121F';
   body.style.color = '#F8FAFC';
   body.style.minHeight = '100vh';
 
