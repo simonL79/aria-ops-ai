@@ -2,10 +2,16 @@
 import { useState, useEffect } from "react";
 import { Navigate, useLocation, useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Shield, AlertCircle, CheckCircle } from "lucide-react";
+import { Shield, AlertCircle, CheckCircle, Check } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import LoginForm from "@/components/auth/LoginForm";
 import SEO from "@/components/seo/SEO";
+
+const PLAN_NAMES: Record<string, string> = {
+  basic: "Personal Shield",
+  individual: "Creator Shield",
+  pro: "Business Shield",
+};
 
 const Authentication = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -16,37 +22,43 @@ const Authentication = () => {
   const authType = searchParams.get('type');
   const error = searchParams.get('error');
   const errorDescription = searchParams.get('error_description');
-  
+  const planId = searchParams.get('plan');
+  const redirect = searchParams.get('redirect');
+  const isCheckout = !!planId;
+  const planName = planId ? PLAN_NAMES[planId] ?? "your plan" : null;
+
   useEffect(() => {
-    // Handle auth errors from URL params
     if (error) {
       console.error('Auth error from URL:', error, errorDescription);
     }
-    
-    // Small timeout to prevent flash
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 300);
-    
+    const timer = setTimeout(() => setIsLoading(false), 300);
     return () => clearTimeout(timer);
   }, [error, errorDescription]);
-  
-  // If still loading, show a simple loading state
+
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="animate-spin h-6 w-6 border-4 border-primary border-t-transparent rounded-full"></div>
       </div>
     );
   }
-  
-  // If already authenticated, route by role
+
+  // If already authenticated, route by intent
   if (isAuthenticated && !isAdminLoading && !isPortalLoading) {
+    if (isCheckout && planId) {
+      // Stash the plan so the pricing section can resume checkout automatically
+      try {
+        sessionStorage.setItem('resumeCheckoutPlan', planId);
+      } catch {
+        /* ignore */
+      }
+      const dest = redirect ? decodeURIComponent(redirect) : '/home#pricing';
+      return <Navigate to={dest} replace />;
+    }
     const dest = requestedFrom || (isAdmin ? '/admin/shield' : isPortalUser ? '/portal' : '/portal/no-access');
     return <Navigate to={dest} replace />;
   }
 
-  // Message for different auth types
   const getAuthTypeMessage = () => {
     if (authType === 'recovery') {
       return (
@@ -73,7 +85,7 @@ const Authentication = () => {
             <div>
               <h3 className="font-medium text-green-800">Magic Link Authentication</h3>
               <p className="text-sm text-green-600">
-                You've clicked a magic link. You should be signed in automatically. 
+                You've clicked a magic link. You should be signed in automatically.
                 If not, please try signing in again.
               </p>
             </div>
@@ -102,32 +114,49 @@ const Authentication = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
       <SEO title="Sign in — A.R.I.A™" description="Sign in to A.R.I.A™." path="/auth" noIndex />
-      <div className="mb-8 flex flex-col items-center">
-        <div className="flex items-center gap-2 mb-2">
+
+      <div className="mb-8 flex flex-col items-center text-center">
+        <div className="flex items-center gap-2 mb-3">
           <Shield className="h-8 w-8 text-primary" />
-          <h1 className="text-3xl font-bold">A.R.I.A.</h1>
+          <h1 className="text-3xl font-bold text-foreground">A.R.I.A.</h1>
         </div>
-        <p className="text-muted-foreground text-center max-w-md">
-          AI Reputation Intelligence Agent: Secure your brand's online reputation
-        </p>
+        {isCheckout ? (
+          <p className="text-muted-foreground max-w-md">
+            You're one step away from activating <span className="text-primary font-semibold">{planName}</span>.
+            Create your account or sign in to continue securely to payment.
+          </p>
+        ) : (
+          <p className="text-muted-foreground max-w-md">
+            AI Reputation Intelligence Agent — secure your brand's online reputation.
+          </p>
+        )}
       </div>
 
-      <Card className="w-full max-w-md border-2 border-primary shadow-lg">
+      <Card className="w-full max-w-md border border-border shadow-lg bg-card">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">
-            A.R.I.A. Security Login
+          <CardTitle className="text-2xl font-bold text-center text-foreground">
+            {isCheckout ? "Continue to checkout" : "Welcome back"}
           </CardTitle>
           <CardDescription className="text-center">
-            Sign in to access the A.R.I.A. admin dashboard
+            {isCheckout
+              ? `Sign in or create your account to subscribe to ${planName}.`
+              : "Sign in to access your A.R.I.A. account."}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {getAuthTypeMessage()}
-          <LoginForm />
+          <LoginForm defaultSignUp={isCheckout} />
         </CardContent>
       </Card>
+
+      {isCheckout && (
+        <div className="mt-6 flex items-center gap-2 text-xs text-muted-foreground">
+          <Check className="h-4 w-4 text-primary" />
+          <span>Secure checkout · Cancel anytime · UK-based support</span>
+        </div>
+      )}
     </div>
   );
 };
