@@ -19,10 +19,15 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
-const LoginForm = () => {
+interface LoginFormProps {
+  defaultSignUp?: boolean;
+}
+
+const LoginForm = ({ defaultSignUp = false }: LoginFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isResetMode, setIsResetMode] = useState(false);
   const [isMagicLinkMode, setIsMagicLinkMode] = useState(false);
+  const [isSignUpMode, setIsSignUpMode] = useState(defaultSignUp);
   const [resetSent, setResetSent] = useState(false);
   const [magicLinkSent, setMagicLinkSent] = useState(false);
   const location = useLocation();
@@ -36,6 +41,55 @@ const LoginForm = () => {
       password: "",
     },
   });
+
+  const handleSignUp = async (values: LoginFormValues) => {
+    if (values.password.length < 6) {
+      toast.error("Password too short", {
+        description: "Please use at least 6 characters.",
+      });
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.signUp({
+        email: values.email,
+        password: values.password,
+        options: {
+          emailRedirectTo: `${window.location.origin}${window.location.pathname}${window.location.search}`,
+        },
+      });
+      if (error) {
+        if (error.message?.toLowerCase().includes("already")) {
+          toast.error("Account already exists", {
+            description: "Please sign in instead.",
+          });
+          setIsSignUpMode(false);
+        } else {
+          toast.error("Could not create account", {
+            description: error.message || "Please try again.",
+          });
+        }
+        return;
+      }
+      // If email confirmation is disabled, the session is active immediately.
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        toast.success("Account created!");
+        // Redirect handled by Authentication.tsx via isAuthenticated.
+      } else {
+        toast.success("Check your email to confirm your account", {
+          description: "We've sent you a confirmation link to finish signing up.",
+        });
+      }
+    } catch (error: any) {
+      console.error("Sign up error:", error);
+      toast.error("Could not create account", {
+        description: error.message || "Please try again later.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
   
   const handlePasswordReset = async (email: string) => {
     if (!email) {
