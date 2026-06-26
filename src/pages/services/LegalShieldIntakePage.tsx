@@ -216,6 +216,26 @@ const LegalShieldIntakePage = () => {
 
     setIsSubmitting(true);
     try {
+      // Upload evidence files to the private shield-evidence bucket first.
+      const uploadedFiles: EvidenceFileMeta[] = [];
+      if (files.length > 0) {
+        const folder = `intake/${crypto.randomUUID()}`;
+        for (const file of files) {
+          const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+          const path = `${folder}/${crypto.randomUUID()}-${safeName}`;
+          const { error: uploadError } = await supabase.storage
+            .from('shield-evidence')
+            .upload(path, file, { contentType: file.type, upsert: false });
+          if (uploadError) throw uploadError;
+          uploadedFiles.push({
+            path,
+            name: file.name,
+            size: file.size,
+            type: file.type,
+          });
+        }
+      }
+
       const { error } = await supabase.from('legal_shield_intakes' as any).insert({
         issue_type: form.issue_type,
         issue_description: form.issue_description.trim(),
@@ -226,6 +246,7 @@ const LegalShieldIntakePage = () => {
         email: form.email.trim(),
         phone: form.phone.trim() || null,
         consent_given: form.consent_given,
+        evidence_files: uploadedFiles,
       });
 
       if (error) throw error;
