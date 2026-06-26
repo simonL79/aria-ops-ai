@@ -17,11 +17,7 @@ serve(async (req) => {
   console.log(`[ARIA-INGEST] Method: ${req.method}`);
   console.log(`[ARIA-INGEST] URL: ${req.url}`);
   
-  // Log all headers for debugging
-  console.log(`[ARIA-INGEST] Headers:`);
-  for (const [key, value] of req.headers.entries()) {
-    console.log(`[ARIA-INGEST]   ${key}: ${value}`);
-  }
+
   
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
