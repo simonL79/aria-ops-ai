@@ -176,8 +176,8 @@ const LegalShieldPage = () => {
           </div>
           <div className="mt-8 flex flex-wrap gap-4">
             <Button asChild size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
-              <Link to="/contact">
-                Get protected <ArrowRight className="ml-2 h-4 w-4" />
+              <Link to="/services/legal-shield/intake">
+                Start your guided intake <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
             <Button asChild size="lg" variant="outline">
