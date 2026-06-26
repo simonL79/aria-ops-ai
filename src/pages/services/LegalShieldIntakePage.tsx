@@ -70,6 +70,108 @@ const urgencyLevels = [
   { value: 'urgent', label: 'Urgent — active deadline or escalation' },
 ];
 
+type CourseOfAction = {
+  steps: string[];
+  disclaimers: string[];
+};
+
+// Always-required acknowledgements, regardless of issue type.
+const BASE_DISCLAIMERS: string[] = [
+  'I understand the suggested course of action below is AI-generated legal information based only on what I have provided — not advice tailored to my full circumstances.',
+  'I understand ARIA Legal Shield™ is not a law firm, does not provide regulated legal services, and is not a substitute for advice from a qualified solicitor.',
+  'I understand the strength of any course of action depends on the accuracy and completeness of the evidence I have supplied.',
+];
+
+// Issue-specific recommended course of action and extra acknowledgements.
+const courseOfActionByIssue: Record<string, CourseOfAction> = {
+  'Consumer dispute': {
+    steps: [
+      'Gather proof of purchase, the contract/terms and all correspondence with the seller.',
+      'Send a clear written complaint setting out the fault and the outcome you want, with a reasonable deadline.',
+      'If unresolved, escalate to the relevant ombudsman or alternative dispute resolution scheme before considering court.',
+    ],
+    disclaimers: [
+      'I understand strict time limits and consumer-protection rules may apply, and I should confirm deadlines with a qualified professional.',
+    ],
+  },
+  'Employment issue': {
+    steps: [
+      'Collect your contract, payslips, written warnings, policies and any relevant messages.',
+      'Raise the matter through your employer’s internal grievance procedure in writing first.',
+      'Be aware many employment claims have a short limitation period — early Acas Early Conciliation may be required.',
+    ],
+    disclaimers: [
+      'I understand employment claim deadlines can be as short as three months and that I am responsible for confirming my own time limits.',
+    ],
+  },
+  'Landlord / tenant disagreement': {
+    steps: [
+      'Gather the tenancy agreement, deposit-protection details, rent records and photos of any disrepair.',
+      'Put your concerns to the other party in writing and keep copies of everything.',
+      'If unresolved, consider the deposit scheme’s dispute service or appropriate housing/legal routes.',
+    ],
+    disclaimers: [
+      'I understand housing law and deposit rules are complex and that formal action (e.g. eviction or possession) must follow strict legal process.',
+    ],
+  },
+  'Unpaid invoice': {
+    steps: [
+      'Compile the contract/agreement, the invoice, delivery proof and any chaser communications.',
+      'Send a formal letter before action stating the amount owed and a deadline to pay.',
+      'If still unpaid, consider a money claim or debt-recovery route.',
+    ],
+    disclaimers: [
+      'I understand a letter before action and court claims have formal requirements and that interest/limitation rules may apply.',
+    ],
+  },
+  'Online harassment': {
+    steps: [
+      'Preserve evidence: dated screenshots, URLs, usernames and any threats — do not delete anything.',
+      'Report the content to the relevant platform and, where there is a risk to safety, to the police.',
+      'Keep a log of incidents to support any complaint, takedown or legal action.',
+    ],
+    disclaimers: [
+      'I understand that if I feel unsafe or threatened I should contact the police, and ARIA cannot provide emergency assistance.',
+    ],
+  },
+  'Reputational attack / defamation': {
+    steps: [
+      'Capture the defamatory material with dated screenshots and full URLs before it is changed or removed.',
+      'Record the impact (financial, professional, personal) the statements have caused.',
+      'Consider takedown requests and a formal complaint; defamation claims are time-sensitive and complex.',
+    ],
+    disclaimers: [
+      'I understand defamation claims carry a short limitation period (generally one year) and high legal thresholds, and require specialist legal advice.',
+    ],
+  },
+  'Contractual disagreement': {
+    steps: [
+      'Assemble the signed contract, variations, invoices and all correspondence about performance.',
+      'Identify the specific terms you believe were breached and the loss caused.',
+      'Raise the breach in writing, propose resolution, and consider mediation before litigation.',
+    ],
+    disclaimers: [
+      'I understand contract interpretation and remedies depend on the precise wording and facts, which only a qualified professional can fully assess.',
+    ],
+  },
+  Other: {
+    steps: [
+      'Organise all relevant documents and a clear timeline of what happened.',
+      'Set out, in writing, the outcome you are seeking.',
+      'Use your case pack to seek tailored advice from a qualified legal professional.',
+    ],
+    disclaimers: [],
+  },
+};
+
+const getCourseOfAction = (issueType: string): CourseOfAction => {
+  const specific = courseOfActionByIssue[issueType] ?? courseOfActionByIssue.Other;
+  return {
+    steps: specific.steps,
+    disclaimers: [...BASE_DISCLAIMERS, ...specific.disclaimers],
+  };
+};
+
 const intakeSchema = z.object({
   issue_type: z.string().min(1, 'Please choose the type of issue'),
   issue_description: z
