@@ -46,15 +46,15 @@ const AddOnServicesSection = () => {
     },
     {
       title: "AI Initiative Watching",
-      description: "Track AI models being EXCLUSIVELY trained on negative content about you or your brand."
+      description: "Track AI models being trained on negative content about you or your brand."
     },
     {
-      title: "Family Reputation Package",
-      description: "Comprehensive protection for family members including children and extended relatives."
+      title: "ARIA Legal Shield™ Add-On",
+      description: "Unlimited AI legal guidance, document drafting, evidence vaults and solicitor-ready case packs."
     },
     {
       title: "Full Service Takeovers",
-      description: "We run the entire reputation defense operation — from monitoring to response."
+      description: "We run the entire reputation and legal defence operation — from monitoring to response."
     }
   ];
 
