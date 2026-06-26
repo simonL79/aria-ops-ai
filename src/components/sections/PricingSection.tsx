@@ -103,7 +103,7 @@ const PricingSection = () => {
         "Crisis response team",
         "Priority support",
       ],
-      buttonText: "Subscribe",
+      buttonText: "Get Started",
       popular: false
     }
   ];
