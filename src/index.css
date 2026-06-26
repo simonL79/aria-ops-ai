@@ -116,7 +116,17 @@
     border-radius: 0.5rem;
     scroll-margin-top: 6rem;
   }
+  /* Hide scrollbars cleanly (used for horizontal scroll spy) */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }
+
+@layer components {
 
 @layer components {
   /* Luxury dark gradient — subtle vignette */
