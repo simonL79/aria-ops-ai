@@ -28,7 +28,28 @@ import {
   FileDown,
   Plus,
   Trash2,
+  Paperclip,
+  X,
+  FileText,
 } from 'lucide-react';
+
+const MAX_FILES = 10;
+const MAX_FILE_BYTES = 15 * 1024 * 1024; // 15MB
+const ACCEPTED_TYPES = [
+  'image/png',
+  'image/jpeg',
+  'image/gif',
+  'image/webp',
+  'image/heic',
+  'application/pdf',
+];
+
+type EvidenceFileMeta = {
+  path: string;
+  name: string;
+  size: number;
+  type: string;
+};
 
 const issueTypes = [
   'Consumer dispute',
@@ -100,6 +121,36 @@ const LegalShieldIntakePage = () => {
   const [form, setForm] = useState<FormState>(initialState);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [files, setFiles] = useState<File[]>([]);
+
+  const addFiles = (incoming: FileList | null) => {
+    if (!incoming) return;
+    const selected = Array.from(incoming);
+    setFiles((prev) => {
+      const next = [...prev];
+      for (const file of selected) {
+        if (next.length >= MAX_FILES) {
+          toast.error(`You can attach up to ${MAX_FILES} files.`);
+          break;
+        }
+        if (!ACCEPTED_TYPES.includes(file.type)) {
+          toast.error(`${file.name}: unsupported file type. Use images or PDFs.`);
+          continue;
+        }
+        if (file.size > MAX_FILE_BYTES) {
+          toast.error(`${file.name}: file is larger than 15MB.`);
+          continue;
+        }
+        if (next.some((f) => f.name === file.name && f.size === file.size)) continue;
+        next.push(file);
+      }
+      return next;
+    });
+  };
+
+  const removeFile = (index: number) =>
+    setFiles((prev) => prev.filter((_, i) => i !== index));
+
 
   const update = (field: keyof FormState, value: string | boolean) =>
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -165,6 +216,26 @@ const LegalShieldIntakePage = () => {
 
     setIsSubmitting(true);
     try {
+      // Upload evidence files to the private shield-evidence bucket first.
+      const uploadedFiles: EvidenceFileMeta[] = [];
+      if (files.length > 0) {
+        const folder = `intake/${crypto.randomUUID()}`;
+        for (const file of files) {
+          const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+          const path = `${folder}/${crypto.randomUUID()}-${safeName}`;
+          const { error: uploadError } = await supabase.storage
+            .from('shield-evidence')
+            .upload(path, file, { contentType: file.type, upsert: false });
+          if (uploadError) throw uploadError;
+          uploadedFiles.push({
+            path,
+            name: file.name,
+            size: file.size,
+            type: file.type,
+          });
+        }
+      }
+
       const { error } = await supabase.from('legal_shield_intakes' as any).insert({
         issue_type: form.issue_type,
         issue_description: form.issue_description.trim(),
@@ -175,6 +246,7 @@ const LegalShieldIntakePage = () => {
         email: form.email.trim(),
         phone: form.phone.trim() || null,
         consent_given: form.consent_given,
+        evidence_files: uploadedFiles,
       });
 
       if (error) throw error;
@@ -383,6 +455,61 @@ const LegalShieldIntakePage = () => {
                         ))}
                       </div>
                     </div>
+                    <div>
+                      <Label className="text-base">Upload evidence files (optional)</Label>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Attach screenshots, photos or PDFs (emails, messages, contracts,
+                        invoices). Up to {MAX_FILES} files, 15MB each. Stored securely with your
+                        submission.
+                      </p>
+                      <label
+                        htmlFor="evidence-files"
+                        className="mt-3 flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border bg-background px-4 py-8 text-center cursor-pointer hover:border-primary/50 transition-colors"
+                      >
+                        <Paperclip className="h-6 w-6 text-primary" />
+                        <span className="text-sm text-foreground">
+                          Click to choose files
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          PNG, JPG, GIF, WEBP or PDF
+                        </span>
+                        <input
+                          id="evidence-files"
+                          type="file"
+                          multiple
+                          accept={ACCEPTED_TYPES.join(',')}
+                          className="hidden"
+                          onChange={(e) => {
+                            addFiles(e.target.files);
+                            e.target.value = '';
+                          }}
+                        />
+                      </label>
+                      {files.length > 0 && (
+                        <ul className="mt-3 space-y-2">
+                          {files.map((file, i) => (
+                            <li
+                              key={`${file.name}-${i}`}
+                              className="flex items-center gap-3 rounded-md border border-border bg-background px-3 py-2"
+                            >
+                              <FileText className="h-4 w-4 text-primary shrink-0" />
+                              <span className="flex-1 text-sm truncate">{file.name}</span>
+                              <span className="text-xs text-muted-foreground shrink-0">
+                                {(file.size / 1024 / 1024).toFixed(1)}MB
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => removeFile(i)}
+                                aria-label={`Remove ${file.name}`}
+                                className="text-muted-foreground hover:text-foreground"
+                              >
+                                <X className="h-4 w-4" />
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
                   </div>
                 )}
 
@@ -446,6 +573,12 @@ const LegalShieldIntakePage = () => {
                         <dt className="text-muted-foreground">Contact</dt>
                         <dd className="text-foreground">{form.full_name} · {form.email}{form.phone ? ` · ${form.phone}` : ''}</dd>
                       </div>
+                      {files.length > 0 && (
+                        <div>
+                          <dt className="text-muted-foreground">Evidence files</dt>
+                          <dd className="text-foreground">{files.length} file{files.length > 1 ? 's' : ''} attached</dd>
+                        </div>
+                      )}
                     </dl>
 
                     <label className="flex items-start gap-3 cursor-pointer">
