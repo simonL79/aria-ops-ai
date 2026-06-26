@@ -1,4 +1,5 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
+import { requireAdmin, isAuthenticated } from '../_shared/auth.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -29,6 +30,13 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
 
   try {
+    // Allow internal service-role callers (cron) or an admin user.
+    const authHeader = req.headers.get('authorization') ?? '';
+    if (authHeader !== `Bearer ${SERVICE_ROLE}`) {
+      const auth = await requireAdmin(req);
+      if (!isAuthenticated(auth)) return auth;
+    }
+
     const supabase = createClient(SUPABASE_URL, SERVICE_ROLE);
 
     const { data: prefsList, error: prefsErr } = await (supabase.from('eidetic_alert_preferences') as any)
