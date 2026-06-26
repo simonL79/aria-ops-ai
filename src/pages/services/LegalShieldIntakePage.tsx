@@ -455,6 +455,61 @@ const LegalShieldIntakePage = () => {
                         ))}
                       </div>
                     </div>
+                    <div>
+                      <Label className="text-base">Upload evidence files (optional)</Label>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Attach screenshots, photos or PDFs (emails, messages, contracts,
+                        invoices). Up to {MAX_FILES} files, 15MB each. Stored securely with your
+                        submission.
+                      </p>
+                      <label
+                        htmlFor="evidence-files"
+                        className="mt-3 flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border bg-background px-4 py-8 text-center cursor-pointer hover:border-primary/50 transition-colors"
+                      >
+                        <Paperclip className="h-6 w-6 text-primary" />
+                        <span className="text-sm text-foreground">
+                          Click to choose files
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          PNG, JPG, GIF, WEBP or PDF
+                        </span>
+                        <input
+                          id="evidence-files"
+                          type="file"
+                          multiple
+                          accept={ACCEPTED_TYPES.join(',')}
+                          className="hidden"
+                          onChange={(e) => {
+                            addFiles(e.target.files);
+                            e.target.value = '';
+                          }}
+                        />
+                      </label>
+                      {files.length > 0 && (
+                        <ul className="mt-3 space-y-2">
+                          {files.map((file, i) => (
+                            <li
+                              key={`${file.name}-${i}`}
+                              className="flex items-center gap-3 rounded-md border border-border bg-background px-3 py-2"
+                            >
+                              <FileText className="h-4 w-4 text-primary shrink-0" />
+                              <span className="flex-1 text-sm truncate">{file.name}</span>
+                              <span className="text-xs text-muted-foreground shrink-0">
+                                {(file.size / 1024 / 1024).toFixed(1)}MB
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => removeFile(i)}
+                                aria-label={`Remove ${file.name}`}
+                                className="text-muted-foreground hover:text-foreground"
+                              >
+                                <X className="h-4 w-4" />
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
                   </div>
                 )}
 
