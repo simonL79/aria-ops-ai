@@ -2373,6 +2373,57 @@ export type Database = {
         }
         Relationships: []
       }
+      legal_shield_intakes: {
+        Row: {
+          consent_given: boolean | null
+          created_at: string
+          desired_outcome: string | null
+          email: string
+          evidence_summary: string | null
+          full_name: string
+          id: string
+          issue_description: string
+          issue_type: string
+          metadata: Json | null
+          phone: string | null
+          status: string | null
+          updated_at: string
+          urgency: string | null
+        }
+        Insert: {
+          consent_given?: boolean | null
+          created_at?: string
+          desired_outcome?: string | null
+          email: string
+          evidence_summary?: string | null
+          full_name: string
+          id?: string
+          issue_description: string
+          issue_type: string
+          metadata?: Json | null
+          phone?: string | null
+          status?: string | null
+          updated_at?: string
+          urgency?: string | null
+        }
+        Update: {
+          consent_given?: boolean | null
+          created_at?: string
+          desired_outcome?: string | null
+          email?: string
+          evidence_summary?: string | null
+          full_name?: string
+          id?: string
+          issue_description?: string
+          issue_type?: string
+          metadata?: Json | null
+          phone?: string | null
+          status?: string | null
+          updated_at?: string
+          urgency?: string | null
+        }
+        Relationships: []
+      }
       lia_records: {
         Row: {
           assessment_type: string | null

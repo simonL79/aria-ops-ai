@@ -176,8 +176,8 @@ const LegalShieldPage = () => {
           </div>
           <div className="mt-8 flex flex-wrap gap-4">
             <Button asChild size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
-              <Link to="/contact">
-                Get protected <ArrowRight className="ml-2 h-4 w-4" />
+              <Link to="/services/legal-shield/intake">
+                Start your guided intake <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
             <Button asChild size="lg" variant="outline">
@@ -258,7 +258,7 @@ const LegalShieldPage = () => {
                 </p>
                 <p className="text-muted-foreground leading-relaxed mb-6">{forWho}</p>
                 <Button asChild variant={featured ? 'default' : 'outline'} className="w-full">
-                  <Link to="/contact">Get {name}</Link>
+                  <Link to="/services/legal-shield/intake">Get {name}</Link>
                 </Button>
               </div>
             ))}
@@ -294,8 +294,8 @@ const LegalShieldPage = () => {
               legal costs spiral.
             </p>
             <Button asChild size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
-              <Link to="/contact">
-                Talk to ARIA <ArrowRight className="ml-2 h-4 w-4" />
+              <Link to="/services/legal-shield/intake">
+                Start your guided intake <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
           </div>
