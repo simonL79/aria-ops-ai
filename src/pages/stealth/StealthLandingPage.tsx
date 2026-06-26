@@ -88,6 +88,18 @@ const StealthLandingPage: React.FC<{ cfg: StealthPageConfig }> = ({ cfg }) => {
 
   const positioning = cfg.positioningQuote ?? POSITIONING_DEFAULT;
 
+  const scrollSections = useMemo(
+    () => [
+      { id: 'problem', label: 'The issue' },
+      { id: 'capabilities', label: 'Approach' },
+      { id: 'coverage', label: 'Coverage' },
+      { id: 'methodology', label: 'Execution' },
+      { id: 'comparison', label: 'Comparison' },
+      { id: 'faq', label: 'FAQ' },
+    ],
+    []
+  );
+
   return (
     <PublicLayout>
       <SEO
