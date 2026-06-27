@@ -70,7 +70,7 @@ const AboutPage = () => {
           url: 'https://www.ariaops.co.uk/about',
         }}
       />
-      <div className="min-h-screen bg-background text-foreground">
+      <div className="min-h-screen text-foreground">
         {/* Hero + mission, condensed */}
         <section className="py-16 md:py-20 border-b border-border">
           <div className="container mx-auto px-6">

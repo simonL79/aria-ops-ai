@@ -275,7 +275,7 @@ const CybersecurityFrameworkPage = () => {
         <link rel="canonical" href="https://www.ariaops.co.uk/cybersecurity-framework" />
       </Helmet>
 
-      <div className="min-h-screen bg-background text-foreground">
+      <div className="min-h-screen text-foreground">
         {/* Header */}
         <div className="relative border-b border-border">
           <div className="absolute inset-0 bg-gradient-to-b from-orange-500/10 via-transparent to-transparent pointer-events-none" />

@@ -12,7 +12,7 @@ const ScanPage = () => {
         description="Run a free scan and get an instant view of online threats, impersonation risks, harmful content, and legal exposure targeting you or your brand."
         path="/scan"
       />
-      <div className="min-h-screen bg-background py-12">
+      <div className="min-h-screen py-12">
         <div className="container mx-auto px-6">
           <ConcernSubmissionForm />
         </div>
