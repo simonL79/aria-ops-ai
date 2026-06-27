@@ -247,6 +247,7 @@ const packages = [
 ];
 
 const LegalShieldPage = () => {
+  const hero = useScrollReveal(0.1);
   const faqJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
