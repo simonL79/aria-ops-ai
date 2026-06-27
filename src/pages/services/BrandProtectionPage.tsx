@@ -104,7 +104,7 @@ const BrandProtectionPage = () => {
         jsonLd={[faqJsonLd, serviceJsonLd, breadcrumbJsonLd]}
       />
 
-      <article className="bg-background text-foreground">
+      <article className="text-foreground">
         {/* Hero */}
         <section className="container mx-auto px-6 pt-20 pb-12 max-w-4xl">
           <p className="text-sm uppercase tracking-widest text-primary mb-4">UK Brand Protection</p>

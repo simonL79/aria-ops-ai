@@ -488,7 +488,7 @@ const LegalShieldIntakePage = () => {
         path="/services/legal-shield/intake"
       />
 
-      <article className="bg-background text-foreground min-h-screen">
+      <article className="text-foreground min-h-screen">
         <section className="container mx-auto px-6 pt-16 pb-12 max-w-3xl">
           <div className="flex items-center gap-2 text-primary mb-4">
             <Shield className="h-5 w-5" />
