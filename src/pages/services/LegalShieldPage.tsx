@@ -740,7 +740,7 @@ const LegalShieldPage = () => {
 
         {/* Related */}
         <section className="container mx-auto px-6 pb-20 max-w-4xl">
-          <h2 className="text-xl font-bold mb-4">Related services</h2>
+          <h2 className="font-display text-xl font-semibold mb-4">Related services</h2>
           <ul className="space-y-2 text-primary">
             <li><Link to="/services/brand-protection" className="hover:underline">→ Brand protection</Link></li>
             <li><Link to="/legal-defence-compliance" className="hover:underline">→ Legal defence & compliance</Link></li>
