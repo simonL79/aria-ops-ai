@@ -1,7 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import commandCentre from '@/assets/hero-command-centre.jpg';
+import commandCentre from '@/assets/hero-command-centre.jpg?w=1280&quality=72';
+import commandCentreAvif from '@/assets/hero-command-centre.jpg?w=640;1280;1920&format=avif&quality=60&as=srcset';
+import commandCentreWebp from '@/assets/hero-command-centre.jpg?w=640;1280;1920&format=webp&quality=72&as=srcset';
 
 /*
   ARIA — The Digital Protection Platform
