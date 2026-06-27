@@ -164,6 +164,15 @@ export default {
 				'25%': { transform: 'translate(10px, -15px)', opacity: '0.6' },
 				'50%': { transform: 'translate(-5px, 10px)', opacity: '0.4' },
 				'75%': { transform: 'translate(15px, 5px)', opacity: '0.5' }
+			},
+			'breathe': {
+				'0%, 100%': { transform: 'scale(1)', opacity: '0.85' },
+				'50%': { transform: 'scale(1.18)', opacity: '1' }
+			},
+			'filament': {
+				'0%': { strokeDashoffset: '24', opacity: '0.15' },
+				'50%': { opacity: '0.7' },
+				'100%': { strokeDashoffset: '0', opacity: '0.15' }
 			}
 			},
 			animation: {
