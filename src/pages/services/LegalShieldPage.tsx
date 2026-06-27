@@ -373,7 +373,7 @@ const LegalShieldPage = () => {
 
         {/* What it helps you do */}
         <section className="container mx-auto px-6 py-12 max-w-4xl">
-          <h2 className="text-3xl font-bold mb-8">What ARIA Legal Shield helps you do</h2>
+          <h2 className="font-display text-3xl md:text-4xl font-semibold mb-8">What ARIA Legal Shield helps you do</h2>
           <div className="grid sm:grid-cols-2 gap-3">
             {[
               'Understand your rights in plain English',
@@ -384,7 +384,7 @@ const LegalShieldPage = () => {
               'Track deadlines and next steps',
               'Escalate to a regulated solicitor when needed',
             ].map((t) => (
-              <div key={t} className="flex items-start gap-3 bg-card border border-border rounded-lg px-4 py-3 text-muted-foreground">
+              <div key={t} className="flex items-start gap-3 glass-card px-4 py-3 text-muted-foreground">
                 <ShieldCheck className="h-5 w-5 text-primary mt-0.5 shrink-0" />
                 <span>{t}</span>
               </div>
@@ -394,10 +394,10 @@ const LegalShieldPage = () => {
 
         {/* What the product produces */}
         <section className="container mx-auto px-6 py-12 max-w-4xl">
-          <h2 className="text-3xl font-bold mb-8">What the product produces</h2>
+          <h2 className="font-display text-3xl md:text-4xl font-semibold mb-8">What the product produces</h2>
           <div className="grid md:grid-cols-2 gap-6">
             {produces.map(({ icon: Icon, title, body }) => (
-              <div key={title} className="bg-card border border-border rounded-lg p-6">
+              <div key={title} className="glass-card p-6">
                 <Icon className="h-8 w-8 text-primary mb-4" />
                 <h3 className="text-xl font-bold mb-2">{title}</h3>
                 <p className="text-muted-foreground leading-relaxed">{body}</p>
@@ -408,8 +408,8 @@ const LegalShieldPage = () => {
 
         {/* How it works — workflow */}
         <section className="container mx-auto px-6 py-12 max-w-4xl">
-          <p className="text-sm uppercase tracking-widest text-primary mb-3">How it works</p>
-          <h2 className="text-3xl font-bold mb-4">From scattered facts to a solicitor-ready case file</h2>
+          <p className="text-[11px] font-medium tracking-[0.25em] uppercase text-primary/80 mb-3">How it works</p>
+          <h2 className="font-display text-3xl md:text-4xl font-semibold mb-4">From scattered facts to a solicitor-ready case file</h2>
           <p className="text-muted-foreground text-lg leading-relaxed mb-8 max-w-3xl">
             ARIA handles everything <span className="text-foreground font-medium">before</span> you
             instruct a solicitor — the preparation that normally takes hours, done in minutes. You
@@ -417,7 +417,7 @@ const LegalShieldPage = () => {
           </p>
           <ol className="space-y-3">
             {workflow.map((step, i) => (
-              <li key={step} className="flex items-start gap-4 bg-card border border-border rounded-lg px-5 py-4">
+              <li key={step} className="flex items-start gap-4 glass-card px-5 py-4">
                 <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary font-bold text-sm">
                   {i + 1}
                 </span>
@@ -430,8 +430,8 @@ const LegalShieldPage = () => {
         {/* Escalation workflow */}
         <section className="container mx-auto px-6 py-12 max-w-5xl">
           <div className="text-center mb-10">
-            <p className="text-sm uppercase tracking-widest text-primary mb-3">When the issue goes further</p>
-            <h2 className="text-3xl font-bold mb-4">From Legal Shield to Legal Defence & Compliance</h2>
+            <p className="text-[11px] font-medium tracking-[0.25em] uppercase text-primary/80 mb-3">When the issue goes further</p>
+            <h2 className="font-display text-3xl md:text-4xl font-semibold mb-4">From Legal Shield to Legal Defence & Compliance</h2>
             <p className="text-muted-foreground text-lg leading-relaxed max-w-3xl mx-auto">
               Most matters stay inside Legal Shield: preparation, guidance and solicitor-ready packs.
               When a case involves defamation, unlawful personal data, platform abuse or regulatory
@@ -476,7 +476,7 @@ const LegalShieldPage = () => {
                 body: 'Once resolved, the outcome feeds back into your ARIA record — so future monitoring, threat scoring and case files already know what happened and what worked.',
               },
             ].map(({ step, title, body }) => (
-              <div key={step} className="bg-card border border-border rounded-lg p-6">
+              <div key={step} className="glass-card p-6">
                 <span className="text-xs uppercase tracking-wider text-primary font-semibold">{step}</span>
                 <h3 className="text-lg font-bold mt-2 mb-2">{title}</h3>
                 <p className="text-muted-foreground text-sm leading-relaxed">{body}</p>
@@ -495,7 +495,7 @@ const LegalShieldPage = () => {
 
         {/* Scope — what we do and don't do */}
         <section className="container mx-auto px-6 py-12 max-w-5xl">
-          <h2 className="text-3xl font-bold mb-2">AI Legal Intelligence — not an "AI lawyer"</h2>
+          <h2 className="font-display text-3xl md:text-4xl font-semibold mb-2">AI Legal Intelligence — not an "AI lawyer"</h2>
           <p className="text-muted-foreground mb-8 max-w-3xl">
             We are deliberate about scope. ARIA informs and prepares; it never directs your decisions
             or acts as a regulated legal practice. That clear boundary is what keeps you protected.
@@ -539,8 +539,8 @@ const LegalShieldPage = () => {
         {/* Solicitor network */}
         <section className="container mx-auto px-6 py-12 max-w-4xl">
           <div className="rounded-2xl border border-primary/40 bg-card p-8 md:p-12">
-            <p className="text-sm uppercase tracking-widest text-primary mb-3">Partner solicitor network</p>
-            <h2 className="text-3xl font-bold mb-4">When you do need a solicitor, they start hours ahead</h2>
+            <p className="text-[11px] font-medium tracking-[0.25em] uppercase text-primary/80 mb-3">Partner solicitor network</p>
+            <h2 className="font-display text-3xl md:text-4xl font-semibold mb-4">When you do need a solicitor, they start hours ahead</h2>
             <p className="text-muted-foreground text-lg leading-relaxed mb-8 max-w-3xl">
               Instead of handing a solicitor 400 random emails, ARIA hands them an organised case pack —
               so their time goes on legal analysis, strategy and representation, not admin.
@@ -567,14 +567,14 @@ const LegalShieldPage = () => {
 
         {/* Areas we support */}
         <section className="container mx-auto px-6 py-12 max-w-5xl">
-          <h2 className="text-3xl font-bold mb-2">Areas ARIA Legal Shield™ can support</h2>
+          <h2 className="font-display text-3xl md:text-4xl font-semibold mb-2">Areas ARIA Legal Shield™ can support</h2>
           <p className="text-muted-foreground mb-8 max-w-3xl">
             From everyday consumer issues to complex commercial matters — intelligent guidance and
             structured preparation across the situations that matter most.
           </p>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {supportAreas.map(({ icon: Icon, title, items, href, linkLabel }) => (
-              <div key={title} className="bg-card border border-border rounded-lg p-6 flex flex-col">
+              <div key={title} className="glass-card p-6 flex flex-col">
                 <div className="flex items-center gap-3 mb-4">
                   <Icon className="h-6 w-6 text-primary shrink-0" />
                   <h3 className="text-lg font-bold">{title}</h3>
@@ -601,8 +601,8 @@ const LegalShieldPage = () => {
         {/* Membership vision */}
         <section className="container mx-auto px-6 py-12 max-w-5xl">
           <div className="rounded-2xl border border-primary/40 bg-card p-8 md:p-12">
-            <p className="text-sm uppercase tracking-widest text-primary mb-3">Always-on legal protection</p>
-            <h2 className="text-3xl font-bold mb-4">Not "AI legal advice" — continuous legal protection</h2>
+            <p className="text-[11px] font-medium tracking-[0.25em] uppercase text-primary/80 mb-3">Always-on legal protection</p>
+            <h2 className="font-display text-3xl md:text-4xl font-semibold mb-4">Not "AI legal advice" — continuous legal protection</h2>
             <p className="text-muted-foreground text-lg leading-relaxed mb-8 max-w-3xl">
               ARIA Legal Shield™ shifts the value from asking an AI a one-off legal question to having
               an always-on legal support system. One membership keeps your rights, evidence and
@@ -632,7 +632,7 @@ const LegalShieldPage = () => {
 
 
         <section id="packages" className="container mx-auto px-6 py-12 max-w-4xl scroll-mt-24">
-          <h2 className="text-3xl font-bold mb-2">Packages</h2>
+          <h2 className="font-display text-3xl md:text-4xl font-semibold mb-2">Packages</h2>
           <p className="text-muted-foreground mb-8">Choose the level of protection that fits your situation.</p>
           <div className="grid sm:grid-cols-2 gap-6">
             {packages.map(({ icon: Icon, name, price, cadence, for: forWho, featured }) => (
@@ -650,7 +650,7 @@ const LegalShieldPage = () => {
                 <Icon className="h-8 w-8 text-primary mb-4" />
                 <h3 className="text-xl font-bold mb-1">{name}</h3>
                 <p className="mb-3">
-                  <span className="text-3xl font-bold">{price}</span>
+                  <span className="font-display text-3xl md:text-4xl font-semibold">{price}</span>
                   <span className="text-muted-foreground"> {cadence}</span>
                 </p>
                 <p className="text-muted-foreground leading-relaxed mb-6">{forWho}</p>
@@ -664,7 +664,7 @@ const LegalShieldPage = () => {
 
         {/* Reserved activities note */}
         <section className="container mx-auto px-6 py-12 max-w-4xl">
-          <h2 className="text-3xl font-bold mb-6">Built to launch faster — and safer</h2>
+          <h2 className="font-display text-3xl md:text-4xl font-semibold mb-6">Built to launch faster — and safer</h2>
           <div className="space-y-4 text-muted-foreground text-lg leading-relaxed">
             <p>
               In England & Wales, only certain activities are{' '}
@@ -685,7 +685,7 @@ const LegalShieldPage = () => {
         <section className="container mx-auto px-6 py-16 max-w-4xl">
           <div className="bg-card border border-primary/40 rounded-lg p-10 text-center">
             <Mail className="h-10 w-10 text-primary mx-auto mb-4" />
-            <h2 className="text-2xl md:text-3xl font-bold mb-4">Take control before it escalates.</h2>
+            <h2 className="text-2xl md:font-display text-3xl md:text-4xl font-semibold mb-4">Take control before it escalates.</h2>
             <p className="text-muted-foreground text-lg mb-8 max-w-2xl mx-auto">
               Get clarity, organise your evidence and prepare a solicitor-ready case pack — before
               legal costs spiral.
@@ -700,7 +700,7 @@ const LegalShieldPage = () => {
 
         {/* FAQ */}
         <section className="container mx-auto px-6 py-12 max-w-4xl">
-          <h2 className="text-3xl font-bold mb-8">Frequently asked questions</h2>
+          <h2 className="font-display text-3xl md:text-4xl font-semibold mb-8">Frequently asked questions</h2>
           <Accordion type="single" collapsible className="w-full">
             {faqs.map((f, i) => (
               <AccordionItem key={i} value={`q-${i}`}>
@@ -715,7 +715,7 @@ const LegalShieldPage = () => {
 
         {/* ARIA ecosystem */}
         <section className="container mx-auto px-6 py-12 max-w-5xl">
-          <h2 className="text-3xl font-bold mb-2">Part of the wider ARIA ecosystem</h2>
+          <h2 className="font-display text-3xl md:text-4xl font-semibold mb-2">Part of the wider ARIA ecosystem</h2>
           <p className="text-muted-foreground mb-8 max-w-3xl">
             Legal Shield is one layer of an integrated platform built to protect every part of your
             personal and professional life.
