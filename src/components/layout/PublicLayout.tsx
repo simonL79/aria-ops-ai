@@ -137,6 +137,14 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
                   </Link>
                 )}
                 <Link 
+                  to="/services/legal-shield" 
+                  className="inline-flex items-center gap-2 text-primary font-medium hover:text-primary/80 transition-colors py-2"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <Shield className="h-4 w-4" />
+                  Legal Shield
+                </Link>
+                <Link 
                   to="/blog" 
                   className="text-muted-foreground hover:text-foreground transition-colors py-2"
                   onClick={() => setIsMobileMenuOpen(false)}
