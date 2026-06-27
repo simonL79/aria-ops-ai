@@ -36,5 +36,47 @@ jobs:
       - name: Install dependencies (no scripts)
         run: npm ci --ignore-scripts
 
+      # Capture the audit result without aborting the job, so we can post a
+      # Slack alert before failing the run.
       - name: Audit (high + critical only)
-        run: npm audit --audit-level=high
+        id: audit
+        run: |
+          set +e
+          REPORT="$(npm audit --audit-level=high 2>&1)"
+          STATUS=$?
+          echo "$REPORT"
+          # Persist a trimmed report for the Slack step.
+          {
+            echo "report<<EOF"
+            echo "$REPORT" | tail -n 40
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+          echo "status=$STATUS" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Notify Slack on high/critical findings
+        if: steps.audit.outputs.status != '0' && env.SLACK_WEBHOOK_URL != ''
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          REPORT: ${{ steps.audit.outputs.report }}
+        run: |
+          PAYLOAD=$(jq -n \
+            --arg repo "$GITHUB_REPOSITORY" \
+            --arg run "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+            --arg report "$REPORT" \
+            '{
+              text: ":rotating_light: *Dependency audit found high/critical vulnerabilities*",
+              blocks: [
+                { type: "section", text: { type: "mrkdwn", text: (":rotating_light: *High/critical dependency vulnerabilities in* `" + $repo + "`") } },
+                { type: "section", text: { type: "mrkdwn", text: ("```" + $report + "```") } },
+                { type: "section", text: { type: "mrkdwn", text: ("<" + $run + "|View workflow run>") } }
+              ]
+            }')
+          curl -sf -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK_URL"
+
+      - name: Fail if vulnerabilities were found
+        if: steps.audit.outputs.status != '0'
+        run: |
+          echo "High or critical vulnerabilities detected. See the audit report above."
+          exit 1
+
