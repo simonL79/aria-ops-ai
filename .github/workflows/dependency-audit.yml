@@ -1,0 +1,40 @@
+name: Dependency Audit
+
+# Proactive supply-chain alerting: runs weekly and on every dependency change.
+# Fails (and therefore surfaces an alert/notification) when a high or critical
+# severity advisory is found, so upstream fixes can be applied promptly.
+on:
+  schedule:
+    - cron: "0 7 * * 1" # Mondays 07:00 UTC
+  push:
+    paths:
+      - "package.json"
+      - "package-lock.json"
+      - "bun.lockb"
+  pull_request:
+    paths:
+      - "package.json"
+      - "package-lock.json"
+      - "bun.lockb"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies (no scripts)
+        run: npm ci --ignore-scripts
+
+      - name: Audit (high + critical only)
+        run: npm audit --audit-level=high
