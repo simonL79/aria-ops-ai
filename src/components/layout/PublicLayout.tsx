@@ -6,7 +6,7 @@ import MobileNav from './MobileNav';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '../ui/button';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { LogIn, LogOut, Home, Menu, X } from 'lucide-react';
+import { LogIn, LogOut, Home, Menu, X, Shield } from 'lucide-react';
 import Logo from '../ui/logo';
 
 interface PublicLayoutProps {
