@@ -30,7 +30,7 @@ const ServiceCard = ({ service, index, visible }: { service: any; index: number;
       className={`transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
       style={{ transitionDelay: visible ? `${index * 120}ms` : '0ms', transformStyle: 'preserve-3d' }}
     >
-      <Card className="glass-card p-8 text-foreground hover:border-primary/30 hover:shadow-[0_0_30px_rgba(245,158,11,0.1)] transition-all duration-500 h-full flex flex-col">
+      <Card className="glass-card p-8 text-foreground hover:border-primary/30 hover:shadow-[0_0_30px_hsl(var(--primary)/0.1)] transition-all duration-500 h-full flex flex-col">
         <div className="flex items-center gap-4 mb-4">
           <div className="w-12 h-12 bg-primary/10 border border-primary/20 rounded-xl flex items-center justify-center">
             <service.icon className="h-6 w-6 text-primary" />
@@ -162,10 +162,15 @@ const ServicesSection = () => {
         </div>
 
 
-        <div className={`text-center transition-all duration-700 delay-500 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
+        <div className={`flex flex-col sm:flex-row gap-4 justify-center transition-all duration-700 delay-500 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
           <Link to="/scan">
-            <button className="bg-primary hover:bg-primary/90 text-primary-foreground px-10 py-4 rounded-xl font-medium transition-all duration-300 hover:shadow-[0_0_30px_rgba(245,158,11,0.3)]">
-              Request Risk Assessment
+            <button className="bg-primary hover:bg-primary/90 text-primary-foreground px-10 py-4 rounded-xl font-medium transition-all duration-300 hover:shadow-[0_0_30px_hsl(var(--primary)/0.3)] w-full">
+              Start Free Reputation Scan
+            </button>
+          </Link>
+          <Link to="/services/legal-shield">
+            <button className="border border-primary text-primary hover:bg-primary/10 px-10 py-4 rounded-xl font-medium transition-all duration-300 w-full">
+              Open ARIA Legal Shield
             </button>
           </Link>
         </div>
