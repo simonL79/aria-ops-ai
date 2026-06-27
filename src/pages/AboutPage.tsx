@@ -6,6 +6,8 @@ import SEO from '@/components/seo/SEO';
 import SectionDivider from '@/components/ui/SectionDivider';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { cn } from '@/lib/utils';
+import heroBg from '@/assets/cinematic-hero-bg.jpg';
+import ctaBg from '@/assets/cinematic-cta-bg.jpg';
 
 const pillars = [
   {
@@ -75,6 +77,16 @@ const AboutPage = () => {
       <div className="min-h-screen text-foreground">
         {/* Hero + mission */}
         <section className="relative py-24 md:py-32 overflow-hidden">
+          <img
+            src={heroBg}
+            alt=""
+            aria-hidden="true"
+            loading="eager"
+            width={1920}
+            height={1088}
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-50"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/60 to-background" />
           <div
             className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,hsl(var(--primary)/0.10),transparent_60%)]"
             aria-hidden
@@ -232,6 +244,15 @@ const AboutPage = () => {
         <section className="py-20">
           <div className="container mx-auto px-6 max-w-4xl">
             <div className="glass-card border-primary/30 p-10 md:p-14 text-center relative overflow-hidden">
+              <img
+                src={ctaBg}
+                alt=""
+                aria-hidden="true"
+                loading="lazy"
+                width={1920}
+                height={1088}
+                className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-50"
+              />
               <div
                 className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--primary)/0.12),transparent_70%)]"
                 aria-hidden
