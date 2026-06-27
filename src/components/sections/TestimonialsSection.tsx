@@ -42,12 +42,17 @@ const TestimonialsSection = () => {
   ];
 
   return (
-    <section className="bg-background py-16">
+    <section className="bg-background py-28 md:py-36">
       <div className="container mx-auto px-6">
-        <h2 className="text-3xl md:text-4xl font-bold text-foreground text-center mb-4">What Our Clients Say</h2>
-        <p className="text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
-          Trusted by executives, founders, and public figures to protect what matters most — their reputation.
-        </p>
+        <div className="max-w-2xl mx-auto text-center mb-12">
+          <span className="text-[11px] font-medium tracking-[0.25em] uppercase text-primary/80">
+            In their words
+          </span>
+          <h2 className="font-display text-3xl md:text-5xl font-semibold text-foreground mt-4 mb-4">What our clients say</h2>
+          <p className="text-muted-foreground text-lg">
+            Trusted by executives, founders and public figures to protect what matters most — their reputation.
+          </p>
+        </div>
 
         {/* Animated Stats bar */}
         <div ref={statsRef} className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto mb-14">
