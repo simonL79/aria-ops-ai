@@ -151,6 +151,14 @@ const ConcernSubmissionForm = () => {
 
   const concernType = form.watch('concernType');
 
+  const [searchParams] = useSearchParams();
+  const initialType = searchParams.get('type');
+  useEffect(() => {
+    if (initialType === 'legal' || initialType === 'reputational') {
+      form.setValue('concernType', initialType);
+    }
+  }, [initialType, form]);
+
   const onSubmit = async (data: FormData) => {
     const now = Date.now();
     if (now - lastSubmission < 30000) {
