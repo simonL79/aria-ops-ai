@@ -46,7 +46,7 @@ const HomePage = () => {
         <div className="bg-background text-foreground min-h-screen">
           <HeroSection />
 
-          <ThreatScoreSection />
+          <ActiveFootprintSection />
           <SectionDivider glow />
           <ServicesSection />
           <Suspense fallback={null}>
