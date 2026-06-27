@@ -22,7 +22,7 @@ const cfg: StealthPageConfig = {
     body: [
       'The legacy UK ORM market — Igniyte, ReputationDefender, BrandYourself — was built for an internet where Google was the only verdict that mattered. Build positive content, push the negative to page two, hold the line.',
       'That model is breaking. ChatGPT, Gemini, Perplexity and Google\'s own AI Overviews now answer the credibility question before a single search result is clicked. A reputation that looks clean on Google can still be lethal inside an LLM\'s answer.',
-      'A.R.I.A is a UK reputation specialist with an AI defence layer built in. The full traditional ORM toolkit — suppression, removal, monitoring, authority content — plus active defence across the LLM web.',
+      'A.R.I.A is a UK reputation specialist with an AI defence layer built in. The full ARIA Ops AI reputation toolkit — suppression, removal, monitoring, authority content — plus active defence across the LLM web.',
     ],
   },
   capabilities: [
@@ -33,7 +33,7 @@ const cfg: StealthPageConfig = {
     },
     {
       icon: ShieldCheck,
-      title: 'Full ORM toolkit',
+      title: 'Full reputation toolkit',
       body: 'Negative search result suppression, harmful content removal, defamation and false-content pathways, review management, crisis response.',
     },
     {
