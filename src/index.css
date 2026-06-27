@@ -57,33 +57,33 @@
   }
 
   .dark {
-    /* /admin keeps the same dark intelligence theme */
-    --background: 258 30% 9%;
+    /* /admin keeps the same charcoal intelligence theme */
+    --background: 240 12% 5%;
     --foreground: 210 40% 98%;
-    --card: 257 28% 13%;
+    --card: 240 11% 9%;
     --card-foreground: 210 40% 98%;
-    --popover: 257 28% 13%;
+    --popover: 240 11% 9%;
     --popover-foreground: 210 40% 98%;
     --primary: 258 90% 66%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 256 26% 16%;
+    --secondary: 240 10% 12%;
     --secondary-foreground: 210 40% 98%;
-    --muted: 256 26% 16%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 240 10% 12%;
+    --muted-foreground: 220 9% 60%;
     --accent: 255 92% 76%;
-    --accent-foreground: 258 30% 9%;
+    --accent-foreground: 240 12% 5%;
     --destructive: 0 74% 42%;
     --destructive-foreground: 210 40% 98%;
-    --border: 256 24% 22%;
-    --input: 256 26% 16%;
+    --border: 240 10% 18%;
+    --input: 240 10% 12%;
     --ring: 258 90% 66%;
-    --sidebar-background: 258 30% 9%;
+    --sidebar-background: 240 12% 5%;
     --sidebar-foreground: 213 27% 84%;
     --sidebar-primary: 258 90% 66%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 256 26% 16%;
+    --sidebar-accent: 240 10% 12%;
     --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 256 24% 22%;
+    --sidebar-border: 240 10% 18%;
     --sidebar-ring: 258 90% 66%;
   }
 }
