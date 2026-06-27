@@ -112,29 +112,29 @@ const ChatWidget = () => {
       {/* FAB */}
       <button
         onClick={() => setOpen(o => !o)}
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-orange-500 hover:bg-orange-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center group"
+        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center group"
         aria-label={open ? 'Close chat' : 'Open chat'}
       >
         {open ? <X className="h-6 w-6" /> : (
           <>
             <MessageCircle className="h-6 w-6" />
-            <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse" />
+            <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full animate-pulse" />
           </>
         )}
       </button>
 
       {/* Chat panel */}
       {open && (
-        <div className="fixed bottom-24 right-6 z-50 w-[360px] max-w-[calc(100vw-2rem)] h-[500px] max-h-[calc(100vh-8rem)] bg-gray-950 border border-gray-800 rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-scale-in">
+        <div className="fixed bottom-24 right-6 z-50 w-[360px] max-w-[calc(100vw-2rem)] h-[500px] max-h-[calc(100vh-8rem)] bg-card border border-border rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-scale-in">
           {/* Header */}
-          <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-800 bg-gray-900/80">
-            <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center">
-              <Bot className="h-4 w-4 text-white" />
+          <div className="flex items-center gap-3 px-4 py-3 border-b border-border bg-muted/50">
+            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+              <Bot className="h-4 w-4 text-primary-foreground" />
             </div>
             <div>
-              <p className="text-white text-sm font-semibold">A.R.I.A™ Assistant</p>
-              <p className="text-green-400 text-xs flex items-center gap-1">
-                <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" /> Online
+              <p className="text-foreground text-sm font-semibold">A.R.I.A™ Assistant</p>
+              <p className="text-emerald-400 text-xs flex items-center gap-1">
+                <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" /> Online
               </p>
             </div>
           </div>
@@ -144,25 +144,25 @@ const ChatWidget = () => {
             {messages.map((m, i) => (
               <div key={i} className={`flex gap-2 ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 {m.role === 'assistant' && (
-                  <div className="w-6 h-6 rounded-full bg-orange-500/20 flex items-center justify-center shrink-0 mt-1">
-                    <Bot className="h-3 w-3 text-orange-400" />
+                  <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center shrink-0 mt-1">
+                    <Bot className="h-3 w-3 text-primary" />
                   </div>
                 )}
                 <div
                   className={`max-w-[80%] rounded-xl px-3 py-2 text-sm leading-relaxed ${
                     m.role === 'user'
-                      ? 'bg-orange-500 text-white rounded-br-sm'
-                      : 'bg-gray-800 text-gray-200 rounded-bl-sm'
+                      ? 'bg-primary text-primary-foreground rounded-br-sm'
+                      : 'bg-muted text-foreground rounded-bl-sm'
                   }`}
                 >
                   {m.content}
                   {loading && i === messages.length - 1 && m.role === 'assistant' && (
-                    <span className="inline-block w-1.5 h-4 bg-orange-400 ml-1 animate-pulse rounded-sm" />
+                    <span className="inline-block w-1.5 h-4 bg-primary ml-1 animate-pulse rounded-sm" />
                   )}
                 </div>
                 {m.role === 'user' && (
-                  <div className="w-6 h-6 rounded-full bg-gray-700 flex items-center justify-center shrink-0 mt-1">
-                    <User className="h-3 w-3 text-gray-300" />
+                  <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center shrink-0 mt-1">
+                    <User className="h-3 w-3 text-muted-foreground" />
                   </div>
                 )}
               </div>
@@ -172,7 +172,7 @@ const ChatWidget = () => {
           {/* Input */}
           <form
             onSubmit={(e) => { e.preventDefault(); send(); }}
-            className="flex items-center gap-2 px-3 py-3 border-t border-gray-800 bg-gray-900/80"
+            className="flex items-center gap-2 px-3 py-3 border-t border-border bg-muted/50"
           >
             <input
               ref={inputRef}
@@ -181,13 +181,13 @@ const ChatWidget = () => {
               onChange={e => setInput(e.target.value)}
               placeholder="Ask about our services..."
               disabled={loading}
-              className="flex-1 bg-gray-800 text-white text-sm rounded-lg px-3 py-2 outline-none border border-gray-700 focus:border-orange-500 transition-colors placeholder-gray-500"
+              className="flex-1 bg-background text-foreground text-sm rounded-lg px-3 py-2 outline-none border border-border focus:border-primary transition-colors placeholder:text-muted-foreground"
             />
             <Button
               type="submit"
               size="icon"
               disabled={loading || !input.trim()}
-              className="bg-orange-500 hover:bg-orange-600 rounded-lg h-9 w-9 shrink-0"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg h-9 w-9 shrink-0"
             >
               <Send className="h-4 w-4" />
             </Button>
