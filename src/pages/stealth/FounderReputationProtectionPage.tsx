@@ -5,7 +5,7 @@ import ExternalAuthorityLinks from '@/components/seo/ExternalAuthorityLinks';
 
 const cfg: StealthPageConfig = {
   path: '/founder-reputation-protection',
-  title: 'Founder Reputation Protection | Investor-Grade ORM | A.R.I.A™',
+  title: 'Founder Reputation Protection | Investor-Grade Defence | A.R.I.A™',
   metaDescription:
     'Investor-grade reputation protection for founders. Pre-due-diligence audits, AI search defence, historic content cleanup, hostile-narrative response.',
   h1: 'Founder Reputation Protection',
