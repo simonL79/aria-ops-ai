@@ -53,7 +53,7 @@ const TrustSection = () => {
 
         {/* Anonymised Outcomes */}
         <div className={`mb-20 transition-all duration-700 delay-200 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
-          <h3 className="text-2xl font-bold text-foreground text-center mb-10">Anonymised Outcomes</h3>
+          <h3 className="font-display text-2xl font-semibold text-foreground text-center mb-10">Anonymised outcomes</h3>
           <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             {outcomes.map((o, i) => (
               <div key={i} className="glass-card p-8 text-center">
@@ -69,7 +69,7 @@ const TrustSection = () => {
 
         {/* Methodology */}
         <div className={`transition-all duration-700 delay-400 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
-          <h3 className="text-2xl font-bold text-foreground text-center mb-10">How We Operate</h3>
+          <h3 className="font-display text-2xl font-semibold text-foreground text-center mb-10">How we operate</h3>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
             {methodology.map((m, i) => (
               <div key={i} className="glass-card p-6">
