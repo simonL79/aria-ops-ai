@@ -124,6 +124,14 @@ const faqs: { q: string; a: string }[] = [
     a: 'Consumers, tenants and employees dealing with complaints and disputes; small businesses facing unpaid invoices, bad reviews or supplier issues; and creators, public figures and athletes dealing with defamation, harassment or reputation attacks.',
   },
   {
+    q: 'How does billing work?',
+    a: 'Personal Shield (£29/mo), Creator Shield (£97/mo) and Business Shield (£397/mo) are billed monthly by subscription. You can manage or cancel your membership from your account portal at any time. The Crisis Pack is a one-off £99 purchase — no recurring commitment.',
+  },
+  {
+    q: 'What is the £99 Crisis Pack?',
+    a: 'The Crisis Pack is a single, one-off purchase for urgent situations. It includes an emergency evidence pack, a draft letter tailored to your facts, a timeline of events, a risk summary and a solicitor handover file — so you can move quickly when a legal issue needs immediate attention.',
+  },
+  {
     q: 'How does this connect to the rest of A.R.I.A™?',
     a: 'Legal Shield plugs directly into reputation monitoring, crisis response and evidence protection. When a threat surfaces, you already have the structure to act — clarity first, evidence organised, and a clean handover file if escalation is needed.',
   },
