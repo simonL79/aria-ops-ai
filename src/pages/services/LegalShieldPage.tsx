@@ -7,6 +7,7 @@ import SectionDivider from '@/components/ui/SectionDivider';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import CinematicImage from '@/components/ui/CinematicImage';
 import { Button } from '@/components/ui/button';
+import StickyPricingBar from '@/components/widgets/StickyPricingBar';
 import {
   Accordion,
   AccordionContent,
