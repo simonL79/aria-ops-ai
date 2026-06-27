@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { X, ArrowRight } from 'lucide-react';
 
 type Props = {
@@ -86,6 +86,19 @@ const StickyPricingBar = ({ targetId, label, ctaText }: Props) => {
 
   const show = scrolledPastHero && !pricingVisible && !dismissed;
 
+  // Polite, screen-reader-only announcements for appearance/dismissal so the
+  // change in UI is conveyed without the user seeing it visually.
+  const [announcement, setAnnouncement] = useState('');
+  const prevShow = useRef(false);
+  useEffect(() => {
+    if (show && !prevShow.current) {
+      setAnnouncement(`${label}. A pricing shortcut is available. Press Escape to dismiss it.`);
+    } else if (!show && prevShow.current && dismissed) {
+      setAnnouncement('Pricing shortcut dismissed.');
+    }
+    prevShow.current = show;
+  }, [show, dismissed, label]);
+
   // Allow keyboard users to dismiss the bar with Escape while it is shown.
   useEffect(() => {
     if (!show) return;
@@ -96,18 +109,31 @@ const StickyPricingBar = ({ targetId, label, ctaText }: Props) => {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [show, handleDismiss]);
 
+  const hintId = `pricing-bar-hint-${targetId}`;
+
   return (
-    <div
-      role="region"
-      aria-label="Pricing quick access"
-      className={`fixed inset-x-0 bottom-0 z-40 flex justify-center px-4 pb-4 pointer-events-none transition-all duration-300 ${
-        show ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6 pointer-events-none'
-      }`}
-      aria-hidden={!show}
-      // Keep the bar out of the focus order entirely while hidden so keyboard
-      // users never tab into invisible controls.
-      {...(!show ? { inert: '' as unknown as boolean } : {})}
-    >
+    <>
+      {/* Visually hidden polite announcer — lives outside the inert region so it
+          is always available to assistive tech. */}
+      <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+        {announcement}
+      </div>
+      <div
+        role="region"
+        aria-label="Pricing quick access"
+        aria-describedby={hintId}
+        className={`fixed inset-x-0 bottom-0 z-40 flex justify-center px-4 pb-4 pointer-events-none transition-all duration-300 ${
+          show ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6 pointer-events-none'
+        }`}
+        aria-hidden={!show}
+        // Keep the bar out of the focus order entirely while hidden so keyboard
+        // users never tab into invisible controls.
+        {...(!show ? { inert: '' as unknown as boolean } : {})}
+      >
+        <span id={hintId} className="sr-only">
+          Quick access to pricing. Press Escape to dismiss this bar.
+        </span>
+
       <div className="pointer-events-auto flex items-center gap-3 w-full max-w-2xl pr-20 sm:pr-24 rounded-2xl border border-border bg-card/95 backdrop-blur-md shadow-2xl pl-4 py-2.5">
         <p className="hidden sm:block flex-1 text-sm text-foreground/90 font-medium truncate">
           {label}
@@ -132,7 +158,8 @@ const StickyPricingBar = ({ targetId, label, ctaText }: Props) => {
           <X className="h-4 w-4" aria-hidden="true" />
         </button>
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 
