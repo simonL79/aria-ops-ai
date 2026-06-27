@@ -67,20 +67,23 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
             
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-6 lg:space-x-8">
-              <Link to="/blog" className="text-muted-foreground hover:text-foreground transition-colors text-sm lg:text-base">
-                Blog
+              <button
+                onClick={scrollToServices}
+                className="text-muted-foreground hover:text-foreground transition-colors text-sm lg:text-base"
+              >
+                Platform
+              </button>
+              <Link to="/services/legal-shield" className="text-muted-foreground hover:text-foreground transition-colors text-sm lg:text-base">
+                Legal Shield
+              </Link>
+              <Link to="/home#pricing" className="text-muted-foreground hover:text-foreground transition-colors text-sm lg:text-base">
+                Pricing
               </Link>
               <Link to="/about" className="text-muted-foreground hover:text-foreground transition-colors text-sm lg:text-base">
                 About
               </Link>
-              <button 
-                onClick={scrollToServices} 
-                className="text-muted-foreground hover:text-foreground transition-colors text-sm lg:text-base"
-              >
-                Services
-              </button>
-              <Link to="/home#pricing" className="text-muted-foreground hover:text-foreground transition-colors text-sm lg:text-base">
-                Pricing
+              <Link to="/blog" className="text-muted-foreground hover:text-foreground transition-colors text-sm lg:text-base">
+                Resources
               </Link>
               <div className="flex items-center gap-2">
                 <Button asChild size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground">
