@@ -297,55 +297,65 @@ const LegalShieldPage = () => {
 
       <article className="text-foreground">
         {/* Hero */}
-        <section className="container mx-auto px-6 pt-20 pb-12 max-w-4xl">
-          <p className="text-sm uppercase tracking-widest text-primary mb-4">ARIA Legal Shield™ — Your AI Legal Protection Platform</p>
-          <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
-            Make legal understanding accessible to everyone
-          </h1>
-          <div className="space-y-4 text-lg text-muted-foreground leading-relaxed">
-            <p>
-              At ARIA, we believe that understanding your legal position should never depend solely
-              on your ability to afford expensive legal fees.
-            </p>
-            <p>
-              Every day, individuals, families, athletes, creators, homeowners and businesses face
-              legal questions that leave them uncertain about their rights, responsibilities and the
-              best course of action. For many, the first obstacle isn't the legal issue itself — it's
-              the cost of knowing where they stand.
-            </p>
-            <p>
-              That's why we created ARIA Legal Shield™ — an AI-powered legal intelligence and case
-              preparation platform designed to help people understand complex legal matters, organise
-              evidence, prepare professional documentation and make informed decisions before seeking
-              regulated legal representation where necessary.
-            </p>
-            <p>
-              Whether you're negotiating a contract, dealing with a dispute, protecting your
-              reputation, resolving a consumer issue, challenging a parking charge, navigating
-              employment concerns, managing a property dispute, preparing a sports management
-              agreement or understanding business obligations, ARIA Legal Shield™ provides intelligent
-              guidance, structured preparation and practical support.
-            </p>
-            <p>
-              Rather than replacing legal professionals, ARIA Legal Shield™ helps users become better
-              prepared — saving time, reducing unnecessary costs and ensuring that when specialist
-              legal advice is required, they approach it with organised evidence, clear timelines and
-              professionally prepared documentation.
-            </p>
-            <p className="text-foreground font-medium">
-              Because confidence should begin with clarity — not uncertainty.
-            </p>
-          </div>
+        <section className="relative overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,hsl(var(--primary)/0.10),transparent_60%)]" aria-hidden />
+          <div
+            ref={hero.ref}
+            className={`container relative mx-auto px-6 pt-28 pb-12 max-w-4xl transition-all duration-700 ${
+              hero.visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+            }`}
+          >
+            <span className="text-[11px] font-medium tracking-[0.25em] uppercase text-primary/80">ARIA Legal Shield™ — Your AI Legal Protection Platform</span>
+            <h1 className="font-display text-4xl md:text-6xl font-semibold mt-5 mb-6 leading-tight text-shadow">
+              Make legal understanding accessible to everyone
+            </h1>
+            <div className="space-y-4 text-lg text-muted-foreground leading-relaxed">
+              <p>
+                At ARIA, we believe that understanding your legal position should never depend solely
+                on your ability to afford expensive legal fees.
+              </p>
+              <p>
+                Every day, individuals, families, athletes, creators, homeowners and businesses face
+                legal questions that leave them uncertain about their rights, responsibilities and the
+                best course of action. For many, the first obstacle isn't the legal issue itself — it's
+                the cost of knowing where they stand.
+              </p>
+              <p>
+                That's why we created ARIA Legal Shield™ — an AI-powered legal intelligence and case
+                preparation platform designed to help people understand complex legal matters, organise
+                evidence, prepare professional documentation and make informed decisions before seeking
+                regulated legal representation where necessary.
+              </p>
+              <p>
+                Whether you're negotiating a contract, dealing with a dispute, protecting your
+                reputation, resolving a consumer issue, challenging a parking charge, navigating
+                employment concerns, managing a property dispute, preparing a sports management
+                agreement or understanding business obligations, ARIA Legal Shield™ provides intelligent
+                guidance, structured preparation and practical support.
+              </p>
+              <p>
+                Rather than replacing legal professionals, ARIA Legal Shield™ helps users become better
+                prepared — saving time, reducing unnecessary costs and ensuring that when specialist
+                legal advice is required, they approach it with organised evidence, clear timelines and
+                professionally prepared documentation.
+              </p>
+              <p className="text-foreground font-medium">
+                Because confidence should begin with clarity — not uncertainty.
+              </p>
+            </div>
 
-          <div className="mt-8 flex flex-wrap gap-4">
-            <Button asChild size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
-              <Link to="/services/legal-shield/intake">
-                Start your guided intake <ArrowRight className="ml-2 h-4 w-4" />
+            <div className="mt-10 flex flex-wrap gap-3">
+              <Link
+                to="/services/legal-shield/intake"
+                className="group inline-flex items-center justify-center gap-2 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-medium px-7 py-3.5 transition-all duration-300 hover:shadow-[0_0_30px_hsl(var(--primary)/0.3)]"
+              >
+                Start your guided intake
+                <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
               </Link>
-            </Button>
-            <Button asChild size="lg" variant="outline">
-              <a href="#packages">See packages</a>
-            </Button>
+              <Button asChild size="lg" variant="outline">
+                <a href="#packages">See packages</a>
+              </Button>
+            </div>
           </div>
         </section>
 
