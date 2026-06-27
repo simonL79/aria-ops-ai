@@ -54,7 +54,7 @@ const RequestDataAccessPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-premium-silver/20">
+    <div className="min-h-screen bg-background text-foreground">
       <SEO
         title="Request Data Access — A.R.I.A™ Subject Access Request"
         description="Submit a UK GDPR data subject access request to A.R.I.A™. We respond within statutory timeframes."
