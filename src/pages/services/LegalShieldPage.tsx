@@ -371,6 +371,8 @@ const LegalShieldPage = () => {
           </div>
         </section>
 
+        <div className="container mx-auto px-6 max-w-5xl"><SectionDivider /></div>
+
         {/* What it helps you do */}
         <section className="container mx-auto px-6 py-12 max-w-4xl">
           <h2 className="font-display text-3xl md:text-4xl font-semibold mb-8">What ARIA Legal Shield helps you do</h2>
@@ -392,6 +394,8 @@ const LegalShieldPage = () => {
           </div>
         </section>
 
+        <div className="container mx-auto px-6 max-w-5xl"><SectionDivider /></div>
+
         {/* What the product produces */}
         <section className="container mx-auto px-6 py-12 max-w-4xl">
           <h2 className="font-display text-3xl md:text-4xl font-semibold mb-8">What the product produces</h2>
@@ -405,6 +409,8 @@ const LegalShieldPage = () => {
             ))}
           </div>
         </section>
+
+        <div className="container mx-auto px-6 max-w-5xl"><SectionDivider /></div>
 
         {/* How it works — workflow */}
         <section className="container mx-auto px-6 py-12 max-w-4xl">
@@ -426,6 +432,8 @@ const LegalShieldPage = () => {
             ))}
           </ol>
         </section>
+
+        <div className="container mx-auto px-6 max-w-5xl"><SectionDivider /></div>
 
         {/* Escalation workflow */}
         <section className="container mx-auto px-6 py-12 max-w-5xl">
@@ -493,6 +501,8 @@ const LegalShieldPage = () => {
           </div>
         </section>
 
+        <div className="container mx-auto px-6 max-w-5xl"><SectionDivider /></div>
+
         {/* Scope — what we do and don't do */}
         <section className="container mx-auto px-6 py-12 max-w-5xl">
           <h2 className="font-display text-3xl md:text-4xl font-semibold mb-2">AI Legal Intelligence — not an "AI lawyer"</h2>
@@ -536,6 +546,8 @@ const LegalShieldPage = () => {
           </div>
         </section>
 
+        <div className="container mx-auto px-6 max-w-5xl"><SectionDivider /></div>
+
         {/* Solicitor network */}
         <section className="container mx-auto px-6 py-12 max-w-4xl">
           <div className="glass-card border-primary/40 p-8 md:p-12">
@@ -564,6 +576,8 @@ const LegalShieldPage = () => {
             </div>
           </div>
         </section>
+
+        <div className="container mx-auto px-6 max-w-5xl"><SectionDivider /></div>
 
         {/* Areas we support */}
         <section className="container mx-auto px-6 py-12 max-w-5xl">
@@ -597,6 +611,8 @@ const LegalShieldPage = () => {
             ))}
           </div>
         </section>
+
+        <div className="container mx-auto px-6 max-w-5xl"><SectionDivider /></div>
 
         {/* Membership vision */}
         <section className="container mx-auto px-6 py-12 max-w-5xl">
@@ -664,6 +680,8 @@ const LegalShieldPage = () => {
           </div>
         </section>
 
+        <div className="container mx-auto px-6 max-w-5xl"><SectionDivider /></div>
+
         {/* Reserved activities note */}
         <section className="container mx-auto px-6 py-12 max-w-4xl">
           <h2 className="font-display text-3xl md:text-4xl font-semibold mb-6">Built to launch faster — and safer</h2>
@@ -706,6 +724,8 @@ const LegalShieldPage = () => {
         </section>
 
 
+        <div className="container mx-auto px-6 max-w-5xl"><SectionDivider /></div>
+
         {/* FAQ */}
         <section className="container mx-auto px-6 py-12 max-w-4xl">
           <h2 className="font-display text-3xl md:text-4xl font-semibold mb-8">Frequently asked questions</h2>
@@ -720,6 +740,8 @@ const LegalShieldPage = () => {
             ))}
           </Accordion>
         </section>
+
+        <div className="container mx-auto px-6 max-w-5xl"><SectionDivider /></div>
 
         {/* ARIA ecosystem */}
         <section className="container mx-auto px-6 py-12 max-w-5xl">
