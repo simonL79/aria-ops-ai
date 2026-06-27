@@ -638,8 +638,8 @@ const LegalShieldPage = () => {
             {packages.map(({ icon: Icon, name, price, cadence, for: forWho, featured }) => (
               <div
                 key={name}
-                className={`relative rounded-lg p-6 border ${
-                  featured ? 'border-primary bg-card' : 'border-border bg-card'
+                className={`relative glass-card p-6 transition-all duration-300 ${
+                  featured ? 'border-primary/60' : 'hover:border-primary/30'
                 }`}
               >
                 {featured && (
