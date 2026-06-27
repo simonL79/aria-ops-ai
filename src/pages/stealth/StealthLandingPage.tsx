@@ -8,8 +8,7 @@ import StatDisclaimer from '@/components/legal/StatDisclaimer';
 import ScrollSpy from '@/components/sections/ScrollSpy';
 import SectionDivider from '@/components/ui/SectionDivider';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
-import heroBg from '@/assets/cinematic-hero-bg.jpg';
-import ctaBg from '@/assets/cinematic-cta-bg.jpg';
+import CinematicImage from '@/components/ui/CinematicImage';
 
 export interface StealthPageConfig {
   path: string;
@@ -117,7 +116,7 @@ const StealthLandingPage: React.FC<{ cfg: StealthPageConfig }> = ({ cfg }) => {
       <article className="text-foreground">
         {/* Hero */}
         <section className="relative overflow-hidden">
-          <img src={heroBg} alt="" aria-hidden="true" loading="eager" width={1920} height={1088} className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-50" />
+          <CinematicImage variant="hero" priority className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-50" />
           <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/60 to-background" />
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,hsl(var(--primary)/0.10),transparent_60%)]" aria-hidden />
           <div
@@ -331,7 +330,7 @@ const StealthLandingPage: React.FC<{ cfg: StealthPageConfig }> = ({ cfg }) => {
         {/* CTA */}
         <section className="container mx-auto px-6 py-16 max-w-4xl">
           <div className="glass-card border-primary/30 p-10 md:p-14 text-center relative overflow-hidden">
-            <img src={ctaBg} alt="" aria-hidden="true" loading="lazy" width={1920} height={1088} className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-50" />
+            <CinematicImage variant="cta" className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-50" />
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--primary)/0.12),transparent_70%)]" aria-hidden />
             <div className="relative">
               <h2 className="font-display text-2xl md:text-4xl font-semibold mb-4">

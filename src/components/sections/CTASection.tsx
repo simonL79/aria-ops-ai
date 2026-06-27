@@ -2,19 +2,14 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Link } from 'react-router-dom';
-import ctaBg from '@/assets/cinematic-cta-bg.jpg';
+import CinematicImage from '@/components/ui/CinematicImage';
 
 const CTASection = () => {
   return (
     <section id="cta-section" data-section="cta" className="py-28 md:py-36 bg-background relative overflow-hidden">
       {/* Cinematic CTA backdrop */}
-      <img
-        src={ctaBg}
-        alt=""
-        aria-hidden="true"
-        loading="lazy"
-        width={1920}
-        height={1088}
+      <CinematicImage
+        variant="cta"
         className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-50"
       />
       <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-background/80" />

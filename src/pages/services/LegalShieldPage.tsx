@@ -5,8 +5,7 @@ import SEO from '@/components/seo/SEO';
 import LegalShieldEscalationWorkflow from '@/components/services/LegalShieldEscalationWorkflow';
 import SectionDivider from '@/components/ui/SectionDivider';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
-import heroBg from '@/assets/cinematic-hero-bg.jpg';
-import ctaBg from '@/assets/cinematic-cta-bg.jpg';
+import CinematicImage from '@/components/ui/CinematicImage';
 import { Button } from '@/components/ui/button';
 import {
   Accordion,
@@ -300,7 +299,7 @@ const LegalShieldPage = () => {
       <article className="text-foreground">
         {/* Hero */}
         <section className="relative overflow-hidden">
-          <img src={heroBg} alt="" aria-hidden="true" loading="eager" width={1920} height={1088} className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-50" />
+          <CinematicImage variant="hero" priority className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-50" />
           <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/60 to-background" />
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,hsl(var(--primary)/0.10),transparent_60%)]" aria-hidden />
           <div
@@ -708,7 +707,7 @@ const LegalShieldPage = () => {
         {/* CTA */}
         <section className="container mx-auto px-6 py-16 max-w-4xl">
           <div className="glass-card border-primary/30 p-10 md:p-14 text-center relative overflow-hidden">
-            <img src={ctaBg} alt="" aria-hidden="true" loading="lazy" width={1920} height={1088} className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-50" />
+            <CinematicImage variant="cta" className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-50" />
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--primary)/0.12),transparent_70%)]" aria-hidden />
             <div className="relative">
               <Mail className="h-10 w-10 text-primary mx-auto mb-4" />

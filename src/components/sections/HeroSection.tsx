@@ -1,7 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import commandCentre from '@/assets/hero-command-centre.jpg';
+import commandCentre from '@/assets/hero-command-centre.jpg?w=1280&quality=72';
+import commandCentreAvif from '@/assets/hero-command-centre.jpg?w=640;1280;1920&format=avif&quality=60&as=srcset';
+import commandCentreWebp from '@/assets/hero-command-centre.jpg?w=640;1280;1920&format=webp&quality=72&as=srcset';
 
 /*
   ARIA — The Digital Protection Platform
@@ -17,15 +19,21 @@ const HeroSection = () => {
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden bg-background text-foreground">
       {/* Cinematic full-bleed backdrop */}
-      <img
-        src={commandCentre}
-        alt="ARIA digital intelligence command centre — analyst monitoring a global threat map"
-        className="absolute inset-0 w-full h-full object-cover"
-        width={1920}
-        height={1088}
-        loading="eager"
-        fetchPriority="high"
-      />
+      <picture>
+        <source type="image/avif" srcSet={commandCentreAvif} sizes="100vw" />
+        <source type="image/webp" srcSet={commandCentreWebp} sizes="100vw" />
+        <img
+          src={commandCentre}
+          alt="ARIA digital intelligence command centre — analyst monitoring a global threat map"
+          className="absolute inset-0 w-full h-full object-cover"
+          width={1920}
+          height={1088}
+          loading="eager"
+          fetchPriority="high"
+          decoding="async"
+        />
+      </picture>
+
 
       {/* Charcoal cinematic grade — legibility + depth */}
       <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-background/30" />
