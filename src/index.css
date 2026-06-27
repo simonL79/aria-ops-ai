@@ -5,27 +5,27 @@
 
 @layer base {
   :root {
-    /* A.R.I.A Luxury Dark Intelligence Theme */
-    --background: 258 30% 9%;          /* #111827 deep void background */
+    /* A.R.I.A — The Digital Protection Platform: cinematic charcoal + minimal violet accent */
+    --background: 240 12% 5%;           /* #0B0B0F near-black charcoal */
     --foreground: 210 40% 98%;          /* #F8FAFC */
 
-    --card: 257 28% 13%;                /* #182231 card surface */
+    --card: 240 11% 9%;                 /* #15151B glass card surface */
     --card-foreground: 210 40% 98%;
 
-    --popover: 257 28% 13%;
+    --popover: 240 11% 9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 258 90% 66%;              /* #8B5CF6 violet — luxury CTA */
+    --primary: 258 90% 66%;              /* #8B5CF6 violet — single precise accent */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 256 26% 16%;           /* #1F2937 panel surface */
+    --secondary: 240 10% 12%;           /* #1B1B22 panel surface */
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 256 26% 16%;               /* #1F2937 */
-    --muted-foreground: 215 20% 65%;    /* #94A3B8 */
+    --muted: 240 10% 12%;               /* #1B1B22 */
+    --muted-foreground: 220 9% 60%;     /* #94959E */
 
     --accent: 255 92% 76%;               /* violet glow accent */
-    --accent-foreground: 258 30% 9%;
+    --accent-foreground: 240 12% 5%;
 
     --info: 199 92% 60%;                /* #38BDF8 AI blue — data / signal */
     --info-foreground: 258 30% 9%;
