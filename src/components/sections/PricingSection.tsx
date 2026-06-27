@@ -145,11 +145,16 @@ const PricingSection = () => {
   };
 
   return (
-    <section id="pricing" className="scroll-mt-24 py-24 bg-gradient-to-b from-background via-background to-background">
-      <div ref={ref} className={`container mx-auto px-6 transition-all duration-1000 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-        <h2 className="text-4xl md:text-5xl font-bold mb-16 text-center text-foreground">
-          Pricing
-        </h2>
+    <section id="pricing" className="scroll-mt-24 py-28 md:py-36 bg-background">
+      <div ref={ref} className={`container mx-auto px-6 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
+        <div className="max-w-2xl mx-auto text-center mb-16">
+          <span className="text-[11px] font-medium tracking-[0.25em] uppercase text-primary/80">
+            Plans
+          </span>
+          <h2 className="font-display text-3xl md:text-5xl font-semibold mt-4 text-foreground">
+            One subscription. Intelligence and legal cover.
+          </h2>
+        </div>
         
         <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
           {plans.map((plan, index) => (
@@ -167,7 +172,7 @@ const PricingSection = () => {
                 </div>
               )}
               
-              <h3 className="text-2xl font-bold mb-4 text-primary">{plan.name}</h3>
+              <h3 className="font-display text-2xl font-semibold mb-4 text-primary">{plan.name}</h3>
               <div className="mb-6">
                 <span className="text-3xl font-bold text-foreground">{plan.price}</span>
                 <span className="text-muted-foreground">{plan.period}</span>
@@ -208,7 +213,7 @@ const PricingSection = () => {
         <div className="max-w-3xl mx-auto mt-8">
           <div className="glass-card p-8 transition-colors hover:border-primary/30 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div className="flex-1">
-              <h3 className="text-2xl font-bold mb-2 text-primary">{enterprisePlan.name}</h3>
+              <h3 className="font-display text-2xl font-semibold mb-2 text-primary">{enterprisePlan.name}</h3>
               <div className="mb-3">
                 <span className="text-3xl font-bold text-foreground">{enterprisePlan.price}</span>
                 <span className="text-muted-foreground ml-1">{enterprisePlan.period}</span>

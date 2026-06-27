@@ -5,15 +5,18 @@ import { Link } from 'react-router-dom';
 
 const CTASection = () => {
   return (
-    <section id="cta-section" data-section="cta" className="py-24 bg-background relative overflow-hidden">
+    <section id="cta-section" data-section="cta" className="py-28 md:py-36 bg-background relative overflow-hidden">
       {/* Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-primary/5 rounded-full blur-[120px]" />
 
       <div className="container mx-auto px-6 relative z-10">
         <div className="max-w-3xl mx-auto text-center space-y-8">
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight">
-            Detect Threats. Build Cases.<br />
-            <span className="text-primary">Before They Escalate</span>
+          <span className="text-[11px] font-medium tracking-[0.25em] uppercase text-primary/80">
+            Begin in confidence
+          </span>
+          <h2 className="font-display text-4xl md:text-5xl lg:text-6xl font-semibold text-foreground leading-[1.05]">
+            Detect threats. Build cases.<br />
+            <span className="text-primary">Before they escalate.</span>
           </h2>
           <p className="text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
             Request a private consultation with our intelligence and legal preparation team. Every engagement begins with absolute discretion.

@@ -28,12 +28,15 @@ const TrustSection = () => {
   ];
 
   return (
-    <section className="py-24 bg-background" id="trust">
+    <section className="py-28 md:py-36 bg-background" id="trust">
       <div ref={ref} className="container mx-auto px-6">
         {/* Discreet Client Sectors */}
         <div className={`text-center mb-20 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4">
-            Trusted by the <span className="text-primary">Most Visible</span>
+          <span className="text-[11px] font-medium tracking-[0.25em] uppercase text-primary/80">
+            Who we protect
+          </span>
+          <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-semibold text-foreground mt-4 mb-4">
+            Trusted by the <span className="text-primary">most visible</span>
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto mb-12">
             We work with individuals and organisations where reputation is existential — not optional.
@@ -50,7 +53,7 @@ const TrustSection = () => {
 
         {/* Anonymised Outcomes */}
         <div className={`mb-20 transition-all duration-700 delay-200 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
-          <h3 className="text-2xl font-bold text-foreground text-center mb-10">Anonymised Outcomes</h3>
+          <h3 className="font-display text-2xl font-semibold text-foreground text-center mb-10">Anonymised outcomes</h3>
           <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             {outcomes.map((o, i) => (
               <div key={i} className="glass-card p-8 text-center">
@@ -66,7 +69,7 @@ const TrustSection = () => {
 
         {/* Methodology */}
         <div className={`transition-all duration-700 delay-400 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
-          <h3 className="text-2xl font-bold text-foreground text-center mb-10">How We Operate</h3>
+          <h3 className="font-display text-2xl font-semibold text-foreground text-center mb-10">How we operate</h3>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
             {methodology.map((m, i) => (
               <div key={i} className="glass-card p-6">
