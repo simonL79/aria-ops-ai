@@ -219,7 +219,7 @@ const packages = [
   },
   {
     name: 'Business Shield',
-    price: '£49',
+    price: '£397',
     cadence: '/month',
     for: 'Small businesses — unpaid invoices, bad reviews, supplier issues, contracts and complaints.',
     icon: Scale,
