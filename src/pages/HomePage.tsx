@@ -7,6 +7,7 @@ import HeroSection from '@/components/sections/HeroSection';
 
 import ActiveFootprintSection from '@/components/sections/ActiveFootprintSection';
 import ServicesSection from '@/components/sections/ServicesSection';
+import EcosystemSection from '@/components/sections/EcosystemSection';
 import SectionDivider from '@/components/ui/SectionDivider';
 import SEO from '@/components/seo/SEO';
 
