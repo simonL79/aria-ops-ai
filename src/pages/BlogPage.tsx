@@ -115,7 +115,7 @@ const BlogPage = () => {
                     <Link
                       key={post.id}
                       to={`/blog/${post.slug}`}
-                      className="group rounded-lg border border-border bg-card backdrop-blur-sm overflow-hidden hover:border-primary/50 hover:shadow-[0_0_30px_rgba(245,158,11,0.1)] hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+                      className="group rounded-lg border border-border bg-card backdrop-blur-sm overflow-hidden hover:border-primary/50 hover:shadow-[0_0_30px_hsl(var(--primary)/0.1)] hover:-translate-y-1 transition-all duration-300 cursor-pointer"
                     >
                       {post.image_url && (
                         <div className="h-48 overflow-hidden">

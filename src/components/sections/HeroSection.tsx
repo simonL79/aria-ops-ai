@@ -191,24 +191,26 @@ const HeroSection = () => {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
             <Button
-              onClick={scrollToThreatScore}
+              asChild
               size="lg"
-              className="bg-primary hover:bg-primary/90 text-primary-foreground px-10 py-6 text-lg font-medium rounded-xl hover:shadow-[0_0_30px_rgba(245,158,11,0.3)] transition-all duration-300"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground px-10 py-6 text-lg font-medium rounded-xl hover:shadow-[0_0_30px_hsl(var(--primary)/0.3)] transition-all duration-300"
             >
-              Get Free Threat Score
+              <Link to="/scan">Start Free Reputation Scan</Link>
             </Button>
 
             <Button
               asChild
               variant="outline"
               size="lg"
-              className="border-border text-foreground hover:bg-muted/40 px-10 py-6 text-lg font-medium rounded-xl transition-all duration-300"
+              className="border-primary text-primary hover:bg-primary/10 px-10 py-6 text-lg font-medium rounded-xl transition-all duration-300"
             >
-              <Link to="/scan">
-                Book Private Consultation
-              </Link>
+              <Link to="/services/legal-shield">Open ARIA Legal Shield</Link>
             </Button>
           </div>
+
+          <p className="text-sm text-muted-foreground max-w-xl mx-auto">
+            Choose the protection you need — both feed into the same intelligence engine.
+          </p>
 
           {/* Dashboard mockup */}
           <DashboardMockup />

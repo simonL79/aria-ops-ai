@@ -215,7 +215,7 @@ const BlogPostPage = () => {
                     <Link
                       key={r.id}
                       to={`/blog/${r.slug}`}
-                      className="group flex gap-3 sm:flex-col rounded-lg border border-border bg-card backdrop-blur-sm overflow-hidden hover:border-primary/50 hover:shadow-[0_0_20px_rgba(245,158,11,0.1)] transition-all cursor-pointer"
+                      className="group flex gap-3 sm:flex-col rounded-lg border border-border bg-card backdrop-blur-sm overflow-hidden hover:border-primary/50 hover:shadow-[0_0_20px_hsl(var(--primary)/0.1)] transition-all cursor-pointer"
                     >
                       {r.image_url && (
                         <div className="w-24 sm:w-full h-20 sm:h-32 flex-shrink-0 overflow-hidden">

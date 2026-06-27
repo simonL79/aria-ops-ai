@@ -28,8 +28,8 @@ const AddOnServiceCard = ({ service, index, visible }: { service: { title: strin
       className={`transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
       style={{ transitionDelay: visible ? `${index * 120}ms` : '0ms', transformStyle: 'preserve-3d' }}
     >
-      <Card className="bg-muted/60 backdrop-blur-md border border-border/50 p-6 text-foreground hover:border-orange-500/50 hover:shadow-[0_0_25px_rgba(245,158,11,0.12)] transition-all duration-500 h-full">
-        <h4 className="font-bold mb-3 text-orange-400">{service.title}</h4>
+      <Card className="bg-muted/60 backdrop-blur-md border border-border/50 p-6 text-foreground hover:border-primary/50 hover:shadow-[0_0_25px_hsl(var(--primary)/0.12)] transition-all duration-500 h-full">
+        <h4 className="font-bold mb-3 text-primary">{service.title}</h4>
         <p className="text-muted-foreground text-sm">{service.description}</p>
       </Card>
     </div>

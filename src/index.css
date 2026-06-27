@@ -6,7 +6,7 @@
 @layer base {
   :root {
     /* A.R.I.A Luxury Dark Intelligence Theme */
-    --background: 258 30% 9%;          /* #111827 dark navy charcoal */
+    --background: 258 30% 9%;          /* #111827 deep void background */
     --foreground: 210 40% 98%;          /* #F8FAFC */
 
     --card: 257 28% 13%;                /* #182231 card surface */
@@ -15,7 +15,7 @@
     --popover: 257 28% 13%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 258 90% 66%;              /* #C6A15B champagne gold — luxury CTA */
+    --primary: 258 90% 66%;              /* #8B5CF6 violet — luxury CTA */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 256 26% 16%;           /* #1F2937 panel surface */
@@ -24,7 +24,7 @@
     --muted: 256 26% 16%;               /* #1F2937 */
     --muted-foreground: 215 20% 65%;    /* #94A3B8 */
 
-    --accent: 255 92% 76%;               /* champagne gold accent */
+    --accent: 255 92% 76%;               /* violet glow accent */
     --accent-foreground: 258 30% 9%;
 
     --info: 199 92% 60%;                /* #38BDF8 AI blue — data / signal */

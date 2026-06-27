@@ -64,18 +64,11 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
             
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-6 lg:space-x-8">
-              <Link to="/services/legal-shield" className="inline-flex items-center gap-1.5 text-primary font-medium hover:text-primary/80 transition-colors text-sm lg:text-base">
-                <Shield className="h-4 w-4" />
-                Legal Shield
-              </Link>
               <Link to="/blog" className="text-muted-foreground hover:text-foreground transition-colors text-sm lg:text-base">
                 Blog
               </Link>
               <Link to="/about" className="text-muted-foreground hover:text-foreground transition-colors text-sm lg:text-base">
                 About
-              </Link>
-              <Link to="/scan" className="text-muted-foreground hover:text-foreground transition-colors text-sm lg:text-base">
-                Get Started
               </Link>
               <button 
                 onClick={scrollToServices} 
@@ -86,12 +79,23 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
               <Link to="/home#pricing" className="text-muted-foreground hover:text-foreground transition-colors text-sm lg:text-base">
                 Pricing
               </Link>
+              <div className="flex items-center gap-2">
+                <Button asChild size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                  <Link to="/scan">Start Scan</Link>
+                </Button>
+                <Button asChild variant="outline" size="sm" className="border-primary text-primary hover:bg-primary/10">
+                  <Link to="/services/legal-shield" className="inline-flex items-center gap-1.5">
+                    <Shield className="h-3.5 w-3.5" />
+                    Legal Shield
+                  </Link>
+                </Button>
+              </div>
               {isAuthenticated ? (
                 <Button 
                   variant="ghost" 
                   size="sm" 
                   onClick={handleAuthAction}
-                  className="ml-4 text-sm font-medium text-muted-foreground hover:text-foreground"
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground"
                 >
                   <LogOut className="mr-2 h-4 w-4" />
                   Sign Out
@@ -181,6 +185,19 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
                 >
                   Pricing
                 </Link>
+                <div className="flex flex-col gap-3 pt-2">
+                  <Button asChild size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground w-full justify-center">
+                    <Link to="/scan" onClick={() => setIsMobileMenuOpen(false)}>
+                      Start Scan
+                    </Link>
+                  </Button>
+                  <Button asChild variant="outline" size="sm" className="border-primary text-primary hover:bg-primary/10 w-full justify-center">
+                    <Link to="/services/legal-shield" className="inline-flex items-center gap-1.5" onClick={() => setIsMobileMenuOpen(false)}>
+                      <Shield className="h-3.5 w-3.5" />
+                      Legal Shield
+                    </Link>
+                  </Button>
+                </div>
                 {isAuthenticated ? (
                   <Button 
                     variant="ghost" 
