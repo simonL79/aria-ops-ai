@@ -383,7 +383,7 @@ const CybersecurityFrameworkPage = () => {
               <ol className="space-y-4">
                 {nextSteps.map((step, i) => (
                   <li key={i} className="flex items-start gap-4">
-                    <span className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-black font-bold text-sm flex items-center justify-center">
+                    <span className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground font-bold text-sm flex items-center justify-center">
                       {i + 1}
                     </span>
                     <span className="text-foreground/90 leading-relaxed pt-1">{step}</span>
