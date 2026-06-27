@@ -49,8 +49,8 @@ const AINewsFeedSection = () => {
             <Newspaper className="w-4 h-4 text-primary" />
             <span className="text-xs font-medium tracking-wider uppercase text-primary">Live Intelligence</span>
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            AI Intelligence Feed
+          <h2 className="font-display text-3xl md:text-5xl font-semibold text-foreground mb-4">
+            AI intelligence feed
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
             Real-time coverage from AI Business — informing, educating & connecting the global AI community.

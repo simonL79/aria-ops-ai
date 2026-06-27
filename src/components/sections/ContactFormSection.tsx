@@ -85,12 +85,15 @@ const ContactFormSection = () => {
   const inputClasses = "bg-secondary border-border text-foreground placeholder-muted-foreground focus:border-primary focus:outline-none";
 
   return (
-    <section className="bg-background py-16">
+    <section className="bg-background py-28 md:py-36">
       <div className="container mx-auto px-6">
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-foreground mb-4">
-              Get a comprehensive assessment of your digital risk profile. Our experts will identify vulnerabilities and provide a strategic roadmap.
+            <span className="text-[11px] font-medium tracking-[0.25em] uppercase text-primary/80">
+              Confidential intake
+            </span>
+            <h2 className="font-display text-2xl md:text-3xl font-semibold text-foreground mt-4">
+              Get a comprehensive assessment of your digital risk profile. Our experts identify vulnerabilities and provide a strategic roadmap.
             </h2>
           </div>
 
