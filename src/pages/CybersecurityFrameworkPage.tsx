@@ -278,18 +278,18 @@ const CybersecurityFrameworkPage = () => {
       <div className="min-h-screen text-foreground">
         {/* Header */}
         <div className="relative border-b border-border">
-          <div className="absolute inset-0 bg-gradient-to-b from-orange-500/10 via-transparent to-transparent pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/10 via-transparent to-transparent pointer-events-none" />
           <div className="container mx-auto max-w-6xl px-6 py-16 relative">
             <Link
               to="/"
-              className="inline-flex items-center gap-2 text-sm text-foreground/60 hover:text-orange-500 transition-colors mb-8"
+              className="inline-flex items-center gap-2 text-sm text-foreground/60 hover:text-primary transition-colors mb-8"
             >
               <ArrowLeft className="h-4 w-4" />
               Back to home
             </Link>
             <div className="flex items-center gap-3 mb-4">
-              <div className="h-px w-12 bg-orange-500" />
-              <span className="text-xs uppercase tracking-[0.2em] text-orange-500 font-medium">
+              <div className="h-px w-12 bg-primary" />
+              <span className="text-xs uppercase tracking-[0.2em] text-primary font-medium">
                 Trust & Compliance
               </span>
             </div>
@@ -312,9 +312,9 @@ const CybersecurityFrameworkPage = () => {
               <a
                 key={s.id}
                 href={`#${s.id}`}
-                className="group flex items-start gap-2 p-3 rounded-lg border border-border hover:border-orange-500/40 hover:bg-white/[0.02] transition-all"
+                className="group flex items-start gap-2 p-3 rounded-lg border border-border hover:border-primary/40 hover:bg-white/[0.02] transition-all"
               >
-                <span className="text-xs font-mono text-orange-500/70 mt-0.5">{s.number}</span>
+                <span className="text-xs font-mono text-primary/70 mt-0.5">{s.number}</span>
                 <span className="text-sm text-foreground/80 group-hover:text-foreground transition-colors">
                   {s.title}
                 </span>
@@ -330,11 +330,11 @@ const CybersecurityFrameworkPage = () => {
             return (
               <section key={section.id} id={section.id} className="scroll-mt-24">
                 <div className="flex items-center gap-4 mb-6">
-                  <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-orange-500/10 border border-orange-500/30">
-                    <Icon className="h-5 w-5 text-orange-500" />
+                  <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10 border border-primary/30">
+                    <Icon className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <div className="text-xs font-mono text-orange-500/70 mb-1">
+                    <div className="text-xs font-mono text-primary/70 mb-1">
                       Section {section.number}
                     </div>
                     <h2 className="text-2xl md:text-3xl font-bold">{section.title}</h2>
@@ -361,7 +361,7 @@ const CybersecurityFrameworkPage = () => {
                             key={ii}
                             className="flex items-start gap-3 p-4 rounded-lg bg-white/[0.02] border border-border"
                           >
-                            <CheckCircle2 className="h-5 w-5 text-orange-500 mt-0.5 flex-shrink-0" />
+                            <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
                             <span className="text-foreground/85 leading-relaxed">{item}</span>
                           </li>
                         ))}
@@ -375,15 +375,15 @@ const CybersecurityFrameworkPage = () => {
 
           {/* Next Steps */}
           <section id="next-steps" className="scroll-mt-24">
-            <div className="rounded-2xl border border-orange-500/30 bg-gradient-to-br from-orange-500/10 to-transparent p-8 md:p-10">
-              <div className="text-xs uppercase tracking-[0.2em] text-orange-500 mb-3">
+            <div className="rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 to-transparent p-8 md:p-10">
+              <div className="text-xs uppercase tracking-[0.2em] text-primary mb-3">
                 Roadmap
               </div>
               <h2 className="text-2xl md:text-3xl font-bold mb-6">Immediate Next Steps</h2>
               <ol className="space-y-4">
                 {nextSteps.map((step, i) => (
                   <li key={i} className="flex items-start gap-4">
-                    <span className="flex-shrink-0 w-8 h-8 rounded-full bg-orange-500 text-black font-bold text-sm flex items-center justify-center">
+                    <span className="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-primary-foreground font-bold text-sm flex items-center justify-center">
                       {i + 1}
                     </span>
                     <span className="text-foreground/90 leading-relaxed pt-1">{step}</span>

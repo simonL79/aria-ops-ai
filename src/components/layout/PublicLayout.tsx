@@ -146,6 +146,15 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
                     <span>Back to Home</span>
                   </Link>
                 )}
+                <button 
+                  onClick={() => {
+                    scrollToServices();
+                    setIsMobileMenuOpen(false);
+                  }} 
+                  className="text-muted-foreground hover:text-foreground transition-colors py-2 text-left"
+                >
+                  Platform
+                </button>
                 <Link 
                   to="/services/legal-shield" 
                   className="inline-flex items-center gap-2 text-primary font-medium hover:text-primary/80 transition-colors py-2"
@@ -155,11 +164,11 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
                   Legal Shield
                 </Link>
                 <Link 
-                  to="/blog" 
+                  to="/home#pricing" 
                   className="text-muted-foreground hover:text-foreground transition-colors py-2"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  Blog
+                  Pricing
                 </Link>
                 <Link 
                   to="/about" 
@@ -169,27 +178,11 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
                   About
                 </Link>
                 <Link 
-                  to="/scan" 
+                  to="/blog" 
                   className="text-muted-foreground hover:text-foreground transition-colors py-2"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  Get Started
-                </Link>
-                <button 
-                  onClick={() => {
-                    scrollToServices();
-                    setIsMobileMenuOpen(false);
-                  }} 
-                  className="text-muted-foreground hover:text-foreground transition-colors py-2 text-left"
-                >
-                  Services
-                </button>
-                <Link 
-                  to="/home#pricing" 
-                  className="text-muted-foreground hover:text-foreground transition-colors py-2"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Pricing
+                  Resources
                 </Link>
                 <div className="flex flex-col gap-3 pt-2">
                   <Button asChild size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground w-full justify-center">
