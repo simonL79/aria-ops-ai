@@ -21,7 +21,8 @@ export default {
 		extend: {
 			fontFamily: {
 				sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'sans-serif'],
-				heading: ['"SF Pro Display"', 'Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+				heading: ['Outfit', 'Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+				display: ['Outfit', 'Inter', 'system-ui', 'sans-serif'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',
@@ -163,6 +164,15 @@ export default {
 				'25%': { transform: 'translate(10px, -15px)', opacity: '0.6' },
 				'50%': { transform: 'translate(-5px, 10px)', opacity: '0.4' },
 				'75%': { transform: 'translate(15px, 5px)', opacity: '0.5' }
+			},
+			'breathe': {
+				'0%, 100%': { transform: 'scale(1)', opacity: '0.85' },
+				'50%': { transform: 'scale(1.18)', opacity: '1' }
+			},
+			'filament': {
+				'0%': { strokeDashoffset: '24', opacity: '0.15' },
+				'50%': { opacity: '0.7' },
+				'100%': { strokeDashoffset: '0', opacity: '0.15' }
 			}
 			},
 			animation: {
@@ -175,7 +185,9 @@ export default {
 			'ring-pulse': 'ring-pulse 3s ease-in-out infinite',
 			'fade-in-scale': 'fade-in-scale 1.2s ease-out forwards',
 			'marquee': 'marquee 20s linear infinite',
-			'drift': 'drift 8s ease-in-out infinite'
+			'drift': 'drift 8s ease-in-out infinite',
+			'breathe': 'breathe 4s ease-in-out infinite',
+			'filament': 'filament 3s linear infinite'
 			}
 		}
 	},

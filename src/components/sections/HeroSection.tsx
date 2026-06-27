@@ -1,221 +1,92 @@
-
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import heroHeader from '@/assets/aria-hero-header.png';
+import commandCentre from '@/assets/hero-command-centre.jpg';
 
-const useLayoutReady = () => {
-  const [ready, setReady] = useState(false);
+/*
+  ARIA — The Digital Protection Platform
+  Cinematic command-centre hero. One statement. One CTA.
 
-  useEffect(() => {
-    let cancelled = false;
-    const prepare = async () => {
-      // Wait for all web fonts to load so the headline reserve renders at its final metrics.
-      if ('fonts' in document && document.fonts) {
-        try { await document.fonts.ready; } catch { /* ignore unsupported */ }
-      }
-      // Wait for the next paint to ensure the invisible headline has laid out.
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          if (!cancelled) setReady(true);
-        });
-      });
-    };
-    prepare();
-    return () => { cancelled = true; };
-  }, []);
-
-  return ready;
-};
-
-const useTypewriter = (text: string, speed = 45, delay = 600) => {
-  const [displayed, setDisplayed] = useState('');
-  const [done, setDone] = useState(false);
-  const ready = useLayoutReady();
-
-  useEffect(() => {
-    if (!ready) return;
-    let i = 0;
-    const timeout = setTimeout(() => {
-      const interval = setInterval(() => {
-        if (i < text.length) {
-          setDisplayed(text.slice(0, i + 1));
-          i++;
-        } else {
-          setDone(true);
-          clearInterval(interval);
-        }
-      }, speed);
-      return () => clearInterval(interval);
-    }, delay);
-    return () => clearTimeout(timeout);
-  }, [text, speed, delay, ready]);
-
-  return { displayed, done };
-};
-
-const DashboardMockup = () => {
-  return (
-    <div className="w-full max-w-4xl mx-auto mt-16" style={{ perspective: '1200px' }}>
-      <div
-        className="glass-card p-0 overflow-hidden shadow-2xl"
-        style={{ transform: 'rotateX(4deg)', transformOrigin: 'center bottom' }}
-      >
-        {/* Top bar */}
-        <div className="flex items-center justify-between px-4 py-2.5 border-b border-border bg-muted/40">
-          <div className="flex items-center gap-2">
-            <div className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
-            <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/80" />
-            <div className="w-2.5 h-2.5 rounded-full bg-green-500/80" />
-          </div>
-          <span className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground font-medium">
-            ARIA Threat Intelligence
-          </span>
-          <div className="flex items-center gap-1.5">
-            <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-            <span className="text-[10px] text-green-400/80">LIVE</span>
-          </div>
-        </div>
-
-        {/* Metrics row */}
-        <div className="grid grid-cols-3 gap-px bg-muted/40">
-          {/* Threat Score */}
-          <div className="p-5 bg-card text-center space-y-2">
-            <div className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Threat Score</div>
-            <div className="text-3xl font-light text-primary">12</div>
-            <div className="text-[10px] text-green-400/70">▼ Low Risk</div>
-          </div>
-          {/* Signals */}
-          <div className="p-5 bg-card text-center space-y-2 border-x border-border">
-            <div className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Signals Monitored</div>
-            <div className="text-3xl font-light text-foreground">2,847</div>
-            <div className="text-[10px] text-muted-foreground">across 14 platforms</div>
-          </div>
-          {/* Risk Level */}
-          <div className="p-5 bg-card text-center space-y-2">
-            <div className="text-[10px] uppercase tracking-[0.15em] text-muted-foreground">Risk Level</div>
-            <div className="text-3xl font-light text-green-400">Stable</div>
-            <div className="text-[10px] text-muted-foreground">no escalation detected</div>
-          </div>
-        </div>
-
-        {/* Scanning bar */}
-        <div className="relative h-1 bg-muted/40 overflow-hidden">
-          <div className="absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-primary/60 to-transparent animate-[scanline-bar_3s_ease-in-out_infinite]" />
-        </div>
-
-        {/* Status footer */}
-        <div className="px-4 py-2.5 bg-muted/30 flex items-center justify-between">
-          <span className="text-[10px] text-muted-foreground tracking-wide">Real-time monitoring active</span>
-          <span className="text-[10px] text-muted-foreground">Last scan: 4s ago</span>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const HERO_HEADLINE = 'AI Reputation & Legal Intelligence That Detects Risk Before It Escalates';
-
-const renderHeadlineWords = (text: string) =>
-  text.split(' ').map((word, i) => (
-    <React.Fragment key={i}>
-      {i > 0 && ' '}
-      {['Reputation', 'Legal', 'Intelligence', 'Risk'].includes(word.replace(/[^a-zA-Z]/g, '')) ? (
-        <span className="text-primary">{word}</span>
-      ) : (
-        <span>{word}</span>
-      )}
-    </React.Fragment>
-  ));
+  Headline alternates (easy swap):
+   - "Control the narrative before someone else does."
+   - "Your digital identity is now your greatest asset."
+*/
+const HEADLINE = 'Protect what the world believes about you.';
 
 const HeroSection = () => {
-  const { displayed, done } = useTypewriter(HERO_HEADLINE, 40, 250);
-
-  const scrollToThreatScore = () => {
-    const el = document.getElementById('threat-score');
-    if (el) el.scrollIntoView({ behavior: 'smooth' });
-  };
-
   return (
-    <section className="relative bg-gradient-to-b from-background via-background to-secondary/40 text-foreground min-h-screen flex items-center overflow-hidden">
-      {/* Grid overlay — faint gold lattice */}
-      <div className="absolute inset-0 opacity-[0.06]" style={{
-        backgroundImage: `linear-gradient(hsl(258 90% 66% / 0.35) 1px, transparent 1px), linear-gradient(90deg, hsl(258 90% 66% / 0.35) 1px, transparent 1px)`,
-        backgroundSize: '64px 64px',
-        maskImage: 'radial-gradient(ellipse at center, black 35%, transparent 80%)',
-        WebkitMaskImage: 'radial-gradient(ellipse at center, black 35%, transparent 80%)'
-      }} />
+    <section className="relative min-h-screen flex items-center overflow-hidden bg-background text-foreground">
+      {/* Cinematic full-bleed backdrop */}
+      <img
+        src={commandCentre}
+        alt="ARIA digital intelligence command centre — analyst monitoring a global threat map"
+        className="absolute inset-0 w-full h-full object-cover"
+        width={1920}
+        height={1088}
+        loading="eager"
+        fetchPriority="high"
+      />
 
-      {/* Champagne ambient light */}
-      <div className="absolute top-1/3 left-1/4 w-[36rem] h-[36rem] bg-primary/[0.10] rounded-full blur-[160px]" />
-      <div className="absolute bottom-1/4 right-1/4 w-[28rem] h-[28rem] bg-[hsl(199_92%_60%/0.08)] rounded-full blur-[140px]" />
+      {/* Charcoal cinematic grade — legibility + depth */}
+      <div className="absolute inset-0 bg-gradient-to-r from-background via-background/85 to-background/30" />
+      <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/60" />
 
+      {/* Drifting intelligence motes */}
+      <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+        {[
+          { t: '22%', l: '58%', d: '0s', s: 3 },
+          { t: '40%', l: '72%', d: '2s', s: 2 },
+          { t: '64%', l: '64%', d: '4s', s: 4 },
+          { t: '52%', l: '82%', d: '1s', s: 2 },
+        ].map((p, i) => (
+          <span
+            key={i}
+            className="absolute rounded-full bg-primary/60 blur-[1px] animate-drift"
+            style={{ top: p.t, left: p.l, width: p.s, height: p.s, animationDelay: p.d }}
+          />
+        ))}
+      </div>
 
-
-      <div className="container mx-auto px-6 relative z-10 w-full py-20">
-        <div className="max-w-4xl mx-auto text-center space-y-10">
-          {/* Hero header image */}
-          <div className="flex justify-center mb-6">
-            <img
-              src={heroHeader}
-              alt="A.R.I.A — AI Reputation Intelligence Agent reputation operations command center"
-              className="w-full max-w-3xl h-auto rounded-xl shadow-2xl"
-              loading="eager"
-            />
+      <div className="container mx-auto px-6 relative z-10 w-full py-28">
+        <div className="max-w-3xl space-y-8">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-primary/30 bg-primary/5 backdrop-blur-sm">
+            <span className="flex h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+            <span className="text-[11px] font-medium tracking-[0.25em] uppercase text-primary/90">
+              The Digital Protection Platform
+            </span>
           </div>
 
-          {/*
-            CLS lock: an invisible copy of the final headline reserves the full
-            wrapped height at every breakpoint, while the typed text overlays it.
-            This prevents the h1 (and the blinking cursor) from shifting as
-            characters appear, which was the main CLS offender.
-          */}
-          <h1 className="relative text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-light leading-tight text-foreground">
-            <span aria-hidden="true" className="invisible block">
-              {renderHeadlineWords(HERO_HEADLINE)}
-            </span>
-            <span className="absolute inset-0 block">
-              {renderHeadlineWords(displayed)}
-              {!done && (
-                <span
-                  aria-hidden="true"
-                  className="inline-block w-[3px] h-[0.9em] bg-primary ml-1 align-text-bottom animate-pulse"
-                />
-              )}
-            </span>
+          <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-semibold leading-[1.04] text-foreground text-shadow-lg">
+            {HEADLINE}
           </h1>
 
-          <p className="text-lg md:text-xl lg:text-2xl leading-relaxed text-muted-foreground max-w-3xl mx-auto">
-            ARIA Ops combines AI signal monitoring, predictive threat analysis, and solicitor-ready legal defence to protect reputations and resolve disputes in real time.
+          <p className="text-lg md:text-xl leading-relaxed text-muted-foreground max-w-xl">
+            Protect your identity, reputation, legal position and digital footprint
+            from a single AI-powered intelligence platform.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5 pt-2">
             <Button
               asChild
               size="lg"
-              className="bg-primary hover:bg-primary/90 text-primary-foreground px-10 py-6 text-lg font-medium rounded-xl hover:shadow-[0_0_30px_hsl(var(--primary)/0.3)] transition-all duration-300"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground px-9 py-6 text-base font-medium rounded-xl hover:shadow-[0_0_40px_hsl(var(--primary)/0.35)] transition-all duration-300"
             >
-              <Link to="/scan">Start Free Reputation Scan</Link>
+              <Link to="/scan">Request a confidential assessment</Link>
             </Button>
 
-            <Button
-              asChild
-              variant="outline"
-              size="lg"
-              className="border-primary text-primary hover:bg-primary/10 px-10 py-6 text-lg font-medium rounded-xl transition-all duration-300"
+            <Link
+              to="/services/legal-shield"
+              className="group text-sm font-medium text-foreground/80 hover:text-foreground transition-colors"
             >
-              <Link to="/services/legal-shield">Open ARIA Legal Shield</Link>
-            </Button>
+              Explore ARIA Legal Shield
+              <span className="inline-block ml-1 transition-transform group-hover:translate-x-1">→</span>
+            </Link>
           </div>
-
-          <p className="text-sm text-muted-foreground max-w-xl mx-auto">
-            Choose the protection you need — both feed into the same intelligence engine.
-          </p>
-
-          {/* Dashboard mockup */}
-          <DashboardMockup />
         </div>
       </div>
+
+      {/* Bottom fade into next section */}
+      <div className="absolute bottom-0 inset-x-0 h-32 bg-gradient-to-t from-background to-transparent" />
     </section>
   );
 };

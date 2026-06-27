@@ -5,7 +5,7 @@ import PublicPagesProtection from '@/components/layout/PublicPagesProtection';
 import PublicLayout from '@/components/layout/PublicLayout';
 import HeroSection from '@/components/sections/HeroSection';
 
-import ThreatScoreSection from '@/components/sections/ThreatScoreSection';
+import ActiveFootprintSection from '@/components/sections/ActiveFootprintSection';
 import ServicesSection from '@/components/sections/ServicesSection';
 import SectionDivider from '@/components/ui/SectionDivider';
 import SEO from '@/components/seo/SEO';
@@ -46,7 +46,7 @@ const HomePage = () => {
         <div className="bg-background text-foreground min-h-screen">
           <HeroSection />
 
-          <ThreatScoreSection />
+          <ActiveFootprintSection />
           <SectionDivider glow />
           <ServicesSection />
           <Suspense fallback={null}>

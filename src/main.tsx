@@ -2,19 +2,26 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.tsx";
+import "@fontsource/outfit/400.css";
+import "@fontsource/outfit/500.css";
+import "@fontsource/outfit/600.css";
+import "@fontsource/outfit/700.css";
+import "@fontsource/inter/400.css";
+import "@fontsource/inter/500.css";
+import "@fontsource/inter/600.css";
 import "./index.css";
 import { HelmetProvider } from "react-helmet-async";
 import { initializeARIACore } from "@/services/ariaCore";
 import { initializeDatabase } from "@/utils/initializeMonitoring";
 
-// Apply initial luxury dark theme to prevent flash
+// Apply initial charcoal theme to prevent flash
 const applyInitialTheme = () => {
   const root = document.documentElement;
   const body = document.body;
 
-  root.style.backgroundColor = '#15121F';
+  root.style.backgroundColor = '#0B0B0F';
   root.style.color = '#F8FAFC';
-  body.style.backgroundColor = '#15121F';
+  body.style.backgroundColor = '#0B0B0F';
   body.style.color = '#F8FAFC';
   body.style.minHeight = '100vh';
 
