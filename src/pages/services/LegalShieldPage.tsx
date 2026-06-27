@@ -782,6 +782,11 @@ const LegalShieldPage = () => {
           </ul>
         </section>
       </article>
+      <StickyPricingBar
+        targetId="packages"
+        label="ARIA Legal Shield™ — plans from £29/mo"
+        ctaText="See packages"
+      />
     </PublicLayout>
   );
 };
