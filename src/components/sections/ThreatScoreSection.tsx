@@ -285,7 +285,7 @@ const ThreatScoreSection = () => {
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 text-lg font-medium rounded-xl hover:shadow-[0_0_30px_rgba(245,158,11,0.3)] transition-all duration-300"
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-6 text-lg font-medium rounded-xl hover:shadow-[0_0_30px_hsl(var(--primary)/0.3)] transition-all duration-300"
               >
                 {loading ? 'Calculating...' : 'Calculate Your Threat Score'}
               </Button>
@@ -313,7 +313,7 @@ const ThreatScoreSection = () => {
               <div className="pt-4">
                 <Button
                   asChild
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground px-10 py-6 text-lg font-medium rounded-xl hover:shadow-[0_0_30px_rgba(245,158,11,0.3)] transition-all duration-300"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground px-10 py-6 text-lg font-medium rounded-xl hover:shadow-[0_0_30px_hsl(var(--primary)/0.3)] transition-all duration-300"
                 >
                   <Link to="/scan">Receive Full AI Threat Breakdown</Link>
                 </Button>
