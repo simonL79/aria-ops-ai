@@ -6,7 +6,7 @@ import MobileNav from './MobileNav';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '../ui/button';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { LogIn, LogOut, Home, Menu, X } from 'lucide-react';
+import { LogIn, LogOut, Home, Menu, X, Shield } from 'lucide-react';
 import Logo from '../ui/logo';
 
 interface PublicLayoutProps {
@@ -64,6 +64,10 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
             
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-6 lg:space-x-8">
+              <Link to="/services/legal-shield" className="inline-flex items-center gap-1.5 text-primary font-medium hover:text-primary/80 transition-colors text-sm lg:text-base">
+                <Shield className="h-4 w-4" />
+                Legal Shield
+              </Link>
               <Link to="/blog" className="text-muted-foreground hover:text-foreground transition-colors text-sm lg:text-base">
                 Blog
               </Link>
@@ -132,6 +136,14 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
                     <span>Back to Home</span>
                   </Link>
                 )}
+                <Link 
+                  to="/services/legal-shield" 
+                  className="inline-flex items-center gap-2 text-primary font-medium hover:text-primary/80 transition-colors py-2"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <Shield className="h-4 w-4" />
+                  Legal Shield
+                </Link>
                 <Link 
                   to="/blog" 
                   className="text-muted-foreground hover:text-foreground transition-colors py-2"
