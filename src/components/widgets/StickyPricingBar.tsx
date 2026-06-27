@@ -35,16 +35,28 @@ const StickyPricingBar = ({ targetId, label, ctaText }: Props) => {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Hide while the pricing section is on screen.
+  // Hide while the pricing section is on screen. The target may be lazy-mounted,
+  // so poll until it exists before observing.
   useEffect(() => {
-    const el = document.getElementById(targetId);
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => setPricingVisible(entry.isIntersecting),
-      { threshold: 0.15 },
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
+    let observer: IntersectionObserver | null = null;
+    let raf = 0;
+    const attach = () => {
+      const el = document.getElementById(targetId);
+      if (!el) {
+        raf = window.setTimeout(attach, 300);
+        return;
+      }
+      observer = new IntersectionObserver(
+        ([entry]) => setPricingVisible(entry.isIntersecting),
+        { threshold: 0.15 },
+      );
+      observer.observe(el);
+    };
+    attach();
+    return () => {
+      observer?.disconnect();
+      clearTimeout(raf);
+    };
   }, [targetId]);
 
   const handleClick = useCallback(() => {
