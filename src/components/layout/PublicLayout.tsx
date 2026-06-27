@@ -231,7 +231,8 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
         )}
       </header>
       
-      <main className="flex-1 w-full bg-background">
+      <main className="flex-1 w-full bg-transparent">
+
         {children}
       </main>
       
