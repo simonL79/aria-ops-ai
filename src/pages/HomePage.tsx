@@ -43,7 +43,7 @@ const HomePage = () => {
           description="A.R.I.A™ combines AI-powered reputation monitoring with solicitor-ready legal response. Real-time threat detection, narrative defence, identity protection, and AI legal case preparation."
           path="/"
         />
-        <div className="bg-background text-foreground min-h-screen">
+        <div className="text-foreground min-h-screen">
           <HeroSection />
 
           <ActiveFootprintSection />

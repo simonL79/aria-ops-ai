@@ -70,7 +70,7 @@ const UnsubscribePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-6">
+    <div className="min-h-screen bg-background text-foreground flex items-center justify-center px-6">
       <SEO title="Unsubscribe — A.R.I.A™" description="Unsubscribe from A.R.I.A™ communications." path="/unsubscribe" noIndex />
       <Card className="bg-card border-border p-8 max-w-md w-full text-center">
         {status === 'loading' && (
@@ -89,7 +89,7 @@ const UnsubscribePage = () => {
             <Button
               onClick={handleUnsubscribe}
               disabled={processing}
-              className="w-full bg-orange-500 hover:bg-orange-600 text-foreground"
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               {processing ? 'Processing...' : 'Confirm Unsubscribe'}
             </Button>

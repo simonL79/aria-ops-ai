@@ -62,7 +62,7 @@ const ResourceLayout: React.FC<{ cfg: ResourceConfig }> = ({ cfg }) => {
         ogType="article"
         jsonLd={jsonLd}
       />
-      <article className="bg-background text-foreground">
+      <article className="text-foreground">
         <header className="container mx-auto px-6 pt-20 pb-10 max-w-4xl">
           <p className="text-sm uppercase tracking-widest text-primary mb-4">{cfg.eyebrow}</p>
           <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">{cfg.h1}</h1>

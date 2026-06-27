@@ -13,7 +13,7 @@ const ContactPage = () => {
         description="Speak to A.R.I.A™ about online reputation defence, threat detection and narrative protection. UK-based reputation intelligence experts."
         path="/contact"
       />
-      <div className="min-h-screen bg-background text-foreground py-16">
+      <div className="min-h-screen text-foreground py-16">
         <div className="container mx-auto px-6">
           <div className="max-w-4xl mx-auto">
             <h1 className="text-4xl font-bold text-center mb-8">Contact A.R.I.A™</h1>

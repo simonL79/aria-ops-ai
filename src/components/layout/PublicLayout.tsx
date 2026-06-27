@@ -8,6 +8,7 @@ import { Button } from '../ui/button';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { LogIn, LogOut, Home, Menu, X, Shield } from 'lucide-react';
 import Logo from '../ui/logo';
+import CinematicBackground from './CinematicBackground';
 
 interface PublicLayoutProps {
   children: ReactNode;
@@ -44,8 +45,10 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
   const isHomePage = location.pathname === '/';
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <header className="sticky top-0 z-50 w-full bg-card/95 backdrop-blur border-b border-border">
+    <div className="relative flex min-h-screen flex-col bg-transparent">
+      <CinematicBackground />
+      <header className="sticky top-0 z-50 w-full bg-card/80 backdrop-blur-xl border-b border-border">
+
         <div className="container mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between py-3 sm:py-4">
             <div className="flex items-center gap-2 sm:gap-4">
@@ -228,7 +231,8 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
         )}
       </header>
       
-      <main className="flex-1 w-full bg-background">
+      <main className="flex-1 w-full bg-transparent">
+
         {children}
       </main>
       

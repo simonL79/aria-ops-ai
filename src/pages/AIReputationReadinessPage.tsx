@@ -300,7 +300,7 @@ const AIReputationReadinessPage: React.FC = () => {
     <PublicLayout>
       <SEO title={TITLE} description={DESCRIPTION} path={PATH} ogType="website" jsonLd={jsonLd} />
 
-      <article className="bg-background text-foreground">
+      <article className="text-foreground">
         {/* Hero */}
         <section className="container mx-auto px-6 pt-20 pb-12 max-w-5xl text-center">
           <p className="text-sm uppercase tracking-widest text-primary mb-4">
