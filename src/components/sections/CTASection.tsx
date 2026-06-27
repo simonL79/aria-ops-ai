@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Link } from 'react-router-dom';
-import ctaBg from '@/assets/cinematic-cta-bg.jpg';
+import CinematicImage from '@/components/ui/CinematicImage';
 
 const CTASection = () => {
   return (
