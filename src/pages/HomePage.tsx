@@ -69,6 +69,11 @@ const HomePage = () => {
         </div>
         <Suspense fallback={null}>
           <ChatWidget />
+          <StickyPricingBar
+            targetId="pricing"
+            label="Protect your reputation — plans from £29/mo"
+            ctaText="View plans"
+          />
         </Suspense>
       </PublicLayout>
     </PublicPagesProtection>
