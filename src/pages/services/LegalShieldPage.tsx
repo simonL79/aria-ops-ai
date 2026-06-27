@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import PublicLayout from '@/components/layout/PublicLayout';
 import SEO from '@/components/seo/SEO';
+import LegalShieldEscalationWorkflow from '@/components/services/LegalShieldEscalationWorkflow';
 import { Button } from '@/components/ui/button';
 import {
   Accordion,
@@ -411,6 +412,72 @@ const LegalShieldPage = () => {
               </li>
             ))}
           </ol>
+        </section>
+
+        {/* Escalation workflow */}
+        <section className="container mx-auto px-6 py-12 max-w-5xl">
+          <div className="text-center mb-10">
+            <p className="text-sm uppercase tracking-widest text-primary mb-3">When the issue goes further</p>
+            <h2 className="text-3xl font-bold mb-4">From Legal Shield to Legal Defence & Compliance</h2>
+            <p className="text-muted-foreground text-lg leading-relaxed max-w-3xl mx-auto">
+              Most matters stay inside Legal Shield: preparation, guidance and solicitor-ready packs.
+              When a case involves defamation, unlawful personal data, platform abuse or regulatory
+              exposure, it escalates into the statutory layer without losing context.
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-primary/30 bg-card p-6 md:p-10 mb-12">
+            <LegalShieldEscalationWorkflow />
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              {
+                step: '01',
+                title: 'Triage inside Legal Shield',
+                body: 'After the intake and case pack are built, ARIA flags whether the issue is a routine dispute or needs statutory force — takedown, defamation, GDPR or regulator action.',
+              },
+              {
+                step: '02',
+                title: 'Evidence transfers intact',
+                body: 'The timeline, screenshots, documents, hash records and risk flags move into Legal Defence & Compliance as a single, auditable file — no rebuilding, no lost context.',
+              },
+              {
+                step: '03',
+                title: 'Statutory action begins',
+                body: 'Legal Defence files GDPR Article 17 requests, dispatches pre-action/C&D letters, escalates to platforms and data brokers, and opens ICO or regulator channels where needed.',
+              },
+              {
+                step: '04',
+                title: 'Parallel suppression runs',
+                body: 'While legal action removes what can be removed at source, SEO suppression and narrative defence push down anything that remains visible — closing both the legal and visibility surfaces.',
+              },
+              {
+                step: '05',
+                title: 'Compliance-grade close',
+                body: 'Every action is logged to a SOC II / ISO 27001-aligned audit trail. Boards, principals or instructed counsel receive a signed, chain-of-custody report on request.',
+              },
+              {
+                step: '06',
+                title: 'Loop back to protection',
+                body: 'Once resolved, the outcome feeds back into your ARIA record — so future monitoring, threat scoring and case files already know what happened and what worked.',
+              },
+            ].map(({ step, title, body }) => (
+              <div key={step} className="bg-card border border-border rounded-lg p-6">
+                <span className="text-xs uppercase tracking-wider text-primary font-semibold">{step}</span>
+                <h3 className="text-lg font-bold mt-2 mb-2">{title}</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">{body}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-10 text-center">
+            <Button asChild variant="outline" size="lg">
+              <Link to="/legal-defence-compliance">
+                Explore Legal Defence & Compliance <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
         </section>
 
         {/* Scope — what we do and don't do */}
