@@ -8,6 +8,7 @@ import { Button } from '../ui/button';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { LogIn, LogOut, Home, Menu, X, Shield } from 'lucide-react';
 import Logo from '../ui/logo';
+import CinematicBackground from './CinematicBackground';
 
 interface PublicLayoutProps {
   children: ReactNode;
