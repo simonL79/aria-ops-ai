@@ -3,10 +3,11 @@ import { Link } from 'react-router-dom';
 import PublicLayout from '@/components/layout/PublicLayout';
 import SEO from '@/components/seo/SEO';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { ArrowRight, CheckCircle2, XCircle, type LucideIcon } from 'lucide-react';
 import StatDisclaimer from '@/components/legal/StatDisclaimer';
 import ScrollSpy from '@/components/sections/ScrollSpy';
+import SectionDivider from '@/components/ui/SectionDivider';
+import { useScrollReveal } from '@/hooks/useScrollReveal';
 
 export interface StealthPageConfig {
   path: string;
