@@ -83,7 +83,7 @@ const AboutPage = () => {
             ref={hero.ref}
             className={cn(
               'container mx-auto px-6 relative transition-all duration-700',
-              hero.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6',
+              hero.visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6',
             )}
           >
             <div className="max-w-3xl mx-auto text-center">
