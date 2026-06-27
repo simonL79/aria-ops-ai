@@ -64,8 +64,24 @@ const StickyPricingBar = ({ targetId, label, ctaText }: Props) => {
   }, [targetId]);
 
   const handleDismiss = useCallback(() => {
+    // Capture the element that had focus before the bar (the dismiss/CTA button)
+    // so we can hand focus back to a sensible place instead of letting it fall to <body>.
+    const active = document.activeElement as HTMLElement | null;
+    const insideBar = active?.closest('[aria-label="Pricing quick access"]');
+
     setDismissed(true);
     if (typeof window !== 'undefined') sessionStorage.setItem(storageKey, '1');
+
+    // If focus was inside the bar (keyboard dismiss), restore it to the main
+    // landmark so keyboard users continue from a predictable location.
+    if (insideBar) {
+      requestAnimationFrame(() => {
+        const main = document.querySelector('main') as HTMLElement | null;
+        const fallback = main ?? document.body;
+        if (main && !main.hasAttribute('tabindex')) main.setAttribute('tabindex', '-1');
+        fallback.focus();
+      });
+    }
   }, [storageKey]);
 
   const show = scrolledPastHero && !pricingVisible && !dismissed;
