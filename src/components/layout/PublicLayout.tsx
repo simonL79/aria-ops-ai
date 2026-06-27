@@ -185,6 +185,19 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
                 >
                   Pricing
                 </Link>
+                <div className="flex flex-col gap-3 pt-2">
+                  <Button asChild size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground w-full justify-center">
+                    <Link to="/scan" onClick={() => setIsMobileMenuOpen(false)}>
+                      Start Scan
+                    </Link>
+                  </Button>
+                  <Button asChild variant="outline" size="sm" className="border-primary text-primary hover:bg-primary/10 w-full justify-center">
+                    <Link to="/services/legal-shield" className="inline-flex items-center gap-1.5" onClick={() => setIsMobileMenuOpen(false)}>
+                      <Shield className="h-3.5 w-3.5" />
+                      Legal Shield
+                    </Link>
+                  </Button>
+                </div>
                 {isAuthenticated ? (
                   <Button 
                     variant="ghost" 
