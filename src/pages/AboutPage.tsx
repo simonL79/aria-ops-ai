@@ -77,6 +77,16 @@ const AboutPage = () => {
       <div className="min-h-screen text-foreground">
         {/* Hero + mission */}
         <section className="relative py-24 md:py-32 overflow-hidden">
+          <img
+            src={heroBg}
+            alt=""
+            aria-hidden="true"
+            loading="eager"
+            width={1920}
+            height={1088}
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-50"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-background/70 via-background/60 to-background" />
           <div
             className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,hsl(var(--primary)/0.10),transparent_60%)]"
             aria-hidden
