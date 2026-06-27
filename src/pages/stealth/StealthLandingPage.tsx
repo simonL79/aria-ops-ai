@@ -8,6 +8,8 @@ import StatDisclaimer from '@/components/legal/StatDisclaimer';
 import ScrollSpy from '@/components/sections/ScrollSpy';
 import SectionDivider from '@/components/ui/SectionDivider';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
+import heroBg from '@/assets/cinematic-hero-bg.jpg';
+import ctaBg from '@/assets/cinematic-cta-bg.jpg';
 
 export interface StealthPageConfig {
   path: string;
