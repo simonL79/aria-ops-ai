@@ -5,6 +5,8 @@ import SEO from '@/components/seo/SEO';
 import LegalShieldEscalationWorkflow from '@/components/services/LegalShieldEscalationWorkflow';
 import SectionDivider from '@/components/ui/SectionDivider';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
+import heroBg from '@/assets/cinematic-hero-bg.jpg';
+import ctaBg from '@/assets/cinematic-cta-bg.jpg';
 import { Button } from '@/components/ui/button';
 import {
   Accordion,
