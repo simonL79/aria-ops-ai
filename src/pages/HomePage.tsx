@@ -50,6 +50,8 @@ const HomePage = () => {
           <ActiveFootprintSection />
           <SectionDivider glow />
           <ServicesSection />
+          <SectionDivider glow />
+          <EcosystemSection />
           <Suspense fallback={null}>
             <AINewsFeedSection />
             <SectionDivider glow />
