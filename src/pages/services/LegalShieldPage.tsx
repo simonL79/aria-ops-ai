@@ -361,7 +361,7 @@ const LegalShieldPage = () => {
 
         {/* Positioning notice */}
         <section className="container mx-auto px-6 pb-4 max-w-4xl">
-          <div className="bg-card border border-primary/40 rounded-lg p-6">
+          <div className="glass-card border-primary/40 p-6">
             <p className="text-muted-foreground leading-relaxed">
               ARIA Legal Shield™ provides AI-powered legal information, document preparation and
               case organisation. It is not a law firm and does not provide regulated legal services
@@ -439,7 +439,7 @@ const LegalShieldPage = () => {
             </p>
           </div>
 
-          <div className="rounded-2xl border border-primary/30 bg-card p-6 md:p-10 mb-12">
+          <div className="glass-card border-primary/30 p-6 md:p-10 mb-12">
             <LegalShieldEscalationWorkflow />
           </div>
 
@@ -515,7 +515,7 @@ const LegalShieldPage = () => {
                   ? 'bg-amber-500'
                   : 'bg-destructive';
               return (
-                <div key={title} className={`bg-card border ${accent} rounded-lg p-6 flex flex-col`}>
+                <div key={title} className={`glass-card ${accent} p-6 flex flex-col`}>
                   <div className="flex items-center gap-2 mb-3">
                     <span className={`h-2.5 w-2.5 rounded-full ${dot}`} />
                     <span className="text-xs uppercase tracking-wider text-muted-foreground">{badge}</span>
@@ -538,7 +538,7 @@ const LegalShieldPage = () => {
 
         {/* Solicitor network */}
         <section className="container mx-auto px-6 py-12 max-w-4xl">
-          <div className="rounded-2xl border border-primary/40 bg-card p-8 md:p-12">
+          <div className="glass-card border-primary/40 p-8 md:p-12">
             <p className="text-[11px] font-medium tracking-[0.25em] uppercase text-primary/80 mb-3">Partner solicitor network</p>
             <h2 className="font-display text-3xl md:text-4xl font-semibold mb-4">When you do need a solicitor, they start hours ahead</h2>
             <p className="text-muted-foreground text-lg leading-relaxed mb-8 max-w-3xl">
@@ -600,7 +600,7 @@ const LegalShieldPage = () => {
 
         {/* Membership vision */}
         <section className="container mx-auto px-6 py-12 max-w-5xl">
-          <div className="rounded-2xl border border-primary/40 bg-card p-8 md:p-12">
+          <div className="glass-card border-primary/40 p-8 md:p-12">
             <p className="text-[11px] font-medium tracking-[0.25em] uppercase text-primary/80 mb-3">Always-on legal protection</p>
             <h2 className="font-display text-3xl md:text-4xl font-semibold mb-4">Not "AI legal advice" — continuous legal protection</h2>
             <p className="text-muted-foreground text-lg leading-relaxed mb-8 max-w-3xl">
@@ -683,7 +683,7 @@ const LegalShieldPage = () => {
 
         {/* CTA */}
         <section className="container mx-auto px-6 py-16 max-w-4xl">
-          <div className="bg-card border border-primary/40 rounded-lg p-10 text-center">
+          <div className="glass-card border-primary/40 p-10 text-center">
             <Mail className="h-10 w-10 text-primary mx-auto mb-4" />
             <h2 className="text-2xl md:font-display text-3xl md:text-4xl font-semibold mb-4">Take control before it escalates.</h2>
             <p className="text-muted-foreground text-lg mb-8 max-w-2xl mx-auto">
