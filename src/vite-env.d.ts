@@ -1,5 +1,23 @@
-
 /// <reference types="vite/client" />
+/// <reference types="vite-imagetools/client" />
+
+// vite-imagetools query imports resolve to string URLs (or srcset strings).
+declare module '*&as=srcset' {
+  const src: string;
+  export default src;
+}
+declare module '*&format=avif' {
+  const src: string;
+  export default src;
+}
+declare module '*&format=webp' {
+  const src: string;
+  export default src;
+}
+declare module '*&quality=72' {
+  const src: string;
+  export default src;
+}
 
 interface Window {
   fbq?: (event: string, eventName: string, options?: any) => void;
