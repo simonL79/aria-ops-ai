@@ -64,6 +64,10 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
             
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center space-x-6 lg:space-x-8">
+              <Link to="/services/legal-shield" className="inline-flex items-center gap-1.5 text-primary font-medium hover:text-primary/80 transition-colors text-sm lg:text-base">
+                <Shield className="h-4 w-4" />
+                Legal Shield
+              </Link>
               <Link to="/blog" className="text-muted-foreground hover:text-foreground transition-colors text-sm lg:text-base">
                 Blog
               </Link>
