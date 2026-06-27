@@ -172,7 +172,7 @@ const PricingSection = () => {
                 </div>
               )}
               
-              <h3 className="text-2xl font-bold mb-4 text-primary">{plan.name}</h3>
+              <h3 className="font-display text-2xl font-semibold mb-4 text-primary">{plan.name}</h3>
               <div className="mb-6">
                 <span className="text-3xl font-bold text-foreground">{plan.price}</span>
                 <span className="text-muted-foreground">{plan.period}</span>
@@ -213,7 +213,7 @@ const PricingSection = () => {
         <div className="max-w-3xl mx-auto mt-8">
           <div className="glass-card p-8 transition-colors hover:border-primary/30 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div className="flex-1">
-              <h3 className="text-2xl font-bold mb-2 text-primary">{enterprisePlan.name}</h3>
+              <h3 className="font-display text-2xl font-semibold mb-2 text-primary">{enterprisePlan.name}</h3>
               <div className="mb-3">
                 <span className="text-3xl font-bold text-foreground">{enterprisePlan.price}</span>
                 <span className="text-muted-foreground ml-1">{enterprisePlan.period}</span>
