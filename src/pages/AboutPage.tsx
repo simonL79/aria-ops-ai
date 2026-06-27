@@ -244,6 +244,15 @@ const AboutPage = () => {
         <section className="py-20">
           <div className="container mx-auto px-6 max-w-4xl">
             <div className="glass-card border-primary/30 p-10 md:p-14 text-center relative overflow-hidden">
+              <img
+                src={ctaBg}
+                alt=""
+                aria-hidden="true"
+                loading="lazy"
+                width={1920}
+                height={1088}
+                className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-50"
+              />
               <div
                 className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--primary)/0.12),transparent_70%)]"
                 aria-hidden
