@@ -211,7 +211,7 @@ const packages = [
   },
   {
     name: 'Creator Shield',
-    price: '£39',
+    price: '£97',
     cadence: '/month',
     for: 'Influencers, fighters and public figures — reputation attacks, defamation prep, takedowns and harassment evidence.',
     icon: Users,
