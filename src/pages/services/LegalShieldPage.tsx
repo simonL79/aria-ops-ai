@@ -203,7 +203,7 @@ const scopeLevels: {
 const packages = [
   {
     name: 'Personal Shield',
-    price: '£19',
+    price: '£29',
     cadence: '/month',
     for: 'Consumers, tenants, employees, online abuse, complaints and disputes.',
     icon: ShieldCheck,
@@ -211,7 +211,7 @@ const packages = [
   },
   {
     name: 'Creator Shield',
-    price: '£39',
+    price: '£97',
     cadence: '/month',
     for: 'Influencers, fighters and public figures — reputation attacks, defamation prep, takedowns and harassment evidence.',
     icon: Users,
@@ -219,7 +219,7 @@ const packages = [
   },
   {
     name: 'Business Shield',
-    price: '£49',
+    price: '£397',
     cadence: '/month',
     for: 'Small businesses — unpaid invoices, bad reviews, supplier issues, contracts and complaints.',
     icon: Scale,
@@ -521,7 +521,7 @@ const LegalShieldPage = () => {
               documents organised — ready the moment you need them.
             </p>
             <div className="flex flex-col sm:flex-row sm:items-end gap-2 mb-8">
-              <span className="text-5xl font-bold">£24.99</span>
+              <span className="text-5xl font-bold">£29</span>
               <span className="text-muted-foreground mb-1">/ month — membership</span>
             </div>
             <div className="grid sm:grid-cols-2 gap-3">
