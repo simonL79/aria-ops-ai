@@ -145,11 +145,16 @@ const PricingSection = () => {
   };
 
   return (
-    <section id="pricing" className="scroll-mt-24 py-24 bg-gradient-to-b from-background via-background to-background">
-      <div ref={ref} className={`container mx-auto px-6 transition-all duration-1000 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-        <h2 className="text-4xl md:text-5xl font-bold mb-16 text-center text-foreground">
-          Pricing
-        </h2>
+    <section id="pricing" className="scroll-mt-24 py-28 md:py-36 bg-background">
+      <div ref={ref} className={`container mx-auto px-6 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}>
+        <div className="max-w-2xl mx-auto text-center mb-16">
+          <span className="text-[11px] font-medium tracking-[0.25em] uppercase text-primary/80">
+            Plans
+          </span>
+          <h2 className="font-display text-3xl md:text-5xl font-semibold mt-4 text-foreground">
+            One subscription. Intelligence and legal cover.
+          </h2>
+        </div>
         
         <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
           {plans.map((plan, index) => (
