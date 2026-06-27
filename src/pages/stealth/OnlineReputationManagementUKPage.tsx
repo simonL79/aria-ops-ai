@@ -16,7 +16,7 @@ const cfg: StealthPageConfig = {
     </>
   ),
   heroSubhead:
-    'UK-based reputation management agency combining classical ORM, Google search suppression and AI search defence. For founders, executives, athletes and brands across the UK, Scotland and Glasgow.',
+    'UK-based reputation management agency combining classical reputation management, Google search suppression and AI search defence. For founders, executives, athletes and brands across the UK, Scotland and Glasgow.',
   problem: {
     heading: 'Traditional UK ORM stops at Google. That\'s no longer enough.',
     body: [
