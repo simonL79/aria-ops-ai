@@ -2,42 +2,59 @@
 import React from 'react';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 
+const STEPS = [
+  {
+    n: '01',
+    title: 'AI Monitoring',
+    body: 'ARIA continuously scans the surfaces that shape your reputation — search, news, social, forums and the dark web — for any mention of your name, brand or legal exposure.',
+  },
+  {
+    n: '02',
+    title: 'Analyse & Score',
+    body: 'Mentions and disputes are AI-scored for severity, category and urgency — instantly, with evidence-grade documentation behind every signal.',
+  },
+  {
+    n: '03',
+    title: 'Suppress & Repair',
+    body: 'We push down damaging links, position authoritative content, and notify you in real time as the narrative is restored.',
+  },
+  {
+    n: '04',
+    title: 'Legal Response',
+    body: 'When a threat crosses into legal exposure, ARIA Legal Shield™ prepares evidence packs, letters and solicitor-ready case files.',
+  },
+];
+
 const HowItWorksSection = () => {
   const { ref, visible } = useScrollReveal(0.1);
 
   return (
-    <section id="how-it-works" className="py-24 text-center bg-background">
-      <div ref={ref} className={`container mx-auto px-6 transition-all duration-1000 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
-        <h2 className="text-4xl md:text-5xl font-bold mb-16 text-foreground">How A.R.I.A™ Defends You</h2>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 max-w-6xl mx-auto">
-          <div className="relative">
-            <div className="absolute -top-6 -left-6 w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-xl">1</div>
-            <div className="glass-card p-8 h-full hover:border-primary/30 transition-colors">
-              <h3 className="text-xl font-bold mb-4 text-foreground">AI Monitoring</h3>
-              <p className="text-muted-foreground">A.R.I.A™ continuously scans the web — news, social, forums, and search — for any mention of your name, brand or legal exposure.</p>
+    <section id="how-it-works" className="py-28 md:py-36 bg-background">
+      <div
+        ref={ref}
+        className={`container mx-auto px-6 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
+      >
+        <div className="max-w-2xl mx-auto text-center mb-16">
+          <span className="text-[11px] font-medium tracking-[0.25em] uppercase text-primary/80">
+            The system
+          </span>
+          <h2 className="font-display text-3xl md:text-5xl font-semibold text-foreground mt-4 leading-tight">
+            How A.R.I.A™ defends you
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+          {STEPS.map((step, index) => (
+            <div
+              key={step.n}
+              className={`glass-card p-8 h-full hover:border-primary/30 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+              style={{ transitionDelay: visible ? `${index * 120}ms` : '0ms' }}
+            >
+              <span className="font-display text-4xl font-semibold text-primary/30">{step.n}</span>
+              <h3 className="font-display text-xl font-semibold mt-4 mb-3 text-foreground">{step.title}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{step.body}</p>
             </div>
-          </div>
-          <div className="relative">
-            <div className="absolute -top-6 -left-6 w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-xl">2</div>
-            <div className="glass-card p-8 h-full hover:border-primary/30 transition-colors">
-              <h3 className="text-xl font-bold mb-4 text-foreground">Analyze & Score</h3>
-              <p className="text-muted-foreground">Mentions and disputes are AI-scored for severity, category, and urgency — instantly, with evidence-grade documentation.</p>
-            </div>
-          </div>
-          <div className="relative">
-            <div className="absolute -top-6 -left-6 w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-xl">3</div>
-            <div className="glass-card p-8 h-full hover:border-primary/30 transition-colors">
-              <h3 className="text-xl font-bold mb-4 text-foreground">Suppress & Repair</h3>
-              <p className="text-muted-foreground">We push down damaging links, publish optimised content, and notify you in real-time as the narrative is restored.</p>
-            </div>
-          </div>
-          <div className="relative">
-            <div className="absolute -top-6 -left-6 w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-xl">4</div>
-            <div className="glass-card p-8 h-full hover:border-primary/30 transition-colors">
-              <h3 className="text-xl font-bold mb-4 text-foreground">Legal Response</h3>
-              <p className="text-muted-foreground">When a threat crosses into legal exposure, ARIA Legal Shield™ prepares evidence packs, letters and solicitor-ready case files.</p>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
     </section>
