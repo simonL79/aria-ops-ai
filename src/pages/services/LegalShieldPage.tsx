@@ -724,8 +724,8 @@ const LegalShieldPage = () => {
             {ecosystem.map(({ icon: Icon, name, body }) => (
               <div
                 key={name}
-                className={`bg-card border rounded-lg p-6 ${
-                  name === 'ARIA Legal Shield™' ? 'border-primary' : 'border-border'
+                className={`glass-card p-6 transition-all duration-300 ${
+                  name === 'ARIA Legal Shield™' ? 'border-primary/60' : 'hover:border-primary/30'
                 }`}
               >
                 <Icon className="h-7 w-7 text-primary mb-3" />
