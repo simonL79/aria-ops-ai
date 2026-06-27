@@ -22,6 +22,7 @@ const CTASection = lazy(() => import('@/components/sections/CTASection'));
 const SocialLinksSection = lazy(() => import('@/components/sections/SocialLinksSection'));
 const AINewsFeedSection = lazy(() => import('@/components/sections/AINewsFeedSection'));
 const ChatWidget = lazy(() => import('@/components/widgets/ChatWidget'));
+const StickyPricingBar = lazy(() => import('@/components/widgets/StickyPricingBar'));
 
 const HomePage = () => {
   const { hash } = useLocation();
@@ -69,6 +70,11 @@ const HomePage = () => {
         </div>
         <Suspense fallback={null}>
           <ChatWidget />
+          <StickyPricingBar
+            targetId="pricing"
+            label="Protect your reputation — plans from £29/mo"
+            ctaText="View plans"
+          />
         </Suspense>
       </PublicLayout>
     </PublicPagesProtection>

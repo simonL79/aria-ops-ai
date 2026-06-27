@@ -7,6 +7,7 @@ import SectionDivider from '@/components/ui/SectionDivider';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import CinematicImage from '@/components/ui/CinematicImage';
 import { Button } from '@/components/ui/button';
+import StickyPricingBar from '@/components/widgets/StickyPricingBar';
 import {
   Accordion,
   AccordionContent,
@@ -782,6 +783,11 @@ const LegalShieldPage = () => {
           </ul>
         </section>
       </article>
+      <StickyPricingBar
+        targetId="packages"
+        label="ARIA Legal Shield™ — plans from £29/mo"
+        ctaText="See packages"
+      />
     </PublicLayout>
   );
 };
