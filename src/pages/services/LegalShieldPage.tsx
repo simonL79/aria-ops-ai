@@ -683,20 +683,26 @@ const LegalShieldPage = () => {
 
         {/* CTA */}
         <section className="container mx-auto px-6 py-16 max-w-4xl">
-          <div className="glass-card border-primary/40 p-10 text-center">
-            <Mail className="h-10 w-10 text-primary mx-auto mb-4" />
-            <h2 className="text-2xl md:font-display text-3xl md:text-4xl font-semibold mb-4">Take control before it escalates.</h2>
-            <p className="text-muted-foreground text-lg mb-8 max-w-2xl mx-auto">
-              Get clarity, organise your evidence and prepare a solicitor-ready case pack — before
-              legal costs spiral.
-            </p>
-            <Button asChild size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90">
-              <Link to="/services/legal-shield/intake">
-                Start your guided intake <ArrowRight className="ml-2 h-4 w-4" />
+          <div className="glass-card border-primary/30 p-10 md:p-14 text-center relative overflow-hidden">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--primary)/0.12),transparent_70%)]" aria-hidden />
+            <div className="relative">
+              <Mail className="h-10 w-10 text-primary mx-auto mb-4" />
+              <h2 className="font-display text-2xl md:text-4xl font-semibold mb-4">Take control before it escalates.</h2>
+              <p className="text-muted-foreground text-lg mb-8 max-w-2xl mx-auto leading-relaxed">
+                Get clarity, organise your evidence and prepare a solicitor-ready case pack — before
+                legal costs spiral.
+              </p>
+              <Link
+                to="/services/legal-shield/intake"
+                className="group inline-flex items-center justify-center gap-2 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-medium px-7 py-3.5 transition-all duration-300 hover:shadow-[0_0_30px_hsl(var(--primary)/0.3)]"
+              >
+                Start your guided intake
+                <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
               </Link>
-            </Button>
+            </div>
           </div>
         </section>
+
 
         {/* FAQ */}
         <section className="container mx-auto px-6 py-12 max-w-4xl">
