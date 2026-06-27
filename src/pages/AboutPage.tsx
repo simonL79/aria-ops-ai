@@ -6,8 +6,7 @@ import SEO from '@/components/seo/SEO';
 import SectionDivider from '@/components/ui/SectionDivider';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { cn } from '@/lib/utils';
-import heroBg from '@/assets/cinematic-hero-bg.jpg';
-import ctaBg from '@/assets/cinematic-cta-bg.jpg';
+import CinematicImage from '@/components/ui/CinematicImage';
 
 const pillars = [
   {
