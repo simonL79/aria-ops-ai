@@ -185,7 +185,9 @@ export default {
 			'ring-pulse': 'ring-pulse 3s ease-in-out infinite',
 			'fade-in-scale': 'fade-in-scale 1.2s ease-out forwards',
 			'marquee': 'marquee 20s linear infinite',
-			'drift': 'drift 8s ease-in-out infinite'
+			'drift': 'drift 8s ease-in-out infinite',
+			'breathe': 'breathe 4s ease-in-out infinite',
+			'filament': 'filament 3s linear infinite'
 			}
 		}
 	},
