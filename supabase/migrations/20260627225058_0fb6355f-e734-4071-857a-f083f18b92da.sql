@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Users can view their own Legal Shield intakes" ON public.legal_shield_intakes;
