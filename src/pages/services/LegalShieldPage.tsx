@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import PublicLayout from '@/components/layout/PublicLayout';
 import SEO from '@/components/seo/SEO';
+import LegalShieldEscalationWorkflow from '@/components/services/LegalShieldEscalationWorkflow';
 import { Button } from '@/components/ui/button';
 import {
   Accordion,
