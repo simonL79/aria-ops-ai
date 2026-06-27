@@ -88,6 +88,7 @@ const StealthLandingPage: React.FC<{ cfg: StealthPageConfig }> = ({ cfg }) => {
   ];
 
   const positioning = cfg.positioningQuote ?? POSITIONING_DEFAULT;
+  const hero = useScrollReveal(0.1);
 
   const scrollSections = useMemo(
     () => [
