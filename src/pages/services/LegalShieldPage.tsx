@@ -203,7 +203,7 @@ const scopeLevels: {
 const packages = [
   {
     name: 'Personal Shield',
-    price: '£19',
+    price: '£29',
     cadence: '/month',
     for: 'Consumers, tenants, employees, online abuse, complaints and disputes.',
     icon: ShieldCheck,
