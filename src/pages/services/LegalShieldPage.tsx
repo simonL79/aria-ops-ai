@@ -521,7 +521,7 @@ const LegalShieldPage = () => {
               documents organised — ready the moment you need them.
             </p>
             <div className="flex flex-col sm:flex-row sm:items-end gap-2 mb-8">
-              <span className="text-5xl font-bold">£24.99</span>
+              <span className="text-5xl font-bold">£29</span>
               <span className="text-muted-foreground mb-1">/ month — membership</span>
             </div>
             <div className="grid sm:grid-cols-2 gap-3">
