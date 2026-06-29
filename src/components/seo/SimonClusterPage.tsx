@@ -119,18 +119,24 @@ const SimonClusterPage: React.FC<SimonClusterPageProps> = ({
 
   return (
     <PublicLayout>
-      <SEO title={title} description={description} path={path} ogType="article" image={heroImage} jsonLd={jsonLd} />
+      <SEO title={title} description={description} path={path} ogType="article" image={heroFallbackUrl} jsonLd={jsonLd} />
 
       <article className="bg-background text-foreground">
-        {heroImage && (
+        {heroFallbackUrl && (
           <div className="w-full border-b border-border/40">
-            <img
-              src={heroImage}
-              alt={heroAlt || h1}
-              width={1920}
-              height={1080}
-              className="w-full h-auto object-cover max-h-[480px]"
-            />
+            <picture>
+              {heroSources && <source type="image/avif" srcSet={heroSources.avif} sizes="100vw" />}
+              {heroSources && <source type="image/webp" srcSet={heroSources.webp} sizes="100vw" />}
+              <img
+                src={heroFallbackUrl}
+                alt={heroAlt || h1}
+                width={1920}
+                height={1080}
+                loading="eager"
+                decoding="async"
+                className="w-full h-auto object-cover max-h-[480px]"
+              />
+            </picture>
           </div>
         )}
         <section className="container mx-auto px-6 pt-20 pb-10 max-w-4xl">
