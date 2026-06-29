@@ -1,9 +1,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import commandCentre from '@/assets/hero-command-centre.jpg?w=1280&quality=72';
-import commandCentreAvif from '@/assets/hero-command-centre.jpg?w=640;1280;1920&format=avif&quality=60&as=srcset';
-import commandCentreWebp from '@/assets/hero-command-centre.jpg?w=640;1280;1920&format=webp&quality=72&as=srcset';
+
+// Hero LCP image. Stable, pre-optimized variants live in /public/hero so the
+// exact URLs can be preloaded from index.html (imagetools hashes prevent that).
+const commandCentre = '/hero/command-centre-1280.jpg';
+const commandCentreAvif =
+  '/hero/command-centre-640.avif 640w, /hero/command-centre-1280.avif 1280w, /hero/command-centre-1920.avif 1920w';
+const commandCentreWebp =
+  '/hero/command-centre-640.webp 640w, /hero/command-centre-1280.webp 1280w, /hero/command-centre-1920.webp 1920w';
 
 /*
   ARIA — The Digital Protection Platform

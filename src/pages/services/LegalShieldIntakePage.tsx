@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
-import { generateCasePack, type TimelineEntry } from '@/lib/legalShieldCasePack';
+import { type TimelineEntry } from '@/lib/legalShieldCasePack';
 import {
   Shield,
   ArrowRight,
@@ -364,8 +364,10 @@ const LegalShieldIntakePage = () => {
       evidence_timeline: prev.evidence_timeline.filter((_, i) => i !== index),
     }));
 
-  const downloadCasePack = () => {
+  const downloadCasePack = async () => {
     try {
+      // jsPDF is heavy — load it only when a user actually generates a pack.
+      const { generateCasePack } = await import('@/lib/legalShieldCasePack');
       const { reference } = generateCasePack({
         issue_type: form.issue_type,
         urgency_label: urgencyLevels.find((u) => u.value === form.urgency)?.label ?? form.urgency,
