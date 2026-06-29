@@ -275,11 +275,27 @@ jobs:
 
             if (duplicate) {
               const issueUrl = duplicate.html_url;
-              core.info(`Duplicate vulnerability set (fingerprint ${fingerprint}); existing issue #${duplicate.number} already tracks it. Skipping creation.`);
+              core.info(`Matching vulnerability set (fingerprint ${fingerprint}); refreshing existing issue #${duplicate.number} with the latest audit details.`);
 
-              // Even though we skip creating a new issue, surface any newly
-              // discovered Dependabot fix PRs that aren't already linked on the
-              // existing issue, so reviewers know a fix is available.
+              // Refresh the existing issue body with the latest audit details
+              // (updated package ranges, advisory URLs, severity counts, fix PRs
+              // and a new "last updated" timestamp) instead of skipping. The
+              // fingerprint marker is preserved so deduplication still holds.
+              try {
+                await github.rest.issues.update({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: duplicate.number,
+                  body,
+                });
+                core.info(`Updated issue #${duplicate.number} with refreshed audit details.`);
+              } catch (e) {
+                core.warning(`Could not update issue #${duplicate.number}: ${e.message}`);
+              }
+
+              // Surface any newly discovered Dependabot fix PRs that aren't
+              // already linked on the existing issue, so reviewers know a fix is
+              // available.
               if (fixPrs.length) {
                 let existingComments = [];
                 try {
