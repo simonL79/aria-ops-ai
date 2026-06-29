@@ -569,6 +569,7 @@ jobs:
             --arg repo "$GITHUB_REPOSITORY" \
             --arg run "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
             --arg issueUrl "${ISSUE_URL:-}" \
+            --arg reportArtifact "${REPORT_ARTIFACT_URL:-}" \
             --arg report "$REPORT" \
             --arg vulnList "${VULN_LIST:-No specific package details could be extracted.}" \
             '{
@@ -577,6 +578,7 @@ jobs:
                 { type: "section", text: { type: "mrkdwn", text: (":rotating_light: *High/critical dependency vulnerabilities in* `" + $repo + "`") } },
                 { type: "section", text: { type: "mrkdwn", text: ("*Vulnerable packages:*\n" + $vulnList) } },
                 (if $issueUrl != "" then { type: "section", text: { type: "mrkdwn", text: ("*GitHub Issue:* <" + $issueUrl + "|View / track issue>") } } else empty end),
+                (if $reportArtifact != "" then { type: "section", text: { type: "mrkdwn", text: ("*Full audit report:* <" + $reportArtifact + "|Download artifact>") } } else empty end),
                 { type: "section", text: { type: "mrkdwn", text: ("*Audit report:*\n```" + $report + "```") } },
                 { type: "section", text: { type: "mrkdwn", text: ("<" + $run + "|View workflow run>") } }
               ]
