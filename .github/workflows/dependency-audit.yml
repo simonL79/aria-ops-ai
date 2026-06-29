@@ -48,6 +48,12 @@ jobs:
           STATUS=$?
           echo "$TEXT_REPORT"
 
+          # Persist the full audit reports to disk so they can be uploaded as a
+          # build artifact and linked directly from the issue/Slack notifications.
+          mkdir -p audit-report
+          printf '%s\n' "$JSON_REPORT" > audit-report/npm-audit.json
+          printf '%s\n' "$TEXT_REPORT" > audit-report/npm-audit.txt
+
           # Extract a concise, specific list of vulnerable packages and versions
           # from the JSON audit output for Slack/GitHub issue notifications.
           VULN_LIST="$(echo "$JSON_REPORT" | jq -r '
@@ -121,6 +127,20 @@ jobs:
           echo "status=$STATUS" >> "$GITHUB_OUTPUT"
           exit 0
 
+      # Upload the full audit reports as a build artifact so the issue/Slack
+      # notifications can link to a downloadable, complete copy of the findings.
+      - name: Upload audit report artifact
+        id: upload_report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-audit-report-${{ github.run_id }}
+          path: audit-report/
+          if-no-files-found: warn
+          retention-days: 90
+
+
+
       # Open (or update) a GitHub Issue first so the Slack notification can
       # link directly to the created/commented issue.
       - name: Open GitHub Issue on high/critical findings
@@ -135,9 +155,13 @@ jobs:
           TOTAL_VULNS: ${{ steps.audit.outputs.total_vulns }}
           CRITICAL_VULNS: ${{ steps.audit.outputs.critical_vulns }}
           HIGH_VULNS: ${{ steps.audit.outputs.high_vulns }}
+          REPORT_ARTIFACT_URL: ${{ steps.upload_report.outputs.artifact-url }}
         with:
           script: |
             const runUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
+            // Direct link to the uploaded audit-report artifact. Fall back to the
+            // run's artifacts tab if the upload step did not expose a URL.
+            const reportArtifactUrl = process.env.REPORT_ARTIFACT_URL || `${runUrl}#artifacts`;
             const report = process.env.REPORT || 'See workflow logs for details.';
             const vulnList = process.env.VULN_LIST || 'No specific package details could be extracted.';
             const fingerprint = process.env.FINGERPRINT || 'unknown';
@@ -244,6 +268,7 @@ jobs:
               ``,
               `**Last updated:** ${lastUpdated}`,
               `**Workflow run:** ${runUrl}`,
+              `**Full audit report:** [Download artifact](${reportArtifactUrl})`,
               ``,
               `## 🧩 Vulnerable packages`,
               ``,
@@ -538,11 +563,13 @@ jobs:
           REPORT: ${{ steps.audit.outputs.report }}
           VULN_LIST: ${{ steps.audit.outputs.vuln_list }}
           ISSUE_URL: ${{ steps.open_issue.outputs.issue_url }}
+          REPORT_ARTIFACT_URL: ${{ steps.upload_report.outputs.artifact-url }}
         run: |
           PAYLOAD=$(jq -n \
             --arg repo "$GITHUB_REPOSITORY" \
             --arg run "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
             --arg issueUrl "${ISSUE_URL:-}" \
+            --arg reportArtifact "${REPORT_ARTIFACT_URL:-}" \
             --arg report "$REPORT" \
             --arg vulnList "${VULN_LIST:-No specific package details could be extracted.}" \
             '{
@@ -551,6 +578,7 @@ jobs:
                 { type: "section", text: { type: "mrkdwn", text: (":rotating_light: *High/critical dependency vulnerabilities in* `" + $repo + "`") } },
                 { type: "section", text: { type: "mrkdwn", text: ("*Vulnerable packages:*\n" + $vulnList) } },
                 (if $issueUrl != "" then { type: "section", text: { type: "mrkdwn", text: ("*GitHub Issue:* <" + $issueUrl + "|View / track issue>") } } else empty end),
+                (if $reportArtifact != "" then { type: "section", text: { type: "mrkdwn", text: ("*Full audit report:* <" + $reportArtifact + "|Download artifact>") } } else empty end),
                 { type: "section", text: { type: "mrkdwn", text: ("*Audit report:*\n```" + $report + "```") } },
                 { type: "section", text: { type: "mrkdwn", text: ("<" + $run + "|View workflow run>") } }
               ]
