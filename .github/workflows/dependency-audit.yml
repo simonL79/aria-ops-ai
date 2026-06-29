@@ -38,18 +38,40 @@ jobs:
         run: npm ci --ignore-scripts
 
       # Capture the audit result without aborting the job, so we can post a
-      # Slack alert before failing the run.
+      # Slack alert and GitHub issue before failing the run.
       - name: Audit (high + critical only)
         id: audit
         run: |
           set +e
-          REPORT="$(npm audit --audit-level=high 2>&1)"
+          JSON_REPORT="$(npm audit --json --audit-level=high 2>/dev/null)"
+          TEXT_REPORT="$(npm audit --audit-level=high 2>&1)"
           STATUS=$?
-          echo "$REPORT"
-          # Persist a trimmed report for the Slack step.
+          echo "$TEXT_REPORT"
+
+          # Extract a concise, specific list of vulnerable packages and versions
+          # from the JSON audit output for Slack/GitHub issue notifications.
+          VULN_LIST="$(echo "$JSON_REPORT" | jq -r '
+            .vulnerabilities // {}
+            | to_entries
+            | map(.value)
+            | map(
+                "• \(.name) (affected: \(.range)) — \(.severity | ascii_upcase)" +
+                (if (.via | type) == "array" and (.via[0] | type) == "object"
+                 then " — \(.via[0].title) — <\(.via[0].url)>"
+                 else "" end)
+              )
+            | join("\n")
+          ')"
+
+          # Persist a trimmed text report and the vulnerable package list.
           {
             echo "report<<EOF"
-            echo "$REPORT" | tail -n 40
+            echo "$TEXT_REPORT" | tail -n 40
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+          {
+            echo "vuln_list<<EOF"
+            echo "$VULN_LIST"
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
           echo "status=$STATUS" >> "$GITHUB_OUTPUT"
@@ -60,16 +82,19 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           REPORT: ${{ steps.audit.outputs.report }}
+          VULN_LIST: ${{ steps.audit.outputs.vuln_list }}
         run: |
           PAYLOAD=$(jq -n \
             --arg repo "$GITHUB_REPOSITORY" \
             --arg run "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
             --arg report "$REPORT" \
+            --arg vulnList "${VULN_LIST:-No specific package details could be extracted.}" \
             '{
               text: ":rotating_light: *Dependency audit found high/critical vulnerabilities*",
               blocks: [
                 { type: "section", text: { type: "mrkdwn", text: (":rotating_light: *High/critical dependency vulnerabilities in* `" + $repo + "`") } },
-                { type: "section", text: { type: "mrkdwn", text: ("```" + $report + "```") } },
+                { type: "section", text: { type: "mrkdwn", text: ("*Vulnerable packages:*\n" + $vulnList) } },
+                { type: "section", text: { type: "mrkdwn", text: ("*Audit report:*\n```" + $report + "```") } },
                 { type: "section", text: { type: "mrkdwn", text: ("<" + $run + "|View workflow run>") } }
               ]
             }')
@@ -82,14 +107,20 @@ jobs:
         uses: actions/github-script@v7
         env:
           REPORT: ${{ steps.audit.outputs.report }}
+          VULN_LIST: ${{ steps.audit.outputs.vuln_list }}
         with:
           script: |
             const runUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
             const report = process.env.REPORT || 'See workflow logs for details.';
+            const vulnList = process.env.VULN_LIST || 'No specific package details could be extracted.';
             const label = 'dependency-audit';
             const title = '🚨 Dependency audit: high/critical vulnerabilities detected';
             const body = [
               `A scheduled/triggered dependency audit failed with **high or critical** severity findings.`,
+              ``,
+              `**Vulnerable packages:**`,
+              ``,
+              vulnList,
               ``,
               `**Workflow run:** ${runUrl}`,
               ``,
