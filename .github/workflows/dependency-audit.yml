@@ -155,6 +155,7 @@ jobs:
           TOTAL_VULNS: ${{ steps.audit.outputs.total_vulns }}
           CRITICAL_VULNS: ${{ steps.audit.outputs.critical_vulns }}
           HIGH_VULNS: ${{ steps.audit.outputs.high_vulns }}
+          REPORT_ARTIFACT_URL: ${{ steps.upload_report.outputs.artifact-url }}
         with:
           script: |
             const runUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
