@@ -624,6 +624,33 @@ jobs:
             }')
           curl -sf -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK_URL"
 
+      # Notify Slack when an existing deduplicated issue gained new Dependabot
+      # fix PR links this run, including the direct PR URLs so reviewers can act.
+      - name: Notify Slack on new Dependabot fix PRs linked to existing issue
+        if: steps.audit.outputs.status != '0' && env.SLACK_WEBHOOK_URL != '' && steps.open_issue.outputs.new_pr_count != '' && steps.open_issue.outputs.new_pr_count != '0'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          NEW_PR_COUNT: ${{ steps.open_issue.outputs.new_pr_count }}
+          NEW_PR_LINKS: ${{ steps.open_issue.outputs.new_pr_links }}
+          ISSUE_URL: ${{ steps.open_issue.outputs.issue_url }}
+        run: |
+          PAYLOAD=$(jq -n \
+            --arg repo "$GITHUB_REPOSITORY" \
+            --arg run "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+            --arg count "${NEW_PR_COUNT:-0}" \
+            --arg links "${NEW_PR_LINKS:-}" \
+            --arg issueUrl "${ISSUE_URL:-}" \
+            '{
+              text: ":robot_face: *Dependency audit: new Dependabot fix PRs linked*",
+              blocks: [
+                { type: "section", text: { type: "mrkdwn", text: (":robot_face: *" + $count + " new Dependabot fix PR(s) linked to an existing audit issue in* `" + $repo + "`") } },
+                { type: "section", text: { type: "mrkdwn", text: ("*New fix PRs:*\n" + $links) } },
+                (if $issueUrl != "" then { type: "section", text: { type: "mrkdwn", text: ("*Tracking issue:* <" + $issueUrl + "|View / track issue>") } } else empty end),
+                { type: "section", text: { type: "mrkdwn", text: ("<" + $run + "|View workflow run>") } }
+              ]
+            }')
+          curl -sf -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK_URL"
+
 
       # Send a reassuring "all clear" message only on the scheduled weekly run
       # when no high or critical vulnerabilities are found, so the team knows the
