@@ -384,6 +384,17 @@ jobs:
                     body: commentBody,
                   });
                   core.info(`Linked ${newPrs.length} new Dependabot fix PR(s) to issue #${duplicate.number}.`);
+
+                  // Expose the newly linked PRs so a Slack notification can
+                  // report that an existing deduplicated issue gained fix PRs,
+                  // including the direct PR URLs.
+                  core.setOutput('new_pr_count', String(newPrs.length));
+                  core.setOutput(
+                    'new_pr_links',
+                    newPrs
+                      .map((pr) => `• <${pr.url}|#${pr.number}> — ${pr.title} (fixes: ${pr.fixed.join(', ')})`)
+                      .join('\n')
+                  );
                 }
               }
 
