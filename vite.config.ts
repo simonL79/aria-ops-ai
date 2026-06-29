@@ -22,4 +22,17 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        // Content-hashed, immutable filenames for every emitted asset
+        // (including imagetools-generated AVIF/WebP variants). The hash means
+        // a changed image gets a brand-new URL, so the bytes at any given URL
+        // never change and can be cached forever.
+        assetFileNames: "assets/[name]-[hash][extname]",
+        chunkFileNames: "assets/[name]-[hash].js",
+        entryFileNames: "assets/[name]-[hash].js",
+      },
+    },
+  },
 }));
