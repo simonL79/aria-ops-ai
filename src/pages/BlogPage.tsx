@@ -122,6 +122,8 @@ const BlogPage = () => {
                           <img
                             src={post.image_url}
                             alt={post.title}
+                            width={1280}
+                            height={720}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                             onError={(e) => { (e.target as HTMLElement).parentElement!.style.display = 'none'; }}
                           />
@@ -156,9 +158,11 @@ const BlogPage = () => {
               </>
             )}
 
-            <div className="mt-16">
-              <SoroEmbed />
-            </div>
+            {!loading && (
+              <div className="mt-16">
+                <SoroEmbed />
+              </div>
+            )}
           </div>
 
         </div>
