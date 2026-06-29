@@ -89,6 +89,19 @@ jobs:
             echo "$VULN_LIST"
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
+
+          # Machine-readable, newline-separated list of vulnerable package
+          # names so downstream steps can match them against Dependabot PRs.
+          VULN_PACKAGES="$(echo "$JSON_REPORT" | jq -r '
+            .vulnerabilities // {}
+            | keys
+            | .[]
+          ')"
+          {
+            echo "packages<<EOF"
+            echo "$VULN_PACKAGES"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
           echo "status=$STATUS" >> "$GITHUB_OUTPUT"
           exit 0
 
