@@ -107,14 +107,20 @@ jobs:
         uses: actions/github-script@v7
         env:
           REPORT: ${{ steps.audit.outputs.report }}
+          VULN_LIST: ${{ steps.audit.outputs.vuln_list }}
         with:
           script: |
             const runUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
             const report = process.env.REPORT || 'See workflow logs for details.';
+            const vulnList = process.env.VULN_LIST || 'No specific package details could be extracted.';
             const label = 'dependency-audit';
             const title = '🚨 Dependency audit: high/critical vulnerabilities detected';
             const body = [
               `A scheduled/triggered dependency audit failed with **high or critical** severity findings.`,
+              ``,
+              `**Vulnerable packages:**`,
+              ``,
+              vulnList,
               ``,
               `**Workflow run:** ${runUrl}`,
               ``,
