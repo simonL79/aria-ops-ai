@@ -23,8 +23,12 @@ export interface SimonClusterPageProps {
   /** Person JSON-LD knowsAbout / jobTitle override for keyword targeting. */
   personJobTitle?: string;
   personKnowsAbout?: string[];
-  /** Hero image — rendered above the H1 and emitted as og:image / twitter:image. */
-  heroImage?: string;
+  /**
+   * Hero image — rendered above the H1 and emitted as og:image / twitter:image.
+   * Pass a plain string, or an object with AVIF/WebP srcsets + JPEG fallback for
+   * modern-format delivery via <picture>.
+   */
+  heroImage?: string | { avif: string; webp: string; fallback: string };
   heroAlt?: string;
 }
 
