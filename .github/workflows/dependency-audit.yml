@@ -522,7 +522,7 @@ jobs:
               text: ":white_check_mark: *Dependency audit: stale vulnerability issues resolved*",
               blocks: [
                 { type: "section", text: { type: "mrkdwn", text: (":white_check_mark: *Auto-resolved* `" + $resolved + "` *prior high/critical audit issue(s) in* `" + $repo + "`") } },
-                { type: "section", text: { type: "mrkdwn", text: "These vulnerability sets no longer appear in the latest weekly audit." } },
+                { type: "section", text: { type: "mrkdwn", text: "These vulnerability sets no longer appear in the latest audit." } },
                 { type: "section", text: { type: "mrkdwn", text: ("<" + $run + "|View workflow run>") } }
               ]
             }')
