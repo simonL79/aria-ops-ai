@@ -82,16 +82,19 @@ jobs:
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           REPORT: ${{ steps.audit.outputs.report }}
+          VULN_LIST: ${{ steps.audit.outputs.vuln_list }}
         run: |
           PAYLOAD=$(jq -n \
             --arg repo "$GITHUB_REPOSITORY" \
             --arg run "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
             --arg report "$REPORT" \
+            --arg vulnList "${VULN_LIST:-No specific package details could be extracted.}" \
             '{
               text: ":rotating_light: *Dependency audit found high/critical vulnerabilities*",
               blocks: [
                 { type: "section", text: { type: "mrkdwn", text: (":rotating_light: *High/critical dependency vulnerabilities in* `" + $repo + "`") } },
-                { type: "section", text: { type: "mrkdwn", text: ("```" + $report + "```") } },
+                { type: "section", text: { type: "mrkdwn", text: ("*Vulnerable packages:*\n" + $vulnList) } },
+                { type: "section", text: { type: "mrkdwn", text: ("*Audit report:*\n```" + $report + "```") } },
                 { type: "section", text: { type: "mrkdwn", text: ("<" + $run + "|View workflow run>") } }
               ]
             }')
