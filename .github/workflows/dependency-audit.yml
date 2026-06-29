@@ -101,14 +101,20 @@ jobs:
         env:
           REPORT: ${{ steps.audit.outputs.report }}
           VULN_LIST: ${{ steps.audit.outputs.vuln_list }}
+          FINGERPRINT: ${{ steps.audit.outputs.fingerprint }}
         with:
           script: |
             const runUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
             const report = process.env.REPORT || 'See workflow logs for details.';
             const vulnList = process.env.VULN_LIST || 'No specific package details could be extracted.';
+            const fingerprint = process.env.FINGERPRINT || 'unknown';
             const label = 'dependency-audit';
             const title = '🚨 Dependency audit: high/critical vulnerabilities detected';
+            // Hidden marker used to deduplicate: the same vulnerability set
+            // produces the same fingerprint, so we never raise a duplicate.
+            const marker = `<!-- vuln-fingerprint: ${fingerprint} -->`;
             const body = [
+              marker,
               `A scheduled/triggered dependency audit failed with **high or critical** severity findings.`,
               ``,
               `**Vulnerable packages:**`,
@@ -139,39 +145,40 @@ jobs:
               });
             } catch (e) { /* label likely already exists */ }
 
-            // Reuse an existing open issue if present, otherwise create a new one.
-            const existing = await github.rest.issues.listForRepo({
+            // Look across open issues for one whose fingerprint marker matches
+            // the current vulnerability set. If found, this exact set has
+            // already been reported — skip creating an issue/comment entirely.
+            const openIssues = await github.paginate(github.rest.issues.listForRepo, {
               owner: context.repo.owner,
               repo: context.repo.repo,
               state: 'open',
               labels: label,
-              per_page: 1,
+              per_page: 100,
             });
 
-            let issueUrl;
-            if (existing.data.length > 0) {
-              const number = existing.data[0].number;
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: number,
-                body,
-              });
-              issueUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/issues/${number}`;
-              core.info(`Commented on existing issue #${number}: ${issueUrl}`);
-            } else {
-              const created = await github.rest.issues.create({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                title,
-                body,
-                labels: [label],
-              });
-              issueUrl = created.data.html_url;
-              core.info(`Created issue #${created.data.number}: ${issueUrl}`);
+            const duplicate = openIssues.find(
+              (issue) => (issue.body || '').includes(marker)
+            );
+
+            if (duplicate) {
+              const issueUrl = duplicate.html_url;
+              core.info(`Duplicate vulnerability set (fingerprint ${fingerprint}); existing issue #${duplicate.number} already tracks it. Skipping.`);
+              core.setOutput('issue_url', issueUrl);
+              core.setOutput('is_new', 'false');
+              return;
             }
 
-            core.setOutput('issue_url', issueUrl);
+            // No issue tracks this exact set yet — create a fresh one.
+            const created = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              body,
+              labels: [label],
+            });
+            core.info(`Created issue #${created.data.number}: ${created.data.html_url}`);
+            core.setOutput('issue_url', created.data.html_url);
+            core.setOutput('is_new', 'true');
 
       - name: Notify Slack on high/critical findings
         if: steps.audit.outputs.status != '0' && env.SLACK_WEBHOOK_URL != ''
