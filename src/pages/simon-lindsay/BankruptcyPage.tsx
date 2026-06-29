@@ -1,10 +1,12 @@
 import React from 'react';
 import SimonClusterPage from '@/components/seo/SimonClusterPage';
-import heroImage from '@/assets/hero-simon-bankruptcy.jpg';
+import heroAvif from '@/assets/hero-simon-bankruptcy.jpg?w=640;1280;1920&format=avif&quality=60&as=srcset';
+import heroWebp from '@/assets/hero-simon-bankruptcy.jpg?w=640;1280;1920&format=webp&quality=72&as=srcset';
+import heroFallback from '@/assets/hero-simon-bankruptcy.jpg?w=1280&quality=72';
 
 const SimonLindsayBankruptcyPage = () => (
   <SimonClusterPage
-    heroImage={heroImage}
+    heroImage={{ avif: heroAvif, webp: heroWebp, fallback: heroFallback }}
     heroAlt="Simon Lindsay — corporate insolvency, the on-record account"
     title="Simon Lindsay — Corporate Insolvency: The On-Record Account"
     description="The on-record account of the KSL Hair corporate insolvency, what UK insolvency law actually means, and what Simon Lindsay built afterwards."

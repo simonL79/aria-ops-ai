@@ -1,10 +1,12 @@
 import React from 'react';
 import SimonClusterPage from '@/components/seo/SimonClusterPage';
-import heroImage from '@/assets/hero-simon-reviews.jpg';
+import heroAvif from '@/assets/hero-simon-reviews.jpg?w=640;1280;1920&format=avif&quality=60&as=srcset';
+import heroWebp from '@/assets/hero-simon-reviews.jpg?w=640;1280;1920&format=webp&quality=72&as=srcset';
+import heroFallback from '@/assets/hero-simon-reviews.jpg?w=1280&quality=72';
 
 const SimonLindsayReviewsPage = () => (
   <SimonClusterPage
-    heroImage={heroImage}
+    heroImage={{ avif: heroAvif, webp: heroWebp, fallback: heroFallback }}
     heroAlt="Simon Lindsay — reviews, references and verification"
     title="Simon Lindsay Reviews — Professional References & Client Feedback"
     description="Professional references and client feedback for Simon Lindsay, founder of A.R.I.A™ reputation intelligence. How to verify, how to request a reference, how reviews are handled."

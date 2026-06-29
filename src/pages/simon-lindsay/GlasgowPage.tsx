@@ -1,10 +1,12 @@
 import React from 'react';
 import SimonClusterPage from '@/components/seo/SimonClusterPage';
-import heroImage from '@/assets/hero-simon-glasgow.jpg';
+import heroAvif from '@/assets/hero-simon-glasgow.jpg?w=640;1280;1920&format=avif&quality=60&as=srcset';
+import heroWebp from '@/assets/hero-simon-glasgow.jpg?w=640;1280;1920&format=webp&quality=72&as=srcset';
+import heroFallback from '@/assets/hero-simon-glasgow.jpg?w=1280&quality=72';
 
 const SimonLindsayGlasgowPage = () => (
   <SimonClusterPage
-    heroImage={heroImage}
+    heroImage={{ avif: heroAvif, webp: heroWebp, fallback: heroFallback }}
     heroAlt="Simon Lindsay — Glasgow-based founder of A.R.I.A™"
     title="Simon Lindsay Glasgow — Founder, A.R.I.A™ Reputation Intelligence"
     description="Simon Lindsay is a Glasgow-based entrepreneur and founder of A.R.I.A™, a UK reputation intelligence platform. Background, current work, and how to engage."

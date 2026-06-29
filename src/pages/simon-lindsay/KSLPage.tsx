@@ -1,10 +1,12 @@
 import React from 'react';
 import SimonClusterPage from '@/components/seo/SimonClusterPage';
-import heroImage from '@/assets/hero-simon-ksl.jpg';
+import heroAvif from '@/assets/hero-simon-ksl.jpg?w=640;1280;1920&format=avif&quality=60&as=srcset';
+import heroWebp from '@/assets/hero-simon-ksl.jpg?w=640;1280;1920&format=webp&quality=72&as=srcset';
+import heroFallback from '@/assets/hero-simon-ksl.jpg?w=1280&quality=72';
 
 const SimonLindsayKSLPage = () => (
   <SimonClusterPage
-    heroImage={heroImage}
+    heroImage={{ avif: heroAvif, webp: heroWebp, fallback: heroFallback }}
     heroAlt="Simon Lindsay — KSL founder profile, Glasgow"
     title="Simon Lindsay & KSL — Founder Profile, Trading History, Current Work"
     description="Authoritative profile of Simon Lindsay and his association with KSL: founder background, trading history of KSL Hair Clinics, and his current work building A.R.I.A™ reputation intelligence."

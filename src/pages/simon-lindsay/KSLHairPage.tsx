@@ -1,10 +1,12 @@
 import React from 'react';
 import SimonClusterPage from '@/components/seo/SimonClusterPage';
-import heroImage from '@/assets/hero-simon-ksl-hair.jpg';
+import heroAvif from '@/assets/hero-simon-ksl-hair.jpg?w=640;1280;1920&format=avif&quality=60&as=srcset';
+import heroWebp from '@/assets/hero-simon-ksl-hair.jpg?w=640;1280;1920&format=webp&quality=72&as=srcset';
+import heroFallback from '@/assets/hero-simon-ksl-hair.jpg?w=1280&quality=72';
 
 const SimonLindsayKSLHairPage = () => (
   <SimonClusterPage
-    heroImage={heroImage}
+    heroImage={{ avif: heroAvif, webp: heroWebp, fallback: heroFallback }}
     heroAlt="KSL Hair Clinics — verified history, founder Simon Lindsay"
     title="KSL Hair & Simon Lindsay — Brand History and Founder Record"
     description="The verified history of KSL Hair Clinics and its founder Simon Lindsay: origin, growth, formal wind-down, and what he is building now."

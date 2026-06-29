@@ -1,10 +1,12 @@
 import React from 'react';
 import SimonClusterPage from '@/components/seo/SimonClusterPage';
-import heroImage from '@/assets/hero-simon-ksl-hair-complaints.jpg';
+import heroAvif from '@/assets/hero-simon-ksl-hair-complaints.jpg?w=640;1280;1920&format=avif&quality=60&as=srcset';
+import heroWebp from '@/assets/hero-simon-ksl-hair-complaints.jpg?w=640;1280;1920&format=webp&quality=72&as=srcset';
+import heroFallback from '@/assets/hero-simon-ksl-hair-complaints.jpg?w=1280&quality=72';
 
 const SimonLindsayKSLHairComplaintsPage = () => (
   <SimonClusterPage
-    heroImage={heroImage}
+    heroImage={{ avif: heroAvif, webp: heroWebp, fallback: heroFallback }}
     heroAlt="KSL Hair complaints — official statement and resolution routes"
     title="KSL Hair Complaints — Official Statement & Resolution Routes"
     description="Official statement on historical KSL Hair complaints, the formal UK insolvency wind-down, and the routes available to former customers seeking resolution."
