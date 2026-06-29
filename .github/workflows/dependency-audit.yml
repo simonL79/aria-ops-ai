@@ -63,6 +63,21 @@ jobs:
             | join("\n")
           ')"
 
+          # Build a stable fingerprint of the unique vulnerability set so the
+          # workflow can deduplicate: identical sets produce the same hash
+          # regardless of run, ordering, or transient report formatting.
+          FINGERPRINT="$(echo "$JSON_REPORT" | jq -S -r '
+            .vulnerabilities // {}
+            | to_entries
+            | map({
+                name: .value.name,
+                severity: .value.severity,
+                range: .value.range
+              })
+            | sort_by(.name, .severity, .range)
+          ' | sha256sum | cut -d" " -f1)"
+          echo "fingerprint=$FINGERPRINT" >> "$GITHUB_OUTPUT"
+
           # Persist a trimmed text report and the vulnerable package list.
           {
             echo "report<<EOF"
