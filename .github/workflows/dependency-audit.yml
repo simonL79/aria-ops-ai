@@ -141,6 +141,10 @@ jobs:
 
             // Ensure each label exists (ignore errors if they already exist or
             // if the repo disallows label creation).
+
+            // Parse the vulnerable package names so we can look for any open
+            // Dependabot PRs that bump them and link those fixes in the issue.
+            const packages = (process.env.PACKAGES || '')
               .split('\n')
               .map((p) => p.trim())
               .filter(Boolean);
