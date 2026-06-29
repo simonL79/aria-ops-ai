@@ -124,6 +124,9 @@ jobs:
           VULN_LIST: ${{ steps.audit.outputs.vuln_list }}
           FINGERPRINT: ${{ steps.audit.outputs.fingerprint }}
           PACKAGES: ${{ steps.audit.outputs.packages }}
+          TOTAL_VULNS: ${{ steps.audit.outputs.total_vulns }}
+          CRITICAL_VULNS: ${{ steps.audit.outputs.critical_vulns }}
+          HIGH_VULNS: ${{ steps.audit.outputs.high_vulns }}
         with:
           script: |
             const runUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
