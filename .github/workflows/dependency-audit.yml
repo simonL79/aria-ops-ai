@@ -102,6 +102,14 @@ jobs:
             echo "$VULN_PACKAGES"
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
+
+          # Severity counts for a concise at-a-glance audit summary.
+          TOTAL_VULNS="$(echo "$JSON_REPORT" | jq -r '(.vulnerabilities // {}) | length')"
+          CRITICAL_VULNS="$(echo "$JSON_REPORT" | jq -r '[(.vulnerabilities // {})[] | select(.severity == "critical")] | length')"
+          HIGH_VULNS="$(echo "$JSON_REPORT" | jq -r '[(.vulnerabilities // {})[] | select(.severity == "high")] | length')"
+          echo "total_vulns=$TOTAL_VULNS" >> "$GITHUB_OUTPUT"
+          echo "critical_vulns=$CRITICAL_VULNS" >> "$GITHUB_OUTPUT"
+          echo "high_vulns=$HIGH_VULNS" >> "$GITHUB_OUTPUT"
           echo "status=$STATUS" >> "$GITHUB_OUTPUT"
           exit 0
 
@@ -116,6 +124,9 @@ jobs:
           VULN_LIST: ${{ steps.audit.outputs.vuln_list }}
           FINGERPRINT: ${{ steps.audit.outputs.fingerprint }}
           PACKAGES: ${{ steps.audit.outputs.packages }}
+          TOTAL_VULNS: ${{ steps.audit.outputs.total_vulns }}
+          CRITICAL_VULNS: ${{ steps.audit.outputs.critical_vulns }}
+          HIGH_VULNS: ${{ steps.audit.outputs.high_vulns }}
         with:
           script: |
             const runUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
@@ -169,38 +180,60 @@ jobs:
             const fixPrs = await findDependabotFixPrs();
             const fixSection = fixPrs.length
               ? [
-                  ``,
-                  `**Related Dependabot fix PRs:**`,
+                  `### 🔁 Related Dependabot fix PRs`,
                   ``,
                   ...fixPrs.map(
                     (pr) => `- #${pr.number} — ${pr.title} (fixes: ${pr.fixed.join(', ')})`
                   ),
                 ]
               : [
+                  `### 🔁 Related Dependabot fix PRs`,
                   ``,
                   `_No open Dependabot PRs currently address these packages._`,
                 ];
 
+            // Severity counts for the at-a-glance summary table.
+            const total = process.env.TOTAL_VULNS || '?';
+            const critical = process.env.CRITICAL_VULNS || '0';
+            const high = process.env.HIGH_VULNS || '0';
+
             const body = [
               marker,
-              `A scheduled/triggered dependency audit failed with **high or critical** severity findings.`,
+              `> Opened automatically by the **Dependency Audit** workflow.`,
               ``,
-              `**Vulnerable packages:**`,
+              `A scheduled/triggered \`npm audit\` detected **high or critical** severity vulnerabilities in this project's dependencies.`,
               ``,
-              vulnList,
-              ...fixSection,
+              `## 📊 Audit summary`,
+              ``,
+              `| Metric | Count |`,
+              `| --- | --- |`,
+              `| 🔴 Critical | ${critical} |`,
+              `| 🟠 High | ${high} |`,
+              `| 📦 Total affected packages | ${total} |`,
               ``,
               `**Workflow run:** ${runUrl}`,
               ``,
-              `<details><summary>Audit report (trimmed)</summary>`,
+              `## 🧩 Vulnerable packages`,
+              ``,
+              vulnList,
+              ``,
+              ...fixSection,
+              ``,
+              `## ✅ Recommended next steps`,
+              ``,
+              `1. Review the affected packages and their advisories linked above.`,
+              `2. If a Dependabot fix PR is listed, review and merge it once CI passes.`,
+              `3. Otherwise, run \`npm audit fix\` locally; for breaking changes use \`npm audit fix --force\` cautiously and verify the build/tests.`,
+              `4. If no upstream fix exists, assess exploitability in this app's context and apply a temporary mitigation (override, pin, or remove the dependency).`,
+              `5. Re-run the audit to confirm resolution, then close this issue (it auto-deduplicates by vulnerability fingerprint).`,
+              ``,
+              `<details><summary>📄 Audit report (trimmed)</summary>`,
               ``,
               '```',
               report,
               '```',
               ``,
               `</details>`,
-              ``,
-              `_Opened automatically by the Dependency Audit workflow._`,
             ].join('\n');
 
             // Ensure the label exists (ignore error if it already does).
