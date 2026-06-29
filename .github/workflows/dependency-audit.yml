@@ -89,6 +89,19 @@ jobs:
             echo "$VULN_LIST"
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
+
+          # Machine-readable, newline-separated list of vulnerable package
+          # names so downstream steps can match them against Dependabot PRs.
+          VULN_PACKAGES="$(echo "$JSON_REPORT" | jq -r '
+            .vulnerabilities // {}
+            | keys
+            | .[]
+          ')"
+          {
+            echo "packages<<EOF"
+            echo "$VULN_PACKAGES"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
           echo "status=$STATUS" >> "$GITHUB_OUTPUT"
           exit 0
 
@@ -102,6 +115,7 @@ jobs:
           REPORT: ${{ steps.audit.outputs.report }}
           VULN_LIST: ${{ steps.audit.outputs.vuln_list }}
           FINGERPRINT: ${{ steps.audit.outputs.fingerprint }}
+          PACKAGES: ${{ steps.audit.outputs.packages }}
         with:
           script: |
             const runUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
@@ -113,6 +127,60 @@ jobs:
             // Hidden marker used to deduplicate: the same vulnerability set
             // produces the same fingerprint, so we never raise a duplicate.
             const marker = `<!-- vuln-fingerprint: ${fingerprint} -->`;
+
+            // Parse the vulnerable package names so we can look for any open
+            // Dependabot PRs that bump them and link those fixes in the issue.
+            const packages = (process.env.PACKAGES || '')
+              .split('\n')
+              .map((p) => p.trim())
+              .filter(Boolean);
+
+            async function findDependabotFixPrs() {
+              if (packages.length === 0) return [];
+              let openPrs = [];
+              try {
+                openPrs = await github.paginate(github.rest.pulls.list, {
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  state: 'open',
+                  per_page: 100,
+                });
+              } catch (e) {
+                core.warning(`Could not list pull requests: ${e.message}`);
+                return [];
+              }
+
+              const isDependabot = (pr) =>
+                (pr.user && (pr.user.login === 'dependabot[bot]' || pr.user.login === 'dependabot')) ||
+                (pr.head && typeof pr.head.ref === 'string' && pr.head.ref.startsWith('dependabot/'));
+
+              const matches = [];
+              for (const pr of openPrs) {
+                if (!isDependabot(pr)) continue;
+                const haystack = `${pr.title || ''}\n${(pr.head && pr.head.ref) || ''}`.toLowerCase();
+                const fixed = packages.filter((name) => haystack.includes(name.toLowerCase()));
+                if (fixed.length > 0) {
+                  matches.push({ number: pr.number, url: pr.html_url, title: pr.title, fixed });
+                }
+              }
+              return matches;
+            }
+
+            const fixPrs = await findDependabotFixPrs();
+            const fixSection = fixPrs.length
+              ? [
+                  ``,
+                  `**Related Dependabot fix PRs:**`,
+                  ``,
+                  ...fixPrs.map(
+                    (pr) => `- #${pr.number} — ${pr.title} (fixes: ${pr.fixed.join(', ')})`
+                  ),
+                ]
+              : [
+                  ``,
+                  `_No open Dependabot PRs currently address these packages._`,
+                ];
+
             const body = [
               marker,
               `A scheduled/triggered dependency audit failed with **high or critical** severity findings.`,
@@ -120,6 +188,7 @@ jobs:
               `**Vulnerable packages:**`,
               ``,
               vulnList,
+              ...fixSection,
               ``,
               `**Workflow run:** ${runUrl}`,
               ``,
@@ -162,7 +231,45 @@ jobs:
 
             if (duplicate) {
               const issueUrl = duplicate.html_url;
-              core.info(`Duplicate vulnerability set (fingerprint ${fingerprint}); existing issue #${duplicate.number} already tracks it. Skipping.`);
+              core.info(`Duplicate vulnerability set (fingerprint ${fingerprint}); existing issue #${duplicate.number} already tracks it. Skipping creation.`);
+
+              // Even though we skip creating a new issue, surface any newly
+              // discovered Dependabot fix PRs that aren't already linked on the
+              // existing issue, so reviewers know a fix is available.
+              if (fixPrs.length) {
+                let existingComments = [];
+                try {
+                  existingComments = await github.paginate(github.rest.issues.listComments, {
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: duplicate.number,
+                    per_page: 100,
+                  });
+                } catch (e) { /* non-fatal */ }
+
+                const alreadyLinked = (prNumber) =>
+                  (duplicate.body || '').includes(`#${prNumber}`) ||
+                  existingComments.some((c) => (c.body || '').includes(`#${prNumber}`));
+
+                const newPrs = fixPrs.filter((pr) => !alreadyLinked(pr.number));
+                if (newPrs.length) {
+                  const commentBody = [
+                    `**Dependabot fix PRs available for this vulnerability set:**`,
+                    ``,
+                    ...newPrs.map(
+                      (pr) => `- #${pr.number} — ${pr.title} (fixes: ${pr.fixed.join(', ')})`
+                    ),
+                  ].join('\n');
+                  await github.rest.issues.createComment({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: duplicate.number,
+                    body: commentBody,
+                  });
+                  core.info(`Linked ${newPrs.length} new Dependabot fix PR(s) to issue #${duplicate.number}.`);
+                }
+              }
+
               core.setOutput('issue_url', issueUrl);
               core.setOutput('is_new', 'false');
               return;
