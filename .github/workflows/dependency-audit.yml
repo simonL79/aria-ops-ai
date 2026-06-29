@@ -235,16 +235,20 @@ jobs:
               `</details>`,
             ].join('\n');
 
-            // Ensure the label exists (ignore error if it already does).
-            try {
-              await github.rest.issues.createLabel({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                name: label,
-                color: 'd73a4a',
-                description: 'Automated dependency audit findings',
-              });
-            } catch (e) { /* label likely already exists */ }
+            // Ensure the triage labels exist so issues can be filtered by
+            // dependency, security, and audit themes. Ignore errors for
+            // duplicates or missing permissions.
+            for (const label of labels) {
+              try {
+                await github.rest.issues.createLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: label,
+                  color: label === 'security' ? 'd73a4a' : '1d76db',
+                  description: `Automated dependency audit: ${label}`,
+                });
+              } catch (e) { /* label likely already exists */ }
+            }
 
             // Look across open issues for one whose fingerprint marker matches
             // the current vulnerability set. If found, this exact set has
@@ -253,7 +257,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               state: 'open',
-              labels: label,
+              labels: labels.join(','),
               per_page: 100,
             });
 
