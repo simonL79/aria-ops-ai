@@ -142,15 +142,17 @@ const BlogPostPage = () => {
               Back to all articles
             </Link>
 
-            {/* Hero image (falls back to branded default when post has none) */}
+            {/* Hero image (falls back to branded AVIF/WebP default when post
+                has no image or the external image fails to load — never the
+                raw JPG) */}
             <div className="mb-8 rounded-lg overflow-hidden border border-border aspect-video">
-              {post.hero_image_url || post.image_url ? (
+              {(post.hero_image_url || post.image_url) && !heroFailed ? (
                 <img
                   src={post.hero_image_url || post.image_url}
                   alt={post.hero_image_alt || post.title}
                   className="w-full h-full object-cover"
                   loading="eager"
-                  onError={(e) => { (e.target as HTMLImageElement).src = blogDefaultHero; }}
+                  onError={() => setHeroFailed(true)}
                 />
               ) : (
                 <picture>
@@ -165,6 +167,7 @@ const BlogPostPage = () => {
                 </picture>
               )}
             </div>
+
 
             {/* Title */}
             <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-4 leading-tight">
