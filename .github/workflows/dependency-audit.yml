@@ -563,6 +563,7 @@ jobs:
           REPORT: ${{ steps.audit.outputs.report }}
           VULN_LIST: ${{ steps.audit.outputs.vuln_list }}
           ISSUE_URL: ${{ steps.open_issue.outputs.issue_url }}
+          REPORT_ARTIFACT_URL: ${{ steps.upload_report.outputs.artifact-url }}
         run: |
           PAYLOAD=$(jq -n \
             --arg repo "$GITHUB_REPOSITORY" \
