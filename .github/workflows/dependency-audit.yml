@@ -98,6 +98,25 @@ jobs:
                 { type: "section", text: { type: "mrkdwn", text: ("<" + $run + "|View workflow run>") } }
               ]
             }')
+      # Send a reassuring "all clear" message only on the scheduled weekly run
+      # when no high or critical vulnerabilities are found, so the team knows the
+      # supply-chain baseline is healthy without having to check the logs.
+      - name: Notify Slack on clean weekly audit
+        if: steps.audit.outputs.status == '0' && env.SLACK_WEBHOOK_URL != '' && github.event_name == 'schedule'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          PAYLOAD=$(jq -n \
+            --arg repo "$GITHUB_REPOSITORY" \
+            --arg run "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+            '{
+              text: ":white_check_mark: *Weekly dependency audit: all clear*",
+              blocks: [
+                { type: "section", text: { type: "mrkdwn", text: (":white_check_mark: *Weekly dependency audit is clean for* `" + $repo + "`") } },
+                { type: "section", text: { type: "mrkdwn", text: "No high or critical vulnerabilities were detected in the latest scheduled audit." } },
+                { type: "section", text: { type: "mrkdwn", text: ("<" + $run + "|View workflow run>") } }
+              ]
+            }')
           curl -sf -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK_URL"
 
       # Open (or update) a GitHub Issue so the failure is tracked and actionable,
