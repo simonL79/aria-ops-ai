@@ -158,9 +158,11 @@ const BlogPage = () => {
               </>
             )}
 
-            <div className="mt-16">
-              <SoroEmbed />
-            </div>
+            {!loading && (
+              <div className="mt-16">
+                <SoroEmbed />
+              </div>
+            )}
           </div>
 
         </div>
