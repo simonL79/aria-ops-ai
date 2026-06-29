@@ -139,13 +139,26 @@ const BlogPostPage = () => {
 
             {/* Hero image (falls back to branded default when post has none) */}
             <div className="mb-8 rounded-lg overflow-hidden border border-border aspect-video">
-              <img
-                src={post.hero_image_url || post.image_url || blogDefaultHero}
-                alt={post.hero_image_alt || post.title}
-                className="w-full h-full object-cover"
-                loading="eager"
-                onError={(e) => { (e.target as HTMLImageElement).src = blogDefaultHero; }}
-              />
+              {post.hero_image_url || post.image_url ? (
+                <img
+                  src={post.hero_image_url || post.image_url}
+                  alt={post.hero_image_alt || post.title}
+                  className="w-full h-full object-cover"
+                  loading="eager"
+                  onError={(e) => { (e.target as HTMLImageElement).src = blogDefaultHero; }}
+                />
+              ) : (
+                <picture>
+                  <source type="image/avif" srcSet={blogDefaultHeroAvif} sizes="(max-width: 720px) 100vw, 720px" />
+                  <source type="image/webp" srcSet={blogDefaultHeroWebp} sizes="(max-width: 720px) 100vw, 720px" />
+                  <img
+                    src={blogDefaultHero}
+                    alt={post.title}
+                    className="w-full h-full object-cover"
+                    loading="eager"
+                  />
+                </picture>
+              )}
             </div>
 
             {/* Title */}
