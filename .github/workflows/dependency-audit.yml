@@ -102,6 +102,14 @@ jobs:
             echo "$VULN_PACKAGES"
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
+
+          # Severity counts for a concise at-a-glance audit summary.
+          TOTAL_VULNS="$(echo "$JSON_REPORT" | jq -r '(.vulnerabilities // {}) | length')"
+          CRITICAL_VULNS="$(echo "$JSON_REPORT" | jq -r '[(.vulnerabilities // {})[] | select(.severity == "critical")] | length')"
+          HIGH_VULNS="$(echo "$JSON_REPORT" | jq -r '[(.vulnerabilities // {})[] | select(.severity == "high")] | length')"
+          echo "total_vulns=$TOTAL_VULNS" >> "$GITHUB_OUTPUT"
+          echo "critical_vulns=$CRITICAL_VULNS" >> "$GITHUB_OUTPUT"
+          echo "high_vulns=$HIGH_VULNS" >> "$GITHUB_OUTPUT"
           echo "status=$STATUS" >> "$GITHUB_OUTPUT"
           exit 0
 
