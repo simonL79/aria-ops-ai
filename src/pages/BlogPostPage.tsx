@@ -255,6 +255,10 @@ const BlogPostPage = () => {
                           <img
                             src={r.image_url}
                             alt={r.title}
+                            width={320}
+                            height={180}
+                            loading="lazy"
+                            decoding="async"
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                             onError={(e) => { (e.target as HTMLElement).parentElement!.style.display = 'none'; }}
                           />
