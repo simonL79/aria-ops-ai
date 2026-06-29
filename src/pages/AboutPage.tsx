@@ -6,7 +6,8 @@ import SEO from '@/components/seo/SEO';
 import SectionDivider from '@/components/ui/SectionDivider';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { cn } from '@/lib/utils';
-import CinematicImage from '@/components/ui/CinematicImage';
+import CinematicImage, { CINEMATIC_VARIANTS } from '@/components/ui/CinematicImage';
+import { Helmet } from 'react-helmet-async';
 
 const pillars = [
   {
