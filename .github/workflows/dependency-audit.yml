@@ -159,6 +159,9 @@ jobs:
         with:
           script: |
             const runUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
+            // Direct link to the uploaded audit-report artifact. Fall back to the
+            // run's artifacts tab if the upload step did not expose a URL.
+            const reportArtifactUrl = process.env.REPORT_ARTIFACT_URL || `${runUrl}#artifacts`;
             const report = process.env.REPORT || 'See workflow logs for details.';
             const vulnList = process.env.VULN_LIST || 'No specific package details could be extracted.';
             const fingerprint = process.env.FINGERPRINT || 'unknown';
