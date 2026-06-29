@@ -205,12 +205,18 @@ const BlogPostPage = () => {
             {/* Infographic */}
             {post.infographic_url && (
               <div className="mb-12">
-                <img
-                  src={post.infographic_url}
-                  alt={`${post.title} infographic`}
-                  className="w-full rounded-lg border border-border"
-                  onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
-                />
+                <div className="aspect-[4/3] w-full overflow-hidden rounded-lg border border-border bg-secondary/30">
+                  <img
+                    src={post.infographic_url}
+                    alt={`${post.title} infographic`}
+                    width={1200}
+                    height={900}
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full h-full object-contain"
+                    onError={(e) => { (e.target as HTMLElement).closest('div')!.style.display = 'none'; }}
+                  />
+                </div>
               </div>
             )}
 
