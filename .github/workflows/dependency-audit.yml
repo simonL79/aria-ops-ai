@@ -141,7 +141,11 @@ jobs:
             const report = process.env.REPORT || 'See workflow logs for details.';
             const vulnList = process.env.VULN_LIST || 'No specific package details could be extracted.';
             const fingerprint = process.env.FINGERPRINT || 'unknown';
+            const critical = parseInt(process.env.CRITICAL_VULNS || '0', 10);
+            const high = parseInt(process.env.HIGH_VULNS || '0', 10);
+            const severityLabel = critical > 0 ? 'critical' : high > 0 ? 'high' : null;
             const labels = ['dependencies', 'security', 'audit'];
+            if (severityLabel) labels.push(severityLabel);
             const title = '🚨 Dependency audit: high/critical vulnerabilities detected';
             // Hidden marker used to deduplicate: the same vulnerability set
             // produces the same fingerprint, so we never raise a duplicate.
@@ -149,6 +153,18 @@ jobs:
 
             // Ensure each label exists (ignore errors if they already exist or
             // if the repo disallows label creation).
+            for (const label of labels) {
+              const color = label === 'security' ? 'd73a4a' : label === 'critical' ? 'b91c1c' : label === 'high' ? 'f59e0b' : '1d76db';
+              try {
+                await github.rest.issues.createLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: label,
+                  color,
+                  description: `Automated dependency audit: ${label}`,
+                });
+              } catch (e) { /* label likely already exists */ }
+            }
 
             // Parse the vulnerable package names so we can look for any open
             // Dependabot PRs that bump them and link those fixes in the issue.
@@ -203,10 +219,11 @@ jobs:
                   `_No open Dependabot PRs currently address these packages._`,
                 ];
 
-            // Severity counts for the at-a-glance summary table.
+            // Severity counts for the at-a-glance summary table (already
+            // parsed above for the severity label decision).
             const total = process.env.TOTAL_VULNS || '?';
-            const critical = process.env.CRITICAL_VULNS || '0';
-            const high = process.env.HIGH_VULNS || '0';
+            const criticalCount = critical;
+            const highCount = high;
 
             // ISO timestamp recording when this audit data was last refreshed.
             const lastUpdated = new Date().toISOString();
@@ -221,8 +238,8 @@ jobs:
               ``,
               `| Metric | Count |`,
               `| --- | --- |`,
-              `| 🔴 Critical | ${critical} |`,
-              `| 🟠 High | ${high} |`,
+              `| 🔴 Critical | ${criticalCount} |`,
+              `| 🟠 High | ${highCount} |`,
               `| 📦 Total affected packages | ${total} |`,
               ``,
               `**Last updated:** ${lastUpdated}`,
@@ -251,29 +268,16 @@ jobs:
               `</details>`,
             ].join('\n');
 
-            // Ensure the triage labels exist so issues can be filtered by
-            // dependency, security, and audit themes. Ignore errors for
-            // duplicates or missing permissions.
-            for (const label of labels) {
-              try {
-                await github.rest.issues.createLabel({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  name: label,
-                  color: label === 'security' ? 'd73a4a' : '1d76db',
-                  description: `Automated dependency audit: ${label}`,
-                });
-              } catch (e) { /* label likely already exists */ }
-            }
-
-            // Look across open issues for one whose fingerprint marker matches
-            // the current vulnerability set. If found, this exact set has
-            // already been reported — skip creating an issue/comment entirely.
+            // Deduplicate across existing audit issues using the stable triage
+            // labels. The fingerprint marker is the real dedup key, so we use
+            // the base label set to ensure we don't miss an issue just because
+            // its severity label differs from the current run.
+            const triageLabels = ['dependencies', 'security', 'audit'];
             const openIssues = await github.paginate(github.rest.issues.listForRepo, {
               owner: context.repo.owner,
               repo: context.repo.repo,
               state: 'open',
-              labels: labels.join(','),
+              labels: triageLabels.join(','),
               per_page: 100,
             });
 
@@ -299,6 +303,26 @@ jobs:
                 core.info(`Updated issue #${duplicate.number} with refreshed audit details.`);
               } catch (e) {
                 core.warning(`Could not update issue #${duplicate.number}: ${e.message}`);
+              }
+
+              // If the highest severity has changed, apply the current severity
+              // label so the issue is always tagged with the most critical
+              // status known for this vulnerability set.
+              if (severityLabel) {
+                const existingLabels = duplicate.labels.map((l) => l.name);
+                if (!existingLabels.includes(severityLabel)) {
+                  try {
+                    await github.rest.issues.addLabels({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      issue_number: duplicate.number,
+                      labels: [severityLabel],
+                    });
+                    core.info(`Applied severity label ${severityLabel} to issue #${duplicate.number}.`);
+                  } catch (e) {
+                    core.warning(`Could not add severity label to issue #${duplicate.number}: ${e.message}`);
+                  }
+                }
               }
 
               // Surface any newly discovered Dependabot fix PRs that aren't
