@@ -325,7 +325,6 @@ jobs:
                 }
               }
 
-
               // Surface any newly discovered Dependabot fix PRs that aren't
               // already linked on the existing issue, so reviewers know a fix is
               // available.
