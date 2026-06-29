@@ -304,6 +304,27 @@ jobs:
                 core.warning(`Could not update issue #${duplicate.number}: ${e.message}`);
               }
 
+              // If the highest severity has changed, apply the current severity
+              // label so the issue is always tagged with the most critical
+              // status known for this vulnerability set.
+              if (severityLabel) {
+                const existingLabels = duplicate.labels.map((l) => l.name);
+                if (!existingLabels.includes(severityLabel)) {
+                  try {
+                    await github.rest.issues.addLabels({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      issue_number: duplicate.number,
+                      labels: [severityLabel],
+                    });
+                    core.info(`Applied severity label ${severityLabel} to issue #${duplicate.number}.`);
+                  } catch (e) {
+                    core.warning(`Could not add severity label to issue #${duplicate.number}: ${e.message}`);
+                  }
+                }
+              }
+
+
               // Surface any newly discovered Dependabot fix PRs that aren't
               // already linked on the existing issue, so reviewers know a fix is
               // available.
