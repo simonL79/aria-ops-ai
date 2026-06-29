@@ -33,6 +33,11 @@ const BlogPostPage = () => {
   const { post, loading, error } = useBlogPost(slug);
   const related = useRelatedPosts(post);
   const articleRef = useRef<HTMLDivElement>(null);
+  const [heroFailed, setHeroFailed] = useState(false);
+
+  useEffect(() => {
+    setHeroFailed(false);
+  }, [slug]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
