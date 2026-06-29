@@ -482,7 +482,7 @@ jobs:
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   issue_number: issue.number,
-                  body: `✅ This vulnerability set no longer appears in the latest weekly dependency audit, so it has been auto-resolved.\n\n**Workflow run:** ${runUrl}`,
+                  body: `✅ This vulnerability set no longer appears in the latest dependency audit, so it has been auto-resolved.\n\n**Workflow run:** ${runUrl}`,
                 });
                 await github.rest.issues.addLabels({
                   owner: context.repo.owner,
