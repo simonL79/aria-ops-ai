@@ -133,11 +133,14 @@ jobs:
             const report = process.env.REPORT || 'See workflow logs for details.';
             const vulnList = process.env.VULN_LIST || 'No specific package details could be extracted.';
             const fingerprint = process.env.FINGERPRINT || 'unknown';
-            const label = 'dependency-audit';
+            const labels = ['dependencies', 'security', 'audit'];
             const title = '🚨 Dependency audit: high/critical vulnerabilities detected';
             // Hidden marker used to deduplicate: the same vulnerability set
             // produces the same fingerprint, so we never raise a duplicate.
             const marker = `<!-- vuln-fingerprint: ${fingerprint} -->`;
+
+            // Ensure each label exists (ignore errors if they already exist or
+            // if the repo disallows label creation).
 
             // Parse the vulnerable package names so we can look for any open
             // Dependabot PRs that bump them and link those fixes in the issue.
@@ -236,16 +239,20 @@ jobs:
               `</details>`,
             ].join('\n');
 
-            // Ensure the label exists (ignore error if it already does).
-            try {
-              await github.rest.issues.createLabel({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                name: label,
-                color: 'd73a4a',
-                description: 'Automated dependency audit findings',
-              });
-            } catch (e) { /* label likely already exists */ }
+            // Ensure the triage labels exist so issues can be filtered by
+            // dependency, security, and audit themes. Ignore errors for
+            // duplicates or missing permissions.
+            for (const label of labels) {
+              try {
+                await github.rest.issues.createLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: label,
+                  color: label === 'security' ? 'd73a4a' : '1d76db',
+                  description: `Automated dependency audit: ${label}`,
+                });
+              } catch (e) { /* label likely already exists */ }
+            }
 
             // Look across open issues for one whose fingerprint marker matches
             // the current vulnerability set. If found, this exact set has
@@ -254,7 +261,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               state: 'open',
-              labels: label,
+              labels: labels.join(','),
               per_page: 100,
             });
 
@@ -314,7 +321,7 @@ jobs:
               repo: context.repo.repo,
               title,
               body,
-              labels: [label],
+              labels,
             });
             core.info(`Created issue #${created.data.number}: ${created.data.html_url}`);
             core.setOutput('issue_url', created.data.html_url);
