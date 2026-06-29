@@ -7,7 +7,7 @@ import { Mail, Linkedin, Globe, MapPin, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Logo from '@/components/ui/logo';
 import PublicLayout from '@/components/layout/PublicLayout';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+
 import { Helmet } from 'react-helmet-async';
 import SEO from '@/components/seo/SEO';
 import portraitFallback from '@/assets/simon-lindsay-portrait.png?w=192&format=webp&quality=80';
