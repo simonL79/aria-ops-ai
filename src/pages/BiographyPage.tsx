@@ -102,6 +102,7 @@ const BiographyPage = () => {
                           width={192}
                           height={192}
                           loading="lazy"
+                          fetchPriority="low"
                           decoding="async"
                           className="w-full h-full object-cover"
                           onError={(e) => {
