@@ -6,7 +6,8 @@ import SEO from '@/components/seo/SEO';
 import SectionDivider from '@/components/ui/SectionDivider';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import { cn } from '@/lib/utils';
-import CinematicImage from '@/components/ui/CinematicImage';
+import CinematicImage, { CINEMATIC_VARIANTS } from '@/components/ui/CinematicImage';
+import { Helmet } from 'react-helmet-async';
 
 const pillars = [
   {
@@ -60,6 +61,20 @@ const AboutPage = () => {
 
   return (
     <PublicLayout>
+      <Helmet>
+        {/* Preload the AVIF hero so the LCP image is discovered before JS/CSS
+            parse. AVIF-only preload avoids a duplicate WebP fetch on capable
+            browsers; non-AVIF browsers fall back to the <picture> WebP/JPEG. */}
+        <link
+          rel="preload"
+          as="image"
+          type="image/avif"
+          // @ts-expect-error imagesrcset/imagesizes are valid on preload links
+          imagesrcset={CINEMATIC_VARIANTS.hero.avif}
+          imagesizes="100vw"
+          fetchpriority="high"
+        />
+      </Helmet>
       <SEO
         title="About A.R.I.A™ — AI Reputation & Legal Intelligence Platform"
         description="A.R.I.A™ is an enterprise-grade AI platform that pairs real-time reputation monitoring with solicitor-ready legal response, protecting executives, public figures and organisations worldwide."
