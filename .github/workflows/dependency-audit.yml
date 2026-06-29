@@ -332,6 +332,9 @@ jobs:
 
               core.setOutput('issue_url', issueUrl);
               core.setOutput('is_new', 'false');
+              // This vulnerability set already had an open issue, so a new issue
+              // was suppressed by deduplication (the existing one was refreshed).
+              core.setOutput('suppressed_count', '1');
               return;
             }
 
@@ -346,6 +349,9 @@ jobs:
             core.info(`Created issue #${created.data.number}: ${created.data.html_url}`);
             core.setOutput('issue_url', created.data.html_url);
             core.setOutput('is_new', 'true');
+            // A fresh issue was created, so nothing was suppressed this run.
+            core.setOutput('suppressed_count', '0');
+
 
       - name: Notify Slack on high/critical findings
         if: steps.audit.outputs.status != '0' && env.SLACK_WEBHOOK_URL != '' && steps.open_issue.outputs.is_new == 'true'
@@ -372,6 +378,35 @@ jobs:
               ]
             }')
           curl -sf -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK_URL"
+
+      # Report how many high/critical vulnerability sets were suppressed by
+      # deduplication this run (i.e. an existing issue already tracked the same
+      # fingerprint, so no new issue was opened — the existing one was refreshed).
+      - name: Notify Slack on deduplicated vulnerability sets
+        if: steps.audit.outputs.status != '0' && env.SLACK_WEBHOOK_URL != '' && steps.open_issue.outputs.suppressed_count != '' && steps.open_issue.outputs.suppressed_count != '0'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SUPPRESSED_COUNT: ${{ steps.open_issue.outputs.suppressed_count }}
+          FINGERPRINT: ${{ steps.audit.outputs.fingerprint }}
+          ISSUE_URL: ${{ steps.open_issue.outputs.issue_url }}
+        run: |
+          PAYLOAD=$(jq -n \
+            --arg repo "$GITHUB_REPOSITORY" \
+            --arg run "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+            --arg suppressed "${SUPPRESSED_COUNT:-0}" \
+            --arg fingerprint "${FINGERPRINT:-unknown}" \
+            --arg issueUrl "${ISSUE_URL:-}" \
+            '{
+              text: ":recycle: *Dependency audit: vulnerability sets deduplicated*",
+              blocks: [
+                { type: "section", text: { type: "mrkdwn", text: (":recycle: *Deduplication suppressed* `" + $suppressed + "` *high/critical vulnerability set(s) in* `" + $repo + "`") } },
+                { type: "section", text: { type: "mrkdwn", text: ("*Suppressed sets:* " + $suppressed + "\n*Fingerprint:* `" + ($fingerprint | .[0:12]) + "…`") } },
+                (if $issueUrl != "" then { type: "section", text: { type: "mrkdwn", text: ("*Existing issue refreshed:* <" + $issueUrl + "|View / track issue>") } } else empty end),
+                { type: "section", text: { type: "mrkdwn", text: ("<" + $run + "|View workflow run>") } }
+              ]
+            }')
+          curl -sf -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK_URL"
+
 
       # Send a reassuring "all clear" message only on the scheduled weekly run
       # when no high or critical vulnerabilities are found, so the team knows the
