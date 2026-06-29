@@ -19,7 +19,7 @@ import ctaFallback from '@/assets/cinematic-cta-bg.jpg?w=1280&quality=72';
 
 type CinematicVariant = 'hero' | 'divider' | 'cta';
 
-const VARIANTS: Record<
+export const CINEMATIC_VARIANTS: Record<
   CinematicVariant,
   { avif: string; webp: string; fallback: string; width: number; height: number }
 > = {
@@ -27,6 +27,8 @@ const VARIANTS: Record<
   divider: { avif: dividerAvif, webp: dividerWebp, fallback: dividerFallback, width: 1920, height: 640 },
   cta: { avif: ctaAvif, webp: ctaWebp, fallback: ctaFallback, width: 1920, height: 1088 },
 };
+
+const VARIANTS = CINEMATIC_VARIANTS;
 
 interface CinematicImageProps {
   variant: CinematicVariant;
