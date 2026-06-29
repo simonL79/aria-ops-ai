@@ -38,18 +38,40 @@ jobs:
         run: npm ci --ignore-scripts
 
       # Capture the audit result without aborting the job, so we can post a
-      # Slack alert before failing the run.
+      # Slack alert and GitHub issue before failing the run.
       - name: Audit (high + critical only)
         id: audit
         run: |
           set +e
-          REPORT="$(npm audit --audit-level=high 2>&1)"
+          JSON_REPORT="$(npm audit --json --audit-level=high 2>/dev/null)"
+          TEXT_REPORT="$(npm audit --audit-level=high 2>&1)"
           STATUS=$?
-          echo "$REPORT"
-          # Persist a trimmed report for the Slack step.
+          echo "$TEXT_REPORT"
+
+          # Extract a concise, specific list of vulnerable packages and versions
+          # from the JSON audit output for Slack/GitHub issue notifications.
+          VULN_LIST="$(echo "$JSON_REPORT" | jq -r '
+            .vulnerabilities // {}
+            | to_entries
+            | map(.value)
+            | map(
+                "• \(.name) (affected: \(.range)) — \(.severity | ascii_upcase)" +
+                (if (.via | type) == "array" and (.via[0] | type) == "object"
+                 then " — \(.via[0].title) — <\(.via[0].url)>"
+                 else "" end)
+              )
+            | join("\n")
+          ')"
+
+          # Persist a trimmed text report and the vulnerable package list.
           {
             echo "report<<EOF"
-            echo "$REPORT" | tail -n 40
+            echo "$TEXT_REPORT" | tail -n 40
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+          {
+            echo "vuln_list<<EOF"
+            echo "$VULN_LIST"
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
           echo "status=$STATUS" >> "$GITHUB_OUTPUT"
