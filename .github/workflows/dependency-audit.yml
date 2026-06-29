@@ -332,6 +332,9 @@ jobs:
 
               core.setOutput('issue_url', issueUrl);
               core.setOutput('is_new', 'false');
+              // This vulnerability set already had an open issue, so a new issue
+              // was suppressed by deduplication (the existing one was refreshed).
+              core.setOutput('suppressed_count', '1');
               return;
             }
 
