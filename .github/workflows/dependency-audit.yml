@@ -77,6 +77,14 @@ jobs:
             | sort_by(.name, .severity, .range)
           ' | sha256sum | cut -d" " -f1)"
           echo "fingerprint=$FINGERPRINT" >> "$GITHUB_OUTPUT"
+          echo "::notice::Vulnerability-set fingerprint: $FINGERPRINT"
+          {
+            echo "### 🔐 Vulnerability-set fingerprint"
+            echo ""
+            echo "\`$FINGERPRINT\`"
+            echo ""
+            echo "This hash is used to deduplicate repeated audit reports for the same set of vulnerabilities."
+          } >> "$GITHUB_STEP_SUMMARY"
 
           # Persist a trimmed text report and the vulnerable package list.
           {
@@ -351,6 +359,45 @@ jobs:
             core.setOutput('is_new', 'true');
             // A fresh issue was created, so nothing was suppressed this run.
             core.setOutput('suppressed_count', '0');
+
+      # Surface the fingerprint and dedup decision in the workflow logs for
+      # auditability: this makes it easy to verify why an issue was created,
+      # refreshed, or suppressed without reading the full GitHub script output.
+      - name: Log audit dedup decision
+        if: always() && steps.audit.outputs.status != '0'
+        env:
+          FINGERPRINT: ${{ steps.audit.outputs.fingerprint }}
+          IS_NEW: ${{ steps.open_issue.outputs.is_new }}
+          ISSUE_URL: ${{ steps.open_issue.outputs.issue_url }}
+          SUPPRESSED_COUNT: ${{ steps.open_issue.outputs.suppressed_count }}
+        run: |
+          echo "::notice::Vulnerability-set fingerprint: ${FINGERPRINT:-unknown}"
+          echo "::notice::Issue is new: ${IS_NEW:-unknown}"
+          echo "::notice::Issue URL: ${ISSUE_URL:-none}"
+          echo "::notice::Suppressed count: ${SUPPRESSED_COUNT:-0}"
+
+          {
+            echo "### 📋 Dedup decision"
+            echo ""
+            echo "| Field | Value |"
+            echo "| --- | --- |"
+            echo "| Fingerprint | \`${FINGERPRINT:-unknown}\` |"
+            echo "| Issue is new | \`${IS_NEW:-unknown}\` |"
+            echo "| Issue URL | ${ISSUE_URL:+<}${ISSUE_URL:-none}${ISSUE_URL:+>} |"
+            echo "| Suppressed count | \`${SUPPRESSED_COUNT:-0}\` |"
+            echo ""
+            case "${IS_NEW:-unknown}" in
+              true)
+                echo "✅ A new GitHub Issue was created because no existing issue matched this fingerprint."
+                ;;
+              false)
+                echo "♻️ An existing issue matched this fingerprint, so the report was refreshed and no new issue was created."
+                ;;
+              *)
+                echo "⚠️ Dedup status could not be determined (the open_issue step may have been skipped or failed)."
+                ;;
+            esac
+          } >> "$GITHUB_STEP_SUMMARY"
 
       # On the weekly scheduled run, auto-resolve any prior high/critical audit
       # issues whose vulnerability fingerprint no longer appears in the latest
