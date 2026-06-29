@@ -17,7 +17,7 @@ const TestimonialCard = ({ quote, author, role, imageUrl }: {
     <div className="flex items-center mt-auto">
       {imageUrl && (
         <div className="mr-3">
-          <img src={imageUrl} alt={author} className="w-10 h-10 rounded-full object-cover" />
+          <img src={imageUrl} alt={author} width={40} height={40} loading="lazy" decoding="async" className="w-10 h-10 rounded-full object-cover" />
         </div>
       )}
       <div>
