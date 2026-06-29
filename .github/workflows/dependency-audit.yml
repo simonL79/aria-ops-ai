@@ -48,6 +48,12 @@ jobs:
           STATUS=$?
           echo "$TEXT_REPORT"
 
+          # Persist the full audit reports to disk so they can be uploaded as a
+          # build artifact and linked directly from the issue/Slack notifications.
+          mkdir -p audit-report
+          printf '%s\n' "$JSON_REPORT" > audit-report/npm-audit.json
+          printf '%s\n' "$TEXT_REPORT" > audit-report/npm-audit.txt
+
           # Extract a concise, specific list of vulnerable packages and versions
           # from the JSON audit output for Slack/GitHub issue notifications.
           VULN_LIST="$(echo "$JSON_REPORT" | jq -r '
