@@ -349,6 +349,9 @@ jobs:
             core.info(`Created issue #${created.data.number}: ${created.data.html_url}`);
             core.setOutput('issue_url', created.data.html_url);
             core.setOutput('is_new', 'true');
+            // A fresh issue was created, so nothing was suppressed this run.
+            core.setOutput('suppressed_count', '0');
+
 
       - name: Notify Slack on high/critical findings
         if: steps.audit.outputs.status != '0' && env.SLACK_WEBHOOK_URL != '' && steps.open_issue.outputs.is_new == 'true'
