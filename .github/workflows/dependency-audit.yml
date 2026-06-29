@@ -231,7 +231,45 @@ jobs:
 
             if (duplicate) {
               const issueUrl = duplicate.html_url;
-              core.info(`Duplicate vulnerability set (fingerprint ${fingerprint}); existing issue #${duplicate.number} already tracks it. Skipping.`);
+              core.info(`Duplicate vulnerability set (fingerprint ${fingerprint}); existing issue #${duplicate.number} already tracks it. Skipping creation.`);
+
+              // Even though we skip creating a new issue, surface any newly
+              // discovered Dependabot fix PRs that aren't already linked on the
+              // existing issue, so reviewers know a fix is available.
+              if (fixPrs.length) {
+                let existingComments = [];
+                try {
+                  existingComments = await github.paginate(github.rest.issues.listComments, {
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: duplicate.number,
+                    per_page: 100,
+                  });
+                } catch (e) { /* non-fatal */ }
+
+                const alreadyLinked = (prNumber) =>
+                  (duplicate.body || '').includes(`#${prNumber}`) ||
+                  existingComments.some((c) => (c.body || '').includes(`#${prNumber}`));
+
+                const newPrs = fixPrs.filter((pr) => !alreadyLinked(pr.number));
+                if (newPrs.length) {
+                  const commentBody = [
+                    `**Dependabot fix PRs available for this vulnerability set:**`,
+                    ``,
+                    ...newPrs.map(
+                      (pr) => `- #${pr.number} — ${pr.title} (fixes: ${pr.fixed.join(', ')})`
+                    ),
+                  ].join('\n');
+                  await github.rest.issues.createComment({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: duplicate.number,
+                    body: commentBody,
+                  });
+                  core.info(`Linked ${newPrs.length} new Dependabot fix PR(s) to issue #${duplicate.number}.`);
+                }
+              }
+
               core.setOutput('issue_url', issueUrl);
               core.setOutput('is_new', 'false');
               return;
