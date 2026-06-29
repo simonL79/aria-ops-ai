@@ -5,7 +5,8 @@ import SEO from '@/components/seo/SEO';
 import LegalShieldEscalationWorkflow from '@/components/services/LegalShieldEscalationWorkflow';
 import SectionDivider from '@/components/ui/SectionDivider';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
-import CinematicImage from '@/components/ui/CinematicImage';
+import CinematicImage, { CINEMATIC_VARIANTS } from '@/components/ui/CinematicImage';
+import { Helmet } from 'react-helmet-async';
 import { Button } from '@/components/ui/button';
 import StickyPricingBar from '@/components/widgets/StickyPricingBar';
 import {
