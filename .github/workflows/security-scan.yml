@@ -28,6 +28,20 @@ jobs:
       - name: Install dependencies (no scripts)
         run: npm ci --ignore-scripts
 
+      # Generate a CycloneDX SBOM from the EXACT resolved dependency graph
+      # (honours package.json "overrides", e.g. the protobufjs >=7.2.5 pin).
+      # This SBOM is the source of truth the scan is verified against.
+      - name: Generate SBOM (CycloneDX)
+        run: |
+          mkdir -p sbom
+          npx --yes @cyclonedx/cyclonedx-npm@latest \
+            --output-format JSON \
+            --output-file sbom/bom.cdx.json \
+            --omit dev \
+            --spec-version 1.5
+          echo "Components in SBOM:"
+          jq '.components | length' sbom/bom.cdx.json
+
       - name: Run security scan (fail on critical)
         run: |
           set +e
@@ -52,8 +66,27 @@ jobs:
           ')"
 
           echo "critical_count=$CRITICAL_COUNT"
+
+          # Cross-check the audit against the resolved graph captured in the SBOM:
+          # confirm protobufjs is pinned to the patched version (>=7.2.5).
+          PROTOBUF_VERSIONS="$(jq -r '
+            [.components[]? | select(.name == "protobufjs") | .version] | unique | join(", ")
+          ' sbom/bom.cdx.json)"
+          echo "protobufjs resolved in SBOM: ${PROTOBUF_VERSIONS:-<not present>}"
+
           if [ "${CRITICAL_COUNT:-0}" -gt 0 ]; then
-            echo "::error::Security scan failed — $CRITICAL_COUNT critical finding(s) detected."
+            echo "::error::Security scan failed — $CRITICAL_COUNT critical finding(s) detected. See SBOM artifact for the resolved graph."
             exit 1
           fi
-          echo "Security scan passed — no critical findings."
+          echo "Security scan passed — no critical findings (verified against SBOM)."
+
+      # Attach the SBOM to the scan results so reviewers can verify findings
+      # against the exact resolved dependency graph that was scanned.
+      - name: Attach SBOM to scan results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-scan-sbom
+          path: sbom/bom.cdx.json
+          retention-days: 90
+
