@@ -10,6 +10,9 @@ import PublicLayout from '@/components/layout/PublicLayout';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Helmet } from 'react-helmet-async';
 import SEO from '@/components/seo/SEO';
+import portraitFallback from '@/assets/simon-lindsay-portrait.png?w=192&format=webp&quality=80';
+import portraitAvif from '@/assets/simon-lindsay-portrait.png?w=192;384&format=avif&quality=60&as=srcset';
+import portraitWebp from '@/assets/simon-lindsay-portrait.png?w=192;384&format=webp&quality=80&as=srcset';
 
 class PageErrorBoundary extends React.Component<
   { children: React.ReactNode },
