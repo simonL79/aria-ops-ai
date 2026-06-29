@@ -23,8 +23,12 @@ export interface SimonClusterPageProps {
   /** Person JSON-LD knowsAbout / jobTitle override for keyword targeting. */
   personJobTitle?: string;
   personKnowsAbout?: string[];
-  /** Hero image — rendered above the H1 and emitted as og:image / twitter:image. */
-  heroImage?: string;
+  /**
+   * Hero image — rendered above the H1 and emitted as og:image / twitter:image.
+   * Pass a plain string, or an object with AVIF/WebP srcsets + JPEG fallback for
+   * modern-format delivery via <picture>.
+   */
+  heroImage?: string | { avif: string; webp: string; fallback: string };
   heroAlt?: string;
 }
 
@@ -59,7 +63,9 @@ const SimonClusterPage: React.FC<SimonClusterPageProps> = ({
   heroImage,
   heroAlt,
 }) => {
-  const heroAbsUrl = heroImage ? `https://www.ariaops.co.uk${heroImage}` : undefined;
+  const heroFallbackUrl = typeof heroImage === 'string' ? heroImage : heroImage?.fallback;
+  const heroSources = heroImage && typeof heroImage !== 'string' ? heroImage : undefined;
+  const heroAbsUrl = heroFallbackUrl ? `https://www.ariaops.co.uk${heroFallbackUrl}` : undefined;
   const imageObjectJsonLd = heroAbsUrl
     ? {
         '@context': 'https://schema.org',
@@ -113,18 +119,24 @@ const SimonClusterPage: React.FC<SimonClusterPageProps> = ({
 
   return (
     <PublicLayout>
-      <SEO title={title} description={description} path={path} ogType="article" image={heroImage} jsonLd={jsonLd} />
+      <SEO title={title} description={description} path={path} ogType="article" image={heroFallbackUrl} jsonLd={jsonLd} />
 
       <article className="bg-background text-foreground">
-        {heroImage && (
+        {heroFallbackUrl && (
           <div className="w-full border-b border-border/40">
-            <img
-              src={heroImage}
-              alt={heroAlt || h1}
-              width={1920}
-              height={1080}
-              className="w-full h-auto object-cover max-h-[480px]"
-            />
+            <picture>
+              {heroSources && <source type="image/avif" srcSet={heroSources.avif} sizes="100vw" />}
+              {heroSources && <source type="image/webp" srcSet={heroSources.webp} sizes="100vw" />}
+              <img
+                src={heroFallbackUrl}
+                alt={heroAlt || h1}
+                width={1920}
+                height={1080}
+                loading="eager"
+                decoding="async"
+                className="w-full h-auto object-cover max-h-[480px]"
+              />
+            </picture>
           </div>
         )}
         <section className="container mx-auto px-6 pt-20 pb-10 max-w-4xl">

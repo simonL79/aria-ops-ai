@@ -7,9 +7,12 @@ import { Mail, Linkedin, Globe, MapPin, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Logo from '@/components/ui/logo';
 import PublicLayout from '@/components/layout/PublicLayout';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+
 import { Helmet } from 'react-helmet-async';
 import SEO from '@/components/seo/SEO';
+import portraitFallback from '@/assets/simon-lindsay-portrait.png?w=192&format=webp&quality=80';
+import portraitAvif from '@/assets/simon-lindsay-portrait.png?w=192;384&format=avif&quality=60&as=srcset';
+import portraitWebp from '@/assets/simon-lindsay-portrait.png?w=192;384&format=webp&quality=80&as=srcset';
 
 class PageErrorBoundary extends React.Component<
   { children: React.ReactNode },
@@ -90,18 +93,22 @@ const BiographyPage = () => {
                 <CardContent className="space-y-4 pt-6">
                   <div className="flex flex-col md:flex-row gap-6">
                     <div className="md:w-1/3 flex justify-center">
-                      <Avatar className="w-48 h-48 border border-border shadow-md">
-                        <AvatarImage 
-                          src="/lovable-uploads/f716bb9a-039b-4df0-b832-d0b61c2d220d.png"
+                      <picture className="w-48 h-48 rounded-full overflow-hidden border border-border shadow-md block">
+                        <source type="image/avif" srcSet={portraitAvif} sizes="192px" />
+                        <source type="image/webp" srcSet={portraitWebp} sizes="192px" />
+                        <img
+                          src={portraitFallback}
                           alt="Simon Lindsay"
-                          className="object-cover"
+                          width={192}
+                          height={192}
+                          loading="lazy"
+                          decoding="async"
+                          className="w-full h-full object-cover"
                           onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.src = "https://placehold.co/200x200?text=SL";
+                            (e.target as HTMLImageElement).src = "https://placehold.co/200x200?text=SL";
                           }}
                         />
-                        <AvatarFallback className="text-4xl bg-secondary">SL</AvatarFallback>
-                      </Avatar>
+                      </picture>
                     </div>
                     <div className="md:w-2/3">
                       <p className="leading-7 mb-4 text-muted-foreground">

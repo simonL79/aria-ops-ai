@@ -1,10 +1,12 @@
 import React from 'react';
 import SimonClusterPage from '@/components/seo/SimonClusterPage';
-import heroImage from '@/assets/hero-simon-ksl-hair-the-truth.jpg';
+import heroAvif from '@/assets/hero-simon-ksl-hair-the-truth.jpg?w=640;1280;1920&format=avif&quality=60&as=srcset';
+import heroWebp from '@/assets/hero-simon-ksl-hair-the-truth.jpg?w=640;1280;1920&format=webp&quality=72&as=srcset';
+import heroFallback from '@/assets/hero-simon-ksl-hair-the-truth.jpg?w=1280&quality=72';
 
 const SimonLindsayKSLHairTheTruthPage = () => (
   <SimonClusterPage
-    heroImage={heroImage}
+    heroImage={{ avif: heroAvif, webp: heroWebp, fallback: heroFallback }}
     heroAlt="KSL Hair — the truth: verified, on-record account from founder Simon Lindsay"
     title="KSL Hair — The Truth | Verified Record, Founder Simon Lindsay"
     description="KSL Hair — the truth, on the record. Verified history of KSL Hair Clinics, the formal UK insolvency wind-down, how complaints are handled, and a direct response to the 'KSL Hair The Truth' Facebook page (inactive since 2021)."
