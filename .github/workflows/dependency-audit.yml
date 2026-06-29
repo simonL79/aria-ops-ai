@@ -219,10 +219,11 @@ jobs:
                   `_No open Dependabot PRs currently address these packages._`,
                 ];
 
-            // Severity counts for the at-a-glance summary table.
+            // Severity counts for the at-a-glance summary table (already
+            // parsed above for the severity label decision).
             const total = process.env.TOTAL_VULNS || '?';
-            const critical = process.env.CRITICAL_VULNS || '0';
-            const high = process.env.HIGH_VULNS || '0';
+            const criticalCount = critical;
+            const highCount = high;
 
             // ISO timestamp recording when this audit data was last refreshed.
             const lastUpdated = new Date().toISOString();
