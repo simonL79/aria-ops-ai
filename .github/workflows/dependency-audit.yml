@@ -98,6 +98,8 @@ jobs:
                 { type: "section", text: { type: "mrkdwn", text: ("<" + $run + "|View workflow run>") } }
               ]
             }')
+          curl -sf -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK_URL"
+
       # Send a reassuring "all clear" message only on the scheduled weekly run
       # when no high or critical vulnerabilities are found, so the team knows the
       # supply-chain baseline is healthy without having to check the logs.
