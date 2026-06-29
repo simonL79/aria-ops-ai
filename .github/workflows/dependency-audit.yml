@@ -352,6 +352,113 @@ jobs:
             // A fresh issue was created, so nothing was suppressed this run.
             core.setOutput('suppressed_count', '0');
 
+      # On the weekly scheduled run, auto-resolve any prior high/critical audit
+      # issues whose vulnerability fingerprint no longer appears in the latest
+      # audit. A clean run (no high/critical findings) resolves all open audit
+      # issues; a run with findings resolves only the stale ones, leaving the
+      # issue for the current fingerprint open.
+      - name: Resolve stale audit issues no longer present
+        id: resolve_stale
+        if: always() && github.event_name == 'schedule'
+        uses: actions/github-script@v7
+        env:
+          STATUS: ${{ steps.audit.outputs.status }}
+          FINGERPRINT: ${{ steps.audit.outputs.fingerprint }}
+        with:
+          script: |
+            const labels = ['dependencies', 'security', 'audit'];
+            const resolvedLabel = 'resolved';
+            const status = process.env.STATUS || '0';
+            // Current fingerprint represents the latest vulnerability set. When
+            // the run is clean (status 0) there is no active set, so every open
+            // audit issue is considered stale.
+            const currentFingerprint = status === '0' ? null : (process.env.FINGERPRINT || null);
+            const runUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`;
+
+            // Ensure the "resolved" label exists for triage filtering.
+            try {
+              await github.rest.issues.createLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name: resolvedLabel,
+                color: '0e8a16',
+                description: 'Automated dependency audit: vulnerability set no longer present',
+              });
+            } catch (e) { /* label likely already exists */ }
+
+            const openIssues = await github.paginate(github.rest.issues.listForRepo, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: labels.join(','),
+              per_page: 100,
+            });
+
+            // Extract the fingerprint embedded in an issue body marker.
+            const fingerprintOf = (issue) => {
+              const m = (issue.body || '').match(/<!--\s*vuln-fingerprint:\s*([0-9a-f]+)\s*-->/i);
+              return m ? m[1] : null;
+            };
+
+            let resolvedCount = 0;
+            for (const issue of openIssues) {
+              const fp = fingerprintOf(issue);
+              if (!fp) continue; // not a fingerprinted audit issue
+              if (currentFingerprint && fp === currentFingerprint) continue; // still active
+
+              try {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  body: `✅ This vulnerability set no longer appears in the latest weekly dependency audit, so it has been auto-resolved.\n\n**Workflow run:** ${runUrl}`,
+                });
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  labels: [resolvedLabel],
+                });
+                await github.rest.issues.update({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  state: 'closed',
+                  state_reason: 'completed',
+                });
+                resolvedCount += 1;
+                core.info(`Resolved stale audit issue #${issue.number} (fingerprint ${fp}).`);
+              } catch (e) {
+                core.warning(`Could not resolve issue #${issue.number}: ${e.message}`);
+              }
+            }
+
+            core.setOutput('resolved_count', String(resolvedCount));
+            core.info(`Auto-resolved ${resolvedCount} stale audit issue(s).`);
+
+      # Notify Slack when stale audit issues were auto-resolved this run.
+      - name: Notify Slack on resolved audit issues
+        if: always() && github.event_name == 'schedule' && env.SLACK_WEBHOOK_URL != '' && steps.resolve_stale.outputs.resolved_count != '' && steps.resolve_stale.outputs.resolved_count != '0'
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          RESOLVED_COUNT: ${{ steps.resolve_stale.outputs.resolved_count }}
+        run: |
+          PAYLOAD=$(jq -n \
+            --arg repo "$GITHUB_REPOSITORY" \
+            --arg run "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+            --arg resolved "${RESOLVED_COUNT:-0}" \
+            '{
+              text: ":white_check_mark: *Dependency audit: stale vulnerability issues resolved*",
+              blocks: [
+                { type: "section", text: { type: "mrkdwn", text: (":white_check_mark: *Auto-resolved* `" + $resolved + "` *prior high/critical audit issue(s) in* `" + $repo + "`") } },
+                { type: "section", text: { type: "mrkdwn", text: "These vulnerability sets no longer appear in the latest weekly audit." } },
+                { type: "section", text: { type: "mrkdwn", text: ("<" + $run + "|View workflow run>") } }
+              ]
+            }')
+          curl -sf -X POST -H 'Content-type: application/json' --data "$PAYLOAD" "$SLACK_WEBHOOK_URL"
+
+
+
 
       - name: Notify Slack on high/critical findings
         if: steps.audit.outputs.status != '0' && env.SLACK_WEBHOOK_URL != '' && steps.open_issue.outputs.is_new == 'true'
