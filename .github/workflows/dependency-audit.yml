@@ -141,7 +141,11 @@ jobs:
             const report = process.env.REPORT || 'See workflow logs for details.';
             const vulnList = process.env.VULN_LIST || 'No specific package details could be extracted.';
             const fingerprint = process.env.FINGERPRINT || 'unknown';
+            const critical = parseInt(process.env.CRITICAL_VULNS || '0', 10);
+            const high = parseInt(process.env.HIGH_VULNS || '0', 10);
+            const severityLabel = critical > 0 ? 'critical' : high > 0 ? 'high' : null;
             const labels = ['dependencies', 'security', 'audit'];
+            if (severityLabel) labels.push(severityLabel);
             const title = '🚨 Dependency audit: high/critical vulnerabilities detected';
             // Hidden marker used to deduplicate: the same vulnerability set
             // produces the same fingerprint, so we never raise a duplicate.
@@ -149,6 +153,18 @@ jobs:
 
             // Ensure each label exists (ignore errors if they already exist or
             // if the repo disallows label creation).
+            for (const label of labels) {
+              const color = label === 'security' ? 'd73a4a' : label === 'critical' ? 'b91c1c' : label === 'high' ? 'f59e0b' : '1d76db';
+              try {
+                await github.rest.issues.createLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: label,
+                  color,
+                  description: `Automated dependency audit: ${label}`,
+                });
+              } catch (e) { /* label likely already exists */ }
+            }
 
             // Parse the vulnerable package names so we can look for any open
             // Dependabot PRs that bump them and link those fixes in the issue.
