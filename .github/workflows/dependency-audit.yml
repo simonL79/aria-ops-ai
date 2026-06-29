@@ -268,6 +268,7 @@ jobs:
               ``,
               `**Last updated:** ${lastUpdated}`,
               `**Workflow run:** ${runUrl}`,
+              `**Full audit report:** [Download artifact](${reportArtifactUrl})`,
               ``,
               `## 🧩 Vulnerable packages`,
               ``,
