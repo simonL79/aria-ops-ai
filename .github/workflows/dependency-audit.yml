@@ -200,6 +200,9 @@ jobs:
             const critical = process.env.CRITICAL_VULNS || '0';
             const high = process.env.HIGH_VULNS || '0';
 
+            // ISO timestamp recording when this audit data was last refreshed.
+            const lastUpdated = new Date().toISOString();
+
             const body = [
               marker,
               `> Opened automatically by the **Dependency Audit** workflow.`,
@@ -214,6 +217,7 @@ jobs:
               `| 🟠 High | ${high} |`,
               `| 📦 Total affected packages | ${total} |`,
               ``,
+              `**Last updated:** ${lastUpdated}`,
               `**Workflow run:** ${runUrl}`,
               ``,
               `## 🧩 Vulnerable packages`,
