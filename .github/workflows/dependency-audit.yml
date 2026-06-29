@@ -423,14 +423,14 @@ jobs:
             esac
           } >> "$GITHUB_STEP_SUMMARY"
 
-      # On the weekly scheduled run, auto-resolve any prior high/critical audit
-      # issues whose vulnerability fingerprint no longer appears in the latest
-      # audit. A clean run (no high/critical findings) resolves all open audit
-      # issues; a run with findings resolves only the stale ones, leaving the
-      # issue for the current fingerprint open.
+      # On every audit run (push, manual, or scheduled), auto-resolve any prior
+      # high/critical audit issues whose vulnerability fingerprint no longer
+      # appears in the latest audit. A clean run (no high/critical findings)
+      # resolves all open audit issues; a run with findings resolves only the
+      # stale ones, leaving the issue for the current fingerprint open.
       - name: Resolve stale audit issues no longer present
         id: resolve_stale
-        if: always() && github.event_name == 'schedule'
+        if: always()
         uses: actions/github-script@v7
         env:
           STATUS: ${{ steps.audit.outputs.status }}
