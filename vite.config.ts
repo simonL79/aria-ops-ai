@@ -32,6 +32,17 @@ export default defineConfig(({ mode }) => ({
         assetFileNames: "assets/[name]-[hash][extname]",
         chunkFileNames: "assets/[name]-[hash].js",
         entryFileNames: "assets/[name]-[hash].js",
+        manualChunks(id) {
+          // Bundle all lucide-react icons into one chunk instead of
+          // hundreds of tiny per-icon files. This avoids overwhelming
+          // the deploy upload with concurrent requests for many objects.
+          if (id.includes("node_modules/lucide-react")) {
+            return "lucide-icons";
+          }
+          if (id.includes("node_modules/react")) {
+            return "react-vendor";
+          }
+        },
       },
     },
   },
