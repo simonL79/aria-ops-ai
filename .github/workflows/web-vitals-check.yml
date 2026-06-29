@@ -1,0 +1,58 @@
+name: Web Vitals (LCP / CLS)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  web-vitals:
+    name: LCP/CLS budgets (fail if Blog CLS > 0.1)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright + chromium
+        run: npx --yes playwright@1.47.0 install --with-deps chromium
+
+      - name: Build production bundle
+        run: npm run build
+
+      - name: Start preview server
+        # vite preview serves the pre-built, content-hashed assets so CLS/LCP
+        # reflect production, not the dev server's on-demand imagetools latency.
+        run: |
+          npx vite preview --port 4173 --host 127.0.0.1 &
+          echo "PREVIEW_PID=$!" >> "$GITHUB_ENV"
+
+      - name: Wait for preview to be ready
+        run: |
+          for i in $(seq 1 60); do
+            if curl -sf http://127.0.0.1:4173/ >/dev/null; then
+              echo "Preview is up."
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "::error::Preview server did not start in time."
+          exit 1
+
+      - name: Run Web Vitals check
+        env:
+          BASE_URL: http://127.0.0.1:4173
+        run: node scripts/check-web-vitals.mjs
+
+      - name: Stop preview server
+        if: always()
+        run: kill "$PREVIEW_PID" 2>/dev/null || true
