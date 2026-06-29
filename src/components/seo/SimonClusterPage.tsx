@@ -63,7 +63,9 @@ const SimonClusterPage: React.FC<SimonClusterPageProps> = ({
   heroImage,
   heroAlt,
 }) => {
-  const heroAbsUrl = heroImage ? `https://www.ariaops.co.uk${heroImage}` : undefined;
+  const heroFallbackUrl = typeof heroImage === 'string' ? heroImage : heroImage?.fallback;
+  const heroSources = heroImage && typeof heroImage !== 'string' ? heroImage : undefined;
+  const heroAbsUrl = heroFallbackUrl ? `https://www.ariaops.co.uk${heroFallbackUrl}` : undefined;
   const imageObjectJsonLd = heroAbsUrl
     ? {
         '@context': 'https://schema.org',
