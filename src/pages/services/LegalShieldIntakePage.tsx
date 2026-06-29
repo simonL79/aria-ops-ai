@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
-import { generateCasePack, type TimelineEntry } from '@/lib/legalShieldCasePack';
+import { type TimelineEntry } from '@/lib/legalShieldCasePack';
 import {
   Shield,
   ArrowRight,
