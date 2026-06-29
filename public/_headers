@@ -1,0 +1,30 @@
+# Cache-Control headers for Lovable static hosting.
+#
+# Build-emitted assets in /assets/* carry a content hash in their filename
+# (configured via build.rollupOptions.output.assetFileNames in vite.config.ts).
+# A changed file always produces a NEW URL, so the bytes at any given URL are
+# immutable and safe to cache for a year. This covers the imagetools-generated
+# AVIF/WebP image variants, hashed JS/CSS chunks, and fonts.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Pre-generated, version-pinned hero variants in /public/hero are part of the
+# LCP preload path. They are stable filenames, so cache aggressively but allow
+# revalidation rather than full immutability.
+/hero/*
+  Cache-Control: public, max-age=31536000
+
+# Static image/font assets served from /public by extension.
+*.avif
+  Cache-Control: public, max-age=31536000
+*.webp
+  Cache-Control: public, max-age=31536000
+*.woff2
+  Cache-Control: public, max-age=31536000, immutable
+
+# HTML must always revalidate so new deploys (and updated asset URLs) are
+# picked up immediately.
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
