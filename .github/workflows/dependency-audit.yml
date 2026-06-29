@@ -509,7 +509,7 @@ jobs:
 
       # Notify Slack when stale audit issues were auto-resolved this run.
       - name: Notify Slack on resolved audit issues
-        if: always() && github.event_name == 'schedule' && env.SLACK_WEBHOOK_URL != '' && steps.resolve_stale.outputs.resolved_count != '' && steps.resolve_stale.outputs.resolved_count != '0'
+        if: always() && env.SLACK_WEBHOOK_URL != '' && steps.resolve_stale.outputs.resolved_count != '' && steps.resolve_stale.outputs.resolved_count != '0'
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           RESOLVED_COUNT: ${{ steps.resolve_stale.outputs.resolved_count }}
