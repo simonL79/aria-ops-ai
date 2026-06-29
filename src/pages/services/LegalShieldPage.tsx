@@ -5,7 +5,8 @@ import SEO from '@/components/seo/SEO';
 import LegalShieldEscalationWorkflow from '@/components/services/LegalShieldEscalationWorkflow';
 import SectionDivider from '@/components/ui/SectionDivider';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
-import CinematicImage from '@/components/ui/CinematicImage';
+import CinematicImage, { CINEMATIC_VARIANTS } from '@/components/ui/CinematicImage';
+import { Helmet } from 'react-helmet-async';
 import { Button } from '@/components/ui/button';
 import StickyPricingBar from '@/components/widgets/StickyPricingBar';
 import {
@@ -290,6 +291,20 @@ const LegalShieldPage = () => {
 
   return (
     <PublicLayout>
+      <Helmet>
+        {/* Preload the AVIF hero so the LCP image is discovered before JS/CSS
+            parse. AVIF-only preload avoids a duplicate WebP fetch on capable
+            browsers; non-AVIF browsers fall back to the <picture> WebP/JPEG. */}
+        <link
+          rel="preload"
+          as="image"
+          type="image/avif"
+          // @ts-expect-error imagesrcset/imagesizes are valid on preload links
+          imagesrcset={CINEMATIC_VARIANTS.hero.avif}
+          imagesizes="100vw"
+          fetchpriority="high"
+        />
+      </Helmet>
       <SEO
         title="ARIA Legal Shield™ — AI-Powered Legal Support Before You Need a Solicitor"
         description="AI-powered legal information, document preparation and case organisation for individuals, creators and businesses. Understand your rights, organise evidence, and approach solicitors fully prepared. Not a law firm."
