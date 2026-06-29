@@ -150,6 +150,8 @@ const BlogPostPage = () => {
                 <img
                   src={post.hero_image_url || post.image_url}
                   alt={post.hero_image_alt || post.title}
+                  width={1280}
+                  height={720}
                   className="w-full h-full object-cover"
                   loading="eager"
                   onError={() => setHeroFailed(true)}
@@ -161,6 +163,8 @@ const BlogPostPage = () => {
                   <img
                     src={blogDefaultHero}
                     alt={post.title}
+                    width={1280}
+                    height={720}
                     className="w-full h-full object-cover"
                     loading="eager"
                   />
