@@ -77,6 +77,14 @@ jobs:
             | sort_by(.name, .severity, .range)
           ' | sha256sum | cut -d" " -f1)"
           echo "fingerprint=$FINGERPRINT" >> "$GITHUB_OUTPUT"
+          echo "::notice::Vulnerability-set fingerprint: $FINGERPRINT"
+          {
+            echo "### 🔐 Vulnerability-set fingerprint"
+            echo ""
+            echo "\`$FINGERPRINT\`"
+            echo ""
+            echo "This hash is used to deduplicate repeated audit reports for the same set of vulnerabilities."
+          } >> "$GITHUB_STEP_SUMMARY"
 
           # Persist a trimmed text report and the vulnerable package list.
           {
