@@ -317,7 +317,7 @@ jobs:
               repo: context.repo.repo,
               title,
               body,
-              labels: [label],
+              labels,
             });
             core.info(`Created issue #${created.data.number}: ${created.data.html_url}`);
             core.setOutput('issue_url', created.data.html_url);
