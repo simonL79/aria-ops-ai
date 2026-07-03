@@ -151,6 +151,7 @@ function App() {
                       <Route path="/athlete-reputation-management" element={<StealthAthleteReputationManagementPage />} />
                       <Route path="/founder-reputation-protection" element={<StealthFounderReputationProtectionPage />} />
                       <Route path="/crisis-reputation-management" element={<StealthCrisisReputationManagementPage />} />
+                      <Route path="/crisis-communications" element={<StealthCrisisCommunicationsPage />} />
                       <Route path="/legal-defence-compliance" element={<StealthLegalDefenceCompliancePage />} />
                       <Route path="/personal-reputation-management" element={<StealthPersonalReputationManagementPage />} />
                       <Route path="/online-reputation-repair" element={<StealthOnlineReputationRepairPage />} />
