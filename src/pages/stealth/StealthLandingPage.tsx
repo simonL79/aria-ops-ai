@@ -120,7 +120,8 @@ const StealthLandingPage: React.FC<{ cfg: StealthPageConfig }> = ({ cfg }) => {
       { id: 'comparison', label: 'Comparison' },
       { id: 'faq', label: 'FAQ' },
     ],
-    []
+    [cfg.hub]
+
   );
 
   return (
