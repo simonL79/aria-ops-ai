@@ -137,13 +137,47 @@ const cfg: StealthPageConfig = {
       a: 'All UK engagements are NDA-bound and operator-delivered. We never list clients publicly.',
     },
   ],
+  hub: {
+    heading: 'Explore UK reputation management by discipline',
+    intro:
+      'This page is the hub for A.R.I.A’s UK reputation practice. Each discipline below has its own dedicated playbook — start with the one that matches your situation, or talk to an operator if several apply.',
+    spokes: [
+      {
+        to: '/online-reputation-repair',
+        label: 'Online Reputation Repair',
+        description: 'Rebuild a damaged reputation — remove or suppress harmful content and re-establish an accurate, authoritative first page.',
+      },
+      {
+        to: '/suppress-negative-google-results',
+        label: 'Suppress & Remove Negative Google Results',
+        description: 'Push down or delist negative URLs, reviews and news through ranking, authority content, GDPR and outdated-content routes.',
+      },
+      {
+        to: '/negative-search-result-suppression',
+        label: 'Negative Search Result Suppression',
+        description: 'Systematic page-one suppression engineered to outrank hostile pages and hold the line over time.',
+      },
+      {
+        to: '/corporate-reputation-management',
+        label: 'Corporate Reputation Management',
+        description: 'Brand-level defence for companies — crisis exposure, review-bombing, Companies House signals and stakeholder trust.',
+      },
+      {
+        to: '/executive-reputation-protection',
+        label: 'Executive Reputation Protection',
+        description: 'Discreet protection for directors and senior leaders whose personal profile carries commercial and governance risk.',
+      },
+      {
+        to: '/personal-reputation-management',
+        label: 'Personal Reputation Management',
+        description: 'Private-individual protection — remove, correct and control what Google and AI say about you personally.',
+      },
+    ],
+  },
   relatedLinks: [
     { to: '/ai-reputation-management', label: 'AI Reputation Management' },
-    { to: '/suppress-negative-google-results', label: 'Suppress Negative Google Results' },
-    { to: '/executive-reputation-protection', label: 'Executive Reputation Protection' },
+    { to: '/crisis-reputation-management', label: 'Crisis Reputation Management' },
     { to: '/ai-reputation-readiness', label: 'AI Reputation Readiness Audit' },
-    { to: '/personal-reputation-management', label: 'Personal Reputation Management' },
-    { to: '/online-reputation-repair', label: 'Online Reputation Repair' },
     { to: '/simon-lindsay/glasgow', label: 'Glasgow operations' },
   ],
 };
