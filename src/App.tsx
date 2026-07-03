@@ -119,6 +119,7 @@ function App() {
                     <Routes>
                       {/* Protected Public Routes - DO NOT MODIFY */}
                       <Route path="/" element={<Index />} />
+                      <Route path="/intel-preview" element={<IntelPreviewPage />} />
                       <Route path="/auth" element={<Authentication />} />
                       <Route path="/cybersecurity-framework" element={<CybersecurityFrameworkPage />} />
                       <Route path="/services/remove-google-reviews" element={<RemoveGoogleReviewsPage />} />
