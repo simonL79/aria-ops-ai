@@ -102,6 +102,12 @@ export default function SeoStatusPage() {
           <p className="mt-3 text-muted-foreground">
             Live sitemap audit · most recent CI checks · Google Images tracker trajectory.
           </p>
+          <a
+            href="/admin/keyword-performance"
+            className="mt-4 inline-flex items-center gap-2 rounded-lg border border-border/60 bg-card/40 px-4 py-2 text-sm font-medium backdrop-blur transition-colors hover:bg-card/70"
+          >
+            📈 Keyword Performance (Search Console rank tracking) →
+          </a>
         </header>
 
         {/* TOP-LINE METRICS */}

@@ -67,7 +67,7 @@ function deltaBadge(current: number, previous: number | undefined, lowerIsBetter
 export default function KeywordPerformancePage() {
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
-  const [trackedOnly, setTrackedOnly] = useState(true);
+  const [trackedOnly, setTrackedOnly] = useState(false);
 
   const { data: snapshots = [], isLoading } = useQuery({
     queryKey: ["gsc-snapshots"],
