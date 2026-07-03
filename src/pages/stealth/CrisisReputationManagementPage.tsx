@@ -4,18 +4,18 @@ import StealthLandingPage, { type StealthPageConfig } from './StealthLandingPage
 
 const cfg: StealthPageConfig = {
   path: '/crisis-reputation-management',
-  title: 'Crisis Reputation Management | 24/7 Response | A.R.I.A™',
+  title: 'Crisis PR & Crisis Management PR Agency | 24/7 | A.R.I.A™',
   metaDescription:
-    '24/7 crisis reputation management. Live operator-led response across Google, AI search, social, news and legal — for founders, athletes, executives and brands.',
-  h1: 'Crisis Reputation Management',
+    'Crisis PR and crisis management PR from a 24/7 operator-led crisis communications agency. Live response across press, Google, AI search, social and legal for founders, executives and brands.',
+  h1: 'Crisis PR & Reputation Management',
   heroEyebrow: 'When the next 72 hours decide everything',
   heroSubhead:
-    'A live, operator-led response to reputation crises — across Google, ChatGPT, Gemini, social, news, legal and stakeholder channels. Not a dashboard. A team that picks up.',
+    'A crisis PR and crisis management PR team that responds live — across press, Google, ChatGPT, Gemini, social, legal and stakeholder channels. Not a dashboard. A crisis communications agency that picks up.',
   problem: {
-    heading: 'A modern reputation crisis happens in four places at once.',
+    heading: 'Modern crisis PR happens in four places at once.',
     body: [
-      'A bad story now lands on Google, gets summarised inside ChatGPT and Gemini, spreads on social, and gets called by a journalist — all within hours. The classic PR playbook addresses the press release. It does not address the AI summary that has already shaped half the readers’ first impression.',
-      'A.R.I.A’s crisis practice runs all four lanes in parallel: search-surface containment, AI-search correction, social and platform escalation, and direct stakeholder communication — with legal coordination where required.',
+      'A bad story now lands on Google, gets summarised inside ChatGPT and Gemini, spreads on social, and gets called by a journalist — all within hours. The classic crisis PR playbook addresses the press release. It does not address the AI summary that has already shaped half the readers’ first impression.',
+      'A.R.I.A is a crisis communications agency whose crisis management PR practice runs all four lanes in parallel: search-surface containment, AI-search correction, social and platform escalation, and direct stakeholder communication — with legal coordination where required.',
       'Engagements are operator-led. There is a named lead on call, a defined first-72-hours playbook, and quantified reporting back to your board, sponsor, investor or governing body for as long as the incident is live.',
     ],
   },
