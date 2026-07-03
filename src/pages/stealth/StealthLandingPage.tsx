@@ -32,6 +32,12 @@ export interface StealthPageConfig {
   breadcrumbName: string;
   positioningQuote?: string;
   leadCapture?: LeadCaptureConfig;
+  guide?: {
+    eyebrow: string;
+    heading: string;
+    intro: string;
+    steps: { title: string; body: string }[];
+  };
   hub?: {
     heading: string;
     intro: string;
@@ -109,6 +115,21 @@ const StealthLandingPage: React.FC<{ cfg: StealthPageConfig }> = ({ cfg }) => {
     } as (typeof jsonLd)[number]);
   }
 
+  if (cfg.guide) {
+    jsonLd.push({
+      '@context': 'https://schema.org',
+      '@type': 'HowTo',
+      name: cfg.guide.heading,
+      description: cfg.guide.intro,
+      step: cfg.guide.steps.map((s, i) => ({
+        '@type': 'HowToStep',
+        position: i + 1,
+        name: s.title,
+        text: s.body,
+      })),
+    } as unknown as (typeof jsonLd)[number]);
+  }
+
   const positioning = cfg.positioningQuote ?? POSITIONING_DEFAULT;
   const hero = useScrollReveal(0.1);
 
@@ -119,11 +140,12 @@ const StealthLandingPage: React.FC<{ cfg: StealthPageConfig }> = ({ cfg }) => {
       ...(cfg.hub ? [{ id: 'hub', label: 'Explore' }] : []),
       { id: 'coverage', label: 'Coverage' },
       { id: 'methodology', label: 'Execution' },
+      ...(cfg.guide ? [{ id: 'guide', label: 'Playbook' }] : []),
       { id: 'comparison', label: 'Comparison' },
       { id: 'faq', label: 'FAQ' },
       ...(cfg.leadCapture ? [{ id: 'get-help', label: 'Get help' }] : []),
     ],
-    [cfg.hub, cfg.leadCapture]
+    [cfg.hub, cfg.leadCapture, cfg.guide]
 
   );
 
@@ -330,9 +352,32 @@ const StealthLandingPage: React.FC<{ cfg: StealthPageConfig }> = ({ cfg }) => {
           </ol>
         </section>
 
+        {cfg.guide && (
+          <>
+            <div className="container mx-auto px-6 max-w-5xl"><SectionDivider /></div>
+            <section id="guide" data-scrollspy-section tabIndex={-1} className="container mx-auto px-6 py-20 max-w-4xl scroll-mt-24">
+              <span className="text-[11px] font-medium tracking-[0.25em] uppercase text-primary/80">Playbook</span>
+              <h2 className="font-display text-3xl md:text-5xl font-semibold mt-4 mb-5 leading-tight">{cfg.guide.heading}</h2>
+              <p className="text-muted-foreground text-lg mb-12 max-w-3xl leading-relaxed">{cfg.guide.intro}</p>
+              <ol className="space-y-6">
+                {cfg.guide.steps.map((s, i) => (
+                  <li key={s.title} className="glass-card p-6 flex gap-5">
+                    <div className="shrink-0 w-12 h-12 rounded-xl border border-primary/30 bg-primary/10 flex items-center justify-center font-bold text-primary">
+                      {String(i + 1).padStart(2, '0')}
+                    </div>
+                    <div>
+                      <h3 className="font-display text-xl font-semibold mb-2">{s.title}</h3>
+                      <p className="text-muted-foreground leading-relaxed">{s.body}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          </>
+        )}
+
         <div className="container mx-auto px-6 max-w-5xl"><SectionDivider /></div>
 
-        {/* Comparison table */}
         <section id="comparison" data-scrollspy-section tabIndex={-1} className="container mx-auto px-6 py-20 max-w-5xl scroll-mt-24">
           <span className="text-[11px] font-medium tracking-[0.25em] uppercase text-primary/80">Comparison</span>
           <h2 className="font-display text-3xl md:text-5xl font-semibold mt-4 mb-6 leading-tight">
