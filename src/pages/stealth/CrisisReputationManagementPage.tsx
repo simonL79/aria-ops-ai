@@ -29,15 +29,16 @@ const cfg: StealthPageConfig = {
   ],
   keywordClusters: [
     {
-      title: 'Crisis response',
+      title: 'Crisis PR',
       items: [
-        'Crisis reputation management',
-        'Reputation crisis response',
-        'Online crisis management',
+        'Crisis PR',
+        'Crisis management PR',
         'PR crisis management',
+        'Crisis PR firms',
+        'Crisis management agency',
+        'Crisis communications agency',
         'Reputation crisis consultant',
-        '24/7 reputation response',
-        'Emergency reputation defence',
+        '24/7 crisis PR response',
       ],
     },
     {
