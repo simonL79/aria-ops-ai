@@ -121,7 +121,7 @@ export default function IntelligenceItemPage() {
 
           <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
             {item.author && <AuthorByline author={item.author} />}
-            <ReadingTime text={item.body} explicit={item.reading_minutes} />
+            <ReadingTime text={item.body} minutes={item.reading_minutes} />
           </div>
         </header>
 
@@ -161,9 +161,9 @@ export default function IntelligenceItemPage() {
           {/* Sidebar */}
           <aside className="mt-10 lg:mt-0">
             {tocItems.length > 0 && <TableOfContents items={tocItems} className="mb-8 sticky top-24" />}
-            <SocialShare url={typeof window !== "undefined" ? window.location.href : ""} title={item.title} className="mb-8" />
+            <SocialShare path={path} title={item.title} className="mb-8" />
             <NewsletterSignup className="mb-8" />
-            <CtaBlock title="Need tailored intelligence?" body="Request a bespoke briefing from the A.R.I.A analyst desk." buttonLabel="Request Briefing" href="/secure-intake" />
+            <CtaBlock title="Need tailored intelligence?" description="Request a bespoke briefing from the A.R.I.A analyst desk." primaryLabel="Request Briefing" primaryHref="/secure-intake" />
           </aside>
         </div>
 
