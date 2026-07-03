@@ -15,6 +15,7 @@ import CookieConsent from "@/components/legal/CookieConsent";
 
 // Lazy-loaded routes — every other page is split into its own chunk
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
+const IntelPreviewPage = lazy(() => import("./pages/IntelPreviewPage"));
 const UnsubscribePage = lazy(() => import("./pages/UnsubscribePage"));
 const BlogPostPage = lazy(() => import("./pages/BlogPostPage"));
 const SecureClientIntakePage = lazy(() => import("./pages/SecureClientIntakePage"));
