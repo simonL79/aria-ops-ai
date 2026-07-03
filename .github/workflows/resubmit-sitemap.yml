@@ -1,0 +1,47 @@
+name: Resubmit sitemap to Google Search Console
+
+# Keeps Google's discovery current after content/FAQ updates.
+# Fires whenever the sitemap changes on main, and can be run manually
+# right after clicking Lovable Publish → Update.
+#
+# Requires two repo/organisation secrets:
+#   LOVABLE_API_KEY               — auth to the connector gateway
+#   GOOGLE_SEARCH_CONSOLE_API_KEY — the gateway forwards the OAuth token
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'public/sitemap.xml'
+      - 'public/image-sitemap.xml'
+      - 'scripts/submit-sitemap.mjs'
+      - '.github/workflows/resubmit-sitemap.yml'
+  workflow_dispatch:
+    inputs:
+      sitemap_url:
+        description: 'Sitemap URL to submit'
+        required: false
+        default: 'https://www.ariaops.co.uk/sitemap.xml'
+      site_url:
+        description: 'Search Console property URL'
+        required: false
+        default: 'https://www.ariaops.co.uk/'
+
+concurrency:
+  group: resubmit-sitemap
+  cancel-in-progress: false
+
+jobs:
+  submit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - name: Submit sitemap.xml
+        env:
+          LOVABLE_API_KEY: ${{ secrets.LOVABLE_API_KEY }}
+          GOOGLE_SEARCH_CONSOLE_API_KEY: ${{ secrets.GOOGLE_SEARCH_CONSOLE_API_KEY }}
+          SITE_URL: ${{ github.event.inputs.site_url || 'https://www.ariaops.co.uk/' }}
+          SITEMAP_URL: ${{ github.event.inputs.sitemap_url || 'https://www.ariaops.co.uk/sitemap.xml' }}
+        run: node scripts/submit-sitemap.mjs
