@@ -114,6 +114,15 @@ export interface ContentItem {
   viz: VizBlock[];
   reading_minutes?: number | null;
   view_count: number;
+  // editorial governance
+  is_seed_content?: boolean;
+  noindex?: boolean;
+  source_notes?: string | null;
+  fact_checked_at?: string | null;
+  fact_checked_by?: string | null;
+  legal_reviewed_at?: string | null;
+  legal_reviewed_by?: string | null;
+  content_risk_level?: string | null;
   created_at: string;
   updated_at: string;
   // optional joined relations
