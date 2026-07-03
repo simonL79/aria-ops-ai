@@ -127,7 +127,7 @@ const StealthLandingPage: React.FC<{ cfg: StealthPageConfig }> = ({ cfg }) => {
         name: s.title,
         text: s.body,
       })),
-    } as (typeof jsonLd)[number]);
+    } as unknown as (typeof jsonLd)[number]);
   }
 
   const positioning = cfg.positioningQuote ?? POSITIONING_DEFAULT;
