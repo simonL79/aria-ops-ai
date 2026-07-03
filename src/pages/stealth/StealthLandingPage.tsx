@@ -32,6 +32,12 @@ export interface StealthPageConfig {
   breadcrumbName: string;
   positioningQuote?: string;
   leadCapture?: LeadCaptureConfig;
+  guide?: {
+    eyebrow: string;
+    heading: string;
+    intro: string;
+    steps: { title: string; body: string }[];
+  };
   hub?: {
     heading: string;
     intro: string;
