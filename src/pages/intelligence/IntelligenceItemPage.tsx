@@ -21,7 +21,7 @@ import {
   ExpandableSection,
 } from "@/components/intel";
 import { contentItemSchemaGraph } from "@/lib/schema";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ShieldAlert } from "lucide-react";
 
 function BodySection({ section }: { section: ContentSection }) {
   const Tag = section.level === 3 ? "h3" : "h2";
