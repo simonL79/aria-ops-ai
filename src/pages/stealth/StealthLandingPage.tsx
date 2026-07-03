@@ -9,6 +9,7 @@ import ScrollSpy from '@/components/sections/ScrollSpy';
 import SectionDivider from '@/components/ui/SectionDivider';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
 import CinematicImage from '@/components/ui/CinematicImage';
+import LeadCaptureSection, { type LeadCaptureConfig } from '@/components/sections/LeadCaptureSection';
 
 export interface StealthPageConfig {
   path: string;
