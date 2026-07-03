@@ -30,6 +30,11 @@ export interface StealthPageConfig {
   serviceType: string;
   breadcrumbName: string;
   positioningQuote?: string;
+  hub?: {
+    heading: string;
+    intro: string;
+    spokes: { to: string; label: string; description: string }[];
+  };
 }
 
 const SITE = 'https://www.ariaops.co.uk';
@@ -88,6 +93,20 @@ const StealthLandingPage: React.FC<{ cfg: StealthPageConfig }> = ({ cfg }) => {
     },
   ];
 
+  if (cfg.hub) {
+    jsonLd.push({
+      '@context': 'https://schema.org',
+      '@type': 'ItemList',
+      name: cfg.hub.heading,
+      itemListElement: cfg.hub.spokes.map((s, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        name: s.label,
+        url: `${SITE}${s.to}`,
+      })),
+    } as (typeof jsonLd)[number]);
+  }
+
   const positioning = cfg.positioningQuote ?? POSITIONING_DEFAULT;
   const hero = useScrollReveal(0.1);
 
@@ -95,12 +114,14 @@ const StealthLandingPage: React.FC<{ cfg: StealthPageConfig }> = ({ cfg }) => {
     () => [
       { id: 'problem', label: 'The issue' },
       { id: 'capabilities', label: 'Approach' },
+      ...(cfg.hub ? [{ id: 'hub', label: 'Explore' }] : []),
       { id: 'coverage', label: 'Coverage' },
       { id: 'methodology', label: 'Execution' },
       { id: 'comparison', label: 'Comparison' },
       { id: 'faq', label: 'FAQ' },
     ],
-    []
+    [cfg.hub]
+
   );
 
   return (
@@ -200,7 +221,38 @@ const StealthLandingPage: React.FC<{ cfg: StealthPageConfig }> = ({ cfg }) => {
           </div>
         </section>
 
+        {cfg.hub && (
+          <>
+            <div className="container mx-auto px-6 max-w-5xl"><SectionDivider /></div>
+            <section id="hub" data-scrollspy-section tabIndex={-1} className="container mx-auto px-6 py-20 max-w-6xl scroll-mt-24">
+              <div className="mb-12 max-w-3xl">
+                <span className="text-[11px] font-medium tracking-[0.25em] uppercase text-primary/80">Explore</span>
+                <h2 className="font-display text-3xl md:text-5xl font-semibold mt-4 mb-5 leading-tight">
+                  {cfg.hub.heading}
+                </h2>
+                <p className="text-muted-foreground text-lg leading-relaxed">{cfg.hub.intro}</p>
+              </div>
+              <div className="grid md:grid-cols-2 gap-6">
+                {cfg.hub.spokes.map((s) => (
+                  <Link
+                    key={s.to}
+                    to={s.to}
+                    className="group glass-card p-7 transition-all duration-300 hover:border-primary/30"
+                  >
+                    <div className="flex items-center justify-between gap-4 mb-2">
+                      <h3 className="font-display text-xl font-semibold text-foreground">{s.label}</h3>
+                      <ArrowRight className="h-5 w-5 text-primary shrink-0 transition-transform duration-300 group-hover:translate-x-1" />
+                    </div>
+                    <p className="text-muted-foreground leading-relaxed">{s.description}</p>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          </>
+        )}
+
         <div className="container mx-auto px-6 max-w-5xl"><SectionDivider /></div>
+
 
         {/* Keyword cluster grid */}
         <section id="coverage" data-scrollspy-section tabIndex={-1} className="container mx-auto px-6 py-20 max-w-6xl scroll-mt-24">
