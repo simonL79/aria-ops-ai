@@ -5197,6 +5197,7 @@ export type Database = {
     Functions: {
       get_user_client_ids: { Args: { _user_id: string }; Returns: string[] }
       has_role: { Args: { _role: string; _user_id: string }; Returns: boolean }
+      increment_content_view: { Args: { item_id: string }; Returns: undefined }
       is_current_user_admin: { Args: never; Returns: boolean }
       log_compliance_activity: {
         Args: {
