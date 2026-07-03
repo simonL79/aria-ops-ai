@@ -1311,17 +1311,24 @@ export type Database = {
           body: string | null
           canonical_url: string | null
           category_id: string | null
+          content_risk_level: string
           cover_image: string | null
           created_at: string
           detection_confidence: number | null
           downloads: Json
           excerpt: string | null
           executive_risk: string | null
+          fact_checked_at: string | null
+          fact_checked_by: string | null
           faq: Json
           featured: boolean
           id: string
+          is_seed_content: boolean
+          legal_reviewed_at: string | null
+          legal_reviewed_by: string | null
           meta_description: string | null
           meta_title: string | null
+          noindex: boolean
           og_image: string | null
           published_at: string | null
           reading_minutes: number | null
@@ -1330,6 +1337,7 @@ export type Database = {
           reviewed_at: string | null
           sections: Json
           slug: string
+          source_notes: string | null
           stats: Json
           status: string
           subtitle: string | null
@@ -1347,17 +1355,24 @@ export type Database = {
           body?: string | null
           canonical_url?: string | null
           category_id?: string | null
+          content_risk_level?: string
           cover_image?: string | null
           created_at?: string
           detection_confidence?: number | null
           downloads?: Json
           excerpt?: string | null
           executive_risk?: string | null
+          fact_checked_at?: string | null
+          fact_checked_by?: string | null
           faq?: Json
           featured?: boolean
           id?: string
+          is_seed_content?: boolean
+          legal_reviewed_at?: string | null
+          legal_reviewed_by?: string | null
           meta_description?: string | null
           meta_title?: string | null
+          noindex?: boolean
           og_image?: string | null
           published_at?: string | null
           reading_minutes?: number | null
@@ -1366,6 +1381,7 @@ export type Database = {
           reviewed_at?: string | null
           sections?: Json
           slug: string
+          source_notes?: string | null
           stats?: Json
           status?: string
           subtitle?: string | null
@@ -1383,17 +1399,24 @@ export type Database = {
           body?: string | null
           canonical_url?: string | null
           category_id?: string | null
+          content_risk_level?: string
           cover_image?: string | null
           created_at?: string
           detection_confidence?: number | null
           downloads?: Json
           excerpt?: string | null
           executive_risk?: string | null
+          fact_checked_at?: string | null
+          fact_checked_by?: string | null
           faq?: Json
           featured?: boolean
           id?: string
+          is_seed_content?: boolean
+          legal_reviewed_at?: string | null
+          legal_reviewed_by?: string | null
           meta_description?: string | null
           meta_title?: string | null
+          noindex?: boolean
           og_image?: string | null
           published_at?: string | null
           reading_minutes?: number | null
@@ -1402,6 +1425,7 @@ export type Database = {
           reviewed_at?: string | null
           sections?: Json
           slug?: string
+          source_notes?: string | null
           stats?: Json
           status?: string
           subtitle?: string | null
