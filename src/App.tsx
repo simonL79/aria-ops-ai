@@ -82,6 +82,9 @@ const StealthAthleteReputationManagementPage = lazy(() => import("./pages/stealt
 const StealthFounderReputationProtectionPage = lazy(() => import("./pages/stealth/FounderReputationProtectionPage"));
 const StealthCrisisReputationManagementPage = lazy(() => import("./pages/stealth/CrisisReputationManagementPage"));
 const StealthLegalDefenceCompliancePage = lazy(() => import("./pages/stealth/LegalDefenceCompliancePage"));
+const StealthPersonalReputationManagementPage = lazy(() => import("./pages/stealth/PersonalReputationManagementPage"));
+const StealthOnlineReputationRepairPage = lazy(() => import("./pages/stealth/OnlineReputationRepairPage"));
+const StealthCorporateReputationManagementPage = lazy(() => import("./pages/stealth/CorporateReputationManagementPage"));
 const ResourceAIReputationReadinessChecklistPage = lazy(() => import("./pages/resources/AIReputationReadinessChecklistPage"));
 const ResourceFounderReputationRiskReportPage = lazy(() => import("./pages/resources/FounderReputationRiskReportPage"));
 const ResourceAthleteReputationProtectionGuidePage = lazy(() => import("./pages/resources/AthleteReputationProtectionGuidePage"));
@@ -147,6 +150,9 @@ function App() {
                       <Route path="/founder-reputation-protection" element={<StealthFounderReputationProtectionPage />} />
                       <Route path="/crisis-reputation-management" element={<StealthCrisisReputationManagementPage />} />
                       <Route path="/legal-defence-compliance" element={<StealthLegalDefenceCompliancePage />} />
+                      <Route path="/personal-reputation-management" element={<StealthPersonalReputationManagementPage />} />
+                      <Route path="/online-reputation-repair" element={<StealthOnlineReputationRepairPage />} />
+                      <Route path="/corporate-reputation-management" element={<StealthCorporateReputationManagementPage />} />
                       <Route path="/resources/ai-reputation-readiness-checklist" element={<ResourceAIReputationReadinessChecklistPage />} />
                       <Route path="/resources/founder-reputation-risk-report" element={<ResourceFounderReputationRiskReportPage />} />
                       <Route path="/resources/athlete-reputation-protection-guide" element={<ResourceAthleteReputationProtectionGuidePage />} />
