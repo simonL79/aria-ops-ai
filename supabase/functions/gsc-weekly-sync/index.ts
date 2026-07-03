@@ -28,12 +28,23 @@ Deno.serve(async (req: Request) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
-  // Auth: either the cron shared secret, or an admin JWT (manual trigger).
-  let triggeredBy = "cron";
-  const syncSecret = Deno.env.get("GSC_SYNC_SECRET");
-  const providedSecret = req.headers.get("x-sync-secret");
+  const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const db = createClient(supabaseUrl, serviceKey);
 
-  if (syncSecret && providedSecret && providedSecret === syncSecret) {
+  // Auth: either the cron token (validated against the encrypted vault secret),
+  // or an admin JWT (manual trigger from the dashboard).
+  let triggeredBy = "cron";
+  const providedSecret = req.headers.get("x-sync-secret");
+  let cronAuthorized = false;
+  if (providedSecret) {
+    const { data: ok } = await db.rpc("verify_gsc_sync_secret", {
+      _token: providedSecret,
+    });
+    cronAuthorized = ok === true;
+  }
+
+  if (cronAuthorized) {
     triggeredBy = "cron";
   } else {
     const auth = await requireAdmin(req);
@@ -46,10 +57,6 @@ Deno.serve(async (req: Request) => {
   if (!lovableKey || !gscKey) {
     return json({ error: "Search Console connection is not configured" }, 500);
   }
-
-  const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-  const db = createClient(supabaseUrl, serviceKey);
 
   // GSC data lags ~2-3 days. Use a 7-day window ending 3 days ago.
   const end = new Date();

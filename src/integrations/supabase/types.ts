@@ -5341,6 +5341,7 @@ export type Database = {
         Args: { _entity: string; _user_id: string }
         Returns: boolean
       }
+      verify_gsc_sync_secret: { Args: { _token: string }; Returns: boolean }
     }
     Enums: {
       shield_alert_status:
