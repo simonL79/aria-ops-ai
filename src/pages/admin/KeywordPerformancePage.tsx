@@ -97,8 +97,8 @@ export default function KeywordPerformancePage() {
 
   const syncNow = useMutation({
     mutationFn: async () => {
-      const { data, error } = await supabase.functions.invoke("gsc-weekly-sync", {
-        body: {},
+      const { data, error } = await supabase.functions.invoke("google-search-crawler", {
+        body: { action: "gsc-weekly-sync" },
       });
       if (error) throw error;
       return data;
