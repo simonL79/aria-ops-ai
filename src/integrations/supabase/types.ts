@@ -2651,6 +2651,90 @@ export type Database = {
           },
         ]
       }
+      gsc_sync_runs: {
+        Row: {
+          created_at: string
+          error: string | null
+          id: string
+          period_end: string | null
+          period_start: string | null
+          rows_upserted: number
+          site_url: string
+          status: string
+          tracked_matched: number
+          triggered_by: string
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          period_end?: string | null
+          period_start?: string | null
+          rows_upserted?: number
+          site_url: string
+          status?: string
+          tracked_matched?: number
+          triggered_by?: string
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          period_end?: string | null
+          period_start?: string | null
+          rows_upserted?: number
+          site_url?: string
+          status?: string
+          tracked_matched?: number
+          triggered_by?: string
+        }
+        Relationships: []
+      }
+      gsc_weekly_snapshots: {
+        Row: {
+          clicks: number
+          created_at: string
+          ctr: number
+          id: string
+          impressions: number
+          is_tracked: boolean
+          keyword: string
+          period_end: string
+          period_start: string
+          position: number
+          site_url: string
+          updated_at: string
+        }
+        Insert: {
+          clicks?: number
+          created_at?: string
+          ctr?: number
+          id?: string
+          impressions?: number
+          is_tracked?: boolean
+          keyword: string
+          period_end: string
+          period_start: string
+          position?: number
+          site_url: string
+          updated_at?: string
+        }
+        Update: {
+          clicks?: number
+          created_at?: string
+          ctr?: number
+          id?: string
+          impressions?: number
+          is_tracked?: boolean
+          keyword?: string
+          period_end?: string
+          period_start?: string
+          position?: number
+          site_url?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       keyword_targets: {
         Row: {
           active: boolean
