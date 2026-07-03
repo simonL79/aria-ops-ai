@@ -47,6 +47,7 @@ export default function IntelligenceItemPage() {
       const fetched = await getItemBySlug(slug);
       setItem(fetched);
       if (fetched) {
+        recordView(fetched.id);
         const rel = await getRelatedIntel(fetched, 6);
         setRelated(rel);
       }
