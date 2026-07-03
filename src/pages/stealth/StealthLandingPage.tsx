@@ -337,9 +337,32 @@ const StealthLandingPage: React.FC<{ cfg: StealthPageConfig }> = ({ cfg }) => {
           </ol>
         </section>
 
+        {cfg.guide && (
+          <>
+            <div className="container mx-auto px-6 max-w-5xl"><SectionDivider /></div>
+            <section id="guide" data-scrollspy-section tabIndex={-1} className="container mx-auto px-6 py-20 max-w-4xl scroll-mt-24">
+              <span className="text-[11px] font-medium tracking-[0.25em] uppercase text-primary/80">Playbook</span>
+              <h2 className="font-display text-3xl md:text-5xl font-semibold mt-4 mb-5 leading-tight">{cfg.guide.heading}</h2>
+              <p className="text-muted-foreground text-lg mb-12 max-w-3xl leading-relaxed">{cfg.guide.intro}</p>
+              <ol className="space-y-6">
+                {cfg.guide.steps.map((s, i) => (
+                  <li key={s.title} className="glass-card p-6 flex gap-5">
+                    <div className="shrink-0 w-12 h-12 rounded-xl border border-primary/30 bg-primary/10 flex items-center justify-center font-bold text-primary">
+                      {String(i + 1).padStart(2, '0')}
+                    </div>
+                    <div>
+                      <h3 className="font-display text-xl font-semibold mb-2">{s.title}</h3>
+                      <p className="text-muted-foreground leading-relaxed">{s.body}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          </>
+        )}
+
         <div className="container mx-auto px-6 max-w-5xl"><SectionDivider /></div>
 
-        {/* Comparison table */}
         <section id="comparison" data-scrollspy-section tabIndex={-1} className="container mx-auto px-6 py-20 max-w-5xl scroll-mt-24">
           <span className="text-[11px] font-medium tracking-[0.25em] uppercase text-primary/80">Comparison</span>
           <h2 className="font-display text-3xl md:text-5xl font-semibold mt-4 mb-6 leading-tight">
