@@ -150,6 +150,9 @@ function App() {
                       <Route path="/founder-reputation-protection" element={<StealthFounderReputationProtectionPage />} />
                       <Route path="/crisis-reputation-management" element={<StealthCrisisReputationManagementPage />} />
                       <Route path="/legal-defence-compliance" element={<StealthLegalDefenceCompliancePage />} />
+                      <Route path="/personal-reputation-management" element={<StealthPersonalReputationManagementPage />} />
+                      <Route path="/online-reputation-repair" element={<StealthOnlineReputationRepairPage />} />
+                      <Route path="/corporate-reputation-management" element={<StealthCorporateReputationManagementPage />} />
                       <Route path="/resources/ai-reputation-readiness-checklist" element={<ResourceAIReputationReadinessChecklistPage />} />
                       <Route path="/resources/founder-reputation-risk-report" element={<ResourceFounderReputationRiskReportPage />} />
                       <Route path="/resources/athlete-reputation-protection-guide" element={<ResourceAthleteReputationProtectionGuidePage />} />
