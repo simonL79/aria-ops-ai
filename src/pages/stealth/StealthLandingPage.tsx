@@ -115,6 +115,21 @@ const StealthLandingPage: React.FC<{ cfg: StealthPageConfig }> = ({ cfg }) => {
     } as (typeof jsonLd)[number]);
   }
 
+  if (cfg.guide) {
+    jsonLd.push({
+      '@context': 'https://schema.org',
+      '@type': 'HowTo',
+      name: cfg.guide.heading,
+      description: cfg.guide.intro,
+      step: cfg.guide.steps.map((s, i) => ({
+        '@type': 'HowToStep',
+        position: i + 1,
+        name: s.title,
+        text: s.body,
+      })),
+    } as (typeof jsonLd)[number]);
+  }
+
   const positioning = cfg.positioningQuote ?? POSITIONING_DEFAULT;
   const hero = useScrollReveal(0.1);
 
