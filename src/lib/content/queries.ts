@@ -57,7 +57,7 @@ export function formatBucketSlug(type: ContentType): string {
 // Data fetching
 // ─────────────────────────────────────────────────────────────────────────────
 const ITEM_CARD_COLS =
-  "id,slug,type,category_id,author_id,title,subtitle,excerpt,cover_image,status,published_at,featured,threat_level,executive_risk,detection_confidence,reviewed,verified,tags,reading_minutes,view_count,created_at,updated_at";
+  "id,slug,type,category_id,author_id,title,subtitle,excerpt,cover_image,status,published_at,featured,threat_level,executive_risk,detection_confidence,reviewed,verified,tags,reading_minutes,view_count,is_seed_content,noindex,created_at,updated_at";
 
 const AUTHOR_COLS = "id,slug,name,title,bio,credentials,avatar_url";
 const CATEGORY_COLS = "id,slug,name,description,kind,icon,sort_order";

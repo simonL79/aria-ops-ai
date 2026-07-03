@@ -21,7 +21,7 @@ import {
   ExpandableSection,
 } from "@/components/intel";
 import { contentItemSchemaGraph } from "@/lib/schema";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ShieldAlert } from "lucide-react";
 
 function BodySection({ section }: { section: ContentSection }) {
   const Tag = section.level === 3 ? "h3" : "h2";
@@ -101,12 +101,23 @@ export default function IntelligenceItemPage() {
         description={item.meta_description ?? item.excerpt ?? "Intelligence from A.R.I.A"}
         path={path}
         ogType="article"
+        noIndex={item.noindex || item.is_seed_content}
         image={item.og_image ?? item.cover_image ?? undefined}
         jsonLd={contentItemSchemaGraph(item, path, crumbs)}
       />
 
       <main className="container mx-auto px-4 py-12 sm:py-16">
         <IntelBreadcrumbs crumbs={crumbs} className="mb-6" />
+
+        {item.is_seed_content && (
+          <div className="mb-6 flex items-start gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
+            <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+            <p>
+              <span className="font-semibold">Demo / template content.</span> This is unverified template material, excluded from search indexing. Populate with fact-checked, legally-reviewed content before publishing.
+            </p>
+          </div>
+        )}
+
 
         <Link to={`/intelligence/${catSlug}`} className="mb-4 inline-flex items-center gap-1 text-sm text-primary hover:underline">
           <ArrowLeft className="h-4 w-4" /> Back to {catName}
