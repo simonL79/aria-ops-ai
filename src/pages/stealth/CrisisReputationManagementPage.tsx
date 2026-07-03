@@ -99,6 +99,7 @@ const cfg: StealthPageConfig = {
     { to: '/executive-reputation-protection', label: 'Executive Reputation Protection' },
     { to: '/founder-reputation-protection', label: 'Founder Reputation Protection' },
     { to: '/negative-search-result-suppression', label: 'Negative Search Result Suppression' },
+    { to: '/corporate-reputation-management', label: 'Corporate Reputation Management' },
     { to: '/resources/crisis-reputation-response-checklist', label: 'Crisis Reputation Response Checklist' },
   ],
   serviceType: 'Crisis reputation management',
