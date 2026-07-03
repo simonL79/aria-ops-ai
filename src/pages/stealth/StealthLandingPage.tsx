@@ -382,6 +382,15 @@ const StealthLandingPage: React.FC<{ cfg: StealthPageConfig }> = ({ cfg }) => {
           </div>
         </section>
 
+        {cfg.leadCapture && (
+          <>
+            <div className="container mx-auto px-6 max-w-5xl"><SectionDivider /></div>
+            <LeadCaptureSection cfg={cfg.leadCapture} />
+          </>
+        )}
+
+
+
         {/* Related */}
         <section className="container mx-auto px-6 py-12 max-w-5xl">
           <h2 className="font-display text-2xl md:text-3xl font-semibold mb-6">Related A.R.I.A solutions</h2>
