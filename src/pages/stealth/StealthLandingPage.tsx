@@ -114,6 +114,7 @@ const StealthLandingPage: React.FC<{ cfg: StealthPageConfig }> = ({ cfg }) => {
     () => [
       { id: 'problem', label: 'The issue' },
       { id: 'capabilities', label: 'Approach' },
+      ...(cfg.hub ? [{ id: 'hub', label: 'Explore' }] : []),
       { id: 'coverage', label: 'Coverage' },
       { id: 'methodology', label: 'Execution' },
       { id: 'comparison', label: 'Comparison' },
