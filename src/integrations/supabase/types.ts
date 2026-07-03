@@ -1233,6 +1233,287 @@ export type Database = {
         }
         Relationships: []
       }
+      content_authors: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          credentials: string[]
+          id: string
+          name: string
+          slug: string
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          credentials?: string[]
+          id?: string
+          name: string
+          slug: string
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          credentials?: string[]
+          id?: string
+          name?: string
+          slug?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      content_categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          kind: string
+          name: string
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          kind?: string
+          name: string
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          kind?: string
+          name?: string
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      content_items: {
+        Row: {
+          author_id: string | null
+          body: string | null
+          canonical_url: string | null
+          category_id: string | null
+          cover_image: string | null
+          created_at: string
+          detection_confidence: number | null
+          downloads: Json
+          excerpt: string | null
+          executive_risk: string | null
+          faq: Json
+          featured: boolean
+          id: string
+          meta_description: string | null
+          meta_title: string | null
+          og_image: string | null
+          published_at: string | null
+          reading_minutes: number | null
+          references_list: Json
+          reviewed: boolean
+          reviewed_at: string | null
+          sections: Json
+          slug: string
+          stats: Json
+          status: string
+          subtitle: string | null
+          tags: string[]
+          threat_level: string | null
+          title: string
+          type: string
+          updated_at: string
+          verified: boolean
+          view_count: number
+          viz: Json
+        }
+        Insert: {
+          author_id?: string | null
+          body?: string | null
+          canonical_url?: string | null
+          category_id?: string | null
+          cover_image?: string | null
+          created_at?: string
+          detection_confidence?: number | null
+          downloads?: Json
+          excerpt?: string | null
+          executive_risk?: string | null
+          faq?: Json
+          featured?: boolean
+          id?: string
+          meta_description?: string | null
+          meta_title?: string | null
+          og_image?: string | null
+          published_at?: string | null
+          reading_minutes?: number | null
+          references_list?: Json
+          reviewed?: boolean
+          reviewed_at?: string | null
+          sections?: Json
+          slug: string
+          stats?: Json
+          status?: string
+          subtitle?: string | null
+          tags?: string[]
+          threat_level?: string | null
+          title: string
+          type?: string
+          updated_at?: string
+          verified?: boolean
+          view_count?: number
+          viz?: Json
+        }
+        Update: {
+          author_id?: string | null
+          body?: string | null
+          canonical_url?: string | null
+          category_id?: string | null
+          cover_image?: string | null
+          created_at?: string
+          detection_confidence?: number | null
+          downloads?: Json
+          excerpt?: string | null
+          executive_risk?: string | null
+          faq?: Json
+          featured?: boolean
+          id?: string
+          meta_description?: string | null
+          meta_title?: string | null
+          og_image?: string | null
+          published_at?: string | null
+          reading_minutes?: number | null
+          references_list?: Json
+          reviewed?: boolean
+          reviewed_at?: string | null
+          sections?: Json
+          slug?: string
+          stats?: Json
+          status?: string
+          subtitle?: string | null
+          tags?: string[]
+          threat_level?: string | null
+          title?: string
+          type?: string
+          updated_at?: string
+          verified?: boolean
+          view_count?: number
+          viz?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_items_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "content_authors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_items_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "content_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      content_leads: {
+        Row: {
+          content_id: string | null
+          created_at: string
+          email: string
+          id: string
+          name: string | null
+          payload: Json
+          source: string | null
+          tool: string | null
+        }
+        Insert: {
+          content_id?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          name?: string | null
+          payload?: Json
+          source?: string | null
+          tool?: string | null
+        }
+        Update: {
+          content_id?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string | null
+          payload?: Json
+          source?: string | null
+          tool?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_leads_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "content_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      content_links: {
+        Row: {
+          created_at: string
+          id: string
+          relation: string
+          source_id: string
+          target_id: string
+          weight: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          relation?: string
+          source_id: string
+          target_id: string
+          weight?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          relation?: string
+          source_id?: string
+          target_id?: string
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_links_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "content_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_links_target_id_fkey"
+            columns: ["target_id"]
+            isOneToOne: false
+            referencedRelation: "content_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       content_sources: {
         Row: {
           created_at: string
@@ -1272,6 +1553,66 @@ export type Database = {
           title?: string | null
           updated_at?: string
           url?: string | null
+        }
+        Relationships: []
+      }
+      content_taxonomy: {
+        Row: {
+          common_risks: Json
+          created_at: string
+          description: string | null
+          examples: Json
+          faq: Json
+          id: string
+          kind: string
+          meta_description: string | null
+          meta_title: string | null
+          name: string
+          overview: string | null
+          published: boolean
+          recommended_monitoring: Json
+          slug: string
+          sort_order: number
+          threat_level: string | null
+          updated_at: string
+        }
+        Insert: {
+          common_risks?: Json
+          created_at?: string
+          description?: string | null
+          examples?: Json
+          faq?: Json
+          id?: string
+          kind: string
+          meta_description?: string | null
+          meta_title?: string | null
+          name: string
+          overview?: string | null
+          published?: boolean
+          recommended_monitoring?: Json
+          slug: string
+          sort_order?: number
+          threat_level?: string | null
+          updated_at?: string
+        }
+        Update: {
+          common_risks?: Json
+          created_at?: string
+          description?: string | null
+          examples?: Json
+          faq?: Json
+          id?: string
+          kind?: string
+          meta_description?: string | null
+          meta_title?: string | null
+          name?: string
+          overview?: string | null
+          published?: boolean
+          recommended_monitoring?: Json
+          slug?: string
+          sort_order?: number
+          threat_level?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -3377,6 +3718,33 @@ export type Database = {
           id?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      redirects: {
+        Row: {
+          created_at: string
+          from_path: string
+          id: string
+          status_code: number
+          to_path: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          from_path: string
+          id?: string
+          status_code?: number
+          to_path: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          from_path?: string
+          id?: string
+          status_code?: number
+          to_path?: string
+          updated_at?: string
         }
         Relationships: []
       }
