@@ -76,7 +76,7 @@ const cfg: StealthPageConfig = {
     { step: '05', title: 'Beyond 72h: durable defence', body: 'Engagement transitions into ongoing monitoring and defence so the same story can’t come back through a different door.' },
   ],
   comparison: {
-    competitorLabel: 'Traditional PR crisis agencies',
+    competitorLabel: 'Traditional crisis PR agencies',
     rows: [
       { feature: 'Press strategy & spokesperson briefing', competitor: true, aria: true },
       { feature: 'Search-surface containment (Google)', competitor: 'Limited', aria: 'Full' },
