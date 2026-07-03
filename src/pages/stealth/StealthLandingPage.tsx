@@ -30,6 +30,11 @@ export interface StealthPageConfig {
   serviceType: string;
   breadcrumbName: string;
   positioningQuote?: string;
+  hub?: {
+    heading: string;
+    intro: string;
+    spokes: { to: string; label: string; description: string }[];
+  };
 }
 
 const SITE = 'https://www.ariaops.co.uk';
