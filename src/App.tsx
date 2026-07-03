@@ -82,6 +82,7 @@ const StealthNegativeSearchResultSuppressionPage = lazy(() => import("./pages/st
 const StealthAthleteReputationManagementPage = lazy(() => import("./pages/stealth/AthleteReputationManagementPage"));
 const StealthFounderReputationProtectionPage = lazy(() => import("./pages/stealth/FounderReputationProtectionPage"));
 const StealthCrisisReputationManagementPage = lazy(() => import("./pages/stealth/CrisisReputationManagementPage"));
+const StealthCrisisCommunicationsPage = lazy(() => import("./pages/stealth/CrisisCommunicationsPage"));
 const StealthLegalDefenceCompliancePage = lazy(() => import("./pages/stealth/LegalDefenceCompliancePage"));
 const StealthPersonalReputationManagementPage = lazy(() => import("./pages/stealth/PersonalReputationManagementPage"));
 const StealthOnlineReputationRepairPage = lazy(() => import("./pages/stealth/OnlineReputationRepairPage"));
