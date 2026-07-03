@@ -16,6 +16,9 @@ import CookieConsent from "@/components/legal/CookieConsent";
 // Lazy-loaded routes — every other page is split into its own chunk
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
 const IntelPreviewPage = lazy(() => import("./pages/IntelPreviewPage"));
+const IntelligenceHubPage = lazy(() => import("./pages/intelligence/IntelligenceHubPage"));
+const IntelligenceCategoryPage = lazy(() => import("./pages/intelligence/IntelligenceCategoryPage"));
+const IntelligenceItemPage = lazy(() => import("./pages/intelligence/IntelligenceItemPage"));
 const UnsubscribePage = lazy(() => import("./pages/UnsubscribePage"));
 const BlogPostPage = lazy(() => import("./pages/BlogPostPage"));
 const SecureClientIntakePage = lazy(() => import("./pages/SecureClientIntakePage"));
@@ -120,6 +123,9 @@ function App() {
                       {/* Protected Public Routes - DO NOT MODIFY */}
                       <Route path="/" element={<Index />} />
                       <Route path="/intel-preview" element={<IntelPreviewPage />} />
+                      <Route path="/intelligence" element={<IntelligenceHubPage />} />
+                      <Route path="/intelligence/:category" element={<IntelligenceCategoryPage />} />
+                      <Route path="/intelligence/:category/:slug" element={<IntelligenceItemPage />} />
                       <Route path="/auth" element={<Authentication />} />
                       <Route path="/cybersecurity-framework" element={<CybersecurityFrameworkPage />} />
                       <Route path="/services/remove-google-reviews" element={<RemoveGoogleReviewsPage />} />
