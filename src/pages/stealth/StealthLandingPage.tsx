@@ -31,6 +31,7 @@ export interface StealthPageConfig {
   serviceType: string;
   breadcrumbName: string;
   positioningQuote?: string;
+  leadCapture?: LeadCaptureConfig;
   hub?: {
     heading: string;
     intro: string;
