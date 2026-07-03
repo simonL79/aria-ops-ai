@@ -98,6 +98,7 @@ const cfg: StealthPageConfig = {
     { q: 'Do you work with families and protected individuals?', a: 'Yes. Family and protected-individual crises are handled with discretion and an explicit privacy-first protocol.' },
   ],
   relatedLinks: [
+    { to: '/crisis-communications', label: 'Crisis Communications' },
     { to: '/executive-reputation-protection', label: 'Executive Reputation Protection' },
     { to: '/founder-reputation-protection', label: 'Founder Reputation Protection' },
     { to: '/negative-search-result-suppression', label: 'Negative Search Result Suppression' },
