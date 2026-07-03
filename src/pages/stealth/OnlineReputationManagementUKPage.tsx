@@ -142,6 +142,8 @@ const cfg: StealthPageConfig = {
     { to: '/suppress-negative-google-results', label: 'Suppress Negative Google Results' },
     { to: '/executive-reputation-protection', label: 'Executive Reputation Protection' },
     { to: '/ai-reputation-readiness', label: 'AI Reputation Readiness Audit' },
+    { to: '/personal-reputation-management', label: 'Personal Reputation Management' },
+    { to: '/online-reputation-repair', label: 'Online Reputation Repair' },
     { to: '/simon-lindsay/glasgow', label: 'Glasgow operations' },
   ],
 };
