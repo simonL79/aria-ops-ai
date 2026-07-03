@@ -139,6 +139,7 @@ const cfg: StealthPageConfig = {
     { to: '/ai-reputation-readiness', label: 'AI Reputation Readiness Audit' },
     { to: '/executive-reputation-protection', label: 'Executive Reputation Protection' },
     { to: '/services/remove-google-reviews', label: 'Remove Google Reviews' },
+    { to: '/online-reputation-repair', label: 'Online Reputation Repair' },
   ],
 };
 
