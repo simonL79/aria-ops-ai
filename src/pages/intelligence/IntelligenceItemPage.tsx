@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link, useLocation } from "react-router-dom";
 import PublicLayout from "@/components/layout/PublicLayout";
 import SEO from "@/components/seo/SEO";
-import { getItemBySlug, getCategoryDef, itemHref, formatBucketSlug } from "@/lib/content/queries";
+import { getItemBySlug, getCategoryDef, itemHref, formatBucketSlug, recordView } from "@/lib/content/queries";
 import { getRelatedIntel } from "@/lib/graph/resolver";
 import type { ContentItem, ContentSection } from "@/lib/content/types";
 import { CONTENT_TYPE_LABELS, CONTENT_TYPE_CTA } from "@/lib/content/types";
