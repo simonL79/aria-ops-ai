@@ -108,6 +108,16 @@ const cfg: StealthPageConfig = {
   ],
   serviceType: 'Crisis reputation management',
   breadcrumbName: 'Crisis Reputation Management',
+  leadCapture: {
+    eyebrow: 'Get crisis PR help now',
+    heading: 'Speak to a crisis PR operator',
+    subtext:
+      'Tell us what’s happening. A named crisis PR operator reviews every request and responds fast with a first-move plan across press, Google, AI search, social and legal.',
+    urgencyNote: 'Live incident? Flag it as breaking below and we prioritise your request.',
+    submitLabel: 'Request crisis PR help',
+    sourceTag: 'Crisis PR lead — /crisis-reputation-management',
+  },
+
 };
 
 export default function CrisisReputationManagementPage() {
