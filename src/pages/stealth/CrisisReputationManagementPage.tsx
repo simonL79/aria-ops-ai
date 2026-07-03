@@ -117,6 +117,23 @@ const cfg: StealthPageConfig = {
     submitLabel: 'Request crisis PR help',
     sourceTag: 'Crisis PR lead — /crisis-reputation-management',
   },
+  guide: {
+    eyebrow: 'Playbook',
+    heading: 'How to handle a PR crisis: a step-by-step guide',
+    intro:
+      'Effective crisis management PR is a sequence, not a scramble. This is the crisis communication playbook A.R.I.A runs in the first hours of an incident — the same steps you can follow to stabilise a breaking story across press, Google, AI search and social.',
+    steps: [
+      { title: 'Step 1 — Assess and grade the crisis', body: 'Before any statement, map what is being said, where, and how fast it is spreading. Grade severity and reach across press, Google, social and AI-search summaries so your crisis communication response is proportionate. In crisis management PR, an accurate first read prevents both over-reaction and dangerous silence.' },
+      { title: 'Step 2 — Activate the team and a single owner', body: 'Name one crisis lead and one decision-maker. Confusion over who speaks is the most common crisis communication failure. Brief legal, leadership and any PR partners so approvals move in minutes, not hours.' },
+      { title: 'Step 3 — Agree the core message and holding statement', body: 'Draft a short, honest holding statement and the two or three key messages every channel will echo. Consistent messaging is the backbone of crisis communication — it stops the story mutating as it travels between journalists, staff and social feeds.' },
+      { title: 'Step 4 — Brief your spokesperson', body: 'Prepare the spokesperson with approved lines, likely questions and clear boundaries on what not to say. Well-run crisis management PR never sends anyone to the media un-briefed.' },
+      { title: 'Step 5 — Communicate across every channel at once', body: 'Release your message simultaneously to press, staff, customers and stakeholders, and correct the Google results and AI-search summaries (ChatGPT, Gemini, AI Overviews) that are already shaping opinion. Modern crisis communication has to cover the surfaces that summarise you, not just the press release.' },
+      { title: 'Step 6 — Brief stakeholders directly', body: 'Reach sponsors, investors, board, partners and employees before they read it elsewhere. Direct stakeholder communication keeps allies on-side and frames the story on your terms.' },
+      { title: 'Step 7 — Monitor, correct and adapt', body: 'Track coverage, sentiment, SERP composition and AI-output in real time. Correct inaccuracies quickly and update your messaging as facts develop — crisis communication is a live loop, not a one-off send.' },
+      { title: 'Step 8 — Stabilise, review and harden', body: 'Once the peak passes, monitor for resurfacing, publish authoritative content, and run a debrief. The strongest crisis management PR turns the incident into a hardened plan so the same story cannot return through a different door.' },
+    ],
+  },
+
 
 };
 
