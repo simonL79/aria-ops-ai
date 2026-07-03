@@ -88,6 +88,8 @@ const cfg: StealthPageConfig = {
     ],
   },
   faqs: [
+    { q: 'What is crisis PR?', a: 'Crisis PR is the rapid, coordinated management of communications when an event threatens an individual’s or organisation’s reputation. It combines press strategy, spokesperson briefing and stakeholder messaging to control the narrative. A.R.I.A extends classic crisis PR beyond the press release to the surfaces that actually shape opinion today — Google results, AI-search summaries (ChatGPT, Gemini, AI Overviews), social platforms and legal channels — run in parallel by a named operator lead.' },
+    { q: 'How do you handle a PR crisis?', a: 'Handle a PR crisis in four moves: (1) contain — grade severity, escalate to platforms and prepare legal triggers within the first hours; (2) correct — fix Google and AI-search surfaces so they stop repeating the wrong version; (3) counter — publish authoritative content and brief sponsors, investors and board directly so they hear it from you first; (4) stabilise — monitor for resurfacing and transition into durable defence. A.R.I.A runs this as a pre-built first-72-hours playbook rather than improvising under pressure.' },
     { q: 'How fast can you activate?', a: 'Crisis engagements activate within one hour of the initial call, 24/7. A named operator lead is on the line and the first-72-hours playbook starts immediately.' },
     { q: 'Do you replace my PR agency?', a: 'No. A.R.I.A runs the reputation-surface, AI-search, platform and legal lanes alongside whatever PR or comms team you already have.' },
     { q: 'What if the story is already in ChatGPT?', a: 'AI-search correction is a core part of the playbook. We address the underlying source contamination so the models stop repeating the story as fact.' },
