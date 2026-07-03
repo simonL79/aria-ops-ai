@@ -125,11 +125,12 @@ const StealthLandingPage: React.FC<{ cfg: StealthPageConfig }> = ({ cfg }) => {
       ...(cfg.hub ? [{ id: 'hub', label: 'Explore' }] : []),
       { id: 'coverage', label: 'Coverage' },
       { id: 'methodology', label: 'Execution' },
+      ...(cfg.guide ? [{ id: 'guide', label: 'Playbook' }] : []),
       { id: 'comparison', label: 'Comparison' },
       { id: 'faq', label: 'FAQ' },
       ...(cfg.leadCapture ? [{ id: 'get-help', label: 'Get help' }] : []),
     ],
-    [cfg.hub, cfg.leadCapture]
+    [cfg.hub, cfg.leadCapture, cfg.guide]
 
   );
 
