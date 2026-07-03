@@ -159,16 +159,33 @@ const StealthLandingPage: React.FC<{ cfg: StealthPageConfig }> = ({ cfg }) => {
               {cfg.heroSubhead}
             </p>
             <div className="flex flex-wrap gap-3 justify-center mt-10">
-              <Link
-                to="/scan"
-                className="group inline-flex items-center justify-center gap-2 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-medium px-7 py-3.5 transition-all duration-300 hover:shadow-[0_0_30px_hsl(var(--primary)/0.3)]"
-              >
-                Request the readiness audit
-                <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-              </Link>
-              <Button asChild size="lg" variant="outline">
-                <Link to="/contact">Talk to an operator</Link>
-              </Button>
+              {cfg.leadCapture ? (
+                <>
+                  <a
+                    href="#get-help"
+                    className="group inline-flex items-center justify-center gap-2 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-medium px-7 py-3.5 transition-all duration-300 hover:shadow-[0_0_30px_hsl(var(--primary)/0.3)]"
+                  >
+                    {cfg.leadCapture.submitLabel}
+                    <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+                  </a>
+                  <Button asChild size="lg" variant="outline">
+                    <Link to="/contact">Talk to an operator</Link>
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    to="/scan"
+                    className="group inline-flex items-center justify-center gap-2 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-medium px-7 py-3.5 transition-all duration-300 hover:shadow-[0_0_30px_hsl(var(--primary)/0.3)]"
+                  >
+                    Request the readiness audit
+                    <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+                  </Link>
+                  <Button asChild size="lg" variant="outline">
+                    <Link to="/contact">Talk to an operator</Link>
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </section>
