@@ -31,6 +31,7 @@ const SystemSettingsPage = lazy(() => import("./pages/admin/SystemSettingsPage")
 const GenesisSentinelPage = lazy(() => import("./pages/admin/GenesisSentinelPage"));
 const RequiemDashboardPage = lazy(() => import("./pages/admin/RequiemDashboardPage"));
 const KeywordTargetsPage = lazy(() => import("./pages/admin/KeywordTargetsPage"));
+const KeywordPerformancePage = lazy(() => import("./pages/admin/KeywordPerformancePage"));
 const EideticAlertPreferencesPage = lazy(() => import("./pages/admin/EideticAlertPreferencesPage"));
 const AdminNotificationsPage = lazy(() => import("./pages/admin/AdminNotificationsPage"));
 const ShieldDashboard = lazy(() => import("./pages/admin/shield/ShieldDashboard"));
@@ -198,6 +199,7 @@ function App() {
                         <Route path="/admin/genesis-sentinel" element={<GenesisSentinelPage />} />
                         <Route path="/admin/requiem" element={<RequiemDashboardPage />} />
                         <Route path="/admin/keyword-targets" element={<KeywordTargetsPage />} />
+                        <Route path="/admin/keyword-performance" element={<KeywordPerformancePage />} />
                         <Route path="/admin/eidetic/preferences" element={<EideticAlertPreferencesPage />} />
                         <Route path="/admin/notifications" element={<AdminNotificationsPage />} />
                         <Route path="/admin/shield" element={<ShieldDashboard />} />
