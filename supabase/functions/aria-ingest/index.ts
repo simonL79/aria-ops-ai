@@ -32,7 +32,7 @@ serve(async (req) => {
     
     // Parse request body
     const bodyText = await req.text();
-    console.log(`[ARIA-INGEST] Raw request body: ${bodyText}`);
+    console.log(`[ARIA-INGEST] Received request body (${bodyText.length} bytes)`);
     
     let requestData;
     try {
@@ -48,7 +48,7 @@ serve(async (req) => {
 
     // Extract the auth key from the header - accepting a simple key without Bearer prefix
     const authHeader = req.headers.get('authorization') || '';
-    console.log(`[ARIA-INGEST] Raw auth header: "${authHeader}"`);
+    console.log(`[ARIA-INGEST] Auth header present: ${authHeader.length > 0}`);
     
     // The key should be sent directly as is - no Bearer prefix expected
     const receivedKey = authHeader.trim();
