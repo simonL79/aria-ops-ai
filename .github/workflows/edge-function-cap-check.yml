@@ -1,0 +1,41 @@
+name: Edge Function cap pre-deploy check
+
+# Blocks deployment when the Supabase Edge Function slot cap is reached.
+# Runs on any change under supabase/functions/ (a likely deploy trigger),
+# on the config that declares functions, and can be run manually before
+# clicking Lovable Publish. On failure it lists candidate functions to delete.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/functions/**'
+      - 'supabase/config.toml'
+      - 'scripts/check-edge-function-cap.mjs'
+      - '.github/workflows/edge-function-cap-check.yml'
+  pull_request:
+    paths:
+      - 'supabase/functions/**'
+      - 'supabase/config.toml'
+  workflow_dispatch:
+    inputs:
+      cap:
+        description: 'Edge Function slot cap to enforce'
+        required: false
+        default: '100'
+
+concurrency:
+  group: edge-function-cap-check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - name: Enforce Edge Function slot cap
+        env:
+          EDGE_FUNCTION_CAP: ${{ github.event.inputs.cap || '100' }}
+        run: node scripts/check-edge-function-cap.mjs
