@@ -208,6 +208,7 @@ function App() {
                         <Route path="/admin/keyword-targets" element={<KeywordTargetsPage />} />
                         <Route path="/admin/keyword-performance" element={<KeywordPerformancePage />} />
                         <Route path="/admin/eidetic/preferences" element={<EideticAlertPreferencesPage />} />
+                        <Route path="/admin/eidetic/notification-log" element={<EideticNotificationLogPage />} />
                         <Route path="/admin/notifications" element={<AdminNotificationsPage />} />
                         <Route path="/admin/shield" element={<ShieldDashboard />} />
                         <Route path="/admin/shield/alerts" element={<ShieldAlertsList />} />
