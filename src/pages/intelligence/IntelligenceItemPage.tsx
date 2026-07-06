@@ -29,7 +29,7 @@ function BodySection({ section }: { section: ContentSection }) {
   return (
     <section id={section.id ?? section.heading.toLowerCase().replace(/\s+/g, "-")} className="scroll-mt-24">
       <Tag className="mb-3 text-xl font-semibold text-foreground">{section.heading}</Tag>
-      {section.body && <div className="prose prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: section.body }} />}
+      {section.body && <div className="prose prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(section.body) }} />}
     </section>
   );
 }
