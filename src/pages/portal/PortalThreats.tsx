@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import PortalLayout from '@/components/portal/PortalLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -251,11 +252,19 @@ const PortalThreats = () => {
                           {ev.content_excerpt}
                         </p>
                       )}
-                      {ev.content_url && (
-                        <a href={ev.content_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-orange-400 hover:underline">
-                          View source <ExternalLink className="h-3 w-3" />
-                        </a>
-                      )}
+                      <div className="flex items-center gap-4 flex-wrap">
+                        <Link
+                          to={`/portal/threats/resurfacing/${ev.id}`}
+                          className="inline-flex items-center gap-1 text-xs font-medium text-white/80 hover:text-white hover:underline"
+                        >
+                          View details <ChevronRight className="h-3 w-3" />
+                        </Link>
+                        {ev.content_url && (
+                          <a href={ev.content_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-orange-400 hover:underline">
+                            View source <ExternalLink className="h-3 w-3" />
+                          </a>
+                        )}
+                      </div>
                     </CardContent>
                   </Card>
                 ))}
