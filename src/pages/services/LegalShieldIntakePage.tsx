@@ -34,6 +34,58 @@ import {
   Sparkles,
 } from 'lucide-react';
 
+// reCAPTCHA v3 loader — used to obtain a token for the secure evidence upload gateway.
+declare global {
+  interface Window {
+    grecaptcha?: {
+      ready: (cb: () => void) => void;
+      execute: (siteKey: string, opts: { action: string }) => Promise<string>;
+    };
+  }
+}
+
+let recaptchaLoader: Promise<string | null> | null = null;
+const loadRecaptcha = (): Promise<string | null> => {
+  if (recaptchaLoader) return recaptchaLoader;
+  recaptchaLoader = (async () => {
+    try {
+      const { data } = await supabase.functions.invoke('get-public-config');
+      const siteKey: string | undefined = data?.recaptcha_site_key;
+      if (!siteKey) return null;
+      if (!document.querySelector(`script[data-recaptcha="${siteKey}"]`)) {
+        await new Promise<void>((resolve, reject) => {
+          const s = document.createElement('script');
+          s.src = `https://www.google.com/recaptcha/api.js?render=${siteKey}`;
+          s.async = true;
+          s.dataset.recaptcha = siteKey;
+          s.onload = () => resolve();
+          s.onerror = () => reject(new Error('recaptcha load failed'));
+          document.head.appendChild(s);
+        });
+      }
+      await new Promise<void>((resolve) => {
+        const check = () => (window.grecaptcha ? window.grecaptcha.ready(resolve) : setTimeout(check, 100));
+        check();
+      });
+      return siteKey;
+    } catch {
+      return null;
+    }
+  })();
+  return recaptchaLoader;
+};
+
+const getRecaptchaToken = async (action: string): Promise<string> => {
+  const siteKey = await loadRecaptcha();
+  if (!siteKey || !window.grecaptcha) return '';
+  try {
+    return await window.grecaptcha.execute(siteKey, { action });
+  } catch {
+    return '';
+  }
+};
+
+
 const MAX_FILES = 10;
 const MAX_FILE_BYTES = 15 * 1024 * 1024; // 15MB
 const ACCEPTED_TYPES = [
