@@ -32,7 +32,7 @@ serve(async (req) => {
     
     // Parse request body
     const bodyText = await req.text();
-    console.log(`[ARIA-INGEST] Raw request body: ${bodyText}`);
+    console.log(`[ARIA-INGEST] Received request body (${bodyText.length} bytes)`);
     
     let requestData;
     try {
