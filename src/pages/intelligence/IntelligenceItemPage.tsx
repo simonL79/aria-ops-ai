@@ -1,5 +1,6 @@
 // Intelligence item renderer — /intelligence/:category/:slug
 import { useEffect, useState } from "react";
+import DOMPurify from "dompurify";
 import { useParams, Link, useLocation } from "react-router-dom";
 import PublicLayout from "@/components/layout/PublicLayout";
 import SEO from "@/components/seo/SEO";
