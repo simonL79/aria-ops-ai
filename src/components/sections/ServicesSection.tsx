@@ -94,6 +94,19 @@ const ServicesSection = () => {
               </h3>
               <p className="text-muted-foreground mt-4 leading-relaxed">{path.body}</p>
 
+              {'related' in path && path.related ? (
+                <p className="text-sm text-muted-foreground mt-3">
+                  {path.related.prefix}{' '}
+                  <Link
+                    to={path.related.href}
+                    className="text-primary font-medium hover:underline underline-offset-4"
+                  >
+                    {path.related.label}
+                  </Link>
+                  .
+                </p>
+              ) : null}
+
               <ul className="mt-6 space-y-3 flex-1">
                 {path.points.map((pt) => (
                   <li key={pt} className="flex items-start gap-3 text-sm text-foreground/80">
