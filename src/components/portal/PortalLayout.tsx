@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, FileText, ShieldAlert, Sparkles, User, LogOut, Shield, Send, ArrowUpCircle } from 'lucide-react';
+import { LayoutDashboard, FileText, ShieldAlert, Sparkles, User, LogOut, Shield, Send, ArrowUpCircle, Bell } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 
