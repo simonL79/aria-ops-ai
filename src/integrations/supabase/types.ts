@@ -2284,6 +2284,47 @@ export type Database = {
         }
         Relationships: []
       }
+      eidetic_notification_log: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          event_id: string | null
+          id: string
+          recipient_email: string
+          recipient_user_id: string | null
+          sent_at: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          event_id?: string | null
+          id?: string
+          recipient_email: string
+          recipient_user_id?: string | null
+          sent_at?: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          event_id?: string | null
+          id?: string
+          recipient_email?: string
+          recipient_user_id?: string | null
+          sent_at?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "eidetic_notification_log_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "eidetic_resurfacing_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       eidetic_response_hooks: {
         Row: {
           action_config: Json
