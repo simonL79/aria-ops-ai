@@ -154,23 +154,74 @@ const PortalThreats = () => {
               <div className="flex items-center gap-2">
                 <History className="h-4 w-4 text-orange-400" />
                 <h2 className="text-sm font-semibold text-white/80 uppercase tracking-wide">Resurfacing Alerts</h2>
+                {resTotal > 0 && (
+                  <span className="text-xs text-white/40">({resTotal})</span>
+                )}
               </div>
-              {resurfacing.length > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleExport}
+                disabled={exporting || resTotal === 0}
+                className="gap-1.5"
+              >
+                <Download className="h-3.5 w-3.5" />
+                {exporting ? 'Exporting…' : 'Export CSV'}
+              </Button>
+            </div>
+
+            {/* Filters */}
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="relative flex-1 min-w-[180px]">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/40" />
+                <Input
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  placeholder="Search excerpt…"
+                  className="pl-8 h-9 bg-white/5 border-white/10 text-white/90 placeholder:text-white/30"
+                />
+              </div>
+              <Select value={severity} onValueChange={setSeverity}>
+                <SelectTrigger className="h-9 w-[130px] bg-white/5 border-white/10 text-white/80"><SelectValue placeholder="Severity" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All severities</SelectItem>
+                  <SelectItem value="critical">Critical</SelectItem>
+                  <SelectItem value="high">High</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="low">Low</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={status} onValueChange={setStatus}>
+                <SelectTrigger className="h-9 w-[130px] bg-white/5 border-white/10 text-white/80"><SelectValue placeholder="Status" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All statuses</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="snoozed">Snoozed</SelectItem>
+                  <SelectItem value="resolved">Resolved</SelectItem>
+                </SelectContent>
+              </Select>
+              {hasFilters && (
                 <Button
-                  variant="outline"
+                  variant="ghost"
                   size="sm"
-                  onClick={() => exportResurfacingToCSV(resurfacing)}
-                  className="gap-1.5"
+                  className="h-9 text-white/60 hover:text-white/90"
+                  onClick={() => { setSeverity('all'); setEventType('all'); setStatus('all'); setSearchInput(''); setSearch(''); }}
                 >
-                  <Download className="h-3.5 w-3.5" />
-                  Export CSV
+                  Clear
                 </Button>
               )}
             </div>
-            {resurfacing.length === 0 ? (
+
+            {resLoading ? (
+              <Card className="bg-white/5 border-white/10">
+                <CardContent className="p-6 text-center text-white/50">Loading events…</CardContent>
+              </Card>
+            ) : resurfacing.length === 0 ? (
               <Card className="bg-white/5 border-white/10">
                 <CardContent className="p-6 text-center text-white/60">
-                  No resurfacing events detected on your monitored footprints.
+                  {hasFilters
+                    ? 'No resurfacing events match the current filters.'
+                    : 'No resurfacing events detected on your monitored footprints.'}
                 </CardContent>
               </Card>
             ) : (
@@ -208,6 +259,35 @@ const PortalThreats = () => {
                     </CardContent>
                   </Card>
                 ))}
+              </div>
+            )}
+
+            {/* Pagination */}
+            {resTotal > PAGE_SIZE && (
+              <div className="flex items-center justify-between pt-1">
+                <span className="text-xs text-white/40">
+                  Page {page + 1} of {totalPages}
+                </span>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-1"
+                    disabled={page === 0 || resLoading}
+                    onClick={() => setPage((p) => Math.max(0, p - 1))}
+                  >
+                    <ChevronLeft className="h-3.5 w-3.5" /> Prev
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-1"
+                    disabled={page + 1 >= totalPages || resLoading}
+                    onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                  >
+                    Next <ChevronRight className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
               </div>
             )}
           </section>
