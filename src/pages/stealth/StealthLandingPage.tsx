@@ -31,6 +31,14 @@ export interface StealthPageConfig {
   serviceType: string;
   breadcrumbName: string;
   positioningQuote?: string;
+  /** Absolute or root-relative og:image / twitter:image URL. */
+  image?: string;
+  /** og:image pixel width (defaults handled by SEO component). */
+  imageWidth?: number;
+  /** og:image pixel height. */
+  imageHeight?: number;
+  /** og:image MIME type, e.g. "image/png". */
+  imageType?: string;
   leadCapture?: LeadCaptureConfig;
   guide?: {
     eyebrow: string;
