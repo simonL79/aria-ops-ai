@@ -17,6 +17,7 @@ export default defineConfig(({ mode }) => ({
     imagetools(),
     mode === 'development' && componentTagger(),
     routeIntegrityPlugin(),
+    mcpPlugin(),
   ].filter(Boolean),
   resolve: {
     alias: {
