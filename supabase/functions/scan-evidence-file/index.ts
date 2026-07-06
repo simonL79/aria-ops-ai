@@ -187,6 +187,67 @@ Deno.serve(async (req) => {
     }
 
     const result = scan(type, bytes)
+
+    // When upload:true, act as the secure upload gateway: enforce reCAPTCHA and
+    // per-visitor rate limits, then store the file at a server-controlled path.
+    if (body.upload === true) {
+      if (!result.safe) {
+        return new Response(
+          JSON.stringify({ safe: false, reason: result.reason ?? 'File rejected.' }),
+          { status: 422, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+        )
+      }
+
+      const ip = clientIp(req)
+      const captcha = await verifyRecaptcha(String(body.captcha_token ?? ''), ip)
+      if (!captcha.ok) {
+        return new Response(JSON.stringify({ error: captcha.reason || 'CAPTCHA failed' }), {
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+
+      const supabase = createClient(
+        Deno.env.get('SUPABASE_URL')!,
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+      )
+      const ipHash = await hashIp(ip)
+      const now = Date.now()
+      const hourAgo = new Date(now - 60 * 60 * 1000).toISOString()
+      const dayAgo = new Date(now - 24 * 60 * 60 * 1000).toISOString()
+
+      const [{ count: hourCount }, { count: dayCount }] = await Promise.all([
+        supabase.from('shield_intake_upload_rate_limits').select('id', { count: 'exact', head: true }).eq('ip_hash', ipHash).gte('created_at', hourAgo),
+        supabase.from('shield_intake_upload_rate_limits').select('id', { count: 'exact', head: true }).eq('ip_hash', ipHash).gte('created_at', dayAgo),
+      ])
+      if ((hourCount ?? 0) >= HOURLY_LIMIT || (dayCount ?? 0) >= DAILY_LIMIT) {
+        return new Response(JSON.stringify({ error: 'Upload rate limit exceeded. Please try again later.' }), {
+          status: 429,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+
+      // Server-controlled, scoped path — the client cannot influence the folder.
+      const safeName = String(name ?? 'evidence').replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 120) || 'evidence'
+      const path = `intake/${crypto.randomUUID()}/${crypto.randomUUID()}-${safeName}`
+      const { error: upErr } = await supabase.storage
+        .from('shield-evidence')
+        .upload(path, bytes, { contentType: type, upsert: false })
+      if (upErr) {
+        console.error('shield-evidence upload failed')
+        return new Response(JSON.stringify({ error: 'Upload failed. Please try again.' }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+      await supabase.from('shield_intake_upload_rate_limits').insert({ ip_hash: ipHash })
+
+      return new Response(
+        JSON.stringify({ safe: true, path, name: name ?? null, size: bytes.length, type }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+      )
+    }
+
     return new Response(
       JSON.stringify({ name: name ?? null, safe: result.safe, reason: result.reason ?? null }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
