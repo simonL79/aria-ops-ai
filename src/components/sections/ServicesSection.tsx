@@ -42,6 +42,11 @@ const PATHS = [
     ],
     cta: { label: 'Open ARIA Legal Shield', href: '/services/legal-shield' },
     secondary: { label: 'Legal Defence & Compliance', href: '/legal-defence-compliance' },
+    related: {
+      prefix: 'Facing a live incident? Get',
+      label: 'crisis reputation management',
+      href: '/crisis-reputation-management',
+    },
   },
 ];
 
