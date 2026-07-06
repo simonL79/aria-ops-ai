@@ -37,6 +37,9 @@ const PortalResurfacingEvent = () => {
   const [event, setEvent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [acting, setActing] = useState<string | null>(null);
+  const [snoozeHours, setSnoozeHours] = useState('24');
+  const [resolutionNotes, setResolutionNotes] = useState('');
 
   useEffect(() => {
     const load = async () => {
@@ -53,6 +56,31 @@ const PortalResurfacingEvent = () => {
     };
     load();
   }, [id]);
+
+  const runAction = async (action: string, extra?: Record<string, any>) => {
+    if (!id) return;
+    setActing(action);
+    try {
+      const { data, error } = await supabase.functions.invoke('eidetic-portal-event-action', {
+        body: { event_id: id, action, ...extra },
+      });
+      if (error) throw error;
+      if ((data as any)?.event) setEvent((data as any).event);
+      toast.success(
+        action === 'acknowledge' ? 'Event acknowledged'
+          : action === 'snooze' ? 'Event snoozed'
+          : action === 'resolve' ? 'Event resolved'
+          : 'Event reopened',
+      );
+      if (action === 'resolve') setResolutionNotes('');
+    } catch (e: any) {
+      console.error(e);
+      toast.error(e?.message || 'Action failed');
+    } finally {
+      setActing(null);
+    }
+  };
+
 
   const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
     <div className="flex flex-col gap-0.5 py-2 border-b border-white/5 last:border-0 sm:flex-row sm:justify-between sm:gap-4">
