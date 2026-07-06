@@ -1,0 +1,91 @@
+{
+  "version": 1,
+  "sdk_version": "0.20.0",
+  "path": "/functions/v1/mcp",
+  "auth": {
+    "type": "none"
+  },
+  "mcp": {
+    "server": {
+      "name": "ariaops-mcp",
+      "version": "0.1.0",
+      "title": "A.R.I.A Reputation Intelligence MCP"
+    },
+    "tools": [
+      {
+        "name": "list_reputation_services",
+        "title": "List reputation services",
+        "description": "List the reputation management and crisis PR services offered by A.R.I.A / ariaops.co.uk, with a short description and a URL for each.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "estimate_reputation_threat_score",
+        "title": "Estimate reputation threat score",
+        "description": "Return an illustrative reputation threat score (0-100) and risk band for a given person or brand name. This is a simulated estimate matching the public lead-magnet tool, not a live OSINT scan.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "entity_name": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The person or brand name to estimate a reputation threat score for."
+            }
+          },
+          "required": [
+            "entity_name"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "search_blog_posts",
+        "title": "Search blog & insights",
+        "description": "Search the A.R.I.A / ariaops.co.uk published blog and insights articles about reputation management, crisis PR and AI search visibility. Returns matching article titles, summaries and URLs.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Keywords to search article titles and summaries for."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 20,
+              "description": "Max results to return (default 5)."
+            }
+          },
+          "required": [
+            "query"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}

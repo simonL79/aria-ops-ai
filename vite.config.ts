@@ -4,6 +4,7 @@ import path from "path";
 import { componentTagger } from "lovable-tagger";
 import { imagetools } from "vite-imagetools";
 import { routeIntegrityPlugin } from "./vite-plugins/route-integrity";
+import { mcpPlugin } from "@lovable.dev/mcp-js/stacks/supabase/vite";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -16,6 +17,7 @@ export default defineConfig(({ mode }) => ({
     imagetools(),
     mode === 'development' && componentTagger(),
     routeIntegrityPlugin(),
+    mcpPlugin(),
   ].filter(Boolean),
   resolve: {
     alias: {
