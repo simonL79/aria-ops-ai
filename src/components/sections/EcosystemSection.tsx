@@ -49,7 +49,7 @@ const NODES: Node[] = [
   {
     id: 'crisis',
     icon: Siren,
-    title: 'Crisis Response',
+    title: 'Crisis Reputation Management',
     blurb: 'Move fast when a narrative threatens to escalate.',
     href: '/crisis-reputation-management',
     pos: 'top-1/2 left-0 -translate-y-1/2',
