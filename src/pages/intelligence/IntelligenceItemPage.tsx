@@ -1,5 +1,6 @@
 // Intelligence item renderer — /intelligence/:category/:slug
 import { useEffect, useState } from "react";
+import DOMPurify from "dompurify";
 import { useParams, Link, useLocation } from "react-router-dom";
 import PublicLayout from "@/components/layout/PublicLayout";
 import SEO from "@/components/seo/SEO";
@@ -28,7 +29,7 @@ function BodySection({ section }: { section: ContentSection }) {
   return (
     <section id={section.id ?? section.heading.toLowerCase().replace(/\s+/g, "-")} className="scroll-mt-24">
       <Tag className="mb-3 text-xl font-semibold text-foreground">{section.heading}</Tag>
-      {section.body && <div className="prose prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: section.body }} />}
+      {section.body && <div className="prose prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(section.body) }} />}
     </section>
   );
 }
@@ -159,7 +160,7 @@ export default function IntelligenceItemPage() {
             {item.sections?.map((s, i) => <BodySection key={i} section={s} />)}
 
             {item.body && !item.sections?.length && (
-              <div dangerouslySetInnerHTML={{ __html: item.body }} />
+              <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(item.body ?? '') }} />
             )}
 
             {item.faq?.length > 0 && (
