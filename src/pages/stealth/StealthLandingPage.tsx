@@ -31,6 +31,14 @@ export interface StealthPageConfig {
   serviceType: string;
   breadcrumbName: string;
   positioningQuote?: string;
+  /** Absolute or root-relative og:image / twitter:image URL. */
+  image?: string;
+  /** og:image pixel width (defaults handled by SEO component). */
+  imageWidth?: number;
+  /** og:image pixel height. */
+  imageHeight?: number;
+  /** og:image MIME type, e.g. "image/png". */
+  imageType?: string;
   leadCapture?: LeadCaptureConfig;
   guide?: {
     eyebrow: string;
@@ -156,8 +164,13 @@ const StealthLandingPage: React.FC<{ cfg: StealthPageConfig }> = ({ cfg }) => {
         description={cfg.metaDescription}
         path={cfg.path}
         ogType="website"
+        image={cfg.image}
+        imageWidth={cfg.imageWidth}
+        imageHeight={cfg.imageHeight}
+        imageType={cfg.imageType}
         jsonLd={jsonLd}
       />
+
 
       <article className="text-foreground">
         {/* Hero */}
