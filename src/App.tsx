@@ -45,6 +45,7 @@ const Authentication = lazy(() => import("./pages/Authentication"));
 const PortalDashboard = lazy(() => import("./pages/portal/PortalDashboard"));
 const PortalReports = lazy(() => import("./pages/portal/PortalReports"));
 const PortalThreats = lazy(() => import("./pages/portal/PortalThreats"));
+const PortalResurfacingEvent = lazy(() => import("./pages/portal/PortalResurfacingEvent"));
 const PortalFindings = lazy(() => import("./pages/portal/PortalFindings"));
 const PortalAccount = lazy(() => import("./pages/portal/PortalAccount"));
 const PortalNoAccess = lazy(() => import("./pages/portal/PortalNoAccess"));
