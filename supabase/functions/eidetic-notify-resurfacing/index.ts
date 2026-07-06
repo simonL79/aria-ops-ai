@@ -146,7 +146,49 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Fallback: no eligible admin recipient → use fallback email
+    // Notify the client tied to this event (direct contact + portal users).
+    const clientEmails = new Set<string>();
+    if (ev.client_id) {
+      try {
+        const { data: client } = await (supabase.from('clients') as any)
+          .select('contactemail, primary_contact_user_id')
+          .eq('id', ev.client_id)
+          .maybeSingle();
+
+        if (client?.contactemail) {
+          const e = String(client.contactemail).trim();
+          if (e) clientEmails.add(e.toLowerCase());
+        }
+
+        // Portal users + primary contact → resolve emails via auth admin API.
+        const clientUserIds = new Set<string>();
+        if (client?.primary_contact_user_id) clientUserIds.add(client.primary_contact_user_id);
+
+        const { data: portalUsers } = await (supabase.from('client_portal_users') as any)
+          .select('user_id')
+          .eq('client_id', ev.client_id);
+        for (const p of (portalUsers ?? [])) if (p.user_id) clientUserIds.add(p.user_id);
+
+        for (const uid of clientUserIds) {
+          const { data: u } = await supabase.auth.admin.getUserById(uid);
+          const email = u?.user?.email;
+          if (email) clientEmails.add(String(email).toLowerCase());
+        }
+      } catch (e) {
+        console.warn('client recipient lookup failed', e);
+      }
+    }
+
+    // Merge client recipients, de-duping against existing admin recipients.
+    const existing = new Set(recipients.map((r) => r.email.toLowerCase()));
+    for (const email of clientEmails) {
+      if (!existing.has(email)) {
+        recipients.push({ user_id: null, email });
+        existing.add(email);
+      }
+    }
+
+    // Fallback: no eligible recipient → use fallback email
     if (recipients.length === 0) {
       recipients.push({ user_id: null, email: FALLBACK_EMAIL });
     }
