@@ -191,11 +191,24 @@ Deno.serve(async (req) => {
           .eq('client_id', ev.client_id);
         for (const p of (portalUsers ?? [])) if (p.user_id) clientUserIds.add(p.user_id);
 
+        // Respect each client user's email notification setting (default on).
+        const optedOut = new Set<string>();
+        if (clientUserIds.size > 0) {
+          const { data: clientPrefs } = await (supabase.from('eidetic_alert_preferences') as any)
+            .select('user_id, email_enabled')
+            .in('user_id', Array.from(clientUserIds));
+          for (const p of (clientPrefs ?? [])) {
+            if (p.email_enabled === false) optedOut.add(p.user_id);
+          }
+        }
+
         for (const uid of clientUserIds) {
+          if (optedOut.has(uid)) continue;
           const { data: u } = await supabase.auth.admin.getUserById(uid);
           const email = u?.user?.email;
           if (email) clientEmails.add(String(email).toLowerCase());
         }
+
       } catch (e) {
         console.warn('client recipient lookup failed', e);
       }
