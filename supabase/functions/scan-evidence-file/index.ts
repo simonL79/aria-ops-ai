@@ -1,4 +1,49 @@
 import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'
+import { createClient } from 'npm:@supabase/supabase-js@2'
+
+// Secure upload gateway settings (used when the caller requests upload:true).
+const HOURLY_LIMIT = 20
+const DAILY_LIMIT = 100
+const RECAPTCHA_MIN_SCORE = 0.5
+const RECAPTCHA_ACTION = 'shield_intake_upload'
+
+function clientIp(req: Request): string {
+  return (req.headers.get('x-forwarded-for') || '').split(',')[0].trim() || 'unknown'
+}
+
+async function hashIp(ip: string): Promise<string> {
+  const salt = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? 'aria'
+  const data = new TextEncoder().encode(`${salt}:${ip}`)
+  const buf = await crypto.subtle.digest('SHA-256', data)
+  return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, '0')).join('')
+}
+
+async function verifyRecaptcha(token: string, ip: string): Promise<{ ok: boolean; reason?: string }> {
+  const secret = Deno.env.get('RECAPTCHA_V3_SECRET_KEY')
+  if (!secret) return { ok: false, reason: 'CAPTCHA not configured' }
+  if (!token) return { ok: false, reason: 'Missing CAPTCHA token' }
+  try {
+    const params = new URLSearchParams({ secret, response: token, remoteip: ip })
+    const res = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params.toString(),
+    })
+    const json = await res.json()
+    if (!json.success) return { ok: false, reason: 'CAPTCHA verification failed' }
+    if (typeof json.score === 'number' && json.score < RECAPTCHA_MIN_SCORE) {
+      return { ok: false, reason: 'CAPTCHA score too low' }
+    }
+    if (json.action && json.action !== RECAPTCHA_ACTION) {
+      return { ok: false, reason: 'CAPTCHA action mismatch' }
+    }
+    return { ok: true }
+  } catch (_e) {
+    return { ok: false, reason: 'CAPTCHA verification error' }
+  }
+}
+
+
 
 // Allowed evidence MIME types (mirrors the client allow-list).
 const ACCEPTED_TYPES = new Set([
