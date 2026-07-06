@@ -4,9 +4,9 @@ import StealthLandingPage, { type StealthPageConfig } from './StealthLandingPage
 
 const cfg: StealthPageConfig = {
   path: '/crisis-reputation-management',
-  title: 'Crisis PR & Crisis Management PR Agency | 24/7 | A.R.I.A™',
+  title: 'Crisis PR & Reputation Management | 24/7 | A.R.I.A™',
   metaDescription:
-    'Crisis PR and crisis management PR from a 24/7 operator-led crisis communications agency. Live response across press, Google, AI search, social and legal for founders, executives and brands.',
+    '24/7 operator-led crisis PR & reputation management. Live response across press, Google, AI search, social & legal for founders, executives & brands.',
   h1: 'Crisis PR & Reputation Management',
   heroEyebrow: 'When the next 72 hours decide everything',
   heroSubhead:
