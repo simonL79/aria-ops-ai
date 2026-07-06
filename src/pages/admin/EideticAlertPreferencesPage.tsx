@@ -25,7 +25,7 @@ type Prefs = {
 
 const DEFAULTS: Prefs = {
   email_enabled: true,
-  email_min_severity: 'high',
+  email_min_severity: 'low',
   event_type_filter: null,
   narrative_category_filter: null,
   quiet_hours_start: null,
