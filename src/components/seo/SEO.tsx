@@ -12,6 +12,12 @@ interface SEOProps {
   ogType?: "website" | "article";
   /** Absolute or root-relative image URL for og:image / twitter:image. */
   image?: string;
+  /** og:image pixel width. Defaults to 1920. */
+  imageWidth?: number;
+  /** og:image pixel height. Defaults to 1080. */
+  imageHeight?: number;
+  /** og:image MIME type. Defaults to image/jpeg. */
+  imageType?: string;
   /** Optional JSON-LD object(s) to inject. */
   jsonLd?: object | object[];
 }
