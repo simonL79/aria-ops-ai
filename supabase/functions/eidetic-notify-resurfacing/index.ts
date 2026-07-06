@@ -48,6 +48,8 @@ function passesFilters(prefs: any, ev: any): boolean {
 }
 
 async function sendOne(supabase: any, recipient: string, ev: any, eventId: string, recipientUserId: string | null) {
+  let ok = false;
+  let errorMessage: string | null = null;
   try {
     const r = await fetch(`${SUPABASE_URL}/functions/v1/send-transactional-email`, {
       method: 'POST',
@@ -70,13 +72,33 @@ async function sendOne(supabase: any, recipient: string, ev: any, eventId: strin
         },
       }),
     });
-    if (!r.ok) console.warn('send-transactional-email status', r.status, await r.text());
-    return r.ok;
+    ok = r.ok;
+    if (!r.ok) {
+      const body = await r.text();
+      errorMessage = `status ${r.status}: ${body}`.slice(0, 1000);
+      console.warn('send-transactional-email', errorMessage);
+    }
   } catch (e) {
-    console.warn('send-transactional-email failed', e);
-    return false;
+    errorMessage = (e instanceof Error ? e.message : String(e)).slice(0, 1000);
+    console.warn('send-transactional-email failed', errorMessage);
   }
+
+  // Record the send attempt in the admin-visible notification log (best effort).
+  try {
+    await (supabase.from('eidetic_notification_log') as any).insert({
+      event_id: eventId,
+      recipient_email: recipient,
+      recipient_user_id: recipientUserId,
+      status: ok ? 'sent' : 'failed',
+      error_message: errorMessage,
+    });
+  } catch (e) {
+    console.warn('notification log insert failed', e);
+  }
+
+  return ok;
 }
+
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
