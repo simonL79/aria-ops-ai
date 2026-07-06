@@ -119,6 +119,78 @@ const PortalResurfacingEvent = () => {
             )}
           </div>
 
+          {/* Actions */}
+          <Card className="bg-white/5 border-white/10">
+            <CardContent className="p-5 space-y-4">
+              <div className="text-xs uppercase tracking-wide text-white/40">Actions</div>
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={!!acting || event.acknowledged}
+                  onClick={() => runAction('acknowledge')}
+                  className="gap-1.5"
+                >
+                  <Check className="h-3.5 w-3.5" />
+                  {event.acknowledged ? 'Acknowledged' : 'Acknowledge'}
+                </Button>
+
+                <div className="flex items-center gap-1.5">
+                  <Select value={snoozeHours} onValueChange={setSnoozeHours} disabled={!!acting}>
+                    <SelectTrigger className="h-9 w-[130px]"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">1 hour</SelectItem>
+                      <SelectItem value="24">1 day</SelectItem>
+                      <SelectItem value="72">3 days</SelectItem>
+                      <SelectItem value="168">1 week</SelectItem>
+                      <SelectItem value="720">30 days</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={!!acting}
+                    onClick={() => runAction('snooze', { hours: Number(snoozeHours) })}
+                    className="gap-1.5"
+                  >
+                    <Clock className="h-3.5 w-3.5" /> Snooze
+                  </Button>
+                </div>
+
+                {event.status === 'resolved' ? (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={!!acting}
+                    onClick={() => runAction('reopen')}
+                    className="gap-1.5"
+                  >
+                    <RotateCcw className="h-3.5 w-3.5" /> Reopen
+                  </Button>
+                ) : (
+                  <Button
+                    size="sm"
+                    disabled={!!acting}
+                    onClick={() => runAction('resolve', resolutionNotes.trim() ? { resolution_notes: resolutionNotes.trim() } : {})}
+                    className="gap-1.5"
+                  >
+                    <CheckCircle2 className="h-3.5 w-3.5" /> Resolve
+                  </Button>
+                )}
+              </div>
+              {event.status !== 'resolved' && (
+                <Textarea
+                  value={resolutionNotes}
+                  onChange={(e) => setResolutionNotes(e.target.value)}
+                  placeholder="Optional resolution notes (saved when you resolve this event)…"
+                  className="bg-black/20 border-white/10 text-sm"
+                  rows={2}
+                  disabled={!!acting}
+                />
+              )}
+            </CardContent>
+          </Card>
+
           {/* Excerpt */}
           {event.content_excerpt && (
             <Card className="bg-white/5 border-white/10">
