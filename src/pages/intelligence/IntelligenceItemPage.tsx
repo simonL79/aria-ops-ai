@@ -160,7 +160,7 @@ export default function IntelligenceItemPage() {
             {item.sections?.map((s, i) => <BodySection key={i} section={s} />)}
 
             {item.body && !item.sections?.length && (
-              <div dangerouslySetInnerHTML={{ __html: item.body }} />
+              <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(item.body ?? '') }} />
             )}
 
             {item.faq?.length > 0 && (
