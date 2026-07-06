@@ -46,6 +46,7 @@ const PortalDashboard = lazy(() => import("./pages/portal/PortalDashboard"));
 const PortalReports = lazy(() => import("./pages/portal/PortalReports"));
 const PortalThreats = lazy(() => import("./pages/portal/PortalThreats"));
 const PortalResurfacingEvent = lazy(() => import("./pages/portal/PortalResurfacingEvent"));
+const PortalNotifications = lazy(() => import("./pages/portal/PortalNotifications"));
 const PortalFindings = lazy(() => import("./pages/portal/PortalFindings"));
 const PortalAccount = lazy(() => import("./pages/portal/PortalAccount"));
 const PortalNoAccess = lazy(() => import("./pages/portal/PortalNoAccess"));
@@ -186,6 +187,7 @@ function App() {
                         <Route path="/portal/threats" element={<PortalThreats />} />
                         <Route path="/portal/threats/resurfacing/:id" element={<PortalResurfacingEvent />} />
                         <Route path="/portal/findings" element={<PortalFindings />} />
+                        <Route path="/portal/notifications" element={<PortalNotifications />} />
                         <Route path="/portal/account" element={<PortalAccount />} />
                         <Route path="/portal/removal" element={<PortalRemoval />} />
                         <Route path="/portal/upgrade" element={<PortalUpgrade />} />
