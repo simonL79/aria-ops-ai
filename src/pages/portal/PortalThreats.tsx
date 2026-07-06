@@ -1,11 +1,33 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import PortalLayout from '@/components/portal/PortalLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
-import { ExternalLink, History, Download } from 'lucide-react';
+import { ExternalLink, History, Download, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+
+const RESURFACING_COLUMNS = 'id, event_type, severity, narrative_category, content_excerpt, content_url, status, created_at';
+const PAGE_SIZE = 20;
+
+const buildResurfacingQuery = (
+  filters: { severity: string; eventType: string; status: string; search: string },
+  opts?: { count?: boolean },
+) => {
+  let q = (supabase.from('eidetic_resurfacing_events') as any).select(
+    RESURFACING_COLUMNS,
+    opts?.count ? { count: 'exact' } : undefined,
+  );
+  if (filters.severity !== 'all') q = q.eq('severity', filters.severity);
+  if (filters.eventType !== 'all') q = q.eq('event_type', filters.eventType);
+  if (filters.status !== 'all') q = q.eq('status', filters.status);
+  if (filters.search.trim()) q = q.ilike('content_excerpt', `%${filters.search.trim()}%`);
+  return q.order('created_at', { ascending: false });
+};
 
 const exportResurfacingToCSV = (events: any[]) => {
   if (!events || events.length === 0) return;
