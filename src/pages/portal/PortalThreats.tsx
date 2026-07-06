@@ -2,9 +2,38 @@ import { useEffect, useState } from 'react';
 import PortalLayout from '@/components/portal/PortalLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
-import { ExternalLink, History } from 'lucide-react';
+import { ExternalLink, History, Download } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+
+const exportResurfacingToCSV = (events: any[]) => {
+  if (!events || events.length === 0) return;
+  const headers = ['ID', 'Date', 'Event Type', 'Severity', 'Narrative Category', 'Status', 'Content Excerpt', 'Source URL'];
+  const esc = (v: any) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  const csvContent = [
+    headers.join(','),
+    ...events.map((ev) => [
+      esc(ev.id),
+      esc(ev.created_at ? new Date(ev.created_at).toLocaleString() : ''),
+      esc((ev.event_type || '').replace(/_/g, ' ')),
+      esc(ev.severity),
+      esc(ev.narrative_category),
+      esc(ev.status),
+      esc((ev.content_excerpt || '').substring(0, 500)),
+      esc(ev.content_url),
+    ].join(',')),
+  ].join('\n');
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `resurfacing-events-${new Date().toISOString().split('T')[0]}.csv`;
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
 
 const severityColor = (sev?: string) => {
   switch ((sev || '').toLowerCase()) {
@@ -48,9 +77,22 @@ const PortalThreats = () => {
       ) : (
         <div className="space-y-8">
           <section className="space-y-3">
-            <div className="flex items-center gap-2">
-              <History className="h-4 w-4 text-orange-400" />
-              <h2 className="text-sm font-semibold text-white/80 uppercase tracking-wide">Resurfacing Alerts</h2>
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <History className="h-4 w-4 text-orange-400" />
+                <h2 className="text-sm font-semibold text-white/80 uppercase tracking-wide">Resurfacing Alerts</h2>
+              </div>
+              {resurfacing.length > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => exportResurfacingToCSV(resurfacing)}
+                  className="gap-1.5"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  Export CSV
+                </Button>
+              )}
             </div>
             {resurfacing.length === 0 ? (
               <Card className="bg-white/5 border-white/10">
