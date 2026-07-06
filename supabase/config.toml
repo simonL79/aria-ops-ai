@@ -304,6 +304,3 @@ verify_jwt = true
 
 [functions.get-public-config]
 verify_jwt = false
-
-[functions.upload-shield-evidence]
-verify_jwt = false
