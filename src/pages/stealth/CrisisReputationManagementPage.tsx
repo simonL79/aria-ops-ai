@@ -1,13 +1,19 @@
 import React from 'react';
 import { AlarmClock, Flame, Megaphone, PhoneCall, ShieldAlert, Timer } from 'lucide-react';
 import StealthLandingPage, { type StealthPageConfig } from './StealthLandingPage';
+import ogImage from '@/assets/og/crisis-reputation-management.png';
 
 const cfg: StealthPageConfig = {
   path: '/crisis-reputation-management',
   title: 'Crisis PR & Reputation Management | 24/7 | A.R.I.A™',
   metaDescription:
     '24/7 operator-led crisis PR & reputation management. Live response across press, Google, AI search, social & legal for founders, executives & brands.',
+  image: ogImage,
+  imageWidth: 1200,
+  imageHeight: 630,
+  imageType: 'image/png',
   h1: 'Crisis PR & Reputation Management',
+
   heroEyebrow: 'When the next 72 hours decide everything',
   heroSubhead:
     'A crisis PR and crisis management PR team that responds live — across press, Google, ChatGPT, Gemini, social, legal and stakeholder channels. Not a dashboard. A crisis communications agency that picks up.',
