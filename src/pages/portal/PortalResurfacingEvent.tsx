@@ -4,9 +4,14 @@ import PortalLayout from '@/components/portal/PortalLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
-import { ArrowLeft, ExternalLink } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Check, Clock, CheckCircle2, RotateCcw } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
+import { toast } from 'sonner';
 
 const severityColor = (sev?: string) => {
   switch ((sev || '').toLowerCase()) {
@@ -32,6 +37,9 @@ const PortalResurfacingEvent = () => {
   const [event, setEvent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [acting, setActing] = useState<string | null>(null);
+  const [snoozeHours, setSnoozeHours] = useState('24');
+  const [resolutionNotes, setResolutionNotes] = useState('');
 
   useEffect(() => {
     const load = async () => {
@@ -48,6 +56,31 @@ const PortalResurfacingEvent = () => {
     };
     load();
   }, [id]);
+
+  const runAction = async (action: string, extra?: Record<string, any>) => {
+    if (!id) return;
+    setActing(action);
+    try {
+      const { data, error } = await supabase.functions.invoke('eidetic-portal-event-action', {
+        body: { event_id: id, action, ...extra },
+      });
+      if (error) throw error;
+      if ((data as any)?.event) setEvent((data as any).event);
+      toast.success(
+        action === 'acknowledge' ? 'Event acknowledged'
+          : action === 'snooze' ? 'Event snoozed'
+          : action === 'resolve' ? 'Event resolved'
+          : 'Event reopened',
+      );
+      if (action === 'resolve') setResolutionNotes('');
+    } catch (e: any) {
+      console.error(e);
+      toast.error(e?.message || 'Action failed');
+    } finally {
+      setActing(null);
+    }
+  };
+
 
   const Row = ({ label, children }: { label: string; children: React.ReactNode }) => (
     <div className="flex flex-col gap-0.5 py-2 border-b border-white/5 last:border-0 sm:flex-row sm:justify-between sm:gap-4">
@@ -85,6 +118,78 @@ const PortalResurfacingEvent = () => {
               <Badge variant="outline" className="text-xs capitalize">{event.status}</Badge>
             )}
           </div>
+
+          {/* Actions */}
+          <Card className="bg-white/5 border-white/10">
+            <CardContent className="p-5 space-y-4">
+              <div className="text-xs uppercase tracking-wide text-white/40">Actions</div>
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={!!acting || event.acknowledged}
+                  onClick={() => runAction('acknowledge')}
+                  className="gap-1.5"
+                >
+                  <Check className="h-3.5 w-3.5" />
+                  {event.acknowledged ? 'Acknowledged' : 'Acknowledge'}
+                </Button>
+
+                <div className="flex items-center gap-1.5">
+                  <Select value={snoozeHours} onValueChange={setSnoozeHours} disabled={!!acting}>
+                    <SelectTrigger className="h-9 w-[130px]"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">1 hour</SelectItem>
+                      <SelectItem value="24">1 day</SelectItem>
+                      <SelectItem value="72">3 days</SelectItem>
+                      <SelectItem value="168">1 week</SelectItem>
+                      <SelectItem value="720">30 days</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={!!acting}
+                    onClick={() => runAction('snooze', { hours: Number(snoozeHours) })}
+                    className="gap-1.5"
+                  >
+                    <Clock className="h-3.5 w-3.5" /> Snooze
+                  </Button>
+                </div>
+
+                {event.status === 'resolved' ? (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={!!acting}
+                    onClick={() => runAction('reopen')}
+                    className="gap-1.5"
+                  >
+                    <RotateCcw className="h-3.5 w-3.5" /> Reopen
+                  </Button>
+                ) : (
+                  <Button
+                    size="sm"
+                    disabled={!!acting}
+                    onClick={() => runAction('resolve', resolutionNotes.trim() ? { resolution_notes: resolutionNotes.trim() } : {})}
+                    className="gap-1.5"
+                  >
+                    <CheckCircle2 className="h-3.5 w-3.5" /> Resolve
+                  </Button>
+                )}
+              </div>
+              {event.status !== 'resolved' && (
+                <Textarea
+                  value={resolutionNotes}
+                  onChange={(e) => setResolutionNotes(e.target.value)}
+                  placeholder="Optional resolution notes (saved when you resolve this event)…"
+                  className="bg-black/20 border-white/10 text-sm"
+                  rows={2}
+                  disabled={!!acting}
+                />
+              )}
+            </CardContent>
+          </Card>
 
           {/* Excerpt */}
           {event.content_excerpt && (
