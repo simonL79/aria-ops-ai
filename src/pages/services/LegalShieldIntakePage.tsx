@@ -492,16 +492,20 @@ const LegalShieldIntakePage = () => {
           return;
         }
 
-        const folder = `intake/${crypto.randomUUID()}`;
+        // Upload each file through the secure gateway (reCAPTCHA + rate limit +
+        // server-side validation). The bucket no longer accepts direct uploads.
         for (const file of files) {
-          const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-          const path = `${folder}/${crypto.randomUUID()}-${safeName}`;
-          const { error: uploadError } = await supabase.storage
-            .from('shield-evidence')
-            .upload(path, file, { contentType: file.type, upsert: false });
-          if (uploadError) throw uploadError;
+          const dataUrl = await fileToDataUrl(file);
+          const captcha_token = await getRecaptchaToken('shield_intake_upload');
+          const { data: up, error: uploadError } = await supabase.functions.invoke(
+            'upload-shield-evidence',
+            { body: { dataUrl, type: file.type, name: file.name, captcha_token } },
+          );
+          if (uploadError || !up?.path) {
+            throw new Error(up?.error || uploadError?.message || 'Upload failed');
+          }
           uploadedFiles.push({
-            path,
+            path: up.path,
             name: file.name,
             size: file.size,
             type: file.type,
