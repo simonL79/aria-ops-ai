@@ -34,6 +34,58 @@ import {
   Sparkles,
 } from 'lucide-react';
 
+// reCAPTCHA v3 loader — used to obtain a token for the secure evidence upload gateway.
+declare global {
+  interface Window {
+    grecaptcha?: {
+      ready: (cb: () => void) => void;
+      execute: (siteKey: string, opts: { action: string }) => Promise<string>;
+    };
+  }
+}
+
+let recaptchaLoader: Promise<string | null> | null = null;
+const loadRecaptcha = (): Promise<string | null> => {
+  if (recaptchaLoader) return recaptchaLoader;
+  recaptchaLoader = (async () => {
+    try {
+      const { data } = await supabase.functions.invoke('get-public-config');
+      const siteKey: string | undefined = data?.recaptcha_site_key;
+      if (!siteKey) return null;
+      if (!document.querySelector(`script[data-recaptcha="${siteKey}"]`)) {
+        await new Promise<void>((resolve, reject) => {
+          const s = document.createElement('script');
+          s.src = `https://www.google.com/recaptcha/api.js?render=${siteKey}`;
+          s.async = true;
+          s.dataset.recaptcha = siteKey;
+          s.onload = () => resolve();
+          s.onerror = () => reject(new Error('recaptcha load failed'));
+          document.head.appendChild(s);
+        });
+      }
+      await new Promise<void>((resolve) => {
+        const check = () => (window.grecaptcha ? window.grecaptcha.ready(resolve) : setTimeout(check, 100));
+        check();
+      });
+      return siteKey;
+    } catch {
+      return null;
+    }
+  })();
+  return recaptchaLoader;
+};
+
+const getRecaptchaToken = async (action: string): Promise<string> => {
+  const siteKey = await loadRecaptcha();
+  if (!siteKey || !window.grecaptcha) return '';
+  try {
+    return await window.grecaptcha.execute(siteKey, { action });
+  } catch {
+    return '';
+  }
+};
+
+
 const MAX_FILES = 10;
 const MAX_FILE_BYTES = 15 * 1024 * 1024; // 15MB
 const ACCEPTED_TYPES = [
@@ -440,16 +492,20 @@ const LegalShieldIntakePage = () => {
           return;
         }
 
-        const folder = `intake/${crypto.randomUUID()}`;
+        // Upload each file through the secure gateway (reCAPTCHA + rate limit +
+        // server-side validation). The bucket no longer accepts direct uploads.
         for (const file of files) {
-          const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-          const path = `${folder}/${crypto.randomUUID()}-${safeName}`;
-          const { error: uploadError } = await supabase.storage
-            .from('shield-evidence')
-            .upload(path, file, { contentType: file.type, upsert: false });
-          if (uploadError) throw uploadError;
+          const dataUrl = await fileToDataUrl(file);
+          const captcha_token = await getRecaptchaToken('shield_intake_upload');
+          const { data: up, error: uploadError } = await supabase.functions.invoke(
+            'scan-evidence-file',
+            { body: { dataUrl, type: file.type, name: file.name, captcha_token, upload: true } },
+          );
+          if (uploadError || !up?.path) {
+            throw new Error(up?.error || uploadError?.message || 'Upload failed');
+          }
           uploadedFiles.push({
-            path,
+            path: up.path,
             name: file.name,
             size: file.size,
             type: file.type,
