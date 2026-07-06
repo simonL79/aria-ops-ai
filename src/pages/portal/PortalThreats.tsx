@@ -68,29 +68,80 @@ const severityColor = (sev?: string) => {
 
 const PortalThreats = () => {
   const [threats, setThreats] = useState<any[]>([]);
-  const [resurfacing, setResurfacing] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Resurfacing list state (server-side filtering + pagination)
+  const [resurfacing, setResurfacing] = useState<any[]>([]);
+  const [resLoading, setResLoading] = useState(true);
+  const [resTotal, setResTotal] = useState(0);
+  const [page, setPage] = useState(0);
+  const [exporting, setExporting] = useState(false);
+  const [severity, setSeverity] = useState('all');
+  const [eventType, setEventType] = useState('all');
+  const [status, setStatus] = useState('all');
+  const [search, setSearch] = useState('');
+  const [searchInput, setSearchInput] = useState('');
+
+  const filters = { severity, eventType, status, search };
+
+  // Load threats once
   useEffect(() => {
     const load = async () => {
-      const [threatsRes, resurfacingRes] = await Promise.all([
-        (supabase.from('threats') as any)
-          .select('id, entity_name, threat_type, severity, source, content, url, status, created_at')
-          .order('created_at', { ascending: false })
-          .limit(200),
-        (supabase.from('eidetic_resurfacing_events') as any)
-          .select('id, event_type, severity, narrative_category, content_excerpt, content_url, status, created_at')
-          .order('created_at', { ascending: false })
-          .limit(100),
-      ]);
-      if (threatsRes.error) console.error(threatsRes.error);
-      if (resurfacingRes.error) console.error(resurfacingRes.error);
-      setThreats(threatsRes.data ?? []);
-      setResurfacing(resurfacingRes.data ?? []);
+      const { data, error } = await (supabase.from('threats') as any)
+        .select('id, entity_name, threat_type, severity, source, content, url, status, created_at')
+        .order('created_at', { ascending: false })
+        .limit(200);
+      if (error) console.error(error);
+      setThreats(data ?? []);
       setLoading(false);
     };
     load();
   }, []);
+
+  // Reset to first page whenever a filter changes
+  useEffect(() => {
+    setPage(0);
+  }, [severity, eventType, status, search]);
+
+  // Debounce the search input
+  useEffect(() => {
+    const t = setTimeout(() => setSearch(searchInput), 350);
+    return () => clearTimeout(t);
+  }, [searchInput]);
+
+  // Load resurfacing events for current filters + page
+  useEffect(() => {
+    const load = async () => {
+      setResLoading(true);
+      const from = page * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+      const { data, error, count } = await buildResurfacingQuery(filters, { count: true }).range(from, to);
+      if (error) console.error(error);
+      setResurfacing(data ?? []);
+      setResTotal(count ?? 0);
+      setResLoading(false);
+    };
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [severity, eventType, status, search, page]);
+
+  const handleExport = useCallback(async () => {
+    setExporting(true);
+    try {
+      const { data, error } = await buildResurfacingQuery(filters).limit(5000);
+      if (error) throw error;
+      exportResurfacingToCSV(data ?? []);
+    } catch (e) {
+      console.error('Export failed', e);
+    } finally {
+      setExporting(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [severity, eventType, status, search]);
+
+  const totalPages = Math.max(1, Math.ceil(resTotal / PAGE_SIZE));
+  const hasFilters = severity !== 'all' || eventType !== 'all' || status !== 'all' || !!search;
+
 
   return (
     <PortalLayout title="Threats">
