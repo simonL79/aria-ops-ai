@@ -498,8 +498,8 @@ const LegalShieldIntakePage = () => {
           const dataUrl = await fileToDataUrl(file);
           const captcha_token = await getRecaptchaToken('shield_intake_upload');
           const { data: up, error: uploadError } = await supabase.functions.invoke(
-            'upload-shield-evidence',
-            { body: { dataUrl, type: file.type, name: file.name, captcha_token } },
+            'scan-evidence-file',
+            { body: { dataUrl, type: file.type, name: file.name, captcha_token, upload: true } },
           );
           if (uploadError || !up?.path) {
             throw new Error(up?.error || uploadError?.message || 'Upload failed');
