@@ -187,6 +187,7 @@ function App() {
                         <Route path="/portal/threats" element={<PortalThreats />} />
                         <Route path="/portal/threats/resurfacing/:id" element={<PortalResurfacingEvent />} />
                         <Route path="/portal/findings" element={<PortalFindings />} />
+                        <Route path="/portal/notifications" element={<PortalNotifications />} />
                         <Route path="/portal/account" element={<PortalAccount />} />
                         <Route path="/portal/removal" element={<PortalRemoval />} />
                         <Route path="/portal/upgrade" element={<PortalUpgrade />} />
