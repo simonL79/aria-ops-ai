@@ -184,6 +184,7 @@ function App() {
                         <Route path="/portal" element={<PortalDashboard />} />
                         <Route path="/portal/reports" element={<PortalReports />} />
                         <Route path="/portal/threats" element={<PortalThreats />} />
+                        <Route path="/portal/threats/resurfacing/:id" element={<PortalResurfacingEvent />} />
                         <Route path="/portal/findings" element={<PortalFindings />} />
                         <Route path="/portal/account" element={<PortalAccount />} />
                         <Route path="/portal/removal" element={<PortalRemoval />} />
