@@ -77,9 +77,22 @@ const PortalThreats = () => {
       ) : (
         <div className="space-y-8">
           <section className="space-y-3">
-            <div className="flex items-center gap-2">
-              <History className="h-4 w-4 text-orange-400" />
-              <h2 className="text-sm font-semibold text-white/80 uppercase tracking-wide">Resurfacing Alerts</h2>
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <History className="h-4 w-4 text-orange-400" />
+                <h2 className="text-sm font-semibold text-white/80 uppercase tracking-wide">Resurfacing Alerts</h2>
+              </div>
+              {resurfacing.length > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => exportResurfacingToCSV(resurfacing)}
+                  className="gap-1.5"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  Export CSV
+                </Button>
+              )}
             </div>
             {resurfacing.length === 0 ? (
               <Card className="bg-white/5 border-white/10">
