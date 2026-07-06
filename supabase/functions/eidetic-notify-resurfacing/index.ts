@@ -36,7 +36,7 @@ function inQuietHours(prefs: any): boolean {
 function passesFilters(prefs: any, ev: any): boolean {
   if (!prefs.email_enabled) return false;
   if (prefs.mute_until && new Date(prefs.mute_until) > new Date()) return false;
-  const minRank = SEV_RANK[prefs.email_min_severity] ?? 2;
+  const minRank = SEV_RANK[prefs.email_min_severity] ?? 0;
   const evRank = SEV_RANK[ev.severity] ?? 0;
   if (evRank < minRank) return false;
   if (Array.isArray(prefs.event_type_filter) && prefs.event_type_filter.length > 0
