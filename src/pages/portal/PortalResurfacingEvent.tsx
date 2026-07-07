@@ -274,6 +274,43 @@ const PortalResurfacingEvent = () => {
             </Card>
           )}
 
+          {/* Timeline */}
+          <Card className="bg-white/5 border-white/10">
+            <CardContent className="p-5">
+              <div className="text-xs uppercase tracking-wide text-white/40 mb-4">Timeline</div>
+              {(() => {
+                const items = buildTimeline(event);
+                if (!items.length) return <div className="text-sm text-white/50">No timeline events yet.</div>;
+                return (
+                  <ol className="relative border-l border-white/10 ml-1.5 space-y-5">
+                    {items.map((it, i) => (
+                      <li key={i} className="ml-5">
+                        <span
+                          className={`absolute -left-[7px] mt-1 h-3 w-3 rounded-full ring-2 ring-[#1C172B] ${toneDot[it.tone]} ${it.future ? 'opacity-50' : ''}`}
+                        />
+                        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                          <span className="text-sm font-medium text-white/90">{it.label}</span>
+                          {it.future && (
+                            <Badge variant="outline" className="text-[10px] py-0">upcoming</Badge>
+                          )}
+                        </div>
+                        <div className="text-xs text-white/45">
+                          {fmtDate(it.ts)}
+                          <span className="ml-2">
+                            ({formatDistanceToNow(new Date(it.ts), { addSuffix: true })})
+                          </span>
+                        </div>
+                        {it.detail && (
+                          <div className="mt-1 text-sm text-white/70 whitespace-pre-wrap">{it.detail}</div>
+                        )}
+                      </li>
+                    ))}
+                  </ol>
+                );
+              })()}
+            </CardContent>
+          </Card>
+
           {/* Score deltas */}
           <Card className="bg-white/5 border-white/10">
             <CardContent className="p-5">
