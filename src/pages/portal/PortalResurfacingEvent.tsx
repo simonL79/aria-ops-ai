@@ -127,17 +127,18 @@ const PortalResurfacingEvent = () => {
     const loadRelated = async () => {
       if (!event || !id) return;
       setRelatedLoading(true);
-      const filters: string[] = [`id.neq.${id}`];
-      if (event.footprint_id) filters.push(`footprint_id.eq.${event.footprint_id}`);
-      if (event.client_id) filters.push(`client_id.eq.${event.client_id}`);
-      if (filters.length === 1) {
+      const orConditions: string[] = [];
+      if (event.footprint_id) orConditions.push(`footprint_id.eq.${event.footprint_id}`);
+      if (event.client_id) orConditions.push(`client_id.eq.${event.client_id}`);
+      if (orConditions.length === 0) {
         setRelated([]);
         setRelatedLoading(false);
         return;
       }
       const { data, error } = await (supabase.from('eidetic_resurfacing_events') as any)
         .select('*')
-        .or(filters.slice(1).join(','))
+        .neq('id', id)
+        .or(orConditions.join(','))
         .order('created_at', { ascending: false })
         .limit(10);
       if (error) console.error(error);
