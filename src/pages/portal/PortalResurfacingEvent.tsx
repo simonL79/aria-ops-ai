@@ -399,7 +399,7 @@ const PortalResurfacingEvent = () => {
           <Card className="bg-white/5 border-white/10">
             <CardContent className="p-5">
               <div className="text-xs uppercase tracking-wide text-white/40 mb-2">Details</div>
-              <Row label="Event ID">{event.id}</Row>
+              {isAdmin && <Row label="Event ID">{event.id}</Row>}
               <Row label="Event Type">{titleCase(event.event_type) || '—'}</Row>
               <Row label="Severity">{event.severity || '—'}</Row>
               <Row label="Narrative Category">{event.narrative_category || '—'}</Row>
