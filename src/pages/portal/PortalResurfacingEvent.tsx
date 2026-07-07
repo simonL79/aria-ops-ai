@@ -9,7 +9,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
-import { ArrowLeft, ExternalLink, Check, Clock, CheckCircle2, RotateCcw } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Check, Clock, CheckCircle2, RotateCcw, Link2 } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { toast } from 'sonner';
 
@@ -103,6 +103,7 @@ const PortalResurfacingEvent = () => {
   const [acting, setActing] = useState<string | null>(null);
   const [snoozeHours, setSnoozeHours] = useState('24');
   const [resolutionNotes, setResolutionNotes] = useState('');
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -174,15 +175,35 @@ const PortalResurfacingEvent = () => {
       ) : (
         <div className="space-y-6 max-w-3xl">
           {/* Header */}
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge className={severityColor(event.severity)}>{event.severity || 'unknown'}</Badge>
-            <h1 className="text-xl font-semibold text-white capitalize">{titleCase(event.event_type)}</h1>
-            {event.narrative_category && (
-              <Badge variant="outline" className="text-xs">{event.narrative_category}</Badge>
-            )}
-            {event.status && (
-              <Badge variant="outline" className="text-xs capitalize">{event.status}</Badge>
-            )}
+          <div className="flex flex-wrap items-center gap-2 justify-between">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge className={severityColor(event.severity)}>{event.severity || 'unknown'}</Badge>
+              <h1 className="text-xl font-semibold text-white capitalize">{titleCase(event.event_type)}</h1>
+              {event.narrative_category && (
+                <Badge variant="outline" className="text-xs">{event.narrative_category}</Badge>
+              )}
+              {event.status && (
+                <Badge variant="outline" className="text-xs capitalize">{event.status}</Badge>
+              )}
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-1.5"
+              onClick={() => {
+                const url = window.location.href;
+                navigator.clipboard.writeText(url).then(() => {
+                  setCopied(true);
+                  toast.success('Event link copied');
+                  setTimeout(() => setCopied(false), 2000);
+                }).catch(() => {
+                  toast.error('Failed to copy link');
+                });
+              }}
+            >
+              {copied ? <Check className="h-3.5 w-3.5" /> : <Link2 className="h-3.5 w-3.5" />}
+              {copied ? 'Copied' : 'Copy link'}
+            </Button>
           </div>
 
           {/* Actions */}
