@@ -98,6 +98,7 @@ const toneDot: Record<TimelineItem['tone'], string> = {
 
 const PortalResurfacingEvent = () => {
   const { id } = useParams<{ id: string }>();
+  const { isAdmin } = useAuth();
   const [event, setEvent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
