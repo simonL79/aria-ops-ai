@@ -9,7 +9,8 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
-import { ArrowLeft, ExternalLink, Check, Clock, CheckCircle2, RotateCcw, Link2 } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { ArrowLeft, ExternalLink, Check, Clock, CheckCircle2, RotateCcw, Link2, ShieldCheck } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { toast } from 'sonner';
 
@@ -97,6 +98,7 @@ const toneDot: Record<TimelineItem['tone'], string> = {
 
 const PortalResurfacingEvent = () => {
   const { id } = useParams<{ id: string }>();
+  const { isAdmin } = useAuth();
   const [event, setEvent] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -212,6 +214,11 @@ const PortalResurfacingEvent = () => {
               {event.status && (
                 <Badge variant="outline" className="text-xs capitalize">{event.status}</Badge>
               )}
+              {isAdmin && (
+                <Badge className="gap-1 bg-violet-500/20 text-violet-300 border-violet-500/40 text-xs">
+                  <ShieldCheck className="h-3 w-3" /> Admin view
+                </Badge>
+              )}
             </div>
             <Button
               size="sm"
@@ -249,29 +256,31 @@ const PortalResurfacingEvent = () => {
                   {event.acknowledged ? 'Acknowledged' : 'Acknowledge'}
                 </Button>
 
-                <div className="flex items-center gap-1.5">
-                  <Select value={snoozeHours} onValueChange={setSnoozeHours} disabled={!!acting}>
-                    <SelectTrigger className="h-9 w-[130px]"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1">1 hour</SelectItem>
-                      <SelectItem value="24">1 day</SelectItem>
-                      <SelectItem value="72">3 days</SelectItem>
-                      <SelectItem value="168">1 week</SelectItem>
-                      <SelectItem value="720">30 days</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    disabled={!!acting}
-                    onClick={() => runAction('snooze', { hours: Number(snoozeHours) })}
-                    className="gap-1.5"
-                  >
-                    <Clock className="h-3.5 w-3.5" /> Snooze
-                  </Button>
-                </div>
+                {isAdmin && (
+                  <div className="flex items-center gap-1.5">
+                    <Select value={snoozeHours} onValueChange={setSnoozeHours} disabled={!!acting}>
+                      <SelectTrigger className="h-9 w-[130px]"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1">1 hour</SelectItem>
+                        <SelectItem value="24">1 day</SelectItem>
+                        <SelectItem value="72">3 days</SelectItem>
+                        <SelectItem value="168">1 week</SelectItem>
+                        <SelectItem value="720">30 days</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={!!acting}
+                      onClick={() => runAction('snooze', { hours: Number(snoozeHours) })}
+                      className="gap-1.5"
+                    >
+                      <Clock className="h-3.5 w-3.5" /> Snooze
+                    </Button>
+                  </div>
+                )}
 
-                {event.status === 'resolved' ? (
+                {isAdmin && (event.status === 'resolved' ? (
                   <Button
                     size="sm"
                     variant="outline"
@@ -290,9 +299,9 @@ const PortalResurfacingEvent = () => {
                   >
                     <CheckCircle2 className="h-3.5 w-3.5" /> Resolve
                   </Button>
-                )}
+                ))}
               </div>
-              {event.status !== 'resolved' && (
+              {isAdmin && event.status !== 'resolved' && (
                 <Textarea
                   value={resolutionNotes}
                   onChange={(e) => setResolutionNotes(e.target.value)}
@@ -390,7 +399,7 @@ const PortalResurfacingEvent = () => {
           <Card className="bg-white/5 border-white/10">
             <CardContent className="p-5">
               <div className="text-xs uppercase tracking-wide text-white/40 mb-2">Details</div>
-              <Row label="Event ID">{event.id}</Row>
+              {isAdmin && <Row label="Event ID">{event.id}</Row>}
               <Row label="Event Type">{titleCase(event.event_type) || '—'}</Row>
               <Row label="Severity">{event.severity || '—'}</Row>
               <Row label="Narrative Category">{event.narrative_category || '—'}</Row>
@@ -410,7 +419,7 @@ const PortalResurfacingEvent = () => {
               <Row label="Snoozed Until">{fmtDate(event.snoozed_until)}</Row>
               <Row label="Resolved">{fmtDate(event.resolved_at)}</Row>
               {event.resolution_notes && <Row label="Resolution Notes">{event.resolution_notes}</Row>}
-              <Row label="Footprint ID">{event.footprint_id || '—'}</Row>
+              {isAdmin && <Row label="Footprint ID">{event.footprint_id || '—'}</Row>}
             </CardContent>
           </Card>
 
@@ -449,8 +458,8 @@ const PortalResurfacingEvent = () => {
             </Card>
           )}
 
-          {/* Raw metadata */}
-          {event.metadata && Object.keys(event.metadata || {}).length > 0 && (
+          {/* Raw metadata (admin only) */}
+          {isAdmin && event.metadata && Object.keys(event.metadata || {}).length > 0 && (
             <Card className="bg-white/5 border-white/10">
               <CardContent className="p-5">
                 <div className="text-xs uppercase tracking-wide text-white/40 mb-2">Additional Metadata</div>
