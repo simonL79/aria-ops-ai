@@ -206,6 +206,7 @@ function App() {
                         <Route path="/admin" element={<AdminDashboardPage />} />
                         <Route path="/admin/clients" element={<ClientManagementPage />} />
                         <Route path="/admin/settings" element={<SystemSettingsPage />} />
+                        <Route path="/admin/error-log" element={<ErrorLogPage />} />
                         <Route path="/admin/genesis-sentinel" element={<GenesisSentinelPage />} />
                         <Route path="/admin/requiem" element={<RequiemDashboardPage />} />
                         <Route path="/admin/keyword-targets" element={<KeywordTargetsPage />} />
