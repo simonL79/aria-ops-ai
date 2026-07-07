@@ -123,6 +123,30 @@ const PortalResurfacingEvent = () => {
     load();
   }, [id]);
 
+  useEffect(() => {
+    const loadRelated = async () => {
+      if (!event || !id) return;
+      setRelatedLoading(true);
+      const filters: string[] = [`id.neq.${id}`];
+      if (event.footprint_id) filters.push(`footprint_id.eq.${event.footprint_id}`);
+      if (event.client_id) filters.push(`client_id.eq.${event.client_id}`);
+      if (filters.length === 1) {
+        setRelated([]);
+        setRelatedLoading(false);
+        return;
+      }
+      const { data, error } = await (supabase.from('eidetic_resurfacing_events') as any)
+        .select('*')
+        .or(filters.slice(1).join(','))
+        .order('created_at', { ascending: false })
+        .limit(10);
+      if (error) console.error(error);
+      setRelated(data ?? []);
+      setRelatedLoading(false);
+    };
+    loadRelated();
+  }, [event, id]);
+
   const runAction = async (action: string, extra?: Record<string, any>) => {
     if (!id) return;
     setActing(action);
