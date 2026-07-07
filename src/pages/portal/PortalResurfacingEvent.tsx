@@ -32,6 +32,69 @@ const fmtDate = (v?: string | null) => {
 
 const titleCase = (v?: string | null) => (v || '').replace(/_/g, ' ');
 
+type TimelineItem = {
+  ts: string;
+  label: string;
+  detail?: React.ReactNode;
+  tone: 'detect' | 'signal' | 'notify' | 'ack' | 'snooze' | 'resolve';
+  future?: boolean;
+};
+
+const fmtPctT = (n: number | null | undefined) =>
+  (n === null || n === undefined) ? '—' : `${(Number(n) * 100).toFixed(0)}%`;
+
+const buildTimeline = (event: any): TimelineItem[] => {
+  const items: TimelineItem[] = [];
+
+  if (event.created_at) {
+    items.push({ ts: event.created_at, tone: 'detect', label: 'Event detected' });
+    const changes: string[] = [];
+    if (event.prev_decay_score != null || event.new_decay_score != null) {
+      changes.push(`Decay ${fmtPctT(event.prev_decay_score)} → ${fmtPctT(event.new_decay_score)}`);
+    }
+    if (event.prev_threat_30d != null || event.new_threat_30d != null) {
+      changes.push(`Threat 30d ${fmtPctT(event.prev_threat_30d)} → ${fmtPctT(event.new_threat_30d)}`);
+    }
+    if (changes.length) {
+      items.push({ ts: event.created_at, tone: 'signal', label: 'Signal change recorded', detail: changes.join(' · ') });
+    }
+  }
+  if (event.notified_at) {
+    items.push({ ts: event.notified_at, tone: 'notify', label: 'Client notified' });
+  }
+  if (event.acknowledged_at) {
+    items.push({ ts: event.acknowledged_at, tone: 'ack', label: 'Acknowledged' });
+  }
+  if (event.snoozed_until) {
+    const future = new Date(event.snoozed_until).getTime() > Date.now();
+    items.push({
+      ts: event.snoozed_until,
+      tone: 'snooze',
+      label: future ? 'Snoozed until' : 'Snooze expired',
+      future,
+    });
+  }
+  if (event.resolved_at) {
+    items.push({
+      ts: event.resolved_at,
+      tone: 'resolve',
+      label: 'Resolved',
+      detail: event.resolution_notes || undefined,
+    });
+  }
+
+  return items.sort((a, b) => new Date(a.ts).getTime() - new Date(b.ts).getTime());
+};
+
+const toneDot: Record<TimelineItem['tone'], string> = {
+  detect: 'bg-orange-400',
+  signal: 'bg-sky-400',
+  notify: 'bg-violet-400',
+  ack: 'bg-emerald-400',
+  snooze: 'bg-yellow-400',
+  resolve: 'bg-green-500',
+};
+
 const PortalResurfacingEvent = () => {
   const { id } = useParams<{ id: string }>();
   const [event, setEvent] = useState<any>(null);
