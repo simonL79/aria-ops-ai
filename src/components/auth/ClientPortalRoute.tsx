@@ -17,12 +17,9 @@ const ClientPortalRoute = () => {
     return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
-  // Admins go to admin area, not the client portal
-  if (isAdmin) {
-    return <Navigate to="/admin/shield" replace />;
-  }
-
-  if (!isPortalUser) {
+  // Admins may view portal pages (e.g. shared links) with an expanded view.
+  // Non-admin users must be provisioned portal users.
+  if (!isAdmin && !isPortalUser) {
     return <Navigate to="/portal/no-access" replace />;
   }
 
