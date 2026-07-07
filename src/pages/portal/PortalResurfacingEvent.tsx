@@ -103,6 +103,7 @@ const PortalResurfacingEvent = () => {
   const [acting, setActing] = useState<string | null>(null);
   const [snoozeHours, setSnoozeHours] = useState('24');
   const [resolutionNotes, setResolutionNotes] = useState('');
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const load = async () => {
