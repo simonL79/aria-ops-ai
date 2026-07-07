@@ -414,6 +414,41 @@ const PortalResurfacingEvent = () => {
             </CardContent>
           </Card>
 
+          {/* Related events */}
+          {(related.length > 0 || relatedLoading) && (
+            <Card className="bg-white/5 border-white/10">
+              <CardContent className="p-5">
+                <div className="text-xs uppercase tracking-wide text-white/40 mb-3">Related Events</div>
+                {relatedLoading ? (
+                  <div className="text-sm text-white/50">Loading related events…</div>
+                ) : related.length === 0 ? (
+                  <div className="text-sm text-white/50">No related events found.</div>
+                ) : (
+                  <div className="space-y-2">
+                    {related.map((ev) => (
+                      <Link
+                        key={ev.id}
+                        to={`/portal/resurfacing/${ev.id}`}
+                        className="flex items-center justify-between gap-3 rounded-md border border-white/10 bg-white/[0.03] px-3 py-2 hover:bg-white/[0.06] transition-colors"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <Badge className={`shrink-0 ${severityColor(ev.severity)}`}>{ev.severity || 'unknown'}</Badge>
+                          <span className="text-sm text-white/85 truncate capitalize">{titleCase(ev.event_type)}</span>
+                          {ev.status && (
+                            <Badge variant="outline" className="text-[10px] capitalize shrink-0">{ev.status}</Badge>
+                          )}
+                        </div>
+                        <div className="text-xs text-white/40 shrink-0">
+                          {ev.created_at && formatDistanceToNow(new Date(ev.created_at), { addSuffix: true })}
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
           {/* Raw metadata */}
           {event.metadata && Object.keys(event.metadata || {}).length > 0 && (
             <Card className="bg-white/5 border-white/10">
