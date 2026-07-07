@@ -12,6 +12,7 @@ import Index from "./pages/Index";
 import ClientPortalRoute from "@/components/auth/ClientPortalRoute";
 import ScrollToTop from "@/components/layout/ScrollToTop";
 import CookieConsent from "@/components/legal/CookieConsent";
+import SectionErrorBoundary from "@/components/error/SectionErrorBoundary";
 
 // Lazy-loaded routes — every other page is split into its own chunk
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
