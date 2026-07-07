@@ -419,7 +419,7 @@ const PortalResurfacingEvent = () => {
               <Row label="Snoozed Until">{fmtDate(event.snoozed_until)}</Row>
               <Row label="Resolved">{fmtDate(event.resolved_at)}</Row>
               {event.resolution_notes && <Row label="Resolution Notes">{event.resolution_notes}</Row>}
-              <Row label="Footprint ID">{event.footprint_id || '—'}</Row>
+              {isAdmin && <Row label="Footprint ID">{event.footprint_id || '—'}</Row>}
             </CardContent>
           </Card>
 
