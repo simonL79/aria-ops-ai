@@ -214,6 +214,11 @@ const PortalResurfacingEvent = () => {
               {event.status && (
                 <Badge variant="outline" className="text-xs capitalize">{event.status}</Badge>
               )}
+              {isAdmin && (
+                <Badge className="gap-1 bg-violet-500/20 text-violet-300 border-violet-500/40 text-xs">
+                  <ShieldCheck className="h-3 w-3" /> Admin view
+                </Badge>
+              )}
             </div>
             <Button
               size="sm"
