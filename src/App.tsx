@@ -187,8 +187,9 @@ function App() {
                       <Route element={<ClientPortalRoute />}>
                         <Route path="/portal" element={<PortalDashboard />} />
                         <Route path="/portal/reports" element={<PortalReports />} />
-                        <Route path="/portal/threats" element={<PortalThreats />} />
-                        <Route path="/portal/threats/resurfacing/:id" element={<PortalResurfacingEvent />} />
+                        <Route path="/portal/threats" element={<SectionErrorBoundary section="portal-resurfacing-list"><PortalThreats /></SectionErrorBoundary>} />
+                        <Route path="/portal/threats/resurfacing/:id" element={<SectionErrorBoundary section="portal-resurfacing-event"><PortalResurfacingEvent /></SectionErrorBoundary>} />
+
                         <Route path="/portal/findings" element={<PortalFindings />} />
                         <Route path="/portal/notifications" element={<PortalNotifications />} />
                         <Route path="/portal/account" element={<PortalAccount />} />
