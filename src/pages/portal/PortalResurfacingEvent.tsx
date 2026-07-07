@@ -458,8 +458,8 @@ const PortalResurfacingEvent = () => {
             </Card>
           )}
 
-          {/* Raw metadata */}
-          {event.metadata && Object.keys(event.metadata || {}).length > 0 && (
+          {/* Raw metadata (admin only) */}
+          {isAdmin && event.metadata && Object.keys(event.metadata || {}).length > 0 && (
             <Card className="bg-white/5 border-white/10">
               <CardContent className="p-5">
                 <div className="text-xs uppercase tracking-wide text-white/40 mb-2">Additional Metadata</div>
