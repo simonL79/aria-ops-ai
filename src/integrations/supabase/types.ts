@@ -5424,6 +5424,48 @@ export type Database = {
           similarity: number
         }[]
       }
+      portal_resurfacing_event_action: {
+        Args: {
+          _action: string
+          _event_id: string
+          _hours?: number
+          _notes?: string
+        }
+        Returns: {
+          acknowledged: boolean
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          assigned_to: string | null
+          client_id: string | null
+          content_excerpt: string | null
+          content_url: string | null
+          created_at: string
+          decay_delta: number | null
+          event_type: string
+          footprint_id: string | null
+          id: string
+          metadata: Json | null
+          narrative_category: string | null
+          new_decay_score: number | null
+          new_threat_30d: number | null
+          notified_at: string | null
+          prev_decay_score: number | null
+          prev_threat_30d: number | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string
+          snoozed_until: string | null
+          status: string
+          threat_delta: number | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "eidetic_resurfacing_events"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       user_owns_client: {
         Args: { _client_id: string; _user_id: string }
         Returns: boolean
