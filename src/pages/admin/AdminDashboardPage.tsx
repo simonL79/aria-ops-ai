@@ -142,6 +142,14 @@ const AdminDashboardPage = () => {
                     <Activity className="h-6 w-6 mb-2" />
                     Shield Dashboard
                   </Button>
+                  <Button
+                    variant="outline"
+                    className="h-24 flex-col"
+                    onClick={() => navigate('/admin/error-log')}
+                  >
+                    <AlertTriangle className="h-6 w-6 mb-2" />
+                    UI Error Log
+                  </Button>
                 </div>
               </CardContent>
             </Card>

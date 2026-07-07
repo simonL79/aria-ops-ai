@@ -12,6 +12,7 @@ import Index from "./pages/Index";
 import ClientPortalRoute from "@/components/auth/ClientPortalRoute";
 import ScrollToTop from "@/components/layout/ScrollToTop";
 import CookieConsent from "@/components/legal/CookieConsent";
+import SectionErrorBoundary from "@/components/error/SectionErrorBoundary";
 
 // Lazy-loaded routes — every other page is split into its own chunk
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
@@ -47,6 +48,7 @@ const PortalDashboard = lazy(() => import("./pages/portal/PortalDashboard"));
 const PortalReports = lazy(() => import("./pages/portal/PortalReports"));
 const PortalThreats = lazy(() => import("./pages/portal/PortalThreats"));
 const PortalResurfacingEvent = lazy(() => import("./pages/portal/PortalResurfacingEvent"));
+const ErrorLogPage = lazy(() => import("./pages/admin/ErrorLogPage"));
 const PortalNotifications = lazy(() => import("./pages/portal/PortalNotifications"));
 const PortalFindings = lazy(() => import("./pages/portal/PortalFindings"));
 const PortalAccount = lazy(() => import("./pages/portal/PortalAccount"));
@@ -185,8 +187,9 @@ function App() {
                       <Route element={<ClientPortalRoute />}>
                         <Route path="/portal" element={<PortalDashboard />} />
                         <Route path="/portal/reports" element={<PortalReports />} />
-                        <Route path="/portal/threats" element={<PortalThreats />} />
-                        <Route path="/portal/threats/resurfacing/:id" element={<PortalResurfacingEvent />} />
+                        <Route path="/portal/threats" element={<SectionErrorBoundary section="portal-resurfacing-list"><PortalThreats /></SectionErrorBoundary>} />
+                        <Route path="/portal/threats/resurfacing/:id" element={<SectionErrorBoundary section="portal-resurfacing-event"><PortalResurfacingEvent /></SectionErrorBoundary>} />
+
                         <Route path="/portal/findings" element={<PortalFindings />} />
                         <Route path="/portal/notifications" element={<PortalNotifications />} />
                         <Route path="/portal/account" element={<PortalAccount />} />
@@ -203,6 +206,7 @@ function App() {
                         <Route path="/admin" element={<AdminDashboardPage />} />
                         <Route path="/admin/clients" element={<ClientManagementPage />} />
                         <Route path="/admin/settings" element={<SystemSettingsPage />} />
+                        <Route path="/admin/error-log" element={<ErrorLogPage />} />
                         <Route path="/admin/genesis-sentinel" element={<GenesisSentinelPage />} />
                         <Route path="/admin/requiem" element={<RequiemDashboardPage />} />
                         <Route path="/admin/keyword-targets" element={<KeywordTargetsPage />} />
