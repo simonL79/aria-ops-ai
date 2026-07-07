@@ -61,11 +61,14 @@ const PortalResurfacingEvent = () => {
     if (!id) return;
     setActing(action);
     try {
-      const { data, error } = await supabase.functions.invoke('eidetic-portal-event-action', {
-        body: { event_id: id, action, ...extra },
+      const { data, error } = await (supabase.rpc as any)('portal_resurfacing_event_action', {
+        _event_id: id,
+        _action: action,
+        _hours: extra?.hours ?? null,
+        _notes: extra?.resolution_notes ?? null,
       });
       if (error) throw error;
-      if ((data as any)?.event) setEvent((data as any).event);
+      if (data) setEvent(data);
       toast.success(
         action === 'acknowledge' ? 'Event acknowledged'
           : action === 'snooze' ? 'Event snoozed'
