@@ -256,29 +256,31 @@ const PortalResurfacingEvent = () => {
                   {event.acknowledged ? 'Acknowledged' : 'Acknowledge'}
                 </Button>
 
-                <div className="flex items-center gap-1.5">
-                  <Select value={snoozeHours} onValueChange={setSnoozeHours} disabled={!!acting}>
-                    <SelectTrigger className="h-9 w-[130px]"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1">1 hour</SelectItem>
-                      <SelectItem value="24">1 day</SelectItem>
-                      <SelectItem value="72">3 days</SelectItem>
-                      <SelectItem value="168">1 week</SelectItem>
-                      <SelectItem value="720">30 days</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    disabled={!!acting}
-                    onClick={() => runAction('snooze', { hours: Number(snoozeHours) })}
-                    className="gap-1.5"
-                  >
-                    <Clock className="h-3.5 w-3.5" /> Snooze
-                  </Button>
-                </div>
+                {isAdmin && (
+                  <div className="flex items-center gap-1.5">
+                    <Select value={snoozeHours} onValueChange={setSnoozeHours} disabled={!!acting}>
+                      <SelectTrigger className="h-9 w-[130px]"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1">1 hour</SelectItem>
+                        <SelectItem value="24">1 day</SelectItem>
+                        <SelectItem value="72">3 days</SelectItem>
+                        <SelectItem value="168">1 week</SelectItem>
+                        <SelectItem value="720">30 days</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      disabled={!!acting}
+                      onClick={() => runAction('snooze', { hours: Number(snoozeHours) })}
+                      className="gap-1.5"
+                    >
+                      <Clock className="h-3.5 w-3.5" /> Snooze
+                    </Button>
+                  </div>
+                )}
 
-                {event.status === 'resolved' ? (
+                {isAdmin && (event.status === 'resolved' ? (
                   <Button
                     size="sm"
                     variant="outline"
@@ -297,9 +299,9 @@ const PortalResurfacingEvent = () => {
                   >
                     <CheckCircle2 className="h-3.5 w-3.5" /> Resolve
                   </Button>
-                )}
+                ))}
               </div>
-              {event.status !== 'resolved' && (
+              {isAdmin && event.status !== 'resolved' && (
                 <Textarea
                   value={resolutionNotes}
                   onChange={(e) => setResolutionNotes(e.target.value)}
