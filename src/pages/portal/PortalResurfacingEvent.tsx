@@ -9,7 +9,8 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
-import { ArrowLeft, ExternalLink, Check, Clock, CheckCircle2, RotateCcw, Link2 } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { ArrowLeft, ExternalLink, Check, Clock, CheckCircle2, RotateCcw, Link2, ShieldCheck } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { toast } from 'sonner';
 
