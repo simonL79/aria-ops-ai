@@ -39,7 +39,7 @@ const ModerationQueue: React.FC = () => {
     setLoading(true);
     let q = (supabase as any)
       .from('blog_comments')
-      .select('*')
+      .select('id, post_id, author_name, content, status, hidden_reason, report_count, created_at')
       .order('created_at', { ascending: false })
       .limit(200);
     if (filter !== 'all') q = q.eq('status', filter);
