@@ -150,6 +150,14 @@ const AdminDashboardPage = () => {
                     <AlertTriangle className="h-6 w-6 mb-2" />
                     UI Error Log
                   </Button>
+                  <Button
+                    variant="outline"
+                    className="h-24 flex-col"
+                    onClick={() => navigate('/admin/eidetic/unassigned-events')}
+                  >
+                    <Link2 className="h-6 w-6 mb-2" />
+                    Unassigned Events
+                  </Button>
                 </div>
               </CardContent>
             </Card>
