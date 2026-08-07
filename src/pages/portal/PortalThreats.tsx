@@ -219,10 +219,20 @@ const PortalThreats = () => {
               </Card>
             ) : resurfacing.length === 0 ? (
               <Card className="bg-white/5 border-white/10">
-                <CardContent className="p-6 text-center text-white/60">
-                  {hasFilters
-                    ? 'No resurfacing events match the current filters.'
-                    : 'No resurfacing events detected on your monitored footprints.'}
+                <CardContent className="p-6 text-center space-y-2">
+                  {hasFilters ? (
+                    <p className="text-white/60">No resurfacing events match the current filters.</p>
+                  ) : (
+                    <>
+                      <p className="text-white/60">No resurfacing events detected on your monitored footprints.</p>
+                      <p className="text-xs text-white/40 max-w-md mx-auto">
+                        Alerts are linked to your account via a client identifier. Events generated
+                        without this identifier — for example, legacy or test data — will not appear
+                        here. New alerts from your monitored footprints will show up automatically once
+                        they are attributed to your account.
+                      </p>
+                    </>
+                  )}
                 </CardContent>
               </Card>
             ) : (
