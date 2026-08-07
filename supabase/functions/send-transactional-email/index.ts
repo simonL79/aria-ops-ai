@@ -30,9 +30,31 @@ function generateToken(): string {
     .join('')
 }
 
-// Auth note: this function uses verify_jwt = true in config.toml, so Supabase's
-// gateway validates the caller's JWT (anon or service_role) before the request
-// reaches this code. No in-function auth check is needed.
+// Auth: verify_jwt = true means Supabase's gateway validates the caller's JWT,
+// but the public anon key satisfies that. To prevent the function being used as
+// an open phishing relay, untrusted callers (anon / signed-in users) may only
+// use templates in PUBLIC_TEMPLATES, which MUST define a fixed `to` recipient.
+// Everything else requires a service_role JWT (server-side callers only).
+const PUBLIC_TEMPLATES = new Set(['contact-form-notification'])
+// Cap the size of caller-supplied template data for untrusted callers so the
+// relay can't be used to blast large arbitrary payloads.
+const MAX_PUBLIC_FIELD_LENGTH = 5000
+
+function getJwtRole(req: Request): string | null {
+  const auth = req.headers.get('Authorization')
+  if (!auth?.startsWith('Bearer ')) return null
+  try {
+    const payload = auth.slice(7).split('.')[1]
+    if (!payload) return null
+    const json = JSON.parse(
+      atob(payload.replace(/-/g, '+').replace(/_/g, '/'))
+    )
+    return typeof json?.role === 'string' ? json.role : null
+  } catch {
+    return null
+  }
+}
+
 
 Deno.serve(async (req) => {
   // Handle CORS preflight
@@ -105,10 +127,36 @@ Deno.serve(async (req) => {
     )
   }
 
+  // Authorization: only service_role callers may send arbitrary templates to
+  // arbitrary recipients. Untrusted callers are limited to fixed-recipient
+  // public templates (contact/lead forms).
+  const isTrustedCaller = getJwtRole(req) === 'service_role'
+
+  if (!isTrustedCaller) {
+    if (!PUBLIC_TEMPLATES.has(templateName) || !template.to) {
+      console.warn('Blocked untrusted email send attempt', { templateName })
+      return new Response(
+        JSON.stringify({ error: 'Not authorized to send this template' }),
+        {
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      )
+    }
+    // Ignore any caller-supplied recipient for public templates.
+    recipientEmail = template.to
+    for (const [key, value] of Object.entries(templateData)) {
+      if (typeof value === 'string' && value.length > MAX_PUBLIC_FIELD_LENGTH) {
+        templateData[key] = value.slice(0, MAX_PUBLIC_FIELD_LENGTH)
+      }
+    }
+  }
+
   // Resolve effective recipient: template-level `to` takes precedence over
   // the caller-provided recipientEmail. This allows notification templates
   // to always send to a fixed address (e.g., site owner from env var).
   const effectiveRecipient = template.to || recipientEmail
+
 
   if (!effectiveRecipient) {
     return new Response(
