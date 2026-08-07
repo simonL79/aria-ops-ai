@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { logClientError } from '@/lib/errorLog';
 import { formatDistanceToNow } from 'date-fns';
 
 interface Event {
@@ -134,6 +135,11 @@ const ResurfacingAlertsPanel = () => {
       load();
     } catch (e: any) {
       toast.error(e?.message ?? 'Action failed');
+      void logClientError({
+        section: 'Resurfacing Alerts · Triage Action',
+        error: e,
+        context: { action, alert_ids: Array.from(selected), ...extra },
+      });
     } finally { setBusy(false); }
   };
 

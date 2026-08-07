@@ -11,6 +11,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { ExternalLink, History, Download, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { logClientError } from '@/lib/errorLog';
 
 const RESURFACING_COLUMNS = 'id, event_type, severity, narrative_category, content_excerpt, content_url, status, created_at';
 const PAGE_SIZE = 20;
@@ -92,7 +93,10 @@ const PortalThreats = () => {
         .select('id, entity_name, threat_type, severity, source, content, url, status, created_at')
         .order('created_at', { ascending: false })
         .limit(200);
-      if (error) console.error(error);
+      if (error) {
+        console.error(error);
+        void logClientError({ section: 'Portal · Threats Load', error });
+      }
       setThreats(data ?? []);
       setLoading(false);
     };
@@ -117,7 +121,14 @@ const PortalThreats = () => {
       const from = page * PAGE_SIZE;
       const to = from + PAGE_SIZE - 1;
       const { data, error, count } = await buildResurfacingQuery(filters, { count: true }).range(from, to);
-      if (error) console.error(error);
+      if (error) {
+        console.error(error);
+        void logClientError({
+          section: 'Portal · Resurfacing Alerts Load',
+          error,
+          context: { severity, eventType, status, search, page },
+        });
+      }
       setResurfacing(data ?? []);
       setResTotal(count ?? 0);
       setResLoading(false);
@@ -134,6 +145,11 @@ const PortalThreats = () => {
       exportResurfacingToCSV(data ?? []);
     } catch (e) {
       console.error('Export failed', e);
+      void logClientError({
+        section: 'Portal · Resurfacing Alerts Export',
+        error: e,
+        context: { severity, eventType, status, search },
+      });
     } finally {
       setExporting(false);
     }
