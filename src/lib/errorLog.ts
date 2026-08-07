@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { reportToSentry } from '@/lib/sentry';
 
 interface LogClientErrorOptions {
   /** Section name used to group entries in the admin error log. */
