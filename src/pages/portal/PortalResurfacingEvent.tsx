@@ -13,6 +13,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { ArrowLeft, ExternalLink, Check, Clock, CheckCircle2, RotateCcw, Link2, ShieldCheck } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { toast } from 'sonner';
+import { logClientError } from '@/lib/errorLog';
 
 const severityColor = (sev?: string) => {
   switch ((sev || '').toLowerCase()) {
@@ -172,6 +173,11 @@ const PortalResurfacingEvent = () => {
     } catch (e: any) {
       console.error(e);
       toast.error(e?.message || 'Action failed');
+      void logClientError({
+        section: 'Portal · Resurfacing Event Action',
+        error: e,
+        context: { action, eventId: id, ...(extra ?? {}) },
+      });
     } finally {
       setActing(null);
     }
