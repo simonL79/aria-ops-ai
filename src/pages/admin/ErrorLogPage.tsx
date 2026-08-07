@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, RefreshCw, ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import ErrorAlertRules from '@/components/admin/ErrorAlertRules';
 
 type ErrorRow = {
   id: string;
@@ -89,6 +90,8 @@ const ErrorLogPage = () => {
             </Button>
           </div>
         </div>
+
+        <ErrorAlertRules sections={sections} />
 
         <Card>
           <CardHeader>
