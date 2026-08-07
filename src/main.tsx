@@ -13,6 +13,8 @@ import "./index.css";
 import { HelmetProvider } from "react-helmet-async";
 import { initializeARIACore } from "@/services/ariaCore";
 import { initializeDatabase } from "@/utils/initializeMonitoring";
+import { initSentry, setSentryUser } from "@/lib/sentry";
+import { supabase } from "@/integrations/supabase/client";
 
 // Apply initial charcoal theme to prevent flash
 const applyInitialTheme = () => {
@@ -30,6 +32,11 @@ const applyInitialTheme = () => {
 };
 
 applyInitialTheme();
+
+// Crash reporting (no-op unless VITE_SENTRY_DSN is configured)
+initSentry();
+supabase.auth.getSession().then(({ data }) => setSentryUser(data.session?.user?.id ?? null));
+supabase.auth.onAuthStateChange((_event, session) => setSentryUser(session?.user?.id ?? null));
 
 console.log('🚀 Starting A.R.I.A/EX™ System...');
 

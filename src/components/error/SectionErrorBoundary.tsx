@@ -3,6 +3,7 @@ import { AlertTriangle, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
+import { reportToSentry } from '@/lib/sentry';
 
 interface Props {
   /** Name of the section, used to group errors in the admin log. */
@@ -31,6 +32,15 @@ class SectionErrorBoundary extends Component<Props, State> {
 
   async componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error(`[${this.props.section}] Section error:`, error, errorInfo);
+
+    reportToSentry({
+      section: this.props.section,
+      error,
+      componentStack: errorInfo?.componentStack,
+      context: { boundary: 'SectionErrorBoundary' },
+    });
+
+
 
     try {
       const { data } = await supabase.auth.getUser();
