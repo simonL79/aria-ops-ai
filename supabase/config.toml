@@ -304,3 +304,6 @@ verify_jwt = true
 
 [functions.get-public-config]
 verify_jwt = false
+
+[functions.error-rate-alert]
+verify_jwt = false
