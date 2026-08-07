@@ -30,9 +30,31 @@ function generateToken(): string {
     .join('')
 }
 
-// Auth note: this function uses verify_jwt = true in config.toml, so Supabase's
-// gateway validates the caller's JWT (anon or service_role) before the request
-// reaches this code. No in-function auth check is needed.
+// Auth: verify_jwt = true means Supabase's gateway validates the caller's JWT,
+// but the public anon key satisfies that. To prevent the function being used as
+// an open phishing relay, untrusted callers (anon / signed-in users) may only
+// use templates in PUBLIC_TEMPLATES, which MUST define a fixed `to` recipient.
+// Everything else requires a service_role JWT (server-side callers only).
+const PUBLIC_TEMPLATES = new Set(['contact-form-notification'])
+// Cap the size of caller-supplied template data for untrusted callers so the
+// relay can't be used to blast large arbitrary payloads.
+const MAX_PUBLIC_FIELD_LENGTH = 5000
+
+function getJwtRole(req: Request): string | null {
+  const auth = req.headers.get('Authorization')
+  if (!auth?.startsWith('Bearer ')) return null
+  try {
+    const payload = auth.slice(7).split('.')[1]
+    if (!payload) return null
+    const json = JSON.parse(
+      atob(payload.replace(/-/g, '+').replace(/_/g, '/'))
+    )
+    return typeof json?.role === 'string' ? json.role : null
+  } catch {
+    return null
+  }
+}
+
 
 Deno.serve(async (req) => {
   // Handle CORS preflight
