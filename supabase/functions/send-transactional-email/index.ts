@@ -127,10 +127,36 @@ Deno.serve(async (req) => {
     )
   }
 
+  // Authorization: only service_role callers may send arbitrary templates to
+  // arbitrary recipients. Untrusted callers are limited to fixed-recipient
+  // public templates (contact/lead forms).
+  const isTrustedCaller = getJwtRole(req) === 'service_role'
+
+  if (!isTrustedCaller) {
+    if (!PUBLIC_TEMPLATES.has(templateName) || !template.to) {
+      console.warn('Blocked untrusted email send attempt', { templateName })
+      return new Response(
+        JSON.stringify({ error: 'Not authorized to send this template' }),
+        {
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        }
+      )
+    }
+    // Ignore any caller-supplied recipient for public templates.
+    recipientEmail = template.to
+    for (const [key, value] of Object.entries(templateData)) {
+      if (typeof value === 'string' && value.length > MAX_PUBLIC_FIELD_LENGTH) {
+        templateData[key] = value.slice(0, MAX_PUBLIC_FIELD_LENGTH)
+      }
+    }
+  }
+
   // Resolve effective recipient: template-level `to` takes precedence over
   // the caller-provided recipientEmail. This allows notification templates
   // to always send to a fixed address (e.g., site owner from env var).
   const effectiveRecipient = template.to || recipientEmail
+
 
   if (!effectiveRecipient) {
     return new Response(
