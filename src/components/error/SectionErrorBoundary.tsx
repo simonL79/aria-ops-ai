@@ -33,6 +33,15 @@ class SectionErrorBoundary extends Component<Props, State> {
   async componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error(`[${this.props.section}] Section error:`, error, errorInfo);
 
+    reportToSentry({
+      section: this.props.section,
+      error,
+      componentStack: errorInfo?.componentStack,
+      context: { boundary: 'SectionErrorBoundary' },
+    });
+
+
+
     try {
       const { data } = await supabase.auth.getUser();
       await supabase.from('client_error_logs').insert({
