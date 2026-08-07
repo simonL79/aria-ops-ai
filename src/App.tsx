@@ -35,6 +35,7 @@ const KeywordTargetsPage = lazy(() => import("./pages/admin/KeywordTargetsPage")
 const KeywordPerformancePage = lazy(() => import("./pages/admin/KeywordPerformancePage"));
 const EideticAlertPreferencesPage = lazy(() => import("./pages/admin/EideticAlertPreferencesPage"));
 const EideticNotificationLogPage = lazy(() => import("./pages/admin/EideticNotificationLogPage"));
+const EideticUnassignedEventsPage = lazy(() => import("./pages/admin/EideticUnassignedEventsPage"));
 const AdminNotificationsPage = lazy(() => import("./pages/admin/AdminNotificationsPage"));
 const ShieldDashboard = lazy(() => import("./pages/admin/shield/ShieldDashboard"));
 const ShieldAlertsList = lazy(() => import("./pages/admin/shield/ShieldAlertsList"));
@@ -213,6 +214,8 @@ function App() {
                         <Route path="/admin/keyword-performance" element={<KeywordPerformancePage />} />
                         <Route path="/admin/eidetic/preferences" element={<EideticAlertPreferencesPage />} />
                         <Route path="/admin/eidetic/notification-log" element={<EideticNotificationLogPage />} />
+                        <Route path="/admin/eidetic/unassigned-events" element={<EideticUnassignedEventsPage />} />
+
                         <Route path="/admin/notifications" element={<AdminNotificationsPage />} />
                         <Route path="/admin/shield" element={<ShieldDashboard />} />
                         <Route path="/admin/shield/alerts" element={<ShieldAlertsList />} />
