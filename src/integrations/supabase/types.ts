@@ -2665,6 +2665,92 @@ export type Database = {
         }
         Relationships: []
       }
+      error_alert_events: {
+        Row: {
+          created_at: string
+          detail: string | null
+          email_sent: boolean
+          error_count: number
+          id: string
+          notify_email: string | null
+          rule_id: string | null
+          section: string | null
+          threshold: number
+          window_minutes: number
+        }
+        Insert: {
+          created_at?: string
+          detail?: string | null
+          email_sent?: boolean
+          error_count: number
+          id?: string
+          notify_email?: string | null
+          rule_id?: string | null
+          section?: string | null
+          threshold: number
+          window_minutes: number
+        }
+        Update: {
+          created_at?: string
+          detail?: string | null
+          email_sent?: boolean
+          error_count?: number
+          id?: string
+          notify_email?: string | null
+          rule_id?: string | null
+          section?: string | null
+          threshold?: number
+          window_minutes?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "error_alert_events_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "error_alert_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      error_alert_rules: {
+        Row: {
+          cooldown_minutes: number
+          created_at: string
+          enabled: boolean
+          id: string
+          last_triggered_at: string | null
+          notify_email: string
+          section: string | null
+          threshold: number
+          updated_at: string
+          window_minutes: number
+        }
+        Insert: {
+          cooldown_minutes?: number
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          last_triggered_at?: string | null
+          notify_email: string
+          section?: string | null
+          threshold?: number
+          updated_at?: string
+          window_minutes?: number
+        }
+        Update: {
+          cooldown_minutes?: number
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          last_triggered_at?: string | null
+          notify_email?: string
+          section?: string | null
+          threshold?: number
+          updated_at?: string
+          window_minutes?: number
+        }
+        Relationships: []
+      }
       executive_reports: {
         Row: {
           client_id: string | null
