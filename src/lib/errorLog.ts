@@ -23,6 +23,8 @@ const toMessage = (error: unknown): string => {
  * Never throws — logging must not break the calling flow.
  */
 export async function logClientError({ section, error, context }: LogClientErrorOptions): Promise<void> {
+  reportToSentry({ section, error, context });
+
   try {
     const anyErr = error as any;
     const { data } = await supabase.auth.getUser();
