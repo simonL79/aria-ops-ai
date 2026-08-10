@@ -97,12 +97,37 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) return jsonResponse({ error: "AI is not configured" }, 500);
 
-    let payload: { files?: IncomingFile[] };
+    let payload: { files?: IncomingFile[]; captcha_token?: string };
     try {
       payload = await req.json();
     } catch {
       return jsonResponse({ error: "Invalid request body" }, 400);
     }
+
+    // 1. Bot / abuse gate (this endpoint is public and costs AI credits per call).
+    const ip = clientIp(req);
+    const captcha = await verifyRecaptcha(String(payload.captcha_token ?? ""), ip);
+    if (!captcha.ok) {
+      return jsonResponse({ error: captcha.reason ?? "CAPTCHA verification failed" }, 403);
+    }
+
+    // 2. Per-IP rate limit.
+    const admin = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
+    const ipHash = await hashIp(ip);
+    const now = Date.now();
+    const hourAgo = new Date(now - 60 * 60 * 1000).toISOString();
+    const dayAgo = new Date(now - 24 * 60 * 60 * 1000).toISOString();
+    const [{ count: hourCount }, { count: dayCount }] = await Promise.all([
+      admin.from("shield_intake_upload_rate_limits").select("id", { count: "exact", head: true }).eq("ip_hash", ipHash).gte("created_at", hourAgo),
+      admin.from("shield_intake_upload_rate_limits").select("id", { count: "exact", head: true }).eq("ip_hash", ipHash).gte("created_at", dayAgo),
+    ]);
+    if ((hourCount ?? 0) >= HOURLY_LIMIT || (dayCount ?? 0) >= DAILY_LIMIT) {
+      return jsonResponse({ error: "Analysis rate limit exceeded. Please try again later." }, 429);
+    }
+    await admin.from("shield_intake_upload_rate_limits").insert({ ip_hash: ipHash });
 
     const files = Array.isArray(payload.files) ? payload.files : [];
     if (files.length === 0) return jsonResponse({ error: "No files provided" }, 400);
