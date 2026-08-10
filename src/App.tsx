@@ -45,6 +45,7 @@ const SeoStatusPage = lazy(() => import("./pages/admin/SeoStatusPage"));
 const OutdatedContentRemovalPage = lazy(() => import("./pages/admin/OutdatedContentRemovalPage"));
 const MentionsWorkspace = lazy(() => import("./pages/dashboard/mentions"));
 const Authentication = lazy(() => import("./pages/Authentication"));
+const OAuthConsent = lazy(() => import("./pages/OAuthConsent"));
 const PortalDashboard = lazy(() => import("./pages/portal/PortalDashboard"));
 const PortalReports = lazy(() => import("./pages/portal/PortalReports"));
 const PortalThreats = lazy(() => import("./pages/portal/PortalThreats"));
