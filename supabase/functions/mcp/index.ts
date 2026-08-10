@@ -3,7 +3,7 @@
 // supabase function: mcp
 // Bundled from src/lib/mcp/index.ts by @lovable.dev/mcp-js.
 // src/lib/mcp/index.ts
-import { defineMcp } from "npm:@lovable.dev/mcp-js@0.20.0";
+import { auth, defineMcp } from "npm:@lovable.dev/mcp-js@0.20.0";
 
 // src/lib/mcp/tools/list-services.ts
 import { defineTool } from "npm:@lovable.dev/mcp-js@0.20.0";
@@ -142,11 +142,16 @@ var search_blog_default = defineTool3({
 });
 
 // src/lib/mcp/index.ts
+var projectRef = "nphqcwigrxcguztkscak";
 var mcp_default = defineMcp({
   name: "ariaops-mcp",
   title: "A.R.I.A Reputation Intelligence MCP",
   version: "0.1.0",
   instructions: "Tools for A.R.I.A (ariaops.co.uk), a reputation intelligence and crisis PR platform. Use `list_reputation_services` to see available services, `estimate_reputation_threat_score` for an illustrative risk estimate for a name, and `search_blog_posts` to find published insight articles.",
+  auth: auth.oauth.issuer({
+    issuer: `https://${projectRef}.supabase.co/auth/v1`,
+    acceptedAudiences: "authenticated"
+  }),
   tools: [list_services_default, estimate_threat_score_default, search_blog_default]
 });
 
