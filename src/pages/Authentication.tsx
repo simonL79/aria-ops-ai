@@ -55,7 +55,13 @@ const Authentication = () => {
       const dest = redirect ? decodeURIComponent(redirect) : '/home#pricing';
       return <Navigate to={dest} replace />;
     }
-    const dest = requestedFrom || (isAdmin ? '/admin/shield' : isPortalUser ? '/portal' : '/portal/no-access');
+    // Honour an explicit same-origin relative redirect (e.g. the OAuth consent page)
+    const safeRedirect = (() => {
+      if (!redirect) return null;
+      const decoded = decodeURIComponent(redirect);
+      return decoded.startsWith('/') && !decoded.startsWith('//') ? decoded : null;
+    })();
+    const dest = safeRedirect || requestedFrom || (isAdmin ? '/admin/shield' : isPortalUser ? '/portal' : '/portal/no-access');
     return <Navigate to={dest} replace />;
   }
 

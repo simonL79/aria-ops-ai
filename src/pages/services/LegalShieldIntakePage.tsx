@@ -316,8 +316,9 @@ const LegalShieldIntakePage = () => {
           dataUrl: await fileToDataUrl(f),
         })),
       );
+      const captchaToken = await getRecaptchaToken('evidence_timeline');
       const { data, error } = await supabase.functions.invoke('extract-evidence-timeline', {
-        body: { files: encoded },
+        body: { files: encoded, captcha_token: captchaToken },
       });
       if (error) throw error;
       const entries: TimelineEntry[] = Array.isArray(data?.entries)

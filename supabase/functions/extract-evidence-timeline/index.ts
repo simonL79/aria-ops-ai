@@ -1,10 +1,54 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
 };
+
+// Abuse controls for this unauthenticated, AI-cost-bearing endpoint.
+const HOURLY_LIMIT = 5;
+const DAILY_LIMIT = 20;
+const RECAPTCHA_MIN_SCORE = 0.5;
+const RECAPTCHA_ACTIONS = new Set(["evidence_timeline", "shield_intake_upload"]);
+
+function clientIp(req: Request): string {
+  return (req.headers.get("x-forwarded-for") || "").split(",")[0].trim() || "unknown";
+}
+
+async function hashIp(ip: string): Promise<string> {
+  const salt = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "aria";
+  const data = new TextEncoder().encode(`timeline:${salt}:${ip}`);
+  const buf = await crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+async function verifyRecaptcha(token: string, ip: string): Promise<{ ok: boolean; reason?: string }> {
+  const secret = Deno.env.get("RECAPTCHA_V3_SECRET_KEY");
+  if (!secret) return { ok: false, reason: "CAPTCHA not configured" };
+  if (!token) return { ok: false, reason: "Missing CAPTCHA token" };
+  try {
+    const params = new URLSearchParams({ secret, response: token, remoteip: ip });
+    const res = await fetch("https://www.google.com/recaptcha/api/siteverify", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: params.toString(),
+    });
+    const json = await res.json();
+    if (!json.success) return { ok: false, reason: "CAPTCHA verification failed" };
+    if (typeof json.score === "number" && json.score < RECAPTCHA_MIN_SCORE) {
+      return { ok: false, reason: "CAPTCHA score too low" };
+    }
+    if (json.action && !RECAPTCHA_ACTIONS.has(json.action)) {
+      return { ok: false, reason: "CAPTCHA action mismatch" };
+    }
+    return { ok: true };
+  } catch (_e) {
+    return { ok: false, reason: "CAPTCHA verification error" };
+  }
+}
+
 
 const MAX_FILES = 10;
 const MAX_TOTAL_BYTES = 20 * 1024 * 1024; // ~20MB of decoded payload across all files
@@ -53,12 +97,37 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) return jsonResponse({ error: "AI is not configured" }, 500);
 
-    let payload: { files?: IncomingFile[] };
+    let payload: { files?: IncomingFile[]; captcha_token?: string };
     try {
       payload = await req.json();
     } catch {
       return jsonResponse({ error: "Invalid request body" }, 400);
     }
+
+    // 1. Bot / abuse gate (this endpoint is public and costs AI credits per call).
+    const ip = clientIp(req);
+    const captcha = await verifyRecaptcha(String(payload.captcha_token ?? ""), ip);
+    if (!captcha.ok) {
+      return jsonResponse({ error: captcha.reason ?? "CAPTCHA verification failed" }, 403);
+    }
+
+    // 2. Per-IP rate limit.
+    const admin = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
+    const ipHash = await hashIp(ip);
+    const now = Date.now();
+    const hourAgo = new Date(now - 60 * 60 * 1000).toISOString();
+    const dayAgo = new Date(now - 24 * 60 * 60 * 1000).toISOString();
+    const [{ count: hourCount }, { count: dayCount }] = await Promise.all([
+      admin.from("shield_intake_upload_rate_limits").select("id", { count: "exact", head: true }).eq("ip_hash", ipHash).gte("created_at", hourAgo),
+      admin.from("shield_intake_upload_rate_limits").select("id", { count: "exact", head: true }).eq("ip_hash", ipHash).gte("created_at", dayAgo),
+    ]);
+    if ((hourCount ?? 0) >= HOURLY_LIMIT || (dayCount ?? 0) >= DAILY_LIMIT) {
+      return jsonResponse({ error: "Analysis rate limit exceeded. Please try again later." }, 429);
+    }
+    await admin.from("shield_intake_upload_rate_limits").insert({ ip_hash: ipHash });
 
     const files = Array.isArray(payload.files) ? payload.files : [];
     if (files.length === 0) return jsonResponse({ error: "No files provided" }, 400);

@@ -45,6 +45,7 @@ const SeoStatusPage = lazy(() => import("./pages/admin/SeoStatusPage"));
 const OutdatedContentRemovalPage = lazy(() => import("./pages/admin/OutdatedContentRemovalPage"));
 const MentionsWorkspace = lazy(() => import("./pages/dashboard/mentions"));
 const Authentication = lazy(() => import("./pages/Authentication"));
+const OAuthConsent = lazy(() => import("./pages/OAuthConsent"));
 const PortalDashboard = lazy(() => import("./pages/portal/PortalDashboard"));
 const PortalReports = lazy(() => import("./pages/portal/PortalReports"));
 const PortalThreats = lazy(() => import("./pages/portal/PortalThreats"));
@@ -139,6 +140,8 @@ function App() {
                       <Route path="/intelligence/:category" element={<IntelligenceCategoryPage />} />
                       <Route path="/intelligence/:category/:slug" element={<IntelligenceItemPage />} />
                       <Route path="/auth" element={<Authentication />} />
+                      <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
+
                       <Route path="/cybersecurity-framework" element={<CybersecurityFrameworkPage />} />
                       <Route path="/services/remove-google-reviews" element={<RemoveGoogleReviewsPage />} />
                       <Route path="/services/online-impersonation-uk" element={<OnlineImpersonationUKPage />} />
