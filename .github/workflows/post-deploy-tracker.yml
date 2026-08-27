@@ -62,7 +62,7 @@ jobs:
       - name: Cache npm tarball cache (~/.npm)
         if: ${{ github.event.inputs.skip_wait != 'true' }}
         id: npm-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.npm
           key: npm-cache-playwright-1.47.0-${{ runner.os }}
@@ -72,7 +72,7 @@ jobs:
       - name: Cache Playwright browsers
         if: ${{ github.event.inputs.skip_wait != 'true' }}
         id: pw-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/ms-playwright
           key: playwright-chromium-1.47.0-${{ runner.os }}
@@ -212,7 +212,7 @@ jobs:
       # we just paid the ~120MB chromium download, tar up the freshly-populated
       # cache and upload it as a workflow artifact. The next run (or a human)
       # can download it and seed ~/.cache/ms-playwright manually if
-      # actions/cache@v4 hasn't yet saved at job end (e.g. the job was
+      # actions/cache@v6 hasn't yet saved at job end (e.g. the job was
       # cancelled, or you're debugging cache key issues).
       - name: Pack warm Playwright cache (on miss)
         id: warm-pack
